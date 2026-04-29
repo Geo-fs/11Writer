@@ -73,6 +73,17 @@ Treat Playwright as informative when a failure is clearly due to known headless 
 - If the worktree is mixed, stage selectively and confirm scope before commit.
 - Preserve the root `LICENSE` and reconcile remote history before first push or major repo surgery.
 
+## Agent Workflow After Initial Import
+
+- Always pull the latest `main` before starting work so local context matches the public repository.
+- Do not force push.
+- Do not modify `.gitignore`, `README.md`, `LICENSE`, or this repo workflow documentation unless that work is explicitly assigned.
+- Connect AI owns repo hygiene and GitHub workflow changes.
+- Feature agents should report the files they changed and the validation commands they ran.
+- Use focused commits with clear messages that match the actual scope of the change.
+- Avoid committing generated files, caches, local databases, logs, build outputs, or Playwright artifacts.
+- If a push is rejected, stop and report the rejection instead of forcing or rewriting history.
+
 ## Staging rules
 
 - Never stage `node_modules`, build outputs, caches, logs, Playwright artifacts, or local browser traces.
