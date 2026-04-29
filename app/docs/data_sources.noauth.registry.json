@@ -1,0 +1,1836 @@
+{
+  "registry_version": "2026-04-29",
+  "generated_by": "Connect AI",
+  "generated_on": "2026-04-29",
+  "project": "11Writer",
+  "scope": "No-auth future data source registry for documented public machine-readable entry points.",
+  "rules": [
+    "No API key.",
+    "No login.",
+    "No registration.",
+    "No email gate.",
+    "No request-access flow.",
+    "No CAPTCHA-dependent integration.",
+    "Backend-pullable via ordinary HTTP requests or public object storage access.",
+    "Do not add feature logic in this registry."
+  ],
+  "sources": [
+    {
+      "id": "usgs-earthquakes",
+      "title": "USGS Earthquake Hazards Program GeoJSON feeds",
+      "owner": "U.S. Geological Survey",
+      "domain": "earthquakes",
+      "status": "already-integrated",
+      "tier": "already-shipped",
+      "tier_reason": "Already implemented in repo as the baseline environmental event connector.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "geojson",
+      "primary_endpoints": [
+        "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
+      ],
+      "docs_url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php",
+      "sample_url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",
+      "update_cadence": "near-real-time feed family",
+      "geospatial_scope": "global",
+      "geometry_type": "point",
+      "first_output": "Already implemented.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "data_caveats": [
+        "Magnitude does not prove impact.",
+        "Coverage is source-limited and event-specific."
+      ],
+      "legal_compliance_notes": [
+        "Preserve USGS attribution."
+      ],
+      "rate_limit_notes": [
+        "Use bounded polling and fixture-first tests."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Already in repo.",
+      "do_not_do": [
+        "Do not duplicate connector work."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Already implemented in repo and documented in existing earthquake docs."
+    },
+    {
+      "id": "nasa-eonet",
+      "title": "NASA EONET events API",
+      "owner": "NASA",
+      "domain": "environmental events",
+      "status": "already-integrated",
+      "tier": "already-shipped",
+      "tier_reason": "Already implemented in repo as the second environmental event source.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://eonet.gsfc.nasa.gov/api/v3/events"
+      ],
+      "docs_url": "https://eonet.gsfc.nasa.gov/docs/v3",
+      "sample_url": "https://eonet.gsfc.nasa.gov/api/v3/events",
+      "update_cadence": "provider-driven event updates",
+      "geospatial_scope": "global",
+      "geometry_type": "mixed",
+      "first_output": "Already implemented.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Events can have multiple geometries over time.",
+        "Source event context does not prove impact or final footprint."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NASA attribution."
+      ],
+      "rate_limit_notes": [
+        "Bound live polling."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Already in repo.",
+      "do_not_do": [
+        "Do not duplicate connector work."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Already implemented in repo and documented in existing EONET docs."
+    },
+    {
+      "id": "usgs-ashcam",
+      "title": "USGS Ashcam API",
+      "owner": "U.S. Geological Survey",
+      "domain": "webcams / volcano context",
+      "status": "already-integrated",
+      "tier": "already-shipped",
+      "tier_reason": "Already present in webcam subsystem as the current no-auth federal webcam source.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://volcview.wr.usgs.gov/ashcam-api/webcamApi/webcams"
+      ],
+      "docs_url": "https://volcview.wr.usgs.gov/ashcam-api/webcamApi/",
+      "sample_url": "https://volcview.wr.usgs.gov/ashcam-api/webcamApi/webcams",
+      "update_cadence": "provider-driven current webcam inventory and frames",
+      "geospatial_scope": "us",
+      "geometry_type": "station",
+      "first_output": "Already implemented.",
+      "best_owner_agent": "features-webcam",
+      "consumer_agents": ["features-webcam", "geospatial", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Viewer usefulness depends on frame freshness and camera status.",
+        "Camera imagery is context, not proof of ash extent."
+      ],
+      "legal_compliance_notes": [
+        "Preserve USGS attribution and source-specific camera terms."
+      ],
+      "rate_limit_notes": [
+        "Use bounded refresh cadence."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Already in repo.",
+      "do_not_do": [
+        "Do not duplicate connector work."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Already documented in webcam subsystem and present in code."
+    },
+    {
+      "id": "usgs-volcano-hazards",
+      "title": "USGS Volcano Hazards Program API",
+      "owner": "U.S. Geological Survey Volcano Hazards Program",
+      "domain": "volcano alerts / aviation ash context",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official no-auth API with direct GeoJSON/status outputs and strong environmental plus aerospace value.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "geojson",
+      "primary_endpoints": [
+        "https://volcanoes.usgs.gov/vsc/api/volcanoApi/geojson",
+        "https://volcanoes.usgs.gov/vsc/api/volcanoApi/vhpstatus"
+      ],
+      "docs_url": "https://volcanoes.usgs.gov/vsc/api/volcanoApi/",
+      "sample_url": "https://volcanoes.usgs.gov/vsc/api/volcanoApi/geojson",
+      "update_cadence": "status-driven updates by observatories",
+      "geospatial_scope": "us",
+      "geometry_type": "point",
+      "first_output": "Volcano status records and elevated-volcano GeoJSON.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "aerospace", "features-webcam", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "data_caveats": [
+        "Coverage is U.S. volcanoes, not a global volcano feed.",
+        "Status is advisory context and not a plume or ash-dispersion model."
+      ],
+      "legal_compliance_notes": [
+        "Preserve USGS attribution.",
+        "Do not overstate aviation hazard precision."
+      ],
+      "rate_limit_notes": [
+        "Use bounded polling."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Normalize elevated volcano GeoJSON and advisory status fields.",
+      "do_not_do": [
+        "Do not claim ash dispersion or flight-route impact beyond source status.",
+        "Do not invent global coverage."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Docs page and GeoJSON endpoint returned publicly without auth."
+    },
+    {
+      "id": "noaa-tsunami-alerts",
+      "title": "Tsunami.gov Atom and CAP feeds",
+      "owner": "NOAA / U.S. Tsunami Warning System",
+      "domain": "tsunami alerts",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official no-auth Atom and CAP feeds with strong coastal hazard value and simple polling model.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://www.tsunami.gov/events/xml/PAAQAtom.xml",
+        "https://www.tsunami.gov/events/xml/PAAQCAP.xml",
+        "https://www.tsunami.gov/events/xml/PHEBAtom.xml",
+        "https://www.tsunami.gov/events/xml/PHEBCAP.xml"
+      ],
+      "docs_url": "https://www.tsunami.gov/",
+      "sample_url": "https://www.tsunami.gov/events/xml/PAAQAtom.xml",
+      "update_cadence": "event-driven",
+      "geospatial_scope": "coastal",
+      "geometry_type": "point",
+      "first_output": "Alert records with issued time, center, bulletin type, and bulletin URL.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "marine", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "data_caveats": [
+        "Bulletin semantics differ between informational and warning products.",
+        "Feed geometry may require careful interpretation."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution.",
+        "Do not present feed ingestion as sole coastal situational awareness."
+      ],
+      "rate_limit_notes": [
+        "Event-driven feed polling should remain conservative."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Atom feed polling with CAP link preservation and alert deduplication.",
+      "do_not_do": [
+        "Do not infer impact area beyond source messaging.",
+        "Do not collapse informational statements into warnings."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Homepage exposed Atom and CAP links; PAAQ and PHEB feed URLs returned XML without auth."
+    },
+    {
+      "id": "faa-nas-airport-status",
+      "title": "FAA NAS airport status XML",
+      "owner": "Federal Aviation Administration",
+      "domain": "airport operational status",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Public FAA XML endpoint is directly useful to aerospace workflows and returned machine-readable content without auth.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "xml",
+      "primary_endpoints": [
+        "https://nasstatus.faa.gov/api/airport-status-information"
+      ],
+      "excluded_endpoints": [
+        "FAA key-based developer APIs outside this no-auth registry",
+        "SWIM or request-access aviation feeds"
+      ],
+      "docs_url": "https://nasstatus.faa.gov/",
+      "sample_url": "https://nasstatus.faa.gov/api/airport-status-information",
+      "update_cadence": "updates roughly every minute per FAA NAS Status app guidance",
+      "geospatial_scope": "us",
+      "geometry_type": "station",
+      "first_output": "Airport delay and closure records linked to canonical airport ids.",
+      "best_owner_agent": "aerospace",
+      "consumer_agents": ["aerospace", "reference", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "XML shape is FAA-specific and may require custom parsing.",
+        "DTD reference in payload should not be treated as authoritative schema validation for first slice."
+      ],
+      "legal_compliance_notes": [
+        "Preserve FAA attribution.",
+        "Do not claim full NAS operational awareness beyond endpoint contents."
+      ],
+      "rate_limit_notes": [
+        "Use bounded polling and avoid aggressive refresh."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Parse active airport events and normalize airport closures, ground stops, and delay categories.",
+      "do_not_do": [
+        "Do not build a broad FAA scraper around the NAS web UI.",
+        "Do not assume all airport status semantics are globally comparable."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Public XML endpoint returned 200 and machine-readable content from a plain HTTP request."
+    },
+    {
+      "id": "noaa-aviation-weather-center-data-api",
+      "title": "NOAA Aviation Weather Center Data API",
+      "owner": "NOAA Aviation Weather Center",
+      "domain": "aviation weather",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official documented API with JSON and GeoJSON outputs, high aerospace value, and explicit rate guidance.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://aviationweather.gov/api/data/metar?ids=KSFO&format=json",
+        "https://aviationweather.gov/api/data/gairmet?format=json",
+        "https://aviationweather.gov/api/data/airsigmet?format=json",
+        "https://aviationweather.gov/api/data/stationinfo?ids=KSFO&format=json"
+      ],
+      "docs_url": "https://aviationweather.gov/data/api/",
+      "sample_url": "https://aviationweather.gov/api/data/metar?ids=KSFO&format=json",
+      "update_cadence": "product-specific, often minute-scale for core observations",
+      "geospatial_scope": "global",
+      "geometry_type": "mixed",
+      "first_output": "Airport and route weather context records.",
+      "best_owner_agent": "aerospace",
+      "consumer_agents": ["aerospace", "reference", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "AWC has product-specific limits and recent API changes.",
+        "Forecast and advisory products are contextual and not proof of operational outcome."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution.",
+        "Respect published request limits."
+      ],
+      "rate_limit_notes": [
+        "Maximum 100 requests per minute.",
+        "Most endpoints should not be consumed more frequently than 1 request per minute per thread.",
+        "Large pulls should prefer cache files."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Normalize METAR plus one advisory family for selected airports.",
+      "do_not_do": [
+        "Do not poll large unbounded result sets.",
+        "Do not assume browser CORS behavior equals backend permissions."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Docs and sample METAR endpoint returned publicly without auth."
+    },
+    {
+      "id": "noaa-coops-tides-currents",
+      "title": "NOAA CO-OPS Tides and Currents API",
+      "owner": "NOAA CO-OPS",
+      "domain": "tides / currents / coastal observations",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official public JSON API with strong marine and coastal utility and low integration cost.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=11writer&begin_date=20260428&end_date=20260429&datum=MLLW&station=9414290&time_zone=gmt&units=metric&format=json"
+      ],
+      "docs_url": "https://api.tidesandcurrents.noaa.gov/api/uat/",
+      "sample_url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=11writer&begin_date=20260428&end_date=20260429&datum=MLLW&station=9414290&time_zone=gmt&units=metric&format=json",
+      "update_cadence": "product-specific station cadence",
+      "geospatial_scope": "coastal",
+      "geometry_type": "station",
+      "first_output": "Station observations and predictions near the marine viewport.",
+      "best_owner_agent": "marine",
+      "consumer_agents": ["marine", "geospatial", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "data_caveats": [
+        "Station coverage is coastal and station-based, not wall-to-wall coverage.",
+        "Prediction products and observed products should stay distinct."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution."
+      ],
+      "rate_limit_notes": [
+        "Keep station pulls bounded."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Water level observations for nearby stations with station metadata and freshness fields.",
+      "do_not_do": [
+        "Do not mix predictions and observations without labeling them separately."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Docs and sample datagetter JSON request returned publicly without auth."
+    },
+    {
+      "id": "noaa-ndbc-realtime",
+      "title": "NOAA NDBC realtime buoy files",
+      "owner": "NOAA National Data Buoy Center",
+      "domain": "buoys / waves / marine weather",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official no-auth flat files are easy to fetch and useful for marine and coastal context.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://www.ndbc.noaa.gov/data/realtime2/41002.txt"
+      ],
+      "docs_url": "https://www.ndbc.noaa.gov/faq/rt_data_access.shtml",
+      "sample_url": "https://www.ndbc.noaa.gov/data/realtime2/41002.txt",
+      "update_cadence": "typically hourly by station, product-dependent",
+      "geospatial_scope": "coastal",
+      "geometry_type": "station",
+      "first_output": "Latest buoy observation records by station.",
+      "best_owner_agent": "marine",
+      "consumer_agents": ["marine", "geospatial", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "data_caveats": [
+        "Realtime files are automated-QC operational data, not final archive products.",
+        "Data type availability varies by station."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution."
+      ],
+      "rate_limit_notes": [
+        "Limit retrieval frequency to a practical cadence."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Ingest nearest-station standard met and wave summary files with station metadata.",
+      "do_not_do": [
+        "Do not assume every station has every file type."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official FAQ documents HTTPS file access; sample realtime file returned publicly."
+    },
+    {
+      "id": "usgs-water-services-iv",
+      "title": "USGS Water Services Instantaneous Values",
+      "owner": "U.S. Geological Survey",
+      "domain": "streamflow / gauge height / inland water",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official no-auth JSON endpoint with clear hydrology value and low integration cost.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=01646500&parameterCd=00060,00065"
+      ],
+      "docs_url": "https://waterservices.usgs.gov/docs/instantaneous-values/instantaneous-values-details/",
+      "sample_url": "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=01646500&parameterCd=00060,00065",
+      "update_cadence": "site and parameter dependent",
+      "geospatial_scope": "us",
+      "geometry_type": "station",
+      "first_output": "Gauge observations by site with streamflow and stage fields.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "marine", "reference", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "data_caveats": [
+        "Coverage is station-based and parameter-based.",
+        "Observed gauge data should remain distinct from forecast hydrology."
+      ],
+      "legal_compliance_notes": [
+        "Preserve USGS attribution."
+      ],
+      "rate_limit_notes": [
+        "Bound site requests."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Normalize streamflow and gauge-height observations for a bounded site set.",
+      "do_not_do": [
+        "Do not present point gauges as full flood extent."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Docs page and sample IV JSON endpoint returned publicly without auth."
+    },
+    {
+      "id": "noaa-swpc-space-weather",
+      "title": "NOAA SWPC public JSON products",
+      "owner": "NOAA Space Weather Prediction Center",
+      "domain": "space weather",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official no-auth JSON product feeds with immediate aerospace context value.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://services.swpc.noaa.gov/products/alerts.json",
+        "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
+      ],
+      "docs_url": "https://services.swpc.noaa.gov/products/",
+      "sample_url": "https://services.swpc.noaa.gov/products/alerts.json",
+      "update_cadence": "product-specific",
+      "geospatial_scope": "global",
+      "geometry_type": "non-geographic",
+      "first_output": "Space-weather alert and index records.",
+      "best_owner_agent": "aerospace",
+      "consumer_agents": ["aerospace", "future-context-agent", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "data_caveats": [
+        "Global indices are contextual, not target-specific operational proof."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution."
+      ],
+      "rate_limit_notes": [
+        "Use bounded polling."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Normalize current SWPC alerts and K-index summaries.",
+      "do_not_do": [
+        "Do not overclaim mission impact without domain-specific correlation."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official products directory and sample JSON alert feed returned publicly without auth."
+    },
+    {
+      "id": "noaa-national-hurricane-center-gis-rss",
+      "title": "NOAA National Hurricane Center GIS and RSS feeds",
+      "owner": "NOAA National Hurricane Center",
+      "domain": "tropical cyclones",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official GIS RSS feeds are public and valuable for marine, coastal, and environmental context.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://www.nhc.noaa.gov/xml/TWOAT.xml",
+        "https://www.nhc.noaa.gov/gis/rss.php"
+      ],
+      "docs_url": "https://www.nhc.noaa.gov/gis/rss.php",
+      "sample_url": "https://www.nhc.noaa.gov/xml/TWOAT.xml",
+      "update_cadence": "storm and advisory driven",
+      "geospatial_scope": "coastal",
+      "geometry_type": "mixed",
+      "first_output": "Active advisory summaries and linked GIS products by basin.",
+      "best_owner_agent": "marine",
+      "consumer_agents": ["marine", "geospatial", "aerospace", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Feed items link to downstream GIS products whose semantics differ by product type.",
+        "Storm products are advisory context and should preserve issuance windows."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution."
+      ],
+      "rate_limit_notes": [
+        "Poll conservatively by advisory cadence."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "RSS/XML advisory record ingestion before shapefile or raster handling.",
+      "do_not_do": [
+        "Do not pretend RSS summaries are full storm geometry."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official GIS RSS docs and sample XML feed returned publicly without auth."
+    },
+    {
+      "id": "noaa-spc-products",
+      "title": "NOAA Storm Prediction Center RSS products",
+      "owner": "NOAA Storm Prediction Center",
+      "domain": "severe weather advisories and outlooks",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official RSS family verified and useful for contextual severe-weather products.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "rss",
+      "primary_endpoints": [
+        "https://www.spc.noaa.gov/products/spcrss.xml",
+        "https://www.spc.noaa.gov/products/spcwwrss.xml",
+        "https://www.spc.noaa.gov/products/spcmdrss.xml",
+        "https://www.spc.noaa.gov/products/spcacrss.xml",
+        "https://www.spc.noaa.gov/products/spcmbrss.xml"
+      ],
+      "docs_url": "https://www.spc.noaa.gov/aboutrss.html",
+      "sample_url": "https://www.spc.noaa.gov/products/spcrss.xml",
+      "update_cadence": "product driven",
+      "geospatial_scope": "us",
+      "geometry_type": "non-geographic",
+      "first_output": "Severe weather product records with valid windows and source links.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "aerospace", "marine", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "data_caveats": [
+        "RSS gives product records and links; polygon or map geometry may require separate handling.",
+        "Products are forecast/advisory context."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution."
+      ],
+      "rate_limit_notes": [
+        "Feed polling should remain conservative."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Normalize SPC product metadata from RSS and preserve outbound source links.",
+      "do_not_do": [
+        "Do not collapse forecast products into observed event claims."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "General, watch, mesoscale, convective outlook, and mesoscale bulletin RSS URLs returned XML without auth."
+    },
+    {
+      "id": "noaa-spc-storm-reports",
+      "title": "NOAA SPC preliminary storm reports CSV",
+      "owner": "NOAA Storm Prediction Center",
+      "domain": "observed severe weather reports",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official CSV is easy to ingest and strong observed severe-weather context for the platform.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "csv",
+      "primary_endpoints": [
+        "https://www.spc.noaa.gov/climo/reports/today.csv"
+      ],
+      "docs_url": "https://www.spc.noaa.gov/climo/online/",
+      "sample_url": "https://www.spc.noaa.gov/climo/reports/today.csv",
+      "update_cadence": "daily and intra-day report updates",
+      "geospatial_scope": "us",
+      "geometry_type": "point",
+      "first_output": "Observed storm report records with preliminary flag and report type.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "data_caveats": [
+        "Reports are preliminary and not final climatology.",
+        "Location precision varies by report."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution."
+      ],
+      "rate_limit_notes": [
+        "Daily or bounded refresh is sufficient for first slice."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Normalize today and yesterday reports with report type and caveat text.",
+      "do_not_do": [
+        "Do not present preliminary reports as final verified event catalogs."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Sample `today.csv` returned publicly without auth."
+    },
+    {
+      "id": "fema-openfema-disasters",
+      "title": "OpenFEMA disaster declarations API",
+      "owner": "Federal Emergency Management Agency",
+      "domain": "disaster declarations / administrative context",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official read-only API with no key requirement and direct machine-readable disaster declaration records.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries?$top=1"
+      ],
+      "docs_url": "https://www.fema.gov/ilo/about/openfema/api",
+      "sample_url": "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries?$top=1",
+      "update_cadence": "dataset-specific",
+      "geospatial_scope": "us",
+      "geometry_type": "non-geographic",
+      "first_output": "Disaster declaration records by state, county, and FIPS.",
+      "best_owner_agent": "future-context-agent",
+      "consumer_agents": ["geospatial", "reference", "future-context-agent", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "data_caveats": [
+        "This is administrative declaration context, not real-time event detection.",
+        "Entity shape and paging should be honored."
+      ],
+      "legal_compliance_notes": [
+        "Preserve FEMA attribution."
+      ],
+      "rate_limit_notes": [
+        "Use bounded paging."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "DisasterDeclarationsSummaries with state, county, incident type, and dates.",
+      "do_not_do": [
+        "Do not present declarations as immediate operational ground truth."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Sample API endpoint returned JSON publicly without auth; docs are official but one docs URL variant returned 403 to urllib."
+    },
+    {
+      "id": "cisa-kev-catalog",
+      "title": "CISA Known Exploited Vulnerabilities catalog",
+      "owner": "Cybersecurity and Infrastructure Security Agency",
+      "domain": "cyber advisories",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official JSON feed is public, easy to pull, and useful for future cyber/reference context.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+      ],
+      "docs_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+      "sample_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+      "update_cadence": "catalog updates by CISA",
+      "geospatial_scope": "cyber-nongeospatial",
+      "geometry_type": "non-geographic",
+      "first_output": "KEV records indexed by CVE and due date.",
+      "best_owner_agent": "future-context-agent",
+      "consumer_agents": ["reference", "future-context-agent", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "data_caveats": [
+        "This is a cyber advisory catalog and should not be geographically mapped by default.",
+        "KEV inclusion does not by itself prove exploitation against a specific target."
+      ],
+      "legal_compliance_notes": [
+        "Preserve CISA attribution."
+      ],
+      "rate_limit_notes": [
+        "Catalog updates do not require aggressive polling."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Normalize CVE, vendor, product, due date, and notes.",
+      "do_not_do": [
+        "Do not auto-map to geography or imply victim attribution."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official catalog page and JSON feed returned publicly without auth."
+    },
+    {
+      "id": "noaa-nexrad-level2",
+      "title": "NEXRAD Level II public object storage",
+      "owner": "NOAA / Unidata open data distribution",
+      "domain": "weather radar",
+      "status": "approved-candidate",
+      "tier": "tier-2",
+      "tier_reason": "Public and well-documented, but binary radar handling is high complexity and should start at file metadata only.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "public-object-storage",
+      "primary_endpoints": [
+        "https://unidata-nexrad-level2.s3.amazonaws.com/?prefix=KTLX/20260429/&max-keys=2"
+      ],
+      "docs_url": "https://registry.opendata.aws/noaa-nexrad/",
+      "sample_url": "https://unidata-nexrad-level2.s3.amazonaws.com/?prefix=KTLX/20260429/&max-keys=2",
+      "update_cadence": "continuous as radar volumes arrive",
+      "geospatial_scope": "us",
+      "geometry_type": "raster/grid",
+      "first_output": "Radar-site and object-availability metadata, not rendered radar imagery.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "aerospace", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "high",
+      "data_caveats": [
+        "Level II files are binary and large.",
+        "Rendering or interpretation is out of scope for a first slice."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution and open-data notices."
+      ],
+      "rate_limit_notes": [
+        "Object listing should be bounded by site and time prefix."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample index fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Site-level file availability metadata for nearest radar context.",
+      "do_not_do": [
+        "Do not attempt full radar decode/render in the first connector."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Registry docs are public; S3 bucket listing returned publicly without auth."
+    },
+    {
+      "id": "noaa-mrms-products",
+      "title": "NOAA MRMS public products",
+      "owner": "NOAA NSSL / NCEP",
+      "domain": "radar-derived severe weather products",
+      "status": "approved-candidate",
+      "tier": "tier-2",
+      "tier_reason": "Public and valuable, but product family and binary formats make first-slice scope control important.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "grib/netcdf/binary",
+      "primary_endpoints": [
+        "https://mrms.ncep.noaa.gov/data/2D/Reflectivity_-10C/",
+        "https://mrms.ncep.noaa.gov/data/2D/Reflectivity_-10C/MRMS_Reflectivity_-10C.latest.grib2.gz"
+      ],
+      "docs_url": "https://registry.opendata.aws/noaa-mrms-pds/",
+      "sample_url": "https://mrms.ncep.noaa.gov/data/2D/Reflectivity_-10C/",
+      "update_cadence": "approximately 2-minute product cycles",
+      "geospatial_scope": "us",
+      "geometry_type": "raster/grid",
+      "first_output": "MRMS product metadata index and selected contextual overlay candidates.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "aerospace", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "high",
+      "data_caveats": [
+        "Product family is extensive and binary-heavy.",
+        "First slice should focus on discovery metadata, not raw raster rendering."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution."
+      ],
+      "rate_limit_notes": [
+        "Keep product checks bounded."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample index fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Expose product-name, latest-file, and freshness metadata for a small MRMS subset.",
+      "do_not_do": [
+        "Do not scrape the MRMS viewer.",
+        "Do not treat research-heavy products as trivial overlays."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Public directory index and sample gzipped MRMS file returned without auth."
+    },
+    {
+      "id": "noaa-goes-glm-lightning",
+      "title": "NOAA GOES GLM public object storage",
+      "owner": "NOAA GOES-R Series / NOAA Open Data Dissemination",
+      "domain": "lightning / storm intensification context",
+      "status": "approved-candidate",
+      "tier": "tier-2",
+      "tier_reason": "Public object storage is confirmed, but NetCDF-style product handling should start with prefix metadata and summaries.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "public-object-storage",
+      "primary_endpoints": [
+        "https://noaa-goes18.s3.amazonaws.com/?prefix=GLM-L2-LCFA/2026/120/00/&max-keys=2",
+        "https://noaa-goes16.s3.amazonaws.com/?prefix=GLM-L2-LCFA/2026/120/00/&max-keys=2"
+      ],
+      "docs_url": "https://registry.opendata.aws/noaa-goes/",
+      "sample_url": "https://noaa-goes18.s3.amazonaws.com/?prefix=GLM-L2-LCFA/2026/120/00/&max-keys=2",
+      "update_cadence": "continuous product flow",
+      "geospatial_scope": "regional",
+      "geometry_type": "raster/grid",
+      "first_output": "Recent GLM object availability and metadata summaries by time prefix.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "aerospace", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "high",
+      "data_caveats": [
+        "GLM products are not a simple point feed.",
+        "Interpretation should preserve that the source is satellite-derived lightning context."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution and open-data notices."
+      ],
+      "rate_limit_notes": [
+        "Use bounded object prefix listing."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample index fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Prefix-level metadata discovery and freshness checks before any lightning summarization.",
+      "do_not_do": [
+        "Do not promise finished lightning density mapping in the first connector."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "GOES public bucket listings returned XML without auth; official registry docs are public."
+    },
+    {
+      "id": "ioos-hfradar-surface-currents",
+      "title": "NOAA IOOS HF Radar ERDDAP",
+      "owner": "NOAA IOOS Surface Currents Program",
+      "domain": "surface currents",
+      "status": "approved-candidate",
+      "tier": "tier-2",
+      "tier_reason": "Public ERDDAP access is confirmed, but dataset selection and current-vector normalization need a narrow first slice.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://hfradar.ioos.us/erddap/index.json",
+        "https://hfradar.ioos.us/erddap/search/index.json?page=1&itemsPerPage=5&searchFor=currents"
+      ],
+      "docs_url": "https://hfradar.ioos.us/erddap/",
+      "sample_url": "https://hfradar.ioos.us/erddap/search/index.json?page=1&itemsPerPage=5&searchFor=currents",
+      "update_cadence": "dataset dependent",
+      "geospatial_scope": "coastal",
+      "geometry_type": "mixed",
+      "first_output": "Dataset discovery metadata for current-vector feeds near target coastlines.",
+      "best_owner_agent": "marine",
+      "consumer_agents": ["marine", "geospatial", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "high",
+      "data_caveats": [
+        "ERDDAP exposes many datasets; first slice should choose a small stable subset.",
+        "Surface current vectors require careful normalization and confidence caveats."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA IOOS attribution."
+      ],
+      "rate_limit_notes": [
+        "Use search or metadata endpoints first."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample metadata fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Dataset search and metadata discovery for one coastal region before gridded pulls.",
+      "do_not_do": [
+        "Do not attempt full national current-vector ingestion first."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "ERDDAP index and search JSON endpoints returned publicly without auth."
+    },
+    {
+      "id": "noaa-nws-warning-mapservice",
+      "title": "NWS CloudGIS warning and advisory services",
+      "owner": "NOAA National Weather Service",
+      "domain": "warning polygons / overlays",
+      "status": "approved-candidate",
+      "tier": "tier-2",
+      "tier_reason": "Official public OGC services are available, but first use should be overlay-first rather than normalized evidence records.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "wms-wfs-ogc",
+      "primary_endpoints": [
+        "https://opengeo.ncep.noaa.gov/geoserver/wwa/ows?service=WFS&request=GetCapabilities",
+        "https://opengeo.ncep.noaa.gov/geoserver/conus/conus_bref_qcd/ows?service=WMS&request=GetCapabilities"
+      ],
+      "docs_url": "https://www.weather.gov/gis/cloudgiswebservices",
+      "sample_url": "https://opengeo.ncep.noaa.gov/geoserver/wwa/ows?service=WFS&request=GetCapabilities",
+      "update_cadence": "warning and product driven",
+      "geospatial_scope": "us",
+      "geometry_type": "polygon",
+      "first_output": "Overlay service metadata and bounded warning polygon queries.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "features-webcam", "aerospace", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Service family is broad and product semantics vary.",
+        "Overlay availability should not be mistaken for a unified event model."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution."
+      ],
+      "rate_limit_notes": [
+        "Start with bounded capabilities and small queries."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample capabilities fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Capabilities check plus one small warning-layer query for overlay use.",
+      "do_not_do": [
+        "Do not normalize every warning product into the same evidence schema without careful typing."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official CloudGIS docs and sample WFS/WMS capabilities requests returned publicly without auth."
+    },
+    {
+      "id": "nifc-wfigs-public-wildfire",
+      "title": "NIFC WFIGS public wildfire perimeter service",
+      "owner": "National Interagency Fire Center",
+      "domain": "wildfire perimeters",
+      "status": "approved-candidate",
+      "tier": "tier-2",
+      "tier_reason": "Public ArcGIS FeatureServer query is available, but wildfire perimeter semantics and lifecycle handling need a narrow first slice.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "arcgis-feature-service",
+      "primary_endpoints": [
+        "https://services3.arcgis.com/T4QMspbfLg3qTGWY/ArcGIS/rest/services/WFIGS_Interagency_Perimeters_Current/FeatureServer/0/query?where=1%3D1&returnCountOnly=true&f=json"
+      ],
+      "excluded_endpoints": [
+        "Restricted NIFC or EGP login-only datasets"
+      ],
+      "docs_url": "https://data-nifc.opendata.arcgis.com/",
+      "sample_url": "https://services3.arcgis.com/T4QMspbfLg3qTGWY/ArcGIS/rest/services/WFIGS_Interagency_Perimeters_Current/FeatureServer/0/query?where=1%3D1&returnCountOnly=true&f=json",
+      "update_cadence": "incident and perimeter update driven",
+      "geospatial_scope": "us",
+      "geometry_type": "polygon",
+      "first_output": "Current perimeter metadata and bounded wildfire overlay queries.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "features-webcam", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Perimeter products require incident-state caveats and timestamp awareness.",
+        "Current perimeters are not a universal fire activity feed."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NIFC attribution."
+      ],
+      "rate_limit_notes": [
+        "Use bounded ArcGIS queries."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Current perimeter count and bounded incident overlay metadata.",
+      "do_not_do": [
+        "Do not mix in restricted wildfire datasets.",
+        "Do not claim completeness beyond the current public perimeter layer."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Sample ArcGIS FeatureServer count query returned publicly without auth."
+    },
+    {
+      "id": "gdacs-public-feeds",
+      "title": "GDACS public disaster feeds",
+      "owner": "Global Disaster Alert and Coordination System",
+      "domain": "cross-disaster situational context",
+      "status": "approved-candidate",
+      "tier": "tier-2",
+      "tier_reason": "Public interagency feeds are easy to poll, but they should remain contextual and not replace source-specific hazard connectors.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "rss",
+      "primary_endpoints": [
+        "https://www.gdacs.org/xml/rss.xml",
+        "https://data.gdacs.org/feed_reference.aspx"
+      ],
+      "docs_url": "https://gdacs.org/feed_reference.aspx",
+      "sample_url": "https://www.gdacs.org/xml/rss.xml",
+      "update_cadence": "feed updates approximately every 6 minutes per feed reference",
+      "geospatial_scope": "global",
+      "geometry_type": "mixed",
+      "first_output": "Cross-disaster alert context records.",
+      "best_owner_agent": "future-context-agent",
+      "consumer_agents": ["geospatial", "future-context-agent", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "low",
+      "data_caveats": [
+        "GDACS explicitly describes information as indicative and not sole decision support.",
+        "Use as context, not as a replacement for source-specific hazard feeds."
+      ],
+      "legal_compliance_notes": [
+        "Preserve GDACS attribution and disclaimer language."
+      ],
+      "rate_limit_notes": [
+        "Feed polling should remain conservative."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "General all-events RSS ingestion with source-specific category tagging.",
+      "do_not_do": [
+        "Do not present GDACS alone as proof or final ground truth."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official feed reference page and RSS feed returned publicly without auth."
+    },
+    {
+      "id": "noaa-national-water-prediction-service-api",
+      "title": "NOAA National Water Prediction Service API",
+      "owner": "NOAA Office of Water Prediction",
+      "domain": "hydrology forecasts and observations",
+      "status": "needs-verification",
+      "tier": "tier-3",
+      "tier_reason": "Official docs are public, but the exact low-risk first endpoint should be pinned from the API docs before coding.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://api.water.noaa.gov/nwps/v1/docs/"
+      ],
+      "docs_url": "https://api.water.noaa.gov/about/api",
+      "sample_url": "https://api.water.noaa.gov/nwps/v1/docs/",
+      "update_cadence": "product-dependent",
+      "geospatial_scope": "us",
+      "geometry_type": "mixed",
+      "first_output": "Gauge-level NWPS metadata and forecast/observation summaries after endpoint pinning.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "marine", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Forecast and observation products must remain distinct.",
+        "The first endpoint should be selected from the official API docs before implementation."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution."
+      ],
+      "rate_limit_notes": [
+        "Follow API docs once the exact endpoint is chosen."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Pin one documented gauge/forecast endpoint from NWPS docs and build a fixture-first parser.",
+      "do_not_do": [
+        "Do not guess undocumented endpoints from the web app."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official docs page is public, but the exact first implementation endpoint was not pinned during this pass."
+    },
+    {
+      "id": "noaa-nowcoast-ogc-services",
+      "title": "NOAA nowCOAST OGC and REST services",
+      "owner": "NOAA nowCOAST",
+      "domain": "weather and coastal overlays",
+      "status": "needs-verification",
+      "tier": "tier-3",
+      "tier_reason": "Official service family is documented, but direct service probes returned 403 from a plain HTTP client in this environment.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "possible",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/obs_meteocean_insitu_sfc_time/MapServer",
+        "https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer"
+      ],
+      "docs_url": "https://nowcoast.noaa.gov/",
+      "sample_url": "https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/obs_meteocean_insitu_sfc_time/MapServer",
+      "update_cadence": "service-dependent",
+      "geospatial_scope": "coastal",
+      "geometry_type": "mixed",
+      "first_output": "Service-capability and health checks only until backend-safe access is confirmed.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "features-webcam", "marine", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Service family is large and overlay-oriented.",
+        "Backend-safe plain HTTP access should be re-verified before coding."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NOAA attribution."
+      ],
+      "rate_limit_notes": [
+        "Re-verify service behavior before polling."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "capabilities fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Service health and capabilities verification rather than feature integration.",
+      "do_not_do": [
+        "Do not assume the browser app implies stable backend access."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official nowCOAST site is public, but direct REST service probes returned 403 from urllib during this pass."
+    },
+    {
+      "id": "minnesota-511-public-arcgis",
+      "title": "Minnesota 511 public machine endpoint candidate",
+      "owner": "Minnesota DOT / 511MN",
+      "domain": "road / camera / weather operations",
+      "status": "needs-verification",
+      "tier": "tier-3",
+      "tier_reason": "Public site exists, but a stable public machine endpoint was not cleanly verified and the web app exposes reCAPTCHA.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "possible",
+      "machine_readable": false,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://511mn.org/"
+      ],
+      "excluded_endpoints": [
+        "Account, alert, or reCAPTCHA-gated web flows"
+      ],
+      "docs_url": "https://511mn.org/help/index.html",
+      "sample_url": "https://511mn.org/",
+      "update_cadence": "unknown",
+      "geospatial_scope": "regional",
+      "geometry_type": "mixed",
+      "first_output": "Verify whether a public ArcGIS or documented no-auth data endpoint exists.",
+      "best_owner_agent": "features-webcam",
+      "consumer_agents": ["features-webcam", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Public web app behavior does not equal a stable backend API.",
+        "Site includes reCAPTCHA on the web app path."
+      ],
+      "legal_compliance_notes": [
+        "Do not scrape account or protected flows."
+      ],
+      "rate_limit_notes": [
+        "Unclear until a public endpoint is verified."
+      ],
+      "testing_strategy": [
+        "verify endpoint first",
+        "fixture-first after verification"
+      ],
+      "recommended_first_slice": "Only a source-verification pass, not implementation.",
+      "do_not_do": [
+        "Do not scrape the interactive map.",
+        "Do not bypass reCAPTCHA or account flows."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Public site is reachable, but no stable no-auth machine endpoint was pinned during this pass."
+    },
+    {
+      "id": "gdelt",
+      "title": "GDELT public APIs",
+      "owner": "GDELT Project",
+      "domain": "global media and context",
+      "status": "defer",
+      "tier": "tier-3",
+      "tier_reason": "Public and documented, but it is context-heavy media data rather than a primary operational source.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://api.gdeltproject.org/api/v2/doc/doc"
+      ],
+      "docs_url": "https://www.gdeltproject.org/",
+      "sample_url": "https://api.gdeltproject.org/api/v2/doc/doc?query=%22wildfire%22&mode=artlist&format=json",
+      "update_cadence": "continuous media indexing",
+      "geospatial_scope": "global",
+      "geometry_type": "mixed",
+      "first_output": "Future context-only article summaries.",
+      "best_owner_agent": "future-context-agent",
+      "consumer_agents": ["future-context-agent", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Media-derived context is not operational ground truth.",
+        "Geocoding and entity matching require strong caveats."
+      ],
+      "legal_compliance_notes": [
+        "Follow documented API usage and attribution."
+      ],
+      "rate_limit_notes": [
+        "Treat as future context only."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Only future context summarization, not core event ingestion.",
+      "do_not_do": [
+        "Do not treat GDELT as authoritative event truth."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Public documented API exists; source is deferred due fit and interpretation caveats."
+    },
+    {
+      "id": "wikimedia-eventstream",
+      "title": "Wikimedia EventStreams recentchange",
+      "owner": "Wikimedia Foundation",
+      "domain": "public change event stream",
+      "status": "defer",
+      "tier": "tier-3",
+      "tier_reason": "Public and machine-readable, but not a primary source for the platform's current hazard and operations goals.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://stream.wikimedia.org/v2/stream/recentchange"
+      ],
+      "docs_url": "https://stream.wikimedia.org/",
+      "sample_url": "https://stream.wikimedia.org/v2/stream/recentchange",
+      "update_cadence": "continuous stream",
+      "geospatial_scope": "cyber-nongeospatial",
+      "geometry_type": "non-geographic",
+      "first_output": "Future context stream ingestion only if specifically assigned.",
+      "best_owner_agent": "future-context-agent",
+      "consumer_agents": ["future-context-agent", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "General-purpose edit stream is not domain-specific evidence."
+      ],
+      "legal_compliance_notes": [
+        "Follow Wikimedia stream usage expectations."
+      ],
+      "rate_limit_notes": [
+        "Streaming ingestion should be isolated if ever used."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Deferred unless a future context task explicitly needs it.",
+      "do_not_do": [
+        "Do not treat edits as vetted facts."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Sample SSE stream returned publicly without auth; source remains deferred by fit."
+    },
+    {
+      "id": "sans-isc-dshield-api",
+      "title": "SANS ISC / DShield public API",
+      "owner": "SANS Internet Storm Center",
+      "domain": "cyber context",
+      "status": "defer",
+      "tier": "tier-3",
+      "tier_reason": "Public API entry exists, but this is a non-government cyber-context source and not a first-priority platform input.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://isc.sans.edu/api/"
+      ],
+      "docs_url": "https://isc.sans.edu/api/",
+      "sample_url": "https://isc.sans.edu/api/",
+      "update_cadence": "feed dependent",
+      "geospatial_scope": "cyber-nongeospatial",
+      "geometry_type": "non-geographic",
+      "first_output": "Future cyber-context summaries only.",
+      "best_owner_agent": "future-context-agent",
+      "consumer_agents": ["future-context-agent", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Use only as context and preserve source framing."
+      ],
+      "legal_compliance_notes": [
+        "Review source-specific usage expectations before any implementation."
+      ],
+      "rate_limit_notes": [
+        "Do not assume unrestricted polling."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Deferred until explicitly assigned.",
+      "do_not_do": [
+        "Do not treat as authoritative victim attribution."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Public API landing page returned without auth; source is deferred by scope and governance fit."
+    },
+    {
+      "id": "abusech-urlhaus",
+      "title": "abuse.ch URLhaus public JSON feed",
+      "owner": "abuse.ch",
+      "domain": "cyber threat context",
+      "status": "defer",
+      "tier": "tier-3",
+      "tier_reason": "Public JSON feed works, but this remains a future cyber-context candidate rather than a current platform priority.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://urlhaus.abuse.ch/downloads/json_recent/"
+      ],
+      "docs_url": "https://urlhaus.abuse.ch/api/",
+      "sample_url": "https://urlhaus.abuse.ch/downloads/json_recent/",
+      "update_cadence": "feed dependent",
+      "geospatial_scope": "cyber-nongeospatial",
+      "geometry_type": "non-geographic",
+      "first_output": "Future cyber-context feed ingestion only if explicitly assigned.",
+      "best_owner_agent": "future-context-agent",
+      "consumer_agents": ["future-context-agent", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Threat-intel feeds require careful scope and attribution handling."
+      ],
+      "legal_compliance_notes": [
+        "Review abuse.ch feed terms before implementation."
+      ],
+      "rate_limit_notes": [
+        "Keep usage conservative."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Deferred until explicitly assigned.",
+      "do_not_do": [
+        "Do not map or attribute victim geography by default."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Public JSON feed returned without auth; source is deferred by scope and governance fit."
+    },
+    {
+      "id": "marinetraffic-scrape",
+      "title": "MarineTraffic scraping",
+      "owner": "MarineTraffic",
+      "domain": "marine vessel data",
+      "status": "rejected",
+      "tier": "rejected",
+      "tier_reason": "Scraping-based path violates registry standards and carries clear compliance risk.",
+      "auth": "not-allowed",
+      "signup_required": true,
+      "captcha_risk": "possible",
+      "machine_readable": false,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [],
+      "docs_url": "https://www.marinetraffic.com/",
+      "sample_url": null,
+      "update_cadence": "n/a",
+      "geospatial_scope": "global",
+      "geometry_type": "mixed",
+      "first_output": "Do not use.",
+      "best_owner_agent": "connect",
+      "consumer_agents": ["marine", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "high",
+      "data_caveats": [
+        "Rejected due scraping/compliance risk."
+      ],
+      "legal_compliance_notes": [
+        "Do not scrape."
+      ],
+      "rate_limit_notes": [
+        "n/a"
+      ],
+      "testing_strategy": [
+        "none"
+      ],
+      "recommended_first_slice": "None.",
+      "do_not_do": [
+        "Do not scrape MarineTraffic."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Explicit avoid entry per project rules."
+    },
+    {
+      "id": "vesselfinder-scrape",
+      "title": "VesselFinder scraping",
+      "owner": "VesselFinder",
+      "domain": "marine vessel data",
+      "status": "rejected",
+      "tier": "rejected",
+      "tier_reason": "Scraping-based path violates registry standards and carries clear compliance risk.",
+      "auth": "not-allowed",
+      "signup_required": true,
+      "captcha_risk": "possible",
+      "machine_readable": false,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [],
+      "docs_url": "https://www.vesselfinder.com/",
+      "sample_url": null,
+      "update_cadence": "n/a",
+      "geospatial_scope": "global",
+      "geometry_type": "mixed",
+      "first_output": "Do not use.",
+      "best_owner_agent": "connect",
+      "consumer_agents": ["marine", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "high",
+      "data_caveats": [
+        "Rejected due scraping/compliance risk."
+      ],
+      "legal_compliance_notes": [
+        "Do not scrape."
+      ],
+      "rate_limit_notes": [
+        "n/a"
+      ],
+      "testing_strategy": [
+        "none"
+      ],
+      "recommended_first_slice": "None.",
+      "do_not_do": [
+        "Do not scrape VesselFinder."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Explicit avoid entry per project rules."
+    },
+    {
+      "id": "openphish-phishtank-unvetted",
+      "title": "OpenPhish or PhishTank without source-specific vetting",
+      "owner": "Various",
+      "domain": "cyber threat feeds",
+      "status": "rejected",
+      "tier": "rejected",
+      "tier_reason": "Not approved until a specific no-auth machine endpoint and usage posture are individually verified.",
+      "auth": "unknown",
+      "signup_required": true,
+      "captcha_risk": "unknown",
+      "machine_readable": false,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [],
+      "docs_url": null,
+      "sample_url": null,
+      "update_cadence": "unknown",
+      "geospatial_scope": "cyber-nongeospatial",
+      "geometry_type": "non-geographic",
+      "first_output": "Do not use without separate verification.",
+      "best_owner_agent": "connect",
+      "consumer_agents": ["future-context-agent", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Source and access posture must be verified individually."
+      ],
+      "legal_compliance_notes": [
+        "Do not assume these feeds satisfy no-auth production requirements."
+      ],
+      "rate_limit_notes": [
+        "unknown"
+      ],
+      "testing_strategy": [
+        "none until verified"
+      ],
+      "recommended_first_slice": "None.",
+      "do_not_do": [
+        "Do not treat generic public lists as approved production feeds."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Explicit avoid entry per project rules."
+    },
+    {
+      "id": "generic-all-state-dot-feeds",
+      "title": "Generic all-state DOT or 511 integration",
+      "owner": "Various state DOTs",
+      "domain": "road / camera / traffic feeds",
+      "status": "rejected",
+      "tier": "rejected",
+      "tier_reason": "Every DOT or 511 source must be vetted individually; a generic omnibus integration is unsafe and misleading.",
+      "auth": "mixed",
+      "signup_required": true,
+      "captcha_risk": "unknown",
+      "machine_readable": false,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [],
+      "docs_url": null,
+      "sample_url": null,
+      "update_cadence": "mixed",
+      "geospatial_scope": "regional",
+      "geometry_type": "mixed",
+      "first_output": "Do not use as a blanket source family.",
+      "best_owner_agent": "connect",
+      "consumer_agents": ["features-webcam", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "high",
+      "data_caveats": [
+        "Access terms and machine endpoints vary by state."
+      ],
+      "legal_compliance_notes": [
+        "Vetting must occur source by source."
+      ],
+      "rate_limit_notes": [
+        "mixed"
+      ],
+      "testing_strategy": [
+        "none"
+      ],
+      "recommended_first_slice": "None.",
+      "do_not_do": [
+        "Do not claim that one pattern covers all DOT or 511 sources."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Explicit avoid entry per project rules."
+    },
+    {
+      "id": "viewer-only-web-apps-no-stable-endpoint",
+      "title": "Viewer-only web apps without stable public data endpoints",
+      "owner": "Various",
+      "domain": "mixed",
+      "status": "rejected",
+      "tier": "rejected",
+      "tier_reason": "Viewer-only apps are not acceptable backend connectors when no stable public machine endpoint is documented.",
+      "auth": "mixed",
+      "signup_required": false,
+      "captcha_risk": "possible",
+      "machine_readable": false,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [],
+      "docs_url": null,
+      "sample_url": null,
+      "update_cadence": "n/a",
+      "geospatial_scope": "mixed",
+      "geometry_type": "mixed",
+      "first_output": "Do not use.",
+      "best_owner_agent": "connect",
+      "consumer_agents": ["all", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "high",
+      "data_caveats": [
+        "HTML view availability is not an API contract."
+      ],
+      "legal_compliance_notes": [
+        "Do not scrape viewer-only apps."
+      ],
+      "rate_limit_notes": [
+        "n/a"
+      ],
+      "testing_strategy": [
+        "none"
+      ],
+      "recommended_first_slice": "None.",
+      "do_not_do": [
+        "Do not build connectors from undocumented HTML viewers."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Explicit avoid entry per project rules."
+    },
+    {
+      "id": "restricted-login-key-email-captcha-sources",
+      "title": "Sources requiring login, key, email, signup, request access, or CAPTCHA",
+      "owner": "Various",
+      "domain": "mixed",
+      "status": "rejected",
+      "tier": "rejected",
+      "tier_reason": "Outside the no-auth registry contract by definition.",
+      "auth": "not-allowed",
+      "signup_required": true,
+      "captcha_risk": "possible",
+      "machine_readable": false,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [],
+      "docs_url": null,
+      "sample_url": null,
+      "update_cadence": "n/a",
+      "geospatial_scope": "mixed",
+      "geometry_type": "mixed",
+      "first_output": "Do not use in this registry.",
+      "best_owner_agent": "connect",
+      "consumer_agents": ["all", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "high",
+      "data_caveats": [
+        "Fails the core no-auth rule set."
+      ],
+      "legal_compliance_notes": [
+        "Do not bypass access controls."
+      ],
+      "rate_limit_notes": [
+        "n/a"
+      ],
+      "testing_strategy": [
+        "none"
+      ],
+      "recommended_first_slice": "None.",
+      "do_not_do": [
+        "Do not add such sources to production no-auth integrations."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Explicit avoid entry per project rules."
+    },
+    {
+      "id": "restricted-nifc-egp-login-datasets",
+      "title": "Restricted wildfire datasets requiring login or special access",
+      "owner": "Various wildfire data providers",
+      "domain": "wildfire",
+      "status": "rejected",
+      "tier": "rejected",
+      "tier_reason": "Public NIFC open data should not be mixed with restricted wildfire datasets in the no-auth registry.",
+      "auth": "not-allowed",
+      "signup_required": true,
+      "captcha_risk": "unknown",
+      "machine_readable": false,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [],
+      "docs_url": null,
+      "sample_url": null,
+      "update_cadence": "n/a",
+      "geospatial_scope": "us",
+      "geometry_type": "mixed",
+      "first_output": "Do not use.",
+      "best_owner_agent": "connect",
+      "consumer_agents": ["geospatial", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "high",
+      "data_caveats": [
+        "Outside no-auth scope."
+      ],
+      "legal_compliance_notes": [
+        "Do not mix public and restricted wildfire feeds under one connector."
+      ],
+      "rate_limit_notes": [
+        "n/a"
+      ],
+      "testing_strategy": [
+        "none"
+      ],
+      "recommended_first_slice": "None.",
+      "do_not_do": [
+        "Do not use restricted wildfire datasets in this registry."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Explicit avoid entry per project rules."
+    },
+    {
+      "id": "utility-outage-maps-unverified",
+      "title": "Utility outage maps without verified public machine endpoints",
+      "owner": "Various utilities",
+      "domain": "outage maps",
+      "status": "rejected",
+      "tier": "rejected",
+      "tier_reason": "Do not use until a specific stable machine-readable public endpoint is verified source by source.",
+      "auth": "unknown",
+      "signup_required": false,
+      "captcha_risk": "possible",
+      "machine_readable": false,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [],
+      "docs_url": null,
+      "sample_url": null,
+      "update_cadence": "unknown",
+      "geospatial_scope": "regional",
+      "geometry_type": "mixed",
+      "first_output": "Do not use.",
+      "best_owner_agent": "connect",
+      "consumer_agents": ["geospatial", "future-context-agent", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "medium",
+      "data_caveats": [
+        "Many outage maps are viewer-only or operationally brittle."
+      ],
+      "legal_compliance_notes": [
+        "Use only after source-specific verification."
+      ],
+      "rate_limit_notes": [
+        "unknown"
+      ],
+      "testing_strategy": [
+        "none until verified"
+      ],
+      "recommended_first_slice": "None.",
+      "do_not_do": [
+        "Do not scrape outage maps."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Explicit avoid entry per project rules."
+    }
+  ]
+}

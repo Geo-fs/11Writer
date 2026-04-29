@@ -140,6 +140,7 @@ function toEarthquakeEntity(event: EarthquakeEvent, caveat: string): EarthquakeE
   return {
     id: `earthquake:${event.eventId}`,
     type: "environmental-event",
+    eventSource: "usgs-earthquake",
     eventId: event.eventId,
     source: event.source,
     label: event.title,

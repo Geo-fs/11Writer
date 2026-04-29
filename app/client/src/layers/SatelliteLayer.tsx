@@ -31,6 +31,8 @@ export function SatelliteLayer({ viewer }: SatelliteLayerProps) {
   const trailsEnabled = layers.find((layer) => layer.key === "trails")?.enabled ?? true;
   const selectedEntityId = useAppStore((state) => state.selectedEntityId);
   const selectedReplayIndex = useAppStore((state) => state.selectedReplayIndex);
+  const aerospaceFocus = useAppStore((state) => state.aerospaceFocus);
+  const focusActive = aerospaceFocus.enabled && aerospaceFocus.relatedEntityIds.length > 0;
   const setSelectedEntity = useAppStore((state) => state.setSelectedEntity);
   const setSatelliteEntities = useAppStore((state) => state.setSatelliteEntities);
   const setSatelliteHistoryTracks = useAppStore((state) => state.setSatelliteHistoryTracks);
@@ -102,7 +104,9 @@ export function SatelliteLayer({ viewer }: SatelliteLayerProps) {
           orbitPaths[item.id] ?? [],
           labelsEnabled,
           trailsEnabled,
-          selectedEntityId === item.id
+          selectedEntityId === item.id,
+          focusActive,
+          aerospaceFocus.relatedEntityIds.includes(item.id)
         )
       );
       if (replaySnapshot && !replaySnapshot.isLive) {
@@ -130,6 +134,8 @@ export function SatelliteLayer({ viewer }: SatelliteLayerProps) {
   }, [
     labelsEnabled,
     satelliteQuery.data,
+    focusActive,
+    aerospaceFocus.relatedEntityIds,
     selectedEntityId,
     selectedReplayIndex,
     setSelectedEntity,
@@ -162,7 +168,12 @@ export function SatelliteLayer({ viewer }: SatelliteLayerProps) {
         return;
       }
 
-      const satellite = (satelliteQuery.data?.satellites ?? []).find((item) => item.id === selected.id);
+      const selectedId = resolveSatelliteSelectionId(selected.id);
+      if (!selectedId.startsWith("satellite:")) {
+        return;
+      }
+
+      const satellite = (satelliteQuery.data?.satellites ?? []).find((item) => item.id === selectedId);
       if (satellite) {
         const orbitPath = satelliteQuery.data?.orbitPaths?.[satellite.id] ?? [];
         setSelectedEntity({
@@ -211,13 +222,22 @@ export function SatelliteLayer({ viewer }: SatelliteLayerProps) {
   return null;
 }
 
+function resolveSatelliteSelectionId(entityId: string) {
+  return entityId.endsWith(":replay") ? entityId.slice(0, -7) : entityId;
+}
+
 function buildSatelliteEntity(
   satellite: SatelliteEntity,
   orbitPath: OrbitPoint[],
   labelsEnabled: boolean,
   trailsEnabled: boolean,
-  selected: boolean
+  selected: boolean,
+  focusEnabled: boolean,
+  focusRelated: boolean
 ) {
+  const deemphasized = focusEnabled && !focusRelated && !selected;
+  const pointColor = (selected ? Color.LIME : Color.YELLOW).withAlpha(deemphasized ? 0.18 : 1);
+  const labelColor = deemphasized ? Color.WHITE.withAlpha(0.3) : Color.WHITE;
   return new Entity({
     id: satellite.id,
     position: Cartesian3.fromDegrees(
@@ -234,8 +254,8 @@ function buildSatelliteEntity(
     },
     point: {
       pixelSize: selected ? 12 : 8,
-      color: selected ? Color.LIME : Color.YELLOW,
-      outlineColor: Color.BLACK.withAlpha(0.75),
+      color: pointColor,
+      outlineColor: Color.BLACK.withAlpha(deemphasized ? 0.35 : 0.75),
       outlineWidth: 2
     },
     polyline: trailsEnabled && orbitPath.length > 1
@@ -245,7 +265,11 @@ function buildSatelliteEntity(
           ),
           width: selected ? 3 : 2,
           material: new PolylineGlowMaterialProperty({
-            color: selected ? Color.LIME.withAlpha(0.9) : Color.YELLOW.withAlpha(0.55),
+            color: deemphasized
+              ? Color.YELLOW.withAlpha(0.12)
+              : selected
+                ? Color.LIME.withAlpha(0.9)
+                : Color.YELLOW.withAlpha(0.55),
             glowPower: 0.16
           })
         }
@@ -254,7 +278,7 @@ function buildSatelliteEntity(
       ? {
           text: `${satellite.label}  #${satellite.noradId ?? "?"}`,
           font: "12px sans-serif",
-          fillColor: Color.WHITE,
+          fillColor: labelColor,
           outlineColor: Color.BLACK,
           outlineWidth: 3,
           style: LabelStyle.FILL_AND_OUTLINE,

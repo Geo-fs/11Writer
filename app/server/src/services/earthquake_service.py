@@ -56,6 +56,7 @@ class EarthquakeService:
                 source="usgs-earthquake-hazards-program",
                 feed_name=f"all_{query.window}",
                 feed_url=feed_url,
+                source_mode=self._source_mode_label(),
                 generated_at=_epoch_millis_to_iso(metadata.get("generated")),
                 fetched_at=fetched_at,
                 count=len(limited),
@@ -94,6 +95,14 @@ class EarthquakeService:
         if configured:
             return configured
         return USGS_FEED_URLS[window]
+
+    def _source_mode_label(self) -> Literal["fixture", "live", "unknown"]:
+        mode = self._settings.earthquake_source_mode.strip().lower()
+        if mode == "fixture":
+            return "fixture"
+        if mode == "live":
+            return "live"
+        return "unknown"
 
     def _matches_filters(self, event: EarthquakeEvent, query: EarthquakeQuery) -> bool:
         if query.min_magnitude is not None and (event.magnitude is None or event.magnitude < query.min_magnitude):

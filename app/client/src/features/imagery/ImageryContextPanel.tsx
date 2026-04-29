@@ -1,5 +1,12 @@
 import type { ActiveImageryContext } from "../../lib/imageryContext";
 import { getImageryContextDisplay, getReplayImageryWarning } from "../../lib/imageryContext";
+import {
+  CaveatBlock,
+  EvidenceCard,
+  MetricRow,
+  SourceBadge,
+  StatusBadge
+} from "../../components/ui";
 
 interface ImageryContextPanelProps {
   context: ActiveImageryContext | null;
@@ -12,37 +19,38 @@ export function ImageryContextPanel({ context, isReplayContext = false }: Imager
   const shouldShowWarning = isReplayContext && replayWarning.shouldShowInReplay && replayWarning.severity !== "none";
 
   return (
-    <section className="imagery-context-panel data-card data-card--compact" aria-label="Imagery context">
-      <div className="imagery-context-panel__title">
-        <strong>{display.title}</strong>
-      </div>
+    <EvidenceCard
+      aria-label="Imagery context"
+      className="imagery-context-panel"
+      compact
+      heading={<strong>{display.title}</strong>}
+    >
       <div className="imagery-context-panel__meta">
-        <span>{display.modeRoleLabel}</span>
-        <span>{display.sensorFamilyLabel}</span>
-        <span>{display.historicalFidelityLabel}</span>
+        <StatusBadge tone="info">{display.modeRoleLabel}</StatusBadge>
+        <StatusBadge>{display.sensorFamilyLabel}</StatusBadge>
+        <StatusBadge tone="advisory">{display.historicalFidelityLabel}</StatusBadge>
       </div>
-      <div className="imagery-context-panel__meta">
-        <span>Source: {display.source}</span>
-      </div>
+      <MetricRow label="Source" value={<SourceBadge source={display.source} />} />
       {display.tags.length > 0 ? (
         <div className="imagery-context-panel__tags">
           {display.tags.map((tag) => (
-            <span key={tag}>{tag}</span>
+            <StatusBadge key={tag} tone="neutral">
+              {tag}
+            </StatusBadge>
           ))}
         </div>
       ) : null}
-      <div className="imagery-context-panel__text">
-        <span>Caveat: {display.shortCaveat}</span>
-      </div>
-      <div className="imagery-context-panel__text">
-        <span>Replay note: {display.replayShortNote}</span>
-      </div>
+      <CaveatBlock heading="Imagery caveat" tone="source">
+        {display.shortCaveat}
+      </CaveatBlock>
+      <CaveatBlock heading="Replay note" tone={isReplayContext ? "warning" : "evidence"}>
+        {display.replayShortNote}
+      </CaveatBlock>
       {shouldShowWarning ? (
-        <div className={`imagery-context-warning imagery-context-warning--${replayWarning.severity}`}>
-          <span>{replayWarning.title}: </span>
-          <span>{replayWarning.message}</span>
-        </div>
+        <CaveatBlock heading={replayWarning.title} tone={replayWarning.severity === "warning" ? "warning" : "info"}>
+          {replayWarning.message}
+        </CaveatBlock>
       ) : null}
-    </section>
+    </EvidenceCard>
   );
 }

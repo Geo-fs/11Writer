@@ -8,7 +8,7 @@ import {
 } from "./aerospaceActivity";
 
 export interface AerospaceContextIntegrationNote {
-  provider: "weather" | "environment" | "media";
+  provider: "weather" | "aviation-weather" | "environment" | "media";
   ownership: "external-read-only";
   summary: string;
 }
@@ -18,6 +18,11 @@ export const AEROSPACE_FUTURE_CONTEXT_SLOTS: AerospaceContextIntegrationNote[] =
     provider: "weather",
     ownership: "external-read-only",
     summary: "Future aerospace context slot for nearby weather alerts or airport-area weather context."
+  },
+  {
+    provider: "aviation-weather",
+    ownership: "external-read-only",
+    summary: "Future aerospace context slot for airport-area aviation weather context."
   },
   {
     provider: "environment",
@@ -161,4 +166,3 @@ function displayReferenceLabel(summary: ReferenceLinkCandidate["summary"]) {
     ? `${summary.canonicalName} (${summary.primaryCode})`
     : summary.canonicalName;
 }
-

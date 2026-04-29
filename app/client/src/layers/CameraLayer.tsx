@@ -10,6 +10,7 @@ import {
   VerticalOrigin
 } from "cesium";
 import type { Viewer } from "cesium";
+import { clusterWebcams } from "../features/webcams/webcamClustering";
 import { useCameraPolling } from "../hooks/useCameraPolling";
 import { useAppStore } from "../lib/store";
 import { consumeManualSelectionClear } from "../lib/selectionInteraction";
@@ -27,8 +28,11 @@ export function CameraLayer({ viewer }: CameraLayerProps) {
   const enabled = layers.find((layer) => layer.key === "cameras")?.enabled ?? false;
   const labelsEnabled = layers.find((layer) => layer.key === "labels")?.enabled ?? true;
   const selectedEntityId = useAppStore((state) => state.selectedEntityId);
+  const selectedWebcamClusterId = useAppStore((state) => state.selectedWebcamClusterId);
   const setSelectedEntity = useAppStore((state) => state.setSelectedEntity);
+  const setSelectedWebcamClusterId = useAppStore((state) => state.setSelectedWebcamClusterId);
   const setCameraEntities = useAppStore((state) => state.setCameraEntities);
+  const setWebcamClusters = useAppStore((state) => state.setWebcamClusters);
   const cameraQuery = useCameraPolling(viewer, Boolean(viewer && enabled), filters, webcamFilters);
 
   useEffect(() => {
@@ -51,12 +55,28 @@ export function CameraLayer({ viewer }: CameraLayerProps) {
     const collection = dataSourceRef.current.entities;
     collection.removeAll();
     const cameras = cameraQuery.data?.cameras ?? [];
+    const clusterResult = clusterWebcams(
+      cameras,
+      viewer?.camera.positionCartographic?.height ?? null
+    );
 
-    for (const item of cameras) {
+    for (const cluster of clusterResult.clusters) {
+      collection.add(buildClusterEntity(cluster, selectedWebcamClusterId === cluster.clusterId));
+    }
+    for (const item of clusterResult.unclusteredCameras) {
       collection.add(buildCameraEntity(item, labelsEnabled, selectedEntityId === item.id));
     }
     setCameraEntities(cameras);
-  }, [cameraQuery.data, labelsEnabled, selectedEntityId, setCameraEntities, viewer]);
+    setWebcamClusters(clusterResult.clusters);
+  }, [
+    cameraQuery.data,
+    labelsEnabled,
+    selectedEntityId,
+    selectedWebcamClusterId,
+    setCameraEntities,
+    setWebcamClusters,
+    viewer
+  ]);
 
   useEffect(() => {
     if (!viewer) {
@@ -67,13 +87,20 @@ export function CameraLayer({ viewer }: CameraLayerProps) {
       if (!selected) {
         if (consumeManualSelectionClear()) {
           setSelectedEntity(null);
+          setSelectedWebcamClusterId(null);
           return;
         }
         const state = useAppStore.getState();
-        if (state.selectedEntityId != null) {
+        if (state.selectedEntityId != null || state.selectedWebcamClusterId != null) {
           return;
         }
         setSelectedEntity(null);
+        setSelectedWebcamClusterId(null);
+        return;
+      }
+      if (selected.id.startsWith("camera-cluster:")) {
+        setSelectedEntity(null);
+        setSelectedWebcamClusterId(selected.id);
         return;
       }
       if (!selected.id.startsWith("camera:")) {
@@ -82,6 +109,7 @@ export function CameraLayer({ viewer }: CameraLayerProps) {
 
       const camera = cameraQuery.data?.cameras.find((item) => item.id === selected.id);
       if (camera) {
+        setSelectedWebcamClusterId(null);
         setSelectedEntity(camera);
       }
     };
@@ -90,7 +118,7 @@ export function CameraLayer({ viewer }: CameraLayerProps) {
     return () => {
       viewer.selectedEntityChanged.removeEventListener(handleSelection);
     };
-  }, [cameraQuery.data, setSelectedEntity, viewer]);
+  }, [cameraQuery.data, setSelectedEntity, setSelectedWebcamClusterId, viewer]);
 
   useEffect(() => {
     return () => {
@@ -144,5 +172,51 @@ function buildCameraEntity(camera: CameraEntity, labelsEnabled: boolean, selecte
           pixelOffset: new Cartesian2(0, -16)
         }
       : undefined
+  });
+}
+
+function buildClusterEntity(
+  cluster: ReturnType<typeof clusterWebcams>["clusters"][number],
+  selected: boolean
+) {
+  const pointColor =
+    cluster.dominantCapability === "direct-image"
+      ? Color.CYAN
+      : cluster.dominantCapability === "mixed"
+        ? Color.ORANGE
+        : cluster.dominantCapability === "review-heavy"
+          ? Color.GOLD
+          : Color.LIGHTGRAY;
+
+  const reviewSuffix = cluster.needsReviewCount > 0 ? " !review" : "";
+  return new Entity({
+    id: `camera-cluster:${cluster.clusterId.replace("cluster:", "")}`,
+    position: Cartesian3.fromDegrees(cluster.centerLongitude, cluster.centerLatitude, 12),
+    name: `${cluster.cameraCount} cameras`,
+    properties: {
+      type: "camera-cluster",
+      cameraCount: cluster.cameraCount,
+      primarySourceId: cluster.primarySourceId,
+      directImageCount: cluster.directImageCount,
+      viewerOnlyCount: cluster.viewerOnlyCount,
+      needsReviewCount: cluster.needsReviewCount
+    },
+    point: {
+      pixelSize: selected ? 24 : 18,
+      color: pointColor.withAlpha(0.92),
+      outlineColor: Color.BLACK.withAlpha(0.85),
+      outlineWidth: 2,
+      heightReference: HeightReference.CLAMP_TO_GROUND
+    },
+    label: {
+      text: `${cluster.cameraCount}${reviewSuffix}`,
+      font: "12px sans-serif",
+      fillColor: Color.WHITE,
+      outlineColor: Color.BLACK,
+      outlineWidth: 3,
+      style: LabelStyle.FILL_AND_OUTLINE,
+      verticalOrigin: VerticalOrigin.BOTTOM,
+      pixelOffset: new Cartesian2(0, -18)
+    }
   });
 }

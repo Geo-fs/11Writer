@@ -626,6 +626,90 @@ Every source must carry:
 - missing coordinates
 - filters remain local to the webcam layer and do not replace aircraft/satellite filters
 
+### Webcam clustering
+
+- clustering is frontend-only and operates on the already loaded, already filtered camera set
+- the current helper uses a deterministic latitude/longitude grid with cell size derived from camera height
+- cameras with `position.kind=unknown` are excluded from map clustering and counted separately
+- cluster counts are display helpers, not source truth
+- cluster centers are approximate display centroids and do not imply a precise camera location
+- filters apply before clustering, so cluster counts always reflect the current webcam subset
+- direct-image, viewer-only, review-needed, missing-coordinate, and uncertain-orientation states remain distinct inside each cluster
+
+### Cluster inspector and drilldown
+
+- selecting a cluster opens a webcam-local cluster detail panel
+- cluster detail shows:
+  - camera count
+  - source breakdown
+  - direct-image / viewer-only / usable / review-needed counts
+  - missing-coordinate and uncertain-orientation counts
+  - top facility and reference hints
+  - representative cameras
+  - caveats
+- cluster drilldown remains read-only
+- selecting a camera from the cluster list opens the existing camera inspector
+- reference hints remain hints and are not promoted to canonical matches
+
+### Reference context readiness
+
+- webcam reference context remains frontend-local and uses only existing camera fields
+- the clustering helper summarizes:
+  - `referenceHintText`
+  - `facilityCodeHint`
+  - `referenceLinkStatus`
+  - `nearestReferenceRefId`
+- cluster reference readiness labels are:
+  - `Reviewed links available`
+  - `Machine suggestions only`
+  - `Hints need review`
+  - `No reference hints`
+- these labels are organizational aids only
+- connector hints are hints
+- machine suggestions are not reviewed truth
+- reviewed links take precedence if already attached
+- webcams do not own canonical reference matching
+- cluster drilldown rows show whether a camera is:
+  - reviewed
+  - machine-suggested
+  - hint-only
+  - missing reference context
+- the selected camera inspector keeps connector hints, machine suggestions, reviewed links, and missing context distinct
+
+### Coverage summary
+
+- the webcam operations panel now includes a compact coverage summary for the current filtered set:
+  - loaded camera count
+  - cluster count
+  - direct-image count
+  - viewer-only count
+  - review-needed count
+  - sources represented
+  - largest cluster
+  - most review-heavy cluster
+  - strongest direct-image cluster
+
+### Snapshot/export metadata
+
+- when the webcam layer is enabled, snapshot export metadata now includes:
+  - loaded camera count
+  - cluster count
+  - direct-image / viewer-only / review-needed counts
+  - active webcam filters
+  - selected camera id
+  - selected cluster id
+  - selected cluster reference summary when a cluster is selected
+  - aggregate reference summary when no cluster is selected
+  - caveat that cluster centers are approximate
+- compact webcam reference export metadata includes:
+  - top reference hints
+  - top facility hints
+  - reviewed-link count
+  - machine-suggestion count
+  - hint-only count
+  - caveats
+- this is a presentation/export aid only and does not alter webcam source truth
+
 ### Review queue surface
 
 - show read-only queue items using existing persisted review queue data
@@ -639,6 +723,7 @@ Every source must carry:
 - show source counts exactly as supplied by backend inventory/status fields
 - show review burden clearly when a validated source still contains viewer-only or uncertain items
 - label `referenceHintText` and `facilityCodeHint` as hints
+- do not present machine suggestions as canonical matches
 - do not inflate usable camera counts from local UI assumptions
 
 ## Phased Implementation Plan

@@ -31,6 +31,7 @@ def test_earthquake_fixture_parsing_and_provenance() -> None:
     assert payload["count"] == 4
     assert payload["metadata"]["source"] == "usgs-earthquake-hazards-program"
     assert payload["metadata"]["feedName"] == "all_day"
+    assert payload["metadata"]["sourceMode"] == "fixture"
     assert "magnitude and location" in payload["metadata"]["caveat"]
     assert payload["events"][0]["eventId"]
     assert payload["events"][0]["sourceUrl"].startswith("https://earthquake.usgs.gov/earthquakes/eventpage/")

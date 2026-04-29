@@ -203,6 +203,7 @@ export interface MarineVesselEntity extends BaseEntity {
 
 export interface EarthquakeEntity extends BaseEntity {
   type: "environmental-event";
+  eventSource: "usgs-earthquake";
   eventId: string;
   eventType?: string | null;
   magnitude?: number | null;
@@ -219,9 +220,25 @@ export interface EarthquakeEntity extends BaseEntity {
   caveat: string;
 }
 
+export interface EonetEntity extends BaseEntity {
+  type: "environmental-event";
+  eventSource: "nasa-eonet";
+  eventId: string;
+  eventDate: string;
+  categories: string[];
+  statusDetail: "open" | "closed";
+  geometryType: string;
+  geometryCount: number;
+  coordinatesSummary: string;
+  description?: string | null;
+  closedAt?: string | null;
+  caveat: string;
+}
+
 export type SceneEntity =
   | AircraftEntity
   | SatelliteEntity
   | CameraEntity
   | MarineVesselEntity
-  | EarthquakeEntity;
+  | EarthquakeEntity
+  | EonetEntity;

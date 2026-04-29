@@ -337,6 +337,31 @@ a {
   border: 1px solid rgba(103, 167, 201, 0.2);
 }
 
+.marine-queue-item-button {
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  border: 1px solid rgba(103, 167, 201, 0.18);
+  background: var(--bg-panel-soft);
+}
+
+.marine-target-focus {
+  border-color: rgba(87, 211, 255, 0.58);
+  box-shadow: 0 0 0 1px rgba(87, 211, 255, 0.35) inset;
+}
+
+.marine-target-stale {
+  border-color: rgba(255, 195, 88, 0.45);
+}
+
+.marine-evidence-row {
+  border: 1px solid rgba(103, 167, 201, 0.2);
+}
+
+.marine-evidence-row--summary {
+  border-style: dashed;
+}
+
 .stack--actions {
   margin: 12px 0;
 }

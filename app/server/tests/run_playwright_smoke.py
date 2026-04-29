@@ -7,12 +7,73 @@ import subprocess
 import sys
 import time
 import urllib.request
+from typing import Any
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 OUT = ROOT / "output" / "playwright"
 OUT.mkdir(parents=True, exist_ok=True)
 BACKEND_URL = "http://127.0.0.1:8000"
+CLIENT_DIR = ROOT / "app" / "client"
+
+
+PLAYWRIGHT_LAUNCH_CHECK = """\
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  await browser.close();
+})();
+"""
+
+
+def detect_windows_spawn_eperm(stderr: str) -> bool:
+    lowered = stderr.lower()
+    return "spawn eperm" in lowered or "access is denied. (0x5)" in lowered
+
+
+def run_playwright_launch_check() -> dict[str, Any]:
+    result = subprocess.run(
+        ["node", "-e", PLAYWRIGHT_LAUNCH_CHECK],
+        cwd=str(CLIENT_DIR),
+        capture_output=True,
+        text=True,
+        timeout=60,
+        env=os.environ.copy(),
+    )
+    return {
+        "returncode": result.returncode,
+        "stdout": result.stdout[-12000:],
+        "stderr": result.stderr[-12000:],
+    }
+
+
+def build_launch_failure_payload(launch_check: dict[str, Any]) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "runner_error": {
+            "code": launch_check["returncode"],
+            "stdout": launch_check["stdout"],
+            "stderr": launch_check["stderr"],
+        }
+    }
+    if os.name == "nt" and detect_windows_spawn_eperm(str(launch_check["stderr"])):
+        payload["diagnosis"] = {
+            "kind": "windows-playwright-launch-permission",
+            "summary": (
+                "Playwright browser launch failed before smoke assertions. "
+                "This Windows host can execute the browser binary directly, "
+                "but Node/Playwright launch fails with spawn EPERM or access denied."
+            ),
+            "likely_scope": "machine-environment-specific",
+            "troubleshooting": [
+                "Confirm the runner is using Windows paths consistently; avoid mixed WSL and Windows launch paths.",
+                "Verify the Playwright browser binary exists under %LOCALAPPDATA%\\ms-playwright and runs with --version.",
+                "Test a minimal launch with: node -e \"const { chromium } = require('playwright'); chromium.launch({ headless: true })\".",
+                "If direct executable launch works but Node launch fails, check Windows Defender / antivirus / Controlled Folder Access allowlists for node.exe and the Playwright Chromium binaries.",
+                "If needed, reinstall browsers with: npx playwright install chromium.",
+                "Treat this as a harness environment issue unless a browser can actually launch and reach app assertions.",
+            ],
+        }
+    return payload
 
 
 def wait_for_backend(process: subprocess.Popen[str]) -> None:
@@ -36,7 +97,7 @@ def phase_failed(result: dict[str, object], phase: str) -> bool:
         marine = result.get("marine")
         return bool(isinstance(marine, dict) and marine.get("errors"))
 
-    required_failures = ("aircraft", "satellite", "restore", "webcam", "earthquake")
+    required_failures = ("aircraft", "satellite", "restore", "webcam", "earthquake", "eonet")
     if any(
         isinstance(result.get(name), dict) and result[name].get("errors")
         for name in required_failures
@@ -58,6 +119,13 @@ def main() -> int:
     phase = "full"
     if len(sys.argv) > 1:
         phase = sys.argv[1].strip().lower()
+    launch_check = run_playwright_launch_check()
+    if launch_check["returncode"] != 0:
+        data = build_launch_failure_payload(launch_check)
+        session_path = OUT / "playwright-session.json"
+        session_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        print(json.dumps(data, indent=2))
+        return 1
     backend_stdout = open(OUT / "backend.stdout.log", "w", encoding="utf-8")
     backend_stderr = open(OUT / "backend.stderr.log", "w", encoding="utf-8")
     backend = subprocess.Popen(

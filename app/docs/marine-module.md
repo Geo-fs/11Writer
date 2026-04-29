@@ -283,6 +283,9 @@ This validates marine anomaly rendering and controls using deterministic fixture
 - viewport anomaly panel content
 - chokepoint ranking and filter/sort controls
 - marine attention queue presence/content
+- anomaly-to-replay focus actions from queue/slice controls
+- active focused target display
+- snapshot metadata contains `marineAnomalySummary.activeNavigationTarget` after focus + export
 
 The full smoke path remains:
 
@@ -294,7 +297,127 @@ If full smoke fails due unrelated aerospace/canvas instability, use marine-only 
 
 ### Export Metadata Note
 
-Marine anomaly metadata injection into export snapshot text is deferred to a follow-up slice to avoid broad app-shell coupling. Current export remains stable and includes shared imagery context metadata.
+Marine anomaly metadata is now added to snapshot/export through a marine-local helper:
+- `app/client/src/features/marine/marineEvidenceSummary.ts`
+
+Included export evidence fields:
+- selected vessel anomaly (score/level/label/top reasons/caveats + observed/inferred/scored signal counts)
+- viewport anomaly (score/level/label/top reasons/caveats)
+- top chokepoint slice (rank/score/level/label/top reason/caveat indicator)
+- marine attention queue summary (item count + top item)
+- active controls (`chokepointFilter`, `chokepointSort`)
+- marine caution lines for interpretation
+
+Intentionally excluded:
+- full raw anomaly payload blobs
+- backend scoring internals beyond compact signal counts/reasons/caveats
+- any claim of confirmed intent or wrongdoing
+
+Snapshot/export integration behavior:
+- compact marine evidence lines are appended to export footer when marine summary data is available
+- machine-readable `marineAnomalySummary` is attached to `window.__worldviewLastSnapshotMetadata` for downstream export metadata consumers
+- `marineAnomalySummary.focusedReplayEvidence` adds compact focused-evidence metadata:
+  - `rowCount`
+  - `focusedRowKind`
+  - `firstTimestamp`
+  - `lastTimestamp`
+  - `caveats`
+- `marineAnomalySummary.focusedEvidenceInterpretation` adds compact interpretation metadata:
+  - `mode`
+  - `priorityExplanation`
+  - `trustLevel`
+  - `cardCount`
+  - `visibleCardCount`
+  - `topCaveats`
+
+### Anomaly-To-Replay Navigation
+
+Marine anomaly workflows include focused navigation targets derived from existing summary payloads:
+- selected vessel anomaly (prefers resumed/gap event when available)
+- viewport anomaly (summary-level time window focus)
+- chokepoint slice focus (slice time window)
+- marine attention queue item focus (uses item-backed target)
+
+Navigation targets are modeled in:
+- `app/client/src/features/marine/marineReplayNavigation.ts`
+
+Direct replay targets vs summary-only:
+- direct target: event-linked vessel gap/resumed observation with timestamp/window
+- summary-only: viewport/slice signals where no direct event ID is attached
+
+Summary-only disabled text examples:
+- `No direct replay event attached`
+- `Summary-level signal only`
+- `Replay target unavailable for this reason`
+
+Focused target visibility:
+- marine panel shows `Focused replay target` with type, timestamp/window, and caveat when present
+- focus indicates review context, not proof of intent
+- focused queue items and focused chokepoint slice rows receive subtle visual highlight
+
+Interpretation warning:
+- anomaly-to-replay navigation focuses attention and workflow context
+- AIS gaps and inferred intervals remain observed/inferred/scored indicators, not proof of intentional disabling
+
+Stale/unavailable focus behavior:
+- if a focused chokepoint slice is hidden by current filter settings, panel shows:
+  - `Focused target not visible under current filters`
+- summary-only focus targets continue to show:
+  - `Summary-level signal only` or `No direct replay event attached`
+- focused target state remains exportable in compact metadata, including caveat/summary-only context
+
+Focused replay evidence behavior:
+- `Focused Replay Evidence` panel shows compact timeline-style rows around the active focus target.
+- Direct event targets show focused event/window rows plus nearby summary context when available.
+- Summary-only targets show summary rows with caveats:
+  - `Summary-level signal only`
+  - `No direct replay event attached`
+- Row evidence classes are explicit:
+  - `observed`
+  - `inferred`
+  - `scored`
+  - `summary`
+- Evidence rows support analyst review context; they are not proof of intent or wrongdoing.
+
+Focused evidence interpretation behavior:
+- Marine adds compact `Evidence Interpretation` bands for the active focus target.
+- Interpretation cards are deterministic and local to existing payload data:
+  - `gap-duration`
+  - `movement-across-gap`
+  - `source-health`
+  - `sparse-reporting`
+  - `confidence`
+  - `summary-only`
+  - `evidence-limits`
+- Each card includes explicit basis:
+  - `observed`
+  - `inferred`
+  - `scored`
+  - `summary`
+- Severity is presentation-only (`neutral`, `notice`, `important`) and does not claim intent or wrongdoing.
+- Summary-only targets keep explicit limits:
+  - `Summary-level signal only`
+  - `No direct replay event attached`
+  - `Interpretation is based on aggregate anomaly summary`
+- Interpretation display modes are marine-local and do not change scoring:
+  - `compact`
+  - `detailed`
+  - `evidence-only`
+  - `caveats-first`
+- `caveats-first` exists to foreground evidence limits and source caveats, not to intensify conclusions.
+
+Band thresholds (frontend-local, non-authoritative):
+- gap duration:
+  - short: `< 15 minutes`
+  - moderate: `15 minutes to < 2 hours`
+  - long: `>= 2 hours`
+- movement across gap:
+  - limited: `<= 5 km`
+  - notable: `>= 50 km`
+- source health:
+  - normal for `healthy`
+  - degraded/stale for `degraded` or `stale`
+  - unknown otherwise
 
 ## Frontend Replay/Gap Contract
 

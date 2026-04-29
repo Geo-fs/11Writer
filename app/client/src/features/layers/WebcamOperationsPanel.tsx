@@ -5,6 +5,15 @@ import {
   useSourceStatusQuery
 } from "../../lib/queries";
 import { useAppStore } from "../../lib/store";
+import { CaveatBlock, MetricRow, StatusBadge } from "../../components/ui";
+import {
+  getCameraReferenceState,
+  hasDirectImage,
+  isUsableCamera,
+  isViewerOnly,
+  summarizeWebcamCoverage,
+  type WebcamCluster
+} from "../webcams/webcamClustering";
 import type {
   CameraSourceInventoryEntry,
   CameraSourceRegistryEntry,
@@ -16,9 +25,14 @@ import type { CameraEntity } from "../../types/entities";
 export function WebcamOperationsPanel() {
   const layers = useAppStore((state) => state.layers);
   const cameraEntities = useAppStore((state) => state.cameraEntities);
+  const webcamClusters = useAppStore((state) => state.webcamClusters);
   const webcamFilters = useAppStore((state) => state.webcamFilters);
+  const selectedWebcamClusterId = useAppStore((state) => state.selectedWebcamClusterId);
+  const selectedEntityId = useAppStore((state) => state.selectedEntityId);
   const setWebcamFilters = useAppStore((state) => state.setWebcamFilters);
   const resetWebcamFilters = useAppStore((state) => state.resetWebcamFilters);
+  const setSelectedWebcamClusterId = useAppStore((state) => state.setSelectedWebcamClusterId);
+  const setSelectedEntityId = useAppStore((state) => state.setSelectedEntityId);
   const camerasEnabled = layers.find((layer) => layer.key === "cameras")?.enabled ?? false;
   const inventoryQuery = useCameraSourceInventoryQuery();
   const cameraSourcesQuery = useCameraSourcesQuery();
@@ -32,8 +46,12 @@ export function WebcamOperationsPanel() {
     (sourceStatusQuery.data?.sources ?? []).map((source) => [source.name, source] as const)
   );
   const visibleSummary = summarizeVisibleCameras(cameraEntities);
+  const coverageSummary = summarizeWebcamCoverage(cameraEntities, webcamClusters);
   const inventorySources = [...(inventoryQuery.data?.sources ?? [])].sort(compareInventorySources);
   const reviewItems = reviewQueueQuery.data?.items ?? [];
+  const selectedCluster =
+    webcamClusters.find((cluster) => toEntityClusterId(cluster) === selectedWebcamClusterId) ??
+    (webcamClusters.length === 1 ? webcamClusters[0] : null);
 
   return (
     <div className="panel__section" data-testid="webcam-operations-panel">
@@ -48,10 +66,23 @@ export function WebcamOperationsPanel() {
       <div className="data-card data-card--compact webcam-summary-card" data-testid="webcam-visible-summary">
         <strong>Visible Webcam Subset</strong>
         <span>{visibleSummary.total} cameras in current viewport/query result</span>
+        <span>{coverageSummary.clusterCount} clusters</span>
         <span>{visibleSummary.usable} usable</span>
         <span>{visibleSummary.directImage} direct-image</span>
         <span>{visibleSummary.viewerOnly} viewer-only</span>
         <span>{visibleSummary.needsReview} needs review</span>
+        <span>{coverageSummary.sourceCount} sources represented</span>
+        {coverageSummary.largestCluster ? (
+          <span data-testid="webcam-largest-cluster">
+            Largest cluster {coverageSummary.largestCluster.cameraCount} cameras
+          </span>
+        ) : null}
+        {coverageSummary.mostReviewHeavyCluster ? (
+          <span>Most review-heavy cluster {coverageSummary.mostReviewHeavyCluster.needsReviewCount} review-needed</span>
+        ) : null}
+        {coverageSummary.strongestDirectImageCluster ? (
+          <span>Strongest direct-image group {coverageSummary.strongestDirectImageCluster.directImageCount} direct-image</span>
+        ) : null}
       </div>
 
       <div className="data-card" data-testid="webcam-filter-panel">
@@ -152,6 +183,65 @@ export function WebcamOperationsPanel() {
         ))}
       </div>
 
+      <div className="data-card" data-testid="webcam-cluster-list-panel">
+        <strong>Webcam Clusters</strong>
+        <span>
+          {webcamClusters.length} grouped camera areas from the currently loaded and filtered webcam set
+        </span>
+        {webcamClusters.length > 0 ? (
+          <div className="stack" data-testid="webcam-cluster-list">
+            {webcamClusters.slice(0, 8).map((cluster) => (
+              <button
+                key={cluster.clusterId}
+                type="button"
+                className="ghost-button webcam-cluster-button"
+                data-testid="webcam-cluster-item"
+                onClick={() => setSelectedWebcamClusterId(toEntityClusterId(cluster))}
+              >
+                {cluster.primarySourceId} | {cluster.cameraCount} cameras | {cluster.directImageCount} direct-image | {cluster.viewerOnlyCount} viewer-only
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state compact">
+            <p>No multi-camera clusters in the current filtered set.</p>
+            <span>Single cameras still render individually and remain selectable on the globe.</span>
+          </div>
+        )}
+      </div>
+
+      {selectedCluster ? (
+        <ClusterDetailPanel
+          cluster={selectedCluster}
+          selectedEntityId={selectedEntityId}
+          onSelectCamera={(cameraId) => {
+            setSelectedEntityId(cameraId);
+          }}
+          onShowViewerOnly={() =>
+            setWebcamFilters({
+              sourceId: selectedCluster.primarySourceId,
+              viewerOnly: true,
+              directImageOnly: false,
+              needsReview: false
+            })
+          }
+          onShowNeedsReview={() =>
+            setWebcamFilters({
+              sourceId: selectedCluster.primarySourceId,
+              needsReview: true,
+              viewerOnly: false,
+              directImageOnly: false
+            })
+          }
+          onSelectFirstDirectImage={() => {
+            const firstDirectImage = selectedCluster.cameras.find((camera) => hasDirectImage(camera));
+            if (firstDirectImage) {
+              setSelectedEntityId(firstDirectImage.id);
+            }
+          }}
+        />
+      ) : null}
+
       <div className="data-card" data-testid="webcam-review-queue-panel">
         <strong>Webcam Review Queue</strong>
         <span>
@@ -169,6 +259,122 @@ export function WebcamOperationsPanel() {
             <span>Viewer-only and uncertain metadata items will appear here when sources require follow-up.</span>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function ClusterDetailPanel({
+  cluster,
+  selectedEntityId,
+  onSelectCamera,
+  onShowViewerOnly,
+  onShowNeedsReview,
+  onSelectFirstDirectImage
+}: {
+  cluster: WebcamCluster;
+  selectedEntityId: string | null;
+  onSelectCamera: (cameraId: string) => void;
+  onShowViewerOnly: () => void;
+  onShowNeedsReview: () => void;
+  onSelectFirstDirectImage: () => void;
+}) {
+  const sourceBreakdown = cluster.sourceIds.map((sourceId) => {
+    const count = cluster.cameras.filter((camera) => camera.source === sourceId).length;
+    return `${sourceId} (${count})`;
+  });
+
+  return (
+    <div className="data-card webcam-cluster-detail" data-testid="webcam-cluster-detail">
+      <strong>Selected Cluster</strong>
+      <span>{cluster.cameraCount} cameras</span>
+      <span>Primary source {cluster.primarySourceId}</span>
+      <span>{cluster.directImageCount} direct-image | {cluster.viewerOnlyCount} viewer-only</span>
+      <span>{cluster.usableCount} usable | {cluster.needsReviewCount} needs review</span>
+      <span>
+        {cluster.missingCoordinateCount} missing coordinates | {cluster.uncertainOrientationCount} uncertain orientation
+      </span>
+      <span>Sources {sourceBreakdown.join(" | ")}</span>
+      <span>
+        Approximate center {cluster.centerLatitude.toFixed(3)}, {cluster.centerLongitude.toFixed(3)}
+      </span>
+      {cluster.facilityCodeHints.length > 0 ? (
+        <span>Facility hints {cluster.facilityCodeHints.join(", ")}</span>
+      ) : null}
+      {cluster.referenceHintTexts.length > 0 ? (
+        <span>Reference hints {cluster.referenceHintTexts.join(" | ")}</span>
+      ) : null}
+      <div className="data-card data-card--compact" data-testid="webcam-cluster-reference-context">
+        <strong>Reference Context</strong>
+        <div className="stack">
+          <StatusBadge tone={referenceTone(cluster.referenceSummary.readinessLabel)}>
+            {cluster.referenceSummary.readinessLabel}
+          </StatusBadge>
+          <MetricRow
+            label="Reviewed"
+            value={cluster.referenceSummary.reviewedLinkCount.toLocaleString()}
+          />
+          <MetricRow
+            label="Machine suggestions"
+            value={cluster.referenceSummary.machineSuggestionCount.toLocaleString()}
+          />
+          <MetricRow
+            label="Hint-only"
+            value={cluster.referenceSummary.unlinkedHintCount.toLocaleString()}
+          />
+          <MetricRow
+            label="Reference-ready"
+            value={cluster.referenceSummary.referenceReadyCount.toLocaleString()}
+          />
+          <MetricRow
+            label="Needs reference review"
+            value={cluster.referenceSummary.needsReferenceReviewCount.toLocaleString()}
+          />
+          <MetricRow
+            label="Top reference hints"
+            value={cluster.referenceSummary.topReferenceHints.join(" | ") || "None"}
+          />
+          <MetricRow
+            label="Top facility hints"
+            value={cluster.referenceSummary.topFacilityHints.join(" | ") || "None"}
+          />
+        </div>
+        <CaveatBlock heading="Reference caveat" tone="evidence" compact>
+          {cluster.referenceSummary.referenceCaveats.join(" ")}
+        </CaveatBlock>
+      </div>
+      <div className="stack stack--actions webcam-cluster-actions">
+        <button type="button" className="ghost-button" onClick={onSelectFirstDirectImage}>
+          Select First Direct-Image Camera
+        </button>
+        <button type="button" className="ghost-button" onClick={onShowViewerOnly}>
+          Show Viewer-Only Cameras
+        </button>
+        <button type="button" className="ghost-button" onClick={onShowNeedsReview}>
+          Show Review-Needed Cameras
+        </button>
+      </div>
+      <div className="stack" data-testid="webcam-cluster-camera-list">
+        {cluster.cameras.slice(0, 10).map((camera) => (
+          <button
+            key={camera.id}
+            type="button"
+            className="ghost-button webcam-cluster-camera-row"
+            data-testid="webcam-cluster-camera-row"
+            onClick={() => onSelectCamera(camera.id)}
+          >
+            {camera.label} | {camera.source} | {hasDirectImage(camera) ? "Direct-image" : isViewerOnly(camera) ? "Viewer-only" : "No frame"} | {isUsableCamera(camera) ? "Usable" : camera.review.status}
+            {` | ${getCameraReferenceState(camera).label}`}
+            {camera.referenceHintText ? ` | hint=${camera.referenceHintText}` : ""}
+            {camera.facilityCodeHint ? ` | facility=${camera.facilityCodeHint}` : ""}
+            {selectedEntityId === camera.id ? " | selected" : ""}
+          </button>
+        ))}
+      </div>
+      <div className="stack">
+        {cluster.caveats.map((caveat) => (
+          <span key={caveat}>{caveat}</span>
+        ))}
       </div>
     </div>
   );
@@ -280,6 +486,10 @@ function summarizeVisibleCameras(cameras: CameraEntity[]) {
   };
 }
 
+function toEntityClusterId(cluster: WebcamCluster) {
+  return `camera-cluster:${cluster.clusterId.replace("cluster:", "")}`;
+}
+
 function describeReadiness(
   source: CameraSourceInventoryEntry,
   runtime?: CameraSourceRegistryEntry,
@@ -321,17 +531,15 @@ function formatTimestamp(value?: string | null) {
   return value ? new Date(value).toLocaleString() : "Unknown";
 }
 
-function hasDirectImage(camera: CameraEntity) {
-  return Boolean(camera.frame.imageUrl && camera.frame.status !== "viewer-page-only");
-}
-
-function isViewerOnly(camera: CameraEntity) {
-  return camera.frame.status === "viewer-page-only" || (!camera.frame.imageUrl && Boolean(camera.frame.viewerUrl));
-}
-
-function isUsableCamera(camera: CameraEntity) {
-  if (camera.review.status === "blocked" || camera.healthState === "blocked") {
-    return false;
+function referenceTone(label: WebcamCluster["referenceSummary"]["readinessLabel"]) {
+  switch (label) {
+    case "Reviewed links available":
+      return "success" as const;
+    case "Machine suggestions only":
+      return "info" as const;
+    case "Hints need review":
+      return "warning" as const;
+    default:
+      return "neutral" as const;
   }
-  return camera.frame.status === "live" || camera.frame.status === "viewer-page-only";
 }

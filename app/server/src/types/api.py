@@ -862,6 +862,7 @@ class EarthquakeEventsMetadata(CamelModel):
     source: str
     feed_name: str
     feed_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
     generated_at: str | None = None
     fetched_at: str
     count: int
@@ -872,3 +873,44 @@ class EarthquakeEventsResponse(CamelModel):
     metadata: EarthquakeEventsMetadata
     count: int
     events: list[EarthquakeEvent]
+
+
+class EonetEvent(CamelModel):
+    event_id: str
+    source: str
+    source_url: str
+    title: str
+    description: str | None = None
+    categories: list[str] = Field(default_factory=list)
+    category_ids: list[str] = Field(default_factory=list)
+    category_titles: list[str] = Field(default_factory=list)
+    event_date: str
+    updated: str | None = None
+    is_closed: bool | None = None
+    closed: str | None = None
+    status: Literal["open", "closed"]
+    geometry_type: str
+    longitude: float
+    latitude: float
+    coordinates_summary: str
+    magnitude_value: float | None = None
+    magnitude_unit: str | None = None
+    raw_geometry_count: int
+    caveat: str
+
+
+class EonetEventsMetadata(CamelModel):
+    source: str
+    feed_name: str
+    feed_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    fetched_at: str
+    generated_at: str | None = None
+    count: int
+    caveat: str
+
+
+class EonetEventsResponse(CamelModel):
+    metadata: EonetEventsMetadata
+    count: int
+    events: list[EonetEvent]

@@ -56,6 +56,25 @@ python tests/run_playwright_smoke.py
 
 Treat Playwright as informative when a failure is clearly due to known headless Cesium instability outside the changed scope. Do not hide failures; document them.
 
+### Windows Playwright launch troubleshooting
+
+- The smoke runner is intended to run with a consistent Windows-native toolchain on Windows hosts: Windows Python, Windows Node, and Windows filesystem paths.
+- If `python tests/run_playwright_smoke.py earthquake` fails before app assertions with Playwright `spawn EPERM`, treat that as a browser-launch environment failure first, not a feature regression.
+- Local classification for this machine: `windows-playwright-launch-permission`.
+- Treat this as a Connect/tooling issue unless an agent is explicitly assigned to work on Playwright launch behavior.
+- Run a minimal launch probe:
+
+```bash
+cd app/client
+node -e "const { chromium } = require('playwright'); chromium.launch({ headless: true })"
+```
+
+- If the browser executable runs directly with `--version` but the Node launch probe fails, suspect Windows security or permission controls affecting Node-spawned browser processes.
+- Check Windows Defender / antivirus / Controlled Folder Access allowlists for `node.exe`, `chrome-headless-shell.exe`, and `chrome.exe` under `%LOCALAPPDATA%\\ms-playwright`.
+- Verify the browser cache exists under `%LOCALAPPDATA%\\ms-playwright`; if needed, reinstall with `npx playwright install chromium`.
+- If the launch probe fails before any browser page is created, stop and report the environment issue instead of treating the smoke as an application failure.
+- Focused smoke phases can still be validated on another machine or environment where browser launch is healthy.
+
 ## Data and source rules
 
 - Preserve provenance for every source-backed workflow.
@@ -72,6 +91,8 @@ Treat Playwright as informative when a failure is clearly due to known headless 
 - Feature agents should work on branches or provide patch sets instead of rewriting shared history.
 - If the worktree is mixed, stage selectively and confirm scope before commit.
 - Preserve the root `LICENSE` and reconcile remote history before first push or major repo surgery.
+- For the current multi-agent local state, use `app/docs/active-agent-worktree.md` as the consolidation reference before staging or committing.
+- Use `app/docs/release-readiness.md` before consolidating a multi-agent wave into commits and a push.
 
 ## Agent Workflow After Initial Import
 

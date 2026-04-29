@@ -33,6 +33,8 @@ export function AircraftLayer({ viewer }: AircraftLayerProps) {
   const debugEnabled = layers.find((layer) => layer.key === "debug")?.enabled ?? false;
   const selectedEntityId = useAppStore((state) => state.selectedEntityId);
   const selectedReplayIndex = useAppStore((state) => state.selectedReplayIndex);
+  const aerospaceFocus = useAppStore((state) => state.aerospaceFocus);
+  const focusActive = aerospaceFocus.enabled && aerospaceFocus.relatedEntityIds.length > 0;
   const setSelectedEntity = useAppStore((state) => state.setSelectedEntity);
   const setAircraftEntities = useAppStore((state) => state.setAircraftEntities);
   const setAircraftHistoryTracks = useAppStore((state) => state.setAircraftHistoryTracks);
@@ -107,7 +109,9 @@ export function AircraftLayer({ viewer }: AircraftLayerProps) {
           labelsEnabled,
           debugEnabled,
           trailsEnabled ? track.points : [],
-          selectedEntityId === item.id
+          selectedEntityId === item.id,
+          focusActive,
+          aerospaceFocus.relatedEntityIds.includes(item.id)
         )
       );
       if (replaySnapshot && !replaySnapshot.isLive) {
@@ -136,6 +140,8 @@ export function AircraftLayer({ viewer }: AircraftLayerProps) {
     debugEnabled,
     filters.historyWindowMinutes,
     labelsEnabled,
+    focusActive,
+    aerospaceFocus.relatedEntityIds,
     selectedEntityId,
     selectedReplayIndex,
     setAircraftEntities,
@@ -167,7 +173,12 @@ export function AircraftLayer({ viewer }: AircraftLayerProps) {
         return;
       }
 
-      const aircraft = (aircraftQuery.data?.aircraft ?? []).find((item) => item.id === selected.id);
+      const selectedId = resolveAircraftSelectionId(selected.id);
+      if (!selectedId.startsWith("aircraft:")) {
+        return;
+      }
+
+      const aircraft = (aircraftQuery.data?.aircraft ?? []).find((item) => item.id === selectedId);
       if (aircraft) {
         const history = historyRef.current.get(aircraft.id) ?? [];
         setSelectedEntity({
@@ -219,13 +230,23 @@ export function AircraftLayer({ viewer }: AircraftLayerProps) {
   return null;
 }
 
+function resolveAircraftSelectionId(entityId: string) {
+  return entityId.endsWith(":replay") ? entityId.slice(0, -7) : entityId;
+}
+
 function buildAircraftEntity(
   aircraft: AircraftEntity,
   labelsEnabled: boolean,
   debugEnabled: boolean,
   trail: TrackPoint[],
-  selected: boolean
+  selected: boolean,
+  focusEnabled: boolean,
+  focusRelated: boolean
 ) {
+  const deemphasized = focusEnabled && !focusRelated && !selected;
+  const pointColorBase = aircraft.onGround ? Color.ORANGE : selected ? Color.LIME : Color.CYAN;
+  const pointColor = deemphasized ? pointColorBase.withAlpha(0.18) : pointColorBase;
+  const labelColor = deemphasized ? Color.WHITE.withAlpha(0.3) : Color.WHITE;
   return new Entity({
     id: aircraft.id,
     position: Cartesian3.fromDegrees(aircraft.longitude, aircraft.latitude, aircraft.altitude),
@@ -240,8 +261,8 @@ function buildAircraftEntity(
     },
     point: {
       pixelSize: selected ? 14 : debugEnabled ? 12 : 9,
-      color: aircraft.onGround ? Color.ORANGE : selected ? Color.LIME : Color.CYAN,
-      outlineColor: Color.BLACK.withAlpha(0.8),
+      color: pointColor,
+      outlineColor: Color.BLACK.withAlpha(deemphasized ? 0.35 : 0.8),
       outlineWidth: 2,
       heightReference: HeightReference.NONE
     },
@@ -252,7 +273,11 @@ function buildAircraftEntity(
           ),
           width: selected ? 3 : 2,
           material: new PolylineGlowMaterialProperty({
-            color: selected ? Color.LIME.withAlpha(0.9) : Color.CYAN.withAlpha(0.55),
+            color: deemphasized
+              ? Color.CYAN.withAlpha(0.12)
+              : selected
+                ? Color.LIME.withAlpha(0.9)
+                : Color.CYAN.withAlpha(0.55),
             glowPower: 0.16
           })
         }
@@ -261,7 +286,7 @@ function buildAircraftEntity(
       ? {
           text: `${aircraft.callsign ?? aircraft.label}${aircraft.altitude > 0 ? `  ${Math.round(aircraft.altitude / 0.3048).toLocaleString()} ft` : ""}`,
           font: "12px sans-serif",
-          fillColor: Color.WHITE,
+          fillColor: labelColor,
           outlineColor: Color.BLACK,
           outlineWidth: 3,
           style: LabelStyle.FILL_AND_OUTLINE,

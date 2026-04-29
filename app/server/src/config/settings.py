@@ -65,6 +65,16 @@ class Settings(BaseSettings):
         alias="EARTHQUAKE_USGS_FEED_URL",
     )
     earthquake_http_timeout_seconds: int = Field(default=20, alias="EARTHQUAKE_HTTP_TIMEOUT_SECONDS")
+    eonet_source_mode: str = Field(default="fixture", alias="EONET_SOURCE_MODE")
+    eonet_fixture_path: str = Field(
+        default="./data/nasa_eonet_events_fixture.json",
+        alias="EONET_FIXTURE_PATH",
+    )
+    eonet_api_url: str = Field(
+        default="https://eonet.gsfc.nasa.gov/api/v3/events",
+        alias="EONET_API_URL",
+    )
+    eonet_http_timeout_seconds: int = Field(default=20, alias="EONET_HTTP_TIMEOUT_SECONDS")
     webcam_database_url: str | None = Field(default=None, alias="WEBCAM_DATABASE_URL")
     webcam_worker_enabled: bool = Field(default=False, alias="WEBCAM_WORKER_ENABLED")
     webcam_worker_poll_seconds: int = Field(default=15, alias="WEBCAM_WORKER_POLL_SECONDS")

@@ -3,6 +3,7 @@ import type {
   AircraftEntity,
   CameraEntity,
   EarthquakeEntity,
+  EonetEntity,
   EntityHistoryTrack,
   SatelliteEntity,
   SceneEntity
@@ -12,6 +13,9 @@ import type {
   PlanetImageryCategory,
   PlanetImageryMode
 } from "../types/api";
+import type { MarineAnomalySnapshotMetadata } from "../features/marine/marineEvidenceSummary";
+import type { MarineReplayNavigationTarget } from "../features/marine/marineReplayNavigation";
+import type { WebcamCluster } from "../features/webcams/webcamClustering";
 
 export type VisualMode = "standard" | "nightVision" | "thermal" | "crt";
 export type LayerKey =
@@ -20,6 +24,7 @@ export type LayerKey =
   | "satellites"
   | "cameras"
   | "earthquakes"
+  | "eonet"
   | "labels"
   | "trails"
   | "debug";
@@ -63,6 +68,10 @@ export interface EnvironmentalEventFilterState {
   window: "hour" | "day" | "week" | "month";
   sort: "newest" | "magnitude";
   limit: number;
+  eonetCategory: string;
+  eonetStatus: "open" | "closed" | "all";
+  eonetSort: "newest" | "category";
+  eonetLimit: number;
 }
 
 export interface HudState {
@@ -92,6 +101,55 @@ export interface BookmarkView {
   url: string;
 }
 
+export interface PinnedEnvironmentalEvent {
+  source: "earthquakes" | "eonet";
+  entityId: string;
+  eventId: string;
+  title: string;
+  eventTime: string;
+  latitude: number;
+  longitude: number;
+  summaryLabel: string;
+  categoryOrMagnitude: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  caveat: string;
+}
+
+export type AerospaceFocusPresetId =
+  | "nearby-targets"
+  | "airport-context"
+  | "runway-context"
+  | "movement-context"
+  | "replay-context"
+  | "satellite-pass-context";
+
+export interface AerospaceFocusState {
+  enabled: boolean;
+  targetId: string | null;
+  targetType: "aircraft" | "satellite" | null;
+  presetId: AerospaceFocusPresetId;
+  radiusNm: number | null;
+  reason: string | null;
+  startedAt: string | null;
+  relatedEntityIds: string[];
+}
+
+export interface AerospaceFocusSnapshot {
+  id: string;
+  createdAt: string;
+  targetId: string;
+  targetType: "aircraft" | "satellite";
+  targetLabel: string | null;
+  presetId: AerospaceFocusPresetId;
+  presetLabel: string;
+  presetAvailable: boolean;
+  disabledReason: string | null;
+  reason: string | null;
+  radiusNm: number | null;
+  relatedTargetCount: number;
+  caveat: string;
+}
+
 interface AppState {
   layers: LayerState[];
   filters: FilterState;
@@ -103,16 +161,25 @@ interface AppState {
   imageryCategories: PlanetImageryCategory[];
   selectedEntity: SceneEntity | null;
   selectedEntityId: string | null;
+  selectedWebcamClusterId: string | null;
   followedEntityId: string | null;
   hud: HudState;
   aircraftEntities: AircraftEntity[];
   satelliteEntities: SatelliteEntity[];
   cameraEntities: CameraEntity[];
+  webcamClusters: WebcamCluster[];
   earthquakeEntities: EarthquakeEntity[];
+  eonetEntities: EonetEntity[];
   entityHistoryTracks: Record<string, EntityHistoryTrack>;
   satellitePassWindows: Record<string, PassWindowSummary>;
   selectedReplayIndex: number | null;
+  aerospaceFocus: AerospaceFocusState;
+  aerospaceFocusHistory: AerospaceFocusSnapshot[];
+  marineEvidenceLines: string[];
+  marineEvidenceMetadata: MarineAnomalySnapshotMetadata | null;
+  activeMarineReplayTarget: MarineReplayNavigationTarget | null;
   bookmarks: BookmarkView[];
+  pinnedEnvironmentalEvents: PinnedEnvironmentalEvent[];
   setLayerEnabled: (key: LayerState["key"], enabled: boolean) => void;
   setMultipleLayers: (next: Partial<Record<LayerKey, boolean>>) => void;
   setFilters: (filters: Partial<FilterState>) => void;
@@ -127,20 +194,43 @@ interface AppState {
   setImageryModeId: (modeId: string | null) => void;
   setSelectedEntity: (entity: SceneEntity | null) => void;
   setSelectedEntityId: (entityId: string | null) => void;
+  setSelectedWebcamClusterId: (clusterId: string | null) => void;
   setFollowedEntityId: (entityId: string | null) => void;
   setHud: (hud: Partial<HudState>) => void;
   setAircraftEntities: (entities: AircraftEntity[]) => void;
   setSatelliteEntities: (entities: SatelliteEntity[]) => void;
   setCameraEntities: (entities: CameraEntity[]) => void;
+  setWebcamClusters: (clusters: WebcamCluster[]) => void;
   setEarthquakeEntities: (entities: EarthquakeEntity[]) => void;
+  setEonetEntities: (entities: EonetEntity[]) => void;
   setEnvironmentalFilters: (filters: Partial<EnvironmentalEventFilterState>) => void;
   setAircraftHistoryTracks: (tracks: Record<string, EntityHistoryTrack>) => void;
   setSatelliteHistoryTracks: (tracks: Record<string, EntityHistoryTrack>) => void;
   setSatellitePassWindows: (passWindows: Record<string, PassWindowSummary>) => void;
   setSelectedReplayIndex: (index: number | null) => void;
   stepSelectedReplayIndex: (delta: number) => void;
+  setAerospaceFocus: (focus: {
+    targetId: string;
+    targetType: "aircraft" | "satellite";
+    presetId: AerospaceFocusPresetId;
+    radiusNm: number | null;
+    reason: string | null;
+  }) => void;
+  setAerospaceFocusPreset: (presetId: AerospaceFocusPresetId) => void;
+  clearAerospaceFocus: () => void;
+  setAerospaceFocusRelatedEntityIds: (ids: string[]) => void;
+  recordAerospaceFocusSnapshot: (snapshot: AerospaceFocusSnapshot) => void;
+  clearAerospaceFocusHistory: () => void;
+  setMarineEvidenceSummary: (payload: {
+    lines: string[];
+    metadata: MarineAnomalySnapshotMetadata | null;
+  }) => void;
+  setActiveMarineReplayTarget: (target: MarineReplayNavigationTarget | null) => void;
   saveBookmark: (bookmark: Omit<BookmarkView, "id" | "createdAt">) => void;
   removeBookmark: (id: string) => void;
+  pinEnvironmentalEvent: (event: PinnedEnvironmentalEvent) => void;
+  unpinEnvironmentalEvent: (entityId: string) => void;
+  clearPinnedEnvironmentalEvents: () => void;
 }
 
 const initialLayers: LayerState[] = [
@@ -149,6 +239,7 @@ const initialLayers: LayerState[] = [
   { key: "satellites", label: "Satellites", enabled: true, available: true },
   { key: "cameras", label: "Cameras", enabled: true, available: true },
   { key: "earthquakes", label: "Earthquakes", enabled: false, available: true },
+  { key: "eonet", label: "Natural Events (EONET)", enabled: false, available: true },
   { key: "labels", label: "Labels", enabled: true, available: true },
   { key: "trails", label: "Trails", enabled: true, available: true },
   { key: "debug", label: "Debug", enabled: false, available: true }
@@ -206,6 +297,22 @@ const initialEnvironmentalFilters: EnvironmentalEventFilterState = {
   window: "day",
   sort: "newest",
   limit: 300
+  ,
+  eonetCategory: "",
+  eonetStatus: "open",
+  eonetSort: "newest",
+  eonetLimit: 200
+};
+
+const initialAerospaceFocus: AerospaceFocusState = {
+  enabled: false,
+  targetId: null,
+  targetType: null,
+  presetId: "nearby-targets",
+  radiusNm: null,
+  reason: null,
+  startedAt: null,
+  relatedEntityIds: []
 };
 
 export const useAppStore = create<AppState>((set) => ({
@@ -219,16 +326,25 @@ export const useAppStore = create<AppState>((set) => ({
   imageryCategories: [],
   selectedEntity: null,
   selectedEntityId: null,
+  selectedWebcamClusterId: null,
   followedEntityId: null,
   hud: initialHud,
   aircraftEntities: [],
   satelliteEntities: [],
   cameraEntities: [],
+  webcamClusters: [],
   earthquakeEntities: [],
+  eonetEntities: [],
   entityHistoryTracks: {},
   satellitePassWindows: {},
   selectedReplayIndex: null,
-  bookmarks: [],
+  aerospaceFocus: initialAerospaceFocus,
+  aerospaceFocusHistory: [],
+    marineEvidenceLines: [],
+    marineEvidenceMetadata: null,
+    activeMarineReplayTarget: null,
+    bookmarks: [],
+    pinnedEnvironmentalEvents: [],
   setLayerEnabled: (key, enabled) =>
     set((state) => ({
       layers: state.layers.map((layer) =>
@@ -278,11 +394,13 @@ export const useAppStore = create<AppState>((set) => ({
     set({
       selectedEntity: entity,
       selectedEntityId: entity?.id ?? null,
+      selectedWebcamClusterId: null,
       selectedReplayIndex: null
     }),
   setSelectedEntityId: (entityId) =>
     set((state) => ({
       selectedEntityId: entityId,
+      selectedWebcamClusterId: null,
       selectedReplayIndex: null,
       selectedEntity:
         entityId == null
@@ -291,7 +409,15 @@ export const useAppStore = create<AppState>((set) => ({
             state.satelliteEntities.find((item) => item.id === entityId) ??
             state.cameraEntities.find((item) => item.id === entityId) ??
             state.earthquakeEntities.find((item) => item.id === entityId) ??
+            state.eonetEntities.find((item) => item.id === entityId) ??
             null
+    })),
+  setSelectedWebcamClusterId: (clusterId) =>
+    set((state) => ({
+      selectedWebcamClusterId: clusterId,
+      selectedEntity: clusterId != null && state.selectedEntity?.type === "camera" ? null : state.selectedEntity,
+      selectedEntityId: clusterId != null && state.selectedEntity?.type === "camera" ? null : state.selectedEntityId,
+      selectedReplayIndex: null
     })),
   setFollowedEntityId: (entityId) => set({ followedEntityId: entityId }),
   setHud: (hud) =>
@@ -328,13 +454,37 @@ export const useAppStore = create<AppState>((set) => ({
             (state.selectedEntity?.type === "camera" ? null : state.selectedEntity)
           : state.selectedEntity
     })),
+  setWebcamClusters: (clusters) =>
+    set((state) => ({
+      webcamClusters: clusters,
+      selectedWebcamClusterId:
+        state.selectedWebcamClusterId != null &&
+        clusters.some((cluster) => cluster.clusterId === state.selectedWebcamClusterId)
+          ? state.selectedWebcamClusterId
+          : null
+    })),
   setEarthquakeEntities: (entities) =>
     set((state) => ({
       earthquakeEntities: entities,
       selectedEntity:
         state.selectedEntityId != null
           ? entities.find((item) => item.id === state.selectedEntityId) ??
-            (state.selectedEntity?.type === "environmental-event" ? null : state.selectedEntity)
+            (state.selectedEntity?.type === "environmental-event" &&
+            (state.selectedEntity?.id ?? "").startsWith("earthquake:")
+              ? null
+              : state.selectedEntity)
+          : state.selectedEntity
+    })),
+  setEonetEntities: (entities) =>
+    set((state) => ({
+      eonetEntities: entities,
+      selectedEntity:
+        state.selectedEntityId != null
+          ? entities.find((item) => item.id === state.selectedEntityId) ??
+            (state.selectedEntity?.type === "environmental-event" &&
+            (state.selectedEntity?.id ?? "").startsWith("eonet:")
+              ? null
+              : state.selectedEntity)
           : state.selectedEntity
     })),
   setAircraftHistoryTracks: (tracks) =>
@@ -386,6 +536,64 @@ export const useAppStore = create<AppState>((set) => ({
           next >= track.points.length - 1 ? null : clampReplayIndex(next, state.selectedEntityId, state.entityHistoryTracks)
       };
     }),
+  setAerospaceFocus: (focus) =>
+    set({
+      aerospaceFocus: {
+        enabled: true,
+        targetId: focus.targetId,
+        targetType: focus.targetType,
+        presetId: focus.presetId,
+        radiusNm: focus.radiusNm,
+        reason: focus.reason,
+        startedAt: new Date().toISOString(),
+        relatedEntityIds: [focus.targetId]
+      }
+    }),
+  setAerospaceFocusPreset: (presetId) =>
+    set((state) => ({
+      aerospaceFocus: {
+        ...state.aerospaceFocus,
+        presetId,
+        radiusNm: null,
+        reason: null
+      }
+    })),
+  clearAerospaceFocus: () =>
+    set({
+      aerospaceFocus: initialAerospaceFocus
+    }),
+  setAerospaceFocusRelatedEntityIds: (ids) =>
+    set((state) => ({
+      aerospaceFocus: state.aerospaceFocus.enabled
+        ? {
+            ...state.aerospaceFocus,
+            relatedEntityIds: Array.from(new Set(ids))
+          }
+        : state.aerospaceFocus
+    })),
+  recordAerospaceFocusSnapshot: (snapshot) =>
+    set((state) => {
+      const previous = state.aerospaceFocusHistory[0];
+      if (previous && snapshotsEquivalent(previous, snapshot)) {
+        return state;
+      }
+      return {
+        aerospaceFocusHistory: [snapshot, ...state.aerospaceFocusHistory].slice(0, 8)
+      };
+    }),
+  clearAerospaceFocusHistory: () =>
+    set({
+      aerospaceFocusHistory: []
+    }),
+  setMarineEvidenceSummary: ({ lines, metadata }) =>
+    set({
+      marineEvidenceLines: lines.slice(0, 6),
+      marineEvidenceMetadata: metadata
+    }),
+  setActiveMarineReplayTarget: (target) =>
+    set({
+      activeMarineReplayTarget: target
+    }),
   saveBookmark: (bookmark) =>
     set((state) => ({
       bookmarks: [
@@ -397,11 +605,23 @@ export const useAppStore = create<AppState>((set) => ({
         ...state.bookmarks
       ].slice(0, 12)
     })),
-  removeBookmark: (id) =>
-    set((state) => ({
-      bookmarks: state.bookmarks.filter((bookmark) => bookmark.id !== id)
-    }))
-}));
+    removeBookmark: (id) =>
+      set((state) => ({
+        bookmarks: state.bookmarks.filter((bookmark) => bookmark.id !== id)
+      })),
+    pinEnvironmentalEvent: (event) =>
+      set((state) => ({
+        pinnedEnvironmentalEvents: [
+          event,
+          ...state.pinnedEnvironmentalEvents.filter((item) => item.entityId !== event.entityId)
+        ].slice(0, 5)
+      })),
+    unpinEnvironmentalEvent: (entityId) =>
+      set((state) => ({
+        pinnedEnvironmentalEvents: state.pinnedEnvironmentalEvents.filter((item) => item.entityId !== entityId)
+      })),
+    clearPinnedEnvironmentalEvents: () => set({ pinnedEnvironmentalEvents: [] })
+  }));
 
 function clampReplayIndex(
   index: number | null,
@@ -416,4 +636,18 @@ function clampReplayIndex(
     return null;
   }
   return Math.max(0, Math.min(index, track.points.length - 2));
+}
+
+function snapshotsEquivalent(left: AerospaceFocusSnapshot, right: AerospaceFocusSnapshot) {
+  return (
+    left.targetId === right.targetId &&
+    left.targetType === right.targetType &&
+    left.presetId === right.presetId &&
+    left.presetAvailable === right.presetAvailable &&
+    left.disabledReason === right.disabledReason &&
+    left.reason === right.reason &&
+    left.radiusNm === right.radiusNm &&
+    left.relatedTargetCount === right.relatedTargetCount &&
+    left.caveat === right.caveat
+  );
 }

@@ -41,6 +41,7 @@ The geospatial subsystem now includes a reusable environmental event-layer found
 Response includes:
 
 - `metadata` with source/feed/provenance and caveat text
+- `metadata.sourceMode` with `fixture|live|unknown`
 - `count`
 - `events[]`
 
@@ -56,6 +57,9 @@ Supported query controls:
 ## UI Behavior
 
 - Layer toggle: `Earthquakes`
+- Shared overview:
+  - participates in the `Environmental Events Overview` card when one or more environmental event layers are enabled
+  - contributes loaded count, newest earthquake timing, strongest magnitude, selected-event summary, and export overview lines
 - Compact layer summary in controls:
   - loaded count
   - active window
@@ -91,6 +95,7 @@ Inspector fields include:
 - The layer is event coverage from one source and is not a complete global disaster model.
 - Imagery context caveats still apply independently; earthquake markers do not override imagery semantics.
 - Event presence does not imply the platform has performed damage, casualty, or impact-radius assessment.
+- Environmental overview relevance and proximity are frontend-only distance summaries and do not imply event relationship or shared cause.
 
 ## Ownership Boundaries
 
@@ -120,6 +125,8 @@ This USGS implementation is the first reusable pattern:
 7. Deterministic tests (backend fixtures + UI smoke)
 
 Future NOAA/GDELT-style sources should follow this shape without changing marine/aerospace/webcam/reference ownership.
+
+The shared multi-source overview is documented in [environmental-events.md](/C:/Users/mike/11Writer/app/docs/environmental-events.md).
 
 ### Practical checklist for next no-auth source
 

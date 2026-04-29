@@ -13,7 +13,15 @@ from src.services.earthquake_service import (
     parse_bbox,
     parse_since,
 )
-from src.types.api import EarthquakeEventsResponse
+from src.services.eonet_service import (
+    EonetQuery,
+    EonetService,
+    EonetSort,
+    EonetStatus,
+    parse_bbox as parse_eonet_bbox,
+    parse_days,
+)
+from src.types.api import EarthquakeEventsResponse, EonetEventsResponse
 
 router = APIRouter(prefix="/api/events", tags=["events"])
 
@@ -54,5 +62,37 @@ async def recent_earthquakes(
             bbox=parsed_bbox,
             window=window_value,
             sort=sort_value,
+        )
+    )
+
+
+@router.get("/eonet/recent", response_model=EonetEventsResponse)
+async def recent_eonet_events(
+    category: str | None = Query(default=None),
+    status: str = Query(default="open"),
+    limit: int = Query(default=200, ge=1, le=2000),
+    bbox: str | None = Query(default=None, description="minLon,minLat,maxLon,maxLat"),
+    days: int | None = Query(default=30, ge=1, le=365),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> EonetEventsResponse:
+    if status not in {"open", "closed", "all"}:
+        raise HTTPException(status_code=400, detail="status must be one of: open, closed, all")
+    if sort not in {"newest", "category"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, category")
+    try:
+        parsed_bbox = parse_eonet_bbox(bbox)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    service = EonetService(settings)
+    return await service.list_recent(
+        EonetQuery(
+            category=category,
+            status=cast(EonetStatus, status),
+            limit=limit,
+            bbox=parsed_bbox,
+            since=parse_days(days),
+            sort=cast(EonetSort, sort),
         )
     )

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchJson } from "./api";
 import type {
   CameraSourceInventoryResponse,
+  EonetEventsResponse,
   CameraSourceRegistryResponse,
   EarthquakeEventsResponse,
   ReviewQueueResponse,
@@ -268,6 +269,32 @@ export function useEarthquakeEventsQuery(filters: EnvironmentalEventFilterState,
         params.set("min_magnitude", String(filters.minMagnitude));
       }
       return fetchJson<EarthquakeEventsResponse>(`/api/events/earthquakes/recent?${params.toString()}`);
+    },
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000
+  });
+}
+
+export function useEonetEventsQuery(filters: EnvironmentalEventFilterState, enabled: boolean) {
+  return useQuery({
+    queryKey: [
+      "eonet-recent",
+      filters.eonetCategory,
+      filters.eonetStatus,
+      filters.eonetSort,
+      filters.eonetLimit
+    ],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        status: filters.eonetStatus,
+        limit: String(filters.eonetLimit),
+        sort: filters.eonetSort
+      });
+      if (filters.eonetCategory.trim()) {
+        params.set("category", filters.eonetCategory.trim());
+      }
+      return fetchJson<EonetEventsResponse>(`/api/events/eonet/recent?${params.toString()}`);
     },
     enabled,
     staleTime: 45_000,

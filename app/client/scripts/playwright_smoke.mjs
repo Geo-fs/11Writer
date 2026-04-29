@@ -91,7 +91,9 @@ async function collectDiagnostics(page, label, consoleMessages, pageErrors) {
 }
 
 async function createPhasePage(browser) {
-  const context = await browser.newContext();
+  const context = await browser.newContext({
+    viewport: { width: 1440, height: 900 }
+  });
   const page = await context.newPage();
   const consoleMessages = [];
   const pageErrors = [];
@@ -124,7 +126,7 @@ async function setLayerEnabled(page, label, enabled) {
 async function runCanvasAircraftPhase(browser) {
   const { context, page, consoleMessages, pageErrors } = await createPhasePage(browser);
   try {
-    await page.goto(baseUrl, { waitUntil: "networkidle" });
+    await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
     await waitForDebugReady(page);
     await waitForEntityData(page);
     await setLayerEnabled(page, "Satellites", false);
@@ -542,30 +544,119 @@ async function runWebcamPhase(browser) {
     const reviewPanelText = await page.getByTestId("webcam-review-queue-panel").textContent();
     assertIncludes(
       reviewPanelText ?? "",
-      ["Webcam Review Queue", "Spurr Overlook", "Viewer-only"],
+      ["Webcam Review Queue", "Viewer-only", "Facility hint"],
       "webcam review queue"
     );
 
     const inspectorText = await page.locator(".panel--right").textContent();
     assertIncludes(
       inspectorText ?? "",
-      ["Akutan North", "Source ID", "usgs-ashcam", "Direct-image", "Reference Hint", "Facility Code Hint", "Validated"],
+      ["Akutan North", "Source ID", "usgs-ashcam", "Direct-image", "Connector hint", "Facility hint", "Reviewed link: volcano:akutan", "Validated"],
       "direct-image webcam inspector"
     );
 
-    await page.getByTestId("webcam-filter-direct-image").check();
+    const coverageSummaryText = await page.getByTestId("webcam-visible-summary").textContent();
+    assertIncludes(
+      coverageSummaryText ?? "",
+      ["Visible Webcam Subset", "clusters", "direct-image", "viewer-only", "sources represented"],
+      "webcam coverage summary"
+    );
+
     await page.waitForFunction(
-      () => window.__worldviewDebug.getState().cameraEntities.length === 1,
+      () => window.__worldviewDebug.getState().webcamClusters.length > 0,
       null,
       { timeout: 30_000 }
+    );
+    await page.evaluate(() => {
+      const clusters = window.__worldviewDebug.getState().webcamClusters;
+      const firstCluster = clusters[0];
+      if (firstCluster) {
+        window.__worldviewDebug.setSelectedWebcamClusterId(
+          `camera-cluster:${firstCluster.clusterId.replace("cluster:", "")}`
+        );
+      }
+    });
+    const clusterDetailText = await page.getByTestId("webcam-cluster-detail").textContent();
+    assertIncludes(
+      clusterDetailText ?? "",
+      ["Selected Cluster", "Akutan Volcano", "direct-image", "viewer-only", "needs review"],
+      "webcam cluster detail"
+    );
+    const clusterReferenceText = await page.getByTestId("webcam-cluster-reference-context").textContent();
+    assertIncludes(
+      clusterReferenceText ?? "",
+      ["Reference Context", "Reviewed links available", "Machine suggestions", "Hint-only", "Reference caveat"],
+      "webcam cluster reference context"
+    );
+
+    const clusterCameraRows = page.getByTestId("webcam-cluster-camera-row");
+    await clusterCameraRows.first().waitFor({ timeout: 30_000 });
+    await page.evaluate(() => {
+      const firstCluster = window.__worldviewDebug.getState().webcamClusters[0];
+      const firstCameraId = firstCluster?.cameras?.[0]?.id;
+      if (firstCameraId) {
+        window.__worldviewDebug.setSelectedEntityId(firstCameraId);
+      }
+    });
+    await page.waitForFunction(
+      () => {
+        const selectedId = window.__worldviewDebug.getState().selectedEntity?.id ?? "";
+        return selectedId.startsWith("camera:usgs-ashcam:akutan-");
+      },
+      null,
+      { timeout: 30_000 }
+    );
+    const clusterSelectedInspectorText = await page.locator(".panel--right").textContent();
+    assertIncludes(
+      clusterSelectedInspectorText ?? "",
+      ["Akutan", "Direct-image", "Source Readiness", "Validated", "Reviewed link"],
+      "cluster camera selection inspector"
+    );
+
+    await page.evaluate(() =>
+      window.__worldviewDebug.setSelectedEntityId("camera:usgs-ashcam:akutan-ridge")
+    );
+    await page.waitForFunction(
+      () => window.__worldviewDebug.getState().selectedEntity?.id === "camera:usgs-ashcam:akutan-ridge",
+      null,
+      { timeout: 30_000 }
+    );
+    const machineInspectorText = await page.locator(".panel--right").textContent();
+    assertIncludes(
+      machineInspectorText ?? "",
+      ["Akutan Ridge", "Machine suggestion: suggested (2 candidates)", "Connector hint", "Facility hint"],
+      "machine-suggestion webcam inspector"
+    );
+
+    await page.getByRole("button", { name: "Export Snapshot" }).click();
+    const webcamSnapshotMetadata = await page.evaluate(() => window.__worldviewLastSnapshotMetadata?.webcamCoverageSummary ?? null);
+    if (!webcamSnapshotMetadata?.referenceSummary) {
+      throw new Error("Webcam snapshot metadata did not include reference summary.");
+    }
+    if ((webcamSnapshotMetadata.referenceSummary.reviewedLinkCount ?? 0) < 1) {
+      throw new Error("Webcam snapshot metadata did not preserve reviewed-link counts.");
+    }
+    if (!Array.isArray(webcamSnapshotMetadata.referenceSummary.topReferenceHints) || webcamSnapshotMetadata.referenceSummary.topReferenceHints.length < 1) {
+      throw new Error("Webcam snapshot metadata did not preserve top reference hints.");
+    }
+
+    await page.getByTestId("webcam-filter-direct-image").check();
+    await page.waitForFunction(
+      () => window.__worldviewDebug.getState().cameraEntities.length === 2,
+      null,
+      { timeout: 30_000 }
+    );
+    const directFilterSummaryText = await page.getByTestId("webcam-visible-summary").textContent();
+    assertIncludes(
+      directFilterSummaryText ?? "",
+      ["2 cameras", "1 clusters"],
+      "direct-image coverage summary"
     );
 
     await page.getByTestId("webcam-filter-direct-image").uncheck();
     await page.getByTestId("webcam-filter-viewer-only").check();
     await page.waitForFunction(
-      () =>
-        window.__worldviewDebug.getState().cameraEntities.length === 1 &&
-        window.__worldviewDebug.getState().cameraEntities[0]?.id === "camera:usgs-ashcam:spurr-overlook",
+      () => window.__worldviewDebug.getState().cameraEntities.length === 2,
       null,
       { timeout: 30_000 }
     );
@@ -581,14 +672,21 @@ async function runWebcamPhase(browser) {
     const viewerInspectorText = await page.locator(".panel--right").textContent();
     assertIncludes(
       viewerInspectorText ?? "",
-      ["Spurr Overlook", "Viewer fallback only.", "Viewer-only", "needs-review", "Reference Hint", "Facility Code Hint"],
+      ["Spurr Overlook", "Viewer fallback only.", "Viewer-only", "needs-review", "No reference hint, machine suggestion, or reviewed link is available for this camera."],
       "viewer-only webcam inspector"
+    );
+    const viewerFilterSummaryText = await page.getByTestId("webcam-visible-summary").textContent();
+    assertIncludes(
+      viewerFilterSummaryText ?? "",
+      ["2 cameras", "0 clusters"],
+      "viewer-only coverage summary"
     );
 
     return {
       selected: "camera:usgs-ashcam:spurr-overlook",
       sourceCard: sourceText,
-      candidateCard: candidateText
+      candidateCard: candidateText,
+      clusterDetail: clusterDetailText
     };
   } catch (error) {
     return {
@@ -636,10 +734,109 @@ async function runMarinePhase(browser) {
 
     const queueText = await page.locator('[data-testid="marine-attention-queue"]').textContent();
     assertIncludes(queueText ?? "", ["vessel", "viewport", "chokepoint"], "marine attention queue");
+    const queueItemCount = await page.locator('[data-testid="marine-attention-queue-item"]').count();
+    if (queueItemCount > 0) {
+      await page.locator('[data-testid="marine-attention-queue-item"]').first().click();
+      const focusedTargetCount = await page.locator('[data-testid="marine-focused-target"]').count();
+      if (focusedTargetCount < 1) {
+        const vesselFocusCount = await page.locator('[data-testid="marine-focus-vessel-event"]').count();
+        if (vesselFocusCount > 0) {
+          await page.locator('[data-testid="marine-focus-vessel-event"]').first().click();
+        } else {
+          await page.locator('[data-testid="marine-focus-viewport-window"]').first().click();
+        }
+      }
+      await page.waitForSelector('[data-testid="marine-focused-target"]', { timeout: 30_000 });
+      const focusedText = await page.locator('[data-testid="marine-focused-target"]').textContent();
+      assertIncludes(focusedText ?? "", ["Focused replay target"], "marine focused target");
+      const focusedEvidencePanelCount = await page.locator('[data-testid="marine-focused-evidence"]').count();
+      if (focusedEvidencePanelCount < 1) {
+        throw new Error("Marine focused replay evidence panel was not rendered.");
+      }
+      const focusedEvidenceText = await page.locator('[data-testid="marine-focused-evidence"]').first().textContent();
+      assertIncludes(focusedEvidenceText ?? "", ["Focused Replay Evidence"], "marine focused evidence panel");
+      const focusedRows = await page.locator('[data-testid="marine-evidence-row"]').count();
+      if (focusedRows < 1) {
+        throw new Error("Marine focused replay evidence did not render any rows after focus action.");
+      }
+      const interpretationText = await page.locator('[data-testid="marine-focused-evidence"]').textContent();
+      assertIncludes(
+        interpretationText ?? "",
+        ["Evidence Interpretation", "Why this was prioritized", "Trust/caveat"],
+        "marine evidence interpretation panel"
+      );
+      const modeSelector = page.locator('[data-testid="marine-evidence-interpretation-mode"] select');
+      await modeSelector.selectOption("compact");
+      await page.waitForTimeout(150);
+      const compactCount = await page.locator('[data-testid="marine-interpretation-card"]').count();
+      await modeSelector.selectOption("detailed");
+      await page.waitForTimeout(150);
+      const detailedCount = await page.locator('[data-testid="marine-interpretation-card"]').count();
+      if (detailedCount < compactCount) {
+        throw new Error(`Marine interpretation mode did not expand card visibility: compact=${compactCount} detailed=${detailedCount}`);
+      }
+      await modeSelector.selectOption("caveats-first");
+      await page.waitForTimeout(150);
+      const caveatsFirstText = await page.locator('[data-testid="marine-interpretation-card"]').first().textContent();
+      if (!(caveatsFirstText ?? "").toLowerCase().includes("trust") &&
+          !(caveatsFirstText ?? "").toLowerCase().includes("source health") &&
+          !(caveatsFirstText ?? "").toLowerCase().includes("evidence limits")) {
+        throw new Error(`Marine caveats-first mode did not reprioritize caveat cards: ${caveatsFirstText}`);
+      }
+    }
+
+    const sliceFocusCount = await page.locator('[data-testid="marine-focus-slice"]').count();
+    if (sliceFocusCount > 0) {
+      const targetIndex = sliceFocusCount > 1 ? 1 : 0;
+      await page.locator('[data-testid="marine-focus-slice"]').nth(targetIndex).click();
+    } else {
+      await page.locator('[data-testid="marine-focus-viewport-window"]').click();
+    }
+    await page.waitForSelector('[data-testid="marine-focused-target"]', { timeout: 30_000 });
+    await page.locator('[data-testid="marine-chokepoint-filter"] select').selectOption("high");
+    await page.waitForTimeout(250);
+    if (sliceFocusCount > 1) {
+      const focusedKindText = await page.locator('[data-testid="marine-focused-target"]').textContent();
+      if ((focusedKindText ?? "").includes("chokepoint-slice")) {
+        const staleCount = await page.locator('[data-testid="marine-focused-target-stale"]').count();
+        if (staleCount > 0) {
+          const staleText = await page.locator('[data-testid="marine-focused-target-stale"]').textContent();
+          assertIncludes(staleText ?? "", ["Focused target not visible under current filters"], "marine stale focus state");
+        }
+      }
+    }
+
+    await page.getByRole("button", { name: "Export Snapshot" }).click();
+    const metadata = await page.evaluate(() => window.__worldviewLastSnapshotMetadata ?? null);
+    if (!metadata?.marineAnomalySummary) {
+      throw new Error("Marine anomaly snapshot metadata missing after export.");
+    }
+    const marineCaveats = metadata.marineAnomalySummary.caveats ?? [];
+    if (!marineCaveats.some((item) => String(item).toLowerCase().includes("attention prioritization"))) {
+      throw new Error("Marine snapshot metadata caveat text missing.");
+    }
+    if (!metadata.marineAnomalySummary.activeNavigationTarget) {
+      throw new Error("Marine snapshot metadata missing active navigation target.");
+    }
+    const focusedReplayEvidence = metadata.marineAnomalySummary.focusedReplayEvidence ?? null;
+    if (!focusedReplayEvidence || Number(focusedReplayEvidence.rowCount ?? 0) < 1) {
+      throw new Error("Marine snapshot metadata missing focused replay evidence summary.");
+    }
+    const focusedEvidenceInterpretation = metadata.marineAnomalySummary.focusedEvidenceInterpretation ?? null;
+    if (!focusedEvidenceInterpretation || Number(focusedEvidenceInterpretation.cardCount ?? 0) < 1) {
+      throw new Error("Marine snapshot metadata missing focused evidence interpretation summary.");
+    }
+    if (focusedEvidenceInterpretation.mode !== "caveats-first") {
+      throw new Error(`Marine snapshot metadata did not preserve interpretation mode. Received ${focusedEvidenceInterpretation.mode}`);
+    }
+    if (Number(focusedEvidenceInterpretation.visibleCardCount ?? 0) < 1) {
+      throw new Error("Marine snapshot metadata missing visible interpretation card count.");
+    }
 
     return {
       initialRanks,
-      highCount
+      highCount,
+      exportedMarineMetadata: true
     };
   } catch (error) {
     return {
@@ -671,6 +868,7 @@ async function runEarthquakePhase(browser) {
     await page.getByText("Earthquake Window").waitFor({ timeout: 30_000 });
     await page.getByText("Min Magnitude").waitFor({ timeout: 30_000 });
     await page.getByText("Event Limit").waitFor({ timeout: 30_000 });
+    await page.getByTestId("environmental-events-overview").waitFor({ timeout: 30_000 });
 
     const initialCount = await page.evaluate(
       () => window.__worldviewDebug.getState().earthquakeEntities?.length ?? 0
@@ -703,11 +901,45 @@ async function runEarthquakePhase(browser) {
       ["Environmental Event (USGS)", "Magnitude", "Event Time", "Depth", "Source", "Caveat"],
       "earthquake inspector"
     );
+    const overviewText = await page.getByTestId("environmental-events-overview").textContent();
+    assertIncludes(
+      overviewText ?? "",
+      ["Environmental Events Overview", "Earthquakes", "Source health", "fixture", "View relevance", "Event context", "Selected earthquakes"],
+      "environmental overview after earthquake selection"
+    );
+    const nearestOtherText = await page.getByTestId("environmental-overview-nearest-other").textContent();
+    assertIncludes(
+      nearestOtherText ?? "",
+      ["Nearest other loaded environmental event", "No relationship implied"],
+      "environmental nearest other summary"
+    );
+    const crossSourceText = await page.getByTestId("environmental-overview-cross-source").textContent();
+    assertIncludes(
+      crossSourceText ?? "",
+      ["No relationship implied"],
+      "environmental cross-source context"
+    );
+    await page.getByRole("button", { name: "Pin Event" }).click();
+    const pinnedOverviewText = await page.getByTestId("environmental-events-overview").textContent();
+    assertIncludes(
+      pinnedOverviewText ?? "",
+      ["Pinned environmental events", "Comparison only; no relationship implied"],
+      "environmental pinned event overview"
+    );
 
     await page.getByRole("button", { name: "Export Snapshot" }).click();
     const snapshotMetadata = await page.evaluate(() => window.__worldviewLastSnapshotMetadata ?? null);
     if (!snapshotMetadata?.earthquakeLayerSummary) {
       throw new Error("Earthquake snapshot metadata did not include earthquake layer summary.");
+    }
+      if (!snapshotMetadata?.environmentalOverview) {
+        throw new Error("Earthquake snapshot metadata did not include environmental overview.");
+      }
+      if ((snapshotMetadata.environmentalOverview.pinnedComparison?.pinnedCount ?? 0) < 1) {
+        throw new Error("Earthquake snapshot metadata did not preserve pinned environmental events.");
+      }
+    if (!Array.isArray(snapshotMetadata.environmentalOverview.exportLines) || snapshotMetadata.environmentalOverview.exportLines.length === 0) {
+      throw new Error("Earthquake snapshot metadata did not preserve environmental relevance export lines.");
     }
     if (!snapshotMetadata?.selectedTargetSummary || snapshotMetadata.selectedTargetSummary.type !== "environmental-event") {
       throw new Error("Earthquake snapshot metadata did not preserve selected earthquake summary.");
@@ -730,7 +962,95 @@ async function runEarthquakePhase(browser) {
   }
 }
 
-const browser = await chromium.launch({ headless: true });
+async function runEonetPhase(browser) {
+  const { context, page, consoleMessages, pageErrors } = await createPhasePage(browser);
+  try {
+    await page.goto(baseUrl, { waitUntil: "networkidle" });
+    await waitForDebugReady(page);
+    await installCaptureHooks(page);
+
+    const row = page.locator(".panel--left .toggle-row", { hasText: "Natural Events (EONET)" }).first();
+    await row.waitFor({ timeout: 30_000 });
+    await row.locator('input[type="checkbox"]').check();
+
+    await page.waitForFunction(
+      () => (window.__worldviewDebug.getState().eonetEntities?.length ?? 0) > 0,
+      null,
+      { timeout: 30_000 }
+    );
+
+    await page.getByText("EONET Category").waitFor({ timeout: 30_000 });
+    await page.getByText("EONET Status").waitFor({ timeout: 30_000 });
+    await page.getByText("EONET Limit").waitFor({ timeout: 30_000 });
+    await page.getByTestId("environmental-events-overview").waitFor({ timeout: 30_000 });
+
+    const firstItem = page.locator('[data-testid^="eonet-item-"]').first();
+    await firstItem.waitFor({ timeout: 30_000 });
+    await firstItem.click();
+
+    await page.waitForFunction(
+      () => window.__worldviewDebug.getState().selectedEntity?.type === "environmental-event",
+      null,
+      { timeout: 30_000 }
+    );
+    const inspectorText = await page.getByTestId("eonet-inspector").textContent();
+    assertIncludes(
+      inspectorText ?? "",
+      ["Environmental Event (NASA EONET)", "Categories", "Event Date", "Source", "Caveat"],
+      "eonet inspector"
+    );
+    const overviewText = await page.getByTestId("environmental-events-overview").textContent();
+    assertIncludes(
+      overviewText ?? "",
+      ["Environmental Events Overview", "EONET", "Source health", "fixture", "View relevance", "Event context", "Selected eonet"],
+      "environmental overview after eonet selection"
+    );
+    await page.getByRole("button", { name: "Pin Event" }).click();
+    await page.getByRole("button", { name: "Export Snapshot" }).click();
+    const metadata = await page.evaluate(() => window.__worldviewLastSnapshotMetadata ?? null);
+    if (!metadata?.eonetLayerSummary) {
+      throw new Error("EONET snapshot metadata missing.");
+    }
+      if (!metadata?.environmentalOverview) {
+        throw new Error("EONET snapshot metadata missing environmental overview.");
+      }
+      if ((metadata.environmentalOverview.pinnedComparison?.pinnedCount ?? 0) < 1) {
+        throw new Error("EONET snapshot metadata missing pinned environmental event summary.");
+      }
+    if (!Array.isArray(metadata.environmentalOverview.exportLines) || metadata.environmentalOverview.exportLines.length === 0) {
+      throw new Error("EONET snapshot metadata missing environmental relevance export lines.");
+    }
+    return {
+      loadedCount: await page.evaluate(() => window.__worldviewDebug.getState().eonetEntities?.length ?? 0)
+    };
+  } catch (error) {
+    return {
+      errors: [String(error)],
+      diagnostics: await collectDiagnostics(page, "eonet", consoleMessages, pageErrors)
+    };
+  } finally {
+    await context.close();
+  }
+}
+
+async function launchBrowser() {
+  return chromium.launch({ headless: true });
+}
+
+async function runCanvasProbeSafely(runner) {
+  const browser = await launchBrowser();
+  try {
+    return await runner(browser);
+  } catch (error) {
+    return {
+      errors: [String(error)]
+    };
+  } finally {
+    await browser.close();
+  }
+}
+
+const browser = await launchBrowser();
 
 try {
   if (phase === "marine") {
@@ -739,23 +1059,36 @@ try {
   } else if (phase === "earthquake") {
     const earthquake = await runEarthquakePhase(browser);
     console.log(JSON.stringify({ earthquake }, null, 2));
+  } else if (phase === "eonet") {
+    const eonet = await runEonetPhase(browser);
+    console.log(JSON.stringify({ eonet }, null, 2));
   } else if (phase === "aerospace") {
-    const canvasAircraft = await runCanvasAircraftPhase(browser);
-    const canvasSatellite = await runCanvasSatellitePhase(browser);
     const aircraft = await runAircraftPhase(browser);
     const satellite = await runSatellitePhase(browser);
     const restore = await runRestorePhase(browser);
+    await browser.close();
+
+    const canvasAircraft = await runCanvasProbeSafely(runCanvasAircraftPhase);
+    const canvasSatellite = await runCanvasProbeSafely(runCanvasSatellitePhase);
     console.log(JSON.stringify({ canvasAircraft, canvasSatellite, aircraft, satellite, restore }, null, 2));
+  } else if (phase === "webcam") {
+    const webcam = await runWebcamPhase(browser);
+    console.log(JSON.stringify({ webcam }, null, 2));
   } else {
-    const canvasAircraft = await runCanvasAircraftPhase(browser);
-    const canvasSatellite = await runCanvasSatellitePhase(browser);
     const aircraft = await runAircraftPhase(browser);
     const satellite = await runSatellitePhase(browser);
     const restore = await runRestorePhase(browser);
     const webcam = await runWebcamPhase(browser);
     const earthquake = await runEarthquakePhase(browser);
-    console.log(JSON.stringify({ canvasAircraft, canvasSatellite, aircraft, satellite, restore, webcam, earthquake }, null, 2));
+    const eonet = await runEonetPhase(browser);
+    await browser.close();
+
+    const canvasAircraft = await runCanvasProbeSafely(runCanvasAircraftPhase);
+    const canvasSatellite = await runCanvasProbeSafely(runCanvasSatellitePhase);
+    console.log(JSON.stringify({ canvasAircraft, canvasSatellite, aircraft, satellite, restore, webcam, earthquake, eonet }, null, 2));
   }
 } finally {
-  await browser.close();
+  if (browser.isConnected()) {
+    await browser.close();
+  }
 }

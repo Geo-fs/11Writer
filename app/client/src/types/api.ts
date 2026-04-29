@@ -707,6 +707,7 @@ export interface EarthquakeEventsMetadata {
   source: string;
   feedName: string;
   feedUrl: string;
+  sourceMode: "fixture" | "live" | "unknown";
   generatedAt?: string | null;
   fetchedAt: string;
   count: number;
@@ -717,4 +718,45 @@ export interface EarthquakeEventsResponse {
   metadata: EarthquakeEventsMetadata;
   count: number;
   events: EarthquakeEvent[];
+}
+
+export interface EonetEvent {
+  eventId: string;
+  source: string;
+  sourceUrl: string;
+  title: string;
+  description?: string | null;
+  categories: string[];
+  categoryIds: string[];
+  categoryTitles: string[];
+  eventDate: string;
+  updated?: string | null;
+  isClosed?: boolean | null;
+  closed?: string | null;
+  status: "open" | "closed";
+  geometryType: string;
+  longitude: number;
+  latitude: number;
+  coordinatesSummary: string;
+  magnitudeValue?: number | null;
+  magnitudeUnit?: string | null;
+  rawGeometryCount: number;
+  caveat: string;
+}
+
+export interface EonetEventsMetadata {
+  source: string;
+  feedName: string;
+  feedUrl: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  fetchedAt: string;
+  generatedAt?: string | null;
+  count: number;
+  caveat: string;
+}
+
+export interface EonetEventsResponse {
+  metadata: EonetEventsMetadata;
+  count: number;
+  events: EonetEvent[];
 }

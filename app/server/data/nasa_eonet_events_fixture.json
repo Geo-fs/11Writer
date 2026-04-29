@@ -1,0 +1,88 @@
+{
+  "title": "EONET Events",
+  "description": "Fixture payload for deterministic tests",
+  "events": [
+    {
+      "id": "EONET_001",
+      "title": "Canada Wildfires",
+      "description": "Wildfire event from MODIS hotspot context.",
+      "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_001",
+      "closed": null,
+      "categories": [{ "id": "wildfires", "title": "Wildfires" }],
+      "geometry": [
+        {
+          "date": "2026-04-28T09:00:00Z",
+          "type": "Point",
+          "coordinates": [-123.1, 53.9]
+        }
+      ]
+    },
+    {
+      "id": "EONET_002",
+      "title": "Etna Volcanic Activity",
+      "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_002",
+      "closed": null,
+      "categories": [{ "id": "volcanoes", "title": "Volcanoes" }],
+      "geometry": [
+        {
+          "date": "2026-04-27T12:30:00Z",
+          "type": "Point",
+          "coordinates": [15.004, 37.734]
+        }
+      ]
+    },
+    {
+      "id": "EONET_003",
+      "title": "Indian Ocean Tropical Cyclone",
+      "description": "Representative track points",
+      "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_003",
+      "closed": "2026-04-26T14:00:00Z",
+      "categories": [{ "id": "severeStorms", "title": "Severe Storms" }],
+      "geometry": [
+        {
+          "date": "2026-04-24T00:00:00Z",
+          "type": "Point",
+          "coordinates": [74.2, -18.3]
+        },
+        {
+          "date": "2026-04-25T00:00:00Z",
+          "type": "Point",
+          "coordinates": [71.2, -20.1]
+        },
+        {
+          "date": "2026-04-26T12:00:00Z",
+          "type": "Point",
+          "coordinates": [67.9, -22.8]
+        }
+      ]
+    },
+    {
+      "id": "EONET_004",
+      "title": "Saharan Dust Plume",
+      "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_004",
+      "closed": null,
+      "categories": [{ "id": "dustHaze", "title": "Dust and Haze" }],
+      "geometry": [
+        {
+          "date": "2026-04-20T12:00:00Z",
+          "type": "Polygon",
+          "coordinates": [[-18.0, 22.0], [-14.0, 24.0], [-10.0, 22.0], [-18.0, 22.0]]
+        }
+      ]
+    },
+    {
+      "id": "EONET_005",
+      "title": "High Latitude Sea Ice Event",
+      "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_005",
+      "closed": null,
+      "categories": [{ "id": "seaLakeIce", "title": "Sea and Lake Ice" }],
+      "geometry": [
+        {
+          "date": "2026-04-10T12:00:00Z",
+          "type": "Point",
+          "coordinates": [140.0, 72.0]
+        }
+      ]
+    }
+  ]
+}

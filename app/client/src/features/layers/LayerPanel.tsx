@@ -1,4 +1,6 @@
 import clsx from "clsx";
+import { buildEnvironmentalEventsOverview, toPinnedEnvironmentalEvent } from "../environmental/environmentalEventsOverview";
+import { useEonetEventsQuery } from "../../lib/queries";
 import { useEarthquakeEventsQuery } from "../../lib/queries";
 import { groupPlanetImageryModes } from "../../lib/planetImagery";
 import { useAppStore } from "../../lib/store";
@@ -18,16 +20,25 @@ export function LayerPanel({ status, onJumpToCity, onCopyPermalink }: LayerPanel
   const imageryModeId = useAppStore((state) => state.imageryModeId);
   const imageryCategories = useAppStore((state) => state.imageryCategories);
   const availableImageryModes = useAppStore((state) => state.availableImageryModes);
+  const hud = useAppStore((state) => state.hud);
   const setLayerEnabled = useAppStore((state) => state.setLayerEnabled);
   const setImageryModeId = useAppStore((state) => state.setImageryModeId);
   const setFilters = useAppStore((state) => state.setFilters);
   const environmentalFilters = useAppStore((state) => state.environmentalFilters);
   const setEnvironmentalFilters = useAppStore((state) => state.setEnvironmentalFilters);
   const earthquakeEntities = useAppStore((state) => state.earthquakeEntities);
+  const eonetEntities = useAppStore((state) => state.eonetEntities);
+  const pinnedEnvironmentalEvents = useAppStore((state) => state.pinnedEnvironmentalEvents);
+  const selectedEntity = useAppStore((state) => state.selectedEntity);
   const setSelectedEntity = useAppStore((state) => state.setSelectedEntity);
+  const pinEnvironmentalEvent = useAppStore((state) => state.pinEnvironmentalEvent);
+  const unpinEnvironmentalEvent = useAppStore((state) => state.unpinEnvironmentalEvent);
+  const clearPinnedEnvironmentalEvents = useAppStore((state) => state.clearPinnedEnvironmentalEvents);
   const removeBookmark = useAppStore((state) => state.removeBookmark);
   const earthquakesEnabled = layers.find((layer) => layer.key === "earthquakes")?.enabled ?? false;
+  const eonetEnabled = layers.find((layer) => layer.key === "eonet")?.enabled ?? false;
   const earthquakeQuery = useEarthquakeEventsQuery(environmentalFilters, earthquakesEnabled);
+  const eonetQuery = useEonetEventsQuery(environmentalFilters, eonetEnabled);
   const strongestMagnitude = earthquakeQuery.data?.events.reduce<number | null>(
     (max, event) => {
       if (event.magnitude == null) return max;
@@ -37,6 +48,38 @@ export function LayerPanel({ status, onJumpToCity, onCopyPermalink }: LayerPanel
     null
   );
   const newestTime = earthquakeQuery.data?.events[0]?.time ?? null;
+  const eonetNewest = eonetQuery.data?.events[0]?.eventDate ?? null;
+  const environmentalOverview = buildEnvironmentalEventsOverview({
+    earthquakeEnabled: earthquakesEnabled,
+    earthquakeLoading: earthquakeQuery.isLoading,
+    earthquakeError: earthquakeQuery.isError,
+    earthquakeErrorSummary: earthquakeQuery.error instanceof Error ? earthquakeQuery.error.message : null,
+    earthquakeDataUpdatedAt: earthquakeQuery.dataUpdatedAt,
+    earthquakeMetadata: earthquakeQuery.data?.metadata ?? null,
+    earthquakeEntities,
+    eonetEnabled,
+    eonetLoading: eonetQuery.isLoading,
+    eonetError: eonetQuery.isError,
+    eonetErrorSummary: eonetQuery.error instanceof Error ? eonetQuery.error.message : null,
+    eonetDataUpdatedAt: eonetQuery.dataUpdatedAt,
+    eonetMetadata: eonetQuery.data?.metadata ?? null,
+    eonetEntities,
+    pinnedEnvironmentalEvents,
+    filters: environmentalFilters,
+    selectedEntity,
+    hud
+  });
+  const selectedEnvironmentalEntity =
+    selectedEntity?.type === "environmental-event" ? selectedEntity : null;
+  const selectedEnvironmentalSourceMode =
+    selectedEnvironmentalEntity?.eventSource === "nasa-eonet"
+      ? environmentalOverview.sourceHealth.find((item) => item.sourceId === "eonet")?.sourceMode ?? "unknown"
+      : selectedEnvironmentalEntity?.eventSource === "usgs-earthquake"
+        ? environmentalOverview.sourceHealth.find((item) => item.sourceId === "earthquakes")?.sourceMode ?? "unknown"
+        : "unknown";
+  const selectedEnvironmentalPinned =
+    selectedEnvironmentalEntity != null &&
+    pinnedEnvironmentalEvents.some((item) => item.entityId === selectedEnvironmentalEntity.id);
   const groupedImageryModes = groupPlanetImageryModes(imageryCategories, availableImageryModes);
   const activeImageryMode =
     availableImageryModes.find((mode) => mode.id === imageryModeId) ?? availableImageryModes[0];
@@ -237,6 +280,206 @@ export function LayerPanel({ status, onJumpToCity, onCopyPermalink }: LayerPanel
 
       <div className="panel__section">
         <p className="panel__eyebrow">Environmental Events</p>
+        <div className="stack" data-testid="environmental-events-overview">
+          {environmentalOverview.enabledSources.length === 0 ? (
+            <div className="empty-state compact" data-testid="environmental-overview-disabled">
+              <p>No environmental event layers enabled.</p>
+              <span>Enable Earthquakes or Natural Events (EONET) to load source-reported event context.</span>
+            </div>
+          ) : environmentalOverview.loadedEventCount === 0 &&
+            !earthquakeQuery.isLoading &&
+            !eonetQuery.isLoading &&
+            !earthquakeQuery.isError &&
+            !eonetQuery.isError ? (
+            <div className="empty-state compact" data-testid="environmental-overview-empty">
+              <p>No environmental events match current filters.</p>
+              <span>Adjust earthquake or EONET filters to broaden results.</span>
+            </div>
+          ) : (
+            <div className="data-card data-card--compact" data-testid="environmental-overview-card">
+              <strong>
+                Environmental Events Overview | {environmentalOverview.loadedEventCount} loaded
+              </strong>
+              <span>
+                Sources{" "}
+                {environmentalOverview.sourceSummaries
+                  .filter((item) => item.enabled)
+                  .map((item) => `${item.label} ${item.count}`)
+                  .join(" | ") || "none"}
+              </span>
+              <span>
+                Newest{" "}
+                {environmentalOverview.newestEvent
+                  ? `${environmentalOverview.newestEvent.title} | ${new Date(environmentalOverview.newestEvent.when).toLocaleString()}`
+                  : "none loaded"}
+              </span>
+              <span>
+                Strongest earthquake{" "}
+                {environmentalOverview.strongestEarthquake
+                  ? `M${environmentalOverview.strongestEarthquake.magnitude.toFixed(1)}`
+                  : "none loaded"}{" "}
+                | EONET categories {environmentalOverview.eonetCategories.slice(0, 3).join(", ") || "none loaded"}
+              </span>
+              <span>{environmentalOverview.filtersSummary.join(" | ")}</span>
+              <span>{environmentalOverview.caveats[0] ?? "Environmental event context depends on source-specific caveats."}</span>
+              <span>
+                Source health |{" "}
+                {environmentalOverview.sourceHealth
+                  .filter((item) => item.enabled)
+                  .map((item) => `${item.sourceLabel} ${item.health} ${item.loadedCount} loaded ${item.freshnessLabel} ${item.sourceMode}`)
+                  .join(" | ") || "No enabled environmental sources"}
+              </span>
+              {environmentalOverview.sourceHealth
+                .filter((item) => item.enabled)
+                .map((item) => (
+                  <span key={`source-health-${item.sourceId}`}>
+                    {item.sourceLabel} | {item.statusLine}
+                    {item.errorSummary ? ` | ${item.errorSummary}` : ""}
+                  </span>
+                ))}
+              {environmentalOverview.relevance.viewportContextAvailable ? (
+                <>
+                  <span>
+                    View relevance | {environmentalOverview.relevance.visibleOrNearbyCount} nearby loaded events |{" "}
+                    {environmentalOverview.relevance.anchorLabel ?? "view context unavailable"}
+                  </span>
+                  {environmentalOverview.relevance.nearestEvent ? (
+                    <span>
+                      Nearest loaded event {environmentalOverview.relevance.nearestEvent.title} |{" "}
+                      {environmentalOverview.relevance.nearestEvent.distanceKm.toFixed(
+                        environmentalOverview.relevance.nearestEvent.distanceKm >= 100 ? 0 : 1
+                      )}{" "}
+                      km | {environmentalOverview.relevance.nearestEvent.band}
+                    </span>
+                  ) : null}
+                  {environmentalOverview.relevance.strongestNearbyEarthquake ? (
+                    <span>
+                      Strongest nearby earthquake M
+                      {environmentalOverview.relevance.strongestNearbyEarthquake.magnitude.toFixed(1)} |{" "}
+                      {environmentalOverview.relevance.nearbyCategories.length > 0
+                        ? `Nearby EONET ${environmentalOverview.relevance.nearbyCategories.slice(0, 3).join(", ")}`
+                        : "No nearby EONET categories"}
+                    </span>
+                  ) : environmentalOverview.relevance.nearbyCategories.length > 0 ? (
+                    <span>
+                      Nearby EONET categories {environmentalOverview.relevance.nearbyCategories.slice(0, 3).join(", ")}
+                    </span>
+                  ) : null}
+                  <span>
+                    {environmentalOverview.relevance.caveats[0] ??
+                      "Representative-point distance is approximate for non-point EONET events."}
+                  </span>
+                </>
+              ) : null}
+              {environmentalOverview.selectedEnvironmentalEvent ? (
+                <span data-testid="environmental-overview-selected">
+                  Selected {environmentalOverview.selectedEnvironmentalEvent.source} |{" "}
+                  {environmentalOverview.selectedEnvironmentalEvent.title} |{" "}
+                  {environmentalOverview.selectedEnvironmentalEvent.detail}
+                </span>
+              ) : null}
+              {selectedEnvironmentalEntity ? (
+                <div className="stack stack--actions">
+                  <button
+                    type="button"
+                    className="ghost-button"
+                    onClick={() =>
+                      selectedEnvironmentalPinned
+                        ? unpinEnvironmentalEvent(selectedEnvironmentalEntity.id)
+                        : pinEnvironmentalEvent(
+                            toPinnedEnvironmentalEvent({
+                              entity: selectedEnvironmentalEntity,
+                              sourceMode: selectedEnvironmentalSourceMode
+                            })
+                          )
+                    }
+                  >
+                    {selectedEnvironmentalPinned ? "Unpin Event" : "Pin Event"}
+                  </button>
+                </div>
+              ) : null}
+              {environmentalOverview.relevance.selectedEventNearestOther ? (
+                <span data-testid="environmental-overview-nearest-other">
+                  Nearest other loaded environmental event | {environmentalOverview.relevance.selectedEventNearestOther.title} |{" "}
+                  {environmentalOverview.relevance.selectedEventNearestOther.distanceKm.toFixed(
+                    environmentalOverview.relevance.selectedEventNearestOther.distanceKm >= 100 ? 0 : 1
+                  )}{" "}
+                  km | No relationship implied
+                </span>
+              ) : null}
+              {environmentalOverview.cooccurrence.selectedEventContext ||
+              environmentalOverview.cooccurrence.nearestCrossSourcePair ||
+              environmentalOverview.cooccurrence.nearbyDifferentSourceEvents > 0 ? (
+                <>
+                  <span>
+                    Event context |{" "}
+                    {environmentalOverview.cooccurrence.selectedEventContext
+                      ? `Selected ${environmentalOverview.cooccurrence.selectedEventContext.source} | ${environmentalOverview.cooccurrence.selectedEventContext.sourceMode} mode`
+                      : "Loaded cross-source context"}
+                  </span>
+                  {environmentalOverview.cooccurrence.selectedEventContext?.nearestDifferentSource ? (
+                    <span data-testid="environmental-overview-cross-source">
+                      Nearest different-source event |{" "}
+                      {environmentalOverview.cooccurrence.selectedEventContext.nearestDifferentSource.title} |{" "}
+                      {environmentalOverview.cooccurrence.selectedEventContext.nearestDifferentSource.distanceKm.toFixed(
+                        environmentalOverview.cooccurrence.selectedEventContext.nearestDifferentSource.distanceKm >= 100
+                          ? 0
+                          : 1
+                      )}{" "}
+                      km | {environmentalOverview.cooccurrence.selectedEventContext.nearestDifferentSource.timeBand} | No relationship implied
+                    </span>
+                  ) : environmentalOverview.cooccurrence.nearestCrossSourcePair ? (
+                    <span data-testid="environmental-overview-cross-source">
+                      Nearest Earthquake-EONET pair | {environmentalOverview.cooccurrence.nearestCrossSourcePair.left.title} /{" "}
+                      {environmentalOverview.cooccurrence.nearestCrossSourcePair.right.title} |{" "}
+                      {environmentalOverview.cooccurrence.nearestCrossSourcePair.right.distanceKm.toFixed(
+                        environmentalOverview.cooccurrence.nearestCrossSourcePair.right.distanceKm >= 100 ? 0 : 1
+                      )}{" "}
+                      km | {environmentalOverview.cooccurrence.nearestCrossSourcePair.right.timeBand} | No relationship implied
+                    </span>
+                  ) : null}
+                  {environmentalOverview.cooccurrence.timeWindowSummary[0] ? (
+                    <span>{environmentalOverview.cooccurrence.timeWindowSummary[0]}</span>
+                  ) : null}
+                  <span>
+                    {environmentalOverview.cooccurrence.caveats[0] ??
+                      "Nearby or time-adjacent loaded events are contextual only. No relationship implied."}
+                  </span>
+                </>
+              ) : null}
+              {environmentalOverview.pinnedEvents.length > 0 ? (
+                <>
+                  <span>
+                    Pinned environmental events | {environmentalOverview.pinnedComparison.pinnedCount} |{" "}
+                    {environmentalOverview.pinnedComparison.sourceMix.join(", ")}
+                  </span>
+                  {environmentalOverview.pinnedComparison.summaryLines.map((line) => (
+                    <span key={line}>{line}</span>
+                  ))}
+                  {environmentalOverview.pinnedEvents.map((event) => (
+                    <span key={`pinned-${event.entityId}`}>
+                      {event.source} | {event.title} | {event.categoryOrMagnitude} |{" "}
+                      {new Date(event.eventTime).toLocaleString()} | {event.sourceMode}
+                    </span>
+                  ))}
+                  <span>
+                    {environmentalOverview.pinnedComparison.caveats[0] ??
+                      "Pinned environmental events are for comparison only; no relationship implied."}
+                  </span>
+                  <div className="stack stack--actions">
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={() => clearPinnedEnvironmentalEvents()}
+                    >
+                      Clear Pinned Events
+                    </button>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          )}
+        </div>
         <div className="field-grid">
           <label className="field-row">
             <span>Earthquake Window</span>
@@ -300,6 +543,65 @@ export function LayerPanel({ status, onJumpToCity, onCopyPermalink }: LayerPanel
               }
             />
           </label>
+          <label className="field-row">
+            <span>EONET Category</span>
+            <input
+              className="panel__input"
+              value={environmentalFilters.eonetCategory}
+              onChange={(event) =>
+                setEnvironmentalFilters({
+                  eonetCategory: event.currentTarget.value
+                })
+              }
+              placeholder="wildfires, volcanoes, severeStorms"
+            />
+          </label>
+          <label className="field-row">
+            <span>EONET Status</span>
+            <select
+              className="panel__select"
+              value={environmentalFilters.eonetStatus}
+              onChange={(event) =>
+                setEnvironmentalFilters({
+                  eonetStatus: event.currentTarget.value as typeof environmentalFilters.eonetStatus
+                })
+              }
+            >
+              <option value="open">Open</option>
+              <option value="closed">Closed</option>
+              <option value="all">All</option>
+            </select>
+          </label>
+          <label className="field-row">
+            <span>EONET Sort</span>
+            <select
+              className="panel__select"
+              value={environmentalFilters.eonetSort}
+              onChange={(event) =>
+                setEnvironmentalFilters({
+                  eonetSort: event.currentTarget.value as typeof environmentalFilters.eonetSort
+                })
+              }
+            >
+              <option value="newest">Newest first</option>
+              <option value="category">Category</option>
+            </select>
+          </label>
+          <label className="field-row">
+            <span>EONET Limit</span>
+            <input
+              className="panel__input"
+              type="number"
+              min="1"
+              max="2000"
+              value={environmentalFilters.eonetLimit}
+              onChange={(event) =>
+                setEnvironmentalFilters({
+                  eonetLimit: Math.max(1, Math.min(2000, Number(event.currentTarget.value) || 200))
+                })
+              }
+            />
+          </label>
         </div>
         {!earthquakesEnabled ? (
           <div className="empty-state compact" data-testid="earthquake-layer-disabled">
@@ -353,6 +655,57 @@ export function LayerPanel({ status, onJumpToCity, onCopyPermalink }: LayerPanel
                   {event.magnitude != null ? `M${event.magnitude.toFixed(1)}` : "M?"} · {event.place ?? event.title} ·{" "}
                   {event.depthKm != null ? `${event.depthKm.toFixed(1)} km` : "Depth ?"} ·{" "}
                   {new Date(event.time).toLocaleString()}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {!eonetEnabled ? (
+          <div className="empty-state compact" data-testid="eonet-layer-disabled">
+            <p>EONET layer disabled.</p>
+            <span>Enable Natural Events (EONET) to load NASA source-reported natural events.</span>
+          </div>
+        ) : eonetQuery.isLoading ? (
+          <div className="empty-state compact" data-testid="eonet-layer-loading">
+            <p>Loading NASA EONET events.</p>
+            <span>Fetching source-reported natural events.</span>
+          </div>
+        ) : eonetQuery.isError ? (
+          <div className="empty-state compact" data-testid="eonet-layer-error">
+            <p>NASA EONET events unavailable.</p>
+            <span>Unable to load source-reported natural events.</span>
+          </div>
+        ) : (eonetQuery.data?.events.length ?? 0) === 0 ? (
+          <div className="empty-state compact" data-testid="eonet-layer-empty">
+            <p>No EONET events match current filters.</p>
+            <span>Adjust category, status, or limit to broaden results.</span>
+          </div>
+        ) : (
+          <div className="stack" data-testid="eonet-layer-summary">
+            <div className="data-card data-card--compact">
+              <strong>EONET Natural Events | {eonetQuery.data?.count ?? 0} loaded</strong>
+              <span>
+                category {environmentalFilters.eonetCategory || "all"} | status {environmentalFilters.eonetStatus} | sort{" "}
+                {environmentalFilters.eonetSort}
+              </span>
+              <span>Newest {eonetNewest ? new Date(eonetNewest).toLocaleString() : "Unknown"} | Source: NASA EONET</span>
+              <span>{eonetQuery.data?.metadata.caveat}</span>
+            </div>
+            <div className="stack" data-testid="eonet-recent-list">
+              {eonetQuery.data?.events.slice(0, 8).map((event) => (
+                <button
+                  key={event.eventId}
+                  type="button"
+                  className="ghost-button"
+                  data-testid={`eonet-item-${event.eventId}`}
+                  onClick={() => {
+                    const selected = eonetEntities.find((item) => item.eventId === event.eventId);
+                    if (selected) {
+                      setSelectedEntity(selected);
+                    }
+                  }}
+                >
+                  {(event.categoryTitles[0] ?? "event")} | {event.title} | {event.status} | {new Date(event.eventDate).toLocaleString()}
                 </button>
               ))}
             </div>

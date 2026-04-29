@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { buildActiveImageryContextFromHud } from "../../lib/imageryContext";
 import {
   formatAgeLabel,
@@ -6,10 +6,23 @@ import {
   summarizeSatelliteActivity
 } from "./aerospaceActivity";
 import {
-  AEROSPACE_FUTURE_CONTEXT_SLOTS,
   buildAircraftEvidenceSummary,
   buildSatelliteEvidenceSummary
 } from "./aerospaceEvidenceSummary";
+import {
+  buildAircraftSourceHealthSummary,
+  buildAerospaceSectionHealthDisplay,
+  buildSatelliteSourceHealthSummary
+} from "./aerospaceSourceHealth";
+import {
+  buildAircraftNearbyContextSummary,
+  buildSatelliteNearbyContextSummary
+} from "./aerospaceNearbyContext";
+import {
+  buildAerospaceFocusComputation,
+  buildAerospaceFocusHistorySummary,
+  buildAerospaceFocusSnapshot
+} from "./aerospaceFocusMode";
 import { formatRelativeAge, getReplaySnapshot, summarizeTrack } from "../../lib/history";
 import {
   useAircraftReferenceLinkQuery,
@@ -19,14 +32,16 @@ import {
   useSourceStatusQuery
 } from "../../lib/queries";
 import { useAppStore } from "../../lib/store";
+import { CaveatBlock, DataBasisBadge, StatusBadge } from "../../components/ui";
 import type {
   CameraSourceInventoryEntry,
   ReferenceNearbyItem,
   ReferenceObjectSummary
 } from "../../types/api";
-import type { AircraftEntity, CameraEntity, EarthquakeEntity, SceneEntity } from "../../types/entities";
+import type { AircraftEntity, CameraEntity, EarthquakeEntity, EonetEntity, SceneEntity } from "../../types/entities";
 import { ImageryContextPanel } from "../imagery";
 import { MarineAnomalySection } from "../marine/MarineAnomalySection";
+import { getCameraReferenceState } from "../webcams/webcamClustering";
 
 export function InspectorPanel() {
   const entity = useAppStore((state) => state.selectedEntity);
@@ -37,10 +52,19 @@ export function InspectorPanel() {
   const satellitePassWindows = useAppStore((state) => state.satellitePassWindows);
   const followedEntityId = useAppStore((state) => state.followedEntityId);
   const selectedReplayIndex = useAppStore((state) => state.selectedReplayIndex);
+  const aerospaceFocus = useAppStore((state) => state.aerospaceFocus);
+  const aerospaceFocusHistory = useAppStore((state) => state.aerospaceFocusHistory);
   const hud = useAppStore((state) => state.hud);
   const setFollowedEntityId = useAppStore((state) => state.setFollowedEntityId);
+  const setSelectedEntityId = useAppStore((state) => state.setSelectedEntityId);
   const setSelectedReplayIndex = useAppStore((state) => state.setSelectedReplayIndex);
   const stepSelectedReplayIndex = useAppStore((state) => state.stepSelectedReplayIndex);
+  const setAerospaceFocus = useAppStore((state) => state.setAerospaceFocus);
+  const setAerospaceFocusPreset = useAppStore((state) => state.setAerospaceFocusPreset);
+  const clearAerospaceFocus = useAppStore((state) => state.clearAerospaceFocus);
+  const setAerospaceFocusRelatedEntityIds = useAppStore((state) => state.setAerospaceFocusRelatedEntityIds);
+  const recordAerospaceFocusSnapshot = useAppStore((state) => state.recordAerospaceFocusSnapshot);
+  const clearAerospaceFocusHistory = useAppStore((state) => state.clearAerospaceFocusHistory);
   const sourceStatusQuery = useSourceStatusQuery();
   const cameraSourceInventoryQuery = useCameraSourceInventoryQuery();
   const [cameraFrameNonce, setCameraFrameNonce] = useState<number>(Date.now());
@@ -126,11 +150,125 @@ export function InspectorPanel() {
         })
       : null;
   const selectedEvidenceSummary = aircraftEvidenceSummary ?? satelliteEvidenceSummary;
+  const selectedDataHealthSummary = selectedAircraft
+    ? buildAircraftSourceHealthSummary({
+        entity: selectedAircraft,
+        track: historyTrack,
+        sourceHealth: sourceHealth ?? null,
+        nearestAirport: nearestAirportQuery.data?.results[0],
+        nearestRunway: nearestRunwayQuery.data?.results[0]
+      })
+    : entity?.type === "satellite"
+      ? buildSatelliteSourceHealthSummary({
+          entity,
+          track: historyTrack,
+          sourceHealth: sourceHealth ?? null,
+          passWindow
+        })
+      : null;
+  const selectedSectionHealthDisplay = buildAerospaceSectionHealthDisplay(selectedDataHealthSummary);
+  const selectedNearbyContextSummary = selectedAircraft
+    ? buildAircraftNearbyContextSummary({
+        track: historyTrack,
+        nearestAirport: nearestAirportQuery.data?.results[0],
+        nearestRunway: nearestRunwayQuery.data?.results[0],
+        primaryReference: aircraftReferenceQuery.data?.primary ?? null,
+        sourceHealth: sourceHealth ?? null
+      })
+      : entity?.type === "satellite"
+        ? buildSatelliteNearbyContextSummary({
+            track: historyTrack,
+            replaySnapshot,
+            passWindow,
+            sourceHealth: sourceHealth ?? null
+          })
+        : null;
+  const aerospaceFocusComputation = buildAerospaceFocusComputation({
+    focus: aerospaceFocus,
+    selectedEntity: entity,
+    aircraftEntities,
+    satelliteEntities,
+    nearbyContextSummary: selectedNearbyContextSummary,
+    historyTracks: entityHistoryTracks,
+    satellitePassWindows,
+    selectedReplayIndex
+  });
+  const currentFocusSnapshot = useMemo(
+    () =>
+      aerospaceFocus.enabled
+        ? buildAerospaceFocusSnapshot(aerospaceFocusComputation)
+        : null,
+    [aerospaceFocus.enabled, aerospaceFocusComputation]
+  );
+  const focusHistorySummary = useMemo(
+    () =>
+      buildAerospaceFocusHistorySummary({
+        current: currentFocusSnapshot,
+        history: aerospaceFocusHistory
+      }),
+    [aerospaceFocusHistory, currentFocusSnapshot]
+  );
+  const availableAerospaceTargets = useMemo(
+    () =>
+      new Set(
+        [...aircraftEntities, ...satelliteEntities].map((item) => item.id)
+      ),
+    [aircraftEntities, satelliteEntities]
+  );
+  const displayedRelated = useMemo(() => {
+    if (!entity) {
+      return [];
+    }
+    if (!aerospaceFocus.enabled) {
+      return related;
+    }
+
+    return [...aircraftEntities, ...satelliteEntities]
+      .filter((item) => item.id !== entity.id)
+      .filter((item) => aerospaceFocusComputation.relatedEntityIds.includes(item.id))
+      .map((item) => ({
+        item,
+        distanceKm: distanceKm(entity, item),
+        relation: item.source === entity.source ? "same source" : relationLabel(entity, item)
+      }))
+      .sort((left, right) => left.distanceKm - right.distanceKm)
+      .slice(0, 6);
+  }, [aerospaceFocus.enabled, aerospaceFocusComputation.relatedEntityIds, aircraftEntities, entity, related, satelliteEntities]);
   const imageryContext = buildActiveImageryContextFromHud(hud);
   const cameraSourceInventory =
     entity?.type === "camera"
       ? (cameraSourceInventoryQuery.data?.sources ?? []).find((source) => source.key === entity.source)
       : undefined;
+
+  useEffect(() => {
+    const nextIds =
+      aerospaceFocus.enabled && aerospaceFocusComputation.relatedEntityIds.length > 0
+        ? aerospaceFocusComputation.relatedEntityIds
+        : [];
+    const currentIds = aerospaceFocus.relatedEntityIds;
+    if (currentIds.length === nextIds.length && currentIds.every((value, index) => value === nextIds[index])) {
+      return;
+    }
+    setAerospaceFocusRelatedEntityIds(nextIds);
+  }, [
+    aerospaceFocus.enabled,
+    aerospaceFocus.relatedEntityIds,
+    aerospaceFocusComputation.relatedEntityIds,
+    setAerospaceFocusRelatedEntityIds
+  ]);
+
+  useEffect(() => {
+    if (!aerospaceFocus.enabled || !currentFocusSnapshot) {
+      return;
+    }
+    recordAerospaceFocusSnapshot(currentFocusSnapshot);
+  }, [aerospaceFocus.enabled, currentFocusSnapshot, recordAerospaceFocusSnapshot]);
+
+  useEffect(() => {
+    if (aerospaceFocus.enabled && aerospaceFocus.targetType == null) {
+      clearAerospaceFocusHistory();
+    }
+  }, [aerospaceFocus.enabled, aerospaceFocus.targetType, clearAerospaceFocusHistory]);
 
   return (
     <aside className="panel panel--right">
@@ -154,13 +292,127 @@ export function InspectorPanel() {
               {entity.quality?.label ? <span>Quality {entity.quality.label}</span> : null}
             </div>
             {entity.type === "aircraft" || entity.type === "satellite" ? (
-              <button
-                type="button"
-                className="ghost-button"
-                onClick={() => setFollowedEntityId(isFollowing ? null : entity.id)}
-              >
-                {isFollowing ? "Stop Following" : "Follow Target"}
-              </button>
+              <div className="stack stack--actions">
+                <button
+                  type="button"
+                  className="ghost-button"
+                  onClick={() => setFollowedEntityId(isFollowing ? null : entity.id)}
+                >
+                  {isFollowing ? "Stop Following" : "Follow Target"}
+                </button>
+                {aerospaceFocusComputation.canEnable ? (
+                  aerospaceFocus.enabled && aerospaceFocusComputation.targetId === entity.id ? (
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={() => clearAerospaceFocus()}
+                    >
+                      Clear Aerospace Focus
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={() =>
+                        setAerospaceFocus({
+                          targetId: entity.id,
+                          targetType: entity.type,
+                          presetId: aerospaceFocusComputation.activePresetId,
+                          radiusNm: aerospaceFocusComputation.radiusNm,
+                          reason: aerospaceFocusComputation.reason
+                        })
+                      }
+                    >
+                      Focus Around This Target
+                    </button>
+                  )
+                ) : null}
+              </div>
+            ) : null}
+            {entity.type === "aircraft" || entity.type === "satellite" ? (
+              <label className="field-row">
+                <span>Focus Mode</span>
+                <select
+                  className="panel__input"
+                  value={aerospaceFocusComputation.activePresetId}
+                  onChange={(event) => setAerospaceFocusPreset(event.currentTarget.value as typeof aerospaceFocusComputation.activePresetId)}
+                >
+                  {aerospaceFocusComputation.presetOptions.map((preset) => (
+                    <option key={preset.id} value={preset.id} disabled={!preset.available}>
+                      {preset.available ? preset.label : `${preset.label} | Unavailable: ${preset.disabledReason}`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+            {(entity.type === "aircraft" || entity.type === "satellite") &&
+            (focusHistorySummary.current || aerospaceFocusHistory.length > 0) ? (
+              <div className="panel__section">
+                <p className="panel__eyebrow">Recent Focus States</p>
+                {focusHistorySummary.comparisonLine ? (
+                  <div className="data-card data-card--compact">
+                    <span>{focusHistorySummary.comparisonLine}</span>
+                  </div>
+                ) : null}
+                <div className="stack">
+                  {aerospaceFocusHistory.slice(0, 4).map((snapshot) => {
+                    const targetVisible = availableAerospaceTargets.has(snapshot.targetId);
+                    const canRestore = targetVisible && snapshot.presetAvailable;
+                    return (
+                      <div key={`${snapshot.id}:${snapshot.createdAt}`} className="data-card data-card--compact">
+                        <strong>
+                          {snapshot.presetLabel} | {snapshot.targetLabel ?? snapshot.targetId}
+                        </strong>
+                        <span>
+                          {snapshot.targetType} | {snapshot.relatedTargetCount} related targets
+                        </span>
+                        <span>
+                          {snapshot.presetAvailable
+                            ? "Preset available"
+                            : `Unavailable: ${snapshot.disabledReason ?? "Preset unavailable"}`}
+                        </span>
+                        <span>{formatTimestamp(snapshot.createdAt)}</span>
+                        <span>{snapshot.reason ?? "selected-target nearby context"}</span>
+                        {canRestore ? (
+                          <button
+                            type="button"
+                            className="ghost-button"
+                            onClick={() => {
+                              setSelectedEntityId(snapshot.targetId);
+                              setAerospaceFocus({
+                                targetId: snapshot.targetId,
+                                targetType: snapshot.targetType,
+                                presetId: snapshot.presetId,
+                                radiusNm: snapshot.radiusNm,
+                                reason: snapshot.reason
+                              });
+                            }}
+                          >
+                            Restore Focus State
+                          </button>
+                        ) : (
+                          <span>
+                            {targetVisible
+                              ? "Restore unavailable until the preset context is available again."
+                              : "Restore unavailable because the target is not currently visible."}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                {aerospaceFocusHistory.length > 0 ? (
+                  <div className="stack stack--actions">
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={() => clearAerospaceFocusHistory()}
+                    >
+                      Clear Focus History
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             ) : null}
             <div className="stack stack--actions">
               <button
@@ -297,7 +549,7 @@ export function InspectorPanel() {
             ) : null}
 
             {entity.type === "environmental-event" ? (
-              <EarthquakeInspectorPanel event={entity} />
+              <EnvironmentalEventInspectorPanel event={entity} />
             ) : entity.type === "camera" ? (
               <CameraPanel
                 camera={entity}
@@ -460,6 +712,11 @@ export function InspectorPanel() {
                       <span>{aircraftActivitySummary.nearestRunwayRelationship}</span>
                       <span>{aircraftActivitySummary.nearbyAviationContext}</span>
                     </div>
+                    {selectedSectionHealthDisplay?.recentActivityCaveat ? (
+                      <CaveatBlock heading="Activity caveat" tone="evidence" compact>
+                        {selectedSectionHealthDisplay.recentActivityCaveat}
+                      </CaveatBlock>
+                    ) : null}
                   </div>
                 ) : null}
 
@@ -478,6 +735,11 @@ export function InspectorPanel() {
                       <span>Replay relation {satelliteActivitySummary.replayRelation}</span>
                       <span>{satelliteActivitySummary.passWindowStatus}</span>
                     </div>
+                    {selectedSectionHealthDisplay?.recentActivityCaveat ? (
+                      <CaveatBlock heading="Activity caveat" tone="evidence" compact>
+                        {selectedSectionHealthDisplay.recentActivityCaveat}
+                      </CaveatBlock>
+                    ) : null}
                   </div>
                 ) : null}
 
@@ -486,15 +748,84 @@ export function InspectorPanel() {
                     <p className="panel__eyebrow">Snapshot Evidence</p>
                     <div className="data-card data-card--compact">
                       <strong>{selectedEvidenceSummary.label}</strong>
+                      <div className="stack stack--actions">
+                        <DataBasisBadge basis={selectedDataHealthSummary?.evidenceBasis ?? "unavailable"} prefix="Basis" />
+                        <StatusBadge tone={selectedSectionHealthDisplay?.freshnessBadgeTone ?? freshnessTone(selectedDataHealthSummary?.freshness ?? "unknown")}>
+                          Freshness: {selectedSectionHealthDisplay?.freshnessBadgeLabel ?? "unknown"}
+                        </StatusBadge>
+                      </div>
                       {selectedEvidenceSummary.displayLines.slice(0, 6).map((line) => (
                         <span key={line}>{line}</span>
                       ))}
                       <span>{selectedEvidenceSummary.caveat}</span>
                     </div>
+                    {selectedSectionHealthDisplay?.snapshotEvidenceCaveat ? (
+                      <CaveatBlock heading="Evidence caveat" tone="evidence" compact>
+                        {selectedSectionHealthDisplay.snapshotEvidenceCaveat}
+                      </CaveatBlock>
+                    ) : null}
                     <ImageryContextPanel
                       context={imageryContext}
                       isReplayContext={selectedReplayIndex != null}
                     />
+                  </div>
+                ) : null}
+
+                {selectedDataHealthSummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Data Health</p>
+                    <div className="data-card data-card--compact">
+                      <div className="stack stack--actions">
+                        <DataBasisBadge basis={selectedDataHealthSummary.evidenceBasis} prefix="Basis" />
+                        <StatusBadge tone={selectedSectionHealthDisplay?.freshnessBadgeTone ?? freshnessTone(selectedDataHealthSummary.freshness)}>
+                          Freshness: {selectedSectionHealthDisplay?.freshnessBadgeLabel ?? selectedDataHealthSummary.freshness}
+                        </StatusBadge>
+                        <StatusBadge tone={healthTone(selectedDataHealthSummary.health)}>
+                          Health: {selectedDataHealthSummary.health}
+                        </StatusBadge>
+                      </div>
+                      {selectedDataHealthSummary.displayLines.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                      {selectedDataHealthSummary.caveats.slice(0, 3).map((caveat) => (
+                        <span key={caveat}>{caveat}</span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {aerospaceFocus.enabled ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aerospace Focus</p>
+                    <div className="data-card data-card--compact">
+                      <strong>{aerospaceFocusComputation.statusLabel}</strong>
+                      <span>
+                        Preset {aerospaceFocusComputation.activePresetLabel}
+                        {aerospaceFocusComputation.activePresetAvailable
+                          ? ""
+                          : ` | Unavailable: ${aerospaceFocusComputation.activePresetDisabledReason ?? "unavailable"}`}
+                      </span>
+                      <span>
+                        Focus target {aerospaceFocus.targetType ?? "unknown"} {aerospaceFocus.targetId ?? "unknown"}
+                      </span>
+                      <span>
+                        Radius {aerospaceFocus.radiusNm ?? aerospaceFocusComputation.radiusNm ?? "unknown"} nm
+                      </span>
+                      <span>{aerospaceFocus.reason ?? aerospaceFocusComputation.reason ?? "selected-target nearby context"}</span>
+                      <span>{aerospaceFocusComputation.caveat}</span>
+                      {!aerospaceFocusComputation.targetVisible ? (
+                        <span>Focused target not currently visible.</span>
+                      ) : null}
+                      {isFollowing ? <span>Follow target is active alongside aerospace focus.</span> : null}
+                      {selectedReplayIndex != null ? (
+                        <span>Replay cursor remains active while focus mode is enabled.</span>
+                      ) : null}
+                    </div>
+                    {selectedSectionHealthDisplay?.focusModeCaveat ? (
+                      <CaveatBlock heading="Focus caveat" tone="evidence" compact>
+                        {selectedSectionHealthDisplay.focusModeCaveat}
+                      </CaveatBlock>
+                    ) : null}
                   </div>
                 ) : null}
 
@@ -663,37 +994,70 @@ export function InspectorPanel() {
                     nearestPlace={aircraftReferenceQuery.data?.context?.nearestPlace ?? null}
                     nearestAirport={nearestAirportQuery.data?.results[0]}
                     nearestRunway={nearestRunwayQuery.data?.results[0]}
+                    contextCaveat={selectedSectionHealthDisplay?.aviationContextCaveat ?? null}
                   />
                 ) : null}
 
-                {selectedEvidenceSummary ? (
+                {selectedNearbyContextSummary ? (
                   <div className="panel__section">
-                    <p className="panel__eyebrow">Future Nearby Context</p>
-                    <div className="data-card data-card--compact">
-                      <strong>Read-only integration slot</strong>
-                      {AEROSPACE_FUTURE_CONTEXT_SLOTS.map((slot) => (
-                        <span key={slot.provider}>{slot.summary}</span>
+                    <p className="panel__eyebrow">Nearby Aerospace Context</p>
+                    <div className="stack">
+                      {selectedNearbyContextSummary.cards.map((card) => (
+                        <div key={`${card.kind}-${card.label}`} className="data-card data-card--compact">
+                          <strong>{card.label}</strong>
+                          <span>{card.value}</span>
+                          <span>{card.detail}</span>
+                          <span>Confidence {card.confidence}</span>
+                          <span>{card.caveat}</span>
+                        </div>
                       ))}
+                      {selectedNearbyContextSummary.futureProviderSlots.map((slot) => (
+                        <div key={slot.kind} className="data-card data-card--compact">
+                          <strong>{slot.label}</strong>
+                          <span>{slot.value}</span>
+                          <span>{slot.detail}</span>
+                          <span>Confidence {slot.confidence}</span>
+                          <span>{slot.caveat}</span>
+                        </div>
+                      ))}
+                      {selectedNearbyContextSummary.caveats.map((caveat) => (
+                        <div key={caveat} className="data-card data-card--compact">
+                          <strong>Context note</strong>
+                          <span>{caveat}</span>
+                        </div>
+                      ))}
+                      {selectedNearbyContextSummary.missingProviders.length > 0 ? (
+                        <div className="data-card data-card--compact">
+                          <strong>Missing provider families</strong>
+                          <span>{selectedNearbyContextSummary.missingProviders.join(", ")}</span>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 ) : null}
               </>
             )}
 
-            {related.length > 0 ? (
+            {displayedRelated.length > 0 ? (
               <div className="panel__section">
-                <p className="panel__eyebrow">Nearby Context</p>
+                <p className="panel__eyebrow">Nearby Targets</p>
                 <div className="stack">
-                  {related.map(({ item, distanceKm, relation }) => (
+                  {displayedRelated.map(({ item, distanceKm, relation }) => (
                     <div key={item.id} className="data-card data-card--compact">
                       <strong>{item.label}</strong>
+                      {aerospaceFocus.enabled ? <span>Aerospace focus related</span> : null}
                       <span>{relation}</span>
                       <span>{distanceKm.toFixed(1)} km away</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
+                    {selectedSectionHealthDisplay?.nearbyContextCaveat ? (
+                      <CaveatBlock heading="Nearby context caveat" tone="evidence" compact>
+                        {selectedSectionHealthDisplay.nearbyContextCaveat}
+                      </CaveatBlock>
+                    ) : null}
+                  </div>
+                ) : null}
           </div>
         )}
         <MarineAnomalySection />
@@ -709,7 +1073,8 @@ function AircraftReferenceContextPanel({
   containingRegions,
   nearestPlace,
   nearestAirport,
-  nearestRunway
+  nearestRunway,
+  contextCaveat
 }: {
   aircraft: AircraftEntity;
   isLoading: boolean;
@@ -723,6 +1088,7 @@ function AircraftReferenceContextPanel({
   nearestPlace: ReferenceObjectSummary | null;
   nearestAirport?: ReferenceNearbyItem;
   nearestRunway?: ReferenceNearbyItem;
+  contextCaveat?: string | null;
 }) {
   const hasContext =
     primaryReference != null ||
@@ -809,6 +1175,11 @@ function AircraftReferenceContextPanel({
           <span>The reference module did not return a nearby airport, runway, or region.</span>
         </div>
       )}
+      {contextCaveat ? (
+        <CaveatBlock heading="Reference context caveat" tone="evidence" compact>
+          {contextCaveat}
+        </CaveatBlock>
+      ) : null}
     </div>
   );
 }
@@ -837,6 +1208,7 @@ function CameraPanel({
       ? "Viewer-only"
       : "No usable frame path";
   const usableLabel = isUsableCamera(camera) ? "Usable" : camera.review.status === "blocked" ? "Blocked" : "Limited";
+  const referenceState = getCameraReferenceState(camera);
 
   return (
     <div className="panel__section" data-testid="webcam-camera-panel">
@@ -1022,31 +1394,34 @@ function CameraPanel({
             </dd>
           </div>
         ) : null}
-        {camera.referenceHintText ? (
-          <div>
-            <dt>Reference Hint</dt>
-            <dd>{camera.referenceHintText}</dd>
-          </div>
-        ) : null}
-        {camera.facilityCodeHint ? (
-          <div>
-            <dt>Facility Code Hint</dt>
-            <dd>{camera.facilityCodeHint}</dd>
-          </div>
-        ) : null}
-        {camera.referenceLinkStatus || camera.linkCandidateCount != null || camera.nearestReferenceRefId ? (
-          <div>
-            <dt>Reference Link State</dt>
-            <dd>
-              {camera.nearestReferenceRefId
-                ? `Reviewed link ${camera.nearestReferenceRefId}`
-                : camera.referenceLinkStatus
-                  ? `${camera.referenceLinkStatus}${camera.linkCandidateCount != null ? ` (${camera.linkCandidateCount} candidates)` : ""}`
-                  : "No reviewed link"}
-            </dd>
-          </div>
-        ) : null}
       </dl>
+      <div className="panel__section" data-testid="webcam-camera-reference-context">
+        <p className="panel__eyebrow">Reference Context</p>
+        <div className="data-card data-card--compact">
+          <div className="stack">
+            <StatusBadge tone={referenceStateTone(referenceState.kind)}>
+              {referenceState.label}
+            </StatusBadge>
+            {camera.referenceHintText ? <span>Connector hint: {camera.referenceHintText}</span> : null}
+            {camera.facilityCodeHint ? <span>Facility hint: {camera.facilityCodeHint}</span> : null}
+            {camera.nearestReferenceRefId ? (
+              <span>Reviewed link: {camera.nearestReferenceRefId}</span>
+            ) : null}
+            {camera.referenceLinkStatus && camera.referenceLinkStatus !== "hinted" ? (
+              <span>
+                Machine suggestion: {camera.referenceLinkStatus}
+                {camera.linkCandidateCount != null ? ` (${camera.linkCandidateCount} candidates)` : ""}
+              </span>
+            ) : null}
+            {!camera.nearestReferenceRefId && !camera.referenceHintText && !camera.facilityCodeHint && !camera.referenceLinkStatus ? (
+              <span>No reference hint, machine suggestion, or reviewed link is available for this camera.</span>
+            ) : null}
+          </div>
+          <CaveatBlock heading="Reference caveat" tone="evidence" compact>
+            Connector hints are not canonical matches. Machine suggestions remain unreviewed until the reference subsystem confirms them. Reviewed links, when present, take precedence.
+          </CaveatBlock>
+        </div>
+      </div>
       {camera.review.requiredActions.length > 0 ? (
         <div className="panel__section">
           <p className="panel__eyebrow">Review Actions</p>
@@ -1082,7 +1457,32 @@ function CameraPanel({
   );
 }
 
-function EarthquakeInspectorPanel({ event }: { event: EarthquakeEntity }) {
+function EnvironmentalEventInspectorPanel({ event }: { event: EarthquakeEntity | EonetEntity }) {
+  if (event.eventSource === "nasa-eonet") {
+    return (
+      <div className="panel__section" data-testid="eonet-inspector">
+        <p className="panel__eyebrow">Environmental Event (NASA EONET)</p>
+        <dl>
+          <div><dt>Event ID</dt><dd>{event.eventId}</dd></div>
+          <div><dt>Title</dt><dd>{event.label}</dd></div>
+          <div><dt>Categories</dt><dd>{event.categories.join(", ") || "Unknown"}</dd></div>
+          <div><dt>Event Date</dt><dd>{formatTimestamp(event.eventDate)}</dd></div>
+          <div><dt>Status</dt><dd>{event.statusDetail}</dd></div>
+          <div><dt>Geometry Type</dt><dd>{event.geometryType}</dd></div>
+          <div><dt>Geometry Count</dt><dd>{event.geometryCount}</dd></div>
+          <div><dt>Location Semantics</dt><dd>{event.coordinatesSummary}</dd></div>
+          <div><dt>Source</dt><dd>NASA EONET</dd></div>
+          <div><dt>Caveat</dt><dd>{event.caveat}</dd></div>
+        </dl>
+        {event.externalUrl ? (
+          <a className="ghost-button ghost-button--link" data-testid="eonet-inspector-source-link" href={event.externalUrl} target="_blank" rel="noreferrer">
+            Open NASA EONET Event
+          </a>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="panel__section" data-testid="earthquake-inspector">
       <p className="panel__eyebrow">Environmental Event (USGS)</p>
@@ -1204,6 +1604,53 @@ function describeSourceReadiness(source: CameraSourceInventoryEntry) {
 
 function formatCount(value?: number | null) {
   return value == null ? "Unknown" : value.toLocaleString();
+}
+
+function referenceStateTone(kind: ReturnType<typeof getCameraReferenceState>["kind"]) {
+  switch (kind) {
+    case "reviewed":
+      return "success" as const;
+    case "machine":
+      return "info" as const;
+    case "hint":
+      return "warning" as const;
+    default:
+      return "neutral" as const;
+  }
+}
+
+function freshnessTone(value: "fresh" | "recent" | "possibly-stale" | "stale" | "unknown") {
+  switch (value) {
+    case "fresh":
+      return "available" as const;
+    case "recent":
+      return "info" as const;
+    case "possibly-stale":
+      return "advisory" as const;
+    case "stale":
+      return "danger" as const;
+    case "unknown":
+    default:
+      return "neutral" as const;
+  }
+}
+
+function healthTone(value: "normal" | "degraded" | "stale" | "unavailable" | "partial" | "unknown") {
+  switch (value) {
+    case "normal":
+      return "available" as const;
+    case "degraded":
+      return "warning" as const;
+    case "stale":
+      return "danger" as const;
+    case "unavailable":
+      return "unavailable" as const;
+    case "partial":
+      return "advisory" as const;
+    case "unknown":
+    default:
+      return "neutral" as const;
+  }
 }
 
 function relationLabel(subject: SceneEntity, other: SceneEntity) {
