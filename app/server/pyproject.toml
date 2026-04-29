@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "worldview-simulator-server"
+version = "0.1.0"
+description = "FastAPI foundation for the spatial intelligence simulator"
+requires-python = ">=3.10"
+dependencies = [
+  "alembic>=1.13.2",
+  "cachetools>=5.3.3",
+  "fastapi>=0.111.1",
+  "httpx>=0.27.0",
+  "pydantic-settings>=2.3.4",
+  "pydantic>=2.8.2",
+  "sqlalchemy>=2.0.32",
+  "sgp4>=2.23",
+  "uvicorn>=0.30.1"
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.10.1",
+  "pytest>=8.2.2",
+  "ruff>=0.5.1"
+]
+
+[tool.setuptools]
+py-modules = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_configs = true

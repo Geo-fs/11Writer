@@ -1,0 +1,106 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "generated": 1777353600000,
+    "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",
+    "title": "USGS All Earthquakes, Past Day",
+    "status": 200,
+    "api": "1.14.1",
+    "count": 4
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "mag": 5.2,
+        "place": "110 km SE of Hachijo-jima, Japan",
+        "time": 1777349400000,
+        "updated": 1777351200000,
+        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000example1",
+        "detail": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us6000example1.geojson",
+        "felt": 12,
+        "cdi": 4.1,
+        "mmi": 3.2,
+        "alert": null,
+        "status": "reviewed",
+        "tsunami": 0,
+        "sig": 420,
+        "magType": "mww",
+        "type": "earthquake",
+        "title": "M 5.2 - 110 km SE of Hachijo-jima, Japan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [140.826, 32.273, 34.5]
+      },
+      "id": "us6000example1"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "mag": 3.1,
+        "place": "8 km NE of Pāhala, Hawaii",
+        "time": 1777345800000,
+        "updated": 1777347600000,
+        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/hv123example2",
+        "status": "automatic",
+        "tsunami": 0,
+        "sig": 148,
+        "magType": "ml",
+        "type": "earthquake",
+        "title": "M 3.1 - 8 km NE of Pāhala, Hawaii"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-155.439, 19.246, 31.2]
+      },
+      "id": "hv123example2"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "mag": 6.0,
+        "place": "South Sandwich Islands region",
+        "time": 1777341000000,
+        "updated": 1777344600000,
+        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000example3",
+        "status": "reviewed",
+        "tsunami": 1,
+        "sig": 556,
+        "alert": "green",
+        "felt": null,
+        "cdi": null,
+        "mmi": null,
+        "magType": "mww",
+        "type": "earthquake",
+        "title": "M 6.0 - South Sandwich Islands region"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-26.731, -57.892, 10.0]
+      },
+      "id": "us6000example3"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "mag": null,
+        "place": "5 km W of Ridgecrest, CA",
+        "time": 1777337400000,
+        "updated": 1777339200000,
+        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/ci000example4",
+        "status": "automatic",
+        "tsunami": 0,
+        "sig": 12,
+        "type": "quarry blast",
+        "title": "M - - 5 km W of Ridgecrest, CA"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-117.701, 35.623, 1.2]
+      },
+      "id": "ci000example4"
+    }
+  ],
+  "bbox": [-155.439, -57.892, 1.2, 140.826, 35.623, 34.5]
+}
