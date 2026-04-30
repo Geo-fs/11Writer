@@ -68,6 +68,8 @@ def test_faa_nas_status_route_serializes_fixture_record(monkeypatch) -> None:
     assert payload["record"]["sourceMode"] == "fixture"
     assert payload["sourceHealth"]["sourceMode"] == "fixture"
     assert payload["sourceHealth"]["health"] == "normal"
+    assert "not flight-specific" in " ".join(payload["caveats"]).lower()
+    assert "do not infer aircraft intent" in " ".join(payload["caveats"]).lower()
 
 
 def test_faa_nas_status_returns_normal_when_no_match(monkeypatch) -> None:

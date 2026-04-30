@@ -1,0 +1,130 @@
+{
+  "cwaopendata": {
+    "@xmlns": "urn:cwa:gov:tw:cwacommon:0.1",
+    "identifier": "fixture-taiwan-cwa-current-weather",
+    "sender": "od@cwa.gov.tw",
+    "sent": "2026-04-30T21:53:15+08:00",
+    "status": "Actual",
+    "msgType": "Issue",
+    "dataid": "O-A0003_001",
+    "scope": "Public",
+    "dataset": {
+      "Station": [
+        {
+          "StationName": "Taipei Main",
+          "StationId": "466920",
+          "ObsTime": {
+            "DateTime": "2026-04-30T21:40:00+08:00"
+          },
+          "GeoInfo": {
+            "Coordinates": [
+              {
+                "CoordinateName": "TWD67",
+                "CoordinateFormat": "decimal degrees",
+                "StationLatitude": "25.0460",
+                "StationLongitude": "121.5120"
+              },
+              {
+                "CoordinateName": "WGS84",
+                "CoordinateFormat": "decimal degrees",
+                "StationLatitude": "25.0478",
+                "StationLongitude": "121.5170"
+              }
+            ],
+            "StationAltitude": "9.0",
+            "CountyName": "Taipei City",
+            "TownName": "Zhongzheng District",
+            "CountyCode": "63000",
+            "TownCode": "63000010"
+          },
+          "WeatherElement": {
+            "Weather": "Cloudy",
+            "VisibilityDescription": ">30",
+            "SunshineDuration": "0.0",
+            "Now": {
+              "Precipitation": "0.0"
+            },
+            "WindDirection": "80.0",
+            "WindSpeed": "2.1",
+            "AirTemperature": "23.4",
+            "RelativeHumidity": "78",
+            "AirPressure": "1008.2",
+            "UVIndex": "0"
+          }
+        },
+        {
+          "StationName": "Kaohsiung Port",
+          "StationId": "467440",
+          "ObsTime": {
+            "DateTime": "2026-04-30T21:30:00+08:00"
+          },
+          "GeoInfo": {
+            "Coordinates": [
+              {
+                "CoordinateName": "WGS84",
+                "CoordinateFormat": "decimal degrees",
+                "StationLatitude": "22.6163",
+                "StationLongitude": "120.3133"
+              }
+            ],
+            "StationAltitude": "2.3",
+            "CountyName": "Kaohsiung City",
+            "TownName": "Gushan District",
+            "CountyCode": "64000",
+            "TownCode": "64000020"
+          },
+          "WeatherElement": {
+            "Weather": "Sunny",
+            "VisibilityDescription": ">30",
+            "SunshineDuration": "0.8",
+            "Now": {
+              "Precipitation": "-990.0"
+            },
+            "WindDirection": "180.0",
+            "WindSpeed": "5.2",
+            "AirTemperature": "28.1",
+            "RelativeHumidity": "70",
+            "AirPressure": "1006.1",
+            "UVIndex": "6"
+          }
+        },
+        {
+          "StationName": "Yushan",
+          "StationId": "467550",
+          "ObsTime": {
+            "DateTime": "2026-04-30T21:20:00+08:00"
+          },
+          "GeoInfo": {
+            "Coordinates": [
+              {
+                "CoordinateName": "TWD67",
+                "CoordinateFormat": "decimal degrees",
+                "StationLatitude": "23.4700",
+                "StationLongitude": "120.9570"
+              }
+            ],
+            "StationAltitude": "3844.8",
+            "CountyName": "Nantou County",
+            "TownName": "Xinyi Township",
+            "CountyCode": "10008",
+            "TownCode": "10008130"
+          },
+          "WeatherElement": {
+            "Weather": "Cloudy with fog",
+            "VisibilityDescription": "-99",
+            "SunshineDuration": "0.0",
+            "Now": {
+              "Precipitation": "0.4"
+            },
+            "WindDirection": "250.0",
+            "WindSpeed": "9.3",
+            "AirTemperature": "7.2",
+            "RelativeHumidity": "96",
+            "AirPressure": "-99",
+            "UVIndex": "-99"
+          }
+        }
+      ]
+    }
+  }
+}

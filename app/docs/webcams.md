@@ -53,7 +53,8 @@ The repo now ships a first operational worker slice:
 Two entrypoints use the same orchestration:
 
 - standalone CLI: `python -m src.webcam.worker --once` or `--loop`
-- optional FastAPI lifespan loop for local/dev when `WEBCAM_WORKER_ENABLED=true` and `WEBCAM_WORKER_RUN_ON_STARTUP=true`
+- optional FastAPI lifespan loop for current local development when `WEBCAM_WORKER_ENABLED=true` and `WEBCAM_WORKER_RUN_ON_STARTUP=true`
+- future long-running webcam collection should move through the shared backend-only runtime/task model described in `app/docs/runtime-interface-requirements.md`
 
 ### Live validation
 
@@ -314,6 +315,143 @@ Interpretation rules:
 - sandbox import does not enable scheduled refresh
 - sandbox counts are evidence about mapping and review burden only
 - validated and approved-unvalidated production fields remain the source of truth for actual active ingest readiness
+
+Backend-only sandbox validation report:
+
+- run:
+  - `python app/server/scripts/report_camera_sandbox_validation.py`
+  - `python app/server/scripts/report_camera_sandbox_validation.py --json`
+- current first-pass default source:
+  - `finland-digitraffic-road-cameras`
+- report fields are compact mapping/readiness evidence:
+  - `discoveredCount`
+  - `usableCount`
+  - `directImageCount`
+  - `viewerOnlyCount`
+  - `missingCoordinateCount`
+  - `uncertainOrientationCount`
+  - `unavailableFrameCount`
+  - `reviewQueueCount`
+  - `topReviewReasons`
+- count semantics:
+  - `discoveredCount` counts normalized preset-derived cameras from the sandbox fetch result
+  - `usableCount` counts direct-image live cameras that are not blocked
+  - `unavailableFrameCount` counts presets that normalize into unavailable-frame review work
+  - `reviewQueueCount` counts review items produced from the normalized sandbox cameras
+- this report is generated from the sandbox connector and fixture-backed normalization path only
+- it does not write DB state
+- it does not change onboarding state
+- it does not promote lifecycle state
+- it explicitly preserves:
+  - candidate-only posture
+  - sandbox-only posture
+  - scheduled refresh disabled
+  - blocked reason / source caveat context where the source definition provides it
+- `approved-unvalidated` still requires:
+  - mapping review
+  - source-health review
+  - explicit lifecycle decision
+- `validated` still requires real import evidence beyond fixture-backed sandbox output
+
+### Source-ops report index
+
+The backend now also exposes a compact read-only source-operations index at:
+
+- `GET /api/cameras/source-ops-index`
+- `GET /api/cameras/source-ops-index/{source_id}`
+- `GET /api/cameras/source-ops-export-summary`
+- `GET /api/cameras/source-ops-review-queue`
+
+Purpose:
+
+- describe which lifecycle tooling artifacts already exist for each webcam source
+- keep candidate, sandbox, approved-unvalidated, validated, blocked, and credential-blocked states explicit
+- provide compact export/report lines for operational summaries
+
+The index can mark availability for:
+
+- endpoint evaluation
+- candidate endpoint report
+- graduation plan
+- sandbox validation report
+
+The per-source detail view composes stored lifecycle evidence for one source id and can summarize:
+
+- endpoint evaluation metadata
+- candidate endpoint report composition from stored metadata
+- graduation-plan composition from stored metadata
+- sandbox validation availability and latest stored sandbox summary fields
+- review prerequisites showing what evidence is present, what is missing, and what human review remains before stronger lifecycle standing is considered
+
+The export/debug summary route composes:
+
+- source-ops index export lines
+- optional selected per-source detail export lines
+- stored artifact timestamp/provenance summaries
+- fleet-level artifact timestamp-status rollups
+- fleet-level caveat-frequency rollups
+- review-hint summaries for human follow-up prioritization
+- source-ops review queue items for the highest-priority per-source follow-up
+- lifecycle caveats
+- unknown source ids when requested detail lines do not resolve
+
+The filtered review-queue route supports bounded query filters for:
+
+- `priority_band`
+- `reason_category`
+- `lifecycle_state`
+- `source_ids`
+- `limit`
+
+It also returns a compact aggregate over the filtered subset:
+
+- counts grouped by priority band
+- counts grouped by reason category
+- counts grouped by lifecycle state
+- blocked vs credential-blocked vs sandbox-not-validated counts
+- unknown source ids when requested
+- export-safe aggregate lines and caveats
+
+Included fields stay compact:
+
+- source id and source name
+- onboarding state
+- import readiness
+- lifecycle bucket
+- artifact availability/status/summary/caveat
+- blocked reason
+- source-level caveats
+- compact export lines
+- compact caveat-frequency entries
+- compact review-hint export lines
+- per-source review-prerequisite evidence states and review lines
+- compact source-ops review queue items and review export lines
+
+Intentionally excluded:
+
+- raw inventory payload dumps
+- live endpoint probe execution
+- lifecycle mutation or source activation hooks
+- any claim that artifact availability proves ingest readiness
+
+Interpretation rules:
+
+- artifact availability means tooling exists, not that a source is active
+- endpoint-evaluation or graduation-plan availability does not validate a source
+- sandbox validation availability does not enable scheduled ingest
+- blocked sources remain blocked until a compliant machine-readable path is documented and reviewed
+- the detail route is still read-only and does not perform live endpoint evaluation or sandbox imports during request handling
+- the per-source review-prerequisites package is also read-only and does not validate, activate, schedule, or promote a source
+- the export/debug summary route is also read-only and exists for compact operational evidence composition only
+- artifact timestamp summaries describe stored evidence provenance only
+- if a stored artifact does not provide its own timestamp, the backend now exposes explicit `missing` or `not-applicable` semantics instead of inventing freshness
+- fleet-level rollups group those stored timestamp states across sources so operators can see evidence posture quickly without inferring activation or validation
+- fleet-level caveat rollups group governance warnings such as blocked posture, credential blocking, missing artifact evidence, sandbox-not-validation posture, and non-ingestable lifecycle states
+- review hints are prioritization guidance only; they do not alter source lifecycle state, activation, validation, or endpoint health
+- the source-ops review queue is also prioritization-only; queue items are not source activation, validation, endpoint-health, camera-availability, or scheduling proof
+- filtered queue results are convenience views over the same inert source-ops evidence; filtering does not change source state or queue semantics
+- source or candidate text returned in queue items remains untrusted data only and must not be treated as instructions
+- filtered queue aggregates are review/export summarization only and do not imply source activation, validation, endpoint health, or scheduling eligibility
 
 ### Candidate endpoint verification metadata
 

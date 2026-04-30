@@ -1,6 +1,8 @@
+import type { MarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
 import type { MarineNdbcContextSummary } from "./marineNdbcContext";
 import type { MarineNoaaContextSummary } from "./marineNoaaContext";
 import type { MarineScottishWaterContextSummary } from "./marineScottishWaterContext";
+import type { MarineVigicruesContextSummary } from "./marineVigicruesContext";
 
 type SourceMode = "fixture" | "live" | "unknown";
 type SourceHealth = "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
@@ -9,7 +11,7 @@ type SourceAvailability = "loaded" | "empty" | "disabled" | "unavailable" | "deg
 export interface MarineContextSourceSummaryRow {
   sourceId: string;
   label: string;
-  category: "oceanographic" | "meteorological" | "coastal-infrastructure";
+  category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
   sourceMode: SourceMode;
   health: SourceHealth;
   availability: SourceAvailability;
@@ -41,16 +43,25 @@ export interface MarineContextSourceRegistrySummary {
 }
 
 export function buildMarineContextSourceRegistrySummary(input: {
+  irelandOpw: MarineIrelandOpwContextSummary | null;
   noaaCoops: MarineNoaaContextSummary | null;
   ndbc: MarineNdbcContextSummary | null;
   scottishWater: MarineScottishWaterContextSummary | null;
+  vigicrues: MarineVigicruesContextSummary | null;
 }): MarineContextSourceRegistrySummary {
   const rows = [
     input.noaaCoops ? fromNoaaCoops(input.noaaCoops) : unavailableRow("noaa-coops-tides-currents", "NOAA CO-OPS", "oceanographic"),
     input.ndbc ? fromNdbc(input.ndbc) : unavailableRow("noaa-ndbc-realtime", "NOAA NDBC", "meteorological"),
     input.scottishWater
       ? fromScottishWater(input.scottishWater)
-      : unavailableRow("scottish-water-overflows", "Scottish Water Overflows", "coastal-infrastructure")
+      : unavailableRow("scottish-water-overflows", "Scottish Water Overflows", "coastal-infrastructure"),
+    input.vigicrues
+      ? fromVigicrues(input.vigicrues)
+      : unavailableRow("france-vigicrues-hydrometry", "France Vigicrues Hydrometry", "hydrology")
+    ,
+    input.irelandOpw
+      ? fromIrelandOpw(input.irelandOpw)
+      : unavailableRow("ireland-opw-waterlevel", "Ireland OPW Water Level", "hydrology")
   ];
 
   const sourceCount = rows.length;
@@ -143,6 +154,38 @@ function fromScottishWater(summary: MarineScottishWaterContextSummary): MarineCo
       : null,
     caveats: summary.metadata.caveats,
     evidenceBasis: "contextual"
+  };
+}
+
+function fromVigicrues(summary: MarineVigicruesContextSummary): MarineContextSourceSummaryRow {
+  return {
+    sourceId: summary.metadata.sourceId,
+    label: "France Vigicrues Hydrometry",
+    category: "hydrology",
+    sourceMode: summary.metadata.sourceMode,
+    health: summary.metadata.health,
+    availability: availabilityFromHealth(summary.metadata.health),
+    nearbyCount: summary.metadata.nearbyStationCount,
+    activeCount: null,
+    topSummary: summary.metadata.topObservationSummary,
+    caveats: summary.metadata.caveats,
+    evidenceBasis: "observed"
+  };
+}
+
+function fromIrelandOpw(summary: MarineIrelandOpwContextSummary): MarineContextSourceSummaryRow {
+  return {
+    sourceId: summary.metadata.sourceId,
+    label: "Ireland OPW Water Level",
+    category: "hydrology",
+    sourceMode: summary.metadata.sourceMode,
+    health: summary.metadata.health,
+    availability: availabilityFromHealth(summary.metadata.health),
+    nearbyCount: summary.metadata.nearbyStationCount,
+    activeCount: null,
+    topSummary: summary.metadata.topObservationSummary,
+    caveats: summary.metadata.caveats,
+    evidenceBasis: "observed"
   };
 }
 

@@ -30,6 +30,7 @@ def test_swpc_fixture_serialization_all() -> None:
     assert len(payload["summaries"]) == 2
     assert len(payload["alerts"]) == 2
     assert payload["sourceHealth"]["sourceMode"] == "fixture"
+    assert "advisory/contextual" in payload["caveats"][0] or "advisory" in payload["caveats"][0].lower()
 
 
 def test_swpc_alert_filtering_and_normalization() -> None:
@@ -90,3 +91,13 @@ def test_swpc_summary_has_no_failure_claim_fields() -> None:
     record = payload["summaries"][0]
     assert "failure" not in record
     assert "risk" not in record
+
+
+def test_swpc_alerts_keep_no_failure_overclaim_caveat() -> None:
+    client = _client()
+    response = client.get("/api/aerospace/space/swpc-context", params={"product_type": "alerts", "limit": 1})
+    assert response.status_code == 200
+    payload = response.json()
+    caveat_text = " ".join(payload["caveats"]).lower()
+    assert "advisory" in caveat_text or "contextual" in caveat_text
+    assert "failure" not in caveat_text or "do not" in caveat_text

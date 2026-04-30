@@ -377,6 +377,123 @@ export interface SwpcContextResponse {
   caveats: string[];
 }
 
+export interface WashingtonVaacSourceHealth {
+  sourceName: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "normal" | "degraded" | "unavailable" | "unknown";
+  detail: string;
+  listingSourceUrl: string;
+  lastUpdatedAt?: string | null;
+  state?: SourceStatus["state"] | null;
+  caveats: string[];
+}
+
+export interface WashingtonVaacAdvisoryRecord {
+  advisoryId: string;
+  advisoryNumber?: string | null;
+  issueTime?: string | null;
+  observedAt?: string | null;
+  volcanoName: string;
+  volcanoNumber?: string | null;
+  stateOrRegion?: string | null;
+  summitElevationFt?: number | null;
+  informationSource?: string | null;
+  eruptionDetails?: string | null;
+  observationStatus?: string | null;
+  maxFlightLevel?: string | null;
+  sourceUrl?: string | null;
+  caveats: string[];
+  evidenceBasis: "contextual" | "advisory" | "source-reported";
+}
+
+export interface WashingtonVaacAdvisoriesResponse {
+  fetchedAt: string;
+  source: string;
+  volcano?: string | null;
+  count: number;
+  advisories: WashingtonVaacAdvisoryRecord[];
+  sourceHealth: WashingtonVaacSourceHealth;
+  caveats: string[];
+}
+
+export interface AnchorageVaacSourceHealth {
+  sourceName: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "normal" | "degraded" | "unavailable" | "unknown";
+  detail: string;
+  listingSourceUrl: string;
+  lastUpdatedAt?: string | null;
+  state?: SourceStatus["state"] | null;
+  caveats: string[];
+}
+
+export interface AnchorageVaacAdvisoryRecord {
+  advisoryId: string;
+  advisoryNumber?: string | null;
+  issueTime?: string | null;
+  observedAt?: string | null;
+  volcanoName: string;
+  volcanoNumber?: string | null;
+  area?: string | null;
+  sourceElevationText?: string | null;
+  sourceElevationFt?: number | null;
+  informationSource?: string | null;
+  aviationColorCode?: string | null;
+  eruptionDetails?: string | null;
+  sourceUrl?: string | null;
+  caveats: string[];
+  evidenceBasis: "contextual" | "advisory" | "source-reported";
+}
+
+export interface AnchorageVaacAdvisoriesResponse {
+  fetchedAt: string;
+  source: string;
+  volcano?: string | null;
+  count: number;
+  advisories: AnchorageVaacAdvisoryRecord[];
+  sourceHealth: AnchorageVaacSourceHealth;
+  caveats: string[];
+}
+
+export interface TokyoVaacSourceHealth {
+  sourceName: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "normal" | "degraded" | "unavailable" | "unknown";
+  detail: string;
+  listingSourceUrl: string;
+  lastUpdatedAt?: string | null;
+  state?: SourceStatus["state"] | null;
+  caveats: string[];
+}
+
+export interface TokyoVaacAdvisoryRecord {
+  advisoryId: string;
+  advisoryNumber?: string | null;
+  issueTime?: string | null;
+  observedAt?: string | null;
+  volcanoName: string;
+  volcanoNumber?: string | null;
+  area?: string | null;
+  sourceElevationText?: string | null;
+  sourceElevationFt?: number | null;
+  informationSource?: string | null;
+  aviationColorCode?: string | null;
+  eruptionDetails?: string | null;
+  sourceUrl?: string | null;
+  caveats: string[];
+  evidenceBasis: "contextual" | "advisory" | "source-reported";
+}
+
+export interface TokyoVaacAdvisoriesResponse {
+  fetchedAt: string;
+  source: string;
+  volcano?: string | null;
+  count: number;
+  advisories: TokyoVaacAdvisoryRecord[];
+  sourceHealth: TokyoVaacSourceHealth;
+  caveats: string[];
+}
+
 export interface OpenSkySourceHealth {
   sourceName: string;
   sourceMode: "fixture" | "live" | "unknown";
@@ -416,6 +533,55 @@ export interface OpenSkyStatesResponse {
   count: number;
   states: OpenSkyAircraftState[];
   sourceHealth: OpenSkySourceHealth;
+  caveats: string[];
+}
+
+export interface UsgsGeomagnetismSample {
+  observedAt: string;
+  values: Record<string, number | null>;
+  evidenceBasis: "observed";
+}
+
+export interface UsgsGeomagnetismSourceHealth {
+  sourceId: string;
+  sourceLabel: string;
+  enabled: boolean;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  loadedCount: number;
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  detail: string;
+  errorSummary?: string | null;
+  caveat?: string | null;
+}
+
+export interface UsgsGeomagnetismMetadata {
+  source: string;
+  sourceName: string;
+  sourceUrl: string;
+  requestUrl: string;
+  observatoryId: string;
+  observatoryName?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  elevationM?: number | null;
+  sourceMode: "fixture" | "live" | "unknown";
+  fetchedAt: string;
+  generatedAt?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  samplingPeriodSeconds?: number | null;
+  elements: string[];
+  count: number;
+  caveat: string;
+}
+
+export interface UsgsGeomagnetismResponse {
+  metadata: UsgsGeomagnetismMetadata;
+  count: number;
+  sourceHealth: UsgsGeomagnetismSourceHealth;
+  samples: UsgsGeomagnetismSample[];
   caveats: string[];
 }
 
@@ -1152,6 +1318,102 @@ export interface MarineScottishWaterOverflowResponse {
   caveats: string[];
 }
 
+export interface MarineVigicruesHydrometrySourceHealth {
+  sourceId: string;
+  sourceLabel: string;
+  enabled: boolean;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  loadedCount: number;
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  detail: string;
+  errorSummary?: string | null;
+  caveat?: string | null;
+}
+
+export interface MarineVigicruesHydrometryObservation {
+  observedAt: string;
+  parameter: "water-height" | "flow";
+  value: number;
+  unit: string;
+  sourceDetail: string;
+  sourceUrl?: string | null;
+  observedBasis: "observed";
+}
+
+export interface MarineVigicruesHydrometryStation {
+  stationId: string;
+  stationName: string;
+  latitude: number;
+  longitude: number;
+  distanceKm: number;
+  riverBasin?: string | null;
+  statusLine: string;
+  stationSourceUrl?: string | null;
+  latestObservation?: MarineVigicruesHydrometryObservation | null;
+  caveats: string[];
+}
+
+export interface MarineVigicruesHydrometryContextResponse {
+  fetchedAt: string;
+  centerLat: number;
+  centerLon: number;
+  radiusKm: number;
+  parameterFilter: "all" | "water-height" | "flow";
+  count: number;
+  sourceHealth: MarineVigicruesHydrometrySourceHealth;
+  stations: MarineVigicruesHydrometryStation[];
+  caveats: string[];
+}
+
+export interface MarineIrelandOpwWaterLevelSourceHealth {
+  sourceId: string;
+  sourceLabel: string;
+  enabled: boolean;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  loadedCount: number;
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  detail: string;
+  errorSummary?: string | null;
+  caveat?: string | null;
+}
+
+export interface MarineIrelandOpwWaterLevelReading {
+  readingAt: string;
+  waterLevelM: number;
+  sourceDetail: string;
+  sourceUrl?: string | null;
+  observedBasis: "observed";
+}
+
+export interface MarineIrelandOpwWaterLevelStation {
+  stationId: string;
+  stationName: string;
+  latitude: number;
+  longitude: number;
+  distanceKm: number;
+  waterbody?: string | null;
+  hydrometricArea?: string | null;
+  statusLine: string;
+  stationSourceUrl?: string | null;
+  latestReading?: MarineIrelandOpwWaterLevelReading | null;
+  caveats: string[];
+}
+
+export interface MarineIrelandOpwWaterLevelContextResponse {
+  fetchedAt: string;
+  centerLat: number;
+  centerLon: number;
+  radiusKm: number;
+  count: number;
+  sourceHealth: MarineIrelandOpwWaterLevelSourceHealth;
+  stations: MarineIrelandOpwWaterLevelStation[];
+  caveats: string[];
+}
+
 export interface EarthquakeEvent {
   eventId: string;
   source: string;
@@ -1524,6 +1786,149 @@ export interface CanadaCapAlertResponse {
   metadata: CanadaCapMetadata;
   count: number;
   alerts: CanadaCapAlertEvent[];
+}
+
+export interface MetEireannWarningEvent {
+  eventId: string;
+  capId?: string | null;
+  title: string;
+  warningType?: string | null;
+  level: "green" | "yellow" | "orange" | "red" | "unknown";
+  severity: "minor" | "moderate" | "severe" | "extreme" | "unknown";
+  certainty?: string | null;
+  urgency?: string | null;
+  issuedAt?: string | null;
+  onsetAt?: string | null;
+  expiresAt?: string | null;
+  updatedAt?: string | null;
+  affectedArea?: string | null;
+  affectedCodes: string[];
+  description?: string | null;
+  sourceUrl: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  caveat: string;
+  evidenceBasis: "advisory" | "contextual";
+}
+
+export interface MetEireannWarningsSourceHealth {
+  sourceId: string;
+  sourceLabel: string;
+  enabled: boolean;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  loadedCount: number;
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  detail: string;
+  errorSummary?: string | null;
+  caveat?: string | null;
+}
+
+export interface MetEireannWarningsMetadata {
+  source: string;
+  feedName: string;
+  feedUrl: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  fetchedAt: string;
+  generatedAt?: string | null;
+  count: number;
+  caveat: string;
+}
+
+export interface MetEireannWarningsResponse {
+  metadata: MetEireannWarningsMetadata;
+  count: number;
+  sourceHealth: MetEireannWarningsSourceHealth;
+  warnings: MetEireannWarningEvent[];
+  caveats: string[];
+}
+
+export interface MetEireannForecastSample {
+  forecastTime: string;
+  airTemperatureC?: number | null;
+  precipitationMm?: number | null;
+  windSpeedMps?: number | null;
+  windDirectionDeg?: number | null;
+  symbolCode?: string | null;
+  evidenceBasis: "forecast" | "contextual";
+}
+
+export interface MetEireannForecastSourceHealth {
+  sourceId: string;
+  sourceLabel: string;
+  enabled: boolean;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  loadedCount: number;
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  detail: string;
+  errorSummary?: string | null;
+  caveat?: string | null;
+}
+
+export interface MetEireannForecastMetadata {
+  source: string;
+  sourceName: string;
+  sourceUrl: string;
+  requestUrl: string;
+  latitude: number;
+  longitude: number;
+  sourceMode: "fixture" | "live" | "unknown";
+  fetchedAt: string;
+  generatedAt?: string | null;
+  firstForecastTime?: string | null;
+  lastForecastTime?: string | null;
+  count: number;
+  caveat: string;
+}
+
+export interface MetEireannForecastResponse {
+  metadata: MetEireannForecastMetadata;
+  count: number;
+  sourceHealth: MetEireannForecastSourceHealth;
+  samples: MetEireannForecastSample[];
+  caveats: string[];
+}
+
+export interface BmkgEarthquakeEvent {
+  eventId: string;
+  source: string;
+  sourceUrl: string;
+  title: string;
+  eventTime: string;
+  localTime?: string | null;
+  magnitude?: number | null;
+  depthKm?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  region?: string | null;
+  feltSummary?: string | null;
+  tsunamiFlag?: boolean | null;
+  potentialText?: string | null;
+  shakemapUrl?: string | null;
+  sourceMode: "fixture" | "live" | "unknown";
+  caveat: string;
+  evidenceBasis: "source-reported" | "observed";
+}
+
+export interface BmkgEarthquakesMetadata {
+  source: string;
+  latestFeedUrl: string;
+  recentFeedUrl: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  fetchedAt: string;
+  generatedAt?: string | null;
+  count: number;
+  latestAvailableAt?: string | null;
+  caveat: string;
+}
+
+export interface BmkgEarthquakesResponse {
+  metadata: BmkgEarthquakesMetadata;
+  latestEvent?: BmkgEarthquakeEvent | null;
+  count: number;
+  events: BmkgEarthquakeEvent[];
 }
 
 export interface MetNoMetAlertEvent {

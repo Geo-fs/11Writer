@@ -61,13 +61,33 @@ from src.services.metno_metalerts_service import (
     parse_bbox as parse_metno_bbox,
 )
 from src.services.canada_cap_service import CanadaCapAlertType, CanadaCapQuery, CanadaCapService, CanadaCapSeverity, CanadaCapSort
+from src.services.bmkg_earthquakes_service import BmkgEarthquakesQuery, BmkgEarthquakesService, BmkgSort
+from src.services.ipma_warnings_service import IpmaWarningLevel, IpmaWarningSort, IpmaWarningsQuery, IpmaWarningsService
+from src.services.met_eireann_warnings_service import (
+    MetEireannWarningLevel,
+    MetEireannWarningSort,
+    MetEireannWarningsQuery,
+    MetEireannWarningsService,
+)
+from src.services.geosphere_austria_warnings_service import (
+    GeosphereAustriaWarningsQuery,
+    GeosphereAustriaWarningsService,
+    GeosphereWarningLevel,
+    GeosphereWarningSort,
+)
+from src.services.nrc_event_notifications_service import NrcEventNotificationsQuery, NrcEventNotificationsService, NrcSort
 from src.types.api import (
+    BmkgEarthquakesResponse,
     CanadaCapAlertResponse,
     EarthquakeEventsResponse,
     EonetEventsResponse,
+    GeosphereAustriaWarningsResponse,
     GeoNetHazardsResponse,
     HkoWeatherResponse,
+    IpmaWarningsResponse,
+    MetEireannWarningsResponse,
     MetNoMetAlertsResponse,
+    NrcEventNotificationsResponse,
     TsunamiAlertResponse,
     UkEaFloodResponse,
     VolcanoStatusResponse,
@@ -371,5 +391,126 @@ async def recent_canada_cap_alerts(
             province=province,
             limit=limit,
             sort=cast(CanadaCapSort, sort),
+        )
+    )
+
+
+@router.get("/bmkg-earthquakes/recent", response_model=BmkgEarthquakesResponse)
+async def recent_bmkg_earthquakes(
+    min_magnitude: float | None = Query(default=5.0, ge=0.0, le=10.0),
+    limit: int = Query(default=15, ge=1, le=50),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> BmkgEarthquakesResponse:
+    if sort not in {"newest", "magnitude"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, magnitude")
+
+    service = BmkgEarthquakesService(settings)
+    return await service.list_recent(
+        BmkgEarthquakesQuery(
+            min_magnitude=min_magnitude,
+            limit=limit,
+            sort=cast(BmkgSort, sort),
+        )
+    )
+
+
+@router.get("/ipma/warnings", response_model=IpmaWarningsResponse)
+async def recent_ipma_warnings(
+    level: str = Query(default="all"),
+    area_id: str | None = Query(default=None),
+    warning_type: str | None = Query(default=None),
+    active_only: bool = Query(default=True),
+    limit: int = Query(default=100, ge=1, le=1000),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> IpmaWarningsResponse:
+    if level not in {"all", "green", "yellow", "orange", "red", "unknown"}:
+        raise HTTPException(
+            status_code=400,
+            detail="level must be one of: all, green, yellow, orange, red, unknown",
+        )
+    if sort not in {"newest", "level", "area"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, level, area")
+
+    service = IpmaWarningsService(settings)
+    return await service.list_recent(
+        IpmaWarningsQuery(
+            level=cast(IpmaWarningLevel, level),
+            area_id=area_id,
+            warning_type=warning_type,
+            active_only=active_only,
+            limit=limit,
+            sort=cast(IpmaWarningSort, sort),
+        )
+    )
+
+
+@router.get("/met-eireann/warnings", response_model=MetEireannWarningsResponse)
+async def recent_met_eireann_warnings(
+    level: str = Query(default="all"),
+    limit: int = Query(default=100, ge=1, le=1000),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> MetEireannWarningsResponse:
+    if level not in {"all", "green", "yellow", "orange", "red", "unknown"}:
+        raise HTTPException(
+            status_code=400,
+            detail="level must be one of: all, green, yellow, orange, red, unknown",
+        )
+    if sort not in {"newest", "level"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, level")
+
+    service = MetEireannWarningsService(settings)
+    return await service.list_recent(
+        MetEireannWarningsQuery(
+            level=cast(MetEireannWarningLevel, level),
+            limit=limit,
+            sort=cast(MetEireannWarningSort, sort),
+        )
+    )
+
+
+@router.get("/geosphere-austria/warnings", response_model=GeosphereAustriaWarningsResponse)
+async def recent_geosphere_austria_warnings(
+    level: str = Query(default="all"),
+    limit: int = Query(default=100, ge=1, le=1000),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> GeosphereAustriaWarningsResponse:
+    if level not in {"all", "yellow", "orange", "red", "unknown"}:
+        raise HTTPException(
+            status_code=400,
+            detail="level must be one of: all, yellow, orange, red, unknown",
+        )
+    if sort not in {"newest", "level"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, level")
+
+    service = GeosphereAustriaWarningsService(settings)
+    return await service.list_recent(
+        GeosphereAustriaWarningsQuery(
+            level=cast(GeosphereWarningLevel, level),
+            limit=limit,
+            sort=cast(GeosphereWarningSort, sort),
+        )
+    )
+
+
+@router.get("/nrc-notifications/recent", response_model=NrcEventNotificationsResponse)
+async def recent_nrc_event_notifications(
+    q: str | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=500),
+    sort: str = Query(default="event_id"),
+    settings: Settings = Depends(get_settings),
+) -> NrcEventNotificationsResponse:
+    if sort not in {"feed", "event_id"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: feed, event_id")
+
+    service = NrcEventNotificationsService(settings)
+    return await service.list_recent(
+        NrcEventNotificationsQuery(
+            q=q,
+            limit=limit,
+            sort=cast(NrcSort, sort),
         )
     )

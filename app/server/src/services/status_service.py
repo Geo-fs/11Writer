@@ -19,6 +19,9 @@ def build_source_status(settings: Settings) -> SourceStatusResponse:
     faa_nas_runtime = get_source_runtime_status("faa-nas-status")
     cneos_runtime = get_source_runtime_status("cneos-space-events")
     swpc_runtime = get_source_runtime_status("noaa-swpc")
+    anchorage_vaac_runtime = get_source_runtime_status("anchorage-vaac-advisories")
+    tokyo_vaac_runtime = get_source_runtime_status("tokyo-vaac-advisories")
+    washington_vaac_runtime = get_source_runtime_status("washington-vaac-advisories")
     marine_runtime = get_source_runtime_status("ais-fixture-global")
     persisted_camera_sources = _camera_source_map(settings)
 
@@ -102,6 +105,27 @@ def build_source_status(settings: Settings) -> SourceStatusResponse:
             default_freshness=1_800,
             default_stale_after=21_600,
             detail="NOAA SWPC space-weather advisory context is available for selected-target aerospace situational awareness.",
+        ),
+        _runtime_to_status(
+            name="anchorage-vaac-advisories",
+            runtime=anchorage_vaac_runtime,
+            default_freshness=1_800,
+            default_stale_after=21_600,
+            detail="Anchorage VAAC volcanic-ash advisories are available as advisory/contextual aerospace hazard context and do not by themselves determine route impact or aircraft exposure.",
+        ),
+        _runtime_to_status(
+            name="tokyo-vaac-advisories",
+            runtime=tokyo_vaac_runtime,
+            default_freshness=1_800,
+            default_stale_after=21_600,
+            detail="Tokyo VAAC volcanic-ash advisories are available as advisory/contextual aerospace hazard context and do not by themselves determine route impact or aircraft exposure.",
+        ),
+        _runtime_to_status(
+            name="washington-vaac-advisories",
+            runtime=washington_vaac_runtime,
+            default_freshness=1_800,
+            default_stale_after=21_600,
+            detail="Washington VAAC volcanic-ash advisories are available as advisory/contextual aerospace hazard context and do not by themselves determine route impact or aircraft exposure.",
         ),
         _runtime_to_status(
             name="marine",

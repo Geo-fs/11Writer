@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import APIRouter, Depends, Query
 
 from src.config.settings import Settings, get_settings
@@ -5,9 +7,11 @@ from src.services.marine_service import MarineService
 from src.types.api import (
     MarineChokepointAnalyticalSummaryResponse,
     MarineGapEventsResponse,
+    MarineIrelandOpwWaterLevelContextResponse,
     MarineNdbcContextResponse,
     MarineNoaaCoopsContextResponse,
     MarineScottishWaterOverflowResponse,
+    MarineVigicruesHydrometryContextResponse,
     MarineReplayPathResponse,
     MarineReplaySnapshotResponse,
     MarineReplayTimelineResponse,
@@ -284,5 +288,47 @@ async def marine_scottish_water_overflows_context(
         center_lon=lon,
         radius_km=radius_km,
         status=status,
+        limit=limit,
+    )
+
+
+@router.get(
+    "/context/vigicrues-hydrometry",
+    response_model=MarineVigicruesHydrometryContextResponse,
+)
+async def marine_vigicrues_hydrometry_context(
+    lat: float = Query(..., ge=-90.0, le=90.0),
+    lon: float = Query(..., ge=-180.0, le=180.0),
+    radius_km: float = Query(default=250.0, gt=1.0, le=1500.0),
+    parameter: Literal["all", "water-height", "flow"] = Query(default="all"),
+    limit: int = Query(default=5, ge=1, le=50),
+    settings: Settings = Depends(get_settings),
+) -> MarineVigicruesHydrometryContextResponse:
+    service = MarineService(settings)
+    return await service.vigicrues_hydrometry_context(
+        center_lat=lat,
+        center_lon=lon,
+        radius_km=radius_km,
+        parameter_filter=parameter,
+        limit=limit,
+    )
+
+
+@router.get(
+    "/context/ireland-opw-waterlevel",
+    response_model=MarineIrelandOpwWaterLevelContextResponse,
+)
+async def marine_ireland_opw_waterlevel_context(
+    lat: float = Query(..., ge=-90.0, le=90.0),
+    lon: float = Query(..., ge=-180.0, le=180.0),
+    radius_km: float = Query(default=250.0, gt=1.0, le=1500.0),
+    limit: int = Query(default=5, ge=1, le=50),
+    settings: Settings = Depends(get_settings),
+) -> MarineIrelandOpwWaterLevelContextResponse:
+    service = MarineService(settings)
+    return await service.ireland_opw_waterlevel_context(
+        center_lat=lat,
+        center_lon=lon,
+        radius_km=radius_km,
         limit=limit,
     )

@@ -13,7 +13,7 @@ import httpx
 from src.config.settings import Settings
 from src.types.api import RssFeedMetadata, RssFeedRecord, RssFeedResponse, RssFeedSourceHealth
 
-FeedType = Literal["rss", "atom", "unknown"]
+FeedType = Literal["rss", "atom", "rdf", "unknown"]
 SourceMode = Literal["fixture", "live", "unknown"]
 
 DISCOVERY_CAVEAT = (
@@ -148,6 +148,8 @@ def parse_feed_document(document: str, *, source_mode: SourceMode, feed_url: str
         return _parse_rss(root, source_mode=source_mode, feed_url=feed_url)
     if root_name == "feed":
         return _parse_atom(root, source_mode=source_mode, feed_url=feed_url)
+    if root_name.lower() == "rdf":
+        return _parse_rdf(root, source_mode=source_mode, feed_url=feed_url)
     raise ValueError(f"Unsupported feed root element: {root_name}")
 
 
@@ -246,6 +248,63 @@ def _parse_atom(root: ET.Element, *, source_mode: SourceMode, feed_url: str) -> 
         )
     return ParsedFeedDocument(
         feed_type="atom",
+        feed_title=feed_title,
+        feed_home_url=feed_home_url,
+        generated_at=generated_at,
+        items=items,
+    )
+
+
+def _parse_rdf(root: ET.Element, *, source_mode: SourceMode, feed_url: str) -> ParsedFeedDocument:
+    channel = _first_child(root, "channel")
+    feed_title = _child_text(channel, "title") if channel is not None else None
+    feed_home_url = _child_text(channel, "link") if channel is not None else None
+    generated_at = None
+    if channel is not None:
+        generated_at = _normalize_timestamp(
+            _child_text(channel, "date") or _child_text(channel, "lastBuildDate") or _child_text(channel, "pubDate")
+        )
+
+    items: list[RssFeedRecord] = []
+    for item in _children(root, "item"):
+        title = _child_text(item, "title") or "Untitled feed item"
+        link = _child_text(item, "link")
+        guid = _child_text(item, "identifier") or link
+        published_at = _normalize_timestamp(
+            _child_text(item, "date") or _child_text(item, "pubDate") or _child_text(item, "issued")
+        )
+        updated_at = _normalize_timestamp(_child_text(item, "updated") or _child_text(item, "modified"))
+        summary = _child_text(item, "description") or _child_text(item, "summary")
+        categories = [
+            category
+            for category in [
+                *(_collapse_space(value) for value in _child_texts(item, "subject")),
+                *(_collapse_space(value) for value in _child_texts(item, "category")),
+            ]
+            if category
+        ]
+        record_id = guid or link or _fallback_record_id(title, published_at, updated_at)
+        items.append(
+            RssFeedRecord(
+                record_id=record_id,
+                title=title,
+                link=link,
+                guid=guid,
+                published_at=published_at,
+                updated_at=updated_at,
+                summary=summary,
+                categories=_dedupe_strings(categories),
+                feed_title=feed_title,
+                feed_home_url=feed_home_url,
+                source_url=link or feed_url,
+                source_mode=source_mode,
+                caveat=DISCOVERY_CAVEAT,
+                evidence_basis="discovery",
+            )
+        )
+
+    return ParsedFeedDocument(
+        feed_type="rdf",
         feed_title=feed_title,
         feed_home_url=feed_home_url,
         generated_at=generated_at,

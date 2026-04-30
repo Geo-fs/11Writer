@@ -1,0 +1,72 @@
+{
+  "warnings": [
+    {
+      "text": "Strong wind gusts expected in exposed high terrain.",
+      "awarenessTypeName": "Vento",
+      "idAreaAviso": "BGC",
+      "startTime": "2026-05-01T06:00:00",
+      "awarenessLevelID": "yellow",
+      "endTime": "2026-05-01T18:00:00"
+    },
+    {
+      "text": "Persistent heavy rainfall with localized runoff risk in urban low spots.",
+      "awarenessTypeName": "Precipitação",
+      "idAreaAviso": "LSB",
+      "startTime": "2026-05-01T09:00:00",
+      "awarenessLevelID": "orange",
+      "endTime": "2026-05-02T03:00:00"
+    },
+    {
+      "text": "",
+      "awarenessTypeName": "Agitação Marítima",
+      "idAreaAviso": "AVR",
+      "startTime": "2026-05-01T00:00:00",
+      "awarenessLevelID": "green",
+      "endTime": "2026-05-03T00:00:00"
+    },
+    {
+      "text": "",
+      "awarenessTypeName": "Nevoeiro",
+      "idAreaAviso": "POR",
+      "startTime": "2026-05-01T03:00:00",
+      "awarenessLevelID": "yellow",
+      "endTime": "2026-05-01T10:00:00"
+    }
+  ],
+  "areas": {
+    "owner": "IPMA",
+    "country": "PT",
+    "data": [
+      {
+        "idRegiao": 1,
+        "idAreaAviso": "AVR",
+        "idConcelho": 5,
+        "globalIdLocal": 1010500,
+        "latitude": "40.6413",
+        "idDistrito": 1,
+        "local": "Aveiro",
+        "longitude": "-8.6535"
+      },
+      {
+        "idRegiao": 1,
+        "idAreaAviso": "BGC",
+        "idConcelho": 2,
+        "globalIdLocal": 1040200,
+        "latitude": "41.8076",
+        "idDistrito": 4,
+        "local": "Bragança",
+        "longitude": "-6.7606"
+      },
+      {
+        "idRegiao": 1,
+        "idAreaAviso": "LSB",
+        "idConcelho": 6,
+        "globalIdLocal": 1110600,
+        "latitude": "38.7660",
+        "idDistrito": 11,
+        "local": "Lisboa",
+        "longitude": "-9.1286"
+      }
+    ]
+  }
+}

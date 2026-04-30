@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>CISA Cybersecurity Advisories</title>
+    <link>https://www.cisa.gov/</link>
+    <lastBuildDate>Wed, 30 Apr 2026 10:30:00 GMT</lastBuildDate>
+    <item>
+      <title>CISA and Partners Publish Joint Advisory on Credential Theft Activity</title>
+      <link>https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-120a</link>
+      <guid>https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-120a</guid>
+      <pubDate>Thu, 30 Apr 2026 10:15:00 GMT</pubDate>
+      <description><![CDATA[<p>Official advisory summary with technical context and mitigations.</p>]]></description>
+      <category>Cybersecurity Advisory</category>
+      <category>Threats and Advisories</category>
+    </item>
+    <item>
+      <title>CISA Releases Advisory on Active Directory Hardening</title>
+      <link>https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-118a</link>
+      <guid>https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-118a</guid>
+      <pubDate>Tue, 28 Apr 2026 12:00:00 GMT</pubDate>
+      <description><![CDATA[<p>Official advisory summary focused on defensive hardening guidance.</p>]]></description>
+      <category>Cybersecurity Advisory</category>
+    </item>
+    <item>
+      <title>CISA Releases Advisory on Active Directory Hardening</title>
+      <link>https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-118a</link>
+      <guid>https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-118a</guid>
+      <pubDate>Tue, 28 Apr 2026 12:00:00 GMT</pubDate>
+      <description><![CDATA[<p>Duplicate item to exercise source-scoped dedupe behavior.</p>]]></description>
+      <category>Cybersecurity Advisory</category>
+    </item>
+  </channel>
+</rss>

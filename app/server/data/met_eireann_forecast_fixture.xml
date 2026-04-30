@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<weatherdata created="2026-04-30T15:00:00Z">
+  <meta>
+    <model
+      name="harmonie"
+      termin="2026-04-30T12:00:00Z"
+      runended="2026-04-30T14:50:00Z"
+      nextrun="2026-04-30T18:00:00Z"
+      from="2026-04-30T15:00:00Z"
+      to="2026-05-01T03:00:00Z"
+    />
+  </meta>
+  <product class="pointData">
+    <time datatype="forecast" from="2026-04-30T15:00:00Z" to="2026-04-30T15:00:00Z">
+      <location altitude="20" latitude="53.3498" longitude="-6.2603">
+        <temperature id="TTT" unit="celsius" value="12.4" />
+        <precipitation id="RR" unit="mm" value="0.0" />
+        <windDirection id="dd" deg="210.0" name="SW" />
+        <windSpeed id="ff" mps="4.8" beaufort="3" name="Gentle breeze" />
+        <symbol id="PartlyCloudy" number="3" />
+      </location>
+    </time>
+    <time datatype="forecast" from="2026-04-30T16:00:00Z" to="2026-04-30T16:00:00Z">
+      <location altitude="20" latitude="53.3498" longitude="-6.2603">
+        <temperature id="TTT" unit="celsius" value="12.1" />
+        <precipitation id="RR" unit="mm" value="0.2" />
+        <windDirection id="dd" deg="220.0" name="SW" />
+        <windSpeed id="ff" mps="5.2" beaufort="3" name="Gentle breeze" />
+        <symbol id="LightRain" number="40" />
+      </location>
+    </time>
+    <time datatype="forecast" from="2026-04-30T17:00:00Z" to="2026-04-30T17:00:00Z">
+      <location altitude="20" latitude="53.3498" longitude="-6.2603">
+        <temperature id="TTT" unit="celsius" value="11.8" />
+        <precipitation id="RR" unit="mm" value="0.4" />
+        <windDirection id="dd" deg="225.0" name="SW" />
+        <windSpeed id="ff" mps="5.6" beaufort="4" name="Moderate breeze" />
+        <symbol id="Rain" number="50" />
+      </location>
+    </time>
+    <time datatype="forecast" from="2026-04-30T18:00:00Z" to="2026-04-30T18:00:00Z">
+      <location altitude="20" latitude="53.3498" longitude="-6.2603">
+        <temperature id="TTT" unit="celsius" value="11.0" />
+        <windDirection id="dd" deg="230.0" name="SW" />
+        <windSpeed id="ff" mps="6.0" beaufort="4" name="Moderate breeze" />
+        <symbol id="Cloudy" number="4" />
+      </location>
+    </time>
+    <time datatype="forecast" from="2026-04-30T18:00:00Z" to="2026-04-30T24:00:00Z">
+      <location altitude="20" latitude="53.3498" longitude="-6.2603">
+        <precipitation id="RR" unit="mm" minvalue="0.0" maxvalue="1.8" value="0.9" />
+      </location>
+    </time>
+  </product>
+</weatherdata>

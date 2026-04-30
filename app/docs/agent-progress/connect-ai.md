@@ -1,0 +1,430 @@
+# Connect AI Progress
+
+## 2026-04-30 17:01:58 -05:00
+
+- Task:
+  - Run a repo coordination hardening pass focused on ownership scanner accuracy, prompt-injection policy discoverability, and current validation truth after the latest docs/source wave
+- Assignment version read:
+  - `2026-04-30 16:54 America/Chicago`
+- What changed:
+  - Re-read the current Connect assignment, prompt-injection policy, Atlas RSS candidate doc, active coordination surfaces, current lane docs, and the local tooling scripts before touching repo coordination truth
+  - Re-ran the ownership scanner and identified the largest obvious residual `unknown` families from the newest wave
+  - Tightened the scanner only for clear lane-owned additions:
+    - GeoSphere Austria and NASA POWER geospatial services/tests/fixtures
+    - Anchorage, Tokyo, and Washington VAAC aerospace adapters/routes/services/tests/fixtures
+    - webcam review-prerequisites and review-queue backend helpers
+    - prompt-injection policy and Data AI onboarding as Connect-owned coordination docs
+  - Reduced the residual `unknown` bucket from `56` paths to `27` without hiding ambiguous files or the active Data AI implementation family
+  - Confirmed prompt-injection defense is already discoverable from repo workflow, safety, RSS feeds, Data AI onboarding, and active task docs, so no broad workflow rewrite was needed
+  - Added one narrow coordination note making it explicit that `app/docs/data-ai-rss-source-candidates.md` is Atlas planning input only, not implementation or validation proof
+  - Re-ran the current validation checkpoint and confirmed no repo-wide blocker reproduced
+- Files touched:
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `python scripts/list_changed_files_by_owner.py --summary` passed before the scanner refinement
+  - `python scripts/alerts_ledger.py --json` passed
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py -q` passed
+  - `python -m pytest app/server/tests/test_anchorage_vaac_contracts.py app/server/tests/test_tokyo_vaac_contracts.py app/server/tests/test_washington_vaac_contracts.py -q` passed
+  - `python -m pytest app/server/tests/test_geosphere_austria_warnings.py app/server/tests/test_nasa_power_meteorology_solar.py -q` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed after the scanner refinement
+  - `python app/server/tests/run_playwright_smoke.py marine` passed
+  - `python app/server/tests/run_playwright_smoke.py webcam` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed --json` passed
+- Blockers or caveats:
+  - No repo-wide blocker reproduced in this pass
+  - Prompt-injection policy discoverability is now good enough across workflow, safety, RSS, Data AI, and active task surfaces
+  - The remaining `unknown` bucket is now much more honest:
+    - broad roadmap/architecture/runtime docs
+    - Atlas/user-directed planning docs
+    - RSS/Data AI planning docs
+    - the first active Data AI implementation family for CISA/EPSS, which still has no dedicated ownership bucket in the scanner
+  - No domain semantics, source promotion, source status truth, or runtime exposure behavior changed
+- Next recommended task:
+  - Wait for the next Connect assignment unless Manager AI wants a dedicated Data AI ownership bucket added later or wants another checkpoint after the first Data AI implementation slice lands
+
+## 2026-04-30 16:51:52 -05:00
+
+- Task:
+  - Run a larger current-state integration checkpoint after the newest source wave and Data AI lane setup, then refresh coordination truth only where the live validation and ownership state actually moved
+- Assignment version read:
+  - `2026-04-30 16:43 America/Chicago`
+- What changed:
+  - Re-read the current Connect assignment, the latest lane progress docs, the active coordination surfaces, the alerts ledger, and the local validation/ownership helpers before running the checkpoint
+  - Reproduced the current shared validation surface and confirmed it remains green for backend compile, client lint/build, representative latest-lane backend tests, and focused `marine` and `webcam` smoke
+  - Confirmed the latest completed source wave is healthy on the checked surface, including GeoSphere Austria warnings, NASA POWER meteorology/solar context, Washington VAAC advisories, and the newest webcam source-ops detail/export rollups
+  - Refreshed repo-local checkpoint truth so the coordination docs now reflect that newer validated source wave and the fact that the ownership scanner's residual `unknown` bucket has grown again during rapid source expansion
+  - No shared source, runtime, or frontend integration blocker reproduced, so no production code fix was needed
+- Files touched:
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed
+  - `python scripts/alerts_ledger.py --json` passed
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_geosphere_austria_warnings.py app/server/tests/test_nasa_power_meteorology_solar.py -q` passed
+  - `python -m pytest app/server/tests/test_washington_vaac_contracts.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py app/server/tests/test_camera_source_ops_report_index.py -q` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python app/server/tests/run_playwright_smoke.py marine` passed
+  - `python app/server/tests/run_playwright_smoke.py webcam` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed --json` passed
+- Blockers or caveats:
+  - No repo-wide blocker reproduced in this checkpoint pass
+  - Data AI lane coordination did not require a policy change in this sweep because Data AI still has startup-only progress and no active implementation slice yet
+  - The alerts ledger is healthy and currently has zero open alerts
+  - Shared high-collision files remain active and the ownership scanner still shows a larger residual `unknown` bucket, so the worktree is validation-green but not low-risk for consolidation
+  - No domain semantics, runtime exposure behavior, host binding, pairing/auth, storage migration, or source activation behavior changed
+- Next recommended task:
+  - Wait for the next Connect assignment unless Manager AI wants the newest residual `unknown` families classified or wants a fresh checkpoint after Data AI begins its first implementation slice
+
+## 2026-04-30 16:29:30 -05:00
+
+- Task:
+  - Run a current-state repo-wide blocker and readiness sweep with special attention to the reported `AppShell.tsx` `selectedTargetSummary` build blocker
+- Assignment version read:
+  - `2026-04-30 16:24 America/Chicago`
+- What changed:
+  - Re-read the reported shared frontend files, smoke script, cross-platform broadcast note, and current coordination tooling before reproducing the current build state
+  - Reproduced the current client and backend validation surface and confirmed the reported `AppShell.tsx(852,5)` `selectedTargetSummary` build blocker does not exist in the live worktree
+  - Refreshed checkpoint coordination truth so the repo-local docs no longer imply that stale Marine-reported build blocker is still active
+  - Tightened the ownership scanner for the obvious new `met_eireann_forecast` backend service, test, and fixture path family
+  - Recorded that the earlier high-priority cross-platform alert has now been consumed into next-task docs and the alerts ledger is back to zero open alerts
+- Files touched:
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `python scripts/list_changed_files_by_owner.py --summary` passed before and after the scanner refinement
+  - `python scripts/alerts_ledger.py --json` passed
+  - `python -m compileall app/server/src` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_met_eireann_warnings.py app/server/tests/test_dmi_forecast.py app/server/tests/test_ireland_epa_wfd_catchments.py -q` passed
+  - `python app/server/tests/run_playwright_smoke.py marine` passed
+  - `python app/server/tests/run_playwright_smoke.py webcam` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed --json` passed
+- Blockers or caveats:
+  - The reported `selectedTargetSummary` / `AppShell.tsx` blocker was stale and did not reproduce
+  - No repo-wide blocker reproduced in this sweep
+  - Shared high-collision files remain active and still require manual review before any later consolidation
+  - Cross-platform runtime docs remain planning inputs only and still do not imply implemented runtime modes, packaging, pairing/auth, storage-path migration, or companion-access behavior
+- Next recommended task:
+  - Wait for the next Connect assignment unless Manager AI wants another checkpoint sweep after the next shared frontend wave or wants the residual broad `unknown` doc set re-reviewed
+
+## 2026-04-30 16:27:05 -05:00
+
+- Task:
+  - Produce a Phase 2 checkpoint/readiness integration pass that reconciles current validation, ownership, alerts, release-readiness, and the new cross-platform runtime guidance into the repo coordination surfaces
+- Assignment version read:
+  - `2026-04-30 16:21 America/Chicago`
+- What changed:
+  - Re-read the current coordination tooling, release-readiness docs, source-validation docs, cross-platform runtime planning docs, and the latest manager-controlled lane progress docs before validating
+  - Ran a broad current-state checkpoint surface covering ownership, alerts, backend compile, client lint/build, representative Geospatial, Marine, Features/Webcam, and Aerospace backend tests, plus focused `marine` and `webcam` smoke
+  - Confirmed the repo remains green for the requested checkpoint surface even after the latest larger Phase 2 source and workflow additions
+  - Noted a real coordination-truth change: the alerts ledger now contains one open high-priority Manager-facing alert for cross-platform runtime-plan adoption
+  - Added a compact Phase 2 checkpoint note to the coordination docs so the current green validation surface, shared collision risk, live alert state, and non-implemented status of the new cross-platform runtime docs are visible in repo-local truth
+  - Added a small repo-workflow note so runtime-facing tasks explicitly point agents to the new cross-platform planning docs and restate the no-loopback-loosening rule
+- Files touched:
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/repo-workflow.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed
+  - `python scripts/alerts_ledger.py --json` passed
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_met_eireann_warnings.py app/server/tests/test_dmi_forecast.py app/server/tests/test_ireland_epa_wfd_catchments.py -q` passed
+  - `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python app/server/tests/run_playwright_smoke.py marine` passed
+  - `python app/server/tests/run_playwright_smoke.py webcam` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed --json` passed
+  - `git diff --stat -- app/docs/active-agent-worktree.md app/docs/repo-workflow.md app/docs/release-readiness.md scripts/list_changed_files_by_owner.py` ran
+- Blockers or caveats:
+  - No repo-wide blocker reproduced in the requested checkpoint surface
+  - The alerts ledger is still well-formed, but it now has one open high-priority Manager-facing alert rather than zero open alerts
+  - Shared high-collision files remain active across AppShell, InspectorPanel, queries, shared API/types, settings, and the smoke harness, so consolidation risk remains real even while validation is green
+  - The new cross-platform runtime docs are planning inputs only; they are not implementation evidence and still need future runtime-specific validation if those product modes are built
+- Next recommended task:
+  - Wait for the next Connect assignment unless Manager AI wants a follow-up release-readiness pass nearer consolidation or wants the remaining `unknown` ownership set re-reviewed after the next source wave
+
+## 2026-04-30 16:19:58 -05:00
+
+- Task:
+  - Run a larger repo-readiness and coordination-truth pass after the latest Geospatial, Marine, Aerospace, Gather, and Features/Webcam expansion wave
+- Assignment version read:
+  - `2026-04-30 16:11 America/Chicago`
+- What changed:
+  - Re-read the current coordination tooling, release-readiness docs, source-validation docs, and the latest manager-controlled lane progress docs before validating
+  - Ran the current ownership, alerts, compile, client lint/build, representative backend tests, and focused marine/webcam smoke surface for the newest completed work
+  - Confirmed the repo remains coherent for continued Phase 2 acceleration: compile, lint, build, marine smoke, and webcam smoke all stayed green in the live worktree
+  - Tightened the ownership scanner again for fresh obvious lane-owned files from the latest Geospatial and Features/Webcam completions:
+    - `met_eireann_warnings` service, test, and fixtures now classify as `geospatial-environmental`
+    - `camera_source_ops_artifact_timestamps.py` now classifies as `features-webcam`
+  - Added a short current Phase 2 acceleration risk note to the active worktree doc so Manager AI can see that the validation surface is green while shared high-collision files remain active and residual unknowns should stay visible
+- Files touched:
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed before and after the scanner refinement
+  - `python scripts/alerts_ledger.py --json` passed
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_met_eireann_warnings.py -q` passed
+  - `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python app/server/tests/run_playwright_smoke.py marine` passed
+  - `python app/server/tests/run_playwright_smoke.py webcam` passed
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed --json` passed
+  - `git diff --stat` ran
+- Blockers or caveats:
+  - No repo-wide blocker reproduced in the requested readiness surface
+  - The alerts ledger remains well-formed with zero open alerts
+  - Shared high-collision files are still active across AppShell, InspectorPanel, queries, shared API/types, settings, and the smoke harness, so consolidation risk remains real even though validation is green
+  - The residual `unknown` bucket dropped again and now mostly contains broad roadmap/architecture or user-directed docs plus cross-lane app wiring that should remain visible instead of being force-assigned
+- Next recommended task:
+  - Wait for the next Connect assignment unless Manager AI wants one more release-readiness pass closer to consolidation or wants the remaining small `unknown` set reviewed file-by-file
+
+## 2026-04-30 16:10:33 -05:00
+
+- Task:
+  - Reduce the changed-file ownership scanner `unknown` bucket by adding conservative lane-owned path rules for current Phase 2 docs, fixtures, services, and tests
+- Assignment version read:
+  - `2026-04-30 16:06 America/Chicago`
+- What changed:
+  - Expanded the ownership scanner so it now classifies obvious Connect coordination docs, Gather source-planning docs, Geospatial backend-first weather and context source files, Aerospace workflow-validation docs and backend contract tests, Marine hydrology/context docs and backend files, and Features/Webcam source-ops and Finland Digitraffic files
+  - Added a short coordination-doc note explaining that the scanner now covers many lane-owned source docs, backend services, tests, and fixtures while intentionally leaving some broad architecture and cross-lane files unknown
+  - Kept the mapping conservative rather than adding a catch-all that would hide real ambiguity
+  - Reduced the current `unknown` bucket from `75` paths to `8` paths in the live worktree
+- Files touched:
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `python scripts/list_changed_files_by_owner.py --summary` passed before the rule update
+  - `python scripts/list_changed_files_by_owner.py` passed before the rule update
+  - `python scripts/alerts_ledger.py --json` passed before the rule update
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed after the rule update
+  - `python scripts/list_changed_files_by_owner.py --summary` passed after the rule update
+  - `python scripts/list_changed_files_by_owner.py` passed after the rule update
+  - `python scripts/alerts_ledger.py --json` passed after the rule update
+  - `git diff --stat` ran after the rule update
+- Blockers or caveats:
+  - The scanner still intentionally leaves a small `unknown` set where ownership is genuinely cross-lane, user-directed, or too ambiguous for a safe prefix rule
+  - Current intentional `unknown` set includes broad roadmap and architecture docs, `app/server/src/app.py`, the Atlas onboarding doc, one older batch-4 quick-assign doc, and `camera_source_ops_artifact_timestamps.py`
+  - The scanner remains a commit-planning heuristic only and still does not replace manual diff review for shared or high-collision files
+- Next recommended task:
+  - If Manager AI wants one more scanner pass later, add a narrowly justified rule for `camera_source_ops_artifact_timestamps.py` only if Features/Webcam confirms it is stably part of the source-ops lane; otherwise leave the remaining `unknown` set visible
+
+## 2026-04-30 16:01:59 -05:00
+
+- Task:
+  - Run a current-state coordination sweep after the latest Geospatial, Marine, and Features/Webcam completions and capture the actual validation and alerts truth
+- Assignment version read:
+  - `2026-04-30 15:24 America/Chicago`
+- What changed:
+  - Re-read the current coordination docs, alerts ledger helper, validation snapshot helper, and the latest Geospatial, Marine, Features/Webcam, Gather, and Aerospace progress entries before validating
+  - Ran the alerts ledger helper and confirmed the ledger is well-formed, within target, and currently has no open alerts
+  - Reproduced the current shared validation surface and the fresh lane-specific backend checks that matter after the newest completed work
+  - Generated a compact manager-facing validation snapshot showing compile, lint, build, marine smoke, and webcam smoke all green in the current worktree
+  - Left coordination docs unchanged because the current machine truth did not materially change from the already documented state
+- Files touched:
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed
+  - `python scripts/alerts_ledger.py --json` passed
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_dmi_forecast.py -q` passed
+  - `python -m pytest app/server/tests/test_ireland_opw_waterlevel.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_detail.py -q` passed
+  - `python -m pytest app/server/tests/test_marine_contracts.py -q` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python app/server/tests/run_playwright_smoke.py marine` passed
+  - `python app/server/tests/run_playwright_smoke.py webcam` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed --json` passed
+- Blockers or caveats:
+  - No repo-wide compile, lint, build, or requested focused-smoke blocker reproduced in this sweep
+  - The alerts ledger currently has zero open alerts, so there was no escalation item to fan back into coordination docs
+  - Existing documented aerospace Playwright caveat remains part of repo knowledge, but it was not re-executed in this assignment because the current brief only asked for marine and webcam smoke if practical
+  - The ownership scanner still reports a large `unknown` bucket, which remains a commit-planning caveat rather than a validation blocker
+- Next recommended task:
+  - Wait for the next Connect assignment unless Manager AI wants the ownership scanner expanded to reduce the large `unknown` bucket after the latest source and doc growth
+
+## 2026-04-30 15:19:52 -05:00
+
+- Task:
+  - Build the first repo-local maintenance helper for the shared alerts ledger and wire it into the lightweight coordination tooling path
+- Assignment version read:
+  - `2026-04-30 15:11 America/Chicago`
+- What changed:
+  - Added a reusable alerts-ledger helper at `scripts/alerts_ledger.py`
+  - The helper validates one-line alert format, summarizes open alerts by response owner and priority, and flags malformed lines
+  - Added conservative prune-preview support for removing the oldest `completed` alerts first when the file exceeds the line target
+  - Updated coordination docs so `scripts/alerts_ledger.py` and `scripts/validation_snapshot.py` are the standard lightweight manager-facing tooling pair
+- Files touched:
+  - `scripts/alerts_ledger.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/repo-workflow.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `python scripts/alerts_ledger.py` passed
+  - `python scripts/alerts_ledger.py --json` passed
+  - `python scripts/alerts_ledger.py --prune-completed --max-lines 1` passed as a dry-run prune preview
+  - `python -m py_compile scripts/validation_snapshot.py scripts/alerts_ledger.py` passed
+- Blockers or caveats:
+  - The helper is non-mutating by default
+  - Prune behavior only targets `completed` lines and leaves open alerts untouched
+  - Writing prune changes requires both `--prune-completed` and `--write`
+  - If the ledger exceeds the limit and there are no `completed` alerts available, the helper reports that instead of touching open lines
+- Next recommended task:
+  - Use `scripts/alerts_ledger.py` during Manager AI check-ins alongside `scripts/validation_snapshot.py`
+  - If the alerts ledger starts seeing malformed lines in practice, tighten field guidance in `app/docs/alerts.md` or extend the helper with line-format repair suggestions rather than automatic rewriting
+
+## 2026-04-30 14:49:39 -05:00
+
+- Task:
+  - Convert current validation and launcher-state truth into a reusable repo-local tooling path for Manager and coordination use
+- Assignment version read:
+  - `2026-04-30 14:36 America/Chicago`
+- What changed:
+  - Added a reusable repo-local snapshot helper at `scripts/validation_snapshot.py`
+  - Chose a reporting-oriented helper design that accepts validation outcomes as inputs and emits a compact manager-facing summary
+  - Updated coordination docs to use the narrowed launcher wording `windows-browser-launch-permission` under the existing `windows-playwright-launch-permission` kind
+  - Fixed one small type-only frontend blocker in `aerospaceGeomagnetismContext.ts` by normalizing an optional sampling-period value to `null` before formatting
+- Files touched:
+  - `scripts/validation_snapshot.py`
+  - `app/client/src/features/inspector/aerospaceGeomagnetismContext.ts`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/repo-workflow.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `cmd /c npm.cmd run build` passed after the type-only normalization fix
+  - `cmd /c npm.cmd run lint` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke aerospace=known-local-caveat:windows-browser-launch-permission --smoke webcam=passed` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke aerospace=known-local-caveat:windows-browser-launch-permission --smoke webcam=passed --json` passed
+  - `python -m py_compile app/server/tests/run_playwright_smoke.py scripts/validation_snapshot.py` passed
+- Blockers or caveats:
+  - The helper now improves reporting and coordination truth; it does not itself execute Node-based build or smoke commands because Python-spawned Node execution on this host can introduce false-negative `EPERM` behavior
+  - Runtime validation truth remains: `marine` smoke passed, `webcam` smoke passed, `aerospace` smoke remains a known local caveat with narrowed cause `windows-browser-launch-permission`
+  - A transient `AppShell.tsx` duplicate-key build parse error reproduced once during verification but did not persist after rerun; no code change was needed there
+- Next recommended task:
+  - Use `scripts/validation_snapshot.py` for future manager-facing coordination summaries after manual validation runs
+  - If aerospace smoke must pass locally on this machine, investigate host-level Windows browser execution controls outside the repo
+  - Otherwise keep treating `windows-browser-launch-permission` as the narrowed local launcher caveat and validate focused aerospace smoke on another healthy host when needed
+
+## 2026-04-30 14:32:02 -05:00
+
+- Task:
+  - Investigate the focused aerospace smoke launcher failure on this Windows host and improve repo-local diagnosis if a safe fix is not possible
+- Assignment version read:
+  - `2026-04-30 14:26 America/Chicago`
+- What changed:
+  - Reproduced the focused aerospace smoke failure and narrowed it beyond a generic Playwright error
+  - Confirmed the browser install path resolves correctly
+  - Confirmed a minimal Playwright launch still fails with `spawn EPERM`
+  - Confirmed a raw Node `child_process.spawn()` probe against the browser also fails with `EPERM`
+  - Confirmed direct executable probing can also report `Access is denied (0x5)` on this host
+  - Updated the smoke runner failure payload to include these probes and a more precise `narrowed_cause`
+- Files touched:
+  - `app/server/tests/run_playwright_smoke.py`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with `windows-playwright-launch-permission`
+  - `cmd /c node -e "const { chromium } = require('./app/client/node_modules/playwright'); console.log(chromium.executablePath())"` passed
+  - `cmd /c node -e "const { chromium } = require('./app/client/node_modules/playwright'); (async()=>{ const browser = await chromium.launch({ headless: true }); await browser.close(); })().catch(err => { console.error(err); process.exit(1); });"` failed with `spawn EPERM`
+  - `cmd /c node -e "const cp = require('child_process'); const p = cp.spawn(...);"` failed with `spawn EPERM`
+  - `python -m py_compile app/server/tests/run_playwright_smoke.py` passed
+  - `python -m compileall app/server/src` passed
+  - `python app/server/tests/run_playwright_smoke.py aerospace` still failed, but now emits the improved probe-based diagnosis
+- Blockers or caveats:
+  - This was not safely fixable repo-locally in the harness alone
+  - The narrowed cause is now `windows-browser-launch-permission`
+  - Current evidence points to host-level Windows browser execution controls or security policy, not a missing Playwright install and not an aerospace app regression
+- Next recommended task:
+  - If local aerospace smoke must pass on this machine, investigate Windows Defender, Controlled Folder Access, antivirus allowlists, and local browser execution controls outside the repo
+  - Otherwise treat the current repo-local improvement as sufficient and validate focused aerospace smoke on another healthy Windows host or environment
+
+## 2026-04-30 14:23:18 -05:00
+
+- Task:
+  - Cross-domain shared validation and smoke-harness sweep for newly advanced marine, aerospace, and webcam lanes
+- Assignment version read:
+  - `2026-04-30 14:16 America/Chicago`
+- What changed:
+  - No shared compile, lint, or build blocker reproduced
+  - Confirmed focused `marine` smoke passed
+  - Confirmed focused `webcam` smoke passed
+  - Confirmed focused `aerospace` smoke currently fails before app assertions with the known Windows Playwright launch issue
+  - Updated coordination docs so the current shared validation truth no longer incorrectly says webcam smoke is the failing phase
+- Files touched:
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `python -m compileall app/server/src` passed
+  - `cmd /c npm.cmd run lint` passed
+  - `cmd /c npm.cmd run build` passed
+  - `python app/server/tests/run_playwright_smoke.py marine` passed
+  - `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with `windows-playwright-launch-permission` / `spawn EPERM`
+  - `python app/server/tests/run_playwright_smoke.py webcam` passed
+- Blockers or caveats:
+  - The only reproduced smoke blocker in this sweep was the pre-assertion Playwright launch failure on the focused aerospace smoke run
+  - That failure is currently classified as environment/tooling, not app regression
+  - Shared ownership scanner still shows several unrelated docs and sandbox-report files as `unknown`; that remains a commit-planning caveat, not a validation blocker
+- Next recommended task:
+  - Re-run the shared smoke matrix only after further shared harness edits or if another lane reports a fresh reproduced blocker
+  - If aerospace smoke must be validated locally on this machine, investigate the Windows Playwright launch boundary as a separate Connect tooling task
+
+## 2026-04-30 13:59:33 -05:00
+
+- Task:
+  - Current-state repo and smoke-harness sweep for shared validation truth
+- What changed:
+  - No repo-wide shared blocker reproduced in compile, lint, or build
+  - Confirmed webcam smoke now reaches app assertions and passes in the current worktree
+  - No code or workflow doc corrections were needed for this task
+- Files touched:
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `python -m compileall app/server/src` passed
+  - `cmd /c npm.cmd run lint` passed
+  - `cmd /c npm.cmd run build` passed
+  - `python app/server/tests/run_playwright_smoke.py webcam` passed
+- Blockers or caveats:
+  - Shared ownership scanner still classifies several new docs and sandbox-report files as `unknown`; that is a commit-planning caveat, not a validation blocker
+  - The previously documented Windows Playwright `spawn EPERM` issue did not reproduce in this webcam smoke run
+- Next recommended task:
+  - Re-run the shared validation surface only if a new blocker is reported or if shared smoke-harness files change again

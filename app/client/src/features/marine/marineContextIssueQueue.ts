@@ -175,6 +175,48 @@ export function buildMarineContextIssueQueue(
       });
     }
 
+    if (
+      row.sourceId === "france-vigicrues-hydrometry" &&
+      row.caveats.some((caveat) => {
+        const normalized = caveat.toLowerCase();
+        return normalized.includes("missing") || normalized.includes("partial");
+      })
+    ) {
+      generated.push({
+        id: `${row.sourceId}:partial-metadata`,
+        sourceId: row.sourceId,
+        sourceLabel: row.label,
+        severity: "notice",
+        issueType: "partial-metadata",
+        title: `${row.label} contains partial metadata`,
+        detail: "At least one nearby hydrometry station record is missing optional metadata such as river-basin context.",
+        caveat: row.caveats[0] ?? "Partial metadata limits context detail for this source.",
+        recommendedAction: "Treat hydrometry context as station-local and check caveat text before making broader interpretations.",
+        evidenceBasis: row.evidenceBasis
+      });
+    }
+
+    if (
+      row.sourceId === "ireland-opw-waterlevel" &&
+      row.caveats.some((caveat) => {
+        const normalized = caveat.toLowerCase();
+        return normalized.includes("missing") || normalized.includes("partial") || normalized.includes("unavailable");
+      })
+    ) {
+      generated.push({
+        id: `${row.sourceId}:partial-metadata`,
+        sourceId: row.sourceId,
+        sourceLabel: row.label,
+        severity: "notice",
+        issueType: "partial-metadata",
+        title: `${row.label} contains partial metadata`,
+        detail: "At least one nearby OPW station record is missing optional context such as waterbody metadata.",
+        caveat: row.caveats[0] ?? "Partial metadata limits context detail for this source.",
+        recommendedAction: "Treat OPW context as station-local and check caveat text before making broader interpretations.",
+        evidenceBasis: row.evidenceBasis
+      });
+    }
+
     return generated;
   });
 

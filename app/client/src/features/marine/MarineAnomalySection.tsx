@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import {
   useMarineChokepointSummaryQuery,
+  useMarineIrelandOpwWaterLevelContextQuery,
   useMarineNdbcContextQuery,
   useMarineNoaaCoopsContextQuery,
   useMarineScottishWaterOverflowsQuery,
+  useMarineVigicruesHydrometryContextQuery,
   useMarineVesselSummaryQuery,
   useMarineVesselsQuery,
   useMarineViewportSummaryQuery
@@ -25,7 +27,10 @@ import {
 } from "./marineEnvironmentalContext";
 import { buildMarineEvidenceSummary } from "./marineEvidenceSummary";
 import { buildMarineContextIssueQueue } from "./marineContextIssueQueue";
+import { buildMarineContextFusionSummary } from "./marineContextFusionSummary";
+import { buildMarineContextReviewReport } from "./marineContextReviewReport";
 import { buildMarineContextSourceRegistrySummary } from "./marineContextSourceSummary";
+import { buildMarineHydrologyContextSummary } from "./marineHydrologyContext";
 import {
   buildMarineContextSnapshot,
   buildMarineContextTimelineSummary,
@@ -35,7 +40,9 @@ import {
 } from "./marineContextTimeline";
 import { buildMarineNdbcContextSummary } from "./marineNdbcContext";
 import { buildMarineNoaaContextSummary } from "./marineNoaaContext";
+import { buildMarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
 import { buildMarineScottishWaterContextSummary } from "./marineScottishWaterContext";
+import { buildMarineVigicruesContextSummary } from "./marineVigicruesContext";
 import { buildFocusedMarineReplayEvidence } from "./marineReplayEvidence";
 import {
   buildMarineEvidenceInterpretation,
@@ -229,6 +236,17 @@ export function MarineAnomalySection() {
     status: "all",
     enabled: true
   });
+  const vigicruesContextQuery = useMarineVigicruesHydrometryContextQuery({
+    center: effectiveContextState.center,
+    radiusKm: contextRadiusKm,
+    parameter: "all",
+    enabled: effectiveContextState.centerAvailable
+  });
+  const irelandOpwContextQuery = useMarineIrelandOpwWaterLevelContextQuery({
+    center: effectiveContextState.center,
+    radiusKm: contextRadiusKm,
+    enabled: effectiveContextState.centerAvailable
+  });
 
   const sortedSlices = useMemo(() => {
     const slices = [...(chokepointSummaryQuery.data?.slices ?? [])];
@@ -321,14 +339,32 @@ export function MarineAnomalySection() {
     () => buildMarineScottishWaterContextSummary(scottishWaterContextQuery.data ?? null),
     [scottishWaterContextQuery.data]
   );
+  const vigicruesContextSummary = useMemo(
+    () => buildMarineVigicruesContextSummary(vigicruesContextQuery.data ?? null),
+    [vigicruesContextQuery.data]
+  );
+  const irelandOpwContextSummary = useMemo(
+    () => buildMarineIrelandOpwContextSummary(irelandOpwContextQuery.data ?? null),
+    [irelandOpwContextQuery.data]
+  );
+  const hydrologyContextSummary = useMemo(
+    () =>
+      buildMarineHydrologyContextSummary({
+        vigicrues: vigicruesContextSummary,
+        irelandOpw: irelandOpwContextSummary
+      }),
+    [vigicruesContextSummary, irelandOpwContextSummary]
+  );
   const contextSourceRegistrySummary = useMemo(
     () =>
       buildMarineContextSourceRegistrySummary({
+        irelandOpw: irelandOpwContextSummary,
         noaaCoops: noaaContextSummary,
         ndbc: ndbcContextSummary,
-        scottishWater: scottishWaterContextSummary
+        scottishWater: scottishWaterContextSummary,
+        vigicrues: vigicruesContextSummary
       }),
-    [noaaContextSummary, ndbcContextSummary, scottishWaterContextSummary]
+    [irelandOpwContextSummary, noaaContextSummary, ndbcContextSummary, scottishWaterContextSummary, vigicruesContextSummary]
   );
   const environmentalContextSummary = useMemo(
     () =>
@@ -369,6 +405,31 @@ export function MarineAnomalySection() {
   const contextIssueQueueSummary = useMemo(
     () => buildMarineContextIssueQueue(contextSourceRegistrySummary),
     [contextSourceRegistrySummary]
+  );
+  const contextFusionSummary = useMemo(
+    () =>
+      buildMarineContextFusionSummary({
+        environmentalContextSummary,
+        hydrologyContextSummary,
+        scottishWaterContextSummary,
+        contextSourceRegistrySummary,
+        contextIssueQueueSummary
+      }),
+    [
+      environmentalContextSummary,
+      hydrologyContextSummary,
+      scottishWaterContextSummary,
+      contextSourceRegistrySummary,
+      contextIssueQueueSummary
+    ]
+  );
+  const contextReviewReportSummary = useMemo(
+    () =>
+      buildMarineContextReviewReport({
+        fusionSummary: contextFusionSummary,
+        issueQueueSummary: contextIssueQueueSummary
+      }),
+    [contextFusionSummary, contextIssueQueueSummary]
   );
   const currentContextSnapshot = useMemo(
     () =>
@@ -425,6 +486,11 @@ export function MarineAnomalySection() {
         noaaContextSummary,
         ndbcContextSummary,
         scottishWaterContextSummary,
+        vigicruesContextSummary,
+        irelandOpwContextSummary,
+        hydrologyContextSummary,
+        contextFusionSummary,
+        contextReviewReportSummary,
         contextSourceRegistrySummary,
         contextTimelineSummary,
         contextIssueQueueSummary,
@@ -445,6 +511,11 @@ export function MarineAnomalySection() {
       noaaContextSummary,
       ndbcContextSummary,
       scottishWaterContextSummary,
+      vigicruesContextSummary,
+      irelandOpwContextSummary,
+      hydrologyContextSummary,
+      contextFusionSummary,
+      contextReviewReportSummary,
       contextSourceRegistrySummary,
       contextTimelineSummary,
       contextIssueQueueSummary,
@@ -767,6 +838,73 @@ export function MarineAnomalySection() {
           )}
         </div>
       ) : null}
+      {contextFusionSummary ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-context-fusion">
+          <strong>Marine Context Fusion</strong>
+          <span>{contextFusionSummary.overallAvailabilityLine}</span>
+          <span className="marine-anomaly-muted">{contextFusionSummary.exportReadinessLine}</span>
+          {contextFusionSummary.familyLines.map((line) => (
+            <div key={line.family} className="stack stack--tight">
+              <span>
+                {line.label} | {line.availability}
+              </span>
+              <span className="marine-anomaly-muted">{line.detail}</span>
+              {line.topSummary ? (
+                <span className="marine-anomaly-muted">{line.topSummary}</span>
+              ) : null}
+              {line.caveat ? (
+                <span className="marine-anomaly-muted">Caveat: {line.caveat}</span>
+              ) : null}
+            </div>
+          ))}
+          {contextFusionSummary.highestPriorityCaveats.map((caveat) => (
+            <span key={caveat} className="marine-anomaly-muted">
+              Caveat: {caveat}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      {contextReviewReportSummary ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-context-review-report">
+          <strong>{contextReviewReportSummary.title}</strong>
+          <span>{contextReviewReportSummary.summaryLine}</span>
+          <span className="marine-anomaly-muted">{contextReviewReportSummary.sourceHealthSummary}</span>
+          <span className="marine-anomaly-muted">
+            Context families: {contextReviewReportSummary.contextFamiliesIncluded.join(" | ")}
+          </span>
+          {contextReviewReportSummary.reviewNeededItems.map((item) => (
+            <span key={item} className="marine-anomaly-muted">
+              Review next: {item}
+            </span>
+          ))}
+          {contextReviewReportSummary.exportCaveatLines.slice(0, 2).map((line) => (
+            <span key={line} className="marine-anomaly-muted">
+              Caveat: {line}
+            </span>
+          ))}
+          {contextReviewReportSummary.doesNotProveLines.slice(0, 2).map((line) => (
+            <span key={line} className="marine-anomaly-muted">
+              Does not prove: {line}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      {hydrologyContextSummary ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-hydrology-context">
+          <strong>Marine Hydrology Context</strong>
+          <span>{hydrologyContextSummary.sourceLine}</span>
+          {hydrologyContextSummary.reviewLines.map((line) => (
+            <div key={line.sourceId} className="stack stack--tight">
+              <span>{line.label}</span>
+              <span className="marine-anomaly-muted">{line.detail}</span>
+              {line.caveat ? <span className="marine-anomaly-muted">Caveat: {line.caveat}</span> : null}
+            </div>
+          ))}
+          <span className="marine-anomaly-muted">
+            Caveat: {hydrologyContextSummary.metadata.caveats[0]}
+          </span>
+        </div>
+      ) : null}
       {enabledContextSources.coops && noaaCoopsContextQuery.data ? (
         <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-noaa-context">
           <strong>NOAA CO-OPS Tides &amp; Currents</strong>
@@ -854,6 +992,68 @@ export function MarineAnomalySection() {
         <div className="empty-state compact" data-testid="marine-scottish-water-context-error">
           <p>Scottish Water overflow context unavailable.</p>
           <span>Marine coastal infrastructure context is limited until the source loads.</span>
+        </div>
+      ) : null}
+      {vigicruesContextQuery.data ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-vigicrues-context">
+          <strong>France Vigicrues Hydrometry</strong>
+          <span>{vigicruesContextSummary?.sourceLine ?? "Vigicrues hydrometry context loaded."}</span>
+          {vigicruesContextSummary?.stationLines.map((station) => (
+            <div key={station.stationId} className="stack stack--tight">
+              <span>{station.label}</span>
+              <span className="marine-anomaly-muted">{station.observationLine}</span>
+              <span className="marine-anomaly-muted">{station.detailLine}</span>
+              {station.caveat ? <span className="marine-anomaly-muted">Caveat: {station.caveat}</span> : null}
+            </div>
+          ))}
+          {vigicruesContextQuery.data.count === 0 ? (
+            <span className="marine-anomaly-muted">
+              No nearby Vigicrues hydrometry station context in this window.
+            </span>
+          ) : null}
+          {vigicruesContextQuery.data.sourceHealth.caveat ? (
+            <span className="marine-anomaly-muted">{vigicruesContextQuery.data.sourceHealth.caveat}</span>
+          ) : null}
+        </div>
+      ) : vigicruesContextQuery.isLoading ? (
+        <div className="empty-state compact" data-testid="marine-vigicrues-context-loading">
+          <p>Loading Vigicrues hydrometry context.</p>
+        </div>
+      ) : vigicruesContextQuery.isError ? (
+        <div className="empty-state compact" data-testid="marine-vigicrues-context-error">
+          <p>Vigicrues hydrometry context unavailable.</p>
+          <span>Marine river-condition context is limited until the source loads.</span>
+        </div>
+      ) : null}
+      {irelandOpwContextQuery.data ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-ireland-opw-context">
+          <strong>Ireland OPW Water Level</strong>
+          <span>{irelandOpwContextSummary?.sourceLine ?? "Ireland OPW water-level context loaded."}</span>
+          {irelandOpwContextSummary?.stationLines.map((station) => (
+            <div key={station.stationId} className="stack stack--tight">
+              <span>{station.label}</span>
+              <span className="marine-anomaly-muted">{station.observationLine}</span>
+              <span className="marine-anomaly-muted">{station.detailLine}</span>
+              {station.caveat ? <span className="marine-anomaly-muted">Caveat: {station.caveat}</span> : null}
+            </div>
+          ))}
+          {irelandOpwContextQuery.data.count === 0 ? (
+            <span className="marine-anomaly-muted">
+              No nearby Ireland OPW water-level station context in this window.
+            </span>
+          ) : null}
+          {irelandOpwContextQuery.data.sourceHealth.caveat ? (
+            <span className="marine-anomaly-muted">{irelandOpwContextQuery.data.sourceHealth.caveat}</span>
+          ) : null}
+        </div>
+      ) : irelandOpwContextQuery.isLoading ? (
+        <div className="empty-state compact" data-testid="marine-ireland-opw-context-loading">
+          <p>Loading Ireland OPW water-level context.</p>
+        </div>
+      ) : irelandOpwContextQuery.isError ? (
+        <div className="empty-state compact" data-testid="marine-ireland-opw-context-error">
+          <p>Ireland OPW water-level context unavailable.</p>
+          <span>Marine hydrology context is limited until the source loads.</span>
         </div>
       ) : null}
       {vesselsQuery.isError ? (

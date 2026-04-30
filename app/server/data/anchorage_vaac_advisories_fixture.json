@@ -1,0 +1,60 @@
+{
+  "listing_source_url": "https://www.weather.gov/vaac/",
+  "last_updated_at": "2025-12-12T21:36:00+00:00",
+  "caveats": [
+    "Anchorage VAAC advisories are advisory/contextual volcanic-ash hazard records.",
+    "Do not infer route impact, aircraft exposure, engine risk, or operational consequence from this summary alone."
+  ],
+  "advisories": [
+    {
+      "advisory_id": "312170:2025/047",
+      "advisory_number": "2025/047",
+      "issue_time": "2025-12-12T21:36:00+00:00",
+      "observed_at": "2025-12-12T21:36:00+00:00",
+      "volcano_name": "KATMAI",
+      "volcano_number": "312170",
+      "area": "ALASKA PENINSULA",
+      "source_elevation_text": "6716 FT AMSL",
+      "source_elevation_ft": 6716,
+      "information_source": "GOES",
+      "aviation_color_code": null,
+      "eruption_details": "RESUSPENDED VA.",
+      "observed_ash_text": "SFC/FL060 N5823 W15456 - N5733 W15356 - N5722 W15452 - N5811 W15514 - N5823 W15456 MOV STNR",
+      "remarks": "NIL...NS",
+      "next_advisory": "WILL BE ISSUED BY 20251213/0336Z=",
+      "max_flight_level": "FL060",
+      "source_url": "https://forecast.weather.gov/product.php?site=CRH&issuedby=AK1&product=VAA&format=txt&version=1&glossary=1",
+      "source_mode": "fixture",
+      "health": "normal",
+      "summary": "Anchorage VAAC advisory for KATMAI, advisory 2025/047, reported to FL060, issued 2025-12-12T21:36:00+00:00",
+      "caveats": [],
+      "evidence_basis": "advisory"
+    },
+    {
+      "advisory_id": "300190:2025/024",
+      "advisory_number": "2025/024",
+      "issue_time": "2025-10-21T06:30:00+00:00",
+      "observed_at": null,
+      "volcano_name": "KRASHENINNIKOV",
+      "volcano_number": "300190",
+      "area": "KAMCHATKA PENINSULA",
+      "source_elevation_text": "6089 FT (1856 M)",
+      "source_elevation_ft": 6089,
+      "information_source": null,
+      "aviation_color_code": null,
+      "eruption_details": null,
+      "observed_ash_text": null,
+      "remarks": "PLEASE SEE FVFE01 RJTD ISSUED BY VAAC TOKYO WHICH DESCRIBES CONDITIONS NEAR THE VAAC ANCHORAGE AREA OF RESPONSIBILITY...MB",
+      "next_advisory": null,
+      "max_flight_level": null,
+      "source_url": "https://forecast.weather.gov/product.php?site=CRH&issuedby=AK1&product=VAA&format=txt&version=7&glossary=0",
+      "source_mode": "fixture",
+      "health": "normal",
+      "summary": "Anchorage VAAC advisory for KRASHENINNIKOV, advisory 2025/024, issued 2025-10-21T06:30:00+00:00",
+      "caveats": [
+        "Maximum reported flight level was not exposed in this advisory record."
+      ],
+      "evidence_basis": "advisory"
+    }
+  ]
+}

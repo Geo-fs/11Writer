@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>CISA ICS Advisories</title>
+    <link>https://www.cisa.gov/</link>
+    <lastBuildDate>Thu, 30 Apr 2026 11:20:00 GMT</lastBuildDate>
+    <item>
+      <title>ICSA-26-121-01 Vendor Control System Management Interface</title>
+      <link>https://www.cisa.gov/news-events/ics-advisories/icsa-26-121-01</link>
+      <guid>https://www.cisa.gov/news-events/ics-advisories/icsa-26-121-01</guid>
+      <pubDate>Thu, 30 Apr 2026 11:00:00 GMT</pubDate>
+      <description><![CDATA[<p>ICS advisory summary with product and vulnerability context.</p>]]></description>
+      <category>ICS Advisory</category>
+      <category>Industrial Control Systems</category>
+    </item>
+  </channel>
+</rss>

@@ -73,6 +73,20 @@ def test_atom_fixture_parsing_is_supported() -> None:
     assert payload["items"][0]["updatedAt"] == "2026-04-29T09:00:00+00:00"
 
 
+def test_rdf_fixture_parsing_is_supported() -> None:
+    fixture = Path(__file__).resolve().parents[1] / "data" / "rss_rdf_fixture.xml"
+    client = _client_with_fixture(fixture)
+
+    response = client.get("/api/feeds/rss/recent")
+    assert response.status_code == 200
+    payload = response.json()
+
+    assert payload["metadata"]["feedType"] == "rdf"
+    assert payload["count"] == 1
+    assert payload["items"][0]["guid"] == "https://example.com/post-1"
+    assert payload["items"][0]["categories"] == ["science"]
+
+
 def test_feed_source_health_reports_empty_and_error() -> None:
     empty_fixture = """<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Empty</title></channel></rss>"""
     bad_fixture = """<rss><channel><title>Broken"""

@@ -57,6 +57,32 @@ Interpretation:
 - they do not enable scheduled refresh
 - they are intended to help operators judge mapping progress and review burden
 
+Sandbox validation report:
+
+- run:
+  - `python app/server/scripts/report_camera_sandbox_validation.py`
+  - `python app/server/scripts/report_camera_sandbox_validation.py --json`
+- this report calls the sandbox connector directly in fixture mode
+- it does not use scheduled refresh
+- it does not write DB state
+- it does not promote the source lifecycle state
+- current expected report shape for the synthetic fixture:
+  - discovered cameras: `2`
+  - usable direct-image cameras: `1`
+  - viewer-only cameras: `0`
+  - unavailable-frame cameras: at least `1`
+  - uncertain-orientation cameras: at least `2`
+  - review queue count: non-zero
+- what this proves:
+  - fixture parsing works
+  - station/preset normalization works
+  - unavailable presets become explicit review burden instead of silent drops
+- what this does not prove:
+  - production source stability
+  - approved-unvalidated lifecycle promotion
+  - validated status
+  - live endpoint behavior
+
 Observed and documented fields to design around:
 
 - top-level `features[]`

@@ -104,6 +104,7 @@ Required tests before transition:
 - fixture parse and normalization tests
 - candidate remains inactive after sandbox import
 - sandbox counts and caveat visibility tests
+- sandbox validation report coverage
 
 Required source-health checks:
 
@@ -309,12 +310,37 @@ What may trigger a transition:
 - endpoint evaluator/report/graduation plan evidence
 - runtime source-health and import evidence
 
+Admissible sandbox evidence:
+
+- the backend-only sandbox validation report may be used as mapping/readiness evidence for `candidate-sandbox-importable`
+- it may confirm:
+  - normalized camera counts
+  - review burden
+  - unavailable-frame handling
+  - unknown-orientation handling
+- it should preserve explicit caveats that the source is still candidate-only, sandbox-only, and not scheduled for normal refresh
+- it may not by itself justify:
+  - `approved-unvalidated`
+  - `validated`
+  - scheduled refresh enablement
+  - source activation
+
 What may not trigger a transition by itself:
 
 - raw HTML page reachability
 - browser automation or scraping
 - one-off endpoint check alone
 - fixture import alone
+- source-ops report index availability alone
+- source-ops detail-route availability alone
+- source-ops export/debug summary availability alone
+- source-ops artifact timestamp/provenance visibility alone
+- source-ops fleet rollup visibility alone
+- source-ops caveat-frequency or review-hint rollups alone
+- source-ops per-source review-prerequisites output alone
+- source-ops review queue prioritization alone
+- filtered source-ops review queue views alone
+- filtered source-ops review queue aggregates alone
 
 ## Required checks before promotion
 
@@ -395,3 +421,13 @@ What may not trigger a transition by itself:
 - do not scrape interactive apps to force a transition
 - do not bypass CAPTCHA, login, or token gating
 - do not hide credential-blocked sources under poor-quality labels
+- do not treat source-ops report-index presence as proof of validated ingest readiness
+- do not treat source-ops detail-route composition as proof of validated ingest readiness
+- do not treat source-ops export/debug summaries as proof of validated ingest readiness or activation
+- do not treat stored artifact timestamps or provenance summaries as proof of validation, activation, or freshness beyond the explicitly recorded artifact
+- do not treat fleet-level artifact rollups as proof of validation, activation, or equivalent lifecycle standing between sources
+- do not treat fleet-level caveat counts or review-hint rankings as promotion authority; they are review guidance only
+- do not treat per-source review-prerequisites packages as activation, scheduling, endpoint-health, or validation proof
+- do not treat source-ops review queue priority as validation, activation, or promotion authority
+- do not treat filtered queue results or injected source text as instructions, source-health proof, or lifecycle authority
+- do not treat filtered queue aggregate counts as lifecycle authority or as proof of ingest readiness for a subset

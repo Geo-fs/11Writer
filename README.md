@@ -1,6 +1,14 @@
 # 11Writer
 
-11Writer is an OSINT and spatial intelligence platform built around a Cesium 3D globe, real data layers, replay workflows, contextual analysis, and evidence-aware exports. The repository is organized for local and development use first, with explicit provenance and interpretation caveats throughout the stack.
+11Writer is an OSINT and spatial intelligence platform built around a Cesium 3D globe, real data layers, replay workflows, contextual analysis, and evidence-aware exports.
+
+The core platform operating plan targets three first-class interfaces backed by one shared FastAPI/core runtime:
+
+- A full desktop app for Linux, macOS, Windows 10, and Windows 11 workstation sessions
+- A companion web app for efficient browser and partner-device check-ins after explicit pairing/auth
+- A backend-only runtime for unattended user-configured collection and task execution
+
+The current repository is still the local development foundation for that plan. Existing setup commands run the backend and frontend directly while packaging, service/daemon lifecycle, companion pairing, and OS-native installers are implemented.
 
 ## Major capabilities
 
@@ -26,7 +34,7 @@ app/
 - Python 3.10+ or 3.11+
 - A Python virtual environment for backend work is strongly recommended
 
-## Backend setup
+## Backend Setup
 
 ```bash
 cd app/server
@@ -40,7 +48,7 @@ python -m pip install -e .[dev]
 uvicorn src.main:app --reload --port 8000
 ```
 
-## Frontend setup
+## Frontend Setup
 
 ```bash
 cd app/client
@@ -50,7 +58,17 @@ npm install
 npm run dev
 ```
 
-The Vite client proxies API traffic to `http://localhost:8000` in local development.
+The Vite client proxies API traffic to `http://localhost:8000` in local development. Do not expose backend APIs beyond loopback or loosen CORS for companion access unless the assigned work includes explicit user enablement, pairing/auth, and validation.
+
+## Platform Direction
+
+The cross-platform docs are the source of truth for future runtime work:
+
+- Full desktop app: preserve the complete Cesium/workstation experience across Linux, macOS, Windows 10, and Windows 11.
+- Companion web app: provide short overviews, source-health checks, and task/status review from browsers or trusted partner devices.
+- Backend-only runtime: keep source collection, source health, task state, provenance, caveats, and export metadata running without a visual UI.
+
+All three surfaces must use the same backend/core semantics. Source adapters, task execution, source health, evidence basis, caveats, storage paths, and export metadata belong in shared backend/core code, not in a renderer-only implementation.
 
 ## Validation commands
 
@@ -81,10 +99,12 @@ npm run build
 - Anomaly scores and prioritization surfaces direct analyst attention; they are not proof of wrongdoing or intent.
 - Live source access, freshness, and coverage vary by provider and by credential posture.
 
-## Known limitations
+## Known Limitations
 
-- This repository is a local and development platform, not a production-hardened deployment.
+- The current codebase is a local development foundation for the cross-platform operating plan, not yet a packaged production desktop, companion-web, or backend-only release.
 - SQLite is suitable for foundation and local-scale workflows, not planetary-scale production storage.
+- OS-native packaging and service/daemon behavior still require validation on Windows 10/11, macOS, and Linux before support is claimed.
+- Companion access must remain disabled by default until explicit pairing/auth and network-exposure validation exist.
 - Imagery layers can be composite, delayed, cloud-affected, or seasonal depending on the selected mode.
 - Environmental events and live-source overlays reflect source-specific coverage, not guaranteed complete global coverage.
 - Some validation flows depend on fixture-backed modes because live providers can rate-limit, require credentials, or vary operationally.
@@ -100,6 +120,11 @@ npm run build
 - `app/docs/webcams.md`
 - `app/docs/reference-module.md`
 - `app/docs/repo-workflow.md`
+- `app/docs/cross-platform-desktop-app-plan.md`
+- `app/docs/runtime-interface-requirements.md`
+- `app/docs/cross-platform-implementation-playbook.md`
+- `app/docs/cross-platform-agent-guidelines.md`
+- `app/docs/cross-platform-agent-broadcast.md`
 
 ## License
 

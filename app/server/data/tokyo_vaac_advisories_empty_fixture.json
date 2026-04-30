@@ -1,0 +1,10 @@
+{
+  "listing_source_url": "https://www.data.jma.go.jp/vaac/data/vaac_list.html",
+  "last_updated_at": null,
+  "caveats": [
+    "Tokyo VAAC listing was reachable but exposed no advisory text links.",
+    "Tokyo VAAC advisories are advisory/contextual volcanic-ash hazard records.",
+    "Do not infer route impact, aircraft exposure, engine risk, or operational consequence from this summary alone."
+  ],
+  "advisories": []
+}

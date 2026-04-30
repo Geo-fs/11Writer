@@ -1,45 +1,103 @@
 # Roadmap
 
-## Phase 1: Foundation
+11Writer is not just a globe, dashboard, or map viewer.
 
-- React + TypeScript + Vite client scaffold
-- FastAPI server scaffold
-- Cesium viewer lifecycle
-- Google Photorealistic 3D Tiles primary path with terrain fallback
-- immersive UI shell and HUD
+11Writer is a public-source, no-auth, evidence-aware spatial intelligence platform.
 
-## Phase 2: Aircraft
+The globe is the interface.
+The fusion layer is the product.
 
-- public aircraft adapter
-- normalized aircraft entities
-- marker rendering, labels, and inspector data
-- periodic refresh and follow mode
+This roadmap is the short project map. The full strategic direction lives in:
 
-## Phase 3: Satellites
+- [strategic-roadmap.md](/C:/Users/mike/11Writer/app/docs/strategic-roadmap.md)
+- [spatial-intelligence-loop.md](/C:/Users/mike/11Writer/app/docs/spatial-intelligence-loop.md)
+- [fusion-layer-architecture.md](/C:/Users/mike/11Writer/app/docs/fusion-layer-architecture.md)
+- [safety-boundaries.md](/C:/Users/mike/11Writer/app/docs/safety-boundaries.md)
 
-- public orbital data adapter
-- orbit propagation
-- satellite rendering and orbit paths
-- tracking controls and inspector support
+## Current Product Direction
 
-## Phase 4: Visual Modes
+The approved operating model is:
 
-- standard baseline mode
-- night vision post-process
-- thermal false-color mode
-- CRT scanline mode
+`Observe -> Orient -> Prioritize -> Explain -> Act`
 
-## Phase 5: Polish
+Phase 2 work should keep expanding source coverage and domain workflows while preserving:
 
-- search and jump tools
-- stronger loading and error states
-- demo presets and scene polish
-- performance pass and rough-edge cleanup
+- source mode
+- source health
+- evidence basis
+- provenance
+- caveats
+- export metadata
 
-## Phase 6: Marine OSINT Layer
+## Phase Roadmap
 
-- marine vessel entity model with provenance-first evidence fields
-- append-only global marine position history and gap-event persistence
-- AIS/transmission gap detection with explicit observed vs derived semantics
-- replay timeline, snapshots, viewport playback, and vessel path reconstruction
-- source-health integration and scale-ready partitioning fields
+### Phase 1: Framework and Infrastructure
+
+Goal:
+
+- modular repo structure
+- FastAPI backend and React/Vite/Cesium frontend
+- fixture-first source patterns
+- typed contracts
+- validation scaffolding
+- initial strategy docs
+
+Status:
+
+- mostly complete
+
+### Phase 2: Source and Feature Expansion
+
+Goal:
+
+- add no-auth public sources aggressively
+- expand marine, aerospace, environmental, webcam, RSS, and reference workflows
+- strengthen context composition, source lifecycle tooling, review queues, and export metadata
+- keep operational UI minimal and truthful
+- preserve fusion-layer compatibility for later consolidation
+
+Current priorities:
+
+- new source slices
+- new feature slices
+- workflow validation where features mature
+- documentation that makes Phase 3 consolidation easier
+
+Avoid:
+
+- final UI polish as a primary goal
+- broad layout redesign
+- source additions that weaken trust metadata
+
+### Phase 3: UI Foundation and Cohesion
+
+Goal:
+
+- make the platform feel like one product
+- consolidate inspector, layer, and context presentation patterns
+- build a common situation view from already-fusion-compatible domain outputs
+- reduce duplicated UI logic and badge/card/caveat drift
+
+### Phase 4: Final Polish and Resilient Expansion
+
+Goal:
+
+- stronger validation and CI discipline
+- performance and technical-debt reduction
+- easier/safe source onboarding
+- cleaner export and report paths
+- packaging and release readiness
+
+## Non-Negotiable Rules
+
+- do not fake precision
+- do not overclaim authority
+- do not collapse evidence types into false certainty
+- do not infer intent without evidence
+- do not turn context into accusation
+- do not commit secrets or tokenized feeds
+- do not scrape prohibited interactive sources
+- do not let UI polish override source truth
+- do not let source volume destroy architecture
+
+The fusion layer remains the product center.

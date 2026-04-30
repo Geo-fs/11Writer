@@ -1,0 +1,29 @@
+{
+  "status": "OK",
+  "status-code": 200,
+  "version": "1.0",
+  "access": "private, no-cache",
+  "total": 3,
+  "offset": 0,
+  "limit": 100,
+  "data": [
+    {
+      "cve": "CVE-2021-40438",
+      "epss": "0.972240000",
+      "percentile": "1.000000000",
+      "date": "2022-02-28"
+    },
+    {
+      "cve": "CVE-2019-16759",
+      "epss": "0.968170000",
+      "percentile": "0.999990000",
+      "date": "2022-02-28"
+    },
+    {
+      "cve": "CVE-2022-27225",
+      "epss": "0.012340000",
+      "percentile": "0.456780000",
+      "date": "2022-02-28"
+    }
+  ]
+}

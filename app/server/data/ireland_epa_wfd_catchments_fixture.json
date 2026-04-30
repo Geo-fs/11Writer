@@ -1,0 +1,75 @@
+{
+  "catchments": {
+    "Count": 3,
+    "Catchments": [
+      {
+        "Code": "07",
+        "Name": "Boyne",
+        "GeometryExtent": "241099,228840,316384,303120",
+        "LastCycleApproved": "WFD Cycle 3"
+      },
+      {
+        "Code": "09",
+        "Name": "Liffey and Dublin Bay",
+        "GeometryExtent": "276020,197180,330198,251660",
+        "LastCycleApproved": "WFD Cycle 3"
+      },
+      {
+        "Code": "16",
+        "Name": "Suir",
+        "GeometryExtent": "176620,101660,269300,182160",
+        "LastCycleApproved": "WFD Cycle 3"
+      }
+    ]
+  },
+  "searches": {
+    "suir": {
+      "Results": [
+        {
+          "Name": "Suir",
+          "Type": "Catchment",
+          "Organisation": "Tipperary County Council",
+          "Code": "16",
+          "GeometryExtent": "176620,101660,269300,182160"
+        },
+        {
+          "Name": "Suir_SC_050",
+          "Type": "Subcatchment",
+          "Organisation": "Tipperary County Council",
+          "Code": "16_10",
+          "GeometryExtent": "200810,137920,218060,156095"
+        },
+        {
+          "Name": "Barrow Suir Nore Estuary",
+          "Type": "Transitional",
+          "Organisation": "Wexford County Council",
+          "Code": "IE_SE_100_0100",
+          "GeometryExtent": "268422,103288,275096,115982"
+        },
+        {
+          "Name": "SUIR_010",
+          "Type": "River",
+          "Organisation": "Tipperary County Council",
+          "Code": "IE_SE_16S020100",
+          "GeometryExtent": "205834,176805,213560,178889"
+        },
+        {
+          "Name": "Carrick-on-Suir",
+          "Type": "Groundwater",
+          "Organisation": "Waterford City & County Council",
+          "Code": "IE_SE_G_030",
+          "GeometryExtent": "187340,111194,263293,137891"
+        }
+      ],
+      "Page": 0,
+      "Size": 5,
+      "Total": 5
+    },
+    "default": {
+      "Results": [],
+      "Page": 0,
+      "Size": 0,
+      "Total": 0
+    }
+  }
+}

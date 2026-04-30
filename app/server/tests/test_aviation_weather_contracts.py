@@ -85,6 +85,8 @@ def test_aviation_weather_route_serializes_metar_and_taf(monkeypatch) -> None:
     assert payload["metar"]["stationId"] == "KAUS"
     assert payload["metar"]["flightCategory"] == "VFR"
     assert payload["taf"]["forecastPeriods"][0]["windDirection"] == "160"
+    assert payload["sourceDetail"] == "NOAA Aviation Weather Center Data API"
+    assert "read-only situational evidence" in payload["caveats"][0]
     assert "Do not infer flight intent" in payload["caveats"][1]
 
 

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Cloudflare Status - Incident History</title>
+    <link>https://www.cloudflarestatus.com/</link>
+    <lastBuildDate>Thu, 30 Apr 2026 12:05:00 GMT</lastBuildDate>
+    <item>
+      <title>Resolved - Elevated Errors in Turnstile API</title>
+      <link>https://www.cloudflarestatus.com/incidents/turnstile-api-20260430</link>
+      <guid>https://www.cloudflarestatus.com/incidents/turnstile-api-20260430</guid>
+      <pubDate>Thu, 30 Apr 2026 12:00:00 GMT</pubDate>
+      <description><![CDATA[<p>Cloudflare reports that elevated errors affecting the Turnstile API have been resolved.</p>]]></description>
+      <category>resolved</category>
+      <category>turnstile</category>
+    </item>
+  </channel>
+</rss>

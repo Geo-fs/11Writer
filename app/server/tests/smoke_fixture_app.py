@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,11 @@ def _iso(dt: datetime) -> str:
 
 NOW = datetime(2026, 4, 4, 12, 0, tzinfo=timezone.utc)
 CLIENT_DIST = Path(__file__).resolve().parents[2] / "client" / "dist"
+SERVER_DATA = Path(__file__).resolve().parents[1] / "data"
+
+
+def _load_json_fixture(name: str) -> dict[str, Any]:
+    return json.loads((SERVER_DATA / name).read_text(encoding="utf-8"))
 
 
 def _aircraft_entities() -> list[dict[str, Any]]:
@@ -1705,6 +1711,159 @@ def _swpc_space_weather_context(
     }
 
 
+def _usgs_geomagnetism_context(
+    observatory_id: str = "BOU",
+    elements: str | None = None,
+) -> dict[str, Any]:
+    requested_observatory = observatory_id.strip().upper()
+    requested_elements = [part.strip().upper() for part in (elements or "").split(",") if part.strip()]
+    allowed_elements = {"X", "Y", "Z", "F"}
+    if requested_elements:
+        requested_elements = [part for part in requested_elements if part in allowed_elements]
+
+    fixtures: dict[str, dict[str, Any]] = {
+        "BOU": {
+            "metadata": {
+                "source": "usgs-geomagnetism",
+                "sourceName": "USGS Geomagnetism Data Web Service",
+                "sourceUrl": "https://geomag.usgs.gov/ws/data/",
+                "observatoryId": "BOU",
+                "observatoryName": "Boulder",
+                "latitude": 40.137,
+                "longitude": -105.237,
+                "elevationM": 1682.0,
+                "sourceMode": "fixture",
+                "generatedAt": "2026-04-30T19:31:26Z",
+                "samplingPeriodSeconds": 60.0,
+                "samples": [
+                    ("2026-04-30T00:00:00.000Z", {"X": 20518.812, "Y": 2802.936, "Z": 52015.4, "F": 55979.1}),
+                    ("2026-04-30T00:01:00.000Z", {"X": 20519.302, "Y": 2803.16, "Z": 52015.8, "F": 55979.5}),
+                    ("2026-04-30T00:02:00.000Z", {"X": 20518.875, "Y": 2803.466, "Z": 52016.1, "F": None}),
+                    ("2026-04-30T00:03:00.000Z", {"X": 20517.704, "Y": 2803.625, "Z": 52015.7, "F": 55978.8}),
+                ],
+            },
+        },
+        "EMPT": {
+            "metadata": {
+                "source": "usgs-geomagnetism",
+                "sourceName": "USGS Geomagnetism Data Web Service",
+                "sourceUrl": "https://geomag.usgs.gov/ws/data/",
+                "observatoryId": "EMPT",
+                "observatoryName": "Fixture Empty Observatory",
+                "latitude": None,
+                "longitude": None,
+                "elevationM": None,
+                "sourceMode": "fixture",
+                "generatedAt": "2026-04-30T19:31:26Z",
+                "samplingPeriodSeconds": 60.0,
+                "samples": [],
+            },
+        },
+    }
+    fixture = fixtures.get(requested_observatory, fixtures["EMPT"])
+    base_metadata = fixture["metadata"]
+    sample_rows = base_metadata["samples"]
+    selected_elements = requested_elements or ["X", "Y", "Z", "F"]
+    request_url = "https://geomag.usgs.gov/ws/data/?id=" + requested_observatory + "&format=json"
+    if requested_elements:
+        request_url += "&elements=" + "%2C".join(selected_elements)
+
+    samples = [
+        {
+            "observedAt": observed_at,
+            "values": {element: values.get(element) for element in selected_elements},
+            "evidenceBasis": "observed",
+        }
+        for observed_at, values in sample_rows
+    ]
+    base_caveat = (
+        "USGS geomagnetism values are observatory magnetic-field context only. "
+        "Do not infer power-grid, communications, GPS, radio, or aviation impacts from field values alone."
+    )
+    fetched_at = _iso(NOW)
+    generated_at = base_metadata["generatedAt"]
+    health = "loaded" if samples else "empty"
+    return {
+        "metadata": {
+            "source": "usgs-geomagnetism",
+            "sourceName": "USGS Geomagnetism Data Web Service",
+            "sourceUrl": "https://geomag.usgs.gov/ws/data/",
+            "requestUrl": request_url,
+            "observatoryId": requested_observatory,
+            "observatoryName": base_metadata["observatoryName"],
+            "latitude": base_metadata["latitude"],
+            "longitude": base_metadata["longitude"],
+            "elevationM": base_metadata["elevationM"],
+            "sourceMode": "fixture",
+            "fetchedAt": fetched_at,
+            "generatedAt": generated_at,
+            "startTime": samples[0]["observedAt"] if samples else None,
+            "endTime": samples[-1]["observedAt"] if samples else None,
+            "samplingPeriodSeconds": base_metadata["samplingPeriodSeconds"],
+            "elements": selected_elements,
+            "count": len(samples),
+            "caveat": base_caveat,
+        },
+        "count": len(samples),
+        "sourceHealth": {
+            "sourceId": "usgs-geomagnetism",
+            "sourceLabel": "USGS Geomagnetism",
+            "enabled": True,
+            "sourceMode": "fixture",
+            "health": health,
+            "loadedCount": len(samples),
+            "lastFetchedAt": fetched_at,
+            "sourceGeneratedAt": generated_at,
+            "detail": (
+                "USGS geomagnetism observatory samples parsed successfully."
+                if samples
+                else "No geomagnetism samples matched the current observatory payload."
+            ),
+            "errorSummary": None,
+            "caveat": base_caveat,
+        },
+        "samples": samples,
+        "caveats": [base_caveat],
+    }
+
+
+def _vaac_fixture_response(
+    fixture_name: str,
+    source_name: str,
+    volcano: str | None,
+    limit: int,
+) -> dict[str, Any]:
+    payload = _load_json_fixture(fixture_name)
+    advisories = payload.get("advisories", [])
+    if volcano:
+        normalized = volcano.strip().lower()
+        advisories = [
+            advisory
+            for advisory in advisories
+            if str(advisory.get("volcano_name", "")).strip().lower() == normalized
+        ]
+
+    advisories = advisories[: max(limit, 0)]
+    return {
+        "fetched_at": _iso(NOW),
+        "source": source_name,
+        "volcano": volcano,
+        "count": len(advisories),
+        "advisories": advisories,
+        "source_health": {
+            "source_name": source_name,
+            "source_mode": "fixture",
+            "health": "normal",
+            "detail": f"{source_name} fixture smoke response.",
+            "listing_source_url": payload["listing_source_url"],
+            "last_updated_at": payload.get("last_updated_at"),
+            "state": "healthy",
+            "caveats": payload.get("caveats", []),
+        },
+        "caveats": payload.get("caveats", []),
+    }
+
+
 def _parse_iso(value: str | None) -> datetime | None:
     if not value:
         return None
@@ -2110,6 +2269,90 @@ async def source_status() -> dict[str, Any]:
                 "blockedReason": None,
                 "reviewRequired": False,
                 "lastAttemptAt": _iso(NOW - timedelta(minutes=20)),
+                "lastFailureAt": None,
+                "successCount": 2,
+                "failureCount": 0,
+                "warningCount": 0,
+            },
+            {
+                "name": "washington-vaac",
+                "state": "healthy",
+                "enabled": True,
+                "healthy": True,
+                "freshnessSeconds": 3600,
+                "staleAfterSeconds": 21600,
+                "lastSuccessAt": _iso(NOW - timedelta(minutes=15)),
+                "degradedReason": None,
+                "rateLimited": False,
+                "hiddenReason": None,
+                "detail": "Washington VAAC fixture provides bounded volcanic-ash advisory context for aerospace review.",
+                "credentialsConfigured": True,
+                "blockedReason": None,
+                "reviewRequired": False,
+                "lastAttemptAt": _iso(NOW - timedelta(minutes=15)),
+                "lastFailureAt": None,
+                "successCount": 2,
+                "failureCount": 0,
+                "warningCount": 0,
+            },
+            {
+                "name": "anchorage-vaac",
+                "state": "healthy",
+                "enabled": True,
+                "healthy": True,
+                "freshnessSeconds": 3600,
+                "staleAfterSeconds": 21600,
+                "lastSuccessAt": _iso(NOW - timedelta(minutes=18)),
+                "degradedReason": None,
+                "rateLimited": False,
+                "hiddenReason": None,
+                "detail": "Anchorage VAAC fixture provides bounded volcanic-ash advisory context for aerospace review.",
+                "credentialsConfigured": True,
+                "blockedReason": None,
+                "reviewRequired": False,
+                "lastAttemptAt": _iso(NOW - timedelta(minutes=18)),
+                "lastFailureAt": None,
+                "successCount": 2,
+                "failureCount": 0,
+                "warningCount": 0,
+            },
+            {
+                "name": "tokyo-vaac",
+                "state": "healthy",
+                "enabled": True,
+                "healthy": True,
+                "freshnessSeconds": 3600,
+                "staleAfterSeconds": 21600,
+                "lastSuccessAt": _iso(NOW - timedelta(minutes=21)),
+                "degradedReason": None,
+                "rateLimited": False,
+                "hiddenReason": None,
+                "detail": "Tokyo VAAC fixture provides bounded volcanic-ash advisory context for aerospace review.",
+                "credentialsConfigured": True,
+                "blockedReason": None,
+                "reviewRequired": False,
+                "lastAttemptAt": _iso(NOW - timedelta(minutes=21)),
+                "lastFailureAt": None,
+                "successCount": 2,
+                "failureCount": 0,
+                "warningCount": 0,
+            },
+            {
+                "name": "usgs-geomagnetism",
+                "state": "healthy",
+                "enabled": True,
+                "healthy": True,
+                "freshnessSeconds": 3600,
+                "staleAfterSeconds": 86400,
+                "lastSuccessAt": _iso(NOW - timedelta(minutes=30)),
+                "degradedReason": None,
+                "rateLimited": False,
+                "hiddenReason": None,
+                "detail": "USGS geomagnetism fixture provides observatory magnetic-field context for aerospace review.",
+                "credentialsConfigured": True,
+                "blockedReason": None,
+                "reviewRequired": False,
+                "lastAttemptAt": _iso(NOW - timedelta(minutes=30)),
                 "lastFailureAt": None,
                 "successCount": 2,
                 "failureCount": 0,
@@ -2861,6 +3104,147 @@ async def marine_scottish_water_overflows_context() -> dict[str, Any]:
     }
 
 
+@app.get("/api/marine/context/vigicrues-hydrometry")
+async def marine_vigicrues_hydrometry_context() -> dict[str, Any]:
+    return {
+        "fetchedAt": _iso(NOW),
+        "centerLat": 49.30,
+        "centerLon": 1.24,
+        "radiusKm": 300.0,
+        "parameterFilter": "all",
+        "count": 2,
+        "sourceHealth": {
+            "sourceId": "france-vigicrues-hydrometry",
+            "sourceLabel": "France Vigicrues Hydrometry",
+            "enabled": True,
+            "sourceMode": "fixture",
+            "health": "loaded",
+            "loadedCount": 2,
+            "lastFetchedAt": _iso(NOW),
+            "sourceGeneratedAt": _iso(NOW - timedelta(minutes=10)),
+            "detail": "Fixture Vigicrues hydrometry context.",
+            "errorSummary": None,
+            "caveat": "Fixture/local mode. Hydrometry observations are river-condition context only and do not confirm flood impact or vessel behavior.",
+        },
+        "stations": [
+            {
+                "stationId": "U122401001",
+                "stationName": "La Seine a Poses",
+                "latitude": 49.3058,
+                "longitude": 1.2457,
+                "distanceKm": 0.7,
+                "riverBasin": "Seine-Normandie",
+                "statusLine": "water height 2.84 m",
+                "stationSourceUrl": "https://hubeau.eaufrance.fr/api/v2/hydrometrie/referentiel/stations",
+                "latestObservation": {
+                    "observedAt": _iso(NOW - timedelta(minutes=13)),
+                    "parameter": "water-height",
+                    "value": 2.84,
+                    "unit": "m",
+                    "sourceDetail": "Fixture latest Hub'Eau water-height observation for lower Seine river-context review.",
+                    "sourceUrl": "https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr",
+                    "observedBasis": "observed",
+                },
+                "caveats": ["Water height reflects a station reading only and is not flood-impact confirmation."],
+            },
+            {
+                "stationId": "Y142203001",
+                "stationName": "Le Rhone a Beaucaire",
+                "latitude": 43.8059,
+                "longitude": 4.6448,
+                "distanceKm": 12.6,
+                "riverBasin": "Rhone-Mediterranee",
+                "statusLine": "flow 1540 m3/s",
+                "stationSourceUrl": "https://hubeau.eaufrance.fr/api/v2/hydrometrie/referentiel/stations",
+                "latestObservation": {
+                    "observedAt": _iso(NOW - timedelta(minutes=19)),
+                    "parameter": "flow",
+                    "value": 1540.0,
+                    "unit": "m3/s",
+                    "sourceDetail": "Fixture latest Hub'Eau flow observation for Rhone river-context review.",
+                    "sourceUrl": "https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr",
+                    "observedBasis": "observed",
+                },
+                "caveats": ["Flow is a station observation only and should not be treated as inundation confirmation."],
+            },
+        ],
+        "caveats": [
+            "Hydrometry observations are contextual river-condition data only; do not infer inundation, damage, or vessel intent from station values alone.",
+            "Water height and flow are separate observation families and should not be conflated.",
+            "Fixture/local mode is explicit in this first slice and should not be mistaken for live national hydrometry coverage.",
+        ],
+    }
+
+
+@app.get("/api/marine/context/ireland-opw-waterlevel")
+async def marine_ireland_opw_waterlevel_context() -> dict[str, Any]:
+    return {
+        "fetchedAt": _iso(NOW),
+        "centerLat": 52.45,
+        "centerLon": -9.66,
+        "radiusKm": 250.0,
+        "count": 2,
+        "sourceHealth": {
+            "sourceId": "ireland-opw-waterlevel",
+            "sourceLabel": "Ireland OPW Water Level",
+            "enabled": True,
+            "sourceMode": "fixture",
+            "health": "loaded",
+            "loadedCount": 2,
+            "lastFetchedAt": _iso(NOW),
+            "sourceGeneratedAt": _iso(NOW - timedelta(minutes=7)),
+            "detail": "Fixture Ireland OPW water-level context.",
+            "errorSummary": None,
+            "caveat": "Fixture/local mode. OPW water-level readings are provisional hydrometric context only and do not confirm flood impact or vessel behavior.",
+        },
+        "stations": [
+            {
+                "stationId": "25017_0001",
+                "stationName": "Ballyduff",
+                "latitude": 52.4558,
+                "longitude": -9.6635,
+                "distanceKm": 0.7,
+                "waterbody": "River Feale",
+                "hydrometricArea": "Shannon Estuary South",
+                "statusLine": "water level 1.42 m",
+                "stationSourceUrl": "https://waterlevel.ie/geojson/",
+                "latestReading": {
+                    "readingAt": _iso(NOW - timedelta(minutes=18)),
+                    "waterLevelM": 1.42,
+                    "sourceDetail": "Fixture latest OPW GeoJSON water-level reading for lower River Feale context review.",
+                    "sourceUrl": "https://waterlevel.ie/geojson/latest/",
+                    "observedBasis": "observed",
+                },
+                "caveats": ["Provisional reading only; station height does not confirm flood impact beyond the gauge location."],
+            },
+            {
+                "stationId": "19006_0001",
+                "stationName": "Limerick City",
+                "latitude": 52.6613,
+                "longitude": -8.6267,
+                "distanceKm": 87.4,
+                "waterbody": None,
+                "hydrometricArea": "Shannon Lower",
+                "statusLine": "water level 2.17 m",
+                "stationSourceUrl": "https://waterlevel.ie/geojson/",
+                "latestReading": {
+                    "readingAt": _iso(NOW - timedelta(minutes=31)),
+                    "waterLevelM": 2.17,
+                    "sourceDetail": "Fixture latest OPW GeoJSON water-level reading for lower Shannon estuary-adjacent context.",
+                    "sourceUrl": "https://waterlevel.ie/geojson/latest/",
+                    "observedBasis": "observed",
+                },
+                "caveats": ["Waterbody metadata is intentionally missing in this fixture to preserve partial-metadata contract coverage."],
+            },
+        ],
+        "caveats": [
+            "OPW water-level readings are provisional hydrometric observations only; do not infer flooding, damage, contamination, or vessel intent from station values alone.",
+            "Reading timestamps and fetch time should remain distinct because provisional source updates may lag publication timing.",
+            "Fixture/local mode is explicit in this first slice and should not be mistaken for live national water-level coverage.",
+        ],
+    }
+
+
 @app.get("/api/reference/link/aircraft")
 async def reference_link_aircraft(
     lat: float = Query(...),
@@ -3012,6 +3396,53 @@ async def swpc_space_weather_context(
     limit: int = Query(default=3),
 ) -> dict[str, Any]:
     return _swpc_space_weather_context(product_type=product_type, limit=limit)
+
+
+@app.get("/api/aerospace/space/washington-vaac-advisories")
+async def washington_vaac_advisories(
+    volcano: str | None = Query(default=None),
+    limit: int = Query(default=2),
+) -> dict[str, Any]:
+    return _vaac_fixture_response(
+        "washington_vaac_advisories_fixture.json",
+        "washington-vaac",
+        volcano,
+        limit,
+    )
+
+
+@app.get("/api/aerospace/space/anchorage-vaac-advisories")
+async def anchorage_vaac_advisories(
+    volcano: str | None = Query(default=None),
+    limit: int = Query(default=2),
+) -> dict[str, Any]:
+    return _vaac_fixture_response(
+        "anchorage_vaac_advisories_fixture.json",
+        "anchorage-vaac",
+        volcano,
+        limit,
+    )
+
+
+@app.get("/api/aerospace/space/tokyo-vaac-advisories")
+async def tokyo_vaac_advisories(
+    volcano: str | None = Query(default=None),
+    limit: int = Query(default=2),
+) -> dict[str, Any]:
+    return _vaac_fixture_response(
+        "tokyo_vaac_advisories_fixture.json",
+        "tokyo-vaac",
+        volcano,
+        limit,
+    )
+
+
+@app.get("/api/context/geomagnetism/usgs")
+async def usgs_geomagnetism_context(
+    observatory_id: str = Query(default="BOU"),
+    elements: str | None = Query(default=None),
+) -> dict[str, Any]:
+    return _usgs_geomagnetism_context(observatory_id=observatory_id, elements=elements)
 
 
 @app.get("/")

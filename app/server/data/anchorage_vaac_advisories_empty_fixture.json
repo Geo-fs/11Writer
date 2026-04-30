@@ -1,0 +1,10 @@
+{
+  "listing_source_url": "https://www.weather.gov/vaac/",
+  "last_updated_at": null,
+  "caveats": [
+    "Anchorage VAAC listing was reachable but exposed no advisory text product links.",
+    "Anchorage VAAC advisories are advisory/contextual volcanic-ash hazard records.",
+    "Do not infer route impact, aircraft exposure, engine risk, or operational consequence from this summary alone."
+  ],
+  "advisories": []
+}

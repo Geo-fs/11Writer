@@ -8,6 +8,10 @@ This is a connector registry, not feature code. The authoritative machine-readab
 
 - `app/docs/data_sources.noauth.registry.json`
 
+The consolidated human-readable candidate and rejection list is:
+
+- `app/docs/source-consolidated-noauth-registry.md`
+
 Connect AI owns this registry. Feature agents should consume it, not silently invent new production sources.
 
 ## Current repo context
@@ -100,6 +104,17 @@ Legacy entries may still use `defer` while older records are being normalized. N
 - `noaa-nws-warning-mapservice`
 - `nifc-wfigs-public-wildfire`
 - `gdacs-public-feeds`
+- `gebco-bathymetry`
+- `noaa-etopo-global-relief`
+- `gmrt-multires-topography`
+- `emodnet-bathymetry`
+- `hydrosheds-hydrorivers`
+- `hydrosheds-hydrolakes`
+- `grwl-river-widths`
+- `glwd-wetlands`
+- `isric-soilgrids`
+- `fao-hwsd-soils`
+- `esa-worldcover-landcover`
 
 These are public and valuable, but the first slice should stay narrow:
 
@@ -107,6 +122,8 @@ These are public and valuable, but the first slice should stay narrow:
 - overlay-first when appropriate
 - fixture-first tests before any live viewport rendering
 - no attempt to solve full binary raster or all-layer rendering in the first connector
+
+Base-earth additions from Batch 7 are mostly static/reference rasters or large vectors. They are approved as source candidates, but first slices must use one version, one product family, one bounded AOI/point lookup, or one simplified regional extract.
 
 ## Tier 3: Future Or Conditional
 
@@ -117,8 +134,45 @@ These are public and valuable, but the first slice should stay narrow:
 - `wikimedia-eventstream`
 - `sans-isc-dshield-api`
 - `abusech-urlhaus`
+- `allen-coral-atlas-reefs`
+- `usgs-tectonic-boundaries-reference`
 
 These remain in the registry so future agents do not have to rediscover them, but they should not be treated as ready-soon production inputs.
+
+Batch 7 notes:
+
+- `allen-coral-atlas-reefs` remains `needs-verification` because public product descriptions are clear, but the normal Atlas download flow appears account-oriented and Earth Engine access requires registration. Promote only after a direct public no-auth download route is pinned.
+- `usgs-tectonic-boundaries-reference` remains `needs-verification` because public-domain USGS maps are verified, but a stable global machine-readable GIS route was not pinned.
+
+## Base-earth / geography backlog
+
+Assignment-ready static/reference slices:
+
+- `gshhg-shorelines`
+- `natural-earth-physical`
+- `glims-glacier-outlines`
+- `rgi-glacier-inventory`
+- `pb2002-plate-boundaries`
+- `noaa-global-volcano-locations`
+- `smithsonian-gvp-volcanoes`
+
+Tier-2 complex static/raster/vector slices:
+
+- `gebco-bathymetry`
+- `noaa-etopo-global-relief`
+- `gmrt-multires-topography`
+- `emodnet-bathymetry`
+- `hydrosheds-hydrorivers`
+- `hydrosheds-hydrolakes`
+- `grwl-river-widths`
+- `glwd-wetlands`
+- `isric-soilgrids`
+- `fao-hwsd-soils`
+- `esa-worldcover-landcover`
+
+Detailed scope and guardrails:
+
+- `app/docs/source-acceleration-phase2-batch7-base-earth-briefs.md`
 
 ## International backlog
 
@@ -139,6 +193,34 @@ Highest-confidence new international candidates:
 - `scottish-water-overflows`
 - `nasa-jpl-cneos`
 
+## Data AI RSS backlog
+
+Data AI has a dedicated RSS/Atom candidate list for cybersecurity, internet infrastructure, world news, and world events:
+
+- `app/docs/data-ai-rss-source-candidates.md`
+- `app/docs/data-ai-rss-source-candidates-batch2.md`
+
+Validated working feeds found in the first pass:
+
+- 52 RSS/Atom/RDF feeds
+- 115 additional Batch 2 RSS/Atom/RDF feeds
+- 167 total validated Data AI feed candidates
+
+First implementation should not enable all feeds at once. Start with:
+
+- `cisa-cybersecurity-advisories`
+- `cisa-ics-advisories`
+- `sans-isc-diary`
+- `cloudflare-status`
+- `gdacs-alerts`
+
+Data AI feed rules:
+
+- fixture-first parser before runtime polling
+- preserve feed provenance, final URL, timestamps, source health, and caveats
+- treat media/blog/vendor feeds as contextual awareness unless the source itself is the authoritative actor for the event
+- do not scrape linked article pages without separate source approval
+
 ## Rejected / Avoid
 
 - `marinetraffic-scrape`
@@ -156,6 +238,11 @@ Highest-confidence new international candidates:
 
 Best next options:
 
+- `natural-earth-physical`
+- `gshhg-shorelines`
+- `noaa-global-volcano-locations`
+- `pb2002-plate-boundaries`
+- `rgi-glacier-inventory`
 - `usgs-volcano-hazards`
 - `noaa-tsunami-alerts`
 - `noaa-spc-products`
@@ -182,6 +269,10 @@ Best next options:
 
 Best next options:
 
+- `gebco-bathymetry`
+- `emodnet-bathymetry`
+- `hydrosheds-hydrolakes`
+- `glims-glacier-outlines`
 - `noaa-coops-tides-currents`
 - `noaa-ndbc-realtime`
 - `ioos-hfradar-surface-currents`

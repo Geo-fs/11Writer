@@ -30,6 +30,8 @@ def test_cneos_fixture_serialization_all() -> None:
     assert len(payload["closeApproaches"]) == 2
     assert len(payload["fireballs"]) == 2
     assert payload["sourceHealth"]["sourceMode"] == "fixture"
+    assert "not impact predictions" in payload["caveats"][0]
+    assert "do not infer imminent threat" in " ".join(payload["caveats"]).lower()
 
 
 def test_cneos_event_type_filtering() -> None:
@@ -90,3 +92,16 @@ def test_cneos_source_status_reports_degraded_runtime() -> None:
     status = next(source for source in payload["sources"] if source["name"] == "cneos-space-events")
     assert status["state"] == "degraded"
     assert status["freshnessSeconds"] == 3600
+
+
+def test_cneos_records_do_not_expose_risk_fields() -> None:
+    client = _client()
+    response = client.get("/api/aerospace/space/cneos-events", params={"event_type": "all", "limit": 1})
+    assert response.status_code == 200
+    payload = response.json()
+    close_approach = payload["closeApproaches"][0]
+    fireball = payload["fireballs"][0]
+    assert "risk" not in close_approach
+    assert "impactProbability" not in close_approach
+    assert "risk" not in fireball
+    assert "threat" not in fireball

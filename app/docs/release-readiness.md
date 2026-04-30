@@ -21,6 +21,8 @@ Use the repo-local dry-run script before staging:
 python scripts/release_dry_run.py
 python scripts/release_dry_run.py --json
 python scripts/release_dry_run.py --strict
+python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke aerospace=known-local-caveat:windows-browser-launch-permission --smoke webcam=passed
+python scripts/alerts_ledger.py
 ```
 
 What it checks:
@@ -54,14 +56,33 @@ Latest verified local status on this Windows machine:
 - `python -m compileall app/server/src`: passed
 - `cmd /c npm.cmd run lint`: passed
 - `cmd /c npm.cmd run build`: passed
-- `python app/server/tests/run_playwright_smoke.py webcam`: failed before app assertions with `windows-playwright-launch-permission` / `spawn EPERM`
+- `python app/server/tests/run_playwright_smoke.py marine`: passed
+- `python app/server/tests/run_playwright_smoke.py webcam`: passed
+- `python app/server/tests/run_playwright_smoke.py aerospace`: failed before app assertions with `windows-playwright-launch-permission`, narrowed to `windows-browser-launch-permission`
+- representative backend checks for the latest Geospatial, Marine, Features/Webcam, and Aerospace completions also passed in the current Phase 2 checkpoint sweep, including the newest GeoSphere Austria, NASA POWER, Washington VAAC, and webcam source-ops detail/export packages
 
 Interpret this correctly:
 
-- the webcam smoke failure is a machine and browser-launch problem
+- the aerospace smoke failure is a machine and browser-launch problem
 - it does not indicate stale build output
 - it does not indicate a current frontend compile failure
 - source-specific smoke validation that depends on Playwright may need another machine, another environment, or a manual browser check
+
+## Phase 2 checkpoint
+
+Current checkpoint summary:
+
+- the current broad validation surface is green enough to continue Phase 2 acceleration work
+- the worktree is still mixed and shared-file reconciliation risk remains real
+- the earlier high-priority cross-platform runtime-plan alert has been propagated and the alerts ledger is currently back to zero open alerts
+- the previously reported `AppShell.tsx` `selectedTargetSummary` frontend build blocker did not reproduce in the latest Connect checkpoint sweep
+- the new cross-platform runtime docs are planning artifacts, not implementation evidence
+- the ownership scanner remains directionally useful, but the newest source wave pushed the residual `unknown` bucket back up again; reconcile those paths before any serious consolidation push
+
+Current checkpoint caution:
+
+- do not treat the new cross-platform runtime docs as proof that desktop packaging, companion access, runtime modes, pairing/auth, storage-path migration, or backend-only service behavior has been implemented or validated
+- those runtime-facing areas need dedicated implementation assignments and explicit validation later
 
 ## Status categories
 

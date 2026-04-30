@@ -663,6 +663,7 @@ Validation:
 - Backend route proposal:
   - `GET /api/features/finland-road-weather/stations`
   - Query params: `bbox`, `station_ids`, `sensor_ids`, `limit`
+  - follow-up bounded detail route: `GET /api/features/finland-road-weather/stations/{station_id}`
 - Client query proposal:
   - `useFinlandRoadWeatherQuery(filters, enabled)`
   - Callers should stay bounded by viewport or selected corridor.
@@ -687,6 +688,11 @@ Validation:
   - `curl.exe -L "https://tie.digitraffic.fi/api/weather/v1/stations"`
   - `curl.exe -L "https://tie.digitraffic.fi/api/weather/v1/stations/data"`
   - `python -m pytest app/server/tests/test_finland_digitraffic.py -q`
+  - Current repo slice status:
+    - list-view metadata plus current measurements is implemented
+    - bounded single-station detail is also implemented from the same current-weather endpoint family
+    - compact freshness and endpoint-health interpretation is implemented for both list and detail consumers
+    - the slice remains separate from road weather cameras, rail, marine, and broader transport aggregation
 - Paste-ready Codex/domain-agent prompt:
 
 ```text

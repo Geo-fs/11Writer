@@ -1,0 +1,36 @@
+{
+  "type": "FeatureCollection",
+  "dataUpdatedTime": "2026-04-30T11:56:04Z",
+  "features": [
+    {
+      "type": "Feature",
+      "id": 1001,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [24.596399, 60.228227, 0.0]
+      },
+      "properties": {
+        "id": 1001,
+        "name": "vt1_Espoo_Nupuri",
+        "collectionStatus": "GATHERING",
+        "dataUpdatedTime": "2026-04-30T11:55:00Z",
+        "state": "OK"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 1002,
+      "geometry": {
+        "type": "Point",
+        "coordinates": [24.898476, 60.166907, 0.0]
+      },
+      "properties": {
+        "id": 1002,
+        "name": "kt51_Helsinki_Lapinlahti",
+        "collectionStatus": "GATHERING",
+        "dataUpdatedTime": "2026-04-30T11:54:00Z",
+        "state": null
+      }
+    }
+  ]
+}

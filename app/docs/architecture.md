@@ -2,9 +2,17 @@
 
 ## Summary
 
-Phase 1 is split into a browser client and a lightweight API server. The client owns scene rendering, camera interaction, and immersive UI state. The server owns safe configuration exposure, future source normalization, and adapter boundaries for live data phases.
+Phase 1 is split into a browser client and a lightweight API server. The client owns scene rendering, camera interaction, and immersive UI state. The server owns safe configuration exposure, source normalization, source health, task/runtime state, and adapter boundaries for live data phases.
 
-## Client
+The core platform operating plan now targets three first-class interfaces backed by the same FastAPI/core runtime:
+
+- Full desktop app for Linux, macOS, Windows 10, and Windows 11 workstation sessions
+- Companion web app for shorter browser and partner-device check-ins after explicit pairing/auth
+- Backend-only runtime for unattended user-configured collection and task execution
+
+Current browser-client and API-server development remains the foundation for those runtime surfaces. Packaging, companion access, service/daemon lifecycle, and OS-native installers are implementation work, not already-shipped behavior.
+
+## Client And Runtime Surfaces
 
 The client uses React, TypeScript, Vite, and Cesium.
 
@@ -14,6 +22,8 @@ The client uses React, TypeScript, Vite, and Cesium.
 - `lib/tiles.ts`: primary Google tiles loading and fallback decision logic
 - `lib/store.ts`: UI state for layers, planet imagery, visual modes, HUD, and selection
 - `features/*`: shell layout areas for controls, inspector, and status surfaces
+
+The full desktop app should host the complete client. The companion web app should reuse shared UI/domain primitives but expose lighter check-in surfaces. Neither surface should become the authority for source state, task execution, provenance, caveats, or source health.
 
 The UI is designed so Phase 2 and Phase 3 can mount real entity layers without changing the page layout.
 
@@ -29,6 +39,13 @@ The server uses FastAPI with typed response schemas.
 - `services/*`: response composition logic, kept separate from route handlers
 
 This structure keeps future adapters modular and removable if a data source becomes non-compliant or operationally unsuitable.
+
+The backend must remain usable in all target runtime modes:
+
+- `dev`: local development with Vite and Uvicorn
+- `desktop-sidecar`: launched by the desktop shell on loopback
+- `backend-only`: no UI, long-running collection/tasks on loopback by default
+- `companion-server`: explicitly enabled partner-device access after pairing/auth
 
 ## Normalized Entity Model
 

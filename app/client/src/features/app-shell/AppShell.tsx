@@ -11,9 +11,18 @@ import {
 } from "../inspector/aerospaceAirportStatusContext";
 import { buildAerospaceOperationalContextSummary } from "../inspector/aerospaceOperationalContext";
 import {
+  buildAerospaceGeomagnetismContextSummary,
+  buildAerospaceGeomagnetismExportLines
+} from "../inspector/aerospaceGeomagnetismContext";
+import { buildAerospaceVaacContextSummary } from "../inspector/aerospaceVaacContext";
+import {
   buildAerospaceOpenSkyContextSummary,
   buildAerospaceOpenSkyExportLines
 } from "../inspector/aerospaceOpenSkyContext";
+import { buildAerospaceContextIssueSummary } from "../inspector/aerospaceContextIssues";
+import { buildAerospaceExportReadinessSummary } from "../inspector/aerospaceExportReadiness";
+import { buildAerospaceReviewQueueSummary } from "../inspector/aerospaceReviewQueue";
+import { buildAerospaceContextReportSummary } from "../inspector/aerospaceContextReport";
 import {
   buildAerospaceSpaceContextExportLines,
   buildAerospaceSpaceContextSummary
@@ -55,6 +64,7 @@ import { HudBar } from "../status/HudBar";
 import {
   useAircraftReferenceLinkQuery,
   useAviationWeatherContextQuery,
+  useAnchorageVaacAdvisoriesQuery,
   useCameraSourceInventoryQuery,
   useCanadaCapAlertsQuery,
   useCneosEventsQuery,
@@ -69,7 +79,10 @@ import {
   useOpenSkyStatesQuery,
   usePublicConfigQuery,
   useSourceStatusQuery,
+  useTokyoVaacAdvisoriesQuery,
+  useUsgsGeomagnetismContextQuery,
   useSwpcSpaceWeatherContextQuery,
+  useWashingtonVaacAdvisoriesQuery,
   useTsunamiAlertsQuery,
   useUkEaFloodMonitoringQuery
 } from "../../lib/queries";
@@ -158,8 +171,14 @@ type DebugWindow = Window & {
     openskyAnonymousContext?: unknown;
     cneosSpaceContext?: unknown;
     swpcSpaceWeatherContext?: unknown;
+    vaacContext?: unknown;
+    geomagnetismContext?: unknown;
     aerospaceOperationalContext?: unknown;
     aerospaceContextAvailability?: unknown;
+    aerospaceContextIssues?: unknown;
+    aerospaceExportReadiness?: unknown;
+    aerospaceReviewQueue?: unknown;
+    aerospaceContextReport?: unknown;
     aerospaceExportProfile?: unknown;
     aerospaceFocus?: unknown;
     aerospaceFocusHistory?: unknown;
@@ -707,6 +726,23 @@ export function AppShell() {
     productType: "all",
     limit: 3
   });
+  const washingtonVaacQuery = useWashingtonVaacAdvisoriesQuery({
+    enabled: selectedAircraft != null || selectedSatellite != null,
+    limit: 2
+  });
+  const anchorageVaacQuery = useAnchorageVaacAdvisoriesQuery({
+    enabled: selectedAircraft != null || selectedSatellite != null,
+    limit: 2
+  });
+  const tokyoVaacQuery = useTokyoVaacAdvisoriesQuery({
+    enabled: selectedAircraft != null || selectedSatellite != null,
+    limit: 2
+  });
+  const geomagnetismContextQuery = useUsgsGeomagnetismContextQuery({
+    enabled: selectedAircraft != null || selectedSatellite != null,
+    observatoryId: "BOU",
+    elements: ["X", "Y", "Z", "F"]
+  });
   const aviationWeatherSourceHealth =
     selectedAircraft
       ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "noaa-awc") ?? null
@@ -727,6 +763,22 @@ export function AppShell() {
     selectedAircraft != null || selectedSatellite != null
       ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "noaa-swpc") ?? null
       : null;
+  const washingtonVaacSourceHealth =
+    selectedAircraft != null || selectedSatellite != null
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "washington-vaac") ?? null
+      : null;
+  const anchorageVaacSourceHealth =
+    selectedAircraft != null || selectedSatellite != null
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "anchorage-vaac") ?? null
+      : null;
+  const tokyoVaacSourceHealth =
+    selectedAircraft != null || selectedSatellite != null
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "tokyo-vaac") ?? null
+      : null;
+  const geomagnetismSourceHealth =
+    selectedAircraft != null || selectedSatellite != null
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "usgs-geomagnetism") ?? null
+      : null;
   const aviationWeatherSummary = buildAerospaceWeatherContextSummary({
     weather: aviationWeatherQuery.data,
     sourceHealth: aviationWeatherSourceHealth
@@ -744,6 +796,18 @@ export function AppShell() {
   const swpcSpaceWeatherSummary = buildAerospaceSpaceWeatherContextSummary({
     context: swpcContextQuery.data,
     sourceHealth: swpcSourceHealth
+  });
+  const vaacContextSummary = buildAerospaceVaacContextSummary({
+    washingtonContext: washingtonVaacQuery.data,
+    washingtonSourceHealth: washingtonVaacSourceHealth,
+    anchorageContext: anchorageVaacQuery.data,
+    anchorageSourceHealth: anchorageVaacSourceHealth,
+    tokyoContext: tokyoVaacQuery.data,
+    tokyoSourceHealth: tokyoVaacSourceHealth
+  });
+  const geomagnetismSummary = buildAerospaceGeomagnetismContextSummary({
+    context: geomagnetismContextQuery.data,
+    sourceHealth: geomagnetismSourceHealth
   });
   const selectedNearbyContextSummary =
     selectedAircraft && selectedTrack
@@ -783,8 +847,10 @@ export function AppShell() {
     presetId: selectedAerospaceOperationalPreset,
     weatherSummary: aviationWeatherSummary,
     airportStatusSummary: faaNasAirportStatusSummary,
+    geomagnetismSummary,
     spaceContextSummary: cneosSpaceContextSummary,
     spaceWeatherSummary: swpcSpaceWeatherSummary,
+    vaacContextSummary,
     dataHealthSummary: selectedDataHealthSummary
   });
   const aerospaceContextAvailabilitySummary = buildAerospaceContextAvailabilitySummary({
@@ -793,11 +859,33 @@ export function AppShell() {
     weatherSourceHealth: aviationWeatherSourceHealth,
     airportStatusSummary: faaNasAirportStatusSummary,
     airportStatusSourceHealth: faaNasSourceHealth,
+    geomagnetismSummary,
+    geomagnetismSourceHealth,
     openSkySummary: openSkyContextSummary,
     openSkySourceHealth,
     spaceContextSummary: cneosSpaceContextSummary,
     spaceWeatherSummary: swpcSpaceWeatherSummary,
+    vaacContextSummary,
     dataHealthSummary: selectedDataHealthSummary
+  });
+  const aerospaceContextIssueSummary = buildAerospaceContextIssueSummary({
+    operationalContextSummary: aerospaceOperationalContextSummary,
+    availabilitySummary: aerospaceContextAvailabilitySummary,
+    dataHealthSummary: selectedDataHealthSummary,
+    openSkySummary: openSkyContextSummary
+  });
+  const aerospaceExportReadinessSummary = buildAerospaceExportReadinessSummary({
+    operationalContextSummary: aerospaceOperationalContextSummary,
+    availabilitySummary: aerospaceContextAvailabilitySummary,
+    issueSummary: aerospaceContextIssueSummary,
+    dataHealthSummary: selectedDataHealthSummary
+  });
+  const aerospaceReviewQueueSummary = buildAerospaceReviewQueueSummary({
+    issueSummary: aerospaceContextIssueSummary,
+    readinessSummary: aerospaceExportReadinessSummary,
+    availabilitySummary: aerospaceContextAvailabilitySummary,
+    dataHealthSummary: selectedDataHealthSummary,
+    openSkySummary: openSkyContextSummary
   });
   const selectedSectionHealthDisplay = buildAerospaceSectionHealthDisplay(selectedDataHealthSummary);
   const aerospaceFocusComputation = buildAerospaceFocusComputation({
@@ -1097,6 +1185,13 @@ export function AppShell() {
                 ]
               }
           : null;
+    const aerospaceContextReportSummary = buildAerospaceContextReportSummary({
+      selectedTargetSummary,
+      availabilitySummary: aerospaceContextAvailabilitySummary,
+      reviewQueueSummary: aerospaceReviewQueueSummary,
+      readinessSummary: aerospaceExportReadinessSummary,
+      dataHealthSummary: selectedDataHealthSummary
+    });
     const nearbyContextSummary = selectedNearbyContextSummary;
     const summaryLines = selectedTargetSummary?.displayLines.slice(0, 6) ?? [];
     const dataHealthLine = buildAerospaceDataHealthExportLine(selectedDataHealthSummary);
@@ -1104,10 +1199,16 @@ export function AppShell() {
     const aviationWeatherLines = buildAerospaceWeatherExportLines(aviationWeatherSummary);
     const faaNasAirportStatusLines = buildAerospaceAirportStatusExportLines(faaNasAirportStatusSummary);
     const openSkyContextLines = buildAerospaceOpenSkyExportLines(openSkyContextSummary);
+    const geomagnetismLines = buildAerospaceGeomagnetismExportLines(geomagnetismSummary);
     const cneosSpaceContextLines = buildAerospaceSpaceContextExportLines(cneosSpaceContextSummary);
     const swpcSpaceWeatherLines = buildAerospaceSpaceWeatherExportLines(swpcSpaceWeatherSummary);
+    const vaacContextLines = vaacContextSummary?.exportLines ?? [];
     const operationalContextLines = aerospaceOperationalContextSummary?.exportLines ?? [];
     const operationalContextAvailabilityLine = aerospaceContextAvailabilitySummary?.exportLine ?? null;
+    const issueSummaryLines = aerospaceContextIssueSummary?.exportLines ?? [];
+    const readinessLines = aerospaceExportReadinessSummary?.exportLines ?? [];
+    const reviewQueueLines = aerospaceReviewQueueSummary?.exportLines ?? [];
+    const contextReportLines = aerospaceContextReportSummary?.exportLines ?? [];
     const focusLines = aerospaceFocus.enabled
       ? [
           ...buildAerospaceFocusExportLines(aerospaceFocusComputation),
@@ -1122,10 +1223,16 @@ export function AppShell() {
       aviationWeatherLines,
       faaNasAirportStatusLines,
       openSkyContextLines,
+      geomagnetismLines,
       cneosSpaceContextLines,
       swpcSpaceWeatherLines,
+      vaacContextLines,
       operationalContextLines,
       operationalAvailabilityLine: operationalContextAvailabilityLine,
+      issueSummaryLines,
+      readinessLines,
+      reviewQueueLines,
+      contextReportLines,
       focusLines,
       selectedDataHealthSummary,
       operationalContextSummary: aerospaceOperationalContextSummary,
@@ -1160,6 +1267,8 @@ export function AppShell() {
       cneosSpaceContextLines.length > 0 ? 42 + cneosSpaceContextLines.length * 18 : 0;
     const swpcSpaceWeatherPanelHeight =
       swpcSpaceWeatherLines.length > 0 ? 42 + swpcSpaceWeatherLines.length * 18 : 0;
+    const vaacContextPanelHeight =
+      vaacContextLines.length > 0 ? 42 + vaacContextLines.length * 18 : 0;
     const operationalContextPanelHeight =
       operationalContextExportLines.length > 0 ? 42 + operationalContextExportLines.length * 18 : 0;
     const focusPanelHeight = focusLines.length > 0 ? 42 + focusLines.length * 18 : 0;
@@ -1188,6 +1297,7 @@ export function AppShell() {
       openSkyContextPanelHeight +
       cneosSpaceContextPanelHeight +
       swpcSpaceWeatherPanelHeight +
+      vaacContextPanelHeight +
       operationalContextPanelHeight +
       focusPanelHeight +
       marinePanelHeight +
@@ -1593,6 +1703,30 @@ export function AppShell() {
         context.fillText(line, 20, swpcBaseY + 22 + index * 18);
       });
     }
+    if (vaacContextLines.length > 0) {
+      const vaacBaseY =
+        sourceCanvas.height +
+        (camerasLayerEnabled ? 328 : earthquakeLayerEnabled ? 328 : 274) +
+        (eonetLayerEnabled ? 36 : 0) +
+        (camerasLayerEnabled ? 54 : 0) +
+        environmentalFooterHeight +
+        (selectedTargetSummary ? 42 + summaryLines.length * 18 : 0) +
+        dataHealthPanelHeight +
+        nearbyContextPanelHeight +
+        aviationWeatherPanelHeight +
+        faaNasAirportStatusPanelHeight +
+        openSkyContextPanelHeight +
+        cneosSpaceContextPanelHeight +
+        swpcSpaceWeatherPanelHeight;
+      context.fillStyle = "#eff8ff";
+      context.font = "15px Segoe UI";
+      context.fillText("Volcanic Ash Advisory Context", 20, vaacBaseY);
+      context.font = "13px Segoe UI";
+      context.fillStyle = "#8ba8bb";
+      vaacContextLines.forEach((line, index) => {
+        context.fillText(line, 20, vaacBaseY + 22 + index * 18);
+      });
+    }
     if (operationalContextLines.length > 0) {
       const operationalBaseY =
         sourceCanvas.height +
@@ -1607,7 +1741,8 @@ export function AppShell() {
         faaNasAirportStatusPanelHeight +
         openSkyContextPanelHeight +
         cneosSpaceContextPanelHeight +
-        swpcSpaceWeatherPanelHeight;
+        swpcSpaceWeatherPanelHeight +
+        vaacContextPanelHeight;
       context.fillStyle = "#eff8ff";
       context.font = "15px Segoe UI";
       context.fillText("Aerospace Operational Context", 20, operationalBaseY);
@@ -1760,6 +1895,47 @@ export function AppShell() {
               caveats: swpcSpaceWeatherSummary.caveats.slice(0, 4),
             }
           : null,
+        vaacContext: vaacContextSummary
+          ? {
+              sourceCount: vaacContextSummary.sourceCount,
+              healthySourceCount: vaacContextSummary.healthySourceCount,
+              availableSourceCount: vaacContextSummary.availableSourceCount,
+              totalAdvisoryCount: vaacContextSummary.totalAdvisoryCount,
+              sourceModes: vaacContextSummary.sourceModes,
+              sources: vaacContextSummary.sources.map((source) => ({
+                sourceId: source.sourceId,
+                label: source.label,
+                sourceMode: source.sourceMode,
+                sourceHealth: source.sourceHealth,
+                sourceState: source.sourceState,
+                advisoryCount: source.advisoryCount,
+                listingSourceUrl: source.listingSourceUrl,
+                topAdvisory: source.topAdvisory,
+                caveats: source.caveats.slice(0, 4)
+              })),
+              displayLines: vaacContextSummary.displayLines.slice(0, 6),
+              caveats: vaacContextSummary.caveats.slice(0, 4),
+              doesNotProve: vaacContextSummary.doesNotProve.slice(0, 2)
+            }
+          : null,
+        geomagnetismContext: geomagnetismSummary
+          ? {
+              source: geomagnetismSummary.source,
+              observatoryId: geomagnetismSummary.observatoryId,
+              observatoryName: geomagnetismSummary.observatoryName,
+              sourceMode: geomagnetismSummary.sourceMode,
+              sourceHealth: geomagnetismSummary.sourceHealth,
+              sourceState: geomagnetismSummary.sourceState,
+              sampleCount: geomagnetismSummary.sampleCount,
+              samplingPeriodSeconds: geomagnetismSummary.samplingPeriodSeconds,
+              generatedAt: geomagnetismSummary.generatedAt,
+              latestObservedAt: geomagnetismSummary.latestObservedAt,
+              elements: geomagnetismSummary.elements.slice(0, 4),
+              latestValues: geomagnetismSummary.latestValues,
+              displayLines: geomagnetismSummary.displayLines.slice(0, 6),
+              caveats: geomagnetismSummary.caveats.slice(0, 4)
+            }
+          : null,
         aerospaceOperationalContext: aerospaceOperationalContextSummary
           ? {
               ...aerospaceOperationalContextSummary.metadata,
@@ -1768,6 +1944,18 @@ export function AppShell() {
           : null,
         aerospaceContextAvailability: aerospaceContextAvailabilitySummary
           ? aerospaceContextAvailabilitySummary.metadata
+          : null,
+        aerospaceContextIssues: aerospaceContextIssueSummary
+          ? aerospaceContextIssueSummary.metadata
+          : null,
+        aerospaceExportReadiness: aerospaceExportReadinessSummary
+          ? aerospaceExportReadinessSummary.metadata
+          : null,
+        aerospaceReviewQueue: aerospaceReviewQueueSummary
+          ? aerospaceReviewQueueSummary.metadata
+          : null,
+        aerospaceContextReport: aerospaceContextReportSummary
+          ? aerospaceContextReportSummary.metadata
           : null,
         aerospaceExportProfile: exportProfileSummary.metadata,
         aerospaceFocus: aerospaceFocus.enabled
@@ -2023,9 +2211,14 @@ export function AppShell() {
     currentFocusSnapshot,
     aviationWeatherSummary,
     openSkyContextSummary,
-    swpcSpaceWeatherSummary,
-    aerospaceOperationalContextSummary,
+      swpcSpaceWeatherSummary,
+      vaacContextSummary,
+      geomagnetismSummary,
+      aerospaceOperationalContextSummary,
     aerospaceContextAvailabilitySummary,
+    aerospaceContextIssueSummary,
+    aerospaceExportReadinessSummary,
+    aerospaceReviewQueueSummary,
     selectedAerospaceExportProfile,
     faaNasAirportStatusSummary,
     cneosSpaceContextSummary,

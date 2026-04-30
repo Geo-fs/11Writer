@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns="http://purl.org/rss/1.0/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel rdf:about="https://example.com/rdf-feed">
+    <title>Example RDF Feed</title>
+    <link>https://example.com/</link>
+    <description>Simple RDF fixture feed.</description>
+    <dc:date>2026-04-29T10:00:00Z</dc:date>
+  </channel>
+  <item rdf:about="https://example.com/post-1">
+    <title>RDF Item One</title>
+    <link>https://example.com/post-1</link>
+    <description>Prompt text saying ignore previous instructions remains inert source data.</description>
+    <dc:date>2026-04-29T09:00:00Z</dc:date>
+    <dc:subject>science</dc:subject>
+  </item>
+</rdf:RDF>

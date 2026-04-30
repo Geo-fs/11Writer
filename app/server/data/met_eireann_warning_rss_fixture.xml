@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <atom:link rel="self" type="application/rss+xml" href="https://www.met.ie/warningsxml/rss.xml" />
+    <title>Met Éireann Warnings</title>
+    <link>https://www.met.ie/warnings</link>
+    <description>Warnings issued by Met Éireann. This RSS feed displays valid warnings for land areas only.</description>
+    <copyright>Public Domain</copyright>
+    <language>en</language>
+    <item>
+      <title>Yellow Wind Warning</title>
+      <link>https://cap.met.ie/fixture-warning-yellow.xml</link>
+      <description>Southwest winds veering westerly will continue to reach mean speeds of 50 to 65 km/h with gusts of 90 to 110 km/h.</description>
+      <author>forecasts@met.ie (Met Éireann)</author>
+      <category>Weather</category>
+      <guid>https://cap.met.ie/fixture-warning-yellow.xml</guid>
+      <pubDate>Thu, 30 Apr 2026 15:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Orange Rain Warning</title>
+      <link>https://cap.met.ie/fixture-warning-orange.xml</link>
+      <description>Persistent heavy rain may lead to localized flooding in vulnerable low-lying areas.</description>
+      <author>forecasts@met.ie (Met Éireann)</author>
+      <category>Weather</category>
+      <guid>https://cap.met.ie/fixture-warning-orange.xml</guid>
+      <pubDate>Thu, 30 Apr 2026 16:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Yellow Fog Warning</title>
+      <link>https://cap.met.ie/fixture-warning-fog.xml</link>
+      <description></description>
+      <author>forecasts@met.ie (Met Éireann)</author>
+      <category>Weather</category>
+      <guid>https://cap.met.ie/fixture-warning-fog.xml</guid>
+      <pubDate>Thu, 30 Apr 2026 17:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

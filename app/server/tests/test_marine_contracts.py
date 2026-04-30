@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import asyncio
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -22,6 +23,11 @@ from src.marine.models import MarineGapEventORM
 from src.marine.models import MarineSourceORM
 from src.reference.db import get_engine
 from src.routes.marine import router as marine_router
+from src.services.marine_context_service import (
+    MarineNdbcService,
+    MarineNoaaCoopsService,
+    MarineScottishWaterOverflowService,
+)
 
 
 def _client(tmp_path: Path, *, env: dict[str, str] | None = None) -> TestClient:
@@ -38,6 +44,12 @@ def _client(tmp_path: Path, *, env: dict[str, str] | None = None) -> TestClient:
         os.environ["MARINE_DATABASE_URL"] = db_url
         os.environ["WEBCAM_WORKER_ENABLED"] = "false"
         os.environ["WEBCAM_WORKER_RUN_ON_STARTUP"] = "false"
+        os.environ["MARINE_SOURCE_MODE"] = "fixture"
+        os.environ["MARINE_FIXTURE_SCENARIO"] = "investigative-mix"
+        os.environ["MARINE_NOAA_COOPS_MODE"] = "fixture"
+        os.environ["MARINE_NDBC_MODE"] = "fixture"
+        os.environ["VIGICRUES_HYDROMETRY_MODE"] = "fixture"
+        os.environ["SCOTTISH_WATER_OVERFLOWS_MODE"] = "fixture"
         if env:
             for key, value in env.items():
                 os.environ[key] = value
@@ -698,6 +710,142 @@ def test_context_sources_disabled_outside_fixture_mode(tmp_path: Path) -> None:
     assert scottish_water["caveats"]
 
 
+def test_fixture_context_sources_do_not_fabricate_stale_or_unavailable_states(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+
+    noaa = client.get(
+        "/api/marine/context/noaa-coops",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 250},
+    ).json()
+    assert noaa["sourceHealth"]["health"] in {"loaded", "empty"}
+    assert noaa["sourceHealth"]["health"] not in {"stale", "error", "unknown"}
+
+    ndbc = client.get(
+        "/api/marine/context/ndbc",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 250},
+    ).json()
+    assert ndbc["sourceHealth"]["health"] in {"loaded", "empty"}
+    assert ndbc["sourceHealth"]["health"] not in {"stale", "error", "unknown"}
+
+    scottish_water = client.get(
+        "/api/marine/context/scottish-water-overflows",
+        params={"lat": 55.95, "lon": -3.10, "radius_km": 400},
+    ).json()
+    assert scottish_water["sourceHealth"]["health"] in {"loaded", "empty"}
+    assert scottish_water["sourceHealth"]["health"] not in {"stale", "error", "unknown"}
+
+
+def test_disabled_non_fixture_context_sources_do_not_fabricate_unavailable_states(tmp_path: Path) -> None:
+    client = _client(
+        tmp_path,
+        env={
+            "MARINE_NOAA_COOPS_MODE": "bogus-mode",
+            "MARINE_NDBC_MODE": "bogus-mode",
+            "SCOTTISH_WATER_OVERFLOWS_MODE": "bogus-mode",
+        },
+    )
+
+    noaa = client.get(
+        "/api/marine/context/noaa-coops",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 50},
+    ).json()
+    assert noaa["sourceHealth"]["sourceMode"] == "unknown"
+    assert noaa["sourceHealth"]["health"] == "disabled"
+
+    ndbc = client.get(
+        "/api/marine/context/ndbc",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 50},
+    ).json()
+    assert ndbc["sourceHealth"]["sourceMode"] == "unknown"
+    assert ndbc["sourceHealth"]["health"] == "disabled"
+
+    scottish_water = client.get(
+        "/api/marine/context/scottish-water-overflows",
+        params={"lat": 55.95, "lon": -3.1, "radius_km": 50},
+    ).json()
+    assert scottish_water["sourceHealth"]["sourceMode"] == "unknown"
+    assert scottish_water["sourceHealth"]["health"] == "disabled"
+
+
+def test_coops_context_can_honestly_emit_stale_from_old_observation_timestamps(tmp_path: Path, monkeypatch) -> None:
+    original_fixture = MarineNoaaCoopsService._fixture_stations
+
+    def stale_fixture(self: MarineNoaaCoopsService, now: datetime):
+        stations = original_fixture(self, now)
+        stale_at = (now - timedelta(hours=2)).isoformat()
+        return [
+            replace(
+                station,
+                water_level=station.water_level.model_copy(update={"observed_at": stale_at}) if station.water_level else None,
+                current=station.current.model_copy(update={"observed_at": stale_at}) if station.current else None,
+            )
+            for station in stations
+        ]
+
+    monkeypatch.setattr(MarineNoaaCoopsService, "_fixture_stations", stale_fixture)
+    client = _client(tmp_path)
+
+    payload = client.get(
+        "/api/marine/context/noaa-coops",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 250, "limit": 5},
+    ).json()
+
+    assert payload["count"] >= 1
+    assert payload["sourceHealth"]["health"] == "stale"
+    assert "freshness threshold" in (payload["sourceHealth"]["detail"] or "").lower()
+    assert "freshness threshold" in (payload["sourceHealth"]["caveat"] or "").lower()
+
+
+def test_ndbc_context_can_honestly_emit_stale_from_old_observation_timestamps(tmp_path: Path, monkeypatch) -> None:
+    original_fixture = MarineNdbcService._fixture_stations
+
+    def stale_fixture(self: MarineNdbcService, now: datetime):
+        stations = original_fixture(self, now)
+        stale_at = (now - timedelta(hours=2)).isoformat()
+        return [
+            replace(
+                station,
+                observation=station.observation.model_copy(update={"observed_at": stale_at}) if station.observation else None,
+            )
+            for station in stations
+        ]
+
+    monkeypatch.setattr(MarineNdbcService, "_fixture_stations", stale_fixture)
+    client = _client(tmp_path)
+
+    payload = client.get(
+        "/api/marine/context/ndbc",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 250, "limit": 5},
+    ).json()
+
+    assert payload["count"] >= 1
+    assert payload["sourceHealth"]["health"] == "stale"
+    assert "freshness threshold" in (payload["sourceHealth"]["detail"] or "").lower()
+    assert "freshness threshold" in (payload["sourceHealth"]["caveat"] or "").lower()
+
+
+def test_scottish_water_context_can_honestly_emit_stale_from_old_update_timestamps(tmp_path: Path, monkeypatch) -> None:
+    original_fixture = MarineScottishWaterOverflowService._fixture_events
+
+    def stale_fixture(self: MarineScottishWaterOverflowService, now: datetime):
+        events = original_fixture(self, now)
+        stale_at = (now - timedelta(hours=5)).isoformat()
+        return [replace(event, last_updated_at=stale_at) for event in events]
+
+    monkeypatch.setattr(MarineScottishWaterOverflowService, "_fixture_events", stale_fixture)
+    client = _client(tmp_path)
+
+    payload = client.get(
+        "/api/marine/context/scottish-water-overflows",
+        params={"lat": 55.95, "lon": -3.10, "radius_km": 1000, "status": "all", "limit": 10},
+    ).json()
+
+    assert payload["count"] >= 1
+    assert payload["sourceHealth"]["health"] == "stale"
+    assert "freshness threshold" in (payload["sourceHealth"]["detail"] or "").lower()
+    assert "freshness threshold" in (payload["sourceHealth"]["caveat"] or "").lower()
+
+
 def test_context_source_evidence_basis_contracts(tmp_path: Path) -> None:
     client = _client(tmp_path)
 
@@ -725,6 +873,55 @@ def test_context_source_evidence_basis_contracts(tmp_path: Path) -> None:
     ).json()
     for event in scottish_water["events"]:
         assert event["evidenceBasis"] == "source-reported"
+
+
+def test_context_source_fixtures_cover_representative_record_shapes(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+
+    noaa_galveston = client.get(
+        "/api/marine/context/noaa-coops",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 250, "limit": 10},
+    ).json()
+    noaa_san_francisco = client.get(
+        "/api/marine/context/noaa-coops",
+        params={"lat": 37.80, "lon": -122.46, "radius_km": 250, "limit": 10},
+    ).json()
+    assert any(
+        station["latestWaterLevel"] is not None and station["latestCurrent"] is None
+        for station in noaa_galveston["stations"]
+    )
+    assert any(
+        station["latestWaterLevel"] is None and station["latestCurrent"] is not None
+        for station in noaa_galveston["stations"]
+    )
+    assert any(
+        station["latestWaterLevel"] is not None and station["latestCurrent"] is not None
+        for station in noaa_san_francisco["stations"]
+    )
+
+    ndbc_galveston = client.get(
+        "/api/marine/context/ndbc",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 500, "limit": 10},
+    ).json()
+    ndbc_florida = client.get(
+        "/api/marine/context/ndbc",
+        params={"lat": 25.59, "lon": -80.10, "radius_km": 500, "limit": 10},
+    ).json()
+    station_types = {
+        *(station["stationType"] for station in ndbc_galveston["stations"]),
+        *(station["stationType"] for station in ndbc_florida["stations"]),
+    }
+    assert "buoy" in station_types
+    assert "cman" in station_types
+
+    scottish_water = client.get(
+        "/api/marine/context/scottish-water-overflows",
+        params={"lat": 55.95, "lon": -3.10, "radius_km": 1000, "status": "all", "limit": 10},
+    ).json()
+    statuses = {event["status"] for event in scottish_water["events"]}
+    assert "active" in statuses
+    assert "inactive" in statuses
+    assert "unknown" in statuses
 
 
 def test_summary_empty_no_match_behavior(tmp_path: Path) -> None:

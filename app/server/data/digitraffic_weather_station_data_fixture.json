@@ -1,0 +1,53 @@
+{
+  "dataUpdatedTime": "2026-04-30T19:09:43Z",
+  "stations": [
+    {
+      "id": 1001,
+      "dataUpdatedTime": "2026-04-30T19:05:43Z",
+      "sensorValues": [
+        {
+          "id": 1,
+          "stationId": 1001,
+          "name": "ILMA",
+          "shortName": "Ilma",
+          "measuredTime": "2026-04-30T19:04:53Z",
+          "unit": "°C",
+          "value": 13.2
+        },
+        {
+          "id": 16,
+          "stationId": 1001,
+          "name": "KESKITUULI",
+          "shortName": "KTuuli",
+          "measuredTime": "2026-04-30T19:04:53Z",
+          "unit": "m/s",
+          "value": 4.1
+        },
+        {
+          "id": 21,
+          "stationId": 1001,
+          "name": "ILMAN_KOSTEUS",
+          "shortName": "Koste",
+          "measuredTime": "2026-04-30T19:04:53Z",
+          "unit": "%",
+          "value": 57
+        }
+      ]
+    },
+    {
+      "id": 1002,
+      "dataUpdatedTime": "2026-04-30T19:05:43Z",
+      "sensorValues": [
+        {
+          "id": 1,
+          "stationId": 1002,
+          "name": "ILMA",
+          "shortName": "Ilma",
+          "measuredTime": "2026-04-30T19:04:53Z",
+          "unit": "°C",
+          "value": 12.8
+        }
+      ]
+    }
+  ]
+}

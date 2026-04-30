@@ -73,8 +73,15 @@ def is_connect_tooling(path: str) -> bool:
         "app/docs/commit-groups.current.md",
         "app/docs/validation-matrix.md",
         "app/docs/release-readiness.md",
+        "app/docs/alerts.md",
+        "app/docs/data-ai-onboarding.md",
+        "app/docs/fusion-layer-architecture.md",
+        "app/docs/intelligence-loop.md",
+        "app/docs/prompt-injection-defense.md",
+        "app/docs/safety-boundaries.md",
+        "app/docs/spatial-intelligence-loop.md",
         "app/server/tests/run_playwright_smoke.py",
-    } or path.startswith("scripts/")
+    } or path.startswith("scripts/") or path.startswith("app/docs/agent-next-tasks/") or path.startswith("app/docs/agent-progress/")
 
 
 def is_gather_ui_integration(path: str) -> bool:
@@ -91,6 +98,15 @@ def is_gather_ui_integration(path: str) -> bool:
         or path == "app/docs/data-source-integration-rules.md"
         or path == "app/docs/data-source-registry.md"
         or path == "app/docs/data_sources.noauth.registry.json"
+        or path == "app/docs/source-assignment-board.md"
+        or path == "app/docs/source-backlog-phase2-refresh.md"
+        or path == "app/docs/source-ownership-consumption-map.md"
+        or path == "app/docs/source-prompt-index.md"
+        or path == "app/docs/source-validation-status.md"
+        or path == "app/docs/source-workflow-validation-plan.md"
+        or path == "app/docs/source-consolidated-noauth-registry.md"
+        or path == "app/docs/source-quick-assign-packets-batch5.md"
+        or path.startswith("app/docs/source-acceleration-phase2-")
     )
 
 
@@ -98,6 +114,30 @@ def is_geospatial_environmental(path: str) -> bool:
     if path.startswith("app/client/src/features/environmental/"):
         return True
     if path.startswith("app/docs/environmental-events"):
+        return True
+    if path in {
+        "app/server/src/routes/weather_context.py",
+        "app/server/src/routes/geomagnetism.py",
+        "app/server/src/routes/catchments_context.py",
+        "app/server/src/services/bmkg_earthquakes_service.py",
+        "app/server/src/services/dmi_forecast_service.py",
+        "app/server/src/services/ipma_warnings_service.py",
+        "app/server/src/services/ireland_wfd_service.py",
+        "app/server/src/services/met_eireann_forecast_service.py",
+        "app/server/src/services/met_eireann_warnings_service.py",
+        "app/server/src/services/geosphere_austria_warnings_service.py",
+        "app/server/src/services/nasa_power_meteorology_solar_service.py",
+        "app/server/src/services/usgs_geomagnetism_service.py",
+        "app/server/tests/test_bmkg_earthquakes.py",
+        "app/server/tests/test_dmi_forecast.py",
+        "app/server/tests/test_geosphere_austria_warnings.py",
+        "app/server/tests/test_ipma_warnings.py",
+        "app/server/tests/test_ireland_epa_wfd_catchments.py",
+        "app/server/tests/test_met_eireann_forecast.py",
+        "app/server/tests/test_met_eireann_warnings.py",
+        "app/server/tests/test_nasa_power_meteorology_solar.py",
+        "app/server/tests/test_usgs_geomagnetism.py",
+    }:
         return True
     if path in {
         "app/server/src/services/eonet_service.py",
@@ -110,7 +150,19 @@ def is_geospatial_environmental(path: str) -> bool:
     }:
         return True
     if path.startswith("app/server/data/") and (
-        "eonet" in path.lower() or "earthquake" in path.lower()
+        "eonet" in path.lower()
+        or "earthquake" in path.lower()
+        or "bmkg" in path.lower()
+        or "dmi_forecast" in path.lower()
+        or "ipma" in path.lower()
+        or "geomagnetism" in path.lower()
+        or "catchments" in path.lower()
+        or "cap_alert" in path.lower()
+        or "geosphere_austria" in path.lower()
+        or "met_eireann_forecast" in path.lower()
+        or "met_eireann" in path.lower()
+        or "nasa_power" in path.lower()
+        or "fixture-warning-" in path.lower()
     ):
         return True
     return False
@@ -122,7 +174,30 @@ def is_aerospace(path: str) -> bool:
             "app/client/src/layers/AircraftLayer.tsx",
             "app/client/src/layers/SatelliteLayer.tsx",
             "app/docs/aircraft-satellite-smoke.md",
+            "app/docs/aerospace-source-contract-matrix.md",
+            "app/docs/aerospace-workflow-validation.md",
+            "app/server/src/adapters/anchorage_vaac.py",
+            "app/server/src/adapters/tokyo_vaac.py",
+            "app/server/src/adapters/vaac_text_common.py",
+            "app/server/src/adapters/washington_vaac.py",
+            "app/server/src/routes/anchorage_vaac.py",
+            "app/server/src/routes/tokyo_vaac.py",
+            "app/server/src/routes/washington_vaac.py",
+            "app/server/src/services/anchorage_vaac_service.py",
+            "app/server/src/services/tokyo_vaac_service.py",
+            "app/server/src/services/washington_vaac_service.py",
+            "app/server/tests/test_anchorage_vaac_contracts.py",
+            "app/server/tests/test_aviation_weather_contracts.py",
+            "app/server/tests/test_cneos_contracts.py",
+            "app/server/tests/test_faa_nas_status_contracts.py",
+            "app/server/tests/test_opensky_contracts.py",
+            "app/server/tests/test_swpc_contracts.py",
+            "app/server/tests/test_tokyo_vaac_contracts.py",
+            "app/server/tests/test_washington_vaac_contracts.py",
         }
+        or path.startswith("app/server/data/anchorage_vaac_")
+        or path.startswith("app/server/data/tokyo_vaac_")
+        or path.startswith("app/server/data/washington_vaac_")
         or path.startswith("app/client/src/features/inspector/aerospace")
     )
 
@@ -131,7 +206,15 @@ def is_marine(path: str) -> bool:
     return (
         path.startswith("app/client/src/features/marine/")
         or path == "app/docs/marine-module.md"
+        or path == "app/docs/marine-context-source-contract-matrix.md"
+        or path == "app/docs/marine-workflow-validation.md"
+        or path == "app/docs/marine-context-fixture-reference.md"
+        or path == "app/server/src/routes/marine.py"
+        or path == "app/server/src/services/marine_context_service.py"
+        or path == "app/server/src/services/marine_service.py"
         or path == "app/server/tests/test_marine_contracts.py"
+        or path == "app/server/tests/test_ireland_opw_waterlevel.py"
+        or path == "app/server/tests/test_vigicrues_hydrometry.py"
     )
 
 
@@ -141,7 +224,26 @@ def is_features_webcam(path: str) -> bool:
         or path == "app/client/src/features/layers/WebcamOperationsPanel.tsx"
         or path == "app/client/src/layers/CameraLayer.tsx"
         or path == "app/docs/webcams.md"
+        or path == "app/docs/webcam-source-lifecycle-policy.md"
+        or path == "app/docs/webcam-finland-digitraffic-fixture-plan.md"
+        or path == "app/server/scripts/report_camera_sandbox_validation.py"
+        or path == "app/server/src/routes/cameras.py"
+        or path == "app/server/src/routes/features.py"
+        or path == "app/server/src/services/camera_sandbox_validation_report.py"
+        or path == "app/server/src/services/camera_source_ops_detail.py"
+        or path == "app/server/src/services/camera_source_ops_artifact_timestamps.py"
+        or path == "app/server/src/services/camera_source_ops_export_summary.py"
+        or path == "app/server/src/services/camera_source_ops_report_index.py"
+        or path == "app/server/src/services/camera_source_ops_review_prerequisites.py"
+        or path == "app/server/src/services/camera_source_ops_review_queue.py"
+        or path == "app/server/src/services/finland_digitraffic_service.py"
         or path == "app/server/tests/test_webcam_module.py"
+        or path == "app/server/tests/test_camera_sandbox_validation_report.py"
+        or path == "app/server/tests/test_camera_source_ops_detail.py"
+        or path == "app/server/tests/test_camera_source_ops_export_summary.py"
+        or path == "app/server/tests/test_camera_source_ops_report_index.py"
+        or path == "app/server/tests/test_finland_digitraffic.py"
+        or path.startswith("app/server/data/digitraffic_weather_")
     )
 
 

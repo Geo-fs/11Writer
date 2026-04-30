@@ -1,0 +1,374 @@
+# Geospatial AI Progress
+
+## 2026-04-30 17:06:28 -05:00
+
+- Assignment version:
+  - `2026-04-30 16:54 America/Chicago`
+- Task:
+  - Implemented a backend-first two-source geospatial/context bundle for `taiwan-cwa-aws-opendata` and `nrc-event-notifications`.
+- What changed:
+  - Added a bounded Taiwan CWA weather-context connector pinned to one clearly public AWS-backed file family only: `Observation/O-A0003-001.json`.
+  - Preserved observed-weather semantics explicitly by normalizing station observations, observation time, WGS84 coordinates when source-provided, county/town labels, weather values, source health, file-family metadata, and caveats without drifting into key-gated CWA APIs.
+  - Added a bounded NRC event-notification connector pinned to the official NRC Daily Event Report RSS feed only.
+  - Preserved source-reported event-notification semantics explicitly by normalizing event id, title, facility/organization text, source URL, optional feed times, source health, and caveats without inferring radiological impact or public-safety consequence.
+  - Added prompt-injection-safe handling for free-text NRC feed fields, including a deterministic fixture record containing hostile instruction-like text and a test proving the text remains inert source data.
+  - Added deterministic fixtures, focused backend tests, route wiring, and source-specific docs for both slices.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/taiwan_cwa_weather_service.py`
+  - `app/server/src/services/nrc_event_notifications_service.py`
+  - `app/server/src/routes/weather_context.py`
+  - `app/server/src/routes/events.py`
+  - `app/server/data/taiwan_cwa_current_weather_fixture.json`
+  - `app/server/data/nrc_event_notifications_fixture.xml`
+  - `app/server/tests/test_taiwan_cwa_weather.py`
+  - `app/server/tests/test_nrc_event_notifications.py`
+  - `app/docs/environmental-events-taiwan-cwa-weather.md`
+  - `app/docs/environmental-events-nrc-event-notifications.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_taiwan_cwa_weather.py app/server/tests/test_nrc_event_notifications.py -q`
+  - `python -m pytest app/server/tests/test_geonet_events.py app/server/tests/test_hko_weather_events.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - Taiwan exact official endpoint family used:
+    - `https://cwaopendata.s3.ap-northeast-1.amazonaws.com/Observation/O-A0003-001.json`
+    - verified against the official AWS registry entry for CWA OpenData
+  - NRC exact official endpoint family used:
+    - `https://www.nrc.gov/public-involve/rss?feed=event`
+    - verified against the official NRC RSS feed listing page
+  - Taiwan slice stays observed/context only and does not imply warnings, impact, damage, disruption, flooding, or realized consequence.
+  - NRC slice stays source-reported/context only and does not imply radiological impact, public-safety consequence, damage, disruption, closures, or required action.
+  - NRC free-text fields are treated as inert source data only and never as workflow instruction.
+  - No client files were touched, so `npm.cmd run lint` and `npm.cmd run build` were not required for this assignment.
+- Next recommended task:
+  - Manager AI should move the geospatial next-task doc to a new assignment-ready source or a bounded consumer follow-on for one of the newer backend slices rather than widening these two connectors into shared frontend surfaces by default.
+
+## 2026-04-30 16:49:09 -05:00
+
+- Assignment version:
+  - `2026-04-30 16:43 America/Chicago`
+- Task:
+  - Reconciled the active `geonet-geohazards` plus `hko-open-weather` backend bundle against current repo truth and validated the existing slices instead of duplicating them.
+- What changed:
+  - Confirmed that both GeoNet and HKO backend slices already exist in the current tree with fixture-first services, typed contracts, routes, deterministic fixtures, focused tests, and source-specific docs.
+  - Verified that GeoNet remains split into source-native quake versus volcano-alert semantics and that HKO remains split into `warningInfo` warning records plus the already-chosen bounded `flw.tcInfo` tropical-cyclone context path.
+  - Reconciled the stale planning-doc assumption by treating this assignment as a validation/hardening pass rather than adding duplicate connector code.
+  - No server/client source logic changes were required in this pass.
+- Files touched:
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_geonet_events.py app/server/tests/test_hko_weather_events.py -q`
+  - `python -m pytest app/server/tests/test_eonet_events.py app/server/tests/test_earthquake_events.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - GeoNet exact official endpoint families already in use remain the GeoNet quake GeoJSON feed and GeoNet volcanic alert-level GeoJSON feed documented by the existing source slice.
+  - HKO exact official endpoints already in use remain `warningInfo` and `flw` from the official HKO Open Data API; the slice stays narrower than a general HKO weather dashboard.
+  - GeoNet quakes remain source-reported regional earthquake observations; GeoNet volcano alerts remain advisory/contextual status.
+  - HKO warnings remain advisory/contextual, and `tcInfo` remains forecast/context only.
+  - No damage, disruption, causation, or fake severity claims were added.
+  - No client files were touched, so `npm.cmd run lint` and `npm.cmd run build` were not required for this reconciliation pass.
+- Next recommended task:
+  - Manager AI should advance the next-task doc to a new unimplemented geospatial source or a narrowly scoped hardening target, because this GeoNet/HKO bundle is already present and validated.
+
+## 2026-04-30 17:03:11 -05:00
+
+- Assignment version:
+  - `2026-04-30 16:30 America/Chicago`
+- Task:
+  - Implemented the first bounded `geosphere-austria-warnings` advisory slice and the first bounded `nasa-power-meteorology-solar` point-context slice.
+- What changed:
+  - Added GeoSphere Austria warning backend settings, typed advisory/source-health contracts, a fixture-first GeoJSON service, and a narrow `GET /api/events/geosphere-austria/warnings` route pinned to the current `getWarnstatus` feed.
+  - Preserved source-native Austrian warning level/color semantics, warning type codes, time windows, municipality coverage, geometry summary fields, and advisory caveats without inventing a global impact score.
+  - Added NASA POWER backend settings, typed modeled-context/source-health contracts, a fixture-first daily point service, and a narrow `GET /api/context/weather/nasa-power` route pinned to one daily point query shape with the fixed parameter set `T2M` and `ALLSKY_SFC_SW_DWN`.
+  - Preserved query coordinates, modeled date range, parameter names/units, modeled source names, request URL, and modeled-context caveats without presenting the values as observations.
+  - Added deterministic fixtures, focused backend tests, and source-specific docs for both sources.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/geosphere_austria_warnings_service.py`
+  - `app/server/src/services/nasa_power_meteorology_solar_service.py`
+  - `app/server/src/routes/events.py`
+  - `app/server/src/routes/weather_context.py`
+  - `app/server/data/geosphere_austria_warnings_fixture.json`
+  - `app/server/data/nasa_power_meteorology_solar_fixture.json`
+  - `app/server/tests/test_geosphere_austria_warnings.py`
+  - `app/server/tests/test_nasa_power_meteorology_solar.py`
+  - `app/docs/environmental-events-geosphere-austria-warnings.md`
+  - `app/docs/environmental-events-nasa-power-meteorology-solar.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_geosphere_austria_warnings.py app/server/tests/test_nasa_power_meteorology_solar.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - This assignment stayed backend-only. No client or UI changes were added.
+  - GeoSphere Austria warnings remain advisory/contextual only and are not promoted into observed damage, closures, disruption, or causation claims.
+  - NASA POWER values remain modeled/contextual only and are not promoted into observed local weather, energy impact, infrastructure impact, flooding, or incident truth claims.
+- Next recommended task:
+  - If Manager AI wants the next follow-on, assign one narrow backend-only geospatial source from the remaining Batch 6 backlog or one tiny client helper consumer for an already implemented backend slice rather than widening these sources into shared UI.
+
+## 2026-04-30 16:41:54 -05:00
+
+- Assignment version:
+  - `2026-04-30 16:24 America/Chicago`
+- Task:
+  - Re-checked the active Met Eireann warning/forecast Irish weather-context assignment and verified that the current tree already satisfies it.
+- What changed:
+  - No geospatial source/client code changes were required in this pass.
+  - Re-verified the bounded Met Eireann forecast backend slice, the isolated Met Eireann warning/forecast client query helpers, and the Ireland weather-context docs already present in the tree.
+- Files touched:
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_met_eireann_warnings.py app/server/tests/test_met_eireann_forecast.py -q`
+  - `python -m compileall app/server/src`
+  - `cmd /c npm.cmd run lint`
+  - `cmd /c npm.cmd run build`
+- Blockers or caveats:
+  - No new work was required because the assignment was already implemented and validated in the current tree.
+  - Caveats remain unchanged: warnings are advisory/contextual only, forecasts are forecast/context only, and neither is promoted into observed-weather, flooding, disruption, impact, or damage claims.
+- Next recommended task:
+  - Wait for Manager AI to advance the next-task doc to a new geospatial assignment rather than widening the current Met Eireann slice further without an updated handoff.
+
+## 2026-04-30 16:36:58 -05:00
+
+- Assignment version:
+  - `2026-04-30 16:17 America/Chicago`
+- Task:
+  - Implemented the first bounded `met-eireann-forecast` slice and added isolated client query/type coverage for Met Eireann warnings and forecast.
+- What changed:
+  - Added Met Eireann forecast backend settings, typed forecast/source-health contracts, a fixture-first XML service, and a narrow `GET /api/context/weather/met-eireann-forecast` route pinned to one point-query shape only.
+  - Added a deterministic point-forecast XML fixture plus focused tests for provenance, request URL preservation, limit behavior, empty source-health behavior, and invalid params.
+  - Added isolated client response types and query hooks for `useMetEireannWarningsQuery(...)` and `useMetEireannForecastQuery(...)` without widening shared environmental UI/store wiring.
+  - Added a source-specific Met Eireann forecast doc and updated the warning doc so Ireland warnings, forecast, and WFD catchment reference context are discoverable together without collapsing their semantics into one source of truth.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/met_eireann_forecast_service.py`
+  - `app/server/src/routes/weather_context.py`
+  - `app/server/data/met_eireann_forecast_fixture.xml`
+  - `app/server/tests/test_met_eireann_forecast.py`
+  - `app/client/src/types/api.ts`
+  - `app/client/src/lib/queries.ts`
+  - `app/docs/environmental-events-met-eireann-forecast.md`
+  - `app/docs/environmental-events-met-eireann-warnings.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_met_eireann_warnings.py app/server/tests/test_met_eireann_forecast.py -q`
+  - `python -m compileall app/server/src`
+  - `cmd /c npm.cmd run lint`
+  - `cmd /c npm.cmd run build`
+- Blockers or caveats:
+  - This slice stayed backend-first plus isolated client helpers only. No LayerPanel, AppShell, globe-layer, or shared environmental overview wiring was added.
+  - Forecast samples remain forecast/context only. They are not observed weather and are not promoted into flooding, travel disruption, impact, or damage claims.
+  - Warning records remain advisory/contextual only and are still kept distinct from forecast and WFD reference semantics.
+- Next recommended task:
+  - If Manager AI wants the next Irish follow-on, assign one narrow consumer of the new Met Eireann helpers or one bounded Irish hydrology context slice instead of broad shared UI/weather-platform work.
+
+## 2026-04-30 16:14:07 -05:00
+
+- Assignment version:
+  - `2026-04-30 16:06 America/Chicago`
+- Task:
+  - Implemented the first bounded `met-eireann-warnings` slice as a fixture-first Irish weather-warning advisory source.
+- What changed:
+  - Added Met Éireann warning backend settings, typed advisory/source-health contracts, a fixture-first service, and a narrow `GET /api/events/met-eireann/warnings` route.
+  - Implemented parsing against the current documented machine-readable warning RSS feed plus linked CAP XML records, while keeping the slice bounded to warnings only and excluding forecast APIs.
+  - Added deterministic fixtures for active warnings, empty live-like RSS behavior, and one warning with missing optional description fields.
+  - Added focused tests for provenance, advisory parsing, level filtering, empty source-health behavior, and invalid params.
+  - Added a source-specific doc that records the current documented RSS feed and notes that the older `warning_IRELAND.xml` assignment pin did not resolve during inspection.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/met_eireann_warnings_service.py`
+  - `app/server/src/routes/events.py`
+  - `app/server/data/met_eireann_warning_rss_fixture.xml`
+  - `app/server/data/fixture-warning-yellow.xml`
+  - `app/server/data/fixture-warning-orange.xml`
+  - `app/server/data/fixture-warning-fog.xml`
+  - `app/server/tests/test_met_eireann_warnings.py`
+  - `app/docs/environmental-events-met-eireann-warnings.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_met_eireann_warnings.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - This assignment stayed backend-first. No client helper or UI wiring was added because the brief favored a bounded advisory-feed slice over broader shared weather surfaces.
+  - Caveats preserved: warning title, level, severity, and text remain advisory/contextual only and are not promoted into damage, local flooding, travel disruption, or realized-condition claims.
+  - The live documented RSS feed was empty at inspection time; empty is treated here as a source-health state, not as source failure.
+- Next recommended task:
+  - If Manager AI wants a consumer next, assign one tiny warning-query helper or one narrow export/inspector consumer rather than widening this into Met Éireann forecast or broader weather-platform work.
+
+## 2026-04-30 16:01:55 -05:00
+
+- Assignment version:
+  - `2026-04-30 15:24 America/Chicago`
+- Task:
+  - Implemented the first bounded `ireland-epa-wfd-catchments` slice as a fixture-first Irish WFD reference/context source.
+- What changed:
+  - Added Ireland EPA WFD backend settings, typed reference/source-health contracts, a fixture-first service, and a narrow `GET /api/context/catchments/ireland-wfd` route.
+  - Kept the first slice bounded to one route with two source-backed query shapes only: catchment catalog when `q` is omitted, and named search when `q` is supplied.
+  - Added a deterministic fixture covering catchment catalog records plus mixed search results across catchment, subcatchment, transitional, river, and groundwater reference types.
+  - Added focused route tests for provenance, bounded named-search behavior, empty/no-match handling, source health, and invalid params.
+  - Added a source-specific doc for the exact endpoint family, bounded query shape, and reference-only caveats.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/ireland_wfd_service.py`
+  - `app/server/src/routes/catchments_context.py`
+  - `app/server/src/app.py`
+  - `app/server/data/ireland_epa_wfd_catchments_fixture.json`
+  - `app/server/tests/test_ireland_epa_wfd_catchments.py`
+  - `app/docs/environmental-events-ireland-wfd-catchments.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_ireland_epa_wfd_catchments.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - This assignment stayed backend-first. No client helper or UI wiring was added because the brief favored a bounded reference/context slice over broader shared overlay work.
+  - Caveats preserved: WFD records remain reference/context only, source-provided extent strings are not promoted into invented geometry, and no water-quality, pollution, health-risk, flood-impact, or damage claims are inferred from the catalog/search metadata.
+- Next recommended task:
+  - If Manager AI wants a consumer next, assign one tiny reference-context query helper or one narrow inspector/export consumer rather than widening this into a broader Irish hydrology or environmental-condition stack.
+
+## 2026-04-30 15:22:10 -05:00
+
+- Assignment version:
+  - `2026-04-30 15:11 America/Chicago`
+- Task:
+  - Implemented the first bounded `dmi-forecast-aws` slice as a fixture-first DMI point-forecast context source.
+- What changed:
+  - Added DMI backend settings, typed forecast/source-health contracts, a fixture-first service, and a narrow `GET /api/context/weather/dmi-forecast` route.
+  - Kept the slice bounded to one official EDR collection (`harmonie_dini_sf`), one query shape (`position`), and one parameter (`temperature-0m`).
+  - Added a deterministic point-forecast fixture and focused route tests for provenance, request URL preservation, point coordinate metadata, sample limiting, empty source-health behavior, and invalid params.
+  - Added a source-specific doc for the exact endpoint family, collection, and forecast-only caveats.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/dmi_forecast_service.py`
+  - `app/server/src/routes/weather_context.py`
+  - `app/server/src/app.py`
+  - `app/server/data/dmi_forecast_fixture.json`
+  - `app/server/tests/test_dmi_forecast.py`
+  - `app/docs/environmental-events-dmi-forecast.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_dmi_forecast.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - This assignment stayed backend-first. No client helper or UI wiring was added because the brief favored a bounded forecast-context slice over broader shared weather surfaces.
+  - Caveats preserved: DMI values remain forecast/contextual only, fetched time stays separate from forecast timestep time, and model output is not presented as observed local weather or realized impact.
+- Next recommended task:
+  - If Manager AI wants a consumer next, assign one tiny client query helper or one narrow export/inspector weather-context consumer rather than widening this into a multi-model weather platform.
+
+## 2026-04-30 14:46:55 -05:00
+
+- Assignment version:
+  - `2026-04-30 14:36 America/Chicago`
+- Task:
+  - Implemented the first backend-first `portugal-ipma-open-data` slice as a fixture-first IPMA weather warnings advisory source.
+- What changed:
+  - Added IPMA backend settings, typed warning/source-health contracts, a fixture-first service, and a narrow `GET /api/events/ipma/warnings` route.
+  - Added deterministic fixture coverage for active non-green warnings, one green/no-warning housekeeping row, and one warning with no helper area match so missing coordinates stay unfilled.
+  - Added focused route tests for provenance, default active filtering, area lookup enrichment, missing area fallback, empty source-health behavior, and invalid params.
+  - Added source-specific docs for the exact warnings plus district/island helper endpoint family and the first-slice caveats.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/ipma_warnings_service.py`
+  - `app/server/src/routes/events.py`
+  - `app/server/data/ipma_warnings_fixture.json`
+  - `app/server/tests/test_ipma_warnings.py`
+  - `app/docs/environmental-events-ipma-warnings.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_ipma_warnings.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - This assignment stayed backend-first. No client hook or UI wiring was added because the next-task brief favored a bounded exportable advisory source slice over shared frontend churn.
+  - Caveats preserved: IPMA warning rows remain advisory/contextual only, green/no-warning rows are excluded by default from the active set, helper area matches are optional and never guessed, and warning color/text do not by themselves establish local damage, flood depth, or realized impact.
+- Next recommended task:
+  - If Manager AI wants frontend consumption next, assign one tiny client query helper or one narrow export consumer first rather than promoting IPMA directly into the broader environmental layer roster.
+
+## 2026-04-30 15:43:00 -05:00
+
+- Assignment version:
+  - `2026-04-30 14:26 America/Chicago`
+- Task:
+  - Implemented the first backend-only `usgs-geomagnetism` slice as a fixture-first geospatial context source.
+- What changed:
+  - Added USGS geomagnetism backend settings, typed contracts, a fixture-first service, and a narrow `/api/context/geomagnetism/usgs` route.
+  - Added a deterministic fixture bundle with one loaded observatory case and one empty observatory case.
+  - Added focused route tests for provenance, element filtering, empty behavior, and invalid params.
+  - Added source-health plus export-facing metadata fields in the response contract so later consumers can preserve observatory, interval, generated-time, and caveat context without inventing impact semantics.
+  - Added a source-specific doc for the exact endpoint family and first-slice caveats.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/usgs_geomagnetism_service.py`
+  - `app/server/src/routes/geomagnetism.py`
+  - `app/server/src/app.py`
+  - `app/server/data/usgs_geomagnetism_fixture.json`
+  - `app/server/tests/test_usgs_geomagnetism.py`
+  - `app/docs/environmental-events-usgs-geomagnetism.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_usgs_geomagnetism.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - This assignment stayed backend-first. No client hook or UI wiring was added because the brief explicitly favored a bounded context-source slice over shared frontend churn.
+  - Caveats preserved: geomagnetic field values remain observational/contextual only, request scope stays bounded to the current UTC day, and no GPS/radio/aviation/grid/infrastructure impact inference is made from field values alone.
+- Next recommended task:
+  - If Manager AI wants a frontend consumer next, assign one tiny client query helper and one narrow export/inspector consumer path rather than promoting this immediately into broad shared environmental panel wiring.
+
+## 2026-04-30 15:08:00 -05:00
+
+- Assignment version:
+  - `2026-04-30 14:16 America/Chicago`
+- Task:
+  - Completed the minimal BMKG frontend/client slice by adding typed client contracts and a dedicated query helper without broad environmental shell or store churn.
+- What changed:
+  - Added BMKG client API interfaces matching the existing backend route shape, including distinct `latestEvent` and bounded `events` semantics.
+  - Added `useBmkgEarthquakesQuery(...)` as an isolated input-driven hook instead of coupling BMKG to the shared environmental filter store.
+  - Updated the BMKG source doc to record the new client/query coverage and the deliberate stop line: no layer, LayerPanel, inspector, or export-shell wiring in this assignment because that would require broader shared geospatial UI/state edits than allowed.
+- Files touched:
+  - `app/client/src/types/api.ts`
+  - `app/client/src/lib/queries.ts`
+  - `app/docs/environmental-events-bmkg-earthquakes.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_bmkg_earthquakes.py -q`
+  - `python -m compileall app/server/src`
+  - `cmd /c npm.cmd run lint`
+  - `cmd /c npm.cmd run build`
+- Blockers or caveats:
+  - BMKG now has client query coverage, but no visible globe/layer/panel integration was added in this assignment because the current environmental shell pattern would require touching shared store, AppShell, LayerPanel, and inspector surfaces more broadly than the brief allowed.
+  - BMKG semantics remain explicit and source-specific: regional-authority source, latest event and recent bounded list are distinct views, early parameters may be revised, and magnitude alone does not imply damage.
+- Next recommended task:
+  - If Manager AI wants BMKG surfaced in-product next, assign a tightly bounded follow-on patch for one isolated BMKG display surface with explicit approval to touch shared environmental layer/store wiring.
+
+## 2026-04-30 14:02:25 -05:00
+
+- Task:
+  - Implemented the first bounded `bmkg-earthquakes` slice as a fixture-first regional-authority earthquake backend source.
+- What changed:
+  - Added BMKG-specific backend settings, typed API contracts, a fixture-first service, and a narrow `/api/events/bmkg-earthquakes/recent` route.
+  - Added a deterministic combined fixture covering the latest event plus the recent bounded public list.
+  - Added focused backend tests for provenance, latest-event preservation, magnitude filtering, sort behavior, and invalid params.
+  - Added a source-specific doc that captures the exact BMKG endpoint family and caveats around early revisions and non-damage semantics.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/routes/events.py`
+  - `app/server/src/services/bmkg_earthquakes_service.py`
+  - `app/server/data/bmkg_earthquakes_fixture.json`
+  - `app/server/tests/test_bmkg_earthquakes.py`
+  - `app/docs/environmental-events-bmkg-earthquakes.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_bmkg_earthquakes.py -q` passed
+  - `python -m compileall app/server/src` passed
+- Blockers or caveats:
+  - No frontend wiring was added in this slice to avoid broad shared shell/state edits.
+  - BMKG semantics remain source-specific: latest event may be below M5 while the bounded recent list is the BMKG public M5+ feed.
+  - Caveats preserved: early parameters may be revised, BMKG attribution is required, and magnitude/felt reports alone do not imply damage or local impact.
+- Next recommended task:
+  - Add a minimal isolated BMKG client query helper and optional environmental layer wiring only if it can be done without broad edits to shared shell or cross-domain state files.

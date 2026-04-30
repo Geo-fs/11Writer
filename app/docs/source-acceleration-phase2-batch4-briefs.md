@@ -1,0 +1,1051 @@
+# Phase 2 Batch 4 Source Briefs
+
+This pack classifies Batch 4 source candidates for the 11Writer no-auth, fixture-first, evidence-aware fusion layer.
+
+Classification meanings:
+
+- `assignment-ready`
+  - narrow first slice is clear
+  - no-auth posture is sufficiently verified
+  - machine-readable endpoint is pinned or strongly documented
+- `needs-verification`
+  - public/open posture looks plausible, but endpoint details, auth posture, or contract shape still need confirmation
+- `deferred`
+  - source is open enough, but current first-slice complexity or catalog breadth is a poor fit for immediate Phase 2 work
+- `duplicate`
+  - overlaps too directly with already-covered capability
+- `rejected`
+  - violates no-auth / no-signup / no-CAPTCHA / no-interactive-scraping rules
+
+## Top 10 Recommended Next Assignments
+
+Ranked by no-auth confidence, machine-readable structure, implementation simplicity, fit with the current fusion-layer architecture, usefulness for Phase 2, and expected validation difficulty.
+
+1. `bmkg-earthquakes`
+   - regional authority earthquake layer with explicit public JSON feeds and rate-limit guidance
+2. `gb-carbon-intensity`
+   - clean official open API with regional context and simple response shape
+3. `unhcr-refugee-data-finder`
+   - strong country/region displacement context with official open REST API
+4. `worldbank-indicators`
+   - highly stable global baseline context API with straightforward country-indicator normalization
+5. `uk-police-crime`
+   - official open JSON API with useful approximate civic context if semantics stay bounded
+6. `london-air-quality-network`
+   - well-scoped urban station layer with validated readings and existing API docs
+7. `france-vigicrues-hydrometry`
+   - strong official hydrometry context path with JSON/GeoJSON support
+8. `elexon-insights-grid`
+   - official no-key grid context API, but keep the first dataset family narrow
+9. `ga-recent-earthquakes`
+   - useful regional authority earthquake supplement for Australia via public KML
+10. `france-georisques`
+   - open public risk-reference API with clear enrichment value, though not a live alert feed
+
+## Hold / Reject Summary
+
+### Rejected
+
+- `reliefweb-humanitarian-updates`
+  - current read API docs say a pre-approved `appname` is required from 1 November 2025
+
+### Deferred
+
+- `openaq-aws-hourly`
+  - open and useful, but archive-scale bucket navigation and location discovery make it heavier than the current best Phase 2 wins
+- `hdx-ckan-open-resources`
+  - valuable for discovery, but catalog breadth is too high for a first implementation slice
+- `usgs-landslide-inventory`
+  - useful reference layer, but large geodata/reference integration is a poorer immediate fit than narrower event/context feeds
+
+### Needs-verification
+
+- `un-population-api`
+- `uk-ea-water-quality`
+- `ingv-seismic-fdsn`
+- `orfeus-eida-federator`
+- `germany-smard-power`
+- `france-georisques`
+- `iom-dtm-public-displacement`
+
+### Context / Reference Emphasis
+
+These are valuable, but should be treated as context or reference layers rather than live event feeds:
+
+- `unhcr-refugee-data-finder`
+- `worldbank-indicators`
+- `un-population-api`
+- `gb-carbon-intensity`
+- `elexon-insights-grid`
+- `france-georisques`
+- `usgs-landslide-inventory`
+- `hdx-ckan-open-resources`
+- `iom-dtm-public-displacement`
+
+## Source Briefs
+
+### `reliefweb-humanitarian-updates`
+
+- Classification: `rejected`
+- Official docs URL:
+  - [ReliefWeb API docs](https://apidoc.reliefweb.int/)
+- Sample endpoint if verified:
+  - [Endpoints overview](https://apidoc.reliefweb.int/endpoints)
+- Auth / no-signup / CAPTCHA status:
+  - Read API was historically open, but current docs say V2 requests require a pre-approved `appname` from 2025-11-01
+  - This is not acceptable under the current no-signup rule
+- Endpoint type:
+  - REST JSON content API
+- Owner agent recommendation:
+  - `geospatial` if policy changes later
+- Consumer agents:
+  - `marine`, `connect`
+- First implementation slice:
+  - none under current rules
+- Normalized fields:
+  - not applicable in this pass
+- Backend route proposal:
+  - none
+- Client query/helper proposal:
+  - none
+- Fixture strategy:
+  - none
+- Source health/freshness strategy:
+  - none
+- Evidence basis:
+  - contextual/source-linked reporting, not direct ground-truth incident confirmation
+- Caveats:
+  - humanitarian reports are contextual report content, not direct operational truth
+- Do-not-do list:
+  - do not bypass the appname requirement or scrape the interactive site
+- Validation commands:
+  - recheck docs only if policy changes
+- Paste-ready implementation prompt:
+  - not assignment-ready
+- Downgrade/reject trigger:
+  - current appname approval requirement remains in force
+
+### `unhcr-refugee-data-finder`
+
+- Classification: `assignment-ready`
+- Official docs URL:
+  - [UNHCR Refugee Statistics API docs](https://api.unhcr.org/docs/refugee-statistics.html)
+  - [UNHCR explainer](https://www.unhcr.org/refugee-statistics/insights/explainers/forcibly-displaced-api.html)
+- Sample endpoint if verified:
+  - `https://api.unhcr.org/population/v1/population/?limit=10`
+- Auth / no-signup / CAPTCHA status:
+  - official docs describe the API as open to all with no special credentials
+- Endpoint type:
+  - REST JSON
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `marine`, `connect`
+- First implementation slice:
+  - country or region displacement baseline context using population stock figures only
+- Normalized fields:
+  - `source_id`
+  - `country_asylum`
+  - `country_origin`
+  - `year`
+  - `population_group`
+  - `value`
+  - `unit`
+  - `source_url`
+  - `source_mode`
+  - `caveat`
+  - `evidence_basis`
+- Backend route proposal:
+  - `GET /api/context/displacement/unhcr`
+- Client query/helper proposal:
+  - `useUnhcrDisplacementContextQuery`
+- Fixture strategy:
+  - one fixture for country-level stock data
+  - one fixture for empty/no-match
+  - one fixture with missing optional dimensions
+- Source health/freshness strategy:
+  - expose fetched time, dataset year, and note that these are baseline statistics rather than live incident feeds
+- Evidence basis:
+  - `source-reported`, `contextual`
+- Caveats:
+  - baseline displacement context only
+  - do not render as precise point events unless future source geometry is explicit
+- Do-not-do list:
+  - do not imply real-time movements
+  - do not infer local camp conditions from national totals
+- Validation commands:
+  - `python -m pytest app/server/tests/test_unhcr_displacement_contracts.py -q`
+  - `python -m compileall app/server/src`
+- Paste-ready implementation prompt:
+  - Implement `unhcr-refugee-data-finder` as a geospatial country/region displacement context source. Stay fixture-first. First slice only: country/region baseline stock figures from the official open UNHCR API, no live incident mapping, no point fabrication. Add typed backend contracts, one narrow route, client query helper, source health, export metadata, and caveat language that keeps the data contextual/baseline only.
+- Downgrade/reject trigger:
+  - any new credential requirement or withdrawal of public open access
+
+### `worldbank-indicators`
+
+- Classification: `assignment-ready`
+- Official docs URL:
+  - [World Bank Indicators API docs](https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation)
+  - [Indicator query docs](https://datahelpdesk.worldbank.org/knowledgebase/articles/898599-indicator-api-queries)
+- Sample endpoint if verified:
+  - `https://api.worldbank.org/v2/country/all/indicator/SP.POP.TOTL?format=json`
+- Auth / no-signup / CAPTCHA status:
+  - official docs say API keys and authentication are not necessary
+- Endpoint type:
+  - REST XML/JSON
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `marine`, `connect`
+- First implementation slice:
+  - one fixed indicator bundle for country baseline enrichment such as population, electricity access, and land area
+- Normalized fields:
+  - `country_code`
+  - `country_name`
+  - `indicator_code`
+  - `indicator_name`
+  - `year`
+  - `value`
+  - `unit`
+  - `source_note`
+  - `source_url`
+  - `source_mode`
+  - `caveat`
+  - `evidence_basis`
+- Backend route proposal:
+  - `GET /api/context/country/worldbank-indicators`
+- Client query/helper proposal:
+  - `useWorldBankCountryContextQuery`
+- Fixture strategy:
+  - fixed multi-indicator country fixture
+  - null-value fixture
+  - empty-country fixture
+- Source health/freshness strategy:
+  - expose fetched time plus indicator year
+  - keep source health separate from indicator recency
+- Evidence basis:
+  - `source-reported`, `contextual`
+- Caveats:
+  - baseline country context only
+  - not an event feed
+- Do-not-do list:
+  - do not infer incident-scale impacts from national baselines
+  - do not fetch the full catalog in the first slice
+- Validation commands:
+  - `python -m pytest app/server/tests/test_worldbank_context_contracts.py -q`
+- Paste-ready implementation prompt:
+  - Implement `worldbank-indicators` as a fixture-first geospatial country-context source. First slice only: one fixed shortlist of country indicators through the official open V2 API. No generic catalog browser, no broad topic ingestion. Add typed backend contracts, route, fixture tests, client query helper, source health, and export metadata. Keep semantics contextual only.
+- Downgrade/reject trigger:
+  - if endpoint behavior changes to require auth or if fixed-indicator slice cannot be pinned cleanly
+
+### `un-population-api`
+
+- Classification: `needs-verification`
+- Official docs URL:
+  - [UNdata API manual](https://data.un.org/Host.aspx?Content=API)
+  - [UNSD API catalogue](https://unstats.un.org/unsd/api/)
+- Sample endpoint if verified:
+  - no narrow Population Data Portal JSON endpoint was pinned in this pass
+- Auth / no-signup / CAPTCHA status:
+  - UNdata web-service access appears open, but the specific Population Data Portal API path was not pinned
+- Endpoint type:
+  - SDMX REST/SOAP style service
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - verify one country demographic series with stable machine endpoint before assignment
+- Normalized fields:
+  - likely `country`, `year`, `indicator`, `value`, `unit`, `source_url`
+- Backend route proposal:
+  - `GET /api/context/demographics/un-population`
+- Client query/helper proposal:
+  - `useUnPopulationContextQuery`
+- Fixture strategy:
+  - only after endpoint verification
+- Source health/freshness strategy:
+  - treat values as baseline demographics, not live updates
+- Evidence basis:
+  - `source-reported`, `contextual`
+- Caveats:
+  - baseline only
+  - exact portal-vs-UNdata contract still unclear
+- Do-not-do list:
+  - do not implement against unofficial proxies
+  - do not assume JSON if only SDMX/SOAP is verified
+- Validation commands:
+  - docs verification first
+- Paste-ready implementation prompt:
+  - not assignment-ready
+- Downgrade/reject trigger:
+  - if only portal UI or non-public endpoints are available
+
+### `uk-police-crime`
+
+- Classification: `assignment-ready`
+- Official docs URL:
+  - [Police API catalogue entry](https://www.api.gov.uk/ukp/police-api/)
+- Sample endpoint if verified:
+  - `https://data.police.uk/api/crimes-street/all-crime?lat=52.629729&lng=-1.131592`
+- Auth / no-signup / CAPTCHA status:
+  - public API, no authentication required
+  - widely cited rate limit: 15 req/s average, burst 30
+- Endpoint type:
+  - REST JSON
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - approximate street-crime context for a selected location using `crimes-street` plus category metadata
+- Normalized fields:
+  - `crime_id`
+  - `category`
+  - `month`
+  - `reported_by`
+  - `location_lat`
+  - `location_lon`
+  - `location_approximate`
+  - `outcome_status`
+  - `source_url`
+  - `source_mode`
+  - `caveat`
+  - `evidence_basis`
+- Backend route proposal:
+  - `GET /api/context/uk-police/crime`
+- Client query/helper proposal:
+  - `useUkPoliceCrimeContextQuery`
+- Fixture strategy:
+  - one approximate-location crime fixture
+  - one empty-area fixture
+  - one outcome-missing fixture
+- Source health/freshness strategy:
+  - expose requested month and fetched time
+  - note this is published crime context, not live dispatch
+- Evidence basis:
+  - `source-reported`, `contextual`
+- Caveats:
+  - approximate/anonymized locations
+  - not live incident reporting
+- Do-not-do list:
+  - do not infer individual behavior
+  - do not imply exact point precision
+  - do not use as live tactical incident feed
+- Validation commands:
+  - `python -m pytest app/server/tests/test_uk_police_crime_context.py -q`
+- Paste-ready implementation prompt:
+  - Implement `uk-police-crime` as a fixture-first geospatial civic-context source. First slice only: approximate street-level crime context for a selected lat/lon and month, plus category and outcome summary. Preserve anonymized-location semantics, source health, and caveats. Do not present it as live incident reporting and do not support person-level inference.
+- Downgrade/reject trigger:
+  - if authentication or new access restrictions appear in official docs
+
+### `uk-ea-water-quality`
+
+- Classification: `needs-verification`
+- Official docs URL:
+  - [Water Quality collection](https://www.data.gov.uk/collections/environment/water-quality)
+  - [API catalogue entry](https://www.api.gov.uk/ea/water-quality/)
+- Sample endpoint if verified:
+  - no concrete machine query path was pinned from the current docs pass
+- Auth / no-signup / CAPTCHA status:
+  - open/public API is claimed
+- Endpoint type:
+  - linked-data / JSON / CSV API family
+- Owner agent recommendation:
+  - `marine`
+- Consumer agents:
+  - `geospatial`, `connect`
+- First implementation slice:
+  - verify one narrow sampling-point or latest-measurement endpoint before assignment
+- Normalized fields:
+  - likely `sampling_point_id`, `sample_time`, `parameter`, `value`, `unit`, `water_body`
+- Backend route proposal:
+  - `GET /api/context/water-quality/uk-ea`
+- Client query/helper proposal:
+  - `useUkEaWaterQualityContextQuery`
+- Fixture strategy:
+  - after endpoint verification only
+- Source health/freshness strategy:
+  - distinguish sample time from fetch time
+- Evidence basis:
+  - `observed` for actual samples
+- Caveats:
+  - sampling records are not continuous live pollution alarms
+- Do-not-do list:
+  - do not infer contamination events from a single sample
+  - do not implement from explorer-page scraping
+- Validation commands:
+  - docs verification first
+- Paste-ready implementation prompt:
+  - not assignment-ready
+- Downgrade/reject trigger:
+  - if only interactive explorer flows remain practical
+
+### `london-air-quality-network`
+
+- Classification: `assignment-ready`
+- Official docs URL:
+  - [London Air API](https://www.londonair.org.uk/Londonair/API/)
+- Sample endpoint if verified:
+  - docs root verified; exact first query path should be taken from the documented API help during implementation
+- Auth / no-signup / CAPTCHA status:
+  - public API access described; no key or login requirement surfaced in the docs page
+- Endpoint type:
+  - REST/XML/JSON style data feeds
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - station metadata plus latest validated air-quality index/reading for a small set of London sites
+- Normalized fields:
+  - `station_id`
+  - `station_name`
+  - `latitude`
+  - `longitude`
+  - `pollutant`
+  - `measured_at`
+  - `value`
+  - `unit`
+  - `aq_index`
+  - `source_url`
+  - `source_mode`
+  - `caveat`
+  - `evidence_basis`
+- Backend route proposal:
+  - `GET /api/environment/air-quality/londonair`
+- Client query/helper proposal:
+  - `useLondonAirQualityStationsQuery`
+- Fixture strategy:
+  - latest-station fixture
+  - sparse-station fixture
+  - empty/no-station fixture
+- Source health/freshness strategy:
+  - expose measurement timestamp and fetched time
+  - distinguish validated readings from index/objective context
+- Evidence basis:
+  - `observed` for station readings
+  - `contextual` for index/objective fields
+- Caveats:
+  - station readings are not area-wide modeled truth
+- Do-not-do list:
+  - do not interpolate citywide conditions from one station
+  - do not merge validated readings and objective thresholds into one evidence class
+- Validation commands:
+  - `python -m pytest app/server/tests/test_london_air_quality.py -q`
+- Paste-ready implementation prompt:
+  - Implement `london-air-quality-network` as a fixture-first geospatial air-quality station source. First slice only: station metadata plus latest validated reading/index for a bounded London subset. Preserve observed-vs-context distinction, source health, measurement timestamps, and export metadata. No citywide interpolation layer in the first patch.
+- Downgrade/reject trigger:
+  - if exact machine endpoint paths cannot be pinned cleanly from the official docs during implementation
+
+### `openaq-aws-hourly`
+
+- Classification: `deferred`
+- Official docs URL:
+  - [OpenAQ AWS open data docs](https://docs.openaq.org/aws/about)
+- Sample endpoint if verified:
+  - `https://openaq-data-archive.s3.amazonaws.com/records/csv.gz/locationid=2178/year=2022/month=05/location-2178-20220503.csv.gz`
+- Auth / no-signup / CAPTCHA status:
+  - public AWS open-data layout, no signup required
+- Endpoint type:
+  - static archive files on S3
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - not recommended immediately; if revisited, one known location/day file only
+- Normalized fields:
+  - `location_id`, `sensor_id`, `location`, `datetime`, `latitude`, `longitude`, `parameter`, `unit`, `value`
+- Backend route proposal:
+  - `GET /api/environment/air-quality/openaq-hourly`
+- Client query/helper proposal:
+  - `useOpenAqHourlyContextQuery`
+- Fixture strategy:
+  - one pre-downloaded daily CSV fixture only
+- Source health/freshness strategy:
+  - archive write delay is explicit; do not present as real-time
+- Evidence basis:
+  - `observed`, `source-reported`
+- Caveats:
+  - heavy archive layout and delayed writes make it a weaker immediate fit than narrower APIs
+- Do-not-do list:
+  - do not bulk-download large prefixes
+  - do not present archive data as live observations
+- Validation commands:
+  - fixture-only parsing tests if revived
+- Paste-ready implementation prompt:
+  - not assignment-ready
+- Downgrade/reject trigger:
+  - if location discovery and bounded daily retrieval remain too awkward for the current architecture
+
+### `bmkg-earthquakes`
+
+- Classification: `assignment-ready`
+- Official docs URL:
+  - [BMKG open earthquake data](https://data.bmkg.go.id/gempabumi/)
+- Sample endpoint if verified:
+  - `https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json`
+  - `https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json`
+- Auth / no-signup / CAPTCHA status:
+  - public open data
+  - published limit: 60 requests per minute per IP
+- Endpoint type:
+  - JSON/XML file feeds
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - latest earthquake plus recent M5+ list from official BMKG JSON feeds
+- Normalized fields:
+  - `event_id`
+  - `event_time`
+  - `magnitude`
+  - `depth_km`
+  - `latitude`
+  - `longitude`
+  - `region`
+  - `felt_summary`
+  - `tsunami_flag`
+  - `source_url`
+  - `source_mode`
+  - `caveat`
+  - `evidence_basis`
+- Backend route proposal:
+  - `GET /api/events/bmkg-earthquakes/recent`
+- Client query/helper proposal:
+  - `useBmkgEarthquakesQuery`
+- Fixture strategy:
+  - latest quake fixture
+  - recent-list fixture
+  - empty/no-match fixture
+- Source health/freshness strategy:
+  - expose feed timestamp and fetched time
+  - keep early/revised-parameter caveat visible
+- Evidence basis:
+  - `source-reported`, `observed`
+- Caveats:
+  - early real-time parameters may change after review
+- Do-not-do list:
+  - do not merge BMKG and USGS into one authority scale
+  - do not infer damage from magnitude alone
+- Validation commands:
+  - `python -m pytest app/server/tests/test_bmkg_earthquakes.py -q`
+- Paste-ready implementation prompt:
+  - Implement `bmkg-earthquakes` as a fixture-first geospatial regional-authority earthquake layer. First slice only: latest event plus recent M5+ list from official BMKG JSON feeds. Add typed backend contracts, normalized route, client query/layer wiring, source health, export metadata, and explicit caveats that early parameters may be revised and magnitude alone does not imply damage.
+- Downgrade/reject trigger:
+  - if published JSON endpoints disappear or require non-public access
+
+### `ga-recent-earthquakes`
+
+- Classification: `assignment-ready`
+- Official docs URL:
+  - [data.gov.au dataset](https://data.gov.au/data/dataset/recent-earthquakes)
+- Sample endpoint if verified:
+  - `http://www.ga.gov.au/earthquakes/all_recent.kml`
+- Auth / no-signup / CAPTCHA status:
+  - public downloadable KML, no auth surfaced
+- Endpoint type:
+  - KML geospatial feed
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - recent regional earthquake parsing from the public KML only
+- Normalized fields:
+  - `event_id`
+  - `event_time`
+  - `magnitude`
+  - `latitude`
+  - `longitude`
+  - `depth_km`
+  - `region`
+  - `source_url`
+  - `source_mode`
+  - `caveat`
+  - `evidence_basis`
+- Backend route proposal:
+  - `GET /api/events/ga-earthquakes/recent`
+- Client query/helper proposal:
+  - `useGaEarthquakesQuery`
+- Fixture strategy:
+  - one KML fixture with several events
+  - one empty fixture
+- Source health/freshness strategy:
+  - expose fetched time and any source-updated field available from KML/item text
+- Evidence basis:
+  - `source-reported`, `observed`
+- Caveats:
+  - KML contract is narrower and less pleasant than JSON/GeoJSON feeds
+- Do-not-do list:
+  - do not over-normalize into USGS-specific semantics
+  - do not infer impact from magnitude alone
+- Validation commands:
+  - `python -m pytest app/server/tests/test_ga_earthquakes.py -q`
+- Paste-ready implementation prompt:
+  - Implement `ga-recent-earthquakes` as a fixture-first geospatial regional-authority earthquake source. First slice only: parse the public recent-earthquakes KML into normalized recent events. Add typed contracts, route, client query helper, source health, and export metadata. Keep semantics bounded to source-reported seismic context and avoid damage claims.
+- Downgrade/reject trigger:
+  - if the KML feed is withdrawn or turns out too brittle for deterministic fixture-backed parsing
+
+### `ingv-seismic-fdsn`
+
+- Classification: `needs-verification`
+- Official docs URL:
+  - [FDSN INGV data center listing](https://www.fdsn.org/datacenters/detail/INGV/)
+- Sample endpoint if verified:
+  - `https://webservices.ingv.it/fdsnws/station/1/`
+- Auth / no-signup / CAPTCHA status:
+  - public station/metadata access appears open
+  - unrestricted public event path was not pinned clearly in this pass
+- Endpoint type:
+  - FDSN web services
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - verify one public event or station-metadata query before assignment
+- Normalized fields:
+  - likely station or event metadata fields, depending confirmed slice
+- Backend route proposal:
+  - `GET /api/context/seismic/ingv`
+- Client query/helper proposal:
+  - `useIngvSeismicContextQuery`
+- Fixture strategy:
+  - only after endpoint verification
+- Source health/freshness strategy:
+  - expose query-time and stated source service
+- Evidence basis:
+  - `source-reported`
+- Caveats:
+  - regional authority value is real, but first slice is not pinned tightly enough yet
+- Do-not-do list:
+  - do not start with waveform access
+  - do not treat station metadata as event feed
+- Validation commands:
+  - docs verification first
+- Paste-ready implementation prompt:
+  - not assignment-ready
+- Downgrade/reject trigger:
+  - if only station/waveform metadata remains easy while public event access stays unclear
+
+### `orfeus-eida-federator`
+
+- Classification: `needs-verification`
+- Official docs URL:
+  - [ORFEUS EIDA Federator](https://www.orfeus-eu.org/data/eida/nodes/FEDERATOR/)
+- Sample endpoint if verified:
+  - `https://federator.orfeus-eu.org/fdsnws/station/1/`
+- Auth / no-signup / CAPTCHA status:
+  - unrestricted public metadata access is documented
+  - service is oriented to station/waveform discovery, not a clean event feed
+- Endpoint type:
+  - federated FDSN/EIDA services
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - verify whether a station-availability context slice is actually valuable enough for the product before assignment
+- Normalized fields:
+  - station or availability metadata only, if used
+- Backend route proposal:
+  - `GET /api/context/seismic/orfeus-eida`
+- Client query/helper proposal:
+  - `useOrfeusEidaContextQuery`
+- Fixture strategy:
+  - only after a narrow slice is justified
+- Source health/freshness strategy:
+  - keep federator best-effort caveats explicit
+- Evidence basis:
+  - `source-reported`, `contextual`
+- Caveats:
+  - not a direct earthquake-event source
+  - partial fulfillment behavior is documented
+- Do-not-do list:
+  - do not start with waveform download
+  - do not imply complete coverage if one node is unavailable
+- Validation commands:
+  - docs verification first
+- Paste-ready implementation prompt:
+  - not assignment-ready
+- Downgrade/reject trigger:
+  - if the slice remains metadata-heavy and low-leverage relative to simpler regional authority feeds
+
+### `gb-carbon-intensity`
+
+- Classification: `assignment-ready`
+- Official docs URL:
+  - [Official Carbon Intensity API](https://api.carbonintensity.org.uk/)
+- Sample endpoint if verified:
+  - `https://api.carbonintensity.org.uk/regional`
+- Auth / no-signup / CAPTCHA status:
+  - official public API, no auth surfaced
+- Endpoint type:
+  - REST JSON/XML
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - current regional carbon intensity plus short-horizon forecast for GB regions
+- Normalized fields:
+  - `region_id`
+  - `region_name`
+  - `from`
+  - `to`
+  - `forecast_intensity`
+  - `actual_intensity`
+  - `index`
+  - `generation_mix`
+  - `source_url`
+  - `source_mode`
+  - `caveat`
+  - `evidence_basis`
+- Backend route proposal:
+  - `GET /api/context/grid/gb-carbon-intensity`
+- Client query/helper proposal:
+  - `useGbCarbonIntensityQuery`
+- Fixture strategy:
+  - regional current fixture
+  - forecast fixture
+  - unavailable/partial fixture
+- Source health/freshness strategy:
+  - expose interval start/end and fetched time
+  - keep forecast vs estimated distinction explicit
+- Evidence basis:
+  - `source-reported`, `contextual`
+- Caveats:
+  - grid/carbon context only
+  - not outage or failure evidence
+- Do-not-do list:
+  - do not infer supply failure or regional outage from intensity alone
+  - do not merge forecast and actual into one certainty class
+- Validation commands:
+  - `python -m pytest app/server/tests/test_gb_carbon_intensity.py -q`
+- Paste-ready implementation prompt:
+  - Implement `gb-carbon-intensity` as a fixture-first geospatial regional grid-context source. First slice only: current and near-term regional carbon-intensity values from the official API. Preserve forecast-vs-estimated semantics, source health, time intervals, and export metadata. Treat the data as context only and do not infer outages or operational failures.
+- Downgrade/reject trigger:
+  - if public access terms change or regional endpoints become unstable
+
+### `elexon-insights-grid`
+
+- Classification: `assignment-ready`
+- Official docs URL:
+  - [Elexon Insights Solution Developer Portal](https://developer.data.elexon.co.uk/)
+- Sample endpoint if verified:
+  - developer portal root verified; exact dataset endpoint should be pinned during implementation from the official public OpenAPI definitions
+- Auth / no-signup / CAPTCHA status:
+  - official portal states all APIs are public and no API key is required
+- Endpoint type:
+  - REST dataset APIs
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - one narrow dataset family only, such as GB demand or generation mix summary
+- Normalized fields:
+  - `dataset_id`
+  - `publish_time`
+  - `interval_start`
+  - `interval_end`
+  - `region` or `gb`
+  - `value`
+  - `unit`
+  - `source_url`
+  - `source_mode`
+  - `caveat`
+  - `evidence_basis`
+- Backend route proposal:
+  - `GET /api/context/grid/elexon`
+- Client query/helper proposal:
+  - `useElexonGridContextQuery`
+- Fixture strategy:
+  - one dataset-family fixture
+  - empty interval fixture
+  - superseded-data fixture if useful
+- Source health/freshness strategy:
+  - expose publish time vs fetched time
+  - keep superseded-data semantics explicit if used later
+- Evidence basis:
+  - `source-reported`, `contextual`
+- Caveats:
+  - grid context only
+  - first slice must stay bounded to one dataset family
+- Do-not-do list:
+  - do not ingest the whole portal
+  - do not infer outages or failures unless the source explicitly says so
+- Validation commands:
+  - `python -m pytest app/server/tests/test_elexon_grid_context.py -q`
+- Paste-ready implementation prompt:
+  - Implement `elexon-insights-grid` as a fixture-first GB grid-context source. First slice only: one public dataset family from the official no-key Insights APIs, with typed contracts, route, client query helper, source health, and export metadata. Keep it contextual only, do not infer outages, and do not expand into the broader portal in the same patch.
+- Downgrade/reject trigger:
+  - if the exact public dataset endpoint cannot be pinned from the official portal without broad exploratory work
+
+### `germany-smard-power`
+
+- Classification: `needs-verification`
+- Official docs URL:
+  - [SMARD data use](https://www.smard.de/en/datennutzung)
+- Sample endpoint if verified:
+  - community-documented path exists, but an official first-party OpenAPI reference was not pinned in this pass
+- Auth / no-signup / CAPTCHA status:
+  - public data use is explicit
+  - official machine endpoint documentation still needs a cleaner first-party pin
+- Endpoint type:
+  - time-series API / JSON files
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - verify one official generation or load series endpoint before assignment
+- Normalized fields:
+  - likely `timestamp`, `region`, `metric`, `value`, `unit`
+- Backend route proposal:
+  - `GET /api/context/grid/smard`
+- Client query/helper proposal:
+  - `useSmardGridContextQuery`
+- Fixture strategy:
+  - after endpoint verification only
+- Source health/freshness strategy:
+  - time-series timestamp plus fetched time
+- Evidence basis:
+  - `source-reported`, `contextual`
+- Caveats:
+  - grid context only
+- Do-not-do list:
+  - do not rely on community reverse-engineered docs alone
+- Validation commands:
+  - docs verification first
+- Paste-ready implementation prompt:
+  - not assignment-ready
+- Downgrade/reject trigger:
+  - if only unofficial API descriptions remain practical
+
+### `france-vigicrues-hydrometry`
+
+- Classification: `assignment-ready`
+- Official docs URL:
+  - [Hub'Eau Hydrométrie](https://www.data.gouv.fr/dataservices/hubeau-hydrometrie/)
+- Sample endpoint if verified:
+  - docs verify public `sites`, `stations`, and `observations_tr` endpoint families; exact query URL should be pinned during implementation from the official operation docs
+- Auth / no-signup / CAPTCHA status:
+  - open public REST API
+- Endpoint type:
+  - REST JSON/GeoJSON/CSV/XML
+- Owner agent recommendation:
+  - `marine`
+- Consumer agents:
+  - `geospatial`, `connect`
+- First implementation slice:
+  - station metadata plus latest realtime water-height or flow observations for a bounded area
+- Normalized fields:
+  - `station_id`
+  - `station_name`
+  - `latitude`
+  - `longitude`
+  - `parameter`
+  - `observed_at`
+  - `value`
+  - `unit`
+  - `river_basin`
+  - `source_url`
+  - `source_mode`
+  - `caveat`
+  - `evidence_basis`
+- Backend route proposal:
+  - `GET /api/context/hydrology/vigicrues-hydrometry`
+- Client query/helper proposal:
+  - `useVigicruesHydrometryQuery`
+- Fixture strategy:
+  - station metadata fixture
+  - latest observation fixture
+  - empty/no-station fixture
+- Source health/freshness strategy:
+  - expose observed time, fetched time, and parameter family
+- Evidence basis:
+  - `observed`
+- Caveats:
+  - hydrometry context only
+  - observations are not flood-impact confirmation
+- Do-not-do list:
+  - do not conflate water height and flow
+  - do not infer inundation or damage from station values alone
+- Validation commands:
+  - `python -m pytest app/server/tests/test_vigicrues_hydrometry.py -q`
+- Paste-ready implementation prompt:
+  - Implement `france-vigicrues-hydrometry` as a fixture-first marine/geospatial river-condition source. First slice only: station metadata plus latest realtime water-height or flow observations from the official public API. Preserve observed timestamps, units, source health, and export metadata. Treat it as hydrology context only; no flood-impact claims.
+- Downgrade/reject trigger:
+  - if exact operation URLs cannot be pinned from the official docs during implementation
+
+### `france-georisques`
+
+- Classification: `needs-verification`
+- Official docs URL:
+  - [API Géorisques](https://www.data.gouv.fr/dataservices/api-georisques)
+- Sample endpoint if verified:
+  - API service page verified, but concrete first request URL was not pinned in this pass
+- Auth / no-signup / CAPTCHA status:
+  - open access
+  - published rate limit: 1000 requests/minute per IP
+- Endpoint type:
+  - public risk-reference API
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - verify one narrow risk family, such as seismic zoning or landslide-related ground-movement risk
+- Normalized fields:
+  - likely `territory_id`, `risk_type`, `document_type`, `reference_url`, `updated_at`
+- Backend route proposal:
+  - `GET /api/context/risk/georisques`
+- Client query/helper proposal:
+  - `useGeorisquesRiskContextQuery`
+- Fixture strategy:
+  - only after first-request path is pinned
+- Source health/freshness strategy:
+  - expose fetched time and risk-doc update time if present
+- Evidence basis:
+  - `source-reported`, `contextual`, `reference`
+- Caveats:
+  - risk-reference layer, not live alerts
+- Do-not-do list:
+  - do not present static risk zoning as active incident evidence
+  - do not start with the whole risk family catalog
+- Validation commands:
+  - docs verification first
+- Paste-ready implementation prompt:
+  - not assignment-ready
+- Downgrade/reject trigger:
+  - if concrete machine query paths remain too opaque for a bounded first slice
+
+### `usgs-landslide-inventory`
+
+- Classification: `deferred`
+- Official docs URL:
+  - [USGS landslide inventory and susceptibility map](https://www.usgs.gov/tools/us-landslide-inventory-and-susceptibility-map)
+  - [USGS data catalog entry](https://data.usgs.gov/datacatalog/data/USGS%3A671eef1fd34ed0f827ea9f12)
+- Sample endpoint if verified:
+  - catalog/data release pages verified; direct first-slice machine asset path not pinned in this pass
+- Auth / no-signup / CAPTCHA status:
+  - public/open data release
+- Endpoint type:
+  - geodata release / inventory database
+- Owner agent recommendation:
+  - `geospatial`
+- Consumer agents:
+  - `connect`
+- First implementation slice:
+  - not immediate; if revisited, a narrow reference summary by region or bbox would be the safer first slice
+- Normalized fields:
+  - likely landslide id, class, confidence, source link, geometry
+- Backend route proposal:
+  - `GET /api/context/landslide/usgs-inventory`
+- Client query/helper proposal:
+  - `useUsgsLandslideInventoryQuery`
+- Fixture strategy:
+  - pre-extracted small fixture only
+- Source health/freshness strategy:
+  - reference-dataset vintage, not live freshness
+- Evidence basis:
+  - `reference`, `source-reported`
+- Caveats:
+  - susceptibility/reference layer, not live alerts
+- Do-not-do list:
+  - do not imply current landslide activity from susceptibility alone
+  - do not pull full national geodata as a first slice
+- Validation commands:
+  - fixture-only parsing tests if revived
+- Paste-ready implementation prompt:
+  - not assignment-ready
+- Downgrade/reject trigger:
+  - if first-slice value remains lower than narrower active context sources
+
+### `hdx-ckan-open-resources`
+
+- Classification: `deferred`
+- Official docs URL:
+  - [HDX CKAN API overview](https://centre.humdata.org/ufaqs/about-the-humanitarian-data-exchange-api/)
+- Sample endpoint if verified:
+  - generic CKAN API family is documented, but first-slice dataset/resource selection remains too broad in this pass
+- Auth / no-signup / CAPTCHA status:
+  - public metadata access is documented for HDX CKAN
+- Endpoint type:
+  - CKAN metadata/catalog API
+- Owner agent recommendation:
+  - `gather`
+- Consumer agents:
+  - `geospatial`, `marine`, `connect`
+- First implementation slice:
+  - if revisited, metadata-only search for public geospatial/humanitarian resources without file downloads
+- Normalized fields:
+  - dataset id, title, organization, format, url, visibility, last modified
+- Backend route proposal:
+  - `GET /api/source-discovery/hdx-ckan`
+- Client query/helper proposal:
+  - `useHdxCatalogDiscoveryQuery`
+- Fixture strategy:
+  - metadata-only search fixture
+- Source health/freshness strategy:
+  - expose dataset last-modified and fetch time
+- Evidence basis:
+  - `metadata`, `contextual`
+- Caveats:
+  - discovery/catalog only
+  - many resources may still be restricted or operationally unsuitable
+- Do-not-do list:
+  - do not bulk-download large resources
+  - do not assume every listed dataset is public/open for direct use
+- Validation commands:
+  - fixture-only metadata tests if revived
+- Paste-ready implementation prompt:
+  - not assignment-ready
+- Downgrade/reject trigger:
+  - if public-only resource filtering cannot be kept deterministic and narrow
+
+### `iom-dtm-public-displacement`
+
+- Classification: `needs-verification`
+- Official docs URL:
+  - [IOM DTM data portal](https://dtm.iom.int/)
+  - [HDX CKAN / public access explainer](https://centre.humdata.org/ufaqs/how-do-i-access-the-hdx-api/)
+- Sample endpoint if verified:
+  - no stable public machine endpoint was pinned in this pass without risking form-gated paths
+- Auth / no-signup / CAPTCHA status:
+  - public datasets exist, but access posture varies and some DTM flows are form-gated
+- Endpoint type:
+  - public dataset/download ecosystem
+- Owner agent recommendation:
+  - `gather`
+- Consumer agents:
+  - `geospatial`, `marine`, `connect`
+- First implementation slice:
+  - verify one fully public displacement or mobility dataset with stable machine access before assignment
+- Normalized fields:
+  - likely country/region, date, displacement measure, population group, source URL
+- Backend route proposal:
+  - `GET /api/context/displacement/iom-dtm`
+- Client query/helper proposal:
+  - `useIomDtmContextQuery`
+- Fixture strategy:
+  - only after a public dataset is pinned
+- Source health/freshness strategy:
+  - dataset update date plus fetched time
+- Evidence basis:
+  - `source-reported`, `contextual`
+- Caveats:
+  - baseline or periodic displacement datasets, not live movement tracking
+- Do-not-do list:
+  - do not use form-gated datasets
+  - do not bulk-download large resources as the first slice
+- Validation commands:
+  - public-endpoint verification first
+- Paste-ready implementation prompt:
+  - not assignment-ready
+- Downgrade/reject trigger:
+  - if the viable datasets all require forms, account flows, or non-deterministic manual selection

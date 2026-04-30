@@ -19,11 +19,17 @@ import {
   buildSatelliteNearbyContextSummary
 } from "./aerospaceNearbyContext";
 import { buildAerospaceContextAvailabilitySummary } from "./aerospaceContextAvailability";
+import { buildAerospaceContextIssueSummary } from "./aerospaceContextIssues";
+import { buildAerospaceExportReadinessSummary } from "./aerospaceExportReadiness";
+import { buildAerospaceReviewQueueSummary } from "./aerospaceReviewQueue";
+import { buildAerospaceContextReportSummary } from "./aerospaceContextReport";
 import { buildAerospaceAirportStatusSummary } from "./aerospaceAirportStatusContext";
+import { buildAerospaceGeomagnetismContextSummary } from "./aerospaceGeomagnetismContext";
 import {
   AEROSPACE_OPERATIONAL_PRESETS,
   buildAerospaceOperationalContextSummary
 } from "./aerospaceOperationalContext";
+import { buildAerospaceVaacContextSummary } from "./aerospaceVaacContext";
 import { buildAerospaceSpaceContextSummary } from "./aerospaceSpaceContext";
 import { buildAerospaceSpaceWeatherContextSummary } from "./aerospaceSpaceWeatherContext";
 import {
@@ -47,7 +53,11 @@ import {
   useNearestRunwayThresholdReferenceQuery,
   useOpenSkyStatesQuery,
   useSourceStatusQuery,
-  useSwpcSpaceWeatherContextQuery
+  useAnchorageVaacAdvisoriesQuery,
+  useUsgsGeomagnetismContextQuery,
+  useSwpcSpaceWeatherContextQuery,
+  useTokyoVaacAdvisoriesQuery,
+  useWashingtonVaacAdvisoriesQuery
 } from "../../lib/queries";
 import { useAppStore } from "../../lib/store";
 import { CaveatBlock, DataBasisBadge, StatusBadge } from "../../components/ui";
@@ -195,6 +205,23 @@ export function InspectorPanel() {
     productType: "all",
     limit: 3
   });
+  const washingtonVaacQuery = useWashingtonVaacAdvisoriesQuery({
+    enabled: entity?.type === "aircraft" || entity?.type === "satellite",
+    limit: 2
+  });
+  const anchorageVaacQuery = useAnchorageVaacAdvisoriesQuery({
+    enabled: entity?.type === "aircraft" || entity?.type === "satellite",
+    limit: 2
+  });
+  const tokyoVaacQuery = useTokyoVaacAdvisoriesQuery({
+    enabled: entity?.type === "aircraft" || entity?.type === "satellite",
+    limit: 2
+  });
+  const geomagnetismContextQuery = useUsgsGeomagnetismContextQuery({
+    enabled: entity?.type === "aircraft" || entity?.type === "satellite",
+    observatoryId: "BOU",
+    elements: ["X", "Y", "Z", "F"]
+  });
   const aviationWeatherSourceHealth = selectedAircraft
     ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "noaa-awc") ?? null
     : null;
@@ -211,6 +238,22 @@ export function InspectorPanel() {
   const swpcSourceHealth =
     entity?.type === "aircraft" || entity?.type === "satellite"
       ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "noaa-swpc") ?? null
+      : null;
+  const washingtonVaacSourceHealth =
+    entity?.type === "aircraft" || entity?.type === "satellite"
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "washington-vaac") ?? null
+      : null;
+  const anchorageVaacSourceHealth =
+    entity?.type === "aircraft" || entity?.type === "satellite"
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "anchorage-vaac") ?? null
+      : null;
+  const tokyoVaacSourceHealth =
+    entity?.type === "aircraft" || entity?.type === "satellite"
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "tokyo-vaac") ?? null
+      : null;
+  const geomagnetismSourceHealth =
+    entity?.type === "aircraft" || entity?.type === "satellite"
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "usgs-geomagnetism") ?? null
       : null;
   const aviationWeatherSummary = buildAerospaceWeatherContextSummary({
     weather: aviationWeatherQuery.data,
@@ -229,6 +272,18 @@ export function InspectorPanel() {
   const swpcSpaceWeatherSummary = buildAerospaceSpaceWeatherContextSummary({
     context: swpcContextQuery.data,
     sourceHealth: swpcSourceHealth
+  });
+  const vaacContextSummary = buildAerospaceVaacContextSummary({
+    washingtonContext: washingtonVaacQuery.data,
+    washingtonSourceHealth: washingtonVaacSourceHealth,
+    anchorageContext: anchorageVaacQuery.data,
+    anchorageSourceHealth: anchorageVaacSourceHealth,
+    tokyoContext: tokyoVaacQuery.data,
+    tokyoSourceHealth: tokyoVaacSourceHealth
+  });
+  const geomagnetismSummary = buildAerospaceGeomagnetismContextSummary({
+    context: geomagnetismContextQuery.data,
+    sourceHealth: geomagnetismSourceHealth
   });
   const aircraftActivitySummary = selectedAircraft
     ? summarizeAircraftActivity({
@@ -284,8 +339,10 @@ export function InspectorPanel() {
     presetId: selectedAerospaceOperationalPreset,
     weatherSummary: aviationWeatherSummary,
     airportStatusSummary,
+    geomagnetismSummary,
     spaceContextSummary: cneosSpaceContextSummary,
     spaceWeatherSummary: swpcSpaceWeatherSummary,
+    vaacContextSummary,
     dataHealthSummary: selectedDataHealthSummary
   });
   const operationalContextAvailabilitySummary = buildAerospaceContextAvailabilitySummary({
@@ -295,10 +352,39 @@ export function InspectorPanel() {
     weatherSourceHealth: aviationWeatherSourceHealth,
     airportStatusSummary,
     airportStatusSourceHealth: faaNasSourceHealth,
+    geomagnetismSummary,
+    geomagnetismSourceHealth,
     openSkySummary: openSkyContextSummary,
     openSkySourceHealth,
     spaceContextSummary: cneosSpaceContextSummary,
     spaceWeatherSummary: swpcSpaceWeatherSummary,
+    vaacContextSummary,
+    dataHealthSummary: selectedDataHealthSummary
+  });
+  const aerospaceContextIssueSummary = buildAerospaceContextIssueSummary({
+    operationalContextSummary,
+    availabilitySummary: operationalContextAvailabilitySummary,
+    dataHealthSummary: selectedDataHealthSummary,
+    openSkySummary: openSkyContextSummary
+  });
+  const aerospaceExportReadinessSummary = buildAerospaceExportReadinessSummary({
+    operationalContextSummary,
+    availabilitySummary: operationalContextAvailabilitySummary,
+    issueSummary: aerospaceContextIssueSummary,
+    dataHealthSummary: selectedDataHealthSummary
+  });
+  const aerospaceReviewQueueSummary = buildAerospaceReviewQueueSummary({
+    issueSummary: aerospaceContextIssueSummary,
+    readinessSummary: aerospaceExportReadinessSummary,
+    availabilitySummary: operationalContextAvailabilitySummary,
+    dataHealthSummary: selectedDataHealthSummary,
+    openSkySummary: openSkyContextSummary
+  });
+  const aerospaceContextReportSummary = buildAerospaceContextReportSummary({
+    selectedTargetSummary: selectedEvidenceSummary,
+    availabilitySummary: operationalContextAvailabilitySummary,
+    reviewQueueSummary: aerospaceReviewQueueSummary,
+    readinessSummary: aerospaceExportReadinessSummary,
     dataHealthSummary: selectedDataHealthSummary
   });
   const selectedSectionHealthDisplay = buildAerospaceSectionHealthDisplay(selectedDataHealthSummary);
@@ -1019,6 +1105,122 @@ export function InspectorPanel() {
                   </div>
                 ) : null}
 
+                {aerospaceContextIssueSummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aerospace Context Review</p>
+                    <div className="data-card data-card--compact">
+                      <strong>
+                        {aerospaceContextIssueSummary.attentionCount} attention | {aerospaceContextIssueSummary.infoCount} informational
+                      </strong>
+                      {aerospaceContextIssueSummary.displayLines.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                      {aerospaceContextIssueSummary.topIssues.map((issue) => (
+                        <div key={issue.issueId} className="data-card data-card--compact">
+                          <strong>{issue.label}</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge tone={issueSeverityTone(issue.severity)}>
+                              {issue.severity}
+                            </StatusBadge>
+                            <StatusBadge tone={issueCategoryTone(issue.category)}>
+                              {issue.category}
+                            </StatusBadge>
+                            <DataBasisBadge basis={issue.evidenceBasis === "advisory" ? "contextual" : issue.evidenceBasis} prefix="Basis" />
+                          </div>
+                          <span>{issue.summary}</span>
+                          {issue.caveat ? <span>{issue.caveat}</span> : null}
+                        </div>
+                      ))}
+                    </div>
+                    {aerospaceContextIssueSummary.caveats.slice(0, 2).map((caveat) => (
+                      <CaveatBlock key={caveat} heading="Review caveat" tone="evidence" compact>
+                        {caveat}
+                      </CaveatBlock>
+                    ))}
+                  </div>
+                ) : null}
+
+                {aerospaceExportReadinessSummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aerospace Export Readiness</p>
+                    <div className="data-card data-card--compact">
+                      <strong>{aerospaceExportReadinessSummary.label}</strong>
+                      <div className="stack stack--actions">
+                        <StatusBadge tone={readinessTone(aerospaceExportReadinessSummary.category)}>
+                          {aerospaceExportReadinessSummary.category}
+                        </StatusBadge>
+                        <StatusBadge tone={aerospaceExportReadinessSummary.reviewRecommended ? "warning" : "info"}>
+                          {aerospaceExportReadinessSummary.reviewRecommended ? "review recommended" : "export caveated"}
+                        </StatusBadge>
+                      </div>
+                      {aerospaceExportReadinessSummary.displayLines.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                    </div>
+                    {aerospaceExportReadinessSummary.caveats.slice(0, 2).map((caveat) => (
+                      <CaveatBlock key={caveat} heading="Readiness caveat" tone="evidence" compact>
+                        {caveat}
+                      </CaveatBlock>
+                    ))}
+                  </div>
+                ) : null}
+
+                {aerospaceContextReportSummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aerospace Context Report</p>
+                    <div className="data-card data-card--compact">
+                      {aerospaceContextReportSummary.displayLines.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                    </div>
+                    {aerospaceContextReportSummary.topCaveats.slice(0, 2).map((caveat) => (
+                      <CaveatBlock key={caveat} heading="Report caveat" tone="evidence" compact>
+                        {caveat}
+                      </CaveatBlock>
+                    ))}
+                    {aerospaceContextReportSummary.limits.slice(0, 2).map((line) => (
+                      <CaveatBlock key={line} heading="What this does not prove" tone="evidence" compact>
+                        {line}
+                      </CaveatBlock>
+                    ))}
+                  </div>
+                ) : null}
+
+                {aerospaceReviewQueueSummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aerospace Review Queue</p>
+                    <div className="data-card data-card--compact">
+                      <strong>
+                        {aerospaceReviewQueueSummary.reviewFirstCount} review-first | {aerospaceReviewQueueSummary.reviewCount} review | {aerospaceReviewQueueSummary.noteCount} note
+                      </strong>
+                      {aerospaceReviewQueueSummary.displayLines.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                      {aerospaceReviewQueueSummary.topItems.map((item) => (
+                        <div key={item.itemId} className="data-card data-card--compact">
+                          <strong>{item.label}</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge tone={queueBandTone(item.band)}>
+                              {item.band}
+                            </StatusBadge>
+                            <StatusBadge tone={queueCategoryTone(item.category)}>
+                              {item.category}
+                            </StatusBadge>
+                            <DataBasisBadge basis={item.evidenceBasis === "advisory" ? "contextual" : item.evidenceBasis} prefix="Basis" />
+                          </div>
+                          <span>{item.summary}</span>
+                          {item.caveat ? <span>{item.caveat}</span> : null}
+                        </div>
+                      ))}
+                    </div>
+                    {aerospaceReviewQueueSummary.caveats.slice(0, 2).map((caveat) => (
+                      <CaveatBlock key={caveat} heading="Queue caveat" tone="evidence" compact>
+                        {caveat}
+                      </CaveatBlock>
+                    ))}
+                  </div>
+                ) : null}
+
                 {aerospaceFocus.enabled ? (
                   <div className="panel__section">
                     <p className="panel__eyebrow">Aerospace Focus</p>
@@ -1405,6 +1607,65 @@ export function InspectorPanel() {
 
                 {entity && (entity.type === "aircraft" || entity.type === "satellite") ? (
                   <div className="panel__section">
+                    <p className="panel__eyebrow">Geomagnetism (USGS)</p>
+                    {geomagnetismContextQuery.isLoading ? (
+                      <div className="data-card data-card--compact">
+                        <span>Loading contextual observatory geomagnetism values.</span>
+                      </div>
+                    ) : geomagnetismContextQuery.isError ? (
+                      <div className="data-card data-card--compact">
+                        <strong>Geomagnetism context unavailable</strong>
+                        <span>
+                          {geomagnetismContextQuery.error instanceof Error
+                            ? geomagnetismContextQuery.error.message
+                            : "USGS geomagnetism context request failed."}
+                        </span>
+                        <span>Do not infer GPS, radio, aircraft, or satellite failure from missing geomagnetism context.</span>
+                      </div>
+                    ) : geomagnetismSummary ? (
+                      <>
+                        <div className="data-card data-card--compact">
+                          <strong>{geomagnetismSummary.observatoryName ?? geomagnetismSummary.observatoryId}</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge
+                              tone={healthTone(
+                                geomagnetismSourceHealth?.state === "healthy"
+                                  ? "normal"
+                                  : geomagnetismSourceHealth?.state === "stale"
+                                    ? "stale"
+                                    : geomagnetismSourceHealth?.state === "degraded" ||
+                                        geomagnetismSourceHealth?.state === "rate-limited"
+                                      ? "degraded"
+                                      : geomagnetismSourceHealth?.state === "never-fetched"
+                                        ? "unknown"
+                                        : "partial"
+                              )}
+                            >
+                              Source: {geomagnetismSummary.sourceState}
+                            </StatusBadge>
+                            <DataBasisBadge basis="contextual" prefix="Basis" />
+                          </div>
+                          {geomagnetismSummary.displayLines.map((line) => (
+                            <span key={line}>{line}</span>
+                          ))}
+                        </div>
+                        {geomagnetismSummary.caveats.slice(0, 3).map((caveat) => (
+                          <CaveatBlock key={caveat} heading="Geomagnetism caveat" tone="evidence" compact>
+                            {caveat}
+                          </CaveatBlock>
+                        ))}
+                      </>
+                    ) : (
+                      <div className="data-card data-card--compact">
+                        <strong>Geomagnetism context unavailable</strong>
+                        <span>No observatory geomagnetism context is currently loaded.</span>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                {entity && (entity.type === "aircraft" || entity.type === "satellite") ? (
+                  <div className="panel__section">
                     <p className="panel__eyebrow">Space Events (NASA/JPL CNEOS)</p>
                     {cneosEventsQuery.isLoading ? (
                       <div className="data-card data-card--compact">
@@ -1516,6 +1777,106 @@ export function InspectorPanel() {
                       <div className="data-card data-card--compact">
                         <strong>Space-weather context unavailable</strong>
                         <span>No NOAA SWPC summary or advisory context is currently loaded.</span>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                {entity && (entity.type === "aircraft" || entity.type === "satellite") ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Volcanic Ash Advisory Context</p>
+                    {washingtonVaacQuery.isLoading || anchorageVaacQuery.isLoading || tokyoVaacQuery.isLoading ? (
+                      <div className="data-card data-card--compact">
+                        <span>Loading contextual VAAC advisory summaries.</span>
+                      </div>
+                    ) : washingtonVaacQuery.isError || anchorageVaacQuery.isError || tokyoVaacQuery.isError ? (
+                      <div className="data-card data-card--compact">
+                        <strong>Volcanic-ash advisory context unavailable</strong>
+                        <span>
+                          {[
+                            washingtonVaacQuery.error,
+                            anchorageVaacQuery.error,
+                            tokyoVaacQuery.error
+                          ]
+                            .find((error): error is Error => error instanceof Error)
+                            ?.message ?? "One or more VAAC advisory requests failed."}
+                        </span>
+                        <span>
+                          Do not infer route impact, aircraft exposure, or engine risk from missing VAAC context.
+                        </span>
+                      </div>
+                    ) : vaacContextSummary ? (
+                      <>
+                        <div className="data-card data-card--compact">
+                          <strong>Contextual volcanic-ash advisories</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge
+                              tone={
+                                vaacContextSummary.healthySourceCount === vaacContextSummary.sourceCount
+                                  ? "success"
+                                  : vaacContextSummary.availableSourceCount > 0
+                                    ? "warning"
+                                    : "neutral"
+                              }
+                            >
+                              Sources: {vaacContextSummary.availableSourceCount}/{vaacContextSummary.sourceCount} with records
+                            </StatusBadge>
+                            <DataBasisBadge basis="advisory" prefix="Basis" />
+                          </div>
+                          {vaacContextSummary.displayLines.map((line) => (
+                            <span key={line}>{line}</span>
+                          ))}
+                        </div>
+                        {vaacContextSummary.sources.slice(0, 3).map((source) => (
+                          <div key={source.sourceId} className="data-card data-card--compact">
+                            <strong>{source.label}</strong>
+                            <div className="stack stack--actions">
+                              <StatusBadge
+                                tone={healthTone(
+                                  source.sourceState === "healthy"
+                                    ? "normal"
+                                    : source.sourceState === "stale"
+                                      ? "stale"
+                                      : source.sourceState === "degraded" ||
+                                          source.sourceState === "rate-limited"
+                                        ? "degraded"
+                                        : "partial"
+                                )}
+                              >
+                                {source.sourceMode} | {source.sourceState}
+                              </StatusBadge>
+                              <DataBasisBadge
+                                basis={source.topAdvisory?.evidenceBasis === "source-reported" ? "contextual" : "advisory"}
+                                prefix="Basis"
+                              />
+                            </div>
+                            <span>Listing: {source.listingSourceUrl}</span>
+                            <span>Advisories: {source.advisoryCount}</span>
+                            <span>
+                              {source.topAdvisory
+                                ? `${source.topAdvisory.volcanoName} | ${source.topAdvisory.issueTime ?? "issue time unavailable"}`
+                                : "No advisory records in the current source window."}
+                            </span>
+                            {source.topAdvisory?.summaryText ? (
+                              <span>{source.topAdvisory.summaryText}</span>
+                            ) : null}
+                          </div>
+                        ))}
+                        {vaacContextSummary.caveats.slice(0, 3).map((caveat) => (
+                          <CaveatBlock key={caveat} heading="VAAC caveat" tone="evidence" compact>
+                            {caveat}
+                          </CaveatBlock>
+                        ))}
+                        {vaacContextSummary.doesNotProve.slice(0, 2).map((line) => (
+                          <CaveatBlock key={line} heading="Does not prove" tone="evidence" compact>
+                            {line}
+                          </CaveatBlock>
+                        ))}
+                      </>
+                    ) : (
+                      <div className="data-card data-card--compact">
+                        <strong>Volcanic-ash advisory context unavailable</strong>
+                        <span>No aerospace-local VAAC advisory context is currently loaded.</span>
                       </div>
                     )}
                   </div>
@@ -2378,6 +2739,84 @@ function availabilityTone(value: "available" | "unavailable" | "disabled" | "emp
     case "unknown":
     default:
       return "neutral" as const;
+  }
+}
+
+function issueSeverityTone(value: "attention" | "info") {
+  switch (value) {
+    case "attention":
+      return "warning" as const;
+    case "info":
+    default:
+      return "info" as const;
+  }
+}
+
+function readinessTone(
+  value:
+    | "ready-with-caveats"
+    | "missing-optional-context"
+    | "fixture-local-context-present"
+    | "degraded-or-unavailable-context"
+    | "selected-target-freshness-limited"
+) {
+  switch (value) {
+    case "ready-with-caveats":
+      return "info" as const;
+    case "missing-optional-context":
+      return "advisory" as const;
+    case "fixture-local-context-present":
+      return "neutral" as const;
+    case "degraded-or-unavailable-context":
+      return "warning" as const;
+    case "selected-target-freshness-limited":
+      return "danger" as const;
+    default:
+      return "neutral" as const;
+  }
+}
+
+function queueBandTone(value: "review-first" | "review" | "note") {
+  switch (value) {
+    case "review-first":
+      return "warning" as const;
+    case "review":
+      return "advisory" as const;
+    case "note":
+    default:
+      return "info" as const;
+  }
+}
+
+function queueCategoryTone(
+  value: "source-context" | "freshness" | "comparison" | "export-readiness"
+) {
+  switch (value) {
+    case "freshness":
+      return "warning" as const;
+    case "comparison":
+      return "advisory" as const;
+    case "export-readiness":
+      return "info" as const;
+    case "source-context":
+    default:
+      return "neutral" as const;
+  }
+}
+
+function issueCategoryTone(
+  value: "source-health" | "availability-gap" | "coverage-limit" | "evidence-basis"
+) {
+  switch (value) {
+    case "source-health":
+      return "warning" as const;
+    case "availability-gap":
+      return "danger" as const;
+    case "coverage-limit":
+      return "advisory" as const;
+    case "evidence-basis":
+    default:
+      return "info" as const;
   }
 }
 

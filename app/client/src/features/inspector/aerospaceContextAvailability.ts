@@ -1,9 +1,11 @@
 import type { SourceStatus } from "../../types/api";
 import type { AerospaceAirportStatusSummary } from "./aerospaceAirportStatusContext";
+import type { AerospaceGeomagnetismContextSummary } from "./aerospaceGeomagnetismContext";
 import type { AerospaceOpenSkyContextSummary } from "./aerospaceOpenSkyContext";
 import type { AerospaceSourceHealthSummary } from "./aerospaceSourceHealth";
 import type { AerospaceSpaceContextSummary } from "./aerospaceSpaceContext";
 import type { AerospaceSpaceWeatherContextSummary } from "./aerospaceSpaceWeatherContext";
+import type { AerospaceVaacContextSummary } from "./aerospaceVaacContext";
 import type { AerospaceWeatherContextSummary } from "./aerospaceWeatherContext";
 
 export type AerospaceContextAvailability =
@@ -57,10 +59,13 @@ export function buildAerospaceContextAvailabilitySummary(input: {
   weatherSourceHealth?: SourceStatus | null;
   airportStatusSummary?: AerospaceAirportStatusSummary | null;
   airportStatusSourceHealth?: SourceStatus | null;
+  geomagnetismSummary?: AerospaceGeomagnetismContextSummary | null;
+  geomagnetismSourceHealth?: SourceStatus | null;
   openSkySummary?: AerospaceOpenSkyContextSummary | null;
   openSkySourceHealth?: SourceStatus | null;
   spaceContextSummary?: AerospaceSpaceContextSummary | null;
   spaceWeatherSummary?: AerospaceSpaceWeatherContextSummary | null;
+  vaacContextSummary?: AerospaceVaacContextSummary | null;
   dataHealthSummary?: AerospaceSourceHealthSummary | null;
 }): AerospaceContextAvailabilitySummary | null {
   if (
@@ -77,9 +82,11 @@ export function buildAerospaceContextAvailabilitySummary(input: {
   const rows: AerospaceContextAvailabilityRow[] = [
     buildWeatherRow(input),
     buildAirportStatusRow(input),
+    buildGeomagnetismRow(input),
     buildOpenSkyRow(input),
     buildSpaceEventsRow(input),
     buildSpaceWeatherRow(input),
+    buildVaacRow(input),
     buildDataHealthRow(input),
     buildReferenceContextRow(input),
   ];
@@ -117,6 +124,114 @@ export function buildAerospaceContextAvailabilitySummary(input: {
       fixtureSourceCount,
       caveats,
     },
+  };
+}
+
+function buildGeomagnetismRow(input: {
+  selectedTargetType: "aircraft" | "satellite" | null;
+  geomagnetismSummary?: AerospaceGeomagnetismContextSummary | null;
+  geomagnetismSourceHealth?: SourceStatus | null;
+}): AerospaceContextAvailabilityRow {
+  if (input.selectedTargetType == null) {
+    return unavailableRow("usgs-geomagnetism", "USGS Geomagnetism", "geomagnetism-context", "no selected target");
+  }
+
+  const mode = input.geomagnetismSummary?.sourceMode ?? normalizeSourceMode(input.geomagnetismSourceHealth?.lastRunMode);
+  const sourceState = input.geomagnetismSourceHealth?.state ?? "unknown";
+  if (!input.geomagnetismSummary) {
+    return {
+      sourceId: "usgs-geomagnetism",
+      label: "USGS Geomagnetism",
+      contextType: "geomagnetism-context",
+      availability:
+        sourceState === "degraded" || sourceState === "stale" || sourceState === "rate-limited"
+          ? "degraded"
+          : "unavailable",
+      sourceMode: mode,
+      health: sourceState,
+      reason: "global context unavailable",
+      caveat: "Geomagnetism remains optional observatory context only.",
+      evidenceBasis: "contextual"
+    };
+  }
+
+  return {
+    sourceId: "usgs-geomagnetism",
+    label: "USGS Geomagnetism",
+    contextType: "geomagnetism-context",
+    availability:
+      input.geomagnetismSummary.sourceHealth === "stale" ||
+      input.geomagnetismSummary.sourceHealth === "error" ||
+      input.geomagnetismSummary.sourceState === "degraded" ||
+      input.geomagnetismSummary.sourceState === "stale"
+        ? "degraded"
+        : input.geomagnetismSummary.sampleCount > 0
+          ? "available"
+          : "empty",
+    sourceMode: input.geomagnetismSummary.sourceMode,
+    health: `${input.geomagnetismSummary.sourceHealth}/${input.geomagnetismSummary.sourceState}`,
+    reason:
+      input.geomagnetismSummary.sampleCount > 0
+        ? "global geomagnetic observatory context available independent of target"
+        : "source empty",
+    caveat: input.geomagnetismSummary.caveats[0] ?? null,
+    evidenceBasis: "contextual"
+  };
+}
+
+function buildVaacRow(input: {
+  selectedTargetType: "aircraft" | "satellite" | null;
+  vaacContextSummary?: AerospaceVaacContextSummary | null;
+}): AerospaceContextAvailabilityRow {
+  if (input.selectedTargetType == null) {
+    return unavailableRow(
+      "multi-vaac",
+      "Volcanic Ash Advisories",
+      "volcanic-ash-advisories",
+      "no selected target"
+    );
+  }
+
+  if (!input.vaacContextSummary) {
+    return {
+      sourceId: "multi-vaac",
+      label: "Volcanic Ash Advisories",
+      contextType: "volcanic-ash-advisories",
+      availability: "unavailable",
+      sourceMode: "unknown",
+      health: "unknown",
+      reason: "global context unavailable",
+      caveat: "VAAC advisories remain optional contextual volcanic-ash reports only.",
+      evidenceBasis: "advisory"
+    };
+  }
+
+  return {
+    sourceId: "multi-vaac",
+    label: "Volcanic Ash Advisories",
+    contextType: "volcanic-ash-advisories",
+    availability:
+      input.vaacContextSummary.availableSourceCount > 0
+        ? "available"
+        : input.vaacContextSummary.sources.some(
+              (source) =>
+                source.sourceHealth === "degraded" ||
+                source.sourceState === "degraded" ||
+                source.sourceState === "stale" ||
+                source.sourceState === "rate-limited"
+            )
+          ? "degraded"
+          : "empty",
+    sourceMode:
+      input.vaacContextSummary.sourceModes[0] ??
+      "unknown",
+    health: `${input.vaacContextSummary.healthySourceCount}/${input.vaacContextSummary.sourceCount} healthy`,
+    reason:
+      input.vaacContextSummary.availableSourceCount > 0
+        ? "global advisory context available independent of target"
+        : "source empty",
+    caveat: input.vaacContextSummary.caveats[0] ?? null,
+    evidenceBasis: "advisory"
   };
 }
 

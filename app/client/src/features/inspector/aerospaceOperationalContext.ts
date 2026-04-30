@@ -1,8 +1,10 @@
 import type { AerospaceAirportStatusSummary } from "./aerospaceAirportStatusContext";
+import type { AerospaceGeomagnetismContextSummary } from "./aerospaceGeomagnetismContext";
 import type { AerospaceOperationalPresetId } from "../../lib/store";
 import type { AerospaceSpaceContextSummary } from "./aerospaceSpaceContext";
 import type { AerospaceSpaceWeatherContextSummary } from "./aerospaceSpaceWeatherContext";
 import type { AerospaceSourceHealthSummary } from "./aerospaceSourceHealth";
+import type { AerospaceVaacContextSummary } from "./aerospaceVaacContext";
 import type { AerospaceWeatherContextSummary } from "./aerospaceWeatherContext";
 
 export interface AerospaceOperationalContextSummary {
@@ -19,9 +21,13 @@ export interface AerospaceOperationalContextSummary {
   airportStatusAvailable: boolean;
   spaceEventsAvailable: boolean;
   spaceWeatherAvailable: boolean;
+  geomagnetismAvailable: boolean;
+  vaacAvailable: boolean;
   airportContextSummary: string | null;
   weatherSummary: string | null;
   spaceContextSummary: string | null;
+  geomagnetismSummary: string | null;
+  vaacSummary: string | null;
   healthSummary: string;
   caveats: string[];
   displayLines: string[];
@@ -41,6 +47,8 @@ export interface AerospaceOperationalContextSummary {
       airportStatus: string | null;
       spaceEvents: string | null;
       spaceWeather: string | null;
+      geomagnetism: string | null;
+      vaac: string | null;
     };
     caveats: string[];
   };
@@ -59,7 +67,7 @@ export const AEROSPACE_OPERATIONAL_PRESETS: AerospaceOperationalPresetDefinition
     id: "full-aerospace-context",
     label: "Full Aerospace Context",
     description: "Emphasizes airport, weather, space-event, space-weather, and target health context together.",
-    emphasizedContextTypes: ["aviation-weather", "airport-status", "space-events", "space-weather", "data-health"],
+    emphasizedContextTypes: ["aviation-weather", "airport-status", "space-events", "volcanic-ash-advisories", "space-weather", "data-health"],
     caveat: "Full context combines multiple advisory/contextual sources and does not imply causation."
   },
   {
@@ -73,21 +81,21 @@ export const AEROSPACE_OPERATIONAL_PRESETS: AerospaceOperationalPresetDefinition
     id: "weather-review",
     label: "Weather Review",
     description: "Emphasizes aviation weather, space weather, and target data health.",
-    emphasizedContextTypes: ["aviation-weather", "space-weather", "data-health"],
+    emphasizedContextTypes: ["aviation-weather", "space-weather", "geomagnetism-context", "data-health"],
     caveat: "Weather review does not prove operational impact or aircraft/satellite response."
   },
   {
     id: "space-context-review",
     label: "Space Context Review",
     description: "Emphasizes CNEOS and SWPC context with selected-target health.",
-    emphasizedContextTypes: ["space-events", "space-weather", "data-health"],
+    emphasizedContextTypes: ["space-events", "volcanic-ash-advisories", "space-weather", "geomagnetism-context", "data-health"],
     caveat: "Space context review does not imply target-specific danger, failure, or impact."
   },
   {
     id: "selected-target-evidence-review",
     label: "Selected-Target Evidence Review",
     description: "Emphasizes selected-target evidence basis and whichever contextual sources are already available.",
-    emphasizedContextTypes: ["data-health", "aviation-weather", "airport-status", "space-events", "space-weather"],
+    emphasizedContextTypes: ["data-health", "aviation-weather", "airport-status", "space-events", "volcanic-ash-advisories", "space-weather"],
     caveat: "Selected-target evidence review is an analyst aid over already-loaded data only."
   }
 ];
@@ -96,21 +104,27 @@ export function buildAerospaceOperationalContextSummary(input: {
   presetId?: AerospaceOperationalPresetId;
   weatherSummary?: AerospaceWeatherContextSummary | null;
   airportStatusSummary?: AerospaceAirportStatusSummary | null;
+  geomagnetismSummary?: AerospaceGeomagnetismContextSummary | null;
   spaceContextSummary?: AerospaceSpaceContextSummary | null;
   spaceWeatherSummary?: AerospaceSpaceWeatherContextSummary | null;
+  vaacContextSummary?: AerospaceVaacContextSummary | null;
   dataHealthSummary?: AerospaceSourceHealthSummary | null;
 }): AerospaceOperationalContextSummary | null {
   const weather = input.weatherSummary ?? null;
   const airportStatus = input.airportStatusSummary ?? null;
+  const geomagnetism = input.geomagnetismSummary ?? null;
   const spaceEvents = input.spaceContextSummary ?? null;
   const spaceWeather = input.spaceWeatherSummary ?? null;
+  const vaac = input.vaacContextSummary ?? null;
   const dataHealth = input.dataHealthSummary ?? null;
 
   const contexts = [
     weather ? { kind: "aviation-weather", mode: "contextual", healthy: weather.sourceHealthState === "healthy" } : null,
     airportStatus ? { kind: "airport-status", mode: airportStatus.sourceMode, healthy: airportStatus.sourceHealth === "normal" } : null,
+    geomagnetism ? { kind: "geomagnetism-context", mode: geomagnetism.sourceMode, healthy: geomagnetism.sourceHealth === "loaded" } : null,
     spaceEvents ? { kind: "space-events", mode: spaceEvents.sourceMode, healthy: spaceEvents.sourceHealth === "normal" } : null,
     spaceWeather ? { kind: "space-weather", mode: spaceWeather.sourceMode, healthy: spaceWeather.sourceHealth === "normal" } : null,
+    vaac ? { kind: "volcanic-ash-advisories", mode: vaac.sourceModes[0] ?? "unknown", healthy: vaac.healthySourceCount > 0 } : null,
   ].filter((value): value is { kind: string; mode: string; healthy: boolean } => Boolean(value));
 
   if (contexts.length === 0 && !dataHealth) {
@@ -137,6 +151,15 @@ export function buildAerospaceOperationalContextSummary(input: {
       : spaceWeather != null
         ? `${spaceWeather.summaryCount} summaries | ${spaceWeather.alertCount} advisories`
         : null;
+  const geomagnetismSummaryLine =
+    geomagnetism != null
+      ? `${geomagnetism.observatoryId} | ${formatGeomagnetismInterval(geomagnetism.samplingPeriodSeconds)} | ${geomagnetism.sampleCount} samples`
+      : null;
+  const vaacSummaryLine =
+    vaac != null
+      ? `${vaac.availableSourceCount} sources with records | ${vaac.totalAdvisoryCount} advisories`
+      : null;
+  const topVaacAdvisory = vaac?.sources.find((source) => source.topAdvisory != null)?.topAdvisory ?? null;
   const healthSummary = dataHealth
     ? `${formatSourceKind(dataHealth.sourceKind)} | ${dataHealth.freshness} | ${dataHealth.health}`
     : "selected-target data health unavailable";
@@ -148,8 +171,10 @@ export function buildAerospaceOperationalContextSummary(input: {
       ...(dataHealth ? [buildDataHealthCaveat(dataHealth)] : []),
       ...weather?.caveats.slice(0, 1) ?? [],
       ...airportStatus?.caveats.slice(0, 1) ?? [],
+      ...geomagnetism?.caveats.slice(0, 1) ?? [],
       ...spaceEvents?.caveats.slice(0, 1) ?? [],
       ...spaceWeather?.caveats.slice(0, 1) ?? [],
+      ...vaac?.caveats.slice(0, 1) ?? [],
     ].filter((value): value is string => Boolean(value))
     )
   );
@@ -163,7 +188,12 @@ export function buildAerospaceOperationalContextSummary(input: {
       },
       { kind: "airport-context", line: airportContextSummary ? `Airport context: ${airportContextSummary}` : "Airport context: unavailable" },
       { kind: "aviation-weather", line: weatherSummaryLine ? `Weather: ${weatherSummaryLine}` : "Weather: unavailable" },
+      { kind: "geomagnetism-context", line: geomagnetismSummaryLine ? `Geomagnetism: ${geomagnetismSummaryLine}` : "Geomagnetism: unavailable" },
       { kind: "space-events", line: spaceEvents != null ? `Space events: ${spaceContextSummaryLine ?? "unavailable"}` : "Space events: unavailable" },
+      {
+        kind: "volcanic-ash-advisories",
+        line: vaacSummaryLine ? `Volcanic ash advisories: ${vaacSummaryLine}` : "Volcanic ash advisories: unavailable"
+      },
       {
         kind: "space-weather",
         line: spaceWeather != null
@@ -182,7 +212,9 @@ export function buildAerospaceOperationalContextSummary(input: {
     `Operational context: ${contexts.length} sources | ${contexts.filter((item) => item.healthy).length} healthy`,
     airportContextSummary ? `Airport context: ${airportContextSummary}` : null,
     weatherSummaryLine ? `Weather context: ${weatherSummaryLine}` : null,
-    spaceContextSummaryLine ? `Space context: ${spaceContextSummaryLine}` : null
+    geomagnetismSummaryLine ? `Geomagnetism context: ${geomagnetismSummaryLine}` : null,
+    spaceContextSummaryLine ? `Space context: ${spaceContextSummaryLine}` : null,
+    vaacSummaryLine ? `VAAC context: ${vaacSummaryLine}` : null
   ].filter((value): value is string => Boolean(value)).slice(0, 4);
 
   return {
@@ -197,11 +229,15 @@ export function buildAerospaceOperationalContextSummary(input: {
     availableContextTypes: contexts.map((item) => item.kind),
     aviationWeatherAvailable: weather != null,
     airportStatusAvailable: airportStatus != null,
+    geomagnetismAvailable: geomagnetism != null,
     spaceEventsAvailable: spaceEvents != null,
     spaceWeatherAvailable: spaceWeather != null,
+    vaacAvailable: vaac != null,
     airportContextSummary,
     weatherSummary: weatherSummaryLine,
     spaceContextSummary: spaceContextSummaryLine,
+    geomagnetismSummary: geomagnetismSummaryLine,
+    vaacSummary: vaacSummaryLine,
     healthSummary,
     caveats,
     displayLines,
@@ -219,6 +255,7 @@ export function buildAerospaceOperationalContextSummary(input: {
       topSummaries: {
         aviationWeather: weatherSummaryLine,
         airportStatus: airportStatus ? `${airportStatus.statusType} | ${airportStatus.summary}` : null,
+        geomagnetism: geomagnetismSummaryLine,
         spaceEvents: spaceEvents
           ? (spaceEvents.topCloseApproach
               ? `${spaceEvents.topCloseApproach.objectDesignation} | ${spaceEvents.topCloseApproach.closeApproachAt}`
@@ -229,10 +266,23 @@ export function buildAerospaceOperationalContextSummary(input: {
         spaceWeather: spaceWeather
           ? (spaceWeather.topAlert?.headline ?? spaceWeather.topSummary?.headline ?? null)
           : null,
+        vaac: topVaacAdvisory
+          ? `${topVaacAdvisory.volcanoName} | ${topVaacAdvisory.issueTime ?? "issue time unavailable"}`
+          : null,
       },
       caveats: caveats.slice(0, 4),
     },
   };
+}
+
+function formatGeomagnetismInterval(value: number | null) {
+  if (value == null) {
+    return "unknown interval";
+  }
+  if (value % 60 === 0) {
+    return `${value / 60} min`;
+  }
+  return `${value} sec`;
 }
 
 function orderContextLines(

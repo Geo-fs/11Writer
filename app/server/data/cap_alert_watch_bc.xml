@@ -1,7 +1,7 @@
 <alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
   <identifier>cap-bc-002</identifier>
   <sender>ec.alerts@weather.gc.ca</sender>
-  <sent>2026-04-29T11:30:00-07:00</sent>
+  <sent>2036-04-29T11:30:00-07:00</sent>
   <status>Actual</status>
   <msgType>Alert</msgType>
   <scope>Public</scope>
@@ -14,8 +14,8 @@
     <certainty>Possible</certainty>
     <headline>Special Weather Statement for Metro Vancouver</headline>
     <description>Unseasonably warm conditions and localized thunderstorms are possible.</description>
-    <effective>2026-04-29T11:30:00-07:00</effective>
-    <expires>2026-04-30T11:30:00-07:00</expires>
+    <effective>2036-04-29T11:30:00-07:00</effective>
+    <expires>2036-04-30T11:30:00-07:00</expires>
     <area>
       <areaDesc>Metro Vancouver</areaDesc>
       <geocode>

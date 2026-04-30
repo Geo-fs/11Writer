@@ -13,12 +13,17 @@ import type {
   MarineEvidenceInterpretationCard
 } from "./marineEvidenceInterpretation";
 import type { MarineEnvironmentalContextSummary } from "./marineEnvironmentalContext";
+import type { MarineContextFusionSummary, MarineContextFusionFamilyLine } from "./marineContextFusionSummary";
 import type { MarineContextIssue, MarineContextIssueQueueSummary } from "./marineContextIssueQueue";
+import type { MarineContextReviewReportSummary } from "./marineContextReviewReport";
+import type { MarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
+import type { MarineHydrologyContextSummary } from "./marineHydrologyContext";
 import type { MarineNdbcContextSummary } from "./marineNdbcContext";
 import type { MarineNoaaContextSummary } from "./marineNoaaContext";
 import type { MarineContextSourceRegistrySummary, MarineContextSourceSummaryRow } from "./marineContextSourceSummary";
 import type { MarineContextTimelineSummary, MarineContextSnapshot } from "./marineContextTimeline";
 import type { MarineScottishWaterContextSummary } from "./marineScottishWaterContext";
+import type { MarineVigicruesContextSummary } from "./marineVigicruesContext";
 
 export interface MarineEvidenceControls {
   chokepointFilter: "all" | "medium+" | "high";
@@ -134,6 +139,97 @@ export interface MarineAnomalySnapshotMetadata {
         | null;
       caveats: string[];
     } | null;
+    vigicruesHydrometryContext: {
+      sourceId: string;
+      sourceMode: "fixture" | "live" | "unknown";
+      health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+      nearbyStationCount: number;
+      parameterFilter: "all" | "water-height" | "flow";
+      topStation:
+        | {
+            stationId: string;
+            stationName: string;
+            distanceKm: number;
+            parameter: "water-height" | "flow";
+            riverBasin?: string | null;
+          }
+        | null;
+      topObservationSummary: string | null;
+      caveats: string[];
+    } | null;
+    irelandOpwWaterLevelContext: {
+      sourceId: string;
+      sourceMode: "fixture" | "live" | "unknown";
+      health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+      nearbyStationCount: number;
+      topStation:
+        | {
+            stationId: string;
+            stationName: string;
+            distanceKm: number;
+            waterbody?: string | null;
+            hydrometricArea?: string | null;
+          }
+        | null;
+      topObservationSummary: string | null;
+      caveats: string[];
+    } | null;
+    hydrologyContext: {
+      sourceCount: number;
+      loadedSourceCount: number;
+      emptySourceCount: number;
+      degradedSourceCount: number;
+      disabledSourceCount: number;
+      fixtureSourceCount: number;
+      nearbyStationCount: number;
+      healthSummary: string;
+      vigicrues: {
+        sourceMode: "fixture" | "live" | "unknown";
+        health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+        nearbyStationCount: number;
+        parameterFilter: "all" | "water-height" | "flow";
+        topStationName?: string | null;
+        topObservationObservedAt?: string | null;
+        hasPartialMetadata: boolean;
+      } | null;
+      irelandOpw: {
+        sourceMode: "fixture" | "live" | "unknown";
+        health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+        nearbyStationCount: number;
+        topStationName?: string | null;
+        topReadingAt?: string | null;
+        hasPartialMetadata: boolean;
+      } | null;
+      caveats: string[];
+    } | null;
+    contextFusionSummary: {
+      familyCount: number;
+      availableFamilyCount: number;
+      limitedFamilyCount: number;
+      unavailableFamilyCount: number;
+      fixtureFamilyCount: number;
+      issueCount: number;
+      warningCount: number;
+      exportReadiness: "ready-with-caveats" | "limited-context" | "unavailable";
+      overallAvailabilityLine: string;
+      exportReadinessLine: string;
+      familyLines: MarineContextFusionFamilyLine[];
+      highestPriorityCaveats: string[];
+      caveats: string[];
+    } | null;
+    contextReviewReport: {
+      title: string;
+      summaryLine: string;
+      contextFamiliesIncluded: string[];
+      reviewNeededItems: string[];
+      sourceHealthSummary: string;
+      exportReadiness: "ready-with-caveats" | "limited-context" | "unavailable";
+      exportCaveatLines: string[];
+      doesNotProveLines: string[];
+      issueCount: number;
+      warningCount: number;
+      caveats: string[];
+    } | null;
     contextSourceSummary: {
       sourceCount: number;
       availableSourceCount: number;
@@ -241,6 +337,11 @@ export function buildMarineEvidenceSummary(input: {
   noaaContextSummary: MarineNoaaContextSummary | null;
   ndbcContextSummary: MarineNdbcContextSummary | null;
   scottishWaterContextSummary: MarineScottishWaterContextSummary | null;
+  vigicruesContextSummary: MarineVigicruesContextSummary | null;
+  irelandOpwContextSummary: MarineIrelandOpwContextSummary | null;
+  hydrologyContextSummary: MarineHydrologyContextSummary | null;
+  contextFusionSummary: MarineContextFusionSummary | null;
+  contextReviewReportSummary: MarineContextReviewReportSummary | null;
   contextSourceRegistrySummary: MarineContextSourceRegistrySummary | null;
   contextTimelineSummary: MarineContextTimelineSummary | null;
   contextIssueQueueSummary: MarineContextIssueQueueSummary | null;
@@ -310,6 +411,21 @@ export function buildMarineEvidenceSummary(input: {
   }
   if (input.scottishWaterContextSummary) {
     displayLines.push(input.scottishWaterContextSummary.exportLines[0]);
+  }
+  if (input.vigicruesContextSummary) {
+    displayLines.push(input.vigicruesContextSummary.exportLines[0]);
+  }
+  if (input.irelandOpwContextSummary) {
+    displayLines.push(input.irelandOpwContextSummary.exportLines[0]);
+  }
+  if (input.hydrologyContextSummary) {
+    displayLines.push(input.hydrologyContextSummary.exportLines[0]);
+  }
+  if (input.contextFusionSummary) {
+    displayLines.push(input.contextFusionSummary.exportLines[0]);
+  }
+  if (input.contextReviewReportSummary) {
+    displayLines.push(input.contextReviewReportSummary.exportLines[0]);
   }
   if (input.contextSourceRegistrySummary) {
     displayLines.push(input.contextSourceRegistrySummary.exportLines[0]);
@@ -392,12 +508,17 @@ export function buildMarineEvidenceSummary(input: {
           topCaveats: input.focusedEvidenceInterpretation.caveats.slice(0, 3)
         },
         noaaCoopsContext: input.noaaContextSummary?.metadata ?? null,
-      ndbcContext: input.ndbcContextSummary?.metadata ?? null,
-      scottishWaterOverflowContext: input.scottishWaterContextSummary?.metadata ?? null,
-      contextSourceSummary: input.contextSourceRegistrySummary?.metadata ?? null,
-      contextTimeline: input.contextTimelineSummary?.metadata ?? null,
-      contextIssueQueue: input.contextIssueQueueSummary?.metadata ?? null,
-      environmentalContext: input.environmentalContextSummary?.metadata ?? null,
+        ndbcContext: input.ndbcContextSummary?.metadata ?? null,
+        scottishWaterOverflowContext: input.scottishWaterContextSummary?.metadata ?? null,
+        vigicruesHydrometryContext: input.vigicruesContextSummary?.metadata ?? null,
+        irelandOpwWaterLevelContext: input.irelandOpwContextSummary?.metadata ?? null,
+        hydrologyContext: input.hydrologyContextSummary?.metadata ?? null,
+        contextFusionSummary: input.contextFusionSummary?.metadata ?? null,
+        contextReviewReport: input.contextReviewReportSummary?.metadata ?? null,
+        contextSourceSummary: input.contextSourceRegistrySummary?.metadata ?? null,
+        contextTimeline: input.contextTimelineSummary?.metadata ?? null,
+        contextIssueQueue: input.contextIssueQueueSummary?.metadata ?? null,
+        environmentalContext: input.environmentalContextSummary?.metadata ?? null,
         caveats: [
           "Anomaly ranking is attention prioritization, not proof of intent or wrongdoing.",
           "AIS gaps/signals are observed/inferred/scored indicators, not proof of intentional disabling."

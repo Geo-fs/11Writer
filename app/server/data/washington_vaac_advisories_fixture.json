@@ -1,0 +1,59 @@
+{
+  "listing_source_url": "https://www.ospo.noaa.gov/products/atmosphere/vaac/messages.html",
+  "last_updated_at": "2026-04-30T20:31:00+00:00",
+  "caveats": [
+    "Washington VAAC advisories are advisory/contextual volcanic-ash hazard records.",
+    "Do not infer route impact, aircraft exposure, engine risk, or operational consequence from this summary alone."
+  ],
+  "advisories": [
+    {
+      "advisory_id": "342090:2026/474",
+      "advisory_number": "2026/474",
+      "issue_time": "2026-04-30T20:31:00+00:00",
+      "observed_at": "2026-04-30T20:00:00+00:00",
+      "volcano_name": "FUEGO",
+      "volcano_number": "342090",
+      "state_or_region": "GUATEMALA",
+      "summit_elevation_ft": 12346,
+      "information_source": "GOES-19. NWP MODELS.",
+      "eruption_details": "VA EMS TO FL150 MOV W 20KT.",
+      "observation_status": "NORMAL",
+      "max_flight_level": "FL150",
+      "motion_direction_deg": 270,
+      "motion_speed_kt": 20,
+      "report_status": "NORMAL",
+      "source_url": "https://www.ospo.noaa.gov/products/atmosphere/vaac/volcanoes/xml_files/FVXX20_20260430_2031.xml",
+      "source_mode": "fixture",
+      "health": "normal",
+      "summary": "Washington VAAC advisory for FUEGO, advisory 2026/474, reported to FL150, issued 2026-04-30T20:31:00+00:00",
+      "caveats": [],
+      "evidence_basis": "advisory"
+    },
+    {
+      "advisory_id": "352010:2026/003",
+      "advisory_number": "2026/003",
+      "issue_time": "2026-04-30T18:00:00+00:00",
+      "observed_at": null,
+      "volcano_name": "POPOCATEPETL",
+      "volcano_number": "352010",
+      "state_or_region": "MEXICO",
+      "summit_elevation_ft": null,
+      "information_source": "WEBCAM. SATELLITE.",
+      "eruption_details": "VA CLD NOT IDENTIFIABLE FROM SATELLITE IN THIS ADVISORY WINDOW.",
+      "observation_status": null,
+      "max_flight_level": null,
+      "motion_direction_deg": null,
+      "motion_speed_kt": null,
+      "report_status": "NORMAL",
+      "source_url": "https://www.ospo.noaa.gov/products/atmosphere/vaac/volcanoes/xml_files/FVXX24_20260430_1800.xml",
+      "source_mode": "fixture",
+      "health": "normal",
+      "summary": "Washington VAAC advisory for POPOCATEPETL, advisory 2026/003, issued 2026-04-30T18:00:00+00:00",
+      "caveats": [
+        "Summit elevation was not exposed in this advisory record.",
+        "Maximum reported flight level was not exposed in this advisory record."
+      ],
+      "evidence_basis": "advisory"
+    }
+  ]
+}

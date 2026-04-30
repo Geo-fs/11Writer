@@ -68,6 +68,30 @@ class Settings(BaseSettings):
         default="https://tie.digitraffic.fi/api/weathercam/v1",
         alias="FINLAND_DIGITRAFFIC_WEATHERCAM_BASE_URL",
     )
+    finland_digitraffic_source_mode: str = Field(
+        default="fixture",
+        alias="FINLAND_DIGITRAFFIC_SOURCE_MODE",
+    )
+    finland_digitraffic_weather_stations_fixture_path: str = Field(
+        default="./app/server/data/digitraffic_weather_stations_fixture.json",
+        alias="FINLAND_DIGITRAFFIC_WEATHER_STATIONS_FIXTURE_PATH",
+    )
+    finland_digitraffic_weather_station_data_fixture_path: str = Field(
+        default="./app/server/data/digitraffic_weather_station_data_fixture.json",
+        alias="FINLAND_DIGITRAFFIC_WEATHER_STATION_DATA_FIXTURE_PATH",
+    )
+    finland_digitraffic_weather_stations_url: str = Field(
+        default="https://tie.digitraffic.fi/api/weather/v1/stations",
+        alias="FINLAND_DIGITRAFFIC_WEATHER_STATIONS_URL",
+    )
+    finland_digitraffic_weather_station_data_url: str = Field(
+        default="https://tie.digitraffic.fi/api/weather/v1/stations/data",
+        alias="FINLAND_DIGITRAFFIC_WEATHER_STATION_DATA_URL",
+    )
+    finland_digitraffic_http_timeout_seconds: int = Field(
+        default=20,
+        alias="FINLAND_DIGITRAFFIC_HTTP_TIMEOUT_SECONDS",
+    )
     windy_webcams_api_key: str | None = Field(default=None, alias="WINDY_WEBCAMS_API_KEY")
     windy_webcams_base_url: str = Field(default="https://api.windy.com/api/webcams/v2", alias="WINDY_WEBCAMS_BASE_URL")
     reference_database_url: str = Field(default="sqlite:///./data/reference.db", alias="REFERENCE_DATABASE_URL")
@@ -83,6 +107,44 @@ class Settings(BaseSettings):
     marine_noaa_coops_mode: str = Field(default="fixture", alias="MARINE_NOAA_COOPS_MODE")
     marine_ndbc_mode: str = Field(default="fixture", alias="MARINE_NDBC_MODE")
     marine_ndbc_latest_url: str | None = Field(default=None, alias="MARINE_NDBC_LATEST_URL")
+    vigicrues_hydrometry_mode: str = Field(default="fixture", alias="VIGICRUES_HYDROMETRY_MODE")
+    vigicrues_hydrometry_fixture_path: str = Field(
+        default="./data/vigicrues_hydrometry_fixture.json",
+        alias="VIGICRUES_HYDROMETRY_FIXTURE_PATH",
+    )
+    vigicrues_hydrometry_stations_url: str = Field(
+        default="https://hubeau.eaufrance.fr/api/v2/hydrometrie/referentiel/stations",
+        alias="VIGICRUES_HYDROMETRY_STATIONS_URL",
+    )
+    vigicrues_hydrometry_sites_url: str = Field(
+        default="https://hubeau.eaufrance.fr/api/v2/hydrometrie/referentiel/sites",
+        alias="VIGICRUES_HYDROMETRY_SITES_URL",
+    )
+    vigicrues_hydrometry_observations_tr_url: str = Field(
+        default="https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr",
+        alias="VIGICRUES_HYDROMETRY_OBSERVATIONS_TR_URL",
+    )
+    vigicrues_hydrometry_http_timeout_seconds: int = Field(
+        default=20,
+        alias="VIGICRUES_HYDROMETRY_HTTP_TIMEOUT_SECONDS",
+    )
+    ireland_opw_waterlevel_mode: str = Field(default="fixture", alias="IRELAND_OPW_WATERLEVEL_MODE")
+    ireland_opw_waterlevel_fixture_path: str = Field(
+        default="./data/ireland_opw_waterlevel_fixture.json",
+        alias="IRELAND_OPW_WATERLEVEL_FIXTURE_PATH",
+    )
+    ireland_opw_waterlevel_latest_url: str = Field(
+        default="https://waterlevel.ie/geojson/latest/",
+        alias="IRELAND_OPW_WATERLEVEL_LATEST_URL",
+    )
+    ireland_opw_waterlevel_geojson_url: str = Field(
+        default="https://waterlevel.ie/geojson/",
+        alias="IRELAND_OPW_WATERLEVEL_GEOJSON_URL",
+    )
+    ireland_opw_waterlevel_http_timeout_seconds: int = Field(
+        default=20,
+        alias="IRELAND_OPW_WATERLEVEL_HTTP_TIMEOUT_SECONDS",
+    )
     scottish_water_overflows_mode: str = Field(
         default="fixture",
         alias="SCOTTISH_WATER_OVERFLOWS_MODE",
@@ -174,6 +236,54 @@ class Settings(BaseSettings):
         default="./data/swpc_space_weather_fixture.json",
         alias="SWPC_FIXTURE_PATH",
     )
+    washington_vaac_source_mode: str = Field(
+        default="fixture",
+        alias="WASHINGTON_VAAC_SOURCE_MODE",
+    )
+    washington_vaac_advisories_url: str = Field(
+        default="https://www.ospo.noaa.gov/products/atmosphere/vaac/messages.html",
+        alias="WASHINGTON_VAAC_ADVISORIES_URL",
+    )
+    washington_vaac_http_timeout_seconds: int = Field(
+        default=20,
+        alias="WASHINGTON_VAAC_HTTP_TIMEOUT_SECONDS",
+    )
+    washington_vaac_fixture_path: str = Field(
+        default="./data/washington_vaac_advisories_fixture.json",
+        alias="WASHINGTON_VAAC_FIXTURE_PATH",
+    )
+    anchorage_vaac_source_mode: str = Field(
+        default="fixture",
+        alias="ANCHORAGE_VAAC_SOURCE_MODE",
+    )
+    anchorage_vaac_advisories_url: str = Field(
+        default="https://www.weather.gov/vaac/",
+        alias="ANCHORAGE_VAAC_ADVISORIES_URL",
+    )
+    anchorage_vaac_http_timeout_seconds: int = Field(
+        default=20,
+        alias="ANCHORAGE_VAAC_HTTP_TIMEOUT_SECONDS",
+    )
+    anchorage_vaac_fixture_path: str = Field(
+        default="./data/anchorage_vaac_advisories_fixture.json",
+        alias="ANCHORAGE_VAAC_FIXTURE_PATH",
+    )
+    tokyo_vaac_source_mode: str = Field(
+        default="fixture",
+        alias="TOKYO_VAAC_SOURCE_MODE",
+    )
+    tokyo_vaac_advisories_url: str = Field(
+        default="https://www.data.jma.go.jp/vaac/data/vaac_list.html",
+        alias="TOKYO_VAAC_ADVISORIES_URL",
+    )
+    tokyo_vaac_http_timeout_seconds: int = Field(
+        default=20,
+        alias="TOKYO_VAAC_HTTP_TIMEOUT_SECONDS",
+    )
+    tokyo_vaac_fixture_path: str = Field(
+        default="./data/tokyo_vaac_advisories_fixture.json",
+        alias="TOKYO_VAAC_FIXTURE_PATH",
+    )
     volcano_source_mode: str = Field(default="fixture", alias="VOLCANO_SOURCE_MODE")
     volcano_fixture_path: str = Field(
         default="./data/usgs_volcano_status_fixture.json",
@@ -252,6 +362,32 @@ class Settings(BaseSettings):
         alias="HKO_TROPICAL_CYCLONE_URL",
     )
     hko_http_timeout_seconds: int = Field(default=20, alias="HKO_HTTP_TIMEOUT_SECONDS")
+    taiwan_cwa_source_mode: str = Field(default="fixture", alias="TAIWAN_CWA_SOURCE_MODE")
+    taiwan_cwa_fixture_path: str = Field(
+        default="./data/taiwan_cwa_current_weather_fixture.json",
+        alias="TAIWAN_CWA_FIXTURE_PATH",
+    )
+    taiwan_cwa_current_weather_url: str = Field(
+        default="https://cwaopendata.s3.ap-northeast-1.amazonaws.com/Observation/O-A0003-001.json",
+        alias="TAIWAN_CWA_CURRENT_WEATHER_URL",
+    )
+    taiwan_cwa_http_timeout_seconds: int = Field(default=20, alias="TAIWAN_CWA_HTTP_TIMEOUT_SECONDS")
+    nrc_event_notifications_source_mode: str = Field(
+        default="fixture",
+        alias="NRC_EVENT_NOTIFICATIONS_SOURCE_MODE",
+    )
+    nrc_event_notifications_fixture_path: str = Field(
+        default="./data/nrc_event_notifications_fixture.xml",
+        alias="NRC_EVENT_NOTIFICATIONS_FIXTURE_PATH",
+    )
+    nrc_event_notifications_feed_url: str = Field(
+        default="https://www.nrc.gov/public-involve/rss?feed=event",
+        alias="NRC_EVENT_NOTIFICATIONS_FEED_URL",
+    )
+    nrc_event_notifications_http_timeout_seconds: int = Field(
+        default=20,
+        alias="NRC_EVENT_NOTIFICATIONS_HTTP_TIMEOUT_SECONDS",
+    )
     metno_metalerts_source_mode: str = Field(default="fixture", alias="METNO_METALERTS_SOURCE_MODE")
     metno_metalerts_fixture_path: str = Field(
         default="./data/metno_metalerts_fixture.json",
@@ -276,6 +412,139 @@ class Settings(BaseSettings):
         alias="CANADA_CAP_FEED_URL",
     )
     canada_cap_http_timeout_seconds: int = Field(default=20, alias="CANADA_CAP_HTTP_TIMEOUT_SECONDS")
+    bmkg_earthquakes_source_mode: str = Field(default="fixture", alias="BMKG_EARTHQUAKES_SOURCE_MODE")
+    bmkg_earthquakes_fixture_path: str = Field(
+        default="./data/bmkg_earthquakes_fixture.json",
+        alias="BMKG_EARTHQUAKES_FIXTURE_PATH",
+    )
+    bmkg_earthquakes_latest_url: str = Field(
+        default="https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json",
+        alias="BMKG_EARTHQUAKES_LATEST_URL",
+    )
+    bmkg_earthquakes_recent_url: str = Field(
+        default="https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json",
+        alias="BMKG_EARTHQUAKES_RECENT_URL",
+    )
+    bmkg_earthquakes_http_timeout_seconds: int = Field(
+        default=20,
+        alias="BMKG_EARTHQUAKES_HTTP_TIMEOUT_SECONDS",
+    )
+    ipma_source_mode: str = Field(default="fixture", alias="IPMA_SOURCE_MODE")
+    ipma_fixture_path: str = Field(
+        default="./data/ipma_warnings_fixture.json",
+        alias="IPMA_FIXTURE_PATH",
+    )
+    ipma_warnings_url: str = Field(
+        default="https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json",
+        alias="IPMA_WARNINGS_URL",
+    )
+    ipma_areas_url: str = Field(
+        default="https://api.ipma.pt/open-data/distrits-islands.json",
+        alias="IPMA_AREAS_URL",
+    )
+    ipma_http_timeout_seconds: int = Field(default=20, alias="IPMA_HTTP_TIMEOUT_SECONDS")
+    dmi_forecast_source_mode: str = Field(default="fixture", alias="DMI_FORECAST_SOURCE_MODE")
+    dmi_forecast_fixture_path: str = Field(
+        default="./data/dmi_forecast_fixture.json",
+        alias="DMI_FORECAST_FIXTURE_PATH",
+    )
+    dmi_forecast_base_url: str = Field(
+        default="https://opendataapi.dmi.dk/v1/forecastedr",
+        alias="DMI_FORECAST_BASE_URL",
+    )
+    dmi_forecast_collection: str = Field(
+        default="harmonie_dini_sf",
+        alias="DMI_FORECAST_COLLECTION",
+    )
+    dmi_forecast_http_timeout_seconds: int = Field(default=20, alias="DMI_FORECAST_HTTP_TIMEOUT_SECONDS")
+    ireland_wfd_source_mode: str = Field(default="fixture", alias="IRELAND_WFD_SOURCE_MODE")
+    ireland_wfd_fixture_path: str = Field(
+        default="./data/ireland_epa_wfd_catchments_fixture.json",
+        alias="IRELAND_WFD_FIXTURE_PATH",
+    )
+    ireland_wfd_catchment_url: str = Field(
+        default="https://wfdapi.edenireland.ie/api/catchment",
+        alias="IRELAND_WFD_CATCHMENT_URL",
+    )
+    ireland_wfd_search_url: str = Field(
+        default="https://wfdapi.edenireland.ie/api/search",
+        alias="IRELAND_WFD_SEARCH_URL",
+    )
+    ireland_wfd_http_timeout_seconds: int = Field(default=20, alias="IRELAND_WFD_HTTP_TIMEOUT_SECONDS")
+    met_eireann_warnings_source_mode: str = Field(default="fixture", alias="MET_EIREANN_WARNINGS_SOURCE_MODE")
+    met_eireann_warnings_fixture_path: str = Field(
+        default="./data/met_eireann_warning_rss_fixture.xml",
+        alias="MET_EIREANN_WARNINGS_FIXTURE_PATH",
+    )
+    met_eireann_warnings_feed_url: str = Field(
+        default="https://www.met.ie/warningsxml/rss.xml",
+        alias="MET_EIREANN_WARNINGS_FEED_URL",
+    )
+    met_eireann_warnings_http_timeout_seconds: int = Field(
+        default=20,
+        alias="MET_EIREANN_WARNINGS_HTTP_TIMEOUT_SECONDS",
+    )
+    met_eireann_forecast_source_mode: str = Field(default="fixture", alias="MET_EIREANN_FORECAST_SOURCE_MODE")
+    met_eireann_forecast_fixture_path: str = Field(
+        default="./data/met_eireann_forecast_fixture.xml",
+        alias="MET_EIREANN_FORECAST_FIXTURE_PATH",
+    )
+    met_eireann_forecast_url: str = Field(
+        default="https://openaccess.pf.api.met.ie/metno-wdb2ts/locationforecast",
+        alias="MET_EIREANN_FORECAST_URL",
+    )
+    met_eireann_forecast_http_timeout_seconds: int = Field(
+        default=20,
+        alias="MET_EIREANN_FORECAST_HTTP_TIMEOUT_SECONDS",
+    )
+    geosphere_austria_warnings_source_mode: str = Field(
+        default="fixture",
+        alias="GEOSPHERE_AUSTRIA_WARNINGS_SOURCE_MODE",
+    )
+    geosphere_austria_warnings_fixture_path: str = Field(
+        default="./data/geosphere_austria_warnings_fixture.json",
+        alias="GEOSPHERE_AUSTRIA_WARNINGS_FIXTURE_PATH",
+    )
+    geosphere_austria_warnings_url: str = Field(
+        default="https://warnungen.zamg.at/wsapp/api/getWarnstatus?lang=en",
+        alias="GEOSPHERE_AUSTRIA_WARNINGS_URL",
+    )
+    geosphere_austria_warnings_http_timeout_seconds: int = Field(
+        default=20,
+        alias="GEOSPHERE_AUSTRIA_WARNINGS_HTTP_TIMEOUT_SECONDS",
+    )
+    nasa_power_source_mode: str = Field(
+        default="fixture",
+        alias="NASA_POWER_SOURCE_MODE",
+    )
+    nasa_power_fixture_path: str = Field(
+        default="./data/nasa_power_meteorology_solar_fixture.json",
+        alias="NASA_POWER_FIXTURE_PATH",
+    )
+    nasa_power_daily_point_url: str = Field(
+        default="https://power.larc.nasa.gov/api/temporal/daily/point",
+        alias="NASA_POWER_DAILY_POINT_URL",
+    )
+    nasa_power_http_timeout_seconds: int = Field(
+        default=20,
+        alias="NASA_POWER_HTTP_TIMEOUT_SECONDS",
+    )
+    usgs_geomagnetism_source_mode: str = Field(
+        default="fixture",
+        alias="USGS_GEOMAGNETISM_SOURCE_MODE",
+    )
+    usgs_geomagnetism_fixture_path: str = Field(
+        default="./data/usgs_geomagnetism_fixture.json",
+        alias="USGS_GEOMAGNETISM_FIXTURE_PATH",
+    )
+    usgs_geomagnetism_data_url: str = Field(
+        default="https://geomag.usgs.gov/ws/data/",
+        alias="USGS_GEOMAGNETISM_DATA_URL",
+    )
+    usgs_geomagnetism_http_timeout_seconds: int = Field(
+        default=20,
+        alias="USGS_GEOMAGNETISM_HTTP_TIMEOUT_SECONDS",
+    )
     rss_feed_source_mode: str = Field(default="fixture", alias="RSS_FEED_SOURCE_MODE")
     rss_feed_fixture_path: str = Field(
         default="./data/rss_google_alerts_fixture.xml",
@@ -291,6 +560,54 @@ class Settings(BaseSettings):
     )
     rss_feed_http_timeout_seconds: int = Field(default=20, alias="RSS_FEED_HTTP_TIMEOUT_SECONDS")
     rss_feed_stale_after_seconds: int = Field(default=172800, alias="RSS_FEED_STALE_AFTER_SECONDS")
+    cisa_cyber_advisories_source_mode: str = Field(
+        default="fixture",
+        alias="CISA_CYBER_ADVISORIES_SOURCE_MODE",
+    )
+    cisa_cyber_advisories_fixture_path: str = Field(
+        default="./data/cisa_cybersecurity_advisories_fixture.xml",
+        alias="CISA_CYBER_ADVISORIES_FIXTURE_PATH",
+    )
+    cisa_cyber_advisories_feed_url: str = Field(
+        default="https://www.cisa.gov/cybersecurity-advisories/cybersecurity-advisories.xml",
+        alias="CISA_CYBER_ADVISORIES_FEED_URL",
+    )
+    cisa_cyber_advisories_http_timeout_seconds: int = Field(
+        default=20,
+        alias="CISA_CYBER_ADVISORIES_HTTP_TIMEOUT_SECONDS",
+    )
+    first_epss_source_mode: str = Field(
+        default="fixture",
+        alias="FIRST_EPSS_SOURCE_MODE",
+    )
+    first_epss_fixture_path: str = Field(
+        default="./data/first_epss_fixture.json",
+        alias="FIRST_EPSS_FIXTURE_PATH",
+    )
+    first_epss_api_url: str = Field(
+        default="https://api.first.org/data/v1/epss",
+        alias="FIRST_EPSS_API_URL",
+    )
+    first_epss_http_timeout_seconds: int = Field(
+        default=20,
+        alias="FIRST_EPSS_HTTP_TIMEOUT_SECONDS",
+    )
+    data_ai_multi_feed_source_mode: str = Field(
+        default="fixture",
+        alias="DATA_AI_MULTI_FEED_SOURCE_MODE",
+    )
+    data_ai_multi_feed_fixture_root: str = Field(
+        default="./data/data_ai_multi_feeds",
+        alias="DATA_AI_MULTI_FEED_FIXTURE_ROOT",
+    )
+    data_ai_multi_feed_http_timeout_seconds: int = Field(
+        default=20,
+        alias="DATA_AI_MULTI_FEED_HTTP_TIMEOUT_SECONDS",
+    )
+    data_ai_multi_feed_stale_after_seconds: int = Field(
+        default=172800,
+        alias="DATA_AI_MULTI_FEED_STALE_AFTER_SECONDS",
+    )
     webcam_database_url: str | None = Field(default=None, alias="WEBCAM_DATABASE_URL")
     webcam_worker_enabled: bool = Field(default=False, alias="WEBCAM_WORKER_ENABLED")
     webcam_worker_poll_seconds: int = Field(default=15, alias="WEBCAM_WORKER_POLL_SECONDS")

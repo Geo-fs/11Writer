@@ -1,0 +1,58 @@
+{
+  "listing_source_url": "https://www.data.jma.go.jp/vaac/data/vaac_list.html",
+  "last_updated_at": "2026-04-30T18:53:00+00:00",
+  "caveats": [
+    "Tokyo VAAC advisories are advisory/contextual volcanic-ash hazard records.",
+    "Do not infer route impact, aircraft exposure, engine risk, or operational consequence from this summary alone."
+  ],
+  "advisories": [
+    {
+      "advisory_id": "27303000:2026/548",
+      "advisory_number": "2026/548",
+      "issue_time": "2026-04-30T18:53:00+00:00",
+      "observed_at": "2026-04-30T18:41:00+00:00",
+      "volcano_name": "MAYON",
+      "volcano_number": "27303000",
+      "area": "PHILIPPINES",
+      "source_elevation_text": "2463M AMSL",
+      "source_elevation_ft": 8081,
+      "information_source": "JMA HIMAWARI-9",
+      "aviation_color_code": null,
+      "eruption_details": "ERUPTED AT 20260430/1841Z FL150 EXTD W",
+      "observed_ash_text": "OBS VA CLD: SFC/FL150 MOV W 20KT",
+      "remarks": "WE WILL ISSUE FURTHER ADVISORY IF VA IS DETECTED IN SATELLITE IMAGERY.",
+      "next_advisory": "NO FURTHER ADVISORIES=",
+      "max_flight_level": "FL150",
+      "source_url": "https://www.data.jma.go.jp/vaac/data/TextData/2026/20260430_27303000_0548_Text.html",
+      "source_mode": "fixture",
+      "health": "normal",
+      "summary": "Tokyo VAAC advisory for MAYON, advisory 2026/548, reported to FL150, issued 2026-04-30T18:53:00+00:00",
+      "caveats": [],
+      "evidence_basis": "advisory"
+    },
+    {
+      "advisory_id": "28208001:2026/26",
+      "advisory_number": "2026/26",
+      "issue_time": "2026-04-10T07:37:00+00:00",
+      "observed_at": "2026-04-10T07:20:00+00:00",
+      "volcano_name": "SAKURAJIMA (AIRA CALDERA)",
+      "volcano_number": "28208001",
+      "area": "JAPAN",
+      "source_elevation_text": "1117M AMSL",
+      "source_elevation_ft": 3665,
+      "information_source": "JMA HIMAWARI-9",
+      "aviation_color_code": null,
+      "eruption_details": "ERUPTED AT 20260410/0725Z FL090 EXTD NE",
+      "observed_ash_text": "VA NOT IDENTIFIABLE FM SATELLITE DATA WIND FL090 250/47KT",
+      "remarks": "WE WILL ISSUE FURTHER ADVISORY IF VA IS DETECTED IN SATELLITE IMAGERY.",
+      "next_advisory": "NO FURTHER ADVISORIES=",
+      "max_flight_level": "FL090",
+      "source_url": "https://www.data.jma.go.jp/vaac/data/TextData/2026/20260410_28208001_0026_Text.html",
+      "source_mode": "fixture",
+      "health": "normal",
+      "summary": "Tokyo VAAC advisory for SAKURAJIMA (AIRA CALDERA), advisory 2026/26, reported to FL090, issued 2026-04-10T07:37:00+00:00",
+      "caveats": [],
+      "evidence_basis": "advisory"
+    }
+  ]
+}

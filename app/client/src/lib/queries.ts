@@ -2,9 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchJson } from "./api";
 import type {
   AviationWeatherContextResponse,
+  AnchorageVaacAdvisoriesResponse,
+  BmkgEarthquakesResponse,
   CanadaCapAlertResponse,
   CameraSourceInventoryResponse,
   CneosContextResponse,
+  MetEireannForecastResponse,
+  MetEireannWarningsResponse,
   EonetEventsResponse,
   FaaNasAirportStatusResponse,
   OpenSkyStatesResponse,
@@ -18,9 +22,11 @@ import type {
   VolcanoStatusResponse,
   ReviewQueueResponse,
   MarineChokepointAnalyticalSummaryResponse,
+  MarineIrelandOpwWaterLevelContextResponse,
   MarineNdbcContextResponse,
   MarineNoaaCoopsContextResponse,
   MarineScottishWaterOverflowResponse,
+  MarineVigicruesHydrometryContextResponse,
   MarineVesselAnalyticalSummaryResponse,
   MarineVesselsResponse,
   MarineViewportAnalyticalSummaryResponse,
@@ -28,7 +34,10 @@ import type {
   ReferenceNearbyResponse,
   ReferenceResolveLinkResponse,
   SourceStatusResponse,
-  SwpcContextResponse
+  SwpcContextResponse,
+  TokyoVaacAdvisoriesResponse,
+  UsgsGeomagnetismResponse,
+  WashingtonVaacAdvisoriesResponse
 } from "../types/api";
 import type { AircraftEntity } from "../types/entities";
 import type { EnvironmentalEventFilterState } from "./store";
@@ -307,6 +316,110 @@ export function useSwpcSpaceWeatherContextQuery(input: {
   });
 }
 
+export function useUsgsGeomagnetismContextQuery(input?: {
+  enabled?: boolean;
+  observatoryId?: string | null;
+  elements?: string[] | null;
+}) {
+  const enabled = input?.enabled ?? true;
+  const observatoryId = input?.observatoryId ?? "BOU";
+  const elements = input?.elements?.filter((value) => value.length > 0) ?? [];
+  return useQuery({
+    queryKey: ["usgs-geomagnetism-context", observatoryId, elements.join(",")],
+    queryFn: () => {
+      const params = new URLSearchParams({
+        observatory_id: observatoryId
+      });
+      if (elements.length > 0) {
+        params.set("elements", elements.join(","));
+      }
+      return fetchJson<UsgsGeomagnetismResponse>(
+        `/api/context/geomagnetism/usgs?${params.toString()}`
+      );
+    },
+    enabled: enabled && observatoryId.length > 0,
+    staleTime: 120_000
+  });
+}
+
+export function useWashingtonVaacAdvisoriesQuery(input?: {
+  enabled?: boolean;
+  volcano?: string | null;
+  limit?: number;
+}) {
+  const enabled = input?.enabled ?? true;
+  const volcano = input?.volcano ?? null;
+  const limit = input?.limit ?? 2;
+  return useQuery({
+    queryKey: ["washington-vaac-advisories", volcano, limit],
+    queryFn: () => {
+      const params = new URLSearchParams({
+        limit: String(limit)
+      });
+      if (volcano) {
+        params.set("volcano", volcano);
+      }
+      return fetchJson<WashingtonVaacAdvisoriesResponse>(
+        `/api/aerospace/space/washington-vaac-advisories?${params.toString()}`
+      );
+    },
+    enabled,
+    staleTime: 120_000
+  });
+}
+
+export function useAnchorageVaacAdvisoriesQuery(input?: {
+  enabled?: boolean;
+  volcano?: string | null;
+  limit?: number;
+}) {
+  const enabled = input?.enabled ?? true;
+  const volcano = input?.volcano ?? null;
+  const limit = input?.limit ?? 2;
+  return useQuery({
+    queryKey: ["anchorage-vaac-advisories", volcano, limit],
+    queryFn: () => {
+      const params = new URLSearchParams({
+        limit: String(limit)
+      });
+      if (volcano) {
+        params.set("volcano", volcano);
+      }
+      return fetchJson<AnchorageVaacAdvisoriesResponse>(
+        `/api/aerospace/space/anchorage-vaac-advisories?${params.toString()}`
+      );
+    },
+    enabled,
+    staleTime: 120_000
+  });
+}
+
+export function useTokyoVaacAdvisoriesQuery(input?: {
+  enabled?: boolean;
+  volcano?: string | null;
+  limit?: number;
+}) {
+  const enabled = input?.enabled ?? true;
+  const volcano = input?.volcano ?? null;
+  const limit = input?.limit ?? 2;
+  return useQuery({
+    queryKey: ["tokyo-vaac-advisories", volcano, limit],
+    queryFn: () => {
+      const params = new URLSearchParams({
+        limit: String(limit)
+      });
+      if (volcano) {
+        params.set("volcano", volcano);
+      }
+      return fetchJson<TokyoVaacAdvisoriesResponse>(
+        `/api/aerospace/space/tokyo-vaac-advisories?${params.toString()}`
+      );
+    },
+    enabled,
+    staleTime: 120_000
+  });
+}
+
 export function useMarineVesselsQuery() {
   return useQuery({
     queryKey: ["marine-vessels"],
@@ -499,6 +612,80 @@ export function useMarineScottishWaterOverflowsQuery(input: {
       });
       return fetchJson<MarineScottishWaterOverflowResponse>(
         `/api/marine/context/scottish-water-overflows?${params.toString()}`
+      );
+    },
+    enabled: enabled && input.center != null,
+    staleTime: 60_000,
+    refetchInterval: 120_000
+  });
+}
+
+export function useMarineVigicruesHydrometryContextQuery(input: {
+  center: { lat: number; lon: number } | null;
+  radiusKm?: number;
+  parameter?: "all" | "water-height" | "flow";
+  enabled?: boolean;
+}) {
+  const radiusKm = input.radiusKm ?? 250;
+  const parameter = input.parameter ?? "all";
+  const enabled = input.enabled ?? true;
+  return useQuery({
+    queryKey: [
+      "marine-vigicrues-hydrometry",
+      input.center?.lat ?? null,
+      input.center?.lon ?? null,
+      radiusKm,
+      parameter,
+      enabled
+    ],
+    queryFn: () => {
+      if (!input.center) {
+        throw new Error("Marine Vigicrues hydrometry context requires center coordinates.");
+      }
+      const params = new URLSearchParams({
+        lat: String(input.center.lat),
+        lon: String(input.center.lon),
+        radius_km: String(radiusKm),
+        parameter,
+        limit: "5"
+      });
+      return fetchJson<MarineVigicruesHydrometryContextResponse>(
+        `/api/marine/context/vigicrues-hydrometry?${params.toString()}`
+      );
+    },
+    enabled: enabled && input.center != null,
+    staleTime: 60_000,
+    refetchInterval: 120_000
+  });
+}
+
+export function useMarineIrelandOpwWaterLevelContextQuery(input: {
+  center: { lat: number; lon: number } | null;
+  radiusKm?: number;
+  enabled?: boolean;
+}) {
+  const radiusKm = input.radiusKm ?? 250;
+  const enabled = input.enabled ?? true;
+  return useQuery({
+    queryKey: [
+      "marine-ireland-opw-waterlevel",
+      input.center?.lat ?? null,
+      input.center?.lon ?? null,
+      radiusKm,
+      enabled
+    ],
+    queryFn: () => {
+      if (!input.center) {
+        throw new Error("Marine Ireland OPW water-level context requires center coordinates.");
+      }
+      const params = new URLSearchParams({
+        lat: String(input.center.lat),
+        lon: String(input.center.lon),
+        radius_km: String(radiusKm),
+        limit: "5"
+      });
+      return fetchJson<MarineIrelandOpwWaterLevelContextResponse>(
+        `/api/marine/context/ireland-opw-waterlevel?${params.toString()}`
       );
     },
     enabled: enabled && input.center != null,
@@ -701,5 +888,92 @@ export function useCanadaCapAlertsQuery(filters: EnvironmentalEventFilterState, 
     enabled,
     staleTime: 45_000,
     refetchInterval: 60_000,
+  });
+}
+
+export function useBmkgEarthquakesQuery(input?: {
+  minMagnitude?: number | null;
+  limit?: number;
+  sort?: "newest" | "magnitude";
+  enabled?: boolean;
+}) {
+  const minMagnitude = input?.minMagnitude ?? 5;
+  const limit = input?.limit ?? 15;
+  const sort = input?.sort ?? "newest";
+  const enabled = input?.enabled ?? true;
+
+  return useQuery({
+    queryKey: ["bmkg-earthquakes", minMagnitude, limit, sort],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        limit: String(limit),
+        sort,
+      });
+      if (minMagnitude != null) {
+        params.set("min_magnitude", String(minMagnitude));
+      }
+      return fetchJson<BmkgEarthquakesResponse>(`/api/events/bmkg-earthquakes/recent?${params.toString()}`);
+    },
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000,
+  });
+}
+
+export function useMetEireannWarningsQuery(input?: {
+  level?: "all" | "green" | "yellow" | "orange" | "red" | "unknown";
+  limit?: number;
+  sort?: "newest" | "level";
+  enabled?: boolean;
+}) {
+  const level = input?.level ?? "all";
+  const limit = input?.limit ?? 50;
+  const sort = input?.sort ?? "newest";
+  const enabled = input?.enabled ?? true;
+
+  return useQuery({
+    queryKey: ["met-eireann-warnings", level, limit, sort],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        level,
+        limit: String(limit),
+        sort
+      });
+      return fetchJson<MetEireannWarningsResponse>(
+        `/api/events/met-eireann/warnings?${params.toString()}`
+      );
+    },
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000
+  });
+}
+
+export function useMetEireannForecastQuery(input?: {
+  latitude?: number;
+  longitude?: number;
+  limit?: number;
+  enabled?: boolean;
+}) {
+  const latitude = input?.latitude ?? 53.3498;
+  const longitude = input?.longitude ?? -6.2603;
+  const limit = input?.limit ?? 24;
+  const enabled = input?.enabled ?? true;
+
+  return useQuery({
+    queryKey: ["met-eireann-forecast", latitude, longitude, limit],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        latitude: String(latitude),
+        longitude: String(longitude),
+        limit: String(limit)
+      });
+      return fetchJson<MetEireannForecastResponse>(
+        `/api/context/weather/met-eireann-forecast?${params.toString()}`
+      );
+    },
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000
   });
 }

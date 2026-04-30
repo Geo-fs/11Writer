@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from typing import Literal
 
 from src.adapters.marine import build_marine_adapter
 from src.config.settings import Settings
@@ -9,17 +10,21 @@ from src.marine.repository import haversine_meters
 from src.marine.gap_detection import MarineGapDetectionService
 from src.marine.repository import MarineRepository, MarineSourceUpdate
 from src.services.marine_context_service import (
+    MarineIrelandOpwWaterLevelService,
     MarineNdbcService,
     MarineNoaaCoopsService,
     MarineScottishWaterOverflowService,
+    MarineVigicruesHydrometryService,
 )
 from src.services.source_registry import record_source_failure, record_source_success
 from src.types.api import (
     FilterSummary,
     MarineAnomalyScore,
+    MarineIrelandOpwWaterLevelContextResponse,
     MarineNdbcContextResponse,
     MarineNoaaCoopsContextResponse,
     MarineScottishWaterOverflowResponse,
+    MarineVigicruesHydrometryContextResponse,
     MarineGapEventsResponse,
     MarineReplayPathResponse,
     MarineChokepointAnalyticalSummaryResponse,
@@ -45,6 +50,8 @@ class MarineService:
         self._noaa_coops = MarineNoaaCoopsService(settings)
         self._ndbc = MarineNdbcService(settings)
         self._scottish_water = MarineScottishWaterOverflowService(settings)
+        self._vigicrues_hydrometry = MarineVigicruesHydrometryService(settings)
+        self._ireland_opw_waterlevel = MarineIrelandOpwWaterLevelService(settings)
 
     async def ingest_once(self) -> None:
         now = datetime.now(tz=timezone.utc).isoformat()
@@ -666,6 +673,38 @@ class MarineService:
             radius_km=radius_km,
             limit=limit,
             status="inactive" if status == "inactive" else "active" if status == "active" else "all",
+        )
+
+    async def vigicrues_hydrometry_context(
+        self,
+        *,
+        center_lat: float,
+        center_lon: float,
+        radius_km: float,
+        limit: int,
+        parameter_filter: Literal["all", "water-height", "flow"],
+    ) -> MarineVigicruesHydrometryContextResponse:
+        return await self._vigicrues_hydrometry.context(
+            center_lat=center_lat,
+            center_lon=center_lon,
+            radius_km=radius_km,
+            limit=limit,
+            parameter_filter=parameter_filter,
+        )
+
+    async def ireland_opw_waterlevel_context(
+        self,
+        *,
+        center_lat: float,
+        center_lon: float,
+        radius_km: float,
+        limit: int,
+    ) -> MarineIrelandOpwWaterLevelContextResponse:
+        return await self._ireland_opw_waterlevel.context(
+            center_lat=center_lat,
+            center_lon=center_lon,
+            radius_km=radius_km,
+            limit=limit,
         )
 
 

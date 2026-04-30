@@ -1,0 +1,72 @@
+{
+  "BOU": {
+    "type": "Timeseries",
+    "metadata": {
+      "intermagnet": {
+        "imo": {
+          "iaga_code": "BOU",
+          "name": "Boulder",
+          "coordinates": [-105.237, 40.137, 1682.0]
+        },
+        "reported_orientation": "XYZF",
+        "sensor_orientation": "HDZ",
+        "data_type": "adjusted",
+        "sampling_period": 60.0,
+        "digital_sampling_rate": 0.01
+      },
+      "status": 200,
+      "generated": "2026-04-30T19:31:26Z",
+      "url": null
+    },
+    "times": [
+      "2026-04-30T00:00:00.000Z",
+      "2026-04-30T00:01:00.000Z",
+      "2026-04-30T00:02:00.000Z",
+      "2026-04-30T00:03:00.000Z"
+    ],
+    "values": [
+      {
+        "id": "X",
+        "metadata": {"element": "X", "network": "NT", "station": "BOU", "channel": "X", "location": "A0"},
+        "values": [20518.812, 20519.302, 20518.875, 20517.704]
+      },
+      {
+        "id": "Y",
+        "metadata": {"element": "Y", "network": "NT", "station": "BOU", "channel": "Y", "location": "A0"},
+        "values": [2802.936, 2803.16, 2803.466, 2803.625]
+      },
+      {
+        "id": "Z",
+        "metadata": {"element": "Z", "network": "NT", "station": "BOU", "channel": "Z", "location": "A0"},
+        "values": [52015.4, 52015.8, 52016.1, 52015.7]
+      },
+      {
+        "id": "F",
+        "metadata": {"element": "F", "network": "NT", "station": "BOU", "channel": "F", "location": "A0"},
+        "values": [55979.1, 55979.5, null, 55978.8]
+      }
+    ]
+  },
+  "EMPT": {
+    "type": "Timeseries",
+    "metadata": {
+      "intermagnet": {
+        "imo": {
+          "iaga_code": "EMPT",
+          "name": "Fixture Empty Observatory",
+          "coordinates": [null, null, null]
+        },
+        "reported_orientation": "XYZF",
+        "sensor_orientation": "HDZ",
+        "data_type": "adjusted",
+        "sampling_period": 60.0,
+        "digital_sampling_rate": 0.01
+      },
+      "status": 200,
+      "generated": "2026-04-30T19:31:26Z",
+      "url": null
+    },
+    "times": [],
+    "values": []
+  }
+}

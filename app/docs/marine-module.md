@@ -11,6 +11,7 @@ Marine subsystem only: vessel observations, AIS-like transmission gap evidence, 
 Related validation docs:
 - [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
 - [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+- [marine-context-fixture-reference.md](/C:/Users/mike/11Writer/app/docs/marine-context-fixture-reference.md)
 
 ## Provider Integration Strategy
 
@@ -369,18 +370,121 @@ Interpretation rules:
 
 Current integration note:
 - Scottish Water overflow context remains separate from the combined NOAA CO-OPS/NDBC environmental context in this slice
+
+### France Vigicrues Hydrometry Context
+
+Marine now also includes a first fixture-backed France Vigicrues / Hub'Eau hydrometry slice for nearby river-condition context:
+- backend route: `GET /api/marine/context/vigicrues-hydrometry`
+- client hook: `useMarineVigicruesHydrometryContextQuery(...)`
+- frontend helper: `app/client/src/features/marine/marineVigicruesContext.ts`
+- pinned public endpoint family:
+  - `https://hubeau.eaufrance.fr/api/v2/hydrometrie/referentiel/stations`
+  - `https://hubeau.eaufrance.fr/api/v2/hydrometrie/referentiel/sites`
+  - `https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr`
+
+Current scope:
+- bounded station metadata
+- latest realtime water-height or flow observation per fixture station
+- explicit observed timestamp and unit
+- compact source health and mode (`fixture`, later `live`)
+- query center / radius lookup with optional parameter-family filter
+
+Current limits:
+- fixture-first only in this slice
+- no flood dashboard or impact model
+- no broad hydrology browser or timeseries UI
+- no inundation, damage, pollution-impact, health-impact, or vessel-behavior inference
+- water height and flow remain separate observation families and are not combined into one severity metric
+
+Source health semantics:
+- `loaded`: nearby station context returned
+- `empty`: source responded but no nearby station matched the query radius/filter
+- `disabled`: non-fixture mode requested before live implementation exists
+
+Interpretation rules:
+- Vigicrues hydrometry is contextual river-condition data, not anomaly evidence
+- station values must not be presented as flood-impact confirmation
+- fixture/local mode must remain explicit in UI and export metadata
 - a future marine pass may integrate it into a broader marine context federation if that can be done without blurring infrastructure-status context and oceanographic context
+
+### Ireland OPW Water Level Context
+
+Marine now also includes a first fixture-backed Ireland OPW water-level slice for nearby river-condition context:
+- backend route: `GET /api/marine/context/ireland-opw-waterlevel`
+- client hook: `useMarineIrelandOpwWaterLevelContextQuery(...)`
+- frontend helper: `app/client/src/features/marine/marineIrelandOpwContext.ts`
+- pinned public endpoint family:
+  - `https://waterlevel.ie/geojson/latest/`
+  - `https://waterlevel.ie/geojson/`
+
+Current scope:
+- bounded station metadata
+- latest published water-level reading per fixture station
+- explicit reading timestamp and water-level units
+- compact source health and mode (`fixture`, later `live`)
+- query center / radius lookup
+- export-ready provenance fields through station and reading source URLs
+
+Current limits:
+- fixture-first only
+- no flood dashboard or impact model
+- no contamination, damage, health-impact, or vessel-behavior inference
+- provisional-data caveats remain explicit
+
+Source health semantics:
+- `loaded`: nearby station context returned
+- `empty`: source responded but no nearby station matched the query radius
+- `disabled`: non-fixture mode requested before live implementation exists
+
+Interpretation rules:
+- OPW water-level readings are contextual hydrometric data, not anomaly evidence
+- station readings must not be presented as flood-impact, inundation, contamination, or damage confirmation
+- fixture/local mode must remain explicit in contracts and future downstream consumption
+
+### Marine Hydrology Context Review Summary
+
+Marine also composes the two river-condition context sources into a bounded hydrology review summary:
+- helper: `app/client/src/features/marine/marineHydrologyContext.ts`
+- current consumer: `app/client/src/features/marine/MarineAnomalySection.tsx`
+
+Current scope:
+- compose already-loaded France Vigicrues and Ireland OPW summaries into review-ready lines
+- keep water height, flow, and OPW water-level observations distinct
+- surface source health, source mode, empty/no-match context, partial metadata, and missing observed-time caveats
+- expose compact export/snapshot metadata
+
+Interpretation rules:
+- hydrology review summary is workflow context only
+- it must not merge Vigicrues and OPW into a fake severity score
+- it must not be presented as flood-impact, inundation, damage, contamination, health-impact, anomaly-cause, vessel-behavior, or vessel-intent evidence
+- hydrology context remains separate from combined CO-OPS/NDBC environmental context
 
 ### Backend Contract Coverage
 
 Marine backend contract coverage currently locks down the following context-source guarantees:
-- NOAA CO-OPS, NOAA NDBC, and Scottish Water routes are contract-tested
+- NOAA CO-OPS, NOAA NDBC, Scottish Water, Vigicrues, and Ireland OPW routes are contract-tested
 - fixture mode must remain explicit through source-health/source-mode fields
 - empty nearby results must return `health=empty`, not backend error semantics
+- loaded nearby results may now return `health=stale` when returned source observation/update timestamps exceed source-specific freshness thresholds
 - disabled non-fixture behavior must remain explicit when live mode is not implemented
 - CO-OPS/NDBC observation basis must remain `observed`
 - Scottish Water overflow status basis must remain `source-reported`
-- source-level caveats must remain present for all three sources
+- Vigicrues latest hydrometry observation basis must remain `observed`
+- Ireland OPW latest water-level reading basis must remain `observed`
+- source-level caveats must remain present for all five sources
+
+Current marine source-health thresholds:
+- NOAA CO-OPS: stale after 30 minutes based on returned water-level/current observation timestamps
+- NOAA NDBC: stale after 45 minutes based on returned buoy/station observation timestamps
+- Scottish Water Overflows: stale after 2 hours based on returned monitor `last_updated_at`
+- France Vigicrues Hydrometry: stale after 60 minutes based on returned observation timestamps
+- Ireland OPW Water Level: stale after 60 minutes based on returned reading timestamps
+
+States still not emitted in this slice:
+- `unavailable`
+- `degraded`
+
+These remain intentionally undocumented as active backend outputs until a real endpoint-error or partial-ingest health path exists.
 
 Route validation expectations:
 - invalid latitude/longitude requests must be rejected by request validation
@@ -390,6 +494,8 @@ Forbidden inference claims remain unchanged:
 - no vessel-intent inference from any context source
 - no anomaly-cause inference from any context source
 - no pollution-impact or health-risk claim from Scottish Water status alone
+- no flood-impact, inundation, or damage claim from Vigicrues station values alone
+- no flood-impact, inundation, contamination, or damage claim from Ireland OPW station values alone
 
 ### Marine Context Source Registry Summary
 
@@ -404,6 +510,10 @@ Current registry rows include:
   - category: `meteorological`
 - `Scottish Water Overflows`
   - category: `coastal-infrastructure`
+- `France Vigicrues Hydrometry`
+  - category: `hydrology`
+- `Ireland OPW Water Level`
+  - category: `hydrology`
 
 Each row summarizes:
 - source label
@@ -514,6 +624,80 @@ Export metadata includes:
   - top issues
   - caveats
 
+### Marine Context Fusion Summary
+
+Marine also derives a compact fusion/review summary across the existing context families:
+- helper: `app/client/src/features/marine/marineContextFusionSummary.ts`
+- current consumer: `app/client/src/features/marine/MarineAnomalySection.tsx`
+
+Included families:
+- `ocean/met context`
+  - combined CO-OPS/NDBC availability and review context
+- `hydrology context`
+  - composed Vigicrues/OPW hydrology review context
+- `infrastructure context`
+  - Scottish Water overflow-monitor status context
+
+Current scope:
+- summarize family availability without creating a single severity score
+- surface export readiness as a workflow qualifier only
+- surface top caveats from family summaries and source-health issues
+- preserve source-health and issue-queue boundaries in export metadata
+
+Current dependency chain:
+- combined CO-OPS/NDBC environmental context
+- composed Vigicrues/OPW hydrology context
+- Scottish Water overflow context
+- marine context source registry summary
+- marine context issue queue
+
+Validation note:
+- backend trust for this helper comes from the underlying context-source contracts, not a dedicated fusion backend route
+- current smoke expectations are recorded in `marine-workflow-validation.md`
+- current marine validation status:
+  - backend contract dependencies validated
+  - client lint/build validated
+  - marine-only smoke confirms the visible fusion card and `marineAnomalySummary.contextFusionSummary`
+
+Interpretation rules:
+- the fusion summary helps the operator orient to which context families are available, limited, empty, or unavailable
+- it must not merge hydrology, ocean/met, and infrastructure into a generic risk or anomaly score
+- it must not be presented as proof of vessel intent, vessel behavior, anomaly cause, flooding, contamination, health impact, damage, or wrongdoing
+- export readiness here means context completeness/caveat posture only, not confidence in vessel conclusions
+
+### Marine Context Review Report
+
+Marine also derives a compact context review/report package on top of the existing fusion and issue summaries:
+- helper: `app/client/src/features/marine/marineContextReviewReport.ts`
+- current consumer: `app/client/src/features/marine/MarineAnomalySection.tsx`
+
+Current scope:
+- title and summary line for the current marine context lens
+- context families included
+- review-needed items
+- export caveat lines
+- source-health summary
+- explicit `does not prove` lines
+
+Current dependency chain:
+- `app/client/src/features/marine/marineContextFusionSummary.ts`
+- `app/client/src/features/marine/marineContextIssueQueue.ts`
+- export metadata wiring in `app/client/src/features/marine/marineEvidenceSummary.ts`
+
+Validation note:
+- this report package is frontend-local and depends on the existing fusion + issue helpers remaining semantically bounded
+- backend validation comes indirectly from the already-tested source contracts that feed those helpers
+- current marine validation status:
+  - backend/source-summary dependencies validated
+  - client lint/build validated
+  - marine-only smoke confirms the visible review report card and `marineAnomalySummary.contextReviewReport`
+
+Interpretation rules:
+- the review/report package helps a user explain what context is available and what needs follow-up
+- it must not change anomaly scoring
+- it must not collapse unrelated context families into a single severity signal
+- it must not be presented as proof of vessel intent, vessel behavior, anomaly cause, flooding, contamination, health impact, damage, pollution impact, or wrongdoing
+
 ### Combined Marine Environmental Context
 
 Marine also derives a frontend-local combined environmental context summary from already-loaded NOAA CO-OPS and NOAA NDBC data:
@@ -617,9 +801,14 @@ python app/server/tests/run_playwright_smoke.py marine
 This validates marine anomaly rendering and controls using deterministic fixture data:
 - marine anomaly section
 - combined marine environmental context card
+- marine context fusion card
+- marine context review report card
+- marine hydrology context card
 - marine environmental context preset selector
 - NOAA CO-OPS context card
 - NOAA NDBC context card
+- France Vigicrues Hydrometry context card
+- Ireland OPW Water Level context card
 - source-specific preset behavior
 - Scottish Water overflow context card
 - marine context source registry summary
@@ -630,6 +819,11 @@ This validates marine anomaly rendering and controls using deterministic fixture
 - marine attention queue presence/content
 - anomaly-to-replay focus actions from queue/slice controls
 - active focused target display
+- snapshot metadata contains `marineAnomalySummary.vigicruesHydrometryContext` after export
+- snapshot metadata contains `marineAnomalySummary.irelandOpwWaterLevelContext` after export
+- snapshot metadata contains `marineAnomalySummary.hydrologyContext` after export
+- snapshot metadata contains `marineAnomalySummary.contextFusionSummary` after export
+- snapshot metadata contains `marineAnomalySummary.contextReviewReport` after export
 - snapshot metadata contains `marineAnomalySummary.activeNavigationTarget` after focus + export
 
 The full smoke path remains:
@@ -651,6 +845,11 @@ Included export evidence fields:
 - top chokepoint slice (rank/score/level/label/top reason/caveat indicator)
 - NOAA CO-OPS context summary (source mode/health, nearby station count, top station)
 - NOAA NDBC context summary (source mode/health, nearby station count, top station + top observation summary)
+- Vigicrues hydrometry context summary (source mode/health, nearby station count, parameter filter, top station + top observation summary)
+- Ireland OPW water-level context summary (source mode/health, nearby station count, top station + top reading summary)
+- composed marine hydrology context summary (loaded/empty counts, nearby station count, per-source review lines, caveats)
+- composed marine context fusion summary (family availability, export-readiness line, top caveats)
+- composed marine context review report (families included, review-needed items, export caveats, does-not-prove lines)
 - combined environmental context summary (source counts, station counts, health summary, top observations)
 - marine attention queue summary (item count + top item)
 - active controls (`chokepointFilter`, `chokepointSort`)
@@ -693,6 +892,61 @@ Snapshot/export integration behavior:
   - `contextKind`
   - `topStation`
   - `topObservationSummary`
+  - `caveats`
+- `marineAnomalySummary.vigicruesHydrometryContext` adds compact hydrometry-context metadata:
+  - `sourceId`
+  - `sourceMode`
+  - `health`
+  - `nearbyStationCount`
+  - `parameterFilter`
+  - `topStation`
+  - `topObservationSummary`
+  - `caveats`
+- `marineAnomalySummary.irelandOpwWaterLevelContext` adds compact OPW hydrology-context metadata:
+  - `sourceId`
+  - `sourceMode`
+  - `health`
+  - `nearbyStationCount`
+  - `topStation`
+  - `topObservationSummary`
+  - `caveats`
+- `marineAnomalySummary.hydrologyContext` adds compact composed hydrology-review metadata:
+  - `sourceCount`
+  - `loadedSourceCount`
+  - `emptySourceCount`
+  - `degradedSourceCount`
+  - `disabledSourceCount`
+  - `fixtureSourceCount`
+  - `nearbyStationCount`
+  - `healthSummary`
+  - `vigicrues`
+  - `irelandOpw`
+  - `caveats`
+- `marineAnomalySummary.contextFusionSummary` adds compact cross-family context-fusion metadata:
+  - `familyCount`
+  - `availableFamilyCount`
+  - `limitedFamilyCount`
+  - `unavailableFamilyCount`
+  - `fixtureFamilyCount`
+  - `issueCount`
+  - `warningCount`
+  - `exportReadiness`
+  - `overallAvailabilityLine`
+  - `exportReadinessLine`
+  - `familyLines`
+  - `highestPriorityCaveats`
+  - `caveats`
+- `marineAnomalySummary.contextReviewReport` adds compact report-package metadata:
+  - `title`
+  - `summaryLine`
+  - `contextFamiliesIncluded`
+  - `reviewNeededItems`
+  - `sourceHealthSummary`
+  - `exportReadiness`
+  - `exportCaveatLines`
+  - `doesNotProveLines`
+  - `issueCount`
+  - `warningCount`
   - `caveats`
 - `marineAnomalySummary.environmentalContext` adds compact combined marine-context metadata:
   - `sourceCount`

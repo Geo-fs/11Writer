@@ -27,6 +27,17 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   the analytical aircraft/satellite workflows are covered end to end in the deterministic fixture,
   and the required restore-driven aerospace flows now gate pass/fail.
   The direct-canvas headless probes remain recorded as informational telemetry because Cesium pickability under headless WebGL is still variable.
+  The prepared metadata assertions now also cover
+  `geomagnetismContext`
+  and `aerospaceContextIssues`
+  and `aerospaceExportReadiness`
+  and `aerospaceContextReport`
+  and `aerospaceReviewQueue`
+  and `vaacContext`
+  in the aerospace export path.
+  Local execution note for 2026-04-30:
+  the aerospace smoke harness on this Windows host did not reach browser assertions because Playwright Chromium launch failed up front with `spawn EPERM`;
+  treat that specific result as a machine-environment blocker, not as an aerospace assertion failure.
 - Deterministic smoke fixture API: serving both `/api/*` responses and the built client bundle from `app/server/tests/smoke_fixture_app.py`.
 - Playwright validated end to end:
   aircraft selected-target restore,
@@ -137,6 +148,27 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   Anonymous OpenSky access is treated as optional, rate-limited, source-reported context only.
   Coverage is not guaranteed to be complete or authoritative.
   The provider is tracked separately in source status as `opensky-anonymous-states`.
+- USGS geomagnetism contextual consumer:
+  selected aircraft and satellites can now consume optional read-only observatory geomagnetism context through
+  `/api/context/geomagnetism/usgs`.
+  This aerospace consumer is bounded to the existing backend route and remains source-health-aware and export-aware.
+  It surfaces a compact `Geomagnetism (USGS)` inspector section with observatory, interval, latest sample time, selected elements, and caveats.
+  Geomagnetism is treated as observatory magnetic-field context only.
+  It does not imply GPS, radio, aircraft, or satellite failure, and it does not replace selected-target truth.
+  The provider is tracked separately in source status as `usgs-geomagnetism`.
+- Multi-VAAC contextual consumer:
+  aerospace now also consumes bounded read-only advisory context from
+  `/api/aerospace/space/washington-vaac-advisories`.
+  `/api/aerospace/space/anchorage-vaac-advisories`
+  and
+  `/api/aerospace/space/tokyo-vaac-advisories`.
+  This consumer is fixture-first, source-health-aware, and export-aware.
+  It now renders a compact `Volcanic Ash Advisory Context` inspector section and preserves snapshot metadata under `vaacContext`.
+  The backend route pins the official NOAA OSPO Washington VAAC listing page and linked XML advisory documents under `volcanoes/xml_files/`.
+  Anchorage pins the official NOAA/NWS Anchorage VAAC listing page and the linked forecast.weather.gov advisory text-product family for headers `AK1` through `AK5`.
+  Tokyo pins the official JMA Tokyo VAAC advisory listing page and the linked `TextData/..._Text.html` advisory-text family.
+  The combined helper preserves per-VAAC advisory number, timestamps where available, volcano identity, provenance URLs, bounded summary text, source mode, source health, and explicit no-route-impact/no-aircraft-exposure caveats.
+  VAAC advisories remain advisory/contextual volcanic-ash source text only and do not imply flight disruption, route impact, aircraft exposure, engine risk, threat, causation, or operational consequence.
 - Aerospace operational-context composition:
   aerospace now also builds a compact `Aerospace Operational Context` summary from already-loaded AWC, FAA NAS, CNEOS, SWPC, and selected-target data-health context.
   This summary is composition-only.
@@ -155,6 +187,7 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   FAA NAS airport status,
   CNEOS space events,
   SWPC space weather,
+  volcanic ash advisories,
   selected-target data health,
   and selected-target reference/pass-window context.
   Availability rows describe whether each source is
@@ -166,6 +199,35 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   or `unknown`,
   plus source mode, health, a short reason, and an evidence-basis label.
   This section is a trust/coverage aid only and does not imply target behavior or causation.
+- Aerospace context review summary:
+  aerospace now also builds a compact `Aerospace Context Review` summary from already-loaded source health, availability rows, OpenSky comparison guardrails, and selected-target data health.
+  It surfaces attention and informational review notes such as degraded source health, unavailable context prerequisites, empty optional sources, fixture-mode context, stale or unknown selected-target freshness, and guardrailed OpenSky comparison states.
+  This review summary is aerospace-local and export-aware.
+  It does not imply aircraft behavior, satellite failure, target risk, causation, or threat.
+- Aerospace export readiness summary:
+  aerospace now also builds a compact `Aerospace Export Readiness` summary from already-loaded operational context, context availability, context review, and selected-target data health.
+  It labels export state conservatively as
+  `ready with caveats`,
+  `missing optional context`,
+  `fixture/local context present`,
+  `degraded or unavailable context`,
+  or `selected-target freshness limited`.
+  This summary is about export-context completeness and caveat visibility only.
+  It is not a certification of source reliability and does not imply target behavior, threat, failure, causation, or impact.
+- Aerospace context report summary:
+  aerospace now also builds a compact `Aerospace Context Report` summary from already-loaded selected-target evidence, context availability, export readiness, review queue, and selected-target data health.
+  It is an explainability/export aid only.
+  It preserves top caveats and explicit `what this does not prove` lines in both inspector and snapshot metadata.
+  It does not imply certainty, urgency, intent, threat, failure, causation, impact, or real-world action recommendation.
+- Aerospace review queue summary:
+  aerospace now also builds a compact `Aerospace Review Queue` summary from already-loaded context review, export readiness, availability, selected-target data health, and guarded OpenSky comparison state.
+  Queue items are ordered into
+  `review-first`,
+  `review`,
+  and `note`
+  bands for analyst organization only.
+  They summarize context that may deserve human review such as degraded optional context, fixture/local context, limited freshness, unavailable OpenSky comparison, or caveated export readiness.
+  They are not source-certainty scores, not operational urgency markers, and not real-world action recommendations.
 - Reference context coverage:
   the smoke fixture now serves deterministic read-only reference responses for selected aircraft through
   `/api/reference/link/aircraft`,
@@ -301,6 +363,20 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   anonymous access is rate-limited and may expose current state vectors only.
   This optional context is source-reported and must not be treated as complete or authoritative traffic coverage.
   Even an exact OpenSky comparison match does not replace the primary selected-aircraft source or make OpenSky an ATC truth layer.
+- Snapshot/export may now also preserve a compact geomagnetism context summary for selected aircraft or satellites:
+  source id,
+  observatory id/name,
+  source mode,
+  source health/state,
+  sample count,
+  sampling interval,
+  latest observed sample time,
+  selected elements,
+  latest values,
+  and a small number of contextual caveats.
+- Geomagnetism caveat:
+  geomagnetic observatory values are contextual geophysical observations only.
+  They do not by themselves prove avionics, GPS, radio, or satellite degradation or failure.
 - Snapshot/export may now also preserve a compact aerospace operational-context summary:
   source count,
   healthy source count,
@@ -318,6 +394,40 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   fixture-source count,
   and a small number of availability caveats.
   The operational-context export footer may also include one compact availability line summarizing how many context sources are available, unavailable, degraded, or fixture-backed.
+- Snapshot/export may now also preserve a compact aerospace context-review summary:
+  issue count,
+  attention and informational counts,
+  healthy-source count,
+  fixture-source count,
+  top review notes,
+  and a small number of trust/coverage caveats.
+  Export footer profiles may prioritize one or two compact review lines, but those lines remain trust/coverage accounting only.
+- Snapshot/export may now also preserve a compact aerospace export-readiness summary:
+  readiness category,
+  readiness label,
+  review-recommended flag,
+  source/availability counts,
+  top readiness note,
+  source ids contributing to the readiness call,
+  and a small number of caveats.
+  Export footer profiles may prioritize one or two readiness lines, but those lines remain export-context completeness guidance only.
+- Snapshot/export may now also preserve a compact aerospace context-report summary:
+  source count,
+  available count,
+  degraded count,
+  review-queue counts,
+  readiness category,
+  selected-target label,
+  selected-target health summary,
+  top caveats,
+  and explicit `what this does not prove` lines.
+  Export footer profiles may prioritize one or two report lines, but those lines remain bounded explainability summaries only.
+- Snapshot/export may now also preserve a compact aerospace review-queue summary:
+  item count,
+  review-first/review/note counts,
+  top review items,
+  and a small number of queue caveats.
+  Export footer profiles may prioritize one or two queue lines, but those lines remain review-ordering summaries only.
 - Aerospace export profiles:
   aerospace export/snapshot workflows now support compact profile selection for footer-line emphasis without changing machine-readable metadata.
   Available profiles are:
@@ -336,6 +446,12 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
 - Aerospace export-profile caveat:
   footer emphasis is a presentation aid only.
   Choosing an export profile does not imply that emphasized airport/weather/space/health/focus signals are more causal or more authoritative than other preserved metadata.
+- Aerospace context-report caveat:
+  the report is a bounded analyst summary over already-loaded aerospace context only.
+  It does not prove source truth, selected-target behavior, operational consequences, or recommended action.
+- Aerospace review-queue caveat:
+  queue ordering is an analyst sorting aid over already-loaded context only.
+  It does not imply certainty, urgency, intent, threat, failure, causation, impact, or recommended real-world action.
 - Aerospace context-availability meanings:
   `available` means the current selected-target workflow has usable loaded context for that source,
   `empty` means the source responded but reported no records in the current window,
@@ -356,6 +472,10 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   `source empty`,
   `source disabled or blocked`,
   and target-specific context labels such as `reference context unavailable` or `pass-window context partial`.
+- Aerospace context-review meanings:
+  `attention` flags a trust or availability condition that merits review, such as degraded source health, unavailable expected context, or stale/unknown selected-target freshness.
+  `informational` flags softer limits such as fixture-mode operation, empty optional source windows, derived evidence basis, or a non-authoritative optional-source comparison state.
+  These labels are review aids only and do not imply urgency, impact, intent, or causation.
 - NOAA AWC first-slice contract:
   aerospace consumes METAR/TAF read-only through a typed backend route and does not own weather-source ingestion beyond that connector.
   The current first slice intentionally excludes broader AWC products such as SIGMET, G-AIRMET, NOTAM, or route weather synthesis.

@@ -70,8 +70,10 @@ def test_opensky_states_route_serializes_fixture_states(monkeypatch) -> None:
     assert payload["source"] == "opensky-anonymous-states"
     assert payload["count"] == 1
     assert payload["states"][0]["icao24"] == "abc123"
+    assert payload["states"][0]["sourceMode"] == "fixture"
     assert payload["states"][0]["evidenceBasis"] == "source-reported"
     assert "rate-limited" in payload["caveats"][0]
+    assert "not replace the primary aircraft workflow" in " ".join(payload["caveats"]).lower()
 
 
 def test_opensky_states_preserves_missing_coordinate_records(monkeypatch) -> None:
@@ -228,3 +230,32 @@ def test_opensky_states_smoke_fixture_exposes_route() -> None:
     assert payload["count"] == 1
     assert payload["states"][0]["icao24"] == "abc123"
     assert payload["sourceHealth"]["sourceMode"] == "fixture"
+
+
+def test_opensky_states_empty_result_is_explicit(monkeypatch) -> None:
+    async def fake_load_payload(self):
+        return OpenSkyStatesFetchResult(
+            states=[],
+            source_mode="fixture",
+            source_url="fixture.json",
+            last_updated_at=None,
+            caveats=[
+                "OpenSky anonymous access is rate-limited and may expose current state vectors only.",
+                "Coverage is source-reported and not guaranteed to be complete or authoritative.",
+            ],
+        )
+
+    monkeypatch.setattr(
+        "src.services.opensky_states_service.OpenSkyStatesService._load_payload",
+        fake_load_payload,
+    )
+
+    client = _client()
+    response = client.get("/api/aerospace/aircraft/opensky/states", params={"icao24": "missing"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["count"] == 0
+    assert payload["states"] == []
+    assert "rate-limited" in " ".join(payload["caveats"]).lower()
+    assert "not guaranteed to be complete or authoritative" in " ".join(payload["caveats"]).lower()

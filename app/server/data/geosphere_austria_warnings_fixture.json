@@ -1,0 +1,56 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [[[120000, 370000], [121000, 370000], [121000, 371000], [120000, 371000], [120000, 370000]]]
+        ]
+      },
+      "properties": {
+        "warnid": "gwa-test-1001",
+        "wtype": 1,
+        "wlevel": 1,
+        "start": "1774882800",
+        "end": "1774886400",
+        "gemeinden": ["10101", "10102", "10103"]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [[[220000, 470000], [221500, 470000], [221500, 471500], [220000, 471500], [220000, 470000]]]
+        ]
+      },
+      "properties": {
+        "warnid": "gwa-test-2001",
+        "wtype": 2,
+        "wlevel": 2,
+        "start": "1774969200",
+        "end": "1774976400",
+        "gemeinden": ["20201", "20202"]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [[[320000, 570000], [322000, 570000], [322000, 572000], [320000, 572000], [320000, 570000]]]
+        ]
+      },
+      "properties": {
+        "warnid": "gwa-test-3001",
+        "wtype": 5,
+        "wlevel": 3,
+        "start": "1775055600",
+        "end": "1775062800",
+        "gemeinden": ["30301"]
+      }
+    }
+  ]
+}

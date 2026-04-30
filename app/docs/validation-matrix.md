@@ -9,8 +9,12 @@ This guide provides task-scoped validation commands for the active 11Writer work
 For a larger pre-commit advisory scan, use:
 
 - `python scripts/release_dry_run.py`
+- `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke aerospace=known-local-caveat:windows-browser-launch-permission --smoke webcam=passed`
+- `python scripts/alerts_ledger.py`
 
 Commands are written for the current Windows environment and prefer explicit working directories plus `cmd /c npm.cmd ...` for client commands.
+
+The product target is cross-platform: full desktop app, companion web app, and backend-only runtime across Windows 10/11, macOS, and Linux. A Windows-only validation pass is local evidence, not proof of cross-platform support. Any task that touches runtime modes, packaging, storage paths, service/daemon behavior, companion access, network binding, or desktop shell behavior must also define the OS-native validation still required before support is claimed.
 
 ## Existing command entry points inspected
 
@@ -35,8 +39,8 @@ Commands are written for the current Windows environment and prefer explicit wor
 - Do not treat a Windows Playwright browser launch failure as an automatic feature failure on this machine.
 - For docs-only changes, prefer diff review over broad builds.
 - For shared files, validate after hunk staging, not before.
-- Current verified machine state: `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, and `cmd /c npm.cmd run build` are green; `python app/server/tests/run_playwright_smoke.py webcam` currently fails before app assertions with `windows-playwright-launch-permission` / `spawn EPERM`.
-- That webcam smoke result does not imply stale `dist` output or a current client compile failure.
+- Current verified machine state: `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, and `cmd /c npm.cmd run build` are green; focused `marine` and `webcam` smoke currently pass, while focused `aerospace` smoke currently fails before app assertions with `windows-playwright-launch-permission`, narrowed to `windows-browser-launch-permission`.
+- That pre-assertion aerospace smoke result does not imply stale `dist` output or a current client compile failure.
 
 ## Connect / tooling
 
@@ -263,10 +267,11 @@ python app/server/tests/run_playwright_smoke.py webcam
 Playwright environment note:
 
 - Known local classification: `windows-playwright-launch-permission`
+- Current narrowed local cause for the focused aerospace smoke failure: `windows-browser-launch-permission`
 - On this Windows machine, browser-launch failure is an environment and tooling issue, not automatically a feature failure.
 - Non-Connect agents should not chase launch-permission issues unless explicitly assigned.
 - Focused smoke phases may still be validated elsewhere.
-- A pre-assertion webcam smoke failure on this machine does not mean the current client build is stale if `cmd /c npm.cmd run build` already passed.
+- A pre-assertion smoke failure on this machine does not mean the current client build is stale if `cmd /c npm.cmd run build` already passed.
 
 ## Shared shell / panel / store reconciliation
 
