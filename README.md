@@ -17,7 +17,7 @@ The current repository is still the local development foundation for that plan. 
 - Aircraft and satellite analyst workspace with selected-target context, replay surfaces, and evidence-oriented summaries
 - Marine replay, transmission-gap review, and anomaly-ranking workflows
 - Webcam and public camera source operations with inventory and source-health handling
-- Canonical reference subsystem for facilities, navigation objects, and place linkage
+- Canonical reference subsystem for facilities, navigation objects, and place linkage 
 
 ## Repository layout
 
@@ -127,5 +127,6 @@ npm run build
 - `app/docs/cross-platform-agent-broadcast.md`
 
 ## License
+
 
 This repository uses the existing `AGPL-3.0` license from the public GitHub repository. The root `LICENSE` file is preserved from `origin/main`.
