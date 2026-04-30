@@ -1,0 +1,70 @@
+{
+  "events": [
+    {
+      "event_id": "NTWC-2026-ALERT-001",
+      "title": "Tsunami Warning for Alaska Peninsula",
+      "alert_type": "warning",
+      "source_center": "NTWC",
+      "issued_at": "2026-04-28T16:12:00+00:00",
+      "updated_at": "2026-04-28T16:40:00+00:00",
+      "effective_at": "2026-04-28T16:12:00+00:00",
+      "expires_at": "2026-04-28T22:12:00+00:00",
+      "affected_regions": ["South Alaska Peninsula coast", "Kodiak Island"],
+      "basin": "Pacific",
+      "region": "Alaska Peninsula",
+      "longitude": -160.21,
+      "latitude": 54.85,
+      "source_url": "https://www.tsunami.gov/?p=PAAQ/2026/04/28/NTWC001/1/WEAK53",
+      "summary": "This is a Tsunami Warning for parts of coastal Alaska. Advisory/context only.",
+      "caveat": "Official tsunami advisory context only. This fixture does not model inundation or local impact."
+    },
+    {
+      "event_id": "PTWC-2026-ALERT-002",
+      "title": "Tsunami Advisory for Hawaii",
+      "alert_type": "advisory",
+      "source_center": "PTWC",
+      "issued_at": "2026-04-27T10:00:00+00:00",
+      "updated_at": "2026-04-27T10:30:00+00:00",
+      "effective_at": "2026-04-27T10:00:00+00:00",
+      "expires_at": "2026-04-27T18:00:00+00:00",
+      "affected_regions": ["Hawaiian Islands"],
+      "basin": "Pacific",
+      "region": "Hawaii",
+      "longitude": -157.85,
+      "latitude": 21.31,
+      "source_url": "https://www.tsunami.gov/?p=PHEB/2026/04/27/PTWC002/1/WEPA40",
+      "summary": "Strong currents possible near the shore. Advisory/context only.",
+      "caveat": "Official tsunami advisory context only. This fixture does not model inundation or local impact."
+    },
+    {
+      "event_id": "NTWC-2026-ALERT-003",
+      "title": "Tsunami Information Statement for U.S. West Coast",
+      "alert_type": "information",
+      "source_center": "NTWC",
+      "issued_at": "2026-04-26T08:15:00+00:00",
+      "updated_at": "2026-04-26T08:20:00+00:00",
+      "affected_regions": ["Washington", "Oregon", "California"],
+      "basin": "Pacific",
+      "region": "U.S. West Coast",
+      "source_url": "https://www.tsunami.gov/?p=PAAQ/2026/04/26/NTWC003/1/WEAK53",
+      "summary": "No tsunami warning, advisory, watch, or threat. Informational context only.",
+      "caveat": "Official tsunami advisory context only. This fixture does not model inundation or local impact."
+    },
+    {
+      "event_id": "PTWC-2026-ALERT-004",
+      "title": "Tsunami Cancellation for American Samoa",
+      "alert_type": "cancellation",
+      "source_center": "PTWC",
+      "issued_at": "2026-04-25T03:00:00+00:00",
+      "updated_at": "2026-04-25T03:45:00+00:00",
+      "affected_regions": ["American Samoa"],
+      "basin": "Pacific",
+      "region": "American Samoa",
+      "longitude": -170.70,
+      "latitude": -14.27,
+      "source_url": "https://www.tsunami.gov/?p=PHEB/2026/04/25/PTWC004/1/WEPA40",
+      "summary": "Cancellation message for prior coastal tsunami alert.",
+      "caveat": "Official tsunami advisory context only. This fixture does not model inundation or local impact."
+    }
+  ]
+}

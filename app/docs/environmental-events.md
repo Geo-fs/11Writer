@@ -6,6 +6,13 @@ The geospatial subsystem now summarizes multiple environmental event sources thr
 
 - USGS Earthquakes
 - NASA EONET
+- USGS Volcano Status
+- NOAA Tsunami Alerts
+- UK Environment Agency Flood Monitoring
+- GeoNet New Zealand Hazards
+- Hong Kong Observatory Open Weather
+- MET Norway MetAlerts
+- Canada CAP Alerts
 
 ## Overview Behavior
 
@@ -16,6 +23,11 @@ The geospatial subsystem now summarizes multiple environmental event sources thr
   - newest loaded event
   - strongest loaded earthquake when present
   - EONET categories present in the loaded set
+  - UK flood warning / station counts when present
+  - GeoNet quake / volcano counts when present
+  - HKO weather warning / cyclone context counts when present
+  - MET Norway alert counts when present
+  - Canada CAP alert counts when present
   - active earthquake and EONET filter summary
   - a shared caveat line
 - If an environmental event is selected, the overview adds a source-aware selected-event summary.
@@ -84,6 +96,12 @@ The geospatial subsystem now summarizes multiple environmental event sources thr
 
 - Earthquake magnitude remains earthquake-specific and is not merged into EONET severity language.
 - EONET categories and representative-geometry caveats remain EONET-specific.
+- Tsunami alert types remain official advisory message classes and are not merged into a generic severity score.
+- UK flood warnings remain advisory/contextual, while UK flood station readings remain observed measurements.
+- GeoNet quakes remain source-reported regional observations, while GeoNet volcano alerts remain advisory/contextual status.
+- HKO weather warnings remain advisory/context, while HKO tropical cyclone text remains forecast/context rather than impact confirmation.
+- MET Norway alerts remain advisory/contextual warning records and use backend-only live fetch handling because the source requires a proper custom User-Agent.
+- Canada CAP alerts remain advisory/contextual warning records and are not impact confirmation.
 - The overview coordinates the sources without flattening their meaning into a generic hazard score.
 
 ## Export Behavior
@@ -131,6 +149,8 @@ The geospatial subsystem now summarizes multiple environmental event sources thr
 ## Source Health And Freshness
 
 - The overview now includes compact source-health rows for Earthquakes and NASA EONET.
+- Tsunami and UK flood sources also participate when enabled.
+- HKO, MET Norway, and Canada CAP also participate when enabled.
 - Health states are distinct:
   - `disabled`
   - `loading`
@@ -164,6 +184,11 @@ Future environmental sources should plug into the overview by contributing:
 - enabled/loading/error state
 - source-specific caveat text
 - source-specific selected-event meaning
+
+UK flood integration also establishes an evidence-basis split future sources can reuse:
+
+- advisory/contextual records
+- observed measurement records
 
 Possible future candidates:
 

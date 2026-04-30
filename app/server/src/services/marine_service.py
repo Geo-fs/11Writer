@@ -8,10 +8,18 @@ from src.marine.db import session_scope
 from src.marine.repository import haversine_meters
 from src.marine.gap_detection import MarineGapDetectionService
 from src.marine.repository import MarineRepository, MarineSourceUpdate
+from src.services.marine_context_service import (
+    MarineNdbcService,
+    MarineNoaaCoopsService,
+    MarineScottishWaterOverflowService,
+)
 from src.services.source_registry import record_source_failure, record_source_success
 from src.types.api import (
     FilterSummary,
     MarineAnomalyScore,
+    MarineNdbcContextResponse,
+    MarineNoaaCoopsContextResponse,
+    MarineScottishWaterOverflowResponse,
     MarineGapEventsResponse,
     MarineReplayPathResponse,
     MarineChokepointAnalyticalSummaryResponse,
@@ -34,6 +42,9 @@ class MarineService:
         self._settings = settings
         self._adapter = build_marine_adapter(settings)
         self._gap_detector = MarineGapDetectionService()
+        self._noaa_coops = MarineNoaaCoopsService(settings)
+        self._ndbc = MarineNdbcService(settings)
+        self._scottish_water = MarineScottishWaterOverflowService(settings)
 
     async def ingest_once(self) -> None:
         now = datetime.now(tz=timezone.utc).isoformat()
@@ -604,6 +615,57 @@ class MarineService:
                 "total_observed_gap_events",
             ],
             inferred_fields=["slices.suspicious_gap_event_count", "total_suspicious_gap_events"],
+        )
+
+    async def noaa_coops_context(
+        self,
+        *,
+        center_lat: float,
+        center_lon: float,
+        radius_km: float,
+        limit: int,
+        context_kind: str,
+    ) -> MarineNoaaCoopsContextResponse:
+        return await self._noaa_coops.context(
+            center_lat=center_lat,
+            center_lon=center_lon,
+            radius_km=radius_km,
+            limit=limit,
+            context_kind="chokepoint" if context_kind == "chokepoint" else "viewport",
+        )
+
+    async def ndbc_context(
+        self,
+        *,
+        center_lat: float,
+        center_lon: float,
+        radius_km: float,
+        limit: int,
+        context_kind: str,
+    ) -> MarineNdbcContextResponse:
+        return await self._ndbc.context(
+            center_lat=center_lat,
+            center_lon=center_lon,
+            radius_km=radius_km,
+            limit=limit,
+            context_kind="chokepoint" if context_kind == "chokepoint" else "viewport",
+        )
+
+    async def scottish_water_overflows_context(
+        self,
+        *,
+        center_lat: float,
+        center_lon: float,
+        radius_km: float,
+        limit: int,
+        status: str,
+    ) -> MarineScottishWaterOverflowResponse:
+        return await self._scottish_water.context(
+            center_lat=center_lat,
+            center_lon=center_lon,
+            radius_km=radius_km,
+            limit=limit,
+            status="inactive" if status == "inactive" else "active" if status == "active" else "all",
         )
 
 

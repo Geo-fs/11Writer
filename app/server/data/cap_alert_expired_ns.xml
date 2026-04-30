@@ -1,0 +1,28 @@
+<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+  <identifier>cap-ns-003</identifier>
+  <sender>ec.alerts@weather.gc.ca</sender>
+  <sent>2026-04-25T08:00:00-03:00</sent>
+  <status>Actual</status>
+  <msgType>Alert</msgType>
+  <scope>Public</scope>
+  <info>
+    <language>en-CA</language>
+    <category>Met</category>
+    <event>Wind Warning</event>
+    <urgency>Immediate</urgency>
+    <severity>Severe</severity>
+    <certainty>Observed</certainty>
+    <headline>Wind Warning for Halifax Metro</headline>
+    <description>Damaging winds were expected.</description>
+    <effective>2026-04-25T08:00:00-03:00</effective>
+    <expires>2026-04-25T12:00:00-03:00</expires>
+    <area>
+      <areaDesc>Halifax Metro</areaDesc>
+      <geocode>
+        <valueName>layer:EC-MSC-SMC:1.0:Location:Province</valueName>
+        <value>NS</value>
+      </geocode>
+    </area>
+    <web>https://weather.gc.ca/warnings/report_e.html?ns3</web>
+  </info>
+</alert>

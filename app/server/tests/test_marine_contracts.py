@@ -281,6 +281,60 @@ def test_viewport_replay_slice(tmp_path: Path) -> None:
         assert 95 <= vessel["longitude"] <= 110
 
 
+def test_scottish_water_overflow_context_route(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+    response = client.get(
+        "/api/marine/context/scottish-water-overflows",
+        params={"lat": 55.95, "lon": -3.10, "radius_km": 400, "status": "all", "limit": 5},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["sourceHealth"]["sourceId"] == "scottish-water-overflows"
+    assert payload["sourceHealth"]["sourceMode"] == "fixture"
+    assert payload["sourceHealth"]["health"] == "loaded"
+    assert payload["count"] >= 1
+    assert payload["activeCount"] >= 1
+    first = payload["events"][0]
+    assert first["status"] in {"active", "inactive", "unknown"}
+    assert first["evidenceBasis"] == "source-reported"
+    assert "caveats" in first
+    assert all("confirmed pollution" not in caveat.lower() for caveat in payload["caveats"])
+
+
+def test_scottish_water_overflow_context_empty_behavior(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+    response = client.get(
+        "/api/marine/context/scottish-water-overflows",
+        params={"lat": 0, "lon": 0, "radius_km": 10, "status": "active", "limit": 5},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["count"] == 0
+    assert payload["activeCount"] == 0
+    assert payload["sourceHealth"]["health"] == "empty"
+    assert payload["sourceHealth"]["sourceMode"] == "fixture"
+    assert payload["caveats"]
+
+
+def test_scottish_water_overflow_context_missing_optional_fields(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+    response = client.get(
+        "/api/marine/context/scottish-water-overflows",
+        params={"lat": 55.95, "lon": -3.10, "radius_km": 1000, "status": "all", "limit": 10},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    partial = next(event for event in payload["events"] if event["eventId"] == "sw-overflow-partial-metadata")
+    assert partial["latitude"] is None
+    assert partial["longitude"] is None
+    assert partial["distanceKm"] is None
+    assert partial["status"] == "unknown"
+    assert partial["caveats"]
+
+
 def test_chokepoint_and_region_replay_multi_vessel(tmp_path: Path) -> None:
     client = _client(
         tmp_path,
@@ -448,6 +502,229 @@ def test_chokepoint_summary_contract(tmp_path: Path) -> None:
     assert payload["anomaly"]["score"] >= 0
     ranks = [item["anomaly"]["priorityRank"] for item in payload["slices"] if item["anomaly"]["priorityRank"] is not None]
     assert sorted(ranks) == list(range(1, len(ranks) + 1))
+
+
+def test_noaa_coops_context_contract(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+
+    response = client.get(
+        "/api/marine/context/noaa-coops",
+        params={
+            "lat": 29.76,
+            "lon": -95.36,
+            "radius_km": 250,
+            "limit": 3,
+            "context_kind": "chokepoint",
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["contextKind"] == "chokepoint"
+    assert payload["sourceHealth"]["sourceId"] == "noaa-coops-tides-currents"
+    assert payload["sourceHealth"]["sourceMode"] == "fixture"
+    assert payload["sourceHealth"]["health"] in {"loaded", "empty"}
+    assert "coastal context only" in payload["sourceHealth"]["caveat"].lower()
+    assert payload["caveats"]
+    assert payload["count"] >= 1
+    station = payload["stations"][0]
+    assert station["stationId"]
+    assert station["stationName"]
+    assert station["distanceKm"] >= 0
+    assert station["productsAvailable"]
+    assert station["statusLine"]
+    if station.get("latestWaterLevel"):
+        assert station["latestWaterLevel"]["observedBasis"] == "observed"
+    if station.get("latestCurrent"):
+        assert station["latestCurrent"]["observedBasis"] == "observed"
+    assert station["caveats"]
+
+
+def test_noaa_coops_context_empty_is_not_error(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+
+    response = client.get(
+        "/api/marine/context/noaa-coops",
+        params={
+            "lat": 0.0,
+            "lon": 0.0,
+            "radius_km": 50,
+            "limit": 3,
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["count"] == 0
+    assert payload["stations"] == []
+    assert payload["sourceHealth"]["health"] == "empty"
+    assert payload["sourceHealth"]["sourceMode"] == "fixture"
+    assert payload["caveats"]
+
+
+def test_ndbc_context_contract(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+
+    response = client.get(
+        "/api/marine/context/ndbc",
+        params={
+            "lat": 29.76,
+            "lon": -95.36,
+            "radius_km": 250,
+            "limit": 3,
+            "context_kind": "chokepoint",
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["contextKind"] == "chokepoint"
+    assert payload["sourceHealth"]["sourceId"] == "noaa-ndbc-realtime"
+    assert payload["sourceHealth"]["sourceMode"] == "fixture"
+    assert payload["sourceHealth"]["health"] in {"loaded", "empty"}
+    assert "environmental context only" in payload["sourceHealth"]["caveat"].lower()
+    assert payload["caveats"]
+    assert payload["count"] >= 1
+    station = payload["stations"][0]
+    assert station["stationId"]
+    assert station["stationName"]
+    assert station["distanceKm"] >= 0
+    assert station["stationType"] in {"buoy", "cman"}
+    assert station["statusLine"]
+    assert station["latestObservation"]["observedBasis"] == "observed"
+    assert station["latestObservation"]["sourceDetail"]
+    assert station["caveats"]
+
+
+def test_ndbc_context_empty_is_not_error(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+
+    response = client.get(
+        "/api/marine/context/ndbc",
+        params={
+            "lat": 0.0,
+            "lon": 0.0,
+            "radius_km": 50,
+            "limit": 3,
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["count"] == 0
+    assert payload["stations"] == []
+    assert payload["sourceHealth"]["health"] == "empty"
+    assert payload["sourceHealth"]["sourceMode"] == "fixture"
+    assert payload["caveats"]
+
+
+def test_marine_context_routes_validate_invalid_radius_and_coordinates(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+
+    invalid_radius_responses = [
+        client.get(
+            "/api/marine/context/noaa-coops",
+            params={"lat": 29.76, "lon": -95.36, "radius_km": 0.5},
+        ),
+        client.get(
+            "/api/marine/context/ndbc",
+            params={"lat": 29.76, "lon": -95.36, "radius_km": 0.5},
+        ),
+        client.get(
+            "/api/marine/context/scottish-water-overflows",
+            params={"lat": 55.95, "lon": -3.1, "radius_km": 0.5},
+        ),
+    ]
+    for response in invalid_radius_responses:
+        assert response.status_code == 422
+
+    invalid_coordinate_responses = [
+        client.get(
+            "/api/marine/context/noaa-coops",
+            params={"lat": 91.0, "lon": -95.36, "radius_km": 50},
+        ),
+        client.get(
+            "/api/marine/context/ndbc",
+            params={"lat": 29.76, "lon": 181.0, "radius_km": 50},
+        ),
+        client.get(
+            "/api/marine/context/scottish-water-overflows",
+            params={"lat": -91.0, "lon": -3.1, "radius_km": 50},
+        ),
+    ]
+    for response in invalid_coordinate_responses:
+        assert response.status_code == 422
+
+
+def test_context_sources_disabled_outside_fixture_mode(tmp_path: Path) -> None:
+    client = _client(
+        tmp_path,
+        env={
+            "MARINE_NOAA_COOPS_MODE": "live",
+            "MARINE_NDBC_MODE": "live",
+            "SCOTTISH_WATER_OVERFLOWS_MODE": "live",
+        },
+    )
+
+    noaa = client.get(
+        "/api/marine/context/noaa-coops",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 50},
+    ).json()
+    assert noaa["count"] == 0
+    assert noaa["sourceHealth"]["health"] == "disabled"
+    assert noaa["sourceHealth"]["sourceMode"] == "live"
+    assert noaa["sourceHealth"]["enabled"] is False
+    assert noaa["caveats"]
+
+    ndbc = client.get(
+        "/api/marine/context/ndbc",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 50},
+    ).json()
+    assert ndbc["count"] == 0
+    assert ndbc["sourceHealth"]["health"] == "disabled"
+    assert ndbc["sourceHealth"]["sourceMode"] == "live"
+    assert ndbc["sourceHealth"]["enabled"] is False
+    assert ndbc["caveats"]
+
+    scottish_water = client.get(
+        "/api/marine/context/scottish-water-overflows",
+        params={"lat": 55.95, "lon": -3.1, "radius_km": 50},
+    ).json()
+    assert scottish_water["count"] == 0
+    assert scottish_water["activeCount"] == 0
+    assert scottish_water["sourceHealth"]["health"] == "disabled"
+    assert scottish_water["sourceHealth"]["sourceMode"] == "live"
+    assert scottish_water["sourceHealth"]["enabled"] is False
+    assert scottish_water["caveats"]
+
+
+def test_context_source_evidence_basis_contracts(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+
+    noaa = client.get(
+        "/api/marine/context/noaa-coops",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 250, "limit": 5},
+    ).json()
+    for station in noaa["stations"]:
+        if station.get("latestWaterLevel"):
+            assert station["latestWaterLevel"]["observedBasis"] == "observed"
+        if station.get("latestCurrent"):
+            assert station["latestCurrent"]["observedBasis"] == "observed"
+
+    ndbc = client.get(
+        "/api/marine/context/ndbc",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 250, "limit": 5},
+    ).json()
+    for station in ndbc["stations"]:
+        if station.get("latestObservation"):
+            assert station["latestObservation"]["observedBasis"] == "observed"
+
+    scottish_water = client.get(
+        "/api/marine/context/scottish-water-overflows",
+        params={"lat": 55.95, "lon": -3.10, "radius_km": 1000, "status": "all", "limit": 10},
+    ).json()
+    for event in scottish_water["events"]:
+        assert event["evidenceBasis"] == "source-reported"
 
 
 def test_summary_empty_no_match_behavior(tmp_path: Path) -> None:

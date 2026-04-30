@@ -47,6 +47,22 @@ Interpretation:
 - readable output is advisory
 - `--strict` is useful as a release gate and is expected to fail while the current multi-agent worktree is still mixed
 
+## Current validation truth
+
+Latest verified local status on this Windows machine:
+
+- `python -m compileall app/server/src`: passed
+- `cmd /c npm.cmd run lint`: passed
+- `cmd /c npm.cmd run build`: passed
+- `python app/server/tests/run_playwright_smoke.py webcam`: failed before app assertions with `windows-playwright-launch-permission` / `spawn EPERM`
+
+Interpret this correctly:
+
+- the webcam smoke failure is a machine and browser-launch problem
+- it does not indicate stale build output
+- it does not indicate a current frontend compile failure
+- source-specific smoke validation that depends on Playwright may need another machine, another environment, or a manual browser check
+
 ## Status categories
 
 ### Ready
@@ -195,6 +211,7 @@ Decision guidance:
 
 - `Blocked` if smoke logic itself is broken by code changes
 - `Acceptable known issue` if browser launch is blocked by `windows-playwright-launch-permission` and the rest of the validation scope is green
+- A green local `lint` and `build` pass takes precedence over stale reports that assume smoke failure means the client bundle is out of date.
 
 ## Build and lint status
 

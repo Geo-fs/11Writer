@@ -35,6 +35,8 @@ Commands are written for the current Windows environment and prefer explicit wor
 - Do not treat a Windows Playwright browser launch failure as an automatic feature failure on this machine.
 - For docs-only changes, prefer diff review over broad builds.
 - For shared files, validate after hunk staging, not before.
+- Current verified machine state: `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, and `cmd /c npm.cmd run build` are green; `python app/server/tests/run_playwright_smoke.py webcam` currently fails before app assertions with `windows-playwright-launch-permission` / `spawn EPERM`.
+- That webcam smoke result does not imply stale `dist` output or a current client compile failure.
 
 ## Connect / tooling
 
@@ -227,6 +229,7 @@ python app/server/tests/run_playwright_smoke.py webcam
 Notes:
 
 - Webcam smoke remains optional and environment-dependent.
+- If local webcam smoke fails before assertions with `windows-playwright-launch-permission`, use another machine/environment or a manual browser check for source-specific smoke follow-up.
 
 ## Shared smoke harness
 
@@ -263,6 +266,7 @@ Playwright environment note:
 - On this Windows machine, browser-launch failure is an environment and tooling issue, not automatically a feature failure.
 - Non-Connect agents should not chase launch-permission issues unless explicitly assigned.
 - Focused smoke phases may still be validated elsewhere.
+- A pre-assertion webcam smoke failure on this machine does not mean the current client build is stale if `cmd /c npm.cmd run build` already passed.
 
 ## Shared shell / panel / store reconciliation
 

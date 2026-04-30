@@ -1,0 +1,56 @@
+{
+  "alerts": [
+    {
+      "product_id": "R1A",
+      "issue_datetime": "2026-04-28 13:15:00.000",
+      "message": "ALERT: R1 Minor Radio Blackout observed. Potential impacts include weak or minor degradation of HF radio communication on the sunlit side and degraded low-frequency navigation signals for brief intervals."
+    },
+    {
+      "product_id": "G2W",
+      "issue_datetime": "2026-04-28 17:40:00.000",
+      "message": "WATCH: G2 Moderate Geomagnetic Storm conditions expected. Potential impacts include possible satellite orientation irregularities and intermittent navigation effects at high latitudes."
+    },
+    {
+      "product_id": "S1A",
+      "issue_datetime": "2026-04-27 05:25:00.000",
+      "message": "ALERT: S1 Minor Solar Radiation Storm observed."
+    }
+  ],
+  "scales": {
+    "0": {
+      "DateStamp": "2026-04-29",
+      "TimeStamp": "18:00:00",
+      "R": {
+        "Scale": "1",
+        "Text": "minor"
+      },
+      "S": {
+        "Scale": "0",
+        "Text": "none"
+      },
+      "G": {
+        "Scale": "2",
+        "Text": "moderate"
+      }
+    },
+    "1": {
+      "DateStamp": "2026-04-30",
+      "TimeStamp": "00:00:00",
+      "R": {
+        "Scale": null,
+        "Text": null,
+        "MinorProb": "55",
+        "MajorProb": "5"
+      },
+      "S": {
+        "Scale": null,
+        "Text": null,
+        "Prob": "10"
+      },
+      "G": {
+        "Scale": "1",
+        "Text": "minor"
+      }
+    }
+  }
+}

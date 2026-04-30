@@ -1,0 +1,44 @@
+{
+  "warning_info": {
+    "details": [
+      {
+        "contents": [
+          "Thunderstorm Warning issued at 11:40 a.m. on 29 Apr 2026 is now in force.",
+          "People should take precautions against lightning and gusty winds."
+        ],
+        "warningStatementCode": "WTS",
+        "subtype": "",
+        "name": "Thunderstorm Warning",
+        "actionCode": "ISSUE",
+        "issueTime": "2026-04-29T11:40:00+08:00",
+        "updateTime": "2026-04-29T11:40:00+08:00"
+      },
+      {
+        "contents": [
+          "Amber Rainstorm Warning Signal is in force."
+        ],
+        "warningStatementCode": "WRAIN",
+        "subtype": "WRAINA",
+        "name": "Rainstorm Warning Signal",
+        "actionCode": "ISSUE",
+        "issueTime": "2026-04-29T10:15:00+08:00",
+        "updateTime": "2026-04-29T10:20:00+08:00",
+        "expireTime": "2026-04-29T14:00:00+08:00"
+      },
+      {
+        "contents": [
+          "Very Hot Weather Warning is in force."
+        ],
+        "warningStatementCode": "WHOT",
+        "name": "Very Hot Weather Warning",
+        "actionCode": "ISSUE",
+        "updateTime": "2026-04-29T09:00:00+08:00"
+      }
+    ]
+  },
+  "local_forecast": {
+    "generalSituation": "A band of showers is affecting the coast of Guangdong.",
+    "tcInfo": "According to the present forecast track, Tropical Cyclone AURORA will remain over the northern part of the South China Sea today and edge closer to the vicinity of the Pearl River Estuary later tomorrow.",
+    "updateTime": "2026-04-29T12:00:00+08:00"
+  }
+}

@@ -114,6 +114,40 @@ Operators should interpret `importReadiness` together with:
 - `reviewQueueCount`
 - candidate-only metadata: `pageStructure`, `likelyCameraCount`, `complianceRisk`, `extractionFeasibility`
 
+### Source lifecycle summary
+
+The webcam source-operations panel now includes a compact lifecycle summary built from existing inventory fields. It is an operational grouping aid, not a second source-of-truth model.
+
+Lifecycle buckets:
+
+- `validated-active`
+  - source has evidence-backed usable imports and currently reads as validated
+- `approved-unvalidated`
+  - source is approved but still blocked on credentials, source review, or first usable import evidence
+- `candidate-endpoint-verified`
+  - candidate source has a machine-readable endpoint confirmed, but no validated ingest path
+- `candidate-sandbox-importable`
+  - candidate source has a sandbox connector path, typically fixture-backed, but still remains candidate-only
+- `candidate-needs-review`
+  - candidate source still needs endpoint, compliance, or extraction review
+- `blocked-do-not-scrape`
+  - source is blocked by compliance or endpoint constraints and must not be scraped
+- `credential-blocked`
+  - source is structurally viable but cannot proceed without required credentials
+- `low-yield`
+  - source imported but delivered too little usable camera value
+- `poor-quality`
+  - source imported, but review burden or degraded quality makes it weak operationally
+- `unknown`
+  - fallback bucket when current metadata does not fit another class
+
+Interpretation rules:
+
+- `endpoint-verified` does not mean validated
+- `sandbox-importable` does not mean active ingest
+- blocked or do-not-scrape sources may still be strategically valuable if a compliant machine-readable path is later documented
+- a source remains unvalidated until connector mapping, health behavior, compliance, and observed import quality are reviewed
+
 ## Normalized Schema
 
 The canonical camera object is `CameraEntity`.
@@ -208,6 +242,11 @@ Rule: cardinal directions from provider metadata are stored as `approximate`, no
   - strength: official structured federal webcam API with current image URLs and bearing metadata
   - note: provides the first no-auth, inventory-driven live import path that yields usable cameras in the current environment
 
+- `finland-digitraffic-road-cameras`
+  - auth: none
+  - strength: official documented road weather camera API with machine-readable station metadata and documented direct image URLs
+  - note: the first Finland slice is road weather cameras only; rail and marine Digitraffic domains remain outside webcam ownership
+
 ### Priority B: aggregator webcam APIs
 
 - `windy-webcams`
@@ -220,12 +259,320 @@ Rule: cardinal directions from provider metadata are stored as `approximate`, no
 
 The repo now carries explicit candidate inventory records for:
 
+- `finland-digitraffic-road-cameras`
 - `faa-weather-cameras-page`
+- `minnesota-511-public-arcgis`
 - `newengland-511-cameras-page`
 - `511pa-cameras-page`
 - `511nj-cameras-page`
 
-These are intentionally classified as `public-camera-page` via `html-index`, not as APIs. They remain candidate/viewer-only sources until compliance, stability, and camera extraction are explicitly approved.
+These remain inventory-only candidates until compliance, stability, field mapping, and source-health review are explicitly approved. `finland-digitraffic-road-cameras` is the exception in type only: it is an official machine-readable API candidate, but it is still not active for ingest.
+
+`minnesota-511-public-arcgis` is currently an inventory-only Gather-registry candidate. It is not active for import, and the repo explicitly treats it as blocked on public endpoint verification. The current rule is: do not scrape the interactive 511MN web app, and do not enable ingest until a stable public no-auth machine endpoint is verified.
+
+`finland-digitraffic-road-cameras` is the recommended first Digitraffic slice for webcam ownership. Official Digitraffic road traffic documentation exposes road weather camera station APIs and documented image URLs. The repo records the station API as machine-readable-confirmed, but the source remains candidate-only until fixtures, field mapping, source-health review, and connector work are completed.
+
+Finland graduation summary:
+
+- graduation planner recommendation: `approved-unvalidated-candidate`
+- this is still not `validated`
+- the next required work is:
+  - representative fixtures
+  - station-to-preset mapping review
+  - direct image URL verification in connector logic
+  - source-health assumptions and rate-limit handling
+  - review-state handling for missing orientation and out-of-collection presets
+- ingestion remains disabled until that work is complete
+- the detailed fixture-prep document lives at [`app/docs/webcam-finland-digitraffic-fixture-plan.md`](/C:/Users/mike/11Writer/app/docs/webcam-finland-digitraffic-fixture-plan.md)
+- a fixture-first connector now exists, but it is sandbox-only:
+  - default mode is fixture
+  - no live ingestion is the default
+  - normal scheduled refresh still does not activate the source because it remains candidate-only
+  - explicit validation-style refresh is required to exercise the fixture connector path
+  - source operations surface sandbox connector status separately from validated source status
+  - sandbox counts are mapping evidence only and must not be read as production import readiness
+
+Sandbox connector visibility for candidate sources:
+
+- `sandboxImportAvailable`
+  - the source has a fixture-backed or otherwise explicitly sandboxed connector path
+- `sandboxImportMode`
+  - current sandbox mode, such as `fixture`
+- `sandboxConnectorId`
+  - connector implementation name used for the sandbox path
+- `lastSandboxImportAt`
+- `lastSandboxImportOutcome`
+- `sandboxDiscoveredCount`
+- `sandboxUsableCount`
+- `sandboxReviewQueueCount`
+- `sandboxValidationCaveat`
+
+Interpretation rules:
+
+- sandbox import is not validation
+- sandbox import does not change onboarding state from candidate
+- sandbox import does not enable scheduled refresh
+- sandbox counts are evidence about mapping and review burden only
+- validated and approved-unvalidated production fields remain the source of truth for actual active ingest readiness
+
+### Candidate endpoint verification metadata
+
+Candidate webcam sources can now carry source-operations endpoint evaluation metadata without enabling ingest:
+
+- `endpointVerificationStatus`
+  - `not-tested`
+  - `candidate-url-only`
+  - `machine-readable-confirmed`
+  - `html-only`
+  - `blocked`
+  - `captcha-or-login`
+  - `needs-review`
+- `candidateEndpointUrl`
+- `machineReadableEndpointUrl`
+- `lastEndpointCheckAt`
+- `lastEndpointHttpStatus`
+- `lastEndpointContentType`
+- `lastEndpointResult`
+- `lastEndpointNotes`
+- `verificationCaveat`
+- `blockedReason`
+
+Meaning:
+
+- `candidateEndpointUrl` is only the source URL currently under evaluation.
+- `machineReadableEndpointUrl` should only be populated when a stable no-auth machine endpoint is actually verified.
+- `blockedReason` explains why the candidate is still inactive.
+- endpoint metadata is operational review context only and does not imply import readiness.
+
+Current examples:
+
+- `finland-digitraffic-road-cameras`
+  - `endpointVerificationStatus=machine-readable-confirmed`
+  - candidate URL is the official Digitraffic road weather camera station API
+  - machine-readable endpoint is recorded, but the source still remains candidate-only and inactive
+- `faa-weather-cameras-page`
+  - `endpointVerificationStatus=needs-review`
+  - candidate URL is the public FAA weather camera site
+  - no machine-readable endpoint is recorded yet
+  - remains candidate-only and review-gated
+- `minnesota-511-public-arcgis`
+  - `endpointVerificationStatus=needs-review`
+  - candidate URL is the public 511MN site
+  - no machine-readable endpoint is recorded yet
+  - remains candidate-only and explicitly blocked from scraping
+
+Graduation rules:
+
+- no CAPTCHA bypass
+- no login, token, key, or account-flow bypass
+- no scraping viewer-only interactive apps
+- no activation without a stable public no-auth machine-readable endpoint
+- no direct-image capability claim without source validation
+- candidate metadata may help future agents evaluate a source, but it must not silently turn into ingestion
+
+### Candidate endpoint evaluator
+
+The repo now includes a lightweight endpoint-evaluation helper for webcam candidates:
+
+- helper: [`src/services/camera_endpoint_evaluator.py`](C:/Users/mike/11Writer/app/server/src/services/camera_endpoint_evaluator.py)
+- CLI: [`scripts/evaluate_camera_candidate_endpoint.py`](C:/Users/mike/11Writer/app/server/scripts/evaluate_camera_candidate_endpoint.py)
+
+Example:
+
+```bash
+python app/server/scripts/evaluate_camera_candidate_endpoint.py --url https://511mn.org/ --source-id minnesota-511-public-arcgis --json
+```
+
+What it checks:
+
+- HTTP status
+- content type
+- capped response size
+- detected machine-readable type:
+  - `json`
+  - `geojson`
+  - `xml`
+  - `csv`
+  - `arcgis`
+  - `html`
+  - `unknown`
+- detected blocker hints:
+  - `captcha`
+  - `login`
+  - `forbidden`
+  - `tokenized`
+  - `javascript-app-only`
+- recommended `endpointVerificationStatus`
+
+How status mapping works:
+
+- `machine-readable-confirmed`
+  - a likely machine-readable endpoint responded and was detected as JSON, GeoJSON, XML, CSV, or ArcGIS-style JSON
+- `html-only`
+  - the endpoint responded with plain HTML and no stronger machine-readable signal
+- `blocked`
+  - the endpoint returned 401/403 or obvious token/access gating
+- `captcha-or-login`
+  - the endpoint appears gated by login or CAPTCHA
+- `needs-review`
+  - the result is inconclusive, unknown, timeout-bound, or still needs manual review
+
+What it does not prove:
+
+- it does not prove long-term endpoint stability
+- it does not prove camera extraction legality or compliance approval
+- it does not prove direct-image rights
+- it does not activate ingestion
+- it does not write to the database by default
+
+Rules:
+
+- no scraping
+- no browser automation
+- no CAPTCHA or login bypass
+- no activation until the endpoint is both verified and reviewed
+
+### Candidate endpoint report
+
+The repo now includes a read-only bulk report for configured webcam candidates:
+
+- script: [`scripts/report_camera_candidate_endpoints.py`](C:/Users/mike/11Writer/app/server/scripts/report_camera_candidate_endpoints.py)
+
+Examples:
+
+```bash
+python app/server/scripts/report_camera_candidate_endpoints.py
+python app/server/scripts/report_camera_candidate_endpoints.py --json
+python app/server/scripts/report_camera_candidate_endpoints.py --limit 2
+python app/server/scripts/report_camera_candidate_endpoints.py --source-id finland-digitraffic-road-cameras
+python app/server/scripts/report_camera_candidate_endpoints.py --source-id faa-weather-cameras-page
+```
+
+What it does:
+
+- loads webcam source definitions from the registry
+- finds candidate/review-gated sources with `candidateEndpointUrl`
+- runs the existing safe endpoint evaluator for each selected source
+- prints advisory text output or JSON output
+
+What it reports per source:
+
+- source id
+- source title/name
+- candidate URL
+- HTTP status
+- content type
+- detected machine-readable type
+- blocker hints
+- recommended endpoint verification status
+- advisory notes
+- next action
+
+Next action values:
+
+- `keep candidate`
+- `needs manual endpoint research`
+- `machine endpoint candidate found`
+- `blocked/do not scrape`
+
+How to interpret it:
+
+- `keep candidate`
+  - the source is still worth tracking, but no machine-readable path is confirmed yet
+- `needs manual endpoint research`
+  - the public page responded, but the result still looks like HTML, JavaScript app shell, or otherwise inconclusive viewer infrastructure
+- `machine endpoint candidate found`
+  - a machine-readable response was detected and should be reviewed manually before any registry promotion
+- `blocked/do not scrape`
+  - the source appears gated, tokenized, forbidden, CAPTCHA-protected, or otherwise unsuitable for no-auth graduation
+
+Safety and scope:
+
+- the report does not write to the database
+- the report does not modify source definitions
+- the report does not mark sources as verified
+- the report does not enable ingestion
+- no scraping
+- no browser automation
+- no CAPTCHA or login bypass
+- no activation until a stable no-auth machine-readable endpoint is verified and reviewed
+
+How it informs future registry updates:
+
+- use the advisory output to guide manual updates to:
+  - `candidateEndpointUrl`
+  - `machineReadableEndpointUrl`
+  - `lastEndpointResult`
+  - `verificationCaveat`
+- do not treat a single positive response as sufficient proof of operational readiness
+
+If a future agent wants to update source definitions after a safe evaluation, the output should only inform:
+
+- `candidateEndpointUrl`
+- `machineReadableEndpointUrl`
+- `lastEndpointResult`
+- `lastEndpointNotes`
+
+### Candidate graduation plan
+
+The repo now includes a read-only graduation-planning tool for webcam candidates:
+
+- helper: [`src/services/camera_candidate_graduation_plan.py`](C:/Users/mike/11Writer/app/server/src/services/camera_candidate_graduation_plan.py)
+- CLI: [`scripts/plan_camera_candidate_graduation.py`](C:/Users/mike/11Writer/app/server/scripts/plan_camera_candidate_graduation.py)
+
+Examples:
+
+```bash
+python app/server/scripts/plan_camera_candidate_graduation.py --source-id finland-digitraffic-road-cameras
+python app/server/scripts/plan_camera_candidate_graduation.py --source-id faa-weather-cameras-page
+python app/server/scripts/plan_camera_candidate_graduation.py --source-id minnesota-511-public-arcgis --json
+python app/server/scripts/plan_camera_candidate_graduation.py --url https://example.test/cameras.json
+```
+
+What it does:
+
+- consumes an existing candidate endpoint report item or an ad hoc endpoint evaluation
+- converts that advisory endpoint result into a manual graduation checklist
+- recommends only safe intermediate states
+- never writes to the database
+- never changes registry definitions
+- never activates a source
+
+Recommended next states:
+
+- `stay-candidate`
+  - keep the source candidate-only while endpoint research continues
+- `needs-manual-research`
+  - the endpoint result is inconclusive and more manual review is required before any source promotion work
+- `approved-unvalidated-candidate`
+  - a machine-readable endpoint may be real, but the source still requires fixtures, mapping, source-health review, and connector validation before activation
+- `do-not-use`
+  - the endpoint appears blocked, gated, or otherwise unsuitable for no-auth graduation
+
+Important rule:
+
+- endpoint evidence alone is never enough to recommend `validated`
+- `machine-readable-confirmed` can at most justify `approved-unvalidated-candidate`
+- the Finland fixture-first connector does not change this rule; successful fixture imports still leave the source non-validated
+
+Required manual work before any activation still includes:
+
+- fixture creation
+- field mapping review
+- source-health review
+- capability classification
+- compliance review
+
+Safety rules still apply:
+
+- no scraping
+- no browser automation
+- no CAPTCHA or login bypass
+- no direct-image claim without validation
+- no automatic activation
+- `verificationCaveat`
+
+It must not silently change onboarding state from candidate to active.
 
 ## Database Tables
 
@@ -568,6 +915,7 @@ Every source must carry:
 | Idaho 511 | API key | Exact from API | Approximate from direction text | Viewer page currently | Conservative | Conservative |
 | Alaska 511 | API key | Exact from API | Approximate from direction text | Viewer page currently | Conservative | Conservative |
 | USGS Ashcam | None | Exact from API | Exact from bearing metadata when present | Direct image and viewer fallback | Conservative | Conservative |
+| Finland Digitraffic road cameras | None | Exact from API | Unknown from current candidate evidence | Documented direct weather camera images | Conservative | Conservative |
 | Windy Webcams | API key | Exact from API | Usually unknown | Snapshot or viewer page | Depends on source/operator terms | Do not assume archival rights |
 | FAA Weather Cameras page | None | Unknown until verified | Direction text likely present on site | Viewer/page only | Conservative | Conservative |
 | New England 511 page | None | Unknown until verified | Unknown | Viewer/page only | Conservative | Conservative |
@@ -598,6 +946,12 @@ Every source must carry:
 ### Source operations panel
 
 - list inventory-backed sources with readiness and operational counts
+- show a compact lifecycle summary across all sources:
+  - total sources
+  - validated / actively importing / candidate-only counts
+  - endpoint-verified / sandbox-importable counts
+  - blocked / needs-review / credential-blocked counts
+  - grouped source ids by lifecycle bucket
 - for `usgs-ashcam`, surface:
   - source id and source name
   - import readiness
@@ -613,6 +967,7 @@ Every source must carry:
   - explicit candidate-only / review-gated status
 - do not imply candidate-only sources are active imports
 - do not imply credential-blocked sources are low-value sources
+- do not treat lifecycle summary as activation state; it is a compact source-ops classification view only
 
 ### Webcam-local filters
 
@@ -701,6 +1056,19 @@ Every source must carry:
   - selected cluster reference summary when a cluster is selected
   - aggregate reference summary when no cluster is selected
   - caveat that cluster centers are approximate
+- compact source lifecycle export metadata:
+  - `totalSources`
+  - `validatedCount`
+  - `candidateCount`
+  - `endpointVerifiedCount`
+  - `sandboxImportableCount`
+  - `blockedCount`
+  - `credentialBlockedCount`
+  - `lowYieldCount`
+  - `poorQualityCount`
+  - compact grouped lifecycle rows with short source-id lists
+  - lifecycle caveats
+  - compact lifecycle report lines
 - compact webcam reference export metadata includes:
   - top reference hints
   - top facility hints
@@ -709,6 +1077,12 @@ Every source must carry:
   - hint-only count
   - caveats
 - this is a presentation/export aid only and does not alter webcam source truth
+- source lifecycle export metadata is operational source-ops evidence only
+- intentionally excluded:
+  - full raw source inventory payloads
+  - full source compliance documents
+  - complete candidate endpoint notes
+  - any lifecycle state mutation or activation semantics
 
 ### Review queue surface
 

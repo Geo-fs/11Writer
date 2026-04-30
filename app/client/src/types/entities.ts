@@ -235,10 +235,169 @@ export interface EonetEntity extends BaseEntity {
   caveat: string;
 }
 
+export interface VolcanoEntity extends BaseEntity {
+  type: "environmental-event";
+  eventSource: "usgs-volcano-hazards";
+  eventId: string;
+  volcanoName: string;
+  volcanoNumber: string;
+  volcanoCode?: string | null;
+  observatoryName: string;
+  observatoryAbbr?: string | null;
+  region?: string | null;
+  elevationMeters?: number | null;
+  alertLevel: string;
+  aviationColorCode: string;
+  noticeTypeCode?: string | null;
+  noticeTypeLabel?: string | null;
+  noticeIdentifier: string;
+  statusScope: "elevated" | "monitored";
+  volcanoUrl?: string | null;
+  nvewsThreat?: string | null;
+  caveat: string;
+}
+
+export interface TsunamiAlertEntity extends BaseEntity {
+  type: "environmental-event";
+  eventSource: "noaa-tsunami-alerts";
+  eventId: string;
+  alertType: "warning" | "watch" | "advisory" | "information" | "cancellation" | "unknown";
+  sourceCenter: "NTWC" | "PTWC" | "unknown";
+  issuedAt: string;
+  updatedAt?: string | null;
+  effectiveAt?: string | null;
+  expiresAt?: string | null;
+  affectedRegions: string[];
+  basin?: string | null;
+  region?: string | null;
+  summary?: string | null;
+  evidenceBasis: "advisory" | "contextual";
+  caveat: string;
+}
+
+export interface UkEaFloodEntity extends BaseEntity {
+  type: "environmental-event";
+  eventSource: "uk-ea-flood-monitoring";
+  entityKind: "alert" | "station-reading";
+  eventId: string;
+  severity?: "severe-warning" | "warning" | "alert" | "inactive" | "unknown" | null;
+  severityLevel?: number | null;
+  areaName?: string | null;
+  floodAreaId?: string | null;
+  riverOrSea?: string | null;
+  county?: string | null;
+  region?: string | null;
+  message?: string | null;
+  description?: string | null;
+  stationId?: string | null;
+  stationLabel?: string | null;
+  riverName?: string | null;
+  catchment?: string | null;
+  parameter?: "level" | "flow" | "rainfall" | "unknown" | null;
+  value?: number | null;
+  unit?: string | null;
+  qualifier?: string | null;
+  evidenceBasis: "advisory" | "contextual" | "observed";
+  sourceMode: "fixture" | "live" | "unknown";
+  caveat: string;
+}
+
+export interface GeoNetHazardEntity extends BaseEntity {
+  type: "environmental-event";
+  eventSource: "geonet-nz";
+  entityKind: "quake" | "volcano-alert";
+  eventId: string;
+  publicId?: string | null;
+  magnitude?: number | null;
+  depthKm?: number | null;
+  locality?: string | null;
+  region?: string | null;
+  geonetQuality?: string | null;
+  statusDetail?: string | null;
+  volcanoId?: string | null;
+  volcanoName?: string | null;
+  alertLevel?: number | null;
+  aviationColorCode?: string | null;
+  activity?: string | null;
+  hazards?: string | null;
+  evidenceBasis: "observed" | "source-reported" | "advisory" | "contextual";
+  sourceMode: "fixture" | "live" | "unknown";
+  caveat: string;
+}
+
+export interface HkoWeatherEntity extends BaseEntity {
+  type: "environmental-event";
+  eventSource: "hong-kong-observatory";
+  entityKind: "warning" | "tropical-cyclone-context";
+  eventId: string;
+  warningType?: string | null;
+  warningLevel?: string | null;
+  summary?: string | null;
+  issuedAt?: string | null;
+  updatedAt?: string | null;
+  expiresAt?: string | null;
+  affectedArea?: string | null;
+  signal?: string | null;
+  evidenceBasis: "advisory" | "contextual";
+  sourceMode: "fixture" | "live" | "unknown";
+  caveat: string;
+}
+
+export interface MetNoAlertEntity extends BaseEntity {
+  type: "environmental-event";
+  eventSource: "met-norway-metalerts";
+  entityKind: "weather-alert";
+  eventId: string;
+  alertType: string;
+  severity: "red" | "orange" | "yellow" | "green" | "unknown";
+  certainty?: string | null;
+  urgency?: string | null;
+  areaDescription?: string | null;
+  effectiveAt?: string | null;
+  onsetAt?: string | null;
+  expiresAt?: string | null;
+  sentAt?: string | null;
+  updatedAt?: string | null;
+  msgType: "Alert" | "Update" | "Cancel" | "Unknown";
+  statusDetail: "Actual" | "Test" | "Unknown";
+  geometrySummary?: string | null;
+  bboxSummary?: string | null;
+  coordinateProvenance: "bbox-centroid" | "unknown";
+  evidenceBasis: "advisory" | "contextual";
+  sourceMode: "fixture" | "live" | "unknown";
+  caveat: string;
+}
+
+export interface CanadaCapAlertEntity extends BaseEntity {
+  type: "environmental-event";
+  eventSource: "environment-canada-cap";
+  eventId: string;
+  alertType: "warning" | "watch" | "advisory" | "statement" | "unknown";
+  severity: "extreme" | "severe" | "moderate" | "minor" | "unknown";
+  urgency?: string | null;
+  certainty?: string | null;
+  areaDescription?: string | null;
+  provinceOrRegion?: string | null;
+  effectiveAt?: string | null;
+  onsetAt?: string | null;
+  expiresAt?: string | null;
+  geometrySummary?: string | null;
+  evidenceBasis: "advisory" | "contextual";
+  sourceMode: "fixture" | "live" | "unknown";
+  caveat: string;
+}
+
 export type SceneEntity =
   | AircraftEntity
   | SatelliteEntity
   | CameraEntity
   | MarineVesselEntity
   | EarthquakeEntity
-  | EonetEntity;
+  | EonetEntity
+  | VolcanoEntity
+  | TsunamiAlertEntity
+  | UkEaFloodEntity
+  | GeoNetHazardEntity
+  | HkoWeatherEntity
+  | MetNoAlertEntity
+  | CanadaCapAlertEntity;

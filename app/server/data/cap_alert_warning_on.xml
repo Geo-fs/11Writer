@@ -1,0 +1,31 @@
+<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+  <identifier>cap-on-001</identifier>
+  <sender>ec.alerts@weather.gc.ca</sender>
+  <sent>2026-04-29T15:00:00-04:00</sent>
+  <status>Actual</status>
+  <msgType>Alert</msgType>
+  <scope>Public</scope>
+  <info>
+    <language>en-CA</language>
+    <category>Met</category>
+    <event>Rainfall Warning</event>
+    <urgency>Immediate</urgency>
+    <severity>Severe</severity>
+    <certainty>Likely</certainty>
+    <headline>Rainfall Warning for Toronto - Peel</headline>
+    <description>Heavy rainfall is expected this afternoon and evening.</description>
+    <instruction>Watch for local flooding in low-lying areas.</instruction>
+    <effective>2026-04-29T15:00:00-04:00</effective>
+    <onset>2026-04-29T16:00:00-04:00</onset>
+    <expires>2026-04-30T03:00:00-04:00</expires>
+    <area>
+      <areaDesc>Toronto - Peel</areaDesc>
+      <polygon>43.50,-79.90 43.95,-79.90 43.95,-79.10 43.50,-79.10 43.50,-79.90</polygon>
+      <geocode>
+        <valueName>layer:EC-MSC-SMC:1.0:Location:Province</valueName>
+        <value>ON</value>
+      </geocode>
+    </area>
+    <web>https://weather.gc.ca/warnings/report_e.html?on1</web>
+  </info>
+</alert>

@@ -80,6 +80,92 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   When focus mode is active, export metadata and footer lines also preserve compact aerospace-focus state and reason text.
   Focus exports now also preserve the active preset id/label, preset availability, and related-target count.
   Focus history is session-local and compact: aerospace keeps up to 8 recent focus snapshots, suppresses consecutive duplicates when the effective focus state has not changed, and can preserve current/previous focus history context in snapshot metadata.
+- Aviation weather first slice:
+  selected aircraft can now consume read-only airport-context METAR/TAF through the typed NOAA AWC route
+  `/api/aviation-weather/airport-context`.
+  The slice is fixture-first and source-health-aware:
+  it uses the selected aircraft's already-loaded nearest-airport context,
+  preserves export metadata,
+  and surfaces a compact `Aviation Weather (NOAA AWC)` inspector section without inferring flight intent.
+  The provider is tracked separately in source status as `noaa-awc`.
+- FAA NAS airport-status first slice:
+  selected aircraft can now consume read-only airport operational status context through
+  `/api/aerospace/airports/{airport_code}/faa-nas-status`.
+  This slice is also fixture-first and source-health-aware.
+  It normalizes compact advisory categories such as `ground delay`, `ground stop`, `closure`, `delay`, `advisory`, and `normal`,
+  preserves export metadata,
+  and surfaces a compact `Airport Status (FAA NAS)` inspector section.
+  FAA NAS status is treated as contextual/advisory airport information only and is not flight-specific.
+  The provider is tracked separately in source status as `faa-nas-status`.
+- NASA/JPL CNEOS first slice:
+  selected aircraft and satellites can now consume read-only close-approach and fireball context through
+  `/api/aerospace/space/cneos-events`.
+  This slice is fixture-first and source-health-aware.
+  It normalizes compact close-approach and fireball records,
+  preserves export metadata,
+  and surfaces a compact `Space Events (NASA/JPL CNEOS)` inspector section.
+  CNEOS context is treated as contextual space-event evidence only and must not be used for impact prediction or alarmist threat claims.
+  The provider is tracked separately in source status as `cneos-space-events`.
+- NOAA SWPC first slice:
+  selected aircraft and satellites can now consume read-only space-weather context through
+  `/api/aerospace/space/swpc-context`.
+  This slice is fixture-first and source-health-aware.
+  It normalizes compact NOAA scale summaries plus SWPC alert/watch/warning advisories,
+  preserves export metadata,
+  and surfaces a compact `Space Weather (NOAA SWPC)` inspector section.
+  SWPC context is treated as advisory/contextual only and must not be used to claim actual satellite, GPS, or radio failure unless the source explicitly states that impact.
+  The provider is tracked separately in source status as `noaa-swpc`.
+- OpenSky anonymous states first slice:
+  selected aircraft can now consume optional read-only anonymous OpenSky state-vector context through
+  `/api/aerospace/aircraft/opensky/states`.
+  This slice is fixture-first and source-health-aware.
+  It does not replace the primary aircraft workflow or the existing aircraft layer.
+  It surfaces a compact `OpenSky Anonymous States` inspector section and preserves compact export metadata.
+  The selected-aircraft comparison remains guardrailed:
+  aerospace will label OpenSky comparison as
+  `exact ICAO24`,
+  `exact callsign`,
+  `possible callsign`,
+  `ambiguous`,
+  `no match`,
+  or `unavailable`
+  using already-loaded selected-aircraft identifiers only.
+  Exact ICAO24 is preferred.
+  Callsign-only matches remain contextual.
+  Multiple callsign matches are treated as ambiguous.
+  No match does not imply the aircraft is absent from the real world or from all traffic sources.
+  Anonymous OpenSky access is treated as optional, rate-limited, source-reported context only.
+  Coverage is not guaranteed to be complete or authoritative.
+  The provider is tracked separately in source status as `opensky-anonymous-states`.
+- Aerospace operational-context composition:
+  aerospace now also builds a compact `Aerospace Operational Context` summary from already-loaded AWC, FAA NAS, CNEOS, SWPC, and selected-target data-health context.
+  This summary is composition-only.
+  It does not change source semantics, does not infer aircraft/satellite behavior, and does not claim causation between weather, airport status, space events, space weather, and the selected target.
+  Aerospace operational-context presets now allow analysts to emphasize different already-loaded context groupings without changing source loading or meaning:
+  `Full Aerospace Context`,
+  `Airport Operations Review`,
+  `Weather Review`,
+  `Space Context Review`,
+  and `Selected-Target Evidence Review`.
+  Presets only reorder and emphasize the combined summary and export lines; they do not suppress sources, alter source health, or imply operational relationships.
+- Aerospace context availability:
+  aerospace now also builds a compact `Aerospace Context Availability` summary for the selected aircraft/satellite workflow.
+  It shows one row per aerospace context source:
+  AWC aviation weather,
+  FAA NAS airport status,
+  CNEOS space events,
+  SWPC space weather,
+  selected-target data health,
+  and selected-target reference/pass-window context.
+  Availability rows describe whether each source is
+  `available`,
+  `unavailable`,
+  `disabled`,
+  `empty`,
+  `degraded`,
+  or `unknown`,
+  plus source mode, health, a short reason, and an evidence-basis label.
+  This section is a trust/coverage aid only and does not imply target behavior or causation.
 - Reference context coverage:
   the smoke fixture now serves deterministic read-only reference responses for selected aircraft through
   `/api/reference/link/aircraft`,
@@ -151,6 +237,130 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   summarize trust/availability only and do not imply intent, urgency, or operational significance.
 - Trend labels are deterministic and display-safe; they summarize movement shape but do not assert intent.
 - Snapshot/export selected-target evidence uses already-loaded aerospace state only and does not trigger separate fetches.
+- Snapshot/export may now also preserve a compact aviation-weather context summary for selected aircraft:
+  airport code/name,
+  METAR availability,
+  TAF availability,
+  provider/source-health state,
+  and a small number of weather caveats.
+- Snapshot/export may now also preserve a compact FAA NAS airport-status summary for selected aircraft:
+  airport code/name,
+  normalized status type,
+  compact status summary,
+  source mode,
+  source health,
+  and a small number of advisory caveats.
+- Aviation weather remains contextual, not observed target telemetry.
+  METAR/TAF summarize airport-area source products, not airborne conditions at the target's exact position or altitude.
+- FAA NAS airport status also remains contextual/advisory, not target telemetry.
+  Airport operational status does not by itself describe what the selected aircraft is doing and must not be used to infer intent.
+- Snapshot/export may now also preserve a compact NASA/JPL CNEOS space-context summary for selected aircraft or satellites:
+  source id,
+  source mode,
+  source health,
+  close-approach count,
+  fireball count,
+  the nearest/upcoming normalized close-approach record,
+  the latest normalized fireball record,
+  and a small number of source caveats.
+- NASA/JPL CNEOS first-slice contract:
+  aerospace consumes compact close-approach and fireball records read-only through a typed backend route and does not own broader NEO ingestion, risk modeling, or impact prediction.
+  Empty CNEOS results mean no records in the current source window; they are not treated as a failure state by themselves.
+- CNEOS caveat:
+  close approaches and fireballs are source-reported contextual records only.
+  They do not imply target-specific danger, imminent threat, or operational hazard by themselves.
+- Snapshot/export may now also preserve a compact NOAA SWPC space-weather summary for selected aircraft or satellites:
+  source id,
+  source mode,
+  source health,
+  summary count,
+  advisory count,
+  the top normalized summary,
+  the top normalized advisory,
+  affected-context labels,
+  and a small number of source caveats.
+- NOAA SWPC first-slice contract:
+  aerospace consumes compact space-weather summary/advisory context read-only through a typed backend route and does not own broader space-weather ingestion, forecasting, or failure analysis.
+  Empty SWPC results mean no records in the current source window; they are not treated as a failure state by themselves.
+- SWPC caveat:
+  space-weather summaries and alerts are advisory/contextual records only.
+  They do not by themselves prove actual degradation or failure of satellites, GPS, radio, or communications systems.
+- Snapshot/export may now also preserve a compact OpenSky anonymous context summary for selected aircraft:
+  source id,
+  source mode,
+  source health,
+  source state,
+  returned state-vector count,
+  a selected-target comparison summary with match status and matched identifiers when present,
+  an optional matched selected-aircraft state-vector summary,
+  and a small number of caveats.
+- OpenSky anonymous first-slice contract:
+  aerospace consumes anonymous state vectors read-only through a typed backend route and does not own authenticated OpenSky access, traffic completeness claims, or replacement of the main aircraft state flow.
+  Empty OpenSky results mean no matching current state vectors were returned in the optional source window; they are not treated as a failure by themselves.
+- OpenSky anonymous caveat:
+  anonymous access is rate-limited and may expose current state vectors only.
+  This optional context is source-reported and must not be treated as complete or authoritative traffic coverage.
+  Even an exact OpenSky comparison match does not replace the primary selected-aircraft source or make OpenSky an ATC truth layer.
+- Snapshot/export may now also preserve a compact aerospace operational-context summary:
+  source count,
+  healthy source count,
+  source modes,
+  available context types,
+  operational-context preset id/label,
+  emphasized context types,
+  preset caveat,
+  a short selected-target data-health summary,
+  top combined airport/weather/space context summaries,
+  and a small number of no-inference caveats.
+- Snapshot/export may now also preserve a compact aerospace context-availability summary:
+  per-source availability rows,
+  available/unavailable/degraded counts,
+  fixture-source count,
+  and a small number of availability caveats.
+  The operational-context export footer may also include one compact availability line summarizing how many context sources are available, unavailable, degraded, or fixture-backed.
+- Aerospace export profiles:
+  aerospace export/snapshot workflows now support compact profile selection for footer-line emphasis without changing machine-readable metadata.
+  Available profiles are:
+  `Compact Evidence`,
+  `Full Aerospace Context`,
+  `Airport / Weather`,
+  `Space Context`,
+  `Source Health`,
+  and `Focus / History`.
+  Profiles only change which already-loaded aerospace lines are prioritized in the human-visible snapshot footer.
+  They do not change source semantics, data loading, health state, or caveat retention.
+  Full machine-readable metadata is still preserved for the selected-target evidence, source-specific context slices, operational context, context availability, focus/focus history, and aerospace data health.
+- Aerospace operational-context caveat:
+  this section is an analyst convenience composition over already-loaded contextual/advisory sources.
+  It does not prove operational relationship, causation, or target behavior.
+- Aerospace export-profile caveat:
+  footer emphasis is a presentation aid only.
+  Choosing an export profile does not imply that emphasized airport/weather/space/health/focus signals are more causal or more authoritative than other preserved metadata.
+- Aerospace context-availability meanings:
+  `available` means the current selected-target workflow has usable loaded context for that source,
+  `empty` means the source responded but reported no records in the current window,
+  `degraded` means runtime or source-health state is reduced,
+  `disabled` means the source is blocked or intentionally unavailable,
+  `unavailable` means prerequisites or loaded context are missing,
+  and `unknown` means aerospace cannot classify the source confidently from the currently loaded state alone.
+- Source-mode meanings in availability rows:
+  `fixture` means the current source slice is running against deterministic local fixture data,
+  `live` means it is using live upstream responses,
+  and `unknown` means mode was not exposed on the already-loaded client state for that row.
+- Common short unavailable reasons:
+  `no selected target`,
+  `aircraft context only`,
+  `airport code unavailable`,
+  `no nearest airport context`,
+  `global context available independent of target`,
+  `source empty`,
+  `source disabled or blocked`,
+  and target-specific context labels such as `reference context unavailable` or `pass-window context partial`.
+- NOAA AWC first-slice contract:
+  aerospace consumes METAR/TAF read-only through a typed backend route and does not own weather-source ingestion beyond that connector.
+  The current first slice intentionally excludes broader AWC products such as SIGMET, G-AIRMET, NOTAM, or route weather synthesis.
+- FAA NAS first-slice contract:
+  aerospace consumes a compact airport-status view read-only from a typed backend route and does not own broader NAS scraping, route management, or flight-specific disruption analysis.
 - Aircraft status filter is backend-driven and scoped to aircraft; orbit class remains the satellite-specific control.
 - Shared imagery-context follow-up:
   aerospace now consumes the shared imagery-context surface in replay/export-adjacent UI.

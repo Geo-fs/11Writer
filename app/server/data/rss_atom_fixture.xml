@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Open security advisory watch</title>
+  <link rel="alternate" href="https://feeds.example.org/security-watch" />
+  <updated>2026-04-29T09:10:00Z</updated>
+  <id>urn:example:security-watch</id>
+  <entry>
+    <title>Vendor posts advisory for perimeter device CVEs</title>
+    <link rel="alternate" href="https://feeds.example.org/security-watch/perimeter-device-cves" />
+    <id>urn:example:atom:001</id>
+    <updated>2026-04-29T09:00:00Z</updated>
+    <published>2026-04-29T08:45:00Z</published>
+    <summary>Public advisory bulletin summarizing CVEs and mitigation status.</summary>
+    <category term="cybersecurity" />
+    <category term="advisory" />
+  </entry>
+  <entry>
+    <title>Researchers publish incident write-up for cloud identity phishing</title>
+    <link rel="alternate" href="https://feeds.example.org/security-watch/cloud-identity-phishing" />
+    <id>urn:example:atom:002</id>
+    <updated>2026-04-29T07:40:00Z</updated>
+    <content>Incident write-up covering cloud identity phishing infrastructure and recovery actions.</content>
+    <category term="phishing" />
+  </entry>
+</feed>

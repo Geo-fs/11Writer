@@ -5,6 +5,9 @@ from src.services.marine_service import MarineService
 from src.types.api import (
     MarineChokepointAnalyticalSummaryResponse,
     MarineGapEventsResponse,
+    MarineNdbcContextResponse,
+    MarineNoaaCoopsContextResponse,
+    MarineScottishWaterOverflowResponse,
     MarineReplayPathResponse,
     MarineReplaySnapshotResponse,
     MarineReplayTimelineResponse,
@@ -222,4 +225,64 @@ async def replay_chokepoint_summary(
         lomin=lomin,
         lomax=lomax,
         slice_minutes=slice_minutes,
+    )
+
+
+@router.get("/context/noaa-coops", response_model=MarineNoaaCoopsContextResponse)
+async def marine_noaa_coops_context(
+    lat: float = Query(..., ge=-90.0, le=90.0),
+    lon: float = Query(..., ge=-180.0, le=180.0),
+    radius_km: float = Query(default=400.0, gt=1.0, le=2000.0),
+    limit: int = Query(default=3, ge=1, le=20),
+    context_kind: str = Query(default="viewport"),
+    settings: Settings = Depends(get_settings),
+) -> MarineNoaaCoopsContextResponse:
+    service = MarineService(settings)
+    return await service.noaa_coops_context(
+        center_lat=lat,
+        center_lon=lon,
+        radius_km=radius_km,
+        limit=limit,
+        context_kind=context_kind,
+    )
+
+
+@router.get("/context/ndbc", response_model=MarineNdbcContextResponse)
+async def marine_ndbc_context(
+    lat: float = Query(..., ge=-90.0, le=90.0),
+    lon: float = Query(..., ge=-180.0, le=180.0),
+    radius_km: float = Query(default=500.0, gt=1.0, le=3000.0),
+    limit: int = Query(default=3, ge=1, le=20),
+    context_kind: str = Query(default="viewport"),
+    settings: Settings = Depends(get_settings),
+) -> MarineNdbcContextResponse:
+    service = MarineService(settings)
+    return await service.ndbc_context(
+        center_lat=lat,
+        center_lon=lon,
+        radius_km=radius_km,
+        limit=limit,
+        context_kind=context_kind,
+    )
+
+
+@router.get(
+    "/context/scottish-water-overflows",
+    response_model=MarineScottishWaterOverflowResponse,
+)
+async def marine_scottish_water_overflows_context(
+    lat: float = Query(..., ge=-90.0, le=90.0),
+    lon: float = Query(..., ge=-180.0, le=180.0),
+    radius_km: float = Query(default=250.0, gt=1.0, le=1500.0),
+    status: str = Query(default="all"),
+    limit: int = Query(default=5, ge=1, le=50),
+    settings: Settings = Depends(get_settings),
+) -> MarineScottishWaterOverflowResponse:
+    service = MarineService(settings)
+    return await service.scottish_water_overflows_context(
+        center_lat=lat,
+        center_lon=lon,
+        radius_km=radius_km,
+        status=status,
+        limit=limit,
     )

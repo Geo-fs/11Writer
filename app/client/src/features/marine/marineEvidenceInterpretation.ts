@@ -3,6 +3,7 @@ import type {
   MarineVesselAnalyticalSummaryResponse,
   MarineViewportAnalyticalSummaryResponse
 } from "../../types/api";
+import type { MarineEnvironmentalContextSummary } from "./marineEnvironmentalContext";
 import type { MarineReplayEvidenceRow } from "./marineReplayEvidence";
 import type { MarineReplayNavigationTarget } from "./marineReplayNavigation";
 
@@ -46,6 +47,8 @@ export interface MarineEvidenceInterpretationSummary {
   sourceHealthContext: string;
   sparseReportingContext: string;
   confidenceContext: string;
+  environmentalContextAvailability: "available" | "empty" | "unavailable";
+  environmentalContextSourceHealthSummary: string;
   cards: MarineEvidenceInterpretationCard[];
   caveats: string[];
 }
@@ -95,6 +98,7 @@ export function buildMarineEvidenceInterpretation(input: {
   vesselSummary: MarineVesselAnalyticalSummaryResponse | null;
   viewportSummary: MarineViewportAnalyticalSummaryResponse | null;
   chokepointSummary: MarineChokepointAnalyticalSummaryResponse | null;
+  environmentalContextSummary: MarineEnvironmentalContextSummary | null;
 }): MarineEvidenceInterpretationSummary {
   if (!input.activeNavigationTarget) {
     return {
@@ -105,6 +109,8 @@ export function buildMarineEvidenceInterpretation(input: {
       sourceHealthContext: "unknown",
       sparseReportingContext: "unknown",
       confidenceContext: "unavailable",
+      environmentalContextAvailability: "unavailable",
+      environmentalContextSourceHealthSummary: "environmental context unavailable",
       cards: [],
       caveats: ["Focus an anomaly item to inspect interpretation context."]
     };
@@ -119,6 +125,8 @@ export function buildMarineEvidenceInterpretation(input: {
   const confidenceClass = resumed?.confidenceClass ?? null;
   const sourceState = vesselSummary?.sourceStatus?.state ?? "unknown";
   const sparsePlausible = resumed?.normalSparseReportingPlausible ?? null;
+  const environmentalContextCaveatSummary =
+    input.environmentalContextSummary?.environmentalCaveatSummary ?? null;
 
   const cards: MarineEvidenceInterpretationCard[] = [];
 
@@ -206,11 +214,25 @@ export function buildMarineEvidenceInterpretation(input: {
     severity: "notice"
   });
 
+  if (environmentalContextCaveatSummary) {
+    cards.push({
+      kind: "evidence-limits",
+      label: "Environmental context",
+      value: environmentalContextCaveatSummary.availability,
+      detail: environmentalContextCaveatSummary.sourceHealthSummary,
+      basis: "summary",
+      severity:
+        environmentalContextCaveatSummary.availability === "available" ? "neutral" : "notice",
+      caveat: environmentalContextCaveatSummary.caveats[0]
+    });
+  }
+
   const caveats = Array.from(
     new Set(
       [
         ...input.focusedEvidenceRows.map((row) => row.caveat).filter((item): item is string => Boolean(item)),
-        ...cards.map((card) => card.caveat).filter((item): item is string => Boolean(item))
+        ...cards.map((card) => card.caveat).filter((item): item is string => Boolean(item)),
+        ...(environmentalContextCaveatSummary?.caveats ?? [])
       ]
     )
   ).slice(0, 4);
@@ -228,6 +250,9 @@ export function buildMarineEvidenceInterpretation(input: {
     sourceHealthContext: cards.find((card) => card.kind === "source-health")?.value ?? "unknown",
     sparseReportingContext: cards.find((card) => card.kind === "sparse-reporting")?.value ?? "unknown",
     confidenceContext: confidenceClass ?? "unavailable",
+    environmentalContextAvailability: environmentalContextCaveatSummary?.availability ?? "unavailable",
+    environmentalContextSourceHealthSummary:
+      environmentalContextCaveatSummary?.sourceHealthSummary ?? "environmental context unavailable",
     cards,
     caveats
   };

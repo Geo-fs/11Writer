@@ -13,7 +13,12 @@ from src.webcam.repository import WebcamRepository
 def build_source_status(settings: Settings) -> SourceStatusResponse:
     google_enabled = bool(settings.google_maps_api_key)
     aircraft_runtime = get_source_runtime_status("opensky-network")
+    opensky_anonymous_runtime = get_source_runtime_status("opensky-anonymous-states")
     satellite_runtime = get_source_runtime_status("celestrak-active")
+    aviation_weather_runtime = get_source_runtime_status("noaa-awc")
+    faa_nas_runtime = get_source_runtime_status("faa-nas-status")
+    cneos_runtime = get_source_runtime_status("cneos-space-events")
+    swpc_runtime = get_source_runtime_status("noaa-swpc")
     marine_runtime = get_source_runtime_status("ais-fixture-global")
     persisted_camera_sources = _camera_source_map(settings)
 
@@ -57,11 +62,46 @@ def build_source_status(settings: Settings) -> SourceStatusResponse:
             detail="OpenSky-backed aircraft endpoint is available for bounded polling and attribution.",
         ),
         _runtime_to_status(
+            name="opensky-anonymous-states",
+            runtime=opensky_anonymous_runtime,
+            default_freshness=60,
+            default_stale_after=300,
+            detail="Optional OpenSky anonymous state-vector context is available for selected-aircraft source review; coverage is rate-limited and not guaranteed complete.",
+        ),
+        _runtime_to_status(
             name="satellites",
             runtime=satellite_runtime,
             default_freshness=900,
             default_stale_after=43_200,
             detail="CelesTrak-backed satellite catalog and orbit traces are available for OSINT context.",
+        ),
+        _runtime_to_status(
+            name="noaa-awc",
+            runtime=aviation_weather_runtime,
+            default_freshness=300,
+            default_stale_after=1_800,
+            detail="NOAA AWC METAR/TAF airport context is available for selected-target aviation weather evidence.",
+        ),
+        _runtime_to_status(
+            name="faa-nas-status",
+            runtime=faa_nas_runtime,
+            default_freshness=60,
+            default_stale_after=300,
+            detail="FAA NAS airport-status context is available for selected-target airport operational advisories.",
+        ),
+        _runtime_to_status(
+            name="cneos-space-events",
+            runtime=cneos_runtime,
+            default_freshness=3_600,
+            default_stale_after=86_400,
+            detail="NASA/JPL CNEOS close-approach and fireball context is available for selected-target space-event review.",
+        ),
+        _runtime_to_status(
+            name="noaa-swpc",
+            runtime=swpc_runtime,
+            default_freshness=1_800,
+            default_stale_after=21_600,
+            detail="NOAA SWPC space-weather advisory context is available for selected-target aerospace situational awareness.",
         ),
         _runtime_to_status(
             name="marine",

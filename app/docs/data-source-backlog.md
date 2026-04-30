@@ -82,3 +82,41 @@ When handing off Tier 2 or Tier 3 work, Connect AI should specify:
 - the test fixture path
 - the validation command
 - the interpretation caveat text that must survive the integration
+
+## International backlog
+
+Detailed Phase 2 international planning is in:
+
+- `app/docs/data-source-international-backlog.md`
+
+### Ready soon or approved
+
+- `uk-ea-flood-monitoring`
+- `uk-ea-hydrology`
+- `canada-cap-alerts`
+- `dwd-cap-alerts`
+- `geonet-geohazards`
+- `copernicus-ems-rapid-mapping`
+- `germany-autobahn-api`
+- `hko-open-weather`
+- `singapore-nea-weather`
+- `meteoswiss-open-data`
+- `scottish-water-overflows`
+- `nasa-jpl-cneos`
+
+### Tier 2 complex
+
+- `canada-geomet-ogc`
+- `dwd-open-weather`
+- `finland-digitraffic`
+- `esa-neocc-close-approaches`
+
+### Needs verification
+
+- `eea-air-quality`
+- `imo-epos-geohazards`
+
+### Deferred or rejected
+
+- `bom-anonymous-ftp`
+- `iceland-earthquakes`

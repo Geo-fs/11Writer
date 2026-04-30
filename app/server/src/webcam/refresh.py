@@ -17,6 +17,7 @@ from src.services.camera_registry import (
     build_camera_source_inventory,
     build_camera_source_registry,
     get_refresh_policy,
+    is_camera_source_sandbox_importable,
 )
 from src.services.source_registry import record_source_failure, record_source_success
 from src.types.api import CameraSourceRegistryEntry, ReviewQueueIssue, ReviewQueueItem
@@ -129,7 +130,8 @@ class WebcamRefreshService:
             existing = {source.key: source for source in repository.list_sources()}
             now = _now_iso()
             for source in source_definitions:
-                if source.onboarding_state not in {"approved", "active"}:
+                sandbox_importable = is_camera_source_sandbox_importable(source.key, self._settings)
+                if source.onboarding_state not in {"approved", "active"} and not sandbox_importable:
                     continue
                 policy = get_refresh_policy(source.key)
                 if policy is None:
@@ -1012,7 +1014,11 @@ def _inventory_entry_for_source(
     return template.model_copy(
         update={
             "credentials_configured": result.credentials_configured,
-            "onboarding_state": "active" if result.credentials_configured else template.onboarding_state,
+            "onboarding_state": (
+                template.onboarding_state
+                if template.onboarding_state == "candidate"
+                else ("active" if result.credentials_configured else template.onboarding_state)
+            ),
             "approximate_camera_count": result.normalized_records,
             "last_catalog_import_at": result.fetched_at,
             "last_catalog_import_status": result.status,
@@ -1033,7 +1039,11 @@ def _inventory_entry_for_exception(
     return template.model_copy(
         update={
             "credentials_configured": source.credentials_configured,
-            "onboarding_state": template.onboarding_state if not source.credentials_configured else "active",
+            "onboarding_state": (
+                template.onboarding_state
+                if template.onboarding_state == "candidate" or not source.credentials_configured
+                else "active"
+            ),
             "approximate_camera_count": source.last_camera_count or template.approximate_camera_count,
             "last_catalog_import_at": source.last_completed_at,
             "last_catalog_import_status": source.status,

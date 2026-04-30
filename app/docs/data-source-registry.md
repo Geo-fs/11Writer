@@ -26,12 +26,16 @@ See also:
 
 ## Status model
 
+- `tier-1-ready`: public no-auth entry point verified, machine-readable, and suitable for a narrow first implementation slice soon
+- `tier-2-complex`: public no-auth entry point verified, but the first slice must stay narrow because the family is broad, binary-heavy, OGC-heavy, or operationally awkward
 - `approved-candidate`: public no-auth entry point verified and reasonable for backend polling
 - `needs-verification`: public docs exist, but the exact backend-safe entry point still needs tighter confirmation
-- `defer`: public and documented, but not a near-term fit or carries interpretation/operational caveats
+- `deferred`: public and documented, but not a near-term fit or carries licensing, transport, or interpretation caveats
 - `rejected`: should not be used under current project rules
 - `already-integrated`: already shipped in repo
 - `already-planned`: already assigned or intentionally queued elsewhere
+
+Legacy entries may still use `defer` while older records are being normalized. New Phase 2 additions use the expanded status set above.
 
 ## Tier 1: Ready Soon
 
@@ -115,6 +119,25 @@ These are public and valuable, but the first slice should stay narrow:
 - `abusech-urlhaus`
 
 These remain in the registry so future agents do not have to rediscover them, but they should not be treated as ready-soon production inputs.
+
+## International backlog
+
+Phase 2 adds an international backlog for public no-auth flood, weather, hydrology, transport, and space-hazard sources. The detailed planning file is:
+
+- `app/docs/data-source-international-backlog.md`
+
+Highest-confidence new international candidates:
+
+- `uk-ea-flood-monitoring`
+- `canada-cap-alerts`
+- `dwd-cap-alerts`
+- `geonet-geohazards`
+- `copernicus-ems-rapid-mapping`
+- `germany-autobahn-api`
+- `hko-open-weather`
+- `meteoswiss-open-data`
+- `scottish-water-overflows`
+- `nasa-jpl-cneos`
 
 ## Rejected / Avoid
 

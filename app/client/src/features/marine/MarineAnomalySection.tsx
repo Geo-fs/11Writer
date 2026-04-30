@@ -1,7 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import {
   useMarineChokepointSummaryQuery,
+  useMarineNdbcContextQuery,
+  useMarineNoaaCoopsContextQuery,
+  useMarineScottishWaterOverflowsQuery,
   useMarineVesselSummaryQuery,
   useMarineVesselsQuery,
   useMarineViewportSummaryQuery
@@ -11,7 +14,28 @@ import type { MarineChokepointSliceSummary } from "../../types/api";
 import { buildActiveImageryContextFromHud } from "../../lib/imageryContext";
 import { ImageryContextBadge } from "../imagery/ImageryContextBadge";
 import { MarineAnomalyPanel } from "./MarineAnomalyComponents";
+import {
+  buildMarineEnvironmentalContextSummary,
+  findMarineEnvironmentalContextPreset,
+  getMarineEnvironmentalContextPreset,
+  radiusKmForPreset,
+  type MarineEnvironmentalContextAnchor,
+  type MarineEnvironmentalContextPresetSelection,
+  type MarineEnvironmentalContextRadiusPreset
+} from "./marineEnvironmentalContext";
 import { buildMarineEvidenceSummary } from "./marineEvidenceSummary";
+import { buildMarineContextIssueQueue } from "./marineContextIssueQueue";
+import { buildMarineContextSourceRegistrySummary } from "./marineContextSourceSummary";
+import {
+  buildMarineContextSnapshot,
+  buildMarineContextTimelineSummary,
+  clearMarineContextSnapshots,
+  reduceMarineContextSnapshots,
+  type MarineContextSnapshot
+} from "./marineContextTimeline";
+import { buildMarineNdbcContextSummary } from "./marineNdbcContext";
+import { buildMarineNoaaContextSummary } from "./marineNoaaContext";
+import { buildMarineScottishWaterContextSummary } from "./marineScottishWaterContext";
 import { buildFocusedMarineReplayEvidence } from "./marineReplayEvidence";
 import {
   buildMarineEvidenceInterpretation,
@@ -40,18 +64,171 @@ export function MarineAnomalySection() {
   const [sliceSort, setSliceSort] = useState<SliceSort>("priority");
   const [interpretationMode, setInterpretationMode] =
     useState<MarineEvidenceInterpretationMode>("compact");
+  const [contextAnchor, setContextAnchor] =
+    useState<MarineEnvironmentalContextAnchor>("chokepoint");
+  const [contextRadiusPreset, setContextRadiusPreset] =
+    useState<MarineEnvironmentalContextRadiusPreset>("medium");
+  const [selectedEnvironmentalContextPreset, setSelectedEnvironmentalContextPreset] =
+    useState<MarineEnvironmentalContextPresetSelection>("chokepoint-review");
+  const [enabledContextSources, setEnabledContextSources] = useState<{
+    coops: boolean;
+    ndbc: boolean;
+  }>({ coops: true, ndbc: true });
+  const [marineContextSnapshots, setMarineContextSnapshots] = useState<MarineContextSnapshot[]>([]);
+  const lastMarineEvidenceSummaryKeyRef = useRef<string | null>(null);
   const vesselsQuery = useMarineVesselsQuery();
   const selectedMarineVesselId =
     selectedEntity?.type === "marine-vessel"
       ? selectedEntity.id
       : vesselsQuery.data?.vessels?.[0]?.id ?? null;
   const vesselSummaryQuery = useMarineVesselSummaryQuery(selectedMarineVesselId);
-  const center =
-    Number.isFinite(hud.latitude) && Number.isFinite(hud.longitude)
-      ? { lat: hud.latitude, lon: hud.longitude }
-      : null;
-  const viewportSummaryQuery = useMarineViewportSummaryQuery(center);
-  const chokepointSummaryQuery = useMarineChokepointSummaryQuery(center);
+  const viewportLatitude = Number.isFinite(hud.latitude) ? hud.latitude : null;
+  const viewportLongitude = Number.isFinite(hud.longitude) ? hud.longitude : null;
+  const viewportCenter = useMemo(
+    () =>
+      viewportLatitude != null && viewportLongitude != null
+        ? { lat: viewportLatitude, lon: viewportLongitude }
+        : null,
+    [viewportLatitude, viewportLongitude]
+  );
+  const viewportSummaryQuery = useMarineViewportSummaryQuery(viewportCenter);
+  const chokepointSummaryQuery = useMarineChokepointSummaryQuery(viewportCenter);
+  const selectedVesselCoordinates = useMemo(() => {
+    if (
+      selectedEntity?.type === "marine-vessel" &&
+      Number.isFinite(selectedEntity.latitude) &&
+      Number.isFinite(selectedEntity.longitude)
+    ) {
+      return {
+        latitude: selectedEntity.latitude,
+        longitude: selectedEntity.longitude
+      };
+    }
+    const latestObserved = vesselSummaryQuery.data?.latestObserved;
+    if (
+      latestObserved &&
+      Number.isFinite(latestObserved.latitude) &&
+      Number.isFinite(latestObserved.longitude)
+    ) {
+      return {
+        latitude: latestObserved.latitude,
+        longitude: latestObserved.longitude
+      };
+    }
+    return null;
+  }, [
+    selectedEntity?.type,
+    selectedEntity?.latitude,
+    selectedEntity?.longitude,
+    vesselSummaryQuery.data?.latestObserved
+  ]);
+  const effectiveContextState = useMemo(() => {
+    const selectedVesselCenter =
+      selectedVesselCoordinates != null
+        ? {
+            lat: selectedVesselCoordinates.latitude,
+            lon: selectedVesselCoordinates.longitude
+          }
+        : null;
+    const currentViewportCenter =
+      viewportLatitude != null && viewportLongitude != null
+        ? { lat: viewportLatitude, lon: viewportLongitude }
+        : null;
+    if (contextAnchor === "selected-vessel") {
+      if (selectedVesselCenter) {
+        return {
+          center: selectedVesselCenter,
+          contextKind: "viewport" as const,
+          effectiveAnchor: "selected-vessel" as const,
+          centerAvailable: true,
+          fallbackReason: null
+        };
+      }
+      if (currentViewportCenter) {
+        return {
+          center: currentViewportCenter,
+          contextKind: "viewport" as const,
+          effectiveAnchor: "fallback-viewport" as const,
+          centerAvailable: true,
+          fallbackReason:
+            "Selected vessel anchor unavailable; environmental context fell back to viewport center."
+        };
+      }
+      return {
+        center: null,
+        contextKind: "viewport" as const,
+        effectiveAnchor: "unavailable" as const,
+        centerAvailable: false,
+        fallbackReason: "Selected vessel anchor unavailable and no viewport center is available."
+      };
+    }
+    if (contextAnchor === "viewport") {
+      return {
+        center: currentViewportCenter,
+        contextKind: "viewport" as const,
+        effectiveAnchor: currentViewportCenter ? ("viewport" as const) : ("unavailable" as const),
+        centerAvailable: currentViewportCenter != null,
+        fallbackReason: currentViewportCenter
+          ? null
+          : "Viewport anchor unavailable for environmental context."
+      };
+    }
+    return {
+      center: currentViewportCenter,
+      contextKind: "chokepoint" as const,
+      effectiveAnchor: currentViewportCenter ? ("chokepoint" as const) : ("unavailable" as const),
+      centerAvailable: currentViewportCenter != null,
+      fallbackReason: currentViewportCenter
+        ? null
+        : "Chokepoint anchor unavailable for environmental context."
+    };
+  }, [
+    contextAnchor,
+    selectedVesselCoordinates,
+    viewportLatitude,
+    viewportLongitude
+  ]);
+  const contextRadiusKm = radiusKmForPreset(contextRadiusPreset);
+  const activeEnvironmentalPreset = useMemo(
+    () =>
+      selectedEnvironmentalContextPreset === "custom"
+        ? null
+        : getMarineEnvironmentalContextPreset(selectedEnvironmentalContextPreset),
+    [selectedEnvironmentalContextPreset]
+  );
+  const syncEnvironmentalPreset = (
+    anchor: MarineEnvironmentalContextAnchor,
+    radiusPreset: MarineEnvironmentalContextRadiusPreset,
+    sources: { coops: boolean; ndbc: boolean }
+  ) => {
+    const matchedPreset = findMarineEnvironmentalContextPreset({
+      anchor,
+      radiusPreset,
+      enabledSources: [
+        ...(sources.coops ? (["coops"] as const) : []),
+        ...(sources.ndbc ? (["ndbc"] as const) : [])
+      ]
+    });
+    setSelectedEnvironmentalContextPreset(matchedPreset?.id ?? "custom");
+  };
+  const noaaCoopsContextQuery = useMarineNoaaCoopsContextQuery({
+    center: effectiveContextState.center,
+    contextKind: effectiveContextState.contextKind,
+    radiusKm: contextRadiusKm,
+    enabled: enabledContextSources.coops
+  });
+  const ndbcContextQuery = useMarineNdbcContextQuery({
+    center: effectiveContextState.center,
+    contextKind: effectiveContextState.contextKind,
+    radiusKm: contextRadiusKm,
+    enabled: enabledContextSources.ndbc
+  });
+  const scottishWaterContextQuery = useMarineScottishWaterOverflowsQuery({
+    center: effectiveContextState.center,
+    radiusKm: contextRadiusKm,
+    status: "all",
+    enabled: true
+  });
 
   const sortedSlices = useMemo(() => {
     const slices = [...(chokepointSummaryQuery.data?.slices ?? [])];
@@ -132,6 +309,81 @@ export function MarineAnomalySection() {
     [focusedTarget, vesselSummaryQuery.data, viewportSummaryQuery.data, chokepointSummaryQuery.data]
   );
 
+  const noaaContextSummary = useMemo(
+    () => buildMarineNoaaContextSummary(noaaCoopsContextQuery.data ?? null),
+    [noaaCoopsContextQuery.data]
+  );
+  const ndbcContextSummary = useMemo(
+    () => buildMarineNdbcContextSummary(ndbcContextQuery.data ?? null),
+    [ndbcContextQuery.data]
+  );
+  const scottishWaterContextSummary = useMemo(
+    () => buildMarineScottishWaterContextSummary(scottishWaterContextQuery.data ?? null),
+    [scottishWaterContextQuery.data]
+  );
+  const contextSourceRegistrySummary = useMemo(
+    () =>
+      buildMarineContextSourceRegistrySummary({
+        noaaCoops: noaaContextSummary,
+        ndbc: ndbcContextSummary,
+        scottishWater: scottishWaterContextSummary
+      }),
+    [noaaContextSummary, ndbcContextSummary, scottishWaterContextSummary]
+  );
+  const environmentalContextSummary = useMemo(
+    () =>
+      buildMarineEnvironmentalContextSummary({
+        noaaCoops: noaaCoopsContextQuery.data ?? null,
+        ndbc: ndbcContextQuery.data ?? null,
+        controls: {
+          presetId: selectedEnvironmentalContextPreset,
+          presetLabel: activeEnvironmentalPreset?.label ?? "Custom context settings",
+          isCustomPreset: selectedEnvironmentalContextPreset === "custom",
+          presetCaveat:
+            activeEnvironmentalPreset?.caveat ??
+            "Manual environmental context settings may differ from the predefined marine review presets.",
+          anchor: contextAnchor,
+          effectiveAnchor: effectiveContextState.effectiveAnchor,
+          radiusPreset: contextRadiusPreset,
+          radiusKm: contextRadiusKm,
+          enabledSources: [
+            ...(enabledContextSources.coops ? (["coops"] as const) : []),
+            ...(enabledContextSources.ndbc ? (["ndbc"] as const) : [])
+          ],
+          centerAvailable: effectiveContextState.centerAvailable,
+          fallbackReason: effectiveContextState.fallbackReason
+        }
+      }),
+    [
+      noaaCoopsContextQuery.data,
+      ndbcContextQuery.data,
+      selectedEnvironmentalContextPreset,
+      activeEnvironmentalPreset,
+      contextAnchor,
+      contextRadiusPreset,
+      contextRadiusKm,
+      enabledContextSources,
+      effectiveContextState
+    ]
+  );
+  const contextIssueQueueSummary = useMemo(
+    () => buildMarineContextIssueQueue(contextSourceRegistrySummary),
+    [contextSourceRegistrySummary]
+  );
+  const currentContextSnapshot = useMemo(
+    () =>
+      buildMarineContextSnapshot({
+        environmentalContextSummary,
+        contextSourceRegistrySummary,
+        focusedTarget
+      }),
+    [environmentalContextSummary, contextSourceRegistrySummary, focusedTarget]
+  );
+  const contextTimelineSummary = useMemo(
+    () => buildMarineContextTimelineSummary(marineContextSnapshots),
+    [marineContextSnapshots]
+  );
+
   const focusedEvidenceInterpretation = useMemo(
     () =>
       buildMarineEvidenceInterpretation({
@@ -139,14 +391,16 @@ export function MarineAnomalySection() {
         activeNavigationTarget: focusedTarget,
         vesselSummary: vesselSummaryQuery.data ?? null,
         viewportSummary: viewportSummaryQuery.data ?? null,
-        chokepointSummary: chokepointSummaryQuery.data ?? null
+        chokepointSummary: chokepointSummaryQuery.data ?? null,
+        environmentalContextSummary
       }),
     [
       focusedEvidenceRows,
       focusedTarget,
       vesselSummaryQuery.data,
       viewportSummaryQuery.data,
-      chokepointSummaryQuery.data
+      chokepointSummaryQuery.data,
+      environmentalContextSummary
     ]
   );
 
@@ -167,7 +421,14 @@ export function MarineAnomalySection() {
         focusedEvidenceRows,
         focusedEvidenceInterpretation,
         focusedEvidenceInterpretationMode: interpretationMode,
-        visibleInterpretationCards
+        visibleInterpretationCards,
+        noaaContextSummary,
+        ndbcContextSummary,
+        scottishWaterContextSummary,
+        contextSourceRegistrySummary,
+        contextTimelineSummary,
+        contextIssueQueueSummary,
+        environmentalContextSummary
       }),
     [
       vesselSummaryQuery.data,
@@ -180,16 +441,36 @@ export function MarineAnomalySection() {
       focusedEvidenceRows,
       focusedEvidenceInterpretation,
       interpretationMode,
-      visibleInterpretationCards
+      visibleInterpretationCards,
+      noaaContextSummary,
+      ndbcContextSummary,
+      scottishWaterContextSummary,
+      contextSourceRegistrySummary,
+      contextTimelineSummary,
+      contextIssueQueueSummary,
+      environmentalContextSummary
     ]
   );
 
+  const exportSummaryKey = useMemo(
+    () => JSON.stringify({ lines: exportSummary.displayLines, metadata: exportSummary.metadata }),
+    [exportSummary.displayLines, exportSummary.metadata]
+  );
+
   useEffect(() => {
+    if (lastMarineEvidenceSummaryKeyRef.current === exportSummaryKey) {
+      return;
+    }
+    lastMarineEvidenceSummaryKeyRef.current = exportSummaryKey;
     setMarineEvidenceSummary({
       lines: exportSummary.displayLines,
       metadata: exportSummary.metadata
     });
-  }, [exportSummary, setMarineEvidenceSummary]);
+  }, [exportSummary.displayLines, exportSummary.metadata, exportSummaryKey, setMarineEvidenceSummary]);
+
+  useEffect(() => {
+    setMarineContextSnapshots((current) => reduceMarineContextSnapshots(current, currentContextSnapshot));
+  }, [currentContextSnapshot]);
 
   const focusedSliceVisible = useMemo(() => {
     if (!focusedTarget || focusedTarget.kind !== "chokepoint-slice") {
@@ -228,6 +509,353 @@ export function MarineAnomalySection() {
       </div>
       <ImageryContextBadge context={imageryContext} isReplayContext={selectedReplayIndex != null} />
       {anyLoading ? <span className="marine-anomaly-muted">Loading marine anomaly summaries.</span> : null}
+      {environmentalContextSummary ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-environmental-context">
+          <strong>Marine Environmental Context</strong>
+          <div className="marine-anomaly-controls">
+            <label data-testid="marine-environmental-preset">
+              <span>Preset</span>
+              <select
+                value={selectedEnvironmentalContextPreset}
+                onChange={(event) => {
+                  const nextPresetId =
+                    event.currentTarget.value as MarineEnvironmentalContextPresetSelection;
+                  setSelectedEnvironmentalContextPreset(nextPresetId);
+                  if (nextPresetId === "custom") {
+                    return;
+                  }
+                  const nextPreset = getMarineEnvironmentalContextPreset(nextPresetId);
+                  setContextAnchor(nextPreset.anchor);
+                  setContextRadiusPreset(nextPreset.radiusPreset);
+                  setEnabledContextSources({
+                    coops: nextPreset.enabledSources.includes("coops"),
+                    ndbc: nextPreset.enabledSources.includes("ndbc")
+                  });
+                }}
+              >
+                <option value="chokepoint-review">chokepoint review</option>
+                <option value="selected-vessel-review">selected vessel review</option>
+                <option value="regional-marine-context">regional marine context</option>
+                <option value="water-level-current-focus">water level/current focus</option>
+                <option value="buoy-weather-focus">buoy/weather focus</option>
+                <option value="custom">custom</option>
+              </select>
+            </label>
+            <label data-testid="marine-environmental-anchor">
+              <span>Context anchor</span>
+              <select
+                value={contextAnchor}
+                onChange={(event) => {
+                  const nextAnchor = event.currentTarget.value as MarineEnvironmentalContextAnchor;
+                  setContextAnchor(nextAnchor);
+                  syncEnvironmentalPreset(nextAnchor, contextRadiusPreset, enabledContextSources);
+                }}
+              >
+                <option value="selected-vessel">selected vessel</option>
+                <option value="viewport">viewport</option>
+                <option value="chokepoint">chokepoint</option>
+              </select>
+            </label>
+            <label data-testid="marine-environmental-radius">
+              <span>Radius</span>
+              <select
+                value={contextRadiusPreset}
+                onChange={(event) => {
+                  const nextRadiusPreset =
+                    event.currentTarget.value as MarineEnvironmentalContextRadiusPreset;
+                  setContextRadiusPreset(nextRadiusPreset);
+                  syncEnvironmentalPreset(contextAnchor, nextRadiusPreset, enabledContextSources);
+                }}
+              >
+                <option value="small">small</option>
+                <option value="medium">medium</option>
+                <option value="large">large</option>
+              </select>
+            </label>
+            <label data-testid="marine-environmental-source-coops">
+              <input
+                type="checkbox"
+                checked={enabledContextSources.coops}
+                onChange={(event) => {
+                  const nextSources = {
+                    ...enabledContextSources,
+                    coops: event.currentTarget.checked
+                  };
+                  setEnabledContextSources(nextSources);
+                  syncEnvironmentalPreset(contextAnchor, contextRadiusPreset, nextSources);
+                }}
+              />
+              <span>CO-OPS</span>
+            </label>
+            <label data-testid="marine-environmental-source-ndbc">
+              <input
+                type="checkbox"
+                checked={enabledContextSources.ndbc}
+                onChange={(event) => {
+                  const nextSources = {
+                    ...enabledContextSources,
+                    ndbc: event.currentTarget.checked
+                  };
+                  setEnabledContextSources(nextSources);
+                  syncEnvironmentalPreset(contextAnchor, contextRadiusPreset, nextSources);
+                }}
+              />
+              <span>NDBC</span>
+            </label>
+          </div>
+          <span>{environmentalContextSummary.exportLines[0]}</span>
+          <span className="marine-anomaly-muted" data-testid="marine-environmental-preset-summary">
+            Preset {environmentalContextSummary.metadata.presetLabel}
+            {environmentalContextSummary.metadata.isCustomPreset ? " | Custom context settings" : ""}
+          </span>
+          <span className="marine-anomaly-muted">
+            {environmentalContextSummary.metadata.presetCaveat ??
+              "Environmental context presets support review context only."}
+          </span>
+          <span className="marine-anomaly-muted" data-testid="marine-environmental-context-caveat">
+            {environmentalContextSummary.environmentalCaveatSummary.caveats[0]}
+          </span>
+          <span className="marine-anomaly-muted">
+            Anchor {environmentalContextSummary.metadata.effectiveAnchor} | Radius{" "}
+            {environmentalContextSummary.metadata.radiusKm} km | Sources{" "}
+            {environmentalContextSummary.metadata.enabledSources.length > 0
+              ? environmentalContextSummary.metadata.enabledSources.join(", ")
+              : "none"}
+          </span>
+          {environmentalContextSummary.topWaterLevelStation ? (
+            <span className="marine-anomaly-muted">
+              Water level: {environmentalContextSummary.topWaterLevelStation.stationName} |{" "}
+              {environmentalContextSummary.topWaterLevelStation.valueM.toFixed(2)} m (
+              {environmentalContextSummary.topWaterLevelStation.datum})
+            </span>
+          ) : null}
+          {environmentalContextSummary.topCurrentStation ? (
+            <span className="marine-anomaly-muted">
+              Current: {environmentalContextSummary.topCurrentStation.stationName} |{" "}
+              {environmentalContextSummary.topCurrentStation.speedKts.toFixed(1)} kts
+              {environmentalContextSummary.topCurrentStation.directionCardinal
+                ? ` ${environmentalContextSummary.topCurrentStation.directionCardinal}`
+                : ""}
+            </span>
+          ) : null}
+          {environmentalContextSummary.topBuoyStation ? (
+            <span className="marine-anomaly-muted">
+              Buoy: {environmentalContextSummary.topBuoyStation.stationName} |{" "}
+              {environmentalContextSummary.topBuoyStation.observationSummary}
+            </span>
+          ) : null}
+          {environmentalContextSummary.windSummary ? (
+            <span className="marine-anomaly-muted">
+              Wind/wave: {environmentalContextSummary.windSummary}
+              {environmentalContextSummary.waveSummary ? ` | ${environmentalContextSummary.waveSummary}` : ""}
+            </span>
+          ) : null}
+          {environmentalContextSummary.pressureSummary || environmentalContextSummary.temperatureSummary ? (
+            <span className="marine-anomaly-muted">
+              {environmentalContextSummary.pressureSummary ?? ""}
+              {environmentalContextSummary.pressureSummary && environmentalContextSummary.temperatureSummary
+                ? " | "
+                : ""}
+              {environmentalContextSummary.temperatureSummary ?? ""}
+            </span>
+          ) : null}
+          <span className="marine-anomaly-muted">
+            Caveat: {environmentalContextSummary.caveats[0] ?? "Environmental context is not vessel-intent evidence."}
+          </span>
+        </div>
+      ) : null}
+      {contextSourceRegistrySummary ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-context-sources">
+          <strong>Marine Context Sources</strong>
+          <span>{contextSourceRegistrySummary.exportLines[0]}</span>
+          {contextSourceRegistrySummary.rows.map((row) => (
+            <div key={row.sourceId} className="stack stack--tight" data-testid="marine-context-source-row">
+              <span>
+                {row.label} | {row.availability} | {row.sourceMode}
+              </span>
+              <span className="marine-anomaly-muted">
+                {row.nearbyCount} nearby
+                {row.activeCount != null ? ` | ${row.activeCount} active` : ""}
+                {row.topSummary ? ` | ${row.topSummary}` : ""}
+              </span>
+              {row.caveats[0] ? (
+                <span className="marine-anomaly-muted">Caveat: {row.caveats[0]}</span>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {contextTimelineSummary ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-context-timeline">
+          <strong>Marine Context Timeline</strong>
+          <span>
+            {contextTimelineSummary.snapshotCount} snapshot
+            {contextTimelineSummary.snapshotCount === 1 ? "" : "s"} in this session
+          </span>
+          {contextTimelineSummary.currentSnapshot ? (
+            <>
+              <div className="stack stack--tight" data-testid="marine-context-timeline-item">
+                <span>
+                  {contextTimelineSummary.currentSnapshot.presetLabel}
+                  {contextTimelineSummary.currentSnapshot.isCustomPreset ? " | Custom context settings" : ""}
+                </span>
+                <span className="marine-anomaly-muted">
+                  {contextTimelineSummary.currentSnapshot.effectiveAnchor} | {contextTimelineSummary.currentSnapshot.radiusKm} km | {contextTimelineSummary.currentSnapshot.enabledSources.join(", ")}
+                </span>
+                <span className="marine-anomaly-muted">
+                  {contextTimelineSummary.currentSnapshot.availableSourceCount}/{contextTimelineSummary.currentSnapshot.sourceCount} sources loaded
+                </span>
+                {contextTimelineSummary.currentSnapshot.caveats[0] ? (
+                  <span className="marine-anomaly-muted">
+                    Caveat: {contextTimelineSummary.currentSnapshot.caveats[0]}
+                  </span>
+                ) : null}
+              </div>
+              {contextTimelineSummary.previousSnapshot ? (
+                <div className="stack stack--tight" data-testid="marine-context-timeline-item">
+                  <span>{contextTimelineSummary.previousSnapshot.presetLabel}</span>
+                  <span className="marine-anomaly-muted">
+                    {contextTimelineSummary.previousSnapshot.effectiveAnchor} | {contextTimelineSummary.previousSnapshot.radiusKm} km | {contextTimelineSummary.previousSnapshot.enabledSources.join(", ")}
+                  </span>
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <span className="marine-anomaly-muted">No marine context snapshots recorded yet.</span>
+          )}
+          <div className="stack stack--actions">
+            <button
+              type="button"
+              className="ghost-button ghost-button--small"
+              data-testid="marine-context-timeline-clear"
+              onClick={() => setMarineContextSnapshots(clearMarineContextSnapshots())}
+            >
+              Clear context history
+            </button>
+          </div>
+        </div>
+      ) : null}
+      {contextIssueQueueSummary ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-context-issues">
+          <strong>Marine Context Issues</strong>
+          <span>
+            {contextIssueQueueSummary.issueCount} issue
+            {contextIssueQueueSummary.issueCount === 1 ? "" : "s"} | {contextIssueQueueSummary.warningCount} warning |{" "}
+            {contextIssueQueueSummary.noticeCount} notice | {contextIssueQueueSummary.infoCount} info
+          </span>
+          {contextIssueQueueSummary.topIssues.length > 0 ? (
+            contextIssueQueueSummary.topIssues.map((issue) => (
+              <div
+                key={issue.id}
+                className="stack stack--tight"
+                data-testid="marine-context-issue-row"
+              >
+                <span>
+                  {issue.sourceLabel} | {issue.severity} | {issue.title}
+                </span>
+                <span className="marine-anomaly-muted">{issue.detail}</span>
+                <span className="marine-anomaly-muted">
+                  Recommended action: {issue.recommendedAction}
+                </span>
+                <span className="marine-anomaly-muted">Caveat: {issue.caveat}</span>
+              </div>
+            ))
+          ) : (
+            <span className="marine-anomaly-muted">
+              No source-health issues surfaced from current marine context sources.
+            </span>
+          )}
+        </div>
+      ) : null}
+      {enabledContextSources.coops && noaaCoopsContextQuery.data ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-noaa-context">
+          <strong>NOAA CO-OPS Tides &amp; Currents</strong>
+          <span>{noaaContextSummary?.sourceLine ?? "NOAA CO-OPS context loaded."}</span>
+          {noaaContextSummary?.stationLines.map((station) => (
+            <div key={station.stationId} className="stack stack--tight">
+              <span>{station.label}</span>
+              <span className="marine-anomaly-muted">{station.observationLine}</span>
+              <span className="marine-anomaly-muted">{station.detailLine}</span>
+              {station.caveat ? <span className="marine-anomaly-muted">Caveat: {station.caveat}</span> : null}
+            </div>
+          ))}
+          {noaaCoopsContextQuery.data.count === 0 ? (
+            <span className="marine-anomaly-muted">No nearby NOAA CO-OPS station context in this window.</span>
+          ) : null}
+          {noaaCoopsContextQuery.data.sourceHealth.caveat ? (
+            <span className="marine-anomaly-muted">{noaaCoopsContextQuery.data.sourceHealth.caveat}</span>
+          ) : null}
+        </div>
+      ) : enabledContextSources.coops && noaaCoopsContextQuery.isLoading ? (
+        <div className="empty-state compact" data-testid="marine-noaa-context-loading">
+          <p>Loading NOAA CO-OPS context.</p>
+        </div>
+      ) : enabledContextSources.coops && noaaCoopsContextQuery.isError ? (
+        <div className="empty-state compact" data-testid="marine-noaa-context-error">
+          <p>NOAA CO-OPS context unavailable.</p>
+          <span>Marine environmental context is limited until the source loads.</span>
+        </div>
+      ) : null}
+      {enabledContextSources.ndbc && ndbcContextQuery.data ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-ndbc-context">
+          <strong>NOAA NDBC Realtime Buoys</strong>
+          <span>{ndbcContextSummary?.sourceLine ?? "NOAA NDBC context loaded."}</span>
+          {ndbcContextSummary?.stationLines.map((station) => (
+            <div key={station.stationId} className="stack stack--tight">
+              <span>{station.label}</span>
+              <span className="marine-anomaly-muted">{station.observationLine}</span>
+              <span className="marine-anomaly-muted">{station.detailLine}</span>
+              {station.caveat ? <span className="marine-anomaly-muted">Caveat: {station.caveat}</span> : null}
+            </div>
+          ))}
+          {ndbcContextQuery.data.count === 0 ? (
+            <span className="marine-anomaly-muted">No nearby NOAA NDBC buoy context in this window.</span>
+          ) : null}
+          {ndbcContextQuery.data.sourceHealth.caveat ? (
+            <span className="marine-anomaly-muted">{ndbcContextQuery.data.sourceHealth.caveat}</span>
+          ) : null}
+        </div>
+      ) : enabledContextSources.ndbc && ndbcContextQuery.isLoading ? (
+        <div className="empty-state compact" data-testid="marine-ndbc-context-loading">
+          <p>Loading NOAA NDBC context.</p>
+        </div>
+      ) : enabledContextSources.ndbc && ndbcContextQuery.isError ? (
+        <div className="empty-state compact" data-testid="marine-ndbc-context-error">
+          <p>NOAA NDBC context unavailable.</p>
+          <span>Marine weather and wave context is limited until the source loads.</span>
+        </div>
+      ) : null}
+      {scottishWaterContextQuery.data ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-scottish-water-context">
+          <strong>Scottish Water Overflows</strong>
+          <span>{scottishWaterContextSummary?.sourceLine ?? "Scottish Water overflow context loaded."}</span>
+          {scottishWaterContextSummary?.eventLines.map((event) => (
+            <div key={event.eventId} className="stack stack--tight">
+              <span>{event.label}</span>
+              <span className="marine-anomaly-muted">{event.statusLine}</span>
+              <span className="marine-anomaly-muted">{event.detailLine}</span>
+              {event.caveat ? <span className="marine-anomaly-muted">Caveat: {event.caveat}</span> : null}
+            </div>
+          ))}
+          {scottishWaterContextQuery.data.count === 0 ? (
+            <span className="marine-anomaly-muted">
+              No nearby Scottish Water overflow monitor context in this window.
+            </span>
+          ) : null}
+          {scottishWaterContextQuery.data.sourceHealth.caveat ? (
+            <span className="marine-anomaly-muted">{scottishWaterContextQuery.data.sourceHealth.caveat}</span>
+          ) : null}
+        </div>
+      ) : scottishWaterContextQuery.isLoading ? (
+        <div className="empty-state compact" data-testid="marine-scottish-water-context-loading">
+          <p>Loading Scottish Water overflow context.</p>
+        </div>
+      ) : scottishWaterContextQuery.isError ? (
+        <div className="empty-state compact" data-testid="marine-scottish-water-context-error">
+          <p>Scottish Water overflow context unavailable.</p>
+          <span>Marine coastal infrastructure context is limited until the source loads.</span>
+        </div>
+      ) : null}
       {vesselsQuery.isError ? (
         <div className="empty-state compact" data-testid="marine-vessels-error">
           <p>Marine vessel list unavailable.</p>
@@ -505,6 +1133,10 @@ export function MarineAnomalySection() {
               <span>Why this was prioritized: {focusedEvidenceInterpretation.priorityExplanation}</span>
               <span className="marine-anomaly-muted">
                 Trust/caveat: {focusedEvidenceInterpretation.trustLevel}
+              </span>
+              <span className="marine-anomaly-muted" data-testid="marine-focused-environmental-caveat">
+                {environmentalContextSummary?.environmentalCaveatSummary.caveats[0] ??
+                  "Environmental context unavailable for this review window."}
               </span>
               <div className="stack">
                 {visibleInterpretationCards.map((card, index) => (

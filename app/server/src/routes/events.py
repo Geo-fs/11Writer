@@ -21,7 +21,57 @@ from src.services.eonet_service import (
     parse_bbox as parse_eonet_bbox,
     parse_days,
 )
-from src.types.api import EarthquakeEventsResponse, EonetEventsResponse
+from src.services.volcano_service import (
+    VolcanoAlertLevel,
+    VolcanoQuery,
+    VolcanoScope,
+    VolcanoService,
+    VolcanoSort,
+    parse_bbox as parse_volcano_bbox,
+)
+from src.services.tsunami_service import (
+    TsunamiAlertType,
+    TsunamiQuery,
+    TsunamiService,
+    TsunamiSort,
+    TsunamiSourceCenter,
+    parse_bbox as parse_tsunami_bbox,
+)
+from src.services.uk_ea_flood_service import (
+    UkEaFloodQuery,
+    UkEaFloodService,
+    UkEaFloodSeverity,
+    UkEaFloodSort,
+    parse_bbox as parse_uk_ea_flood_bbox,
+)
+from src.services.geonet_service import (
+    GeoNetAlertLevel,
+    GeoNetEventType,
+    GeoNetQuery,
+    GeoNetService,
+    GeoNetSort,
+    parse_bbox as parse_geonet_bbox,
+)
+from src.services.hko_weather_service import HkoSort, HkoWeatherQuery, HkoWeatherService, HkoWarningType
+from src.services.metno_metalerts_service import (
+    MetNoMetAlertsQuery,
+    MetNoMetAlertsService,
+    MetNoSeverity,
+    MetNoSort,
+    parse_bbox as parse_metno_bbox,
+)
+from src.services.canada_cap_service import CanadaCapAlertType, CanadaCapQuery, CanadaCapService, CanadaCapSeverity, CanadaCapSort
+from src.types.api import (
+    CanadaCapAlertResponse,
+    EarthquakeEventsResponse,
+    EonetEventsResponse,
+    GeoNetHazardsResponse,
+    HkoWeatherResponse,
+    MetNoMetAlertsResponse,
+    TsunamiAlertResponse,
+    UkEaFloodResponse,
+    VolcanoStatusResponse,
+)
 
 router = APIRouter(prefix="/api/events", tags=["events"])
 
@@ -94,5 +144,232 @@ async def recent_eonet_events(
             bbox=parsed_bbox,
             since=parse_days(days),
             sort=cast(EonetSort, sort),
+        )
+    )
+
+
+@router.get("/volcanoes/recent", response_model=VolcanoStatusResponse)
+async def recent_volcano_status(
+    scope: str = Query(default="elevated"),
+    alert_level: str = Query(default="all"),
+    observatory: str | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=1000),
+    bbox: str | None = Query(default=None, description="minLon,minLat,maxLon,maxLat"),
+    sort: str = Query(default="alert"),
+    settings: Settings = Depends(get_settings),
+) -> VolcanoStatusResponse:
+    if scope not in {"elevated", "monitored"}:
+        raise HTTPException(status_code=400, detail="scope must be one of: elevated, monitored")
+    if alert_level not in {"all", "NORMAL", "ADVISORY", "WATCH", "WARNING"}:
+        raise HTTPException(
+            status_code=400,
+            detail="alert_level must be one of: all, NORMAL, ADVISORY, WATCH, WARNING",
+        )
+    if sort not in {"newest", "alert"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, alert")
+    try:
+        parsed_bbox = parse_volcano_bbox(bbox)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    service = VolcanoService(settings)
+    return await service.list_recent(
+        VolcanoQuery(
+            scope=cast(VolcanoScope, scope),
+            alert_level=cast(VolcanoAlertLevel, alert_level),
+            observatory=observatory,
+            limit=limit,
+            bbox=parsed_bbox,
+            sort=cast(VolcanoSort, sort),
+        )
+    )
+
+
+@router.get("/tsunami/recent", response_model=TsunamiAlertResponse)
+async def recent_tsunami_alerts(
+    alert_type: str = Query(default="all"),
+    source_center: str = Query(default="all"),
+    limit: int = Query(default=100, ge=1, le=1000),
+    bbox: str | None = Query(default=None, description="minLon,minLat,maxLon,maxLat"),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> TsunamiAlertResponse:
+    if alert_type not in {"all", "warning", "watch", "advisory", "information", "cancellation", "unknown"}:
+        raise HTTPException(
+            status_code=400,
+            detail="alert_type must be one of: all, warning, watch, advisory, information, cancellation, unknown",
+        )
+    if source_center not in {"all", "NTWC", "PTWC", "unknown"}:
+        raise HTTPException(status_code=400, detail="source_center must be one of: all, NTWC, PTWC, unknown")
+    if sort not in {"newest", "alert_type"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, alert_type")
+    try:
+        parsed_bbox = parse_tsunami_bbox(bbox)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    service = TsunamiService(settings)
+    return await service.list_recent(
+        TsunamiQuery(
+            alert_type=cast(TsunamiAlertType, alert_type),
+            source_center=cast(TsunamiSourceCenter, source_center),
+            limit=limit,
+            bbox=parsed_bbox,
+            sort=cast(TsunamiSort, sort),
+        )
+    )
+
+
+@router.get("/uk-floods/recent", response_model=UkEaFloodResponse)
+async def recent_uk_flood_events(
+    severity: str = Query(default="all"),
+    area: str | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=1000),
+    bbox: str | None = Query(default=None, description="minLon,minLat,maxLon,maxLat"),
+    include_stations: bool = Query(default=True),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> UkEaFloodResponse:
+    if severity not in {"all", "severe-warning", "warning", "alert", "inactive", "unknown"}:
+        raise HTTPException(
+            status_code=400,
+            detail="severity must be one of: all, severe-warning, warning, alert, inactive, unknown",
+        )
+    if sort not in {"newest", "severity"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, severity")
+    try:
+        parsed_bbox = parse_uk_ea_flood_bbox(bbox)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    service = UkEaFloodService(settings)
+    return await service.list_recent(
+        UkEaFloodQuery(
+            severity=cast(UkEaFloodSeverity, severity),
+            area=area,
+            limit=limit,
+            bbox=parsed_bbox,
+            include_stations=include_stations,
+            sort=cast(UkEaFloodSort, sort),
+        )
+    )
+
+
+@router.get("/geonet/recent", response_model=GeoNetHazardsResponse)
+async def recent_geonet_hazards(
+    event_type: str = Query(default="all"),
+    min_magnitude: float | None = Query(default=None, ge=0.0, le=10.0),
+    alert_level: str = Query(default="all"),
+    limit: int = Query(default=100, ge=1, le=1000),
+    bbox: str | None = Query(default=None, description="minLon,minLat,maxLon,maxLat"),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> GeoNetHazardsResponse:
+    if event_type not in {"all", "quake", "volcano"}:
+        raise HTTPException(status_code=400, detail="event_type must be one of: all, quake, volcano")
+    if alert_level not in {"all", "0", "1", "2", "3", "4", "5"}:
+        raise HTTPException(status_code=400, detail="alert_level must be one of: all, 0, 1, 2, 3, 4, 5")
+    if sort not in {"newest", "magnitude", "alert_level"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, magnitude, alert_level")
+    try:
+        parsed_bbox = parse_geonet_bbox(bbox)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    service = GeoNetService(settings)
+    return await service.list_recent(
+        GeoNetQuery(
+            event_type=cast(GeoNetEventType, event_type),
+            min_magnitude=min_magnitude,
+            alert_level=cast(GeoNetAlertLevel, alert_level),
+            limit=limit,
+            bbox=parsed_bbox,
+            sort=cast(GeoNetSort, sort),
+        )
+    )
+
+
+@router.get("/hko-weather/recent", response_model=HkoWeatherResponse)
+async def recent_hko_weather(
+    warning_type: str = Query(default="all"),
+    limit: int = Query(default=50, ge=1, le=500),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> HkoWeatherResponse:
+    if warning_type not in {"all", "WFIRE", "WFROST", "WHOT", "WCOLD", "WMSGNL", "WTCPRE8", "WRAIN", "WFNTSA", "WL", "WTCSGNL", "WTMW", "WTS"}:
+        raise HTTPException(
+            status_code=400,
+            detail="warning_type must be one of: all, WFIRE, WFROST, WHOT, WCOLD, WMSGNL, WTCPRE8, WRAIN, WFNTSA, WL, WTCSGNL, WTMW, WTS",
+        )
+    if sort not in {"newest", "warning_type"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, warning_type")
+
+    service = HkoWeatherService(settings)
+    return await service.list_recent(
+        HkoWeatherQuery(
+            warning_type=cast(HkoWarningType, warning_type),
+            limit=limit,
+            sort=cast(HkoSort, sort),
+        )
+    )
+
+
+@router.get("/metno-alerts/recent", response_model=MetNoMetAlertsResponse)
+async def recent_metno_alerts(
+    severity: str = Query(default="all"),
+    alert_type: str | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=500),
+    sort: str = Query(default="newest"),
+    bbox: str | None = Query(default=None, description="minLon,minLat,maxLon,maxLat"),
+    settings: Settings = Depends(get_settings),
+) -> MetNoMetAlertsResponse:
+    if severity not in {"all", "red", "orange", "yellow", "green", "unknown"}:
+        raise HTTPException(
+            status_code=400,
+            detail="severity must be one of: all, red, orange, yellow, green, unknown",
+        )
+    if sort not in {"newest", "severity"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, severity")
+    try:
+        parsed_bbox = parse_metno_bbox(bbox)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    service = MetNoMetAlertsService(settings)
+    return await service.list_recent(
+        MetNoMetAlertsQuery(
+            severity=cast(MetNoSeverity, severity),
+            alert_type=alert_type,
+            limit=limit,
+            sort=cast(MetNoSort, sort),
+            bbox=parsed_bbox,
+        )
+    )
+
+
+@router.get("/canada-cap/recent", response_model=CanadaCapAlertResponse)
+async def recent_canada_cap_alerts(
+    alert_type: str = Query(default="all"),
+    severity: str = Query(default="all"),
+    province: str | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=1000),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> CanadaCapAlertResponse:
+    if alert_type not in {"all", "warning", "watch", "advisory", "statement", "unknown"}:
+        raise HTTPException(status_code=400, detail="alert_type must be one of: all, warning, watch, advisory, statement, unknown")
+    if severity not in {"all", "extreme", "severe", "moderate", "minor", "unknown"}:
+        raise HTTPException(status_code=400, detail="severity must be one of: all, extreme, severe, moderate, minor, unknown")
+    if sort not in {"newest", "severity"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, severity")
+
+    service = CanadaCapService(settings)
+    return await service.list_recent(
+        CanadaCapQuery(
+            alert_type=cast(CanadaCapAlertType, alert_type),
+            severity=cast(CanadaCapSeverity, severity),
+            province=province,
+            limit=limit,
+            sort=cast(CanadaCapSort, sort),
         )
     )

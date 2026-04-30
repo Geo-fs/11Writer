@@ -1,11 +1,34 @@
 import type { EnvironmentalEventFilterState, HudState, PinnedEnvironmentalEvent } from "../../lib/store";
 import type {
+  CanadaCapMetadata,
   EarthquakeEventsMetadata,
-  EonetEventsMetadata
+  EonetEventsMetadata,
+  GeoNetMetadata,
+  HkoWeatherMetadata,
+  MetNoMetAlertsMetadata,
+  TsunamiAlertMetadata,
+  UkEaFloodMetadata
 } from "../../types/api";
-import type { EarthquakeEntity, EonetEntity, SceneEntity } from "../../types/entities";
+import type {
+  CanadaCapAlertEntity,
+  EarthquakeEntity,
+  EonetEntity,
+  GeoNetHazardEntity,
+  HkoWeatherEntity,
+  MetNoAlertEntity,
+  SceneEntity,
+  UkEaFloodEntity
+} from "../../types/entities";
 
-type EnvironmentalSourceKey = "earthquakes" | "eonet";
+type EnvironmentalSourceKey =
+  | "earthquakes"
+  | "eonet"
+  | "tsunami"
+  | "ukFloods"
+  | "geonet"
+  | "hkoWeather"
+  | "metnoAlerts"
+  | "canadaCap";
 type SourceState = "disabled" | "loading" | "error" | "empty" | "ready";
 type SourceHealthState = "loaded" | "loading" | "empty" | "stale" | "error" | "disabled" | "unknown";
 type SourceMode = "fixture" | "live" | "unknown";
@@ -40,6 +63,48 @@ export interface EnvironmentalOverviewInput {
   eonetDataUpdatedAt?: number;
   eonetMetadata?: EonetEventsMetadata | null;
   eonetEntities: EonetEntity[];
+  tsunamiEnabled?: boolean;
+  tsunamiLoading?: boolean;
+  tsunamiError?: boolean;
+  tsunamiErrorSummary?: string | null;
+  tsunamiDataUpdatedAt?: number;
+  tsunamiMetadata?: TsunamiAlertMetadata | null;
+  tsunamiCount?: number;
+  ukFloodEnabled?: boolean;
+  ukFloodLoading?: boolean;
+  ukFloodError?: boolean;
+  ukFloodErrorSummary?: string | null;
+  ukFloodDataUpdatedAt?: number;
+  ukFloodMetadata?: UkEaFloodMetadata | null;
+  ukFloodEntities?: UkEaFloodEntity[];
+  geonetEnabled?: boolean;
+  geonetLoading?: boolean;
+  geonetError?: boolean;
+  geonetErrorSummary?: string | null;
+  geonetDataUpdatedAt?: number;
+  geonetMetadata?: GeoNetMetadata | null;
+  geonetEntities?: GeoNetHazardEntity[];
+  hkoWeatherEnabled?: boolean;
+  hkoWeatherLoading?: boolean;
+  hkoWeatherError?: boolean;
+  hkoWeatherErrorSummary?: string | null;
+  hkoWeatherDataUpdatedAt?: number;
+  hkoWeatherMetadata?: HkoWeatherMetadata | null;
+  hkoWeatherEntities?: HkoWeatherEntity[];
+  metnoAlertsEnabled?: boolean;
+  metnoAlertsLoading?: boolean;
+  metnoAlertsError?: boolean;
+  metnoAlertsErrorSummary?: string | null;
+  metnoAlertsDataUpdatedAt?: number;
+  metnoAlertsMetadata?: MetNoMetAlertsMetadata | null;
+  metnoAlertEntities?: MetNoAlertEntity[];
+  canadaCapEnabled?: boolean;
+  canadaCapLoading?: boolean;
+  canadaCapError?: boolean;
+  canadaCapErrorSummary?: string | null;
+  canadaCapDataUpdatedAt?: number;
+  canadaCapMetadata?: CanadaCapMetadata | null;
+  canadaCapEntities?: CanadaCapAlertEntity[];
   pinnedEnvironmentalEvents: PinnedEnvironmentalEvent[];
   filters: EnvironmentalEventFilterState;
   selectedEntity: SceneEntity | null;
@@ -167,6 +232,12 @@ export interface EnvironmentalOverview {
   loadedEventCount: number;
   earthquakeCount: number;
   eonetCount: number;
+  tsunamiCount: number;
+  ukFloodCount: number;
+  geonetCount: number;
+  hkoWeatherCount: number;
+  metnoAlertsCount: number;
+  canadaCapCount: number;
   newestEvent: { source: EnvironmentalSourceKey; title: string; when: string } | null;
   strongestEarthquake: { title: string; magnitude: number } | null;
   eonetCategories: string[];
@@ -203,6 +274,11 @@ export interface EnvironmentalOverview {
     loadedEventCount: number;
     strongestEarthquakeMagnitude: number | null;
     eonetCategories: string[];
+    ukFloodCount: number;
+    geonetCount: number;
+    hkoWeatherCount: number;
+    metnoAlertsCount: number;
+    canadaCapCount: number;
     selectedEnvironmentalEventSource: EnvironmentalSourceKey | null;
     sourceHealth: Array<{
       sourceId: EnvironmentalSourceKey;
@@ -236,11 +312,31 @@ export function buildEnvironmentalEventsOverview(
 ): EnvironmentalOverview {
   const enabledSources: EnvironmentalSourceKey[] = [
     ...(input.earthquakeEnabled ? ["earthquakes" as const] : []),
-    ...(input.eonetEnabled ? ["eonet" as const] : [])
+    ...(input.eonetEnabled ? ["eonet" as const] : []),
+    ...(input.tsunamiEnabled ? ["tsunami" as const] : []),
+    ...(input.ukFloodEnabled ? ["ukFloods" as const] : []),
+    ...(input.geonetEnabled ? ["geonet" as const] : []),
+    ...(input.hkoWeatherEnabled ? ["hkoWeather" as const] : []),
+    ...(input.metnoAlertsEnabled ? ["metnoAlerts" as const] : []),
+    ...(input.canadaCapEnabled ? ["canadaCap" as const] : [])
   ];
   const earthquakeCount = input.earthquakeEntities.length;
   const eonetCount = input.eonetEntities.length;
-  const loadedEventCount = earthquakeCount + eonetCount;
+  const tsunamiCount = input.tsunamiCount ?? 0;
+  const ukFloodCount = input.ukFloodEntities?.length ?? 0;
+  const geonetCount = input.geonetEntities?.length ?? 0;
+  const hkoWeatherCount = input.hkoWeatherEntities?.length ?? 0;
+  const metnoAlertsCount = input.metnoAlertEntities?.length ?? 0;
+  const canadaCapCount = input.canadaCapEntities?.length ?? 0;
+  const loadedEventCount =
+    earthquakeCount +
+    eonetCount +
+    tsunamiCount +
+    ukFloodCount +
+    geonetCount +
+    hkoWeatherCount +
+    metnoAlertsCount +
+    canadaCapCount;
   const strongestEarthquakeEntity = input.earthquakeEntities.reduce<EarthquakeEntity | null>((strongest, item) => {
     if (item.magnitude == null) {
       return strongest;
@@ -254,7 +350,15 @@ export function buildEnvironmentalEventsOverview(
     strongestEarthquakeEntity?.magnitude != null
       ? { title: strongestEarthquakeEntity.label, magnitude: strongestEarthquakeEntity.magnitude }
       : null;
-  const newestEvent = newestCombinedEvent(input.earthquakeEntities, input.eonetEntities);
+  const newestEvent = newestCombinedEvent(
+    input.earthquakeEntities,
+    input.eonetEntities,
+    input.ukFloodEntities ?? [],
+    input.geonetEntities ?? [],
+    input.hkoWeatherEntities ?? [],
+    input.metnoAlertEntities ?? [],
+    input.canadaCapEntities ?? []
+  );
   const eonetCategories = Array.from(
     new Set(input.eonetEntities.flatMap((item) => item.categories).filter((value) => value.trim().length > 0))
   ).slice(0, 6);
@@ -273,6 +377,48 @@ export function buildEnvironmentalEventsOverview(
       state: sourceState(input.eonetEnabled, input.eonetLoading, input.eonetError, eonetCount),
       enabled: input.eonetEnabled,
       count: eonetCount
+    },
+    {
+      source: "tsunami",
+      label: "Tsunami",
+      state: sourceState(input.tsunamiEnabled ?? false, input.tsunamiLoading ?? false, input.tsunamiError ?? false, tsunamiCount),
+      enabled: input.tsunamiEnabled ?? false,
+      count: tsunamiCount
+    },
+    {
+      source: "ukFloods",
+      label: "UK Flood",
+      state: sourceState(input.ukFloodEnabled ?? false, input.ukFloodLoading ?? false, input.ukFloodError ?? false, ukFloodCount),
+      enabled: input.ukFloodEnabled ?? false,
+      count: ukFloodCount
+    },
+    {
+      source: "geonet",
+      label: "GeoNet",
+      state: sourceState(input.geonetEnabled ?? false, input.geonetLoading ?? false, input.geonetError ?? false, geonetCount),
+      enabled: input.geonetEnabled ?? false,
+      count: geonetCount
+    },
+    {
+      source: "hkoWeather",
+      label: "HKO Weather",
+      state: sourceState(input.hkoWeatherEnabled ?? false, input.hkoWeatherLoading ?? false, input.hkoWeatherError ?? false, hkoWeatherCount),
+      enabled: input.hkoWeatherEnabled ?? false,
+      count: hkoWeatherCount
+    },
+    {
+      source: "metnoAlerts",
+      label: "MET Norway Alerts",
+      state: sourceState(input.metnoAlertsEnabled ?? false, input.metnoAlertsLoading ?? false, input.metnoAlertsError ?? false, metnoAlertsCount),
+      enabled: input.metnoAlertsEnabled ?? false,
+      count: metnoAlertsCount
+    },
+    {
+      source: "canadaCap",
+      label: "Canada CAP",
+      state: sourceState(input.canadaCapEnabled ?? false, input.canadaCapLoading ?? false, input.canadaCapError ?? false, canadaCapCount),
+      enabled: input.canadaCapEnabled ?? false,
+      count: canadaCapCount
     }
   ];
   const sourceHealth = [
@@ -297,6 +443,72 @@ export function buildEnvironmentalEventsOverview(
       loadedCount: eonetCount,
       metadata: input.eonetMetadata ?? null,
       dataUpdatedAt: input.eonetDataUpdatedAt
+    }),
+    buildSourceHealth({
+      sourceId: "tsunami",
+      sourceLabel: "NOAA Tsunami Alerts",
+      enabled: input.tsunamiEnabled ?? false,
+      loading: input.tsunamiLoading ?? false,
+      error: input.tsunamiError ?? false,
+      errorSummary: input.tsunamiErrorSummary ?? null,
+      loadedCount: tsunamiCount,
+      metadata: input.tsunamiMetadata ?? null,
+      dataUpdatedAt: input.tsunamiDataUpdatedAt
+    }),
+    buildSourceHealth({
+      sourceId: "ukFloods",
+      sourceLabel: "UK EA Flood Monitoring",
+      enabled: input.ukFloodEnabled ?? false,
+      loading: input.ukFloodLoading ?? false,
+      error: input.ukFloodError ?? false,
+      errorSummary: input.ukFloodErrorSummary ?? null,
+      loadedCount: ukFloodCount,
+      metadata: input.ukFloodMetadata ?? null,
+      dataUpdatedAt: input.ukFloodDataUpdatedAt
+    }),
+    buildSourceHealth({
+      sourceId: "geonet",
+      sourceLabel: "GeoNet NZ",
+      enabled: input.geonetEnabled ?? false,
+      loading: input.geonetLoading ?? false,
+      error: input.geonetError ?? false,
+      errorSummary: input.geonetErrorSummary ?? null,
+      loadedCount: geonetCount,
+      metadata: input.geonetMetadata ?? null,
+      dataUpdatedAt: input.geonetDataUpdatedAt
+    }),
+    buildSourceHealth({
+      sourceId: "hkoWeather",
+      sourceLabel: "HKO Weather",
+      enabled: input.hkoWeatherEnabled ?? false,
+      loading: input.hkoWeatherLoading ?? false,
+      error: input.hkoWeatherError ?? false,
+      errorSummary: input.hkoWeatherErrorSummary ?? null,
+      loadedCount: hkoWeatherCount,
+      metadata: input.hkoWeatherMetadata ?? null,
+      dataUpdatedAt: input.hkoWeatherDataUpdatedAt
+    }),
+    buildSourceHealth({
+      sourceId: "metnoAlerts",
+      sourceLabel: "MET Norway Alerts",
+      enabled: input.metnoAlertsEnabled ?? false,
+      loading: input.metnoAlertsLoading ?? false,
+      error: input.metnoAlertsError ?? false,
+      errorSummary: input.metnoAlertsErrorSummary ?? null,
+      loadedCount: metnoAlertsCount,
+      metadata: input.metnoAlertsMetadata ?? null,
+      dataUpdatedAt: input.metnoAlertsDataUpdatedAt
+    }),
+    buildSourceHealth({
+      sourceId: "canadaCap",
+      sourceLabel: "Canada CAP",
+      enabled: input.canadaCapEnabled ?? false,
+      loading: input.canadaCapLoading ?? false,
+      error: input.canadaCapError ?? false,
+      errorSummary: input.canadaCapErrorSummary ?? null,
+      loadedCount: canadaCapCount,
+      metadata: input.canadaCapMetadata ?? null,
+      dataUpdatedAt: input.canadaCapDataUpdatedAt
     })
   ];
   const pinnedEvents = input.pinnedEnvironmentalEvents.slice(0, 5);
@@ -312,6 +524,24 @@ export function buildEnvironmentalEventsOverview(
         input.earthquakeEntities.length > 0
           ? "Earthquake magnitude indicates event size, not direct damage or casualty inference."
           : null,
+        tsunamiCount > 0
+          ? "Tsunami alerts are advisory context only and do not provide inundation or impact modeling."
+          : null,
+        ukFloodCount > 0
+          ? "UK flood warnings are advisory/contextual, while station readings are observed monitoring values, not flood impact estimates."
+          : null,
+        geonetCount > 0
+          ? "GeoNet quake records are source-reported observations and GeoNet volcano alerts are advisory/contextual status, not damage assessments."
+          : null,
+        hkoWeatherCount > 0
+          ? "HKO weather warnings are advisory/context, and tropical cyclone text is forecast context rather than direct damage confirmation."
+          : null,
+        metnoAlertsCount > 0
+          ? "MET Norway alerts are advisory/contextual warning records. Severity color and timing do not confirm local damage or realized impact."
+          : null,
+        canadaCapCount > 0
+          ? "Canada CAP alerts are advisory/contextual warning records and do not confirm damage or local impact."
+          : null,
         sourceHealth.some((item) => item.sourceMode === "fixture")
           ? "Fixture mode is local test data and should not be interpreted as a live source feed."
           : null
@@ -320,7 +550,13 @@ export function buildEnvironmentalEventsOverview(
   );
   const filtersSummary = [
     `Earthquakes: window ${input.filters.window}, min magnitude ${input.filters.minMagnitude ?? "none"}, sort ${input.filters.sort}, limit ${input.filters.limit}`,
-    `EONET: category ${input.filters.eonetCategory || "all"}, status ${input.filters.eonetStatus}, sort ${input.filters.eonetSort}, limit ${input.filters.eonetLimit}`
+    `EONET: category ${input.filters.eonetCategory || "all"}, status ${input.filters.eonetStatus}, sort ${input.filters.eonetSort}, limit ${input.filters.eonetLimit}`,
+    `Tsunami: type ${input.filters.tsunamiAlertType}, center ${input.filters.tsunamiSourceCenter}, limit ${input.filters.tsunamiLimit}`,
+    `UK Floods: severity ${input.filters.ukFloodSeverity}, limit ${input.filters.ukFloodLimit}, stations ${input.filters.ukFloodIncludeStations ? "on" : "off"}`,
+    `GeoNet: type ${input.filters.geonetEventType}, min magnitude ${input.filters.geonetMinMagnitude ?? "none"}, alert ${input.filters.geonetAlertLevel}, limit ${input.filters.geonetLimit}`,
+    `HKO Weather: warning type ${input.filters.hkoWarningType}, limit ${input.filters.hkoLimit}`,
+    `MET Norway Alerts: severity ${input.filters.metnoAlertSeverity}, type ${input.filters.metnoAlertType || "all"}, limit ${input.filters.metnoLimit}`,
+    `Canada CAP: alert type ${input.filters.canadaCapAlertType}, severity ${input.filters.canadaCapSeverity}, limit ${input.filters.canadaCapLimit}`
   ];
   const relevance = buildEnvironmentalRelevance(input);
   const cooccurrence = buildEnvironmentalCooccurrence(input, sourceHealth);
@@ -329,6 +565,11 @@ export function buildEnvironmentalEventsOverview(
     enabledSources,
     earthquakeCount,
     eonetCount,
+    ukFloodCount,
+    geonetCount,
+    hkoWeatherCount,
+    metnoAlertsCount,
+    canadaCapCount,
     strongestEarthquake,
     eonetCategories,
     selectedEnvironmentalEvent,
@@ -344,6 +585,12 @@ export function buildEnvironmentalEventsOverview(
     loadedEventCount,
     earthquakeCount,
     eonetCount,
+    tsunamiCount,
+    ukFloodCount,
+    geonetCount,
+    hkoWeatherCount,
+    metnoAlertsCount,
+    canadaCapCount,
     newestEvent,
     strongestEarthquake,
     eonetCategories,
@@ -362,6 +609,11 @@ export function buildEnvironmentalEventsOverview(
       loadedEventCount,
       strongestEarthquakeMagnitude: strongestEarthquake?.magnitude ?? null,
       eonetCategories,
+      ukFloodCount,
+      geonetCount,
+      hkoWeatherCount,
+      metnoAlertsCount,
+      canadaCapCount,
       selectedEnvironmentalEventSource: selectedEnvironmentalEvent?.source ?? null,
       sourceHealth: sourceHealth.map((item) => ({
         sourceId: item.sourceId,
@@ -419,7 +671,10 @@ function buildEnvironmentalRelevance(
   input: EnvironmentalOverviewInput
 ): EnvironmentalOverviewRelevance {
   const selectedEnvironmentalEntity =
-    input.selectedEntity?.type === "environmental-event" ? input.selectedEntity : null;
+    input.selectedEntity?.type === "environmental-event" &&
+    (input.selectedEntity.eventSource === "usgs-earthquake" || input.selectedEntity.eventSource === "nasa-eonet")
+      ? input.selectedEntity
+      : null;
   const viewportContextAvailable = Number.isFinite(input.hud.latitude) && Number.isFinite(input.hud.longitude);
   const anchorLat =
     selectedEnvironmentalEntity?.latitude ?? (viewportContextAvailable ? input.hud.latitude : null);
@@ -705,11 +960,21 @@ type EnvironmentalEventPair = {
 
 function newestCombinedEvent(
   earthquakes: EarthquakeEntity[],
-  eonetEvents: EonetEntity[]
+  eonetEvents: EonetEntity[],
+  ukFloodEntities: UkEaFloodEntity[],
+  geonetEntities: GeoNetHazardEntity[],
+  hkoWeatherEntities: HkoWeatherEntity[],
+  metnoAlertEntities: MetNoAlertEntity[],
+  canadaCapEntities: CanadaCapAlertEntity[]
 ): EnvironmentalOverview["newestEvent"] {
   const candidates = [
     ...earthquakes.map((item) => ({ source: "earthquakes" as const, title: item.place ?? item.label, when: item.timestamp })),
-    ...eonetEvents.map((item) => ({ source: "eonet" as const, title: item.label, when: item.eventDate }))
+    ...eonetEvents.map((item) => ({ source: "eonet" as const, title: item.label, when: item.eventDate })),
+    ...ukFloodEntities.map((item) => ({ source: "ukFloods" as const, title: item.label, when: item.timestamp })),
+    ...geonetEntities.map((item) => ({ source: "geonet" as const, title: item.label, when: item.timestamp })),
+    ...hkoWeatherEntities.map((item) => ({ source: "hkoWeather" as const, title: item.label, when: item.timestamp })),
+    ...metnoAlertEntities.map((item) => ({ source: "metnoAlerts" as const, title: item.label, when: item.timestamp })),
+    ...canadaCapEntities.map((item) => ({ source: "canadaCap" as const, title: item.label, when: item.timestamp }))
   ];
   if (candidates.length === 0) {
     return null;
@@ -731,6 +996,14 @@ function toSelectedEnvironmentalEvent(
   if (!entity || entity.type !== "environmental-event") {
     return null;
   }
+  if (
+    entity.eventSource === "usgs-volcano-hazards" ||
+    entity.eventSource === "noaa-tsunami-alerts" ||
+    entity.eventSource === "uk-ea-flood-monitoring" ||
+    entity.eventSource === "geonet-nz"
+  ) {
+    return null;
+  }
   if (entity.eventSource === "nasa-eonet") {
     return {
       source: "eonet",
@@ -740,16 +1013,49 @@ function toSelectedEnvironmentalEvent(
       caveat: entity.caveat
     };
   }
-  return {
-    source: "earthquakes",
-    title: entity.place ?? entity.label,
-    when: entity.timestamp,
-    detail:
-      entity.magnitude != null
-        ? `Magnitude M${entity.magnitude.toFixed(1)}${entity.magnitudeType ? ` ${entity.magnitudeType}` : ""}`
-        : "Magnitude not reported",
-    caveat: entity.caveat
-  };
+  if (entity.eventSource === "usgs-earthquake") {
+    return {
+      source: "earthquakes",
+      title: entity.place ?? entity.label,
+      when: entity.timestamp,
+      detail:
+        entity.magnitude != null
+          ? `Magnitude M${entity.magnitude.toFixed(1)}${entity.magnitudeType ? ` ${entity.magnitudeType}` : ""}`
+          : "Magnitude not reported",
+      caveat: entity.caveat
+    };
+  }
+  if (entity.eventSource === "hong-kong-observatory") {
+    return {
+      source: "hkoWeather",
+      title: entity.label,
+      when: entity.timestamp,
+      detail:
+        entity.entityKind === "warning"
+          ? `${entity.warningType ?? "warning"}${entity.warningLevel ? ` | ${entity.warningLevel}` : ""}`
+          : `Tropical cyclone context${entity.signal ? ` | ${entity.signal}` : ""}`,
+      caveat: entity.caveat
+    };
+  }
+  if (entity.eventSource === "met-norway-metalerts") {
+    return {
+      source: "metnoAlerts",
+      title: entity.label,
+      when: entity.timestamp,
+      detail: `${entity.severity} | ${entity.alertType}${entity.areaDescription ? ` | ${entity.areaDescription}` : ""}`,
+      caveat: entity.caveat
+    };
+  }
+  if (entity.eventSource === "environment-canada-cap") {
+    return {
+      source: "canadaCap",
+      title: entity.label,
+      when: entity.timestamp,
+      detail: `${entity.alertType} | ${entity.severity}${entity.provinceOrRegion ? ` | ${entity.provinceOrRegion}` : ""}`,
+      caveat: entity.caveat
+    };
+  }
+  return null;
 }
 
 function buildEventDistances(
@@ -982,6 +1288,11 @@ function buildExportLines(input: {
   enabledSources: EnvironmentalSourceKey[];
   earthquakeCount: number;
   eonetCount: number;
+  ukFloodCount: number;
+  geonetCount: number;
+  hkoWeatherCount: number;
+  metnoAlertsCount: number;
+  canadaCapCount: number;
   strongestEarthquake: EnvironmentalOverview["strongestEarthquake"];
   eonetCategories: string[];
   selectedEnvironmentalEvent: EnvironmentalOverviewSelectedEvent | null;
@@ -994,10 +1305,17 @@ function buildExportLines(input: {
   if (input.enabledSources.length === 0) {
     return [];
   }
-  const lines = [`Environmental events: Earthquakes ${input.earthquakeCount} | EONET ${input.eonetCount}`];
+  const lines = [
+    `Environmental events: Earthquakes ${input.earthquakeCount} | EONET ${input.eonetCount} | UK Flood ${input.ukFloodCount} | GeoNet ${input.geonetCount} | HKO ${input.hkoWeatherCount} | METNO ${input.metnoAlertsCount} | Canada CAP ${input.canadaCapCount}`
+  ];
   const summaryParts = [
     input.strongestEarthquake ? `Strongest earthquake M${input.strongestEarthquake.magnitude.toFixed(1)}` : null,
-    input.eonetCategories.length > 0 ? `EONET categories ${input.eonetCategories.slice(0, 3).join(", ")}` : null
+    input.eonetCategories.length > 0 ? `EONET categories ${input.eonetCategories.slice(0, 3).join(", ")}` : null,
+    input.ukFloodCount > 0 ? "UK flood warnings and observed station readings loaded" : null,
+    input.geonetCount > 0 ? "GeoNet regional quake and volcanic alert context loaded" : null,
+    input.hkoWeatherCount > 0 ? "HKO weather warning and cyclone context loaded" : null,
+    input.metnoAlertsCount > 0 ? "MET Norway CAP-style alert context loaded" : null,
+    input.canadaCapCount > 0 ? "Canada CAP weather-alert context loaded" : null
   ].filter((value): value is string => value != null);
   if (summaryParts.length > 0) {
     lines.push(summaryParts.join(" | "));

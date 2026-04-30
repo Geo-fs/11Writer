@@ -3,9 +3,11 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from src.config.settings import Settings
+from src.services.camera_registry import is_camera_source_sandbox_importable
 from src.types.api import (
     CameraQuery,
     CameraResponse,
+    CameraSourceInventoryEntry,
     CameraSourceInventoryResponse,
     CameraSourceInventorySummary,
     CameraSourceRegistryEntry,
@@ -30,7 +32,16 @@ class CameraService:
         with session_scope(self._database_url) as session:
             repository = WebcamRepository(session)
             all_cameras = repository.list_cameras()
-            persisted_sources = _merge_inventory(repository.list_sources(), repository.list_source_inventory())
+            persisted_source_rows = repository.list_sources()
+            source_map = {source.key: source for source in persisted_source_rows}
+            persisted_sources = _merge_inventory(
+                persisted_source_rows,
+                [
+                    _with_sandbox_metadata(self._settings, item, source_map.get(item.key))
+                    for item in repository.list_source_inventory()
+                ],
+                self._settings,
+            )
         filtered = self._apply_query(all_cameras, query)[: query.limit]
         return CameraResponse(
             fetched_at=_now_iso(),
@@ -50,13 +61,27 @@ class CameraService:
         await self._refresh_service.run_due_work()
         with session_scope(self._database_url) as session:
             repository = WebcamRepository(session)
-            sources = _merge_inventory(repository.list_sources(), repository.list_source_inventory())
+            persisted_source_rows = repository.list_sources()
+            source_map = {source.key: source for source in persisted_source_rows}
+            sources = _merge_inventory(
+                persisted_source_rows,
+                [
+                    _with_sandbox_metadata(self._settings, item, source_map.get(item.key))
+                    for item in repository.list_source_inventory()
+                ],
+                self._settings,
+            )
         return CameraSourceRegistryResponse(sources=sources)
 
     async def list_source_inventory(self) -> CameraSourceInventoryResponse:
         await self._refresh_service.bootstrap_inventory()
         with session_scope(self._database_url) as session:
-            sources = WebcamRepository(session).list_source_inventory()
+            repository = WebcamRepository(session)
+            source_map = {source.key: source for source in repository.list_sources()}
+            sources = [
+                _with_sandbox_metadata(self._settings, item, source_map.get(item.key))
+                for item in repository.list_source_inventory()
+            ]
         sources_by_type: dict[str, int] = {}
         for source in sources:
             sources_by_type[source.source_type] = sources_by_type.get(source.source_type, 0) + 1
@@ -165,6 +190,7 @@ def _camera_staleness_warning(sources: list[CameraSourceRegistryEntry]) -> str |
 def _merge_inventory(
     sources: list[CameraSourceRegistryEntry],
     inventory: list,
+    settings: Settings,
 ) -> list[CameraSourceRegistryEntry]:
     inventory_map = {item.key: item for item in inventory}
     merged: list[CameraSourceRegistryEntry] = []
@@ -204,10 +230,62 @@ def _merge_inventory(
                     "likely_camera_count": item.likely_camera_count,
                     "compliance_risk": item.compliance_risk,
                     "extraction_feasibility": item.extraction_feasibility,
+                    "endpoint_verification_status": item.endpoint_verification_status,
+                    "candidate_endpoint_url": item.candidate_endpoint_url,
+                    "machine_readable_endpoint_url": item.machine_readable_endpoint_url,
+                    "last_endpoint_check_at": item.last_endpoint_check_at,
+                    "last_endpoint_http_status": item.last_endpoint_http_status,
+                    "last_endpoint_content_type": item.last_endpoint_content_type,
+                    "last_endpoint_result": item.last_endpoint_result,
+                    "last_endpoint_notes": item.last_endpoint_notes,
+                    "verification_caveat": item.verification_caveat,
+                    "sandbox_import_available": item.sandbox_import_available,
+                    "sandbox_import_mode": item.sandbox_import_mode,
+                    "sandbox_connector_id": item.sandbox_connector_id,
+                    "last_sandbox_import_at": item.last_sandbox_import_at,
+                    "last_sandbox_import_outcome": item.last_sandbox_import_outcome,
+                    "sandbox_discovered_count": item.sandbox_discovered_count,
+                    "sandbox_usable_count": item.sandbox_usable_count,
+                    "sandbox_review_queue_count": item.sandbox_review_queue_count,
+                    "sandbox_validation_caveat": item.sandbox_validation_caveat,
                 }
             )
         )
     return merged
+
+
+def _with_sandbox_metadata(
+    settings: Settings,
+    item: CameraSourceInventoryEntry,
+    source: CameraSourceRegistryEntry | None = None,
+) -> CameraSourceInventoryEntry:
+    sandbox_available = is_camera_source_sandbox_importable(item.key, settings)
+    if not sandbox_available:
+        return item
+    mode = settings.finland_digitraffic_weathercam_mode.lower()
+    return item.model_copy(
+        update={
+            "sandbox_import_available": True,
+            "sandbox_import_mode": mode if mode in {"fixture", "live"} else None,
+            "sandbox_connector_id": "FinlandDigitrafficWeatherCamConnector",
+            "last_sandbox_import_at": (
+                source.last_validation_at
+                or source.last_completed_at
+                or item.last_catalog_import_at
+            ) if source is not None else item.last_catalog_import_at,
+            "last_sandbox_import_outcome": (
+                item.last_import_outcome
+                or item.last_catalog_import_status
+                or source.status
+            ) if source is not None else (item.last_import_outcome or item.last_catalog_import_status),
+            "sandbox_discovered_count": item.discovered_camera_count,
+            "sandbox_usable_count": item.usable_camera_count,
+            "sandbox_review_queue_count": item.review_queue_count,
+            "sandbox_validation_caveat": (
+                "Sandbox fixture import proves mapping only. It does not mark the source validated or enable scheduled ingestion."
+            ),
+        }
+    )
 
 
 def _now_iso() -> str:

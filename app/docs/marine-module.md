@@ -8,6 +8,10 @@ Marine subsystem only: vessel observations, AIS-like transmission gap evidence, 
 - Does not own aircraft/satellite/webcam logic.
 - Does not own geospatial reference datasets; optional `reference_ref_id` hook only.
 
+Related validation docs:
+- [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+- [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+
 ## Provider Integration Strategy
 
 Marine source mode is explicit and configurable through server settings:
@@ -269,6 +273,339 @@ Marine anomaly/replay surfaces consume shared imagery context components/helpers
 
 This keeps marine replay interpretation aligned with global imagery caveat semantics (composite/thematic/historical timing context) without marine-specific caveat forks.
 
+### NOAA CO-OPS Marine Context
+
+Marine now includes a first fixture-backed NOAA CO-OPS Tides & Currents context slice for nearby coastal observations:
+- backend route: `GET /api/marine/context/noaa-coops`
+- client hook: `useMarineNoaaCoopsContextQuery(...)`
+- frontend helper: `app/client/src/features/marine/marineNoaaContext.ts`
+
+Current scope:
+- station metadata
+- latest water level observations when available
+- latest current observations when available
+- compact source health and mode (`fixture`, later `live`)
+- viewport/chokepoint-adjacent station lookup by query center and radius
+
+Current limits:
+- fixture-first only in this slice
+- no full NOAA station browser or dashboard
+- no vessel-behavior inference from tides/currents
+- coastal context only; not a global ocean model
+
+Source health semantics:
+- `loaded`: nearby station context returned
+- `empty`: source responded but no nearby station matched the query radius
+- `disabled`: non-fixture mode requested before live implementation exists
+
+Interpretation rules:
+- NOAA CO-OPS observations are contextual marine environment data, not vessel evidence
+- water level/current values should not be presented as proof of vessel intent, AIS disablement, or evasion
+- fixture/local mode must remain explicit in UI and export metadata
+
+### NOAA NDBC Marine Context
+
+Marine now also includes a first fixture-backed NOAA NDBC realtime buoy slice for nearby offshore/coastal observations:
+- backend route: `GET /api/marine/context/ndbc`
+- client hook: `useMarineNdbcContextQuery(...)`
+- frontend helper: `app/client/src/features/marine/marineNdbcContext.ts`
+
+Current scope:
+- buoy/station metadata
+- latest meteorological and wave observations when available
+- compact source health and mode (`fixture`, later `live`)
+- viewport/chokepoint-adjacent station lookup by query center and radius
+
+Current limits:
+- fixture-first only in this slice
+- no full buoy dashboard or timeseries UI
+- no vessel-behavior inference from winds, waves, pressure, or temperatures
+- buoy observations are point samples, not broad area conditions
+
+Source health semantics:
+- `loaded`: nearby station context returned
+- `empty`: source responded but no nearby buoy matched the query radius
+- `disabled`: non-fixture mode requested before live implementation exists
+
+Interpretation rules:
+- NOAA NDBC observations are contextual marine environment data, not vessel evidence
+- wind/wave/weather values should not be presented as proof of vessel intent, AIS disablement, or evasion
+- fixture/local mode must remain explicit in UI and export metadata
+
+### Scottish Water Overflow Context
+
+Marine now also includes a first fixture-backed Scottish Water overflow-monitor slice for nearby coastal infrastructure context:
+- backend route: `GET /api/marine/context/scottish-water-overflows`
+- client hook: `useMarineScottishWaterOverflowsQuery(...)`
+- frontend helper: `app/client/src/features/marine/marineScottishWaterContext.ts`
+- official endpoint reference verified from local source briefs:
+  - `https://api.scottishwater.co.uk/overflow-event-monitoring/v1/near-real-time`
+
+Current scope:
+- nearby overflow monitor events around the marine analysis center and radius
+- source health and source mode (`fixture`, later `live`)
+- active/inactive/unknown status normalization
+- top active/recent monitor summary
+- export metadata for marine snapshot/evidence flows
+
+Current limits:
+- fixture-first only in this slice
+- no pollution-impact model
+- no health-risk or swim-safety model
+- no vessel-behavior inference from overflow activation status
+- no scraping or interactive-map automation
+
+Source health semantics:
+- `loaded`: nearby overflow monitor context returned
+- `empty`: source responded but no nearby monitor matched the query radius
+- `disabled`: non-fixture mode requested before live implementation exists
+
+Interpretation rules:
+- Scottish Water overflow monitor activation is source-reported contextual infrastructure status only
+- it must not be presented as confirmed pollution impact, environmental harm, swim safety, or health risk
+- it must not be presented as evidence of vessel intent, route choice, anomaly cause, or wrongdoing
+- fixture/local mode must remain explicit in UI and export metadata
+- export metadata preserves source health, nearby monitor counts, active monitor counts, top monitor summary, and caveats
+
+Current integration note:
+- Scottish Water overflow context remains separate from the combined NOAA CO-OPS/NDBC environmental context in this slice
+- a future marine pass may integrate it into a broader marine context federation if that can be done without blurring infrastructure-status context and oceanographic context
+
+### Backend Contract Coverage
+
+Marine backend contract coverage currently locks down the following context-source guarantees:
+- NOAA CO-OPS, NOAA NDBC, and Scottish Water routes are contract-tested
+- fixture mode must remain explicit through source-health/source-mode fields
+- empty nearby results must return `health=empty`, not backend error semantics
+- disabled non-fixture behavior must remain explicit when live mode is not implemented
+- CO-OPS/NDBC observation basis must remain `observed`
+- Scottish Water overflow status basis must remain `source-reported`
+- source-level caveats must remain present for all three sources
+
+Route validation expectations:
+- invalid latitude/longitude requests must be rejected by request validation
+- invalid `radius_km` values must be rejected by request validation
+
+Forbidden inference claims remain unchanged:
+- no vessel-intent inference from any context source
+- no anomaly-cause inference from any context source
+- no pollution-impact or health-risk claim from Scottish Water status alone
+
+### Marine Context Source Registry Summary
+
+Marine also derives a compact source-registry summary for currently loaded marine context sources:
+- helper: `app/client/src/features/marine/marineContextSourceSummary.ts`
+- current consumer: `app/client/src/features/marine/MarineAnomalySection.tsx`
+
+Current registry rows include:
+- `NOAA CO-OPS`
+  - category: `oceanographic`
+- `NOAA NDBC`
+  - category: `meteorological`
+- `Scottish Water Overflows`
+  - category: `coastal-infrastructure`
+
+Each row summarizes:
+- source label
+- source mode
+- source health
+- availability state
+- nearby count
+- active count where applicable
+- top summary
+- compact caveat
+- evidence basis
+
+Availability meanings:
+- `loaded`
+- `empty`
+- `disabled`
+- `unavailable`
+- `degraded`
+- `unknown`
+
+Interpretation rules:
+- the registry summary helps operators understand which marine context sources are present and usable
+- it must not merge CO-OPS/NDBC oceanographic or meteorological context with Scottish Water infrastructure context into a single severity score
+- it must not be presented as evidence of vessel intent, anomaly cause, or wrongdoing
+- Scottish Water remains semantically separate from the combined CO-OPS/NDBC environmental context because infrastructure-status records are not the same class of observation as oceanographic or buoy measurements
+
+Export metadata includes:
+- `marineAnomalySummary.contextSourceSummary`
+  - source count
+  - available source count
+  - degraded source count
+  - fixture source count
+  - disabled source count
+  - per-source rows
+  - caveats
+
+### Marine Context Timeline
+
+Marine also keeps a short session-local context timeline for the active marine review lens:
+- helper: `app/client/src/features/marine/marineContextTimeline.ts`
+- current consumer: `app/client/src/features/marine/MarineAnomalySection.tsx`
+
+Snapshot fields include:
+- preset id and label
+- custom/manual state
+- anchor and effective anchor
+- radius
+- enabled sources
+- source counts and availability summary
+- nearby station count
+- active monitor count when applicable
+- top summary lines
+- caveats
+- focused target label when present
+
+Behavior:
+- snapshots are session-local only
+- marine records snapshots when context settings or relevant focused review state changes
+- consecutive identical context states are deduplicated
+- the list is capped to a small recent history window
+- clear history removes the session-local timeline only
+
+Interpretation rules:
+- the context timeline shows how the analyst's marine context lens changed during the session
+- it does not imply vessel behavior, anomaly cause, or causal relationships between context changes and vessel activity
+
+Export metadata includes:
+- `marineAnomalySummary.contextTimeline`
+  - snapshot count
+  - current snapshot
+  - previous snapshot
+  - caveats
+
+### Marine Context Issue Queue
+
+Marine also derives a compact issue queue from current marine context-source status:
+- helper: `app/client/src/features/marine/marineContextIssueQueue.ts`
+- current consumer: `app/client/src/features/marine/MarineAnomalySection.tsx`
+
+Issue types currently include:
+- `fixture-mode`
+- `empty`
+- `degraded`
+- `disabled`
+- `unavailable`
+- `partial-metadata`
+- `source-health-unknown`
+
+Severity meanings:
+- `info`
+  - source is usable for deterministic workflow review but not live operational coverage
+- `notice`
+  - source is present but limited, empty, disabled, partial, or otherwise requires caution
+- `warning`
+  - source is unavailable or degraded enough that the context view is materially limited
+
+Interpretation rules:
+- the issue queue summarizes source-health and metadata limitations only
+- it must not be presented as evidence of vessel behavior, anomaly cause, or intent
+- fixture/local issues indicate workflow-validation context, not live-source failure
+
+Export metadata includes:
+- `marineAnomalySummary.contextIssueQueue`
+  - issue count
+  - warning count
+  - notice count
+  - info count
+  - top issues
+  - caveats
+
+### Combined Marine Environmental Context
+
+Marine also derives a frontend-local combined environmental context summary from already-loaded NOAA CO-OPS and NOAA NDBC data:
+- helper: `app/client/src/features/marine/marineEnvironmentalContext.ts`
+- current consumer: `app/client/src/features/marine/MarineAnomalySection.tsx`
+
+Current combined summary fields include:
+- source count and healthy source count
+- source modes
+- nearby station counts
+- top nearby water-level station
+- top nearby current station
+- top nearby buoy/coastal weather station
+- compact wind/wave/pressure/temperature summaries when available
+- health summary
+- caveats
+- export lines and compact metadata
+
+Interpretation rules:
+- combined environmental context is marine situational context only
+- it may summarize nearby observed water level/current/buoy conditions
+- it must not be presented as evidence of vessel intent, evasion, route choice, or anomaly cause
+- anomaly evidence and environmental context remain distinct in marine export metadata
+
+Marine environmental context controls:
+- preset modes:
+  - `chokepoint-review`
+  - `selected-vessel-review`
+  - `regional-marine-context`
+  - `water-level-current-focus`
+  - `buoy-weather-focus`
+- anchor modes:
+  - `selected-vessel`
+  - `viewport`
+  - `chokepoint`
+- radius presets:
+  - `small`
+  - `medium`
+  - `large`
+- source toggles:
+  - `CO-OPS`
+  - `NDBC`
+
+Preset mapping:
+- `chokepoint-review`
+  - anchor `chokepoint`
+  - radius `medium`
+  - sources `CO-OPS + NDBC`
+- `selected-vessel-review`
+  - anchor `selected-vessel`
+  - radius `small`
+  - sources `CO-OPS + NDBC`
+- `regional-marine-context`
+  - anchor `viewport`
+  - radius `large`
+  - sources `CO-OPS + NDBC`
+- `water-level-current-focus`
+  - anchor `chokepoint`
+  - radius `medium`
+  - sources `CO-OPS only`
+- `buoy-weather-focus`
+  - anchor `viewport`
+  - radius `medium`
+  - sources `NDBC only`
+
+Manual/custom behavior:
+- selecting a preset rewrites the current marine environmental context controls to the preset values
+- if the current control combination matches another preset exactly, marine reflects that preset
+- if a manual change no longer matches any preset, marine marks the state as `Custom context settings`
+- custom/manual mode changes review scope only; it does not change source semantics or anomaly scoring
+
+Fallback behavior:
+- default behavior preserves current marine context pattern:
+  - preset defaults to `chokepoint-review`
+  - anchor defaults to `chokepoint`
+  - radius defaults to `medium`
+  - both `CO-OPS` and `NDBC` enabled
+- if `selected-vessel` anchor is chosen but no selected vessel center is available, marine falls back to viewport center when possible
+- if no usable center exists, environmental context is marked unavailable rather than fabricating coordinates
+- disabled sources are treated as disabled by current marine controls, not as source failures
+
+Environmental context caveat behavior:
+- marine derives compact caveats from combined CO-OPS/NDBC availability, health, and source mode
+- possible caveat states include:
+  - environmental context available
+  - environmental context empty
+  - environmental context unavailable
+  - fixture/local source mode
+  - mixed or partial source health
+- these caveats are used only to qualify review context and evidence limits
+- they do not change marine anomaly scoring or imply behavioral causation
+
 ### Marine-Focused Playwright Smoke
 
 A marine-isolated smoke path is available and does not depend on aerospace canvas selection phases:
@@ -279,6 +616,14 @@ python app/server/tests/run_playwright_smoke.py marine
 
 This validates marine anomaly rendering and controls using deterministic fixture data:
 - marine anomaly section
+- combined marine environmental context card
+- marine environmental context preset selector
+- NOAA CO-OPS context card
+- NOAA NDBC context card
+- source-specific preset behavior
+- Scottish Water overflow context card
+- marine context source registry summary
+- marine context timeline
 - selected vessel anomaly panel content
 - viewport anomaly panel content
 - chokepoint ranking and filter/sort controls
@@ -304,6 +649,9 @@ Included export evidence fields:
 - selected vessel anomaly (score/level/label/top reasons/caveats + observed/inferred/scored signal counts)
 - viewport anomaly (score/level/label/top reasons/caveats)
 - top chokepoint slice (rank/score/level/label/top reason/caveat indicator)
+- NOAA CO-OPS context summary (source mode/health, nearby station count, top station)
+- NOAA NDBC context summary (source mode/health, nearby station count, top station + top observation summary)
+- combined environmental context summary (source counts, station counts, health summary, top observations)
 - marine attention queue summary (item count + top item)
 - active controls (`chokepointFilter`, `chokepointSort`)
 - marine caution lines for interpretation
@@ -329,6 +677,51 @@ Snapshot/export integration behavior:
   - `cardCount`
   - `visibleCardCount`
   - `topCaveats`
+- `marineAnomalySummary.noaaCoopsContext` adds compact NOAA marine-context metadata:
+  - `sourceId`
+  - `sourceMode`
+  - `health`
+  - `nearbyStationCount`
+  - `contextKind`
+  - `topStation`
+  - `caveats`
+- `marineAnomalySummary.ndbcContext` adds compact NOAA buoy-context metadata:
+  - `sourceId`
+  - `sourceMode`
+  - `health`
+  - `nearbyStationCount`
+  - `contextKind`
+  - `topStation`
+  - `topObservationSummary`
+  - `caveats`
+- `marineAnomalySummary.environmentalContext` adds compact combined marine-context metadata:
+  - `sourceCount`
+  - `healthySourceCount`
+  - `sourceModes`
+  - `nearbyStationCount`
+  - `coopsStationCount`
+  - `ndbcStationCount`
+  - `anchor`
+  - `effectiveAnchor`
+  - `radiusKm`
+  - `radiusPreset`
+  - `enabledSources`
+  - `centerAvailable`
+  - `fallbackReason`
+  - `healthSummary`
+  - `topWaterLevelStation`
+  - `topCurrentStation`
+  - `topBuoyStation`
+  - `topObservations`
+  - `environmentalCaveatSummary`
+  - `caveats`
+- `marineAnomalySummary.focusedEvidenceInterpretation` also includes environmental-context caveat fields:
+  - `environmentalContextAvailability`
+  - `environmentalContextSourceHealthSummary`
+  - `sourceModes`
+  - `environmentalCaveats`
+
+Future marine-owned context sources such as tsunami products, hurricane marine advisories, or HF radar currents can join this combined helper later if they remain explicitly contextual and do not collapse into vessel-intent inference.
 
 ### Anomaly-To-Replay Navigation
 

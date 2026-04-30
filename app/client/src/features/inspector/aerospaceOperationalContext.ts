@@ -1,0 +1,282 @@
+import type { AerospaceAirportStatusSummary } from "./aerospaceAirportStatusContext";
+import type { AerospaceOperationalPresetId } from "../../lib/store";
+import type { AerospaceSpaceContextSummary } from "./aerospaceSpaceContext";
+import type { AerospaceSpaceWeatherContextSummary } from "./aerospaceSpaceWeatherContext";
+import type { AerospaceSourceHealthSummary } from "./aerospaceSourceHealth";
+import type { AerospaceWeatherContextSummary } from "./aerospaceWeatherContext";
+
+export interface AerospaceOperationalContextSummary {
+  presetId: AerospaceOperationalPresetId;
+  presetLabel: string;
+  emphasizedContextTypes: string[];
+  isCustomPreset: boolean;
+  presetCaveat: string;
+  sourceCount: number;
+  healthySourceCount: number;
+  sourceModes: string[];
+  availableContextTypes: string[];
+  aviationWeatherAvailable: boolean;
+  airportStatusAvailable: boolean;
+  spaceEventsAvailable: boolean;
+  spaceWeatherAvailable: boolean;
+  airportContextSummary: string | null;
+  weatherSummary: string | null;
+  spaceContextSummary: string | null;
+  healthSummary: string;
+  caveats: string[];
+  displayLines: string[];
+  exportLines: string[];
+  metadata: {
+    presetId: AerospaceOperationalPresetId;
+    presetLabel: string;
+    emphasizedContextTypes: string[];
+    presetCaveat: string;
+    sourceCount: number;
+    healthySourceCount: number;
+    sourceModes: string[];
+    availableContextTypes: string[];
+    healthSummary: string;
+    topSummaries: {
+      aviationWeather: string | null;
+      airportStatus: string | null;
+      spaceEvents: string | null;
+      spaceWeather: string | null;
+    };
+    caveats: string[];
+  };
+}
+
+export interface AerospaceOperationalPresetDefinition {
+  id: AerospaceOperationalPresetId;
+  label: string;
+  description: string;
+  emphasizedContextTypes: string[];
+  caveat: string;
+}
+
+export const AEROSPACE_OPERATIONAL_PRESETS: AerospaceOperationalPresetDefinition[] = [
+  {
+    id: "full-aerospace-context",
+    label: "Full Aerospace Context",
+    description: "Emphasizes airport, weather, space-event, space-weather, and target health context together.",
+    emphasizedContextTypes: ["aviation-weather", "airport-status", "space-events", "space-weather", "data-health"],
+    caveat: "Full context combines multiple advisory/contextual sources and does not imply causation."
+  },
+  {
+    id: "airport-operations-review",
+    label: "Airport Operations Review",
+    description: "Emphasizes airport operational status, aviation weather, and nearest-airport context.",
+    emphasizedContextTypes: ["airport-status", "aviation-weather", "airport-context", "data-health"],
+    caveat: "Airport operations review does not explain selected-aircraft behavior by itself."
+  },
+  {
+    id: "weather-review",
+    label: "Weather Review",
+    description: "Emphasizes aviation weather, space weather, and target data health.",
+    emphasizedContextTypes: ["aviation-weather", "space-weather", "data-health"],
+    caveat: "Weather review does not prove operational impact or aircraft/satellite response."
+  },
+  {
+    id: "space-context-review",
+    label: "Space Context Review",
+    description: "Emphasizes CNEOS and SWPC context with selected-target health.",
+    emphasizedContextTypes: ["space-events", "space-weather", "data-health"],
+    caveat: "Space context review does not imply target-specific danger, failure, or impact."
+  },
+  {
+    id: "selected-target-evidence-review",
+    label: "Selected-Target Evidence Review",
+    description: "Emphasizes selected-target evidence basis and whichever contextual sources are already available.",
+    emphasizedContextTypes: ["data-health", "aviation-weather", "airport-status", "space-events", "space-weather"],
+    caveat: "Selected-target evidence review is an analyst aid over already-loaded data only."
+  }
+];
+
+export function buildAerospaceOperationalContextSummary(input: {
+  presetId?: AerospaceOperationalPresetId;
+  weatherSummary?: AerospaceWeatherContextSummary | null;
+  airportStatusSummary?: AerospaceAirportStatusSummary | null;
+  spaceContextSummary?: AerospaceSpaceContextSummary | null;
+  spaceWeatherSummary?: AerospaceSpaceWeatherContextSummary | null;
+  dataHealthSummary?: AerospaceSourceHealthSummary | null;
+}): AerospaceOperationalContextSummary | null {
+  const weather = input.weatherSummary ?? null;
+  const airportStatus = input.airportStatusSummary ?? null;
+  const spaceEvents = input.spaceContextSummary ?? null;
+  const spaceWeather = input.spaceWeatherSummary ?? null;
+  const dataHealth = input.dataHealthSummary ?? null;
+
+  const contexts = [
+    weather ? { kind: "aviation-weather", mode: "contextual", healthy: weather.sourceHealthState === "healthy" } : null,
+    airportStatus ? { kind: "airport-status", mode: airportStatus.sourceMode, healthy: airportStatus.sourceHealth === "normal" } : null,
+    spaceEvents ? { kind: "space-events", mode: spaceEvents.sourceMode, healthy: spaceEvents.sourceHealth === "normal" } : null,
+    spaceWeather ? { kind: "space-weather", mode: spaceWeather.sourceMode, healthy: spaceWeather.sourceHealth === "normal" } : null,
+  ].filter((value): value is { kind: string; mode: string; healthy: boolean } => Boolean(value));
+
+  if (contexts.length === 0 && !dataHealth) {
+    return null;
+  }
+
+  const preset =
+    AEROSPACE_OPERATIONAL_PRESETS.find((item) => item.id === (input.presetId ?? "full-aerospace-context")) ??
+    AEROSPACE_OPERATIONAL_PRESETS[0];
+
+  const airportContextSummary =
+    airportStatus != null
+      ? `${displayAirport(airportStatus.airportCode, airportStatus.airportName)} | ${airportStatus.statusType}`
+      : weather != null
+        ? `${displayAirport(weather.airportCode, weather.airportName)} | airport weather context`
+        : null;
+  const weatherSummaryLine =
+    weather != null
+      ? `METAR ${weather.metarAvailable ? "available" : "unavailable"} | TAF ${weather.tafAvailable ? "available" : "unavailable"}`
+      : null;
+  const spaceContextSummaryLine =
+    spaceEvents != null
+      ? `${spaceEvents.closeApproachCount} close approaches | ${spaceEvents.fireballCount} fireballs`
+      : spaceWeather != null
+        ? `${spaceWeather.summaryCount} summaries | ${spaceWeather.alertCount} advisories`
+        : null;
+  const healthSummary = dataHealth
+    ? `${formatSourceKind(dataHealth.sourceKind)} | ${dataHealth.freshness} | ${dataHealth.health}`
+    : "selected-target data health unavailable";
+
+  const caveats = Array.from(
+    new Set([
+      "Aerospace Operational Context is a compact context composition only and does not imply aircraft/satellite behavior or causation.",
+      "Weather, airport status, space events, and space weather remain separate contextual/advisory sources.",
+      ...(dataHealth ? [buildDataHealthCaveat(dataHealth)] : []),
+      ...weather?.caveats.slice(0, 1) ?? [],
+      ...airportStatus?.caveats.slice(0, 1) ?? [],
+      ...spaceEvents?.caveats.slice(0, 1) ?? [],
+      ...spaceWeather?.caveats.slice(0, 1) ?? [],
+    ].filter((value): value is string => Boolean(value))
+    )
+  );
+
+  const orderedDisplayLines = orderContextLines(
+    [
+      { kind: "meta", line: `Sources: ${contexts.length} available | ${contexts.filter((item) => item.healthy).length} healthy` },
+      {
+        kind: "meta",
+        line: contexts.length > 0 ? `Source modes: ${Array.from(new Set(contexts.map((item) => item.mode))).join(", ")}` : "Source modes: unavailable"
+      },
+      { kind: "airport-context", line: airportContextSummary ? `Airport context: ${airportContextSummary}` : "Airport context: unavailable" },
+      { kind: "aviation-weather", line: weatherSummaryLine ? `Weather: ${weatherSummaryLine}` : "Weather: unavailable" },
+      { kind: "space-events", line: spaceEvents != null ? `Space events: ${spaceContextSummaryLine ?? "unavailable"}` : "Space events: unavailable" },
+      {
+        kind: "space-weather",
+        line: spaceWeather != null
+          ? `Space weather: ${spaceWeather.topAlert?.headline ?? spaceWeather.topSummary?.headline ?? "available"}`
+          : "Space weather: unavailable"
+      },
+      { kind: "data-health", line: `Selected target data: ${healthSummary}` },
+    ],
+    preset.emphasizedContextTypes
+  );
+
+  const displayLines = orderedDisplayLines;
+
+  const exportLines = [
+    `Operational preset: ${preset.label}`,
+    `Operational context: ${contexts.length} sources | ${contexts.filter((item) => item.healthy).length} healthy`,
+    airportContextSummary ? `Airport context: ${airportContextSummary}` : null,
+    weatherSummaryLine ? `Weather context: ${weatherSummaryLine}` : null,
+    spaceContextSummaryLine ? `Space context: ${spaceContextSummaryLine}` : null
+  ].filter((value): value is string => Boolean(value)).slice(0, 4);
+
+  return {
+    presetId: preset.id,
+    presetLabel: preset.label,
+    emphasizedContextTypes: preset.emphasizedContextTypes,
+    isCustomPreset: false,
+    presetCaveat: preset.caveat,
+    sourceCount: contexts.length,
+    healthySourceCount: contexts.filter((item) => item.healthy).length,
+    sourceModes: Array.from(new Set(contexts.map((item) => item.mode))),
+    availableContextTypes: contexts.map((item) => item.kind),
+    aviationWeatherAvailable: weather != null,
+    airportStatusAvailable: airportStatus != null,
+    spaceEventsAvailable: spaceEvents != null,
+    spaceWeatherAvailable: spaceWeather != null,
+    airportContextSummary,
+    weatherSummary: weatherSummaryLine,
+    spaceContextSummary: spaceContextSummaryLine,
+    healthSummary,
+    caveats,
+    displayLines,
+    exportLines,
+    metadata: {
+      presetId: preset.id,
+      presetLabel: preset.label,
+      emphasizedContextTypes: preset.emphasizedContextTypes,
+      presetCaveat: preset.caveat,
+      sourceCount: contexts.length,
+      healthySourceCount: contexts.filter((item) => item.healthy).length,
+      sourceModes: Array.from(new Set(contexts.map((item) => item.mode))),
+      availableContextTypes: contexts.map((item) => item.kind),
+      healthSummary,
+      topSummaries: {
+        aviationWeather: weatherSummaryLine,
+        airportStatus: airportStatus ? `${airportStatus.statusType} | ${airportStatus.summary}` : null,
+        spaceEvents: spaceEvents
+          ? (spaceEvents.topCloseApproach
+              ? `${spaceEvents.topCloseApproach.objectDesignation} | ${spaceEvents.topCloseApproach.closeApproachAt}`
+              : spaceEvents.latestFireball
+                ? `fireball | ${spaceEvents.latestFireball.eventTime}`
+                : null)
+          : null,
+        spaceWeather: spaceWeather
+          ? (spaceWeather.topAlert?.headline ?? spaceWeather.topSummary?.headline ?? null)
+          : null,
+      },
+      caveats: caveats.slice(0, 4),
+    },
+  };
+}
+
+function orderContextLines(
+  lines: Array<{ kind: string; line: string }>,
+  emphasizedKinds: string[]
+) {
+  return [...lines]
+    .sort((left, right) => scoreKind(right.kind, emphasizedKinds) - scoreKind(left.kind, emphasizedKinds))
+    .map((item) => item.line);
+}
+
+function scoreKind(kind: string, emphasizedKinds: string[]) {
+  const index = emphasizedKinds.indexOf(kind);
+  return index >= 0 ? emphasizedKinds.length - index : 0;
+}
+
+function displayAirport(code: string, name: string | null) {
+  return name ? `${name} (${code})` : code;
+}
+
+function formatSourceKind(kind: AerospaceSourceHealthSummary["sourceKind"]) {
+  switch (kind) {
+    case "observed-live":
+      return "observed live";
+    case "observed-session":
+      return "observed session";
+    case "derived-propagated":
+      return "derived propagated";
+    case "contextual-reference":
+      return "contextual reference";
+    default:
+      return "unavailable";
+  }
+}
+
+function buildDataHealthCaveat(summary: AerospaceSourceHealthSummary) {
+  if (summary.freshness === "stale" || summary.freshness === "unknown") {
+    return `Selected-target data is ${summary.freshness}; interpret the combined context accordingly.`;
+  }
+  if (summary.evidenceBasis === "derived") {
+    return "Selected-target satellite state remains derived/propagated, not observed live telemetry.";
+  }
+  if (summary.health === "partial" || summary.health === "degraded") {
+    return "Selected-target data health is partial or degraded.";
+  }
+  return `Selected-target data is ${summary.evidenceBasis}.`;
+}

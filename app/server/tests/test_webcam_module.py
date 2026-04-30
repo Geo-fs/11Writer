@@ -240,7 +240,9 @@ def test_source_inventory_templates_include_new_sources_and_page_candidates() ->
     inventory = build_camera_source_inventory(Settings())
     keys = {entry.key for entry in inventory}
     assert "usgs-ashcam" in keys
+    assert "finland-digitraffic-road-cameras" in keys
     assert "faa-weather-cameras-page" in keys
+    assert "minnesota-511-public-arcgis" in keys
     assert "511ny-cameras" in keys
     assert "idaho-511-cameras" in keys
     assert "alaska-511-cameras" in keys
@@ -255,9 +257,95 @@ def test_source_inventory_templates_include_new_sources_and_page_candidates() ->
     assert page_entry.credentials_configured is True
     assert page_entry.page_structure == "interactive-map-html"
     faa_entry = next(item for item in inventory if item.key == "faa-weather-cameras-page")
+    finland_entry = next(item for item in inventory if item.key == "finland-digitraffic-road-cameras")
+    assert finland_entry.onboarding_state == "candidate"
+    assert finland_entry.source_type == "official-dot-api"
+    assert finland_entry.access_method == "json-api"
+    assert finland_entry.credentials_configured is True
+    assert finland_entry.provides_exact_coordinates is True
+    assert finland_entry.provides_direct_image is True
+    assert finland_entry.provides_viewer_only is False
+    assert finland_entry.likely_camera_count == 470
+    assert finland_entry.extraction_feasibility == "high"
+    assert finland_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert finland_entry.candidate_endpoint_url == "https://tie.digitraffic.fi/api/weathercam/v1/stations"
+    assert finland_entry.machine_readable_endpoint_url == "https://tie.digitraffic.fi/api/weathercam/v1/stations"
+    assert "Candidate only" in (finland_entry.blocked_reason or "")
     assert faa_entry.likely_camera_count == 299
     assert faa_entry.compliance_risk == "medium"
     assert faa_entry.extraction_feasibility == "medium"
+    assert faa_entry.blocked_reason is not None
+    assert faa_entry.endpoint_verification_status == "needs-review"
+    assert faa_entry.candidate_endpoint_url == "https://weathercams.faa.gov/"
+    assert faa_entry.machine_readable_endpoint_url is None
+    minnesota_entry = next(item for item in inventory if item.key == "minnesota-511-public-arcgis")
+    assert minnesota_entry.onboarding_state == "candidate"
+    assert minnesota_entry.source_type == "public-camera-page"
+    assert minnesota_entry.access_method == "html-index"
+    assert minnesota_entry.provides_direct_image is False
+    assert minnesota_entry.provides_viewer_only is False
+    assert minnesota_entry.extraction_feasibility == "low"
+    assert minnesota_entry.endpoint_verification_status == "needs-review"
+    assert minnesota_entry.candidate_endpoint_url == "https://511mn.org/"
+    assert minnesota_entry.machine_readable_endpoint_url is None
+    assert "Do not scrape" in (minnesota_entry.blocked_reason or "")
+
+
+def test_candidate_registry_entries_are_not_marked_active_ingest_sources() -> None:
+    registry = build_camera_source_registry(Settings())
+    finland_entry = next(item for item in registry if item.key == "finland-digitraffic-road-cameras")
+    faa_entry = next(item for item in registry if item.key == "faa-weather-cameras-page")
+    minnesota_entry = next(item for item in registry if item.key == "minnesota-511-public-arcgis")
+
+    assert finland_entry.enabled is False
+    assert finland_entry.status == "needs-review"
+    assert finland_entry.inventory_source_type == "official-dot-api"
+    assert finland_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert "fixtures" in (finland_entry.detail or "")
+    assert faa_entry.enabled is False
+    assert faa_entry.status == "needs-review"
+    assert faa_entry.blocked_reason is not None
+    assert minnesota_entry.enabled is False
+    assert minnesota_entry.status == "needs-review"
+    assert "stable public no-auth machine endpoint" in (minnesota_entry.detail or "")
+
+
+def test_lifecycle_policy_invariants_hold_for_current_sources() -> None:
+    inventory = build_camera_source_inventory(Settings())
+    registry = build_camera_source_registry(Settings())
+    inventory_map = {entry.key: entry for entry in inventory}
+    registry_map = {entry.key: entry for entry in registry}
+
+    ashcam_inventory = inventory_map["usgs-ashcam"]
+    finland_inventory = inventory_map["finland-digitraffic-road-cameras"]
+    minnesota_inventory = inventory_map["minnesota-511-public-arcgis"]
+    wsdot_inventory = inventory_map["wsdot-cameras"]
+
+    ashcam_registry = registry_map["usgs-ashcam"]
+    finland_registry = registry_map["finland-digitraffic-road-cameras"]
+    minnesota_registry = registry_map["minnesota-511-public-arcgis"]
+    wsdot_registry = registry_map["wsdot-cameras"]
+
+    assert ashcam_inventory.onboarding_state != "candidate"
+    assert ashcam_registry.enabled is True
+
+    assert minnesota_inventory.onboarding_state == "candidate"
+    assert minnesota_inventory.endpoint_verification_status == "needs-review"
+    assert "Do not scrape" in (minnesota_inventory.blocked_reason or "")
+    assert minnesota_registry.enabled is False
+
+    assert finland_inventory.onboarding_state == "candidate"
+    assert finland_inventory.endpoint_verification_status == "machine-readable-confirmed"
+    assert finland_inventory.provides_direct_image is True
+    assert finland_registry.enabled is False
+    assert finland_registry.status == "needs-review"
+
+    assert wsdot_inventory.onboarding_state == "approved"
+    assert wsdot_inventory.authentication == "access-code"
+    assert wsdot_inventory.provides_direct_image is True
+    assert wsdot_registry.enabled is False
+    assert wsdot_registry.status == "credentials-missing"
+    assert wsdot_registry.credentials_configured is False
 
 
 def test_repository_upsert_is_idempotent_and_review_queue_persists(tmp_path: Path) -> None:
@@ -514,7 +602,41 @@ def test_camera_api_persists_and_returns_sources(tmp_path: Path, monkeypatch) ->
     assert inventory_response.json()["summary"]["directImageSources"] >= 2
     assert "validatedSources" in inventory_response.json()["summary"]
     inventory_wsdot = next(item for item in inventory_response.json()["sources"] if item["key"] == "wsdot-cameras")
+    inventory_finland = next(
+        item for item in inventory_response.json()["sources"] if item["key"] == "finland-digitraffic-road-cameras"
+    )
     assert inventory_wsdot["discoveredCameraCount"] == 1
+    assert inventory_finland["onboardingState"] == "candidate"
+    assert inventory_finland["credentialsConfigured"] is True
+    assert inventory_finland["endpointVerificationStatus"] == "machine-readable-confirmed"
+    assert inventory_finland["candidateEndpointUrl"] == "https://tie.digitraffic.fi/api/weathercam/v1/stations"
+    assert (
+        inventory_finland["machineReadableEndpointUrl"]
+        == "https://tie.digitraffic.fi/api/weathercam/v1/stations"
+    )
+    assert inventory_finland["importReadiness"] == "inventory-only"
+    assert inventory_finland["sandboxImportAvailable"] is True
+    assert inventory_finland["sandboxImportMode"] == "fixture"
+    assert inventory_finland["sandboxConnectorId"] == "FinlandDigitrafficWeatherCamConnector"
+    assert inventory_finland["lastSandboxImportAt"] is None
+    assert inventory_finland["lastSandboxImportOutcome"] == "needs-review"
+    assert inventory_finland["sandboxDiscoveredCount"] == 0
+    assert inventory_finland["sandboxUsableCount"] == 0
+    assert inventory_finland["sandboxReviewQueueCount"] == 0
+    assert "Sandbox fixture import proves mapping only" in inventory_finland["sandboxValidationCaveat"]
+    inventory_faa = next(item for item in inventory_response.json()["sources"] if item["key"] == "faa-weather-cameras-page")
+    assert inventory_faa["onboardingState"] == "candidate"
+    assert inventory_faa["endpointVerificationStatus"] == "needs-review"
+    assert inventory_faa["candidateEndpointUrl"] == "https://weathercams.faa.gov/"
+    inventory_minnesota = next(
+        item for item in inventory_response.json()["sources"] if item["key"] == "minnesota-511-public-arcgis"
+    )
+    assert inventory_minnesota["onboardingState"] == "candidate"
+    assert inventory_minnesota["credentialsConfigured"] is True
+    assert inventory_minnesota["endpointVerificationStatus"] == "needs-review"
+    assert inventory_minnesota["candidateEndpointUrl"] == "https://511mn.org/"
+    assert inventory_minnesota["machineReadableEndpointUrl"] is None
+    assert "Do not scrape" in (inventory_minnesota["blockedReason"] or "")
     assert inventory_wsdot["directImageCameraCount"] == 1
     assert inventory_wsdot["importReadiness"] == "validated"
     inventory_candidate = next(item for item in inventory_response.json()["sources"] if item["key"] == "faa-weather-cameras-page")
@@ -718,3 +840,97 @@ def test_live_validation_preserves_viewer_only_without_direct_probe(tmp_path: Pa
     assert source.last_frame_probe_count == 0
     assert source.last_frame_status_summary["viewer-page-only"] == 1
     assert camera.frame.status == "viewer-page-only"
+
+
+def test_finland_digitraffic_fixture_import_remains_inventory_only(tmp_path: Path) -> None:
+    database_url = f"sqlite:///{tmp_path / 'finland_digitraffic.db'}"
+    _run_migrations(database_url)
+
+    settings = Settings(
+        REFERENCE_DATABASE_URL=database_url,
+        WEBCAM_DATABASE_URL=database_url,
+        FINLAND_DIGITRAFFIC_WEATHERCAM_MODE="fixture",
+        FINLAND_DIGITRAFFIC_WEATHERCAM_FIXTURE_PATH=str(
+            Path(__file__).resolve().parents[1] / "data" / "finland_digitraffic_weathercam_fixture.json"
+        ),
+    )
+    service = WebcamRefreshService(settings)
+
+    result = asyncio.run(service.run_live_validation(source_keys=["finland-digitraffic-road-cameras"]))
+
+    with session_scope(database_url) as session:
+        repository = WebcamRepository(session)
+        source = next(item for item in repository.list_sources() if item.key == "finland-digitraffic-road-cameras")
+        inventory = next(
+            item for item in repository.list_source_inventory() if item.key == "finland-digitraffic-road-cameras"
+        )
+        cameras = sorted(
+            [camera for camera in repository.list_cameras() if camera.source == "finland-digitraffic-road-cameras"],
+            key=lambda camera: camera.camera_id or "",
+        )
+        review_items = [
+            item
+            for item in repository.list_review_queue(limit=50)
+            if item.source_key == "finland-digitraffic-road-cameras"
+        ]
+
+    assert result.refreshed_sources == 1
+    assert source.enabled is False
+    assert source.status == "needs-review"
+    assert source.last_run_mode == "validation"
+    assert source.last_frame_probe_count == 0
+    assert inventory.onboarding_state == "candidate"
+    assert inventory.import_readiness == "inventory-only"
+    assert inventory.discovered_camera_count == 2
+    assert inventory.usable_camera_count == 1
+    assert inventory.direct_image_camera_count == 1
+    assert inventory.viewer_only_camera_count == 0
+    assert inventory.missing_coordinate_camera_count == 0
+    assert inventory.uncertain_orientation_camera_count == 2
+    assert inventory.review_queue_count >= 2
+    assert len(cameras) == 2
+    assert cameras[0].position.kind == "exact"
+    assert all(camera.orientation.kind == "unknown" for camera in cameras)
+    assert cameras[0].frame.image_url == "https://weathercam.digitraffic.fi/C0150301.jpg"
+    assert cameras[1].frame.image_url is None
+    assert all(camera.frame.viewer_url is None for camera in cameras)
+    review_categories = {issue.category for item in review_items for issue in item.issues}
+    assert "orientation-verification" in review_categories
+    assert "frame-unavailable" in review_categories
+
+    camera_service = CameraService(settings)
+    async def no_due_work():
+        return None
+
+    camera_service._refresh_service.run_due_work = no_due_work
+    camera_service._refresh_service.bootstrap_inventory = no_due_work
+    inventory_response = asyncio.run(camera_service.list_source_inventory())
+    inventory_entry = next(
+        item for item in inventory_response.sources if item.key == "finland-digitraffic-road-cameras"
+    )
+    source_response = asyncio.run(camera_service.list_sources())
+    source_entry = next(
+        item for item in source_response.sources if item.key == "finland-digitraffic-road-cameras"
+    )
+
+    assert inventory_entry.onboarding_state == "candidate"
+    assert inventory_entry.import_readiness == "inventory-only"
+    assert inventory_entry.sandbox_import_available is True
+    assert inventory_entry.sandbox_import_mode == "fixture"
+    assert inventory_entry.sandbox_connector_id == "FinlandDigitrafficWeatherCamConnector"
+    assert inventory_entry.last_sandbox_import_at is not None
+    assert inventory_entry.last_sandbox_import_outcome == "needs-review"
+    assert inventory_entry.sandbox_discovered_count == 2
+    assert inventory_entry.sandbox_usable_count == 1
+    assert inventory_entry.sandbox_review_queue_count >= 2
+    assert inventory_entry.sandbox_validation_caveat is not None
+    assert source_entry.onboarding_state == "candidate"
+    assert source_entry.import_readiness == "inventory-only"
+    assert source_entry.sandbox_import_available is True
+    assert source_entry.sandbox_import_mode == "fixture"
+    assert source_entry.sandbox_connector_id == "FinlandDigitrafficWeatherCamConnector"
+    assert source_entry.last_sandbox_import_at is not None
+    assert source_entry.last_sandbox_import_outcome == "needs-review"
+    assert source_entry.sandbox_discovered_count == 2
+    assert source_entry.sandbox_usable_count == 1
+    assert source_entry.sandbox_review_queue_count >= 2

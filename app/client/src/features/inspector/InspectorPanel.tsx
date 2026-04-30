@@ -18,6 +18,19 @@ import {
   buildAircraftNearbyContextSummary,
   buildSatelliteNearbyContextSummary
 } from "./aerospaceNearbyContext";
+import { buildAerospaceContextAvailabilitySummary } from "./aerospaceContextAvailability";
+import { buildAerospaceAirportStatusSummary } from "./aerospaceAirportStatusContext";
+import {
+  AEROSPACE_OPERATIONAL_PRESETS,
+  buildAerospaceOperationalContextSummary
+} from "./aerospaceOperationalContext";
+import { buildAerospaceSpaceContextSummary } from "./aerospaceSpaceContext";
+import { buildAerospaceSpaceWeatherContextSummary } from "./aerospaceSpaceWeatherContext";
+import {
+  buildAerospaceOpenSkyContextSummary
+} from "./aerospaceOpenSkyContext";
+import { buildAerospaceWeatherContextSummary } from "./aerospaceWeatherContext";
+import { AEROSPACE_EXPORT_PROFILES } from "./aerospaceExportProfiles";
 import {
   buildAerospaceFocusComputation,
   buildAerospaceFocusHistorySummary,
@@ -26,10 +39,15 @@ import {
 import { formatRelativeAge, getReplaySnapshot, summarizeTrack } from "../../lib/history";
 import {
   useAircraftReferenceLinkQuery,
+  useAviationWeatherContextQuery,
   useCameraSourceInventoryQuery,
+  useCneosEventsQuery,
+  useFaaNasAirportStatusQuery,
   useNearestAirportReferenceQuery,
   useNearestRunwayThresholdReferenceQuery,
-  useSourceStatusQuery
+  useOpenSkyStatesQuery,
+  useSourceStatusQuery,
+  useSwpcSpaceWeatherContextQuery
 } from "../../lib/queries";
 import { useAppStore } from "../../lib/store";
 import { CaveatBlock, DataBasisBadge, StatusBadge } from "../../components/ui";
@@ -38,7 +56,20 @@ import type {
   ReferenceNearbyItem,
   ReferenceObjectSummary
 } from "../../types/api";
-import type { AircraftEntity, CameraEntity, EarthquakeEntity, EonetEntity, SceneEntity } from "../../types/entities";
+import type {
+  AircraftEntity,
+  CanadaCapAlertEntity,
+  CameraEntity,
+  EarthquakeEntity,
+  EonetEntity,
+  GeoNetHazardEntity,
+  HkoWeatherEntity,
+  MetNoAlertEntity,
+  SceneEntity,
+  TsunamiAlertEntity,
+  UkEaFloodEntity,
+  VolcanoEntity
+} from "../../types/entities";
 import { ImageryContextPanel } from "../imagery";
 import { MarineAnomalySection } from "../marine/MarineAnomalySection";
 import { getCameraReferenceState } from "../webcams/webcamClustering";
@@ -52,12 +83,24 @@ export function InspectorPanel() {
   const satellitePassWindows = useAppStore((state) => state.satellitePassWindows);
   const followedEntityId = useAppStore((state) => state.followedEntityId);
   const selectedReplayIndex = useAppStore((state) => state.selectedReplayIndex);
+  const selectedAerospaceOperationalPreset = useAppStore(
+    (state) => state.selectedAerospaceOperationalPreset
+  );
+  const selectedAerospaceExportProfile = useAppStore(
+    (state) => state.selectedAerospaceExportProfile
+  );
   const aerospaceFocus = useAppStore((state) => state.aerospaceFocus);
   const aerospaceFocusHistory = useAppStore((state) => state.aerospaceFocusHistory);
   const hud = useAppStore((state) => state.hud);
   const setFollowedEntityId = useAppStore((state) => state.setFollowedEntityId);
   const setSelectedEntityId = useAppStore((state) => state.setSelectedEntityId);
   const setSelectedReplayIndex = useAppStore((state) => state.setSelectedReplayIndex);
+  const setSelectedAerospaceOperationalPreset = useAppStore(
+    (state) => state.setSelectedAerospaceOperationalPreset
+  );
+  const setSelectedAerospaceExportProfile = useAppStore(
+    (state) => state.setSelectedAerospaceExportProfile
+  );
   const stepSelectedReplayIndex = useAppStore((state) => state.stepSelectedReplayIndex);
   const setAerospaceFocus = useAppStore((state) => state.setAerospaceFocus);
   const setAerospaceFocusPreset = useAppStore((state) => state.setAerospaceFocusPreset);
@@ -116,6 +159,77 @@ export function InspectorPanel() {
     selectedAircraft,
     runwayAirportRefId
   );
+  const nearestAirportCode =
+    nearestAirportQuery.data?.results[0]?.summary.primaryCode ??
+    (aircraftReferenceQuery.data?.primary?.summary.objectType === "airport"
+      ? aircraftReferenceQuery.data.primary.summary.primaryCode ?? null
+      : aircraftReferenceQuery.data?.context?.nearestAirport?.primaryCode ?? null);
+  const nearestAirportName =
+    nearestAirportQuery.data?.results[0]?.summary.canonicalName ??
+    (aircraftReferenceQuery.data?.primary?.summary.objectType === "airport"
+      ? aircraftReferenceQuery.data.primary.summary.canonicalName
+      : aircraftReferenceQuery.data?.context?.nearestAirport?.canonicalName ?? null);
+  const aviationWeatherQuery = useAviationWeatherContextQuery({
+    airportCode: selectedAircraft ? nearestAirportCode ?? null : null,
+    airportName: selectedAircraft ? nearestAirportName ?? null : null,
+    airportRefId: selectedAircraft ? runwayAirportRefId : null,
+    contextType: "nearest-airport"
+  });
+  const faaNasStatusQuery = useFaaNasAirportStatusQuery({
+    airportCode: selectedAircraft ? nearestAirportCode ?? null : null,
+    airportName: selectedAircraft ? nearestAirportName ?? null : null
+  });
+  const cneosEventsQuery = useCneosEventsQuery({
+    enabled: entity?.type === "aircraft" || entity?.type === "satellite",
+    eventType: "all",
+    limit: 3
+  });
+  const openSkyStatesQuery = useOpenSkyStatesQuery({
+    enabled: selectedAircraft != null,
+    icao24: selectedAircraft?.canonicalIds.icao24 ?? null,
+    callsign: selectedAircraft?.callsign ?? null,
+    limit: 5
+  });
+  const swpcContextQuery = useSwpcSpaceWeatherContextQuery({
+    enabled: entity?.type === "aircraft" || entity?.type === "satellite",
+    productType: "all",
+    limit: 3
+  });
+  const aviationWeatherSourceHealth = selectedAircraft
+    ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "noaa-awc") ?? null
+    : null;
+  const faaNasSourceHealth = selectedAircraft
+    ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "faa-nas-status") ?? null
+    : null;
+  const openSkySourceHealth = selectedAircraft
+    ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "opensky-anonymous-states") ?? null
+    : null;
+  const cneosSourceHealth =
+    entity?.type === "aircraft" || entity?.type === "satellite"
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "cneos-space-events") ?? null
+      : null;
+  const swpcSourceHealth =
+    entity?.type === "aircraft" || entity?.type === "satellite"
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "noaa-swpc") ?? null
+      : null;
+  const aviationWeatherSummary = buildAerospaceWeatherContextSummary({
+    weather: aviationWeatherQuery.data,
+    sourceHealth: aviationWeatherSourceHealth
+  });
+  const airportStatusSummary = buildAerospaceAirportStatusSummary(faaNasStatusQuery.data);
+  const cneosSpaceContextSummary = buildAerospaceSpaceContextSummary({
+    context: cneosEventsQuery.data,
+    sourceHealth: cneosSourceHealth
+  });
+  const openSkyContextSummary = buildAerospaceOpenSkyContextSummary({
+    response: openSkyStatesQuery.data,
+    sourceHealth: openSkySourceHealth,
+    selectedAircraft
+  });
+  const swpcSpaceWeatherSummary = buildAerospaceSpaceWeatherContextSummary({
+    context: swpcContextQuery.data,
+    sourceHealth: swpcSourceHealth
+  });
   const aircraftActivitySummary = selectedAircraft
     ? summarizeAircraftActivity({
         track: historyTrack,
@@ -166,6 +280,27 @@ export function InspectorPanel() {
           passWindow
         })
       : null;
+  const operationalContextSummary = buildAerospaceOperationalContextSummary({
+    presetId: selectedAerospaceOperationalPreset,
+    weatherSummary: aviationWeatherSummary,
+    airportStatusSummary,
+    spaceContextSummary: cneosSpaceContextSummary,
+    spaceWeatherSummary: swpcSpaceWeatherSummary,
+    dataHealthSummary: selectedDataHealthSummary
+  });
+  const operationalContextAvailabilitySummary = buildAerospaceContextAvailabilitySummary({
+    selectedTargetType:
+      entity?.type === "aircraft" || entity?.type === "satellite" ? entity.type : null,
+    weatherSummary: aviationWeatherSummary,
+    weatherSourceHealth: aviationWeatherSourceHealth,
+    airportStatusSummary,
+    airportStatusSourceHealth: faaNasSourceHealth,
+    openSkySummary: openSkyContextSummary,
+    openSkySourceHealth,
+    spaceContextSummary: cneosSpaceContextSummary,
+    spaceWeatherSummary: swpcSpaceWeatherSummary,
+    dataHealthSummary: selectedDataHealthSummary
+  });
   const selectedSectionHealthDisplay = buildAerospaceSectionHealthDisplay(selectedDataHealthSummary);
   const selectedNearbyContextSummary = selectedAircraft
     ? buildAircraftNearbyContextSummary({
@@ -794,6 +929,96 @@ export function InspectorPanel() {
                   </div>
                 ) : null}
 
+                {operationalContextSummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aerospace Operational Context</p>
+                    <label className="field-row">
+                      <span>Context preset</span>
+                      <select
+                        className="panel__input"
+                        value={selectedAerospaceOperationalPreset}
+                        onChange={(event) =>
+                          setSelectedAerospaceOperationalPreset(
+                            event.currentTarget.value as typeof selectedAerospaceOperationalPreset
+                          )
+                        }
+                      >
+                        {AEROSPACE_OPERATIONAL_PRESETS.map((preset) => (
+                          <option key={preset.id} value={preset.id}>
+                            {preset.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <div className="data-card data-card--compact">
+                      <strong>
+                        {operationalContextSummary.sourceCount} context sources | {operationalContextSummary.healthySourceCount} healthy
+                      </strong>
+                      <span>Active preset: {operationalContextSummary.presetLabel}</span>
+                      <span>
+                        Emphasized context: {operationalContextSummary.emphasizedContextTypes.join(", ")}
+                      </span>
+                      {operationalContextSummary.displayLines.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                    </div>
+                    <CaveatBlock heading="Preset caveat" tone="evidence" compact>
+                      {operationalContextSummary.presetCaveat}
+                    </CaveatBlock>
+                    {operationalContextSummary.caveats.slice(0, 2).map((caveat) => (
+                      <CaveatBlock key={caveat} heading="Operational-context caveat" tone="evidence" compact>
+                        {caveat}
+                      </CaveatBlock>
+                    ))}
+                    <label className="field-row">
+                      <span>Export profile</span>
+                      <select
+                        className="panel__input"
+                        value={selectedAerospaceExportProfile}
+                        onChange={(event) =>
+                          setSelectedAerospaceExportProfile(
+                            event.currentTarget.value as typeof selectedAerospaceExportProfile
+                          )
+                        }
+                      >
+                        {AEROSPACE_EXPORT_PROFILES.map((profile) => (
+                          <option key={profile.id} value={profile.id}>
+                            {profile.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                ) : null}
+
+                {operationalContextAvailabilitySummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aerospace Context Availability</p>
+                    <div className="data-card data-card--compact">
+                      <strong>
+                        {operationalContextAvailabilitySummary.availableCount} available | {operationalContextAvailabilitySummary.unavailableCount} unavailable/empty | {operationalContextAvailabilitySummary.degradedCount} degraded
+                      </strong>
+                      <span>Fixture sources: {operationalContextAvailabilitySummary.fixtureSourceCount}</span>
+                      {operationalContextAvailabilitySummary.rows.map((row) => (
+                        <div key={row.sourceId} className="data-card data-card--compact">
+                          <strong>{row.label}</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge tone={availabilityTone(row.availability)}>
+                              {row.availability}
+                            </StatusBadge>
+                            <StatusBadge tone={healthTone(normalizeAvailabilityHealth(row.health))}>
+                              {row.sourceMode} | {row.health}
+                            </StatusBadge>
+                            <DataBasisBadge basis={row.evidenceBasis === "advisory" ? "contextual" : row.evidenceBasis} prefix="Basis" />
+                          </div>
+                          <span>{row.reason}</span>
+                          {row.caveat ? <span>{row.caveat}</span> : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
                 {aerospaceFocus.enabled ? (
                   <div className="panel__section">
                     <p className="panel__eyebrow">Aerospace Focus</p>
@@ -996,6 +1221,304 @@ export function InspectorPanel() {
                     nearestRunway={nearestRunwayQuery.data?.results[0]}
                     contextCaveat={selectedSectionHealthDisplay?.aviationContextCaveat ?? null}
                   />
+                ) : null}
+
+                {selectedAircraft ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aviation Weather (NOAA AWC)</p>
+                    {aviationWeatherQuery.isLoading ? (
+                      <div className="data-card data-card--compact">
+                        <span>Loading airport-context METAR/TAF.</span>
+                      </div>
+                    ) : aviationWeatherQuery.isError ? (
+                      <div className="data-card data-card--compact">
+                        <strong>Airport-area weather context unavailable</strong>
+                        <span>
+                          {aviationWeatherQuery.error instanceof Error
+                            ? aviationWeatherQuery.error.message
+                            : "NOAA AWC airport-context request failed."}
+                        </span>
+                        <span>Do not infer flight intent from missing weather context.</span>
+                      </div>
+                    ) : aviationWeatherSummary ? (
+                      <>
+                        <div className="data-card data-card--compact">
+                          <strong>{aviationWeatherSummary.airportName ?? aviationWeatherSummary.airportCode}</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge
+                              tone={healthTone(
+                                aviationWeatherSourceHealth?.state === "healthy"
+                                  ? "normal"
+                                  : aviationWeatherSourceHealth?.state === "stale"
+                                    ? "stale"
+                                    : aviationWeatherSourceHealth?.state === "degraded" ||
+                                        aviationWeatherSourceHealth?.state === "rate-limited"
+                                      ? "degraded"
+                                      : aviationWeatherSourceHealth?.state === "never-fetched"
+                                        ? "unknown"
+                                        : "partial"
+                              )}
+                            >
+                              Source: {aviationWeatherSummary.sourceHealthState}
+                            </StatusBadge>
+                            <DataBasisBadge basis="contextual" prefix="Basis" />
+                          </div>
+                          {aviationWeatherSummary.displayLines.map((line) => (
+                            <span key={line}>{line}</span>
+                          ))}
+                        </div>
+                        {aviationWeatherSummary.caveats.slice(0, 3).map((caveat) => (
+                          <CaveatBlock key={caveat} heading="Weather caveat" tone="evidence" compact>
+                            {caveat}
+                          </CaveatBlock>
+                        ))}
+                      </>
+                    ) : (
+                      <div className="data-card data-card--compact">
+                        <strong>Airport-area weather context unavailable</strong>
+                        <span>No nearest-airport weather context is currently loaded.</span>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                {selectedAircraft ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Airport Status (FAA NAS)</p>
+                    {faaNasStatusQuery.isLoading ? (
+                      <div className="data-card data-card--compact">
+                        <span>Loading airport operational status context.</span>
+                      </div>
+                    ) : faaNasStatusQuery.isError ? (
+                      <div className="data-card data-card--compact">
+                        <strong>Airport operational status unavailable</strong>
+                        <span>
+                          {faaNasStatusQuery.error instanceof Error
+                            ? faaNasStatusQuery.error.message
+                            : "FAA NAS airport-status request failed."}
+                        </span>
+                        <span>Do not infer aircraft intent from missing airport-status context.</span>
+                      </div>
+                    ) : airportStatusSummary ? (
+                      <>
+                        <div className="data-card data-card--compact">
+                          <strong>{airportStatusSummary.airportName ?? airportStatusSummary.airportCode}</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge
+                              tone={healthTone(
+                                faaNasSourceHealth?.state === "healthy"
+                                  ? "normal"
+                                  : faaNasSourceHealth?.state === "stale"
+                                    ? "stale"
+                                    : faaNasSourceHealth?.state === "degraded" ||
+                                        faaNasSourceHealth?.state === "rate-limited"
+                                      ? "degraded"
+                                      : faaNasSourceHealth?.state === "never-fetched"
+                                        ? "unknown"
+                                        : "partial"
+                              )}
+                            >
+                              Source: {faaNasSourceHealth?.state ?? "unavailable"}
+                            </StatusBadge>
+                            <DataBasisBadge basis="contextual" prefix="Basis" />
+                          </div>
+                          {airportStatusSummary.displayLines.map((line) => (
+                            <span key={line}>{line}</span>
+                          ))}
+                        </div>
+                        {airportStatusSummary.caveats.slice(0, 3).map((caveat) => (
+                          <CaveatBlock key={caveat} heading="Airport-status caveat" tone="evidence" compact>
+                            {caveat}
+                          </CaveatBlock>
+                        ))}
+                      </>
+                    ) : (
+                      <div className="data-card data-card--compact">
+                        <strong>Airport operational status unavailable</strong>
+                        <span>No nearest-airport FAA NAS context is currently loaded.</span>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                {selectedAircraft ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">OpenSky Anonymous States</p>
+                    {openSkyStatesQuery.isLoading ? (
+                      <div className="data-card data-card--compact">
+                        <span>Loading optional anonymous OpenSky state-vector context.</span>
+                      </div>
+                    ) : openSkyStatesQuery.isError ? (
+                      <div className="data-card data-card--compact">
+                        <strong>Optional OpenSky state-vector context unavailable</strong>
+                        <span>
+                          {openSkyStatesQuery.error instanceof Error
+                            ? openSkyStatesQuery.error.message
+                            : "OpenSky anonymous state-vector request failed."}
+                        </span>
+                        <span>Anonymous OpenSky access is optional, rate-limited, and not guaranteed complete.</span>
+                      </div>
+                    ) : openSkyContextSummary ? (
+                      <>
+                        <div className="data-card data-card--compact">
+                          <strong>Optional source-reported state vectors</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge
+                              tone={healthTone(
+                                openSkySourceHealth?.state === "healthy"
+                                  ? "normal"
+                                  : openSkySourceHealth?.state === "stale"
+                                    ? "stale"
+                                    : openSkySourceHealth?.state === "degraded" ||
+                                        openSkySourceHealth?.state === "rate-limited"
+                                      ? "degraded"
+                                      : openSkySourceHealth?.state === "never-fetched"
+                                        ? "unknown"
+                                        : "partial"
+                              )}
+                            >
+                              Source: {openSkyContextSummary.sourceState}
+                            </StatusBadge>
+                            <DataBasisBadge basis="observed" prefix="Basis" />
+                          </div>
+                          {openSkyContextSummary.displayLines.map((line) => (
+                            <span key={line}>{line}</span>
+                          ))}
+                          <span>
+                            Comparison status: {openSkyContextSummary.selectedTargetComparison.matchStatus}
+                          </span>
+                        </div>
+                        {openSkyContextSummary.caveats.slice(0, 3).map((caveat) => (
+                          <CaveatBlock key={caveat} heading="OpenSky caveat" tone="evidence" compact>
+                            {caveat}
+                          </CaveatBlock>
+                        ))}
+                      </>
+                    ) : (
+                      <div className="data-card data-card--compact">
+                        <strong>Optional OpenSky state-vector context unavailable</strong>
+                        <span>No matching anonymous OpenSky context is currently loaded.</span>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                {entity && (entity.type === "aircraft" || entity.type === "satellite") ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Space Events (NASA/JPL CNEOS)</p>
+                    {cneosEventsQuery.isLoading ? (
+                      <div className="data-card data-card--compact">
+                        <span>Loading contextual close-approach and fireball records.</span>
+                      </div>
+                    ) : cneosEventsQuery.isError ? (
+                      <div className="data-card data-card--compact">
+                        <strong>Space-event context unavailable</strong>
+                        <span>
+                          {cneosEventsQuery.error instanceof Error
+                            ? cneosEventsQuery.error.message
+                            : "NASA/JPL CNEOS context request failed."}
+                        </span>
+                        <span>Do not infer impact risk from missing CNEOS context.</span>
+                      </div>
+                    ) : cneosSpaceContextSummary ? (
+                      <>
+                        <div className="data-card data-card--compact">
+                          <strong>Close approaches and fireballs</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge
+                              tone={healthTone(
+                                cneosSourceHealth?.state === "healthy"
+                                  ? "normal"
+                                  : cneosSourceHealth?.state === "stale"
+                                    ? "stale"
+                                    : cneosSourceHealth?.state === "degraded" ||
+                                        cneosSourceHealth?.state === "rate-limited"
+                                      ? "degraded"
+                                      : cneosSourceHealth?.state === "never-fetched"
+                                        ? "unknown"
+                                        : "partial"
+                              )}
+                            >
+                              Source: {cneosSpaceContextSummary.sourceState}
+                            </StatusBadge>
+                            <DataBasisBadge basis="contextual" prefix="Basis" />
+                          </div>
+                          {cneosSpaceContextSummary.displayLines.map((line) => (
+                            <span key={line}>{line}</span>
+                          ))}
+                        </div>
+                        {cneosSpaceContextSummary.caveats.slice(0, 3).map((caveat) => (
+                          <CaveatBlock key={caveat} heading="Space-context caveat" tone="evidence" compact>
+                            {caveat}
+                          </CaveatBlock>
+                        ))}
+                      </>
+                    ) : (
+                      <div className="data-card data-card--compact">
+                        <strong>Space-event context unavailable</strong>
+                        <span>No NASA/JPL CNEOS close-approach or fireball context is currently loaded.</span>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                {entity && (entity.type === "aircraft" || entity.type === "satellite") ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Space Weather (NOAA SWPC)</p>
+                    {swpcContextQuery.isLoading ? (
+                      <div className="data-card data-card--compact">
+                        <span>Loading contextual space-weather summaries and advisories.</span>
+                      </div>
+                    ) : swpcContextQuery.isError ? (
+                      <div className="data-card data-card--compact">
+                        <strong>Space-weather context unavailable</strong>
+                        <span>
+                          {swpcContextQuery.error instanceof Error
+                            ? swpcContextQuery.error.message
+                            : "NOAA SWPC context request failed."}
+                        </span>
+                        <span>Do not infer satellite, GPS, or radio failure from missing SWPC context.</span>
+                      </div>
+                    ) : swpcSpaceWeatherSummary ? (
+                      <>
+                        <div className="data-card data-card--compact">
+                          <strong>Space-weather advisories and scales</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge
+                              tone={healthTone(
+                                swpcSourceHealth?.state === "healthy"
+                                  ? "normal"
+                                  : swpcSourceHealth?.state === "stale"
+                                    ? "stale"
+                                    : swpcSourceHealth?.state === "degraded" ||
+                                        swpcSourceHealth?.state === "rate-limited"
+                                      ? "degraded"
+                                      : swpcSourceHealth?.state === "never-fetched"
+                                        ? "unknown"
+                                        : "partial"
+                              )}
+                            >
+                              Source: {swpcSpaceWeatherSummary.sourceState}
+                            </StatusBadge>
+                            <DataBasisBadge basis="contextual" prefix="Basis" />
+                          </div>
+                          {swpcSpaceWeatherSummary.displayLines.map((line) => (
+                            <span key={line}>{line}</span>
+                          ))}
+                        </div>
+                        {swpcSpaceWeatherSummary.caveats.slice(0, 3).map((caveat) => (
+                          <CaveatBlock key={caveat} heading="Space-weather caveat" tone="evidence" compact>
+                            {caveat}
+                          </CaveatBlock>
+                        ))}
+                      </>
+                    ) : (
+                      <div className="data-card data-card--compact">
+                        <strong>Space-weather context unavailable</strong>
+                        <span>No NOAA SWPC summary or advisory context is currently loaded.</span>
+                      </div>
+                    )}
+                  </div>
                 ) : null}
 
                 {selectedNearbyContextSummary ? (
@@ -1457,7 +1980,195 @@ function CameraPanel({
   );
 }
 
-function EnvironmentalEventInspectorPanel({ event }: { event: EarthquakeEntity | EonetEntity }) {
+function EnvironmentalEventInspectorPanel({
+  event
+}: {
+  event:
+    | EarthquakeEntity
+    | EonetEntity
+    | VolcanoEntity
+    | TsunamiAlertEntity
+    | UkEaFloodEntity
+    | GeoNetHazardEntity
+    | HkoWeatherEntity
+    | MetNoAlertEntity
+    | CanadaCapAlertEntity;
+}) {
+  if (event.eventSource === "environment-canada-cap") {
+    return (
+      <div className="panel__section" data-testid="canada-cap-inspector">
+        <p className="panel__eyebrow">Environmental Event (Canada CAP)</p>
+        <dl>
+          <div><dt>Title</dt><dd>{event.label}</dd></div>
+          <div><dt>Alert Type</dt><dd>{event.alertType}</dd></div>
+          <div><dt>Severity</dt><dd>{event.severity}</dd></div>
+          <div><dt>Urgency / Certainty</dt><dd>{[event.urgency, event.certainty].filter(Boolean).join(" / ") || "Unknown"}</dd></div>
+          <div><dt>Area</dt><dd>{event.areaDescription ?? event.provinceOrRegion ?? "Unknown"}</dd></div>
+          <div><dt>Sent / Effective</dt><dd>{formatTimestamp(event.effectiveAt ?? event.timestamp)}</dd></div>
+          <div><dt>Expires</dt><dd>{event.expiresAt ? formatTimestamp(event.expiresAt) : "Unknown"}</dd></div>
+          <div><dt>Evidence Basis</dt><dd>{event.evidenceBasis}</dd></div>
+          <div><dt>Source Mode</dt><dd>{event.sourceMode}</dd></div>
+          <div><dt>Source</dt><dd>Environment Canada CAP</dd></div>
+          <div><dt>Caveat</dt><dd>{event.caveat}</dd></div>
+        </dl>
+        {event.externalUrl ? (
+          <a className="ghost-button ghost-button--link" data-testid="canada-cap-inspector-source-link" href={event.externalUrl} target="_blank" rel="noreferrer">
+            Open Canada CAP Record
+          </a>
+        ) : null}
+      </div>
+    );
+  }
+  if (event.eventSource === "hong-kong-observatory") {
+    return (
+      <div className="panel__section" data-testid="hko-weather-inspector">
+        <p className="panel__eyebrow">Environmental Event (Hong Kong Observatory)</p>
+        <dl>
+          <div><dt>Title</dt><dd>{event.label}</dd></div>
+          <div><dt>Kind</dt><dd>{event.entityKind}</dd></div>
+          <div><dt>Warning Type</dt><dd>{event.warningType ?? "Unknown"}</dd></div>
+          <div><dt>Level / Signal</dt><dd>{event.warningLevel ?? event.signal ?? "Unknown"}</dd></div>
+          <div><dt>Issued / Updated</dt><dd>{formatTimestamp(event.updatedAt ?? event.issuedAt ?? event.timestamp)}</dd></div>
+          <div><dt>Summary</dt><dd>{event.summary ?? event.affectedArea ?? "Summary unavailable"}</dd></div>
+          <div><dt>Evidence Basis</dt><dd>{event.evidenceBasis}</dd></div>
+          <div><dt>Source Mode</dt><dd>{event.sourceMode}</dd></div>
+          <div><dt>Source</dt><dd>Hong Kong Observatory</dd></div>
+          <div><dt>Caveat</dt><dd>{event.caveat}</dd></div>
+        </dl>
+        {event.externalUrl ? (
+          <a className="ghost-button ghost-button--link" data-testid="hko-weather-inspector-source-link" href={event.externalUrl} target="_blank" rel="noreferrer">
+            Open HKO Record
+          </a>
+        ) : null}
+      </div>
+    );
+  }
+  if (event.eventSource === "met-norway-metalerts") {
+    return (
+      <div className="panel__section" data-testid="metno-alert-inspector">
+        <p className="panel__eyebrow">Environmental Event (MET Norway Alerts)</p>
+        <dl>
+          <div><dt>Title</dt><dd>{event.label}</dd></div>
+          <div><dt>Alert Type</dt><dd>{event.alertType}</dd></div>
+          <div><dt>Severity</dt><dd>{event.severity}</dd></div>
+          <div><dt>Urgency / Certainty</dt><dd>{[event.urgency, event.certainty].filter(Boolean).join(" / ") || "Unknown"}</dd></div>
+          <div><dt>Area</dt><dd>{event.areaDescription ?? "Unknown"}</dd></div>
+          <div><dt>Effective</dt><dd>{event.effectiveAt ? formatTimestamp(event.effectiveAt) : "Unknown"}</dd></div>
+          <div><dt>Onset</dt><dd>{event.onsetAt ? formatTimestamp(event.onsetAt) : "Unknown"}</dd></div>
+          <div><dt>Expires</dt><dd>{event.expiresAt ? formatTimestamp(event.expiresAt) : "Unknown"}</dd></div>
+          <div><dt>Sent / Updated</dt><dd>{formatTimestamp(event.updatedAt ?? event.sentAt ?? event.timestamp)}</dd></div>
+          <div><dt>Geometry Summary</dt><dd>{event.geometrySummary ?? event.bboxSummary ?? "Summary unavailable"}</dd></div>
+          <div><dt>Coordinate Basis</dt><dd>{event.coordinateProvenance}</dd></div>
+          <div><dt>Evidence Basis</dt><dd>{event.evidenceBasis}</dd></div>
+          <div><dt>Source Mode</dt><dd>{event.sourceMode}</dd></div>
+          <div><dt>Source</dt><dd>MET Norway MetAlerts</dd></div>
+          <div><dt>Caveat</dt><dd>{event.caveat}</dd></div>
+        </dl>
+        {event.externalUrl ? (
+          <a className="ghost-button ghost-button--link" data-testid="metno-alert-inspector-source-link" href={event.externalUrl} target="_blank" rel="noreferrer">
+            Open MET Norway Alert
+          </a>
+        ) : null}
+      </div>
+    );
+  }
+  if (event.eventSource === "geonet-nz") {
+    return (
+      <div className="panel__section" data-testid="geonet-inspector">
+        <p className="panel__eyebrow">Environmental Event (GeoNet NZ)</p>
+        <dl>
+          <div><dt>Title</dt><dd>{event.label}</dd></div>
+          <div><dt>Kind</dt><dd>{event.entityKind}</dd></div>
+          <div><dt>Quality</dt><dd>{event.geonetQuality ?? "Unknown"}</dd></div>
+          <div><dt>Region</dt><dd>{event.region ?? event.locality ?? event.volcanoName ?? "Unknown"}</dd></div>
+          <div><dt>Magnitude / Alert</dt><dd>{event.entityKind === "quake" ? (event.magnitude != null ? `M${event.magnitude.toFixed(1)}` : "Unknown") : (event.alertLevel != null ? `VAL ${event.alertLevel}` : "Unknown")}</dd></div>
+          <div><dt>Status</dt><dd>{event.statusDetail ?? event.activity ?? "Unknown"}</dd></div>
+          <div><dt>Source Mode</dt><dd>{event.sourceMode}</dd></div>
+          <div><dt>Source</dt><dd>GeoNet New Zealand</dd></div>
+          <div><dt>Caveat</dt><dd>{event.caveat}</dd></div>
+        </dl>
+        {event.externalUrl ? (
+          <a className="ghost-button ghost-button--link" data-testid="geonet-inspector-source-link" href={event.externalUrl} target="_blank" rel="noreferrer">
+            Open GeoNet Record
+          </a>
+        ) : null}
+      </div>
+    );
+  }
+  if (event.eventSource === "uk-ea-flood-monitoring") {
+    return (
+      <div className="panel__section" data-testid="uk-flood-inspector">
+        <p className="panel__eyebrow">Environmental Event (UK EA Flood Monitoring)</p>
+        <dl>
+          <div><dt>Title</dt><dd>{event.label}</dd></div>
+          <div><dt>Kind</dt><dd>{event.entityKind}</dd></div>
+          <div><dt>Severity</dt><dd>{event.severity ?? "Unknown"}</dd></div>
+          <div><dt>Area</dt><dd>{event.areaName ?? event.stationLabel ?? "Unknown"}</dd></div>
+          <div><dt>River/Sea</dt><dd>{event.riverOrSea ?? event.riverName ?? "Unknown"}</dd></div>
+          <div><dt>Region</dt><dd>{event.region ?? event.county ?? "Unknown"}</dd></div>
+          <div><dt>Observed Value</dt><dd>{event.value != null ? `${event.value}${event.unit ? ` ${event.unit}` : ""}` : "Not reported"}</dd></div>
+          <div><dt>Observed / Issued</dt><dd>{formatTimestamp(event.timestamp)}</dd></div>
+          <div><dt>Evidence Basis</dt><dd>{event.evidenceBasis}</dd></div>
+          <div><dt>Source Mode</dt><dd>{event.sourceMode}</dd></div>
+          <div><dt>Source</dt><dd>UK Environment Agency Flood Monitoring</dd></div>
+          <div><dt>Caveat</dt><dd>{event.caveat}</dd></div>
+        </dl>
+        {event.externalUrl ? (
+          <a className="ghost-button ghost-button--link" data-testid="uk-flood-inspector-source-link" href={event.externalUrl} target="_blank" rel="noreferrer">
+            Open UK EA Flood Record
+          </a>
+        ) : null}
+      </div>
+    );
+  }
+  if (event.eventSource === "noaa-tsunami-alerts") {
+    return (
+      <div className="panel__section" data-testid="tsunami-inspector">
+        <p className="panel__eyebrow">Environmental Event (NOAA Tsunami Alerts)</p>
+        <dl>
+          <div><dt>Title</dt><dd>{event.label}</dd></div>
+          <div><dt>Alert Type</dt><dd>{event.alertType}</dd></div>
+          <div><dt>Source Center</dt><dd>{event.sourceCenter}</dd></div>
+          <div><dt>Issued</dt><dd>{formatTimestamp(event.issuedAt)}</dd></div>
+          <div><dt>Updated</dt><dd>{event.updatedAt ? formatTimestamp(event.updatedAt) : "Unknown"}</dd></div>
+          <div><dt>Affected Regions</dt><dd>{event.affectedRegions.join(", ") || "Summary unavailable"}</dd></div>
+          <div><dt>Basin</dt><dd>{event.basin ?? "Unknown"}</dd></div>
+          <div><dt>Source</dt><dd>NOAA Tsunami Warning Centers</dd></div>
+          <div><dt>Evidence Basis</dt><dd>{event.evidenceBasis}</dd></div>
+          <div><dt>Caveat</dt><dd>{event.caveat}</dd></div>
+        </dl>
+        {event.externalUrl ? (
+          <a className="ghost-button ghost-button--link" data-testid="tsunami-inspector-source-link" href={event.externalUrl} target="_blank" rel="noreferrer">
+            Open Tsunami Bulletin
+          </a>
+        ) : null}
+      </div>
+    );
+  }
+  if (event.eventSource === "usgs-volcano-hazards") {
+    return (
+      <div className="panel__section" data-testid="volcano-inspector">
+        <p className="panel__eyebrow">Environmental Event (USGS Volcano Hazards)</p>
+        <dl>
+          <div><dt>Volcano</dt><dd>{event.volcanoName}</dd></div>
+          <div><dt>Alert Level</dt><dd>{event.alertLevel}</dd></div>
+          <div><dt>Aviation Color</dt><dd>{event.aviationColorCode}</dd></div>
+          <div><dt>Observatory</dt><dd>{event.observatoryName}</dd></div>
+          <div><dt>Region</dt><dd>{event.region ?? "Unknown"}</dd></div>
+          <div><dt>Issued</dt><dd>{formatTimestamp(event.timestamp)}</dd></div>
+          <div><dt>Notice Type</dt><dd>{event.noticeTypeLabel ?? event.noticeTypeCode ?? "Unknown"}</dd></div>
+          <div><dt>Scope</dt><dd>{event.statusScope}</dd></div>
+          <div><dt>Source</dt><dd>USGS Volcano Hazards Program</dd></div>
+          <div><dt>Caveat</dt><dd>{event.caveat}</dd></div>
+        </dl>
+        {event.externalUrl ? (
+          <a className="ghost-button ghost-button--link" data-testid="volcano-inspector-source-link" href={event.externalUrl} target="_blank" rel="noreferrer">
+            Open USGS Volcano Notice
+          </a>
+        ) : null}
+      </div>
+    );
+  }
   if (event.eventSource === "nasa-eonet") {
     return (
       <div className="panel__section" data-testid="eonet-inspector">
@@ -1482,7 +2193,6 @@ function EnvironmentalEventInspectorPanel({ event }: { event: EarthquakeEntity |
       </div>
     );
   }
-
   return (
     <div className="panel__section" data-testid="earthquake-inspector">
       <p className="panel__eyebrow">Environmental Event (USGS)</p>
@@ -1651,6 +2361,43 @@ function healthTone(value: "normal" | "degraded" | "stale" | "unavailable" | "pa
     default:
       return "neutral" as const;
   }
+}
+
+function availabilityTone(value: "available" | "unavailable" | "disabled" | "empty" | "degraded" | "unknown") {
+  switch (value) {
+    case "available":
+      return "available" as const;
+    case "degraded":
+      return "warning" as const;
+    case "empty":
+      return "neutral" as const;
+    case "disabled":
+      return "unavailable" as const;
+    case "unavailable":
+      return "danger" as const;
+    case "unknown":
+    default:
+      return "neutral" as const;
+  }
+}
+
+function normalizeAvailabilityHealth(value: string) {
+  if (value.includes("degraded")) {
+    return "degraded" as const;
+  }
+  if (value.includes("stale")) {
+    return "stale" as const;
+  }
+  if (value.includes("partial")) {
+    return "partial" as const;
+  }
+  if (value.includes("unavailable") || value.includes("blocked") || value.includes("disabled")) {
+    return "unavailable" as const;
+  }
+  if (value.includes("normal") || value.includes("healthy")) {
+    return "normal" as const;
+  }
+  return "unknown" as const;
 }
 
 function relationLabel(subject: SceneEntity, other: SceneEntity) {

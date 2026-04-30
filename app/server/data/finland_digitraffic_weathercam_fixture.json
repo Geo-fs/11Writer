@@ -1,0 +1,34 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "C01503",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          23.99616,
+          60.05374,
+          0.0
+        ]
+      },
+      "properties": {
+        "id": "C01503",
+        "name": "kt51_Inkoo",
+        "collectionStatus": "GATHERING",
+        "dataUpdatedTime": "2026-04-29T15:25:39Z",
+        "state": null,
+        "presets": [
+          {
+            "id": "C0150301",
+            "inCollection": true
+          },
+          {
+            "id": "C0150302",
+            "inCollection": false
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "elevated": [
+    {
+      "obs_fullname": "Alaska Volcano Observatory",
+      "obs_abbr": "avo",
+      "volcano_name": "Great Sitkin",
+      "vnum": "311120",
+      "notice_type_cd": "DU",
+      "notice_identifier": "DOI-USGS-AVO-2026-04-29T19:43:35+00:00",
+      "sent_utc": "2026-04-29 19:44:16",
+      "sent_unixtime": 1777491856,
+      "color_code": "ORANGE",
+      "alert_level": "WATCH",
+      "notice_url": "https://volcanoes.usgs.gov/hans-public/notice/DOI-USGS-AVO-2026-04-29T19:43:35+00:00",
+      "notice_data": "https://volcanoes.usgs.gov/hans-public/api/notice/getNotice/DOI-USGS-AVO-2026-04-29T19:43:35+00:00"
+    },
+    {
+      "obs_fullname": "Hawaiian Volcano Observatory",
+      "obs_abbr": "hvo",
+      "volcano_name": "Kilauea",
+      "vnum": "332010",
+      "notice_type_cd": "DU",
+      "notice_identifier": "DOI-USGS-HVO-2026-04-26T18:28:53+00:00",
+      "sent_utc": "2026-04-26 18:47:22",
+      "sent_unixtime": 1777229242,
+      "color_code": "YELLOW",
+      "alert_level": "ADVISORY",
+      "notice_url": "https://volcanoes.usgs.gov/hans-public/notice/DOI-USGS-HVO-2026-04-26T18:28:53+00:00",
+      "notice_data": "https://volcanoes.usgs.gov/hans-public/api/notice/getNotice/DOI-USGS-HVO-2026-04-26T18:28:53+00:00"
+    }
+  ],
+  "monitored": [
+    {
+      "volcano_name": "Akutan",
+      "vnum": "311320",
+      "sent_utc": "2019-09-06 18:29:39",
+      "sent_unixtime": 1567794579,
+      "alert_level": "NORMAL",
+      "color_code": "GREEN",
+      "volcano_cd": "ak6",
+      "obs_fullname": "Alaska Volcano Observatory",
+      "obs_abbr": "avo",
+      "notice_type_cd": "IS",
+      "notice_identifier": "DOI-USGS-AVO-2019-09-04T15:47:55-08:00",
+      "notice_url": "https://volcanoes.usgs.gov/hans-public/notice/DOI-USGS-AVO-2019-09-04T15:47:55-08:00",
+      "notice_data": "https://volcanoes.usgs.gov/hans-public/api/notice/getNotice/DOI-USGS-AVO-2019-09-04T15:47:55-08:00"
+    },
+    {
+      "volcano_name": "Great Sitkin",
+      "vnum": "311120",
+      "sent_utc": "2026-04-29 19:44:16",
+      "sent_unixtime": 1777491856,
+      "alert_level": "WATCH",
+      "color_code": "ORANGE",
+      "volcano_cd": "gsit",
+      "obs_fullname": "Alaska Volcano Observatory",
+      "obs_abbr": "avo",
+      "notice_type_cd": "DU",
+      "notice_identifier": "DOI-USGS-AVO-2026-04-29T19:43:35+00:00",
+      "notice_url": "https://volcanoes.usgs.gov/hans-public/notice/DOI-USGS-AVO-2026-04-29T19:43:35+00:00",
+      "notice_data": "https://volcanoes.usgs.gov/hans-public/api/notice/getNotice/DOI-USGS-AVO-2026-04-29T19:43:35+00:00"
+    },
+    {
+      "volcano_name": "Mount Hood",
+      "vnum": "321010",
+      "sent_utc": "2026-04-21 16:30:00",
+      "sent_unixtime": 1776789000,
+      "alert_level": "NORMAL",
+      "color_code": "GREEN",
+      "volcano_cd": "mhood",
+      "obs_fullname": "Cascades Volcano Observatory",
+      "obs_abbr": "cvo",
+      "notice_type_cd": "WU",
+      "notice_identifier": "DOI-USGS-CVO-2026-04-21T16:30:00+00:00",
+      "notice_url": "https://volcanoes.usgs.gov/hans-public/notice/DOI-USGS-CVO-2026-04-21T16:30:00+00:00",
+      "notice_data": "https://volcanoes.usgs.gov/hans-public/api/notice/getNotice/DOI-USGS-CVO-2026-04-21T16:30:00+00:00"
+    }
+  ],
+  "catalog": [
+    {
+      "obs_abbr": "avo",
+      "obs_fullname": "Alaska Volcano Observatory",
+      "volcano_cd": "gsit",
+      "vnum": "311120",
+      "volcano_name": "Great Sitkin",
+      "region": "Alaska - Aleutians",
+      "latitude": 52.0764,
+      "longitude": -176.1317,
+      "elevation_meters": 1740,
+      "volcano_url": "https://avo.alaska.edu/volcanoes/volcinfo.php?volcname=Great%20Sitkin",
+      "nvews_threat": "High Threat"
+    },
+    {
+      "obs_abbr": "hvo",
+      "obs_fullname": "Hawaiian Volcano Observatory",
+      "volcano_cd": "hi3",
+      "vnum": "332010",
+      "volcano_name": "Kilauea",
+      "region": "Hawaii",
+      "latitude": 19.4211,
+      "longitude": -155.2873,
+      "elevation_meters": 1247,
+      "volcano_url": "https://www.usgs.gov/volcanoes/kilauea",
+      "nvews_threat": "Very High Threat"
+    },
+    {
+      "obs_abbr": "avo",
+      "obs_fullname": "Alaska Volcano Observatory",
+      "volcano_cd": "ak6",
+      "vnum": "311320",
+      "volcano_name": "Akutan",
+      "region": "Alaska - Aleutians",
+      "latitude": 54.13308,
+      "longitude": -165.98555,
+      "elevation_meters": 1303,
+      "volcano_url": "https://avo.alaska.edu/volcanoes/volcinfo.php?volcname=Akutan",
+      "nvews_threat": "Very High Threat"
+    },
+    {
+      "obs_abbr": "cvo",
+      "obs_fullname": "Cascades Volcano Observatory",
+      "volcano_cd": "mhood",
+      "vnum": "321010",
+      "volcano_name": "Mount Hood",
+      "region": "Oregon",
+      "latitude": 45.3735,
+      "longitude": -121.6959,
+      "elevation_meters": 3426,
+      "volcano_url": "https://www.usgs.gov/volcanoes/mount-hood",
+      "nvews_threat": "Very High Threat"
+    }
+  ]
+}

@@ -142,6 +142,15 @@ AccessMethod = Literal["json-api", "xml-api", "html-index", "viewer-page", "embe
 OnboardingState = Literal["candidate", "approved", "blocked", "unsupported", "active"]
 CandidateAssessmentLevel = Literal["low", "medium", "high"]
 PageStructureType = Literal["unknown", "static-html", "interactive-map-html", "js-data-app", "viewer-catalog-html"]
+EndpointVerificationStatus = Literal[
+    "not-tested",
+    "candidate-url-only",
+    "machine-readable-confirmed",
+    "html-only",
+    "blocked",
+    "captcha-or-login",
+    "needs-review",
+]
 ImportReadiness = Literal[
     "inventory-only",
     "approved-unvalidated",
@@ -240,6 +249,260 @@ class AircraftResponse(CamelModel):
     aircraft: list[AircraftEntity]
 
 
+class AviationWeatherCloudLayer(CamelModel):
+    cover: str
+    base_ft_agl: int | None = None
+    cloud_type: str | None = None
+
+
+class AviationWeatherMetar(CamelModel):
+    station_id: str
+    station_name: str | None = None
+    receipt_time: str | None = None
+    observed_at: str | None = None
+    report_at: str | None = None
+    raw_text: str
+    flight_category: str | None = None
+    visibility: str | None = None
+    wind_direction: str | None = None
+    wind_speed_kt: int | None = None
+    temperature_c: float | None = None
+    dewpoint_c: float | None = None
+    altimeter_hpa: float | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    cloud_layers: list[AviationWeatherCloudLayer] = Field(default_factory=list)
+
+
+class AviationWeatherTafPeriod(CamelModel):
+    valid_from: str | None = None
+    valid_to: str | None = None
+    change_indicator: str | None = None
+    probability_percent: int | None = None
+    wind_direction: str | None = None
+    wind_speed_kt: int | None = None
+    visibility: str | None = None
+    weather: str | None = None
+    cloud_layers: list[AviationWeatherCloudLayer] = Field(default_factory=list)
+
+
+class AviationWeatherTaf(CamelModel):
+    station_id: str
+    station_name: str | None = None
+    issue_time: str | None = None
+    bulletin_time: str | None = None
+    valid_from: str | None = None
+    valid_to: str | None = None
+    raw_text: str
+    forecast_periods: list[AviationWeatherTafPeriod] = Field(default_factory=list)
+
+
+class AviationWeatherContextResponse(CamelModel):
+    fetched_at: str
+    source: str
+    source_detail: str
+    context_type: Literal["nearest-airport", "selected-airport"]
+    airport_code: str
+    airport_name: str | None = None
+    airport_ref_id: str | None = None
+    metar: AviationWeatherMetar | None = None
+    taf: AviationWeatherTaf | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class FaaNasAirportStatusSourceHealth(CamelModel):
+    source_name: str
+    source_mode: Literal["fixture", "live", "unknown"]
+    health: Literal["normal", "degraded", "unavailable", "unknown"]
+    detail: str
+    source_url: str
+    last_updated_at: str | None = None
+    state: SourceState | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class FaaNasAirportStatusRecord(CamelModel):
+    airport_code: str
+    airport_name: str | None = None
+    status_type: Literal[
+        "delay",
+        "closure",
+        "ground stop",
+        "ground delay",
+        "restriction",
+        "advisory",
+        "normal",
+        "unknown",
+    ]
+    reason: str | None = None
+    category: str | None = None
+    summary: str
+    issued_at: str | None = None
+    updated_at: str | None = None
+    source_url: str | None = None
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    health: Literal["normal", "degraded", "unavailable", "unknown"] = "unknown"
+    caveats: list[str] = Field(default_factory=list)
+    evidence_basis: Literal["contextual", "advisory"] = "contextual"
+
+
+class FaaNasAirportStatusResponse(CamelModel):
+    fetched_at: str
+    source: str
+    airport_code: str
+    airport_name: str | None = None
+    record: FaaNasAirportStatusRecord
+    source_health: FaaNasAirportStatusSourceHealth
+    caveats: list[str] = Field(default_factory=list)
+
+
+class CneosSourceHealth(CamelModel):
+    source_name: str
+    source_mode: Literal["fixture", "live", "unknown"]
+    health: Literal["normal", "degraded", "unavailable", "unknown"]
+    detail: str
+    close_approach_source_url: str
+    fireball_source_url: str
+    last_updated_at: str | None = None
+    state: SourceState | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class CneosCloseApproachEvent(CamelModel):
+    object_designation: str
+    object_name: str | None = None
+    close_approach_at: str
+    distance_lunar: float | None = None
+    distance_au: float | None = None
+    distance_km: float | None = None
+    velocity_km_s: float | None = None
+    estimated_diameter_m: float | None = None
+    orbiting_body: str | None = None
+    source_url: str | None = None
+    caveats: list[str] = Field(default_factory=list)
+    evidence_basis: Literal["source-reported", "contextual"] = "source-reported"
+
+
+class CneosFireballEvent(CamelModel):
+    event_time: str
+    latitude: float | None = None
+    longitude: float | None = None
+    altitude_km: float | None = None
+    energy_ten_gigajoules: float | None = None
+    impact_energy_kt: float | None = None
+    velocity_km_s: float | None = None
+    source_url: str | None = None
+    caveats: list[str] = Field(default_factory=list)
+    evidence_basis: Literal["source-reported", "contextual"] = "source-reported"
+
+
+class CneosContextResponse(CamelModel):
+    fetched_at: str
+    source: str
+    event_type: Literal["close-approach", "fireball", "all"]
+    close_approaches: list[CneosCloseApproachEvent] = Field(default_factory=list)
+    fireballs: list[CneosFireballEvent] = Field(default_factory=list)
+    source_health: CneosSourceHealth
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SwpcSourceHealth(CamelModel):
+    source_name: str
+    source_mode: Literal["fixture", "live", "unknown"]
+    health: Literal["normal", "degraded", "unavailable", "unknown"]
+    detail: str
+    summary_source_url: str
+    alerts_source_url: str
+    last_updated_at: str | None = None
+    state: SourceState | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SwpcSpaceWeatherSummary(CamelModel):
+    product_id: str
+    product_type: Literal["scale-summary", "outlook-summary", "summary", "unknown"]
+    issued_at: str | None = None
+    observed_at: str | None = None
+    updated_at: str | None = None
+    scale_category: str | None = None
+    headline: str
+    description: str
+    affected_context: list[Literal["radio", "gps", "satellite", "geomagnetic", "unknown"]] = Field(default_factory=list)
+    source_url: str | None = None
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    health: Literal["normal", "degraded", "unavailable", "unknown"] = "unknown"
+    caveats: list[str] = Field(default_factory=list)
+    evidence_basis: Literal["advisory", "contextual"] = "contextual"
+
+
+class SwpcSpaceWeatherAlert(CamelModel):
+    product_id: str
+    product_type: Literal["alert", "watch", "warning", "advisory", "unknown"]
+    issued_at: str | None = None
+    updated_at: str | None = None
+    scale_category: str | None = None
+    headline: str
+    description: str
+    affected_context: list[Literal["radio", "gps", "satellite", "geomagnetic", "unknown"]] = Field(default_factory=list)
+    source_url: str | None = None
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    health: Literal["normal", "degraded", "unavailable", "unknown"] = "unknown"
+    caveats: list[str] = Field(default_factory=list)
+    evidence_basis: Literal["advisory", "contextual"] = "advisory"
+
+
+class SwpcContextResponse(CamelModel):
+    fetched_at: str
+    source: str
+    product_type: Literal["summary", "alerts", "all"]
+    summaries: list[SwpcSpaceWeatherSummary] = Field(default_factory=list)
+    alerts: list[SwpcSpaceWeatherAlert] = Field(default_factory=list)
+    source_health: SwpcSourceHealth
+    caveats: list[str] = Field(default_factory=list)
+
+
+class OpenSkySourceHealth(CamelModel):
+    source_name: str
+    source_mode: Literal["fixture", "live", "unknown"]
+    health: Literal["normal", "degraded", "unavailable", "unknown"]
+    detail: str
+    source_url: str
+    last_updated_at: str | None = None
+    state: SourceState | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class OpenSkyAircraftState(CamelModel):
+    icao24: str
+    callsign: str | None = None
+    origin_country: str | None = None
+    time_position: str | None = None
+    last_contact: str | None = None
+    longitude: float | None = None
+    latitude: float | None = None
+    baro_altitude: float | None = None
+    on_ground: bool | None = None
+    velocity: float | None = None
+    true_track: float | None = None
+    vertical_rate: float | None = None
+    geo_altitude: float | None = None
+    squawk: str | None = None
+    spi: bool | None = None
+    position_source: int | None = None
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveats: list[str] = Field(default_factory=list)
+    evidence_basis: Literal["observed", "source-reported"] = "source-reported"
+
+
+class OpenSkyStatesResponse(CamelModel):
+    fetched_at: str
+    source: str
+    count: int
+    states: list[OpenSkyAircraftState] = Field(default_factory=list)
+    source_health: OpenSkySourceHealth
+    caveats: list[str] = Field(default_factory=list)
+
+
 class CameraSourceRegistryEntry(CamelModel):
     key: str
     display_name: str
@@ -307,6 +570,24 @@ class CameraSourceRegistryEntry(CamelModel):
     likely_camera_count: int | None = None
     compliance_risk: CandidateAssessmentLevel | None = None
     extraction_feasibility: CandidateAssessmentLevel | None = None
+    endpoint_verification_status: EndpointVerificationStatus | None = None
+    candidate_endpoint_url: str | None = None
+    machine_readable_endpoint_url: str | None = None
+    last_endpoint_check_at: str | None = None
+    last_endpoint_http_status: int | None = None
+    last_endpoint_content_type: str | None = None
+    last_endpoint_result: str | None = None
+    last_endpoint_notes: list[str] = Field(default_factory=list)
+    verification_caveat: str | None = None
+    sandbox_import_available: bool = False
+    sandbox_import_mode: Literal["fixture", "live"] | None = None
+    sandbox_connector_id: str | None = None
+    last_sandbox_import_at: str | None = None
+    last_sandbox_import_outcome: str | None = None
+    sandbox_discovered_count: int | None = None
+    sandbox_usable_count: int | None = None
+    sandbox_review_queue_count: int | None = None
+    sandbox_validation_caveat: str | None = None
 
 
 class CameraSourceRegistryResponse(CamelModel):
@@ -355,6 +636,24 @@ class CameraSourceInventoryEntry(CamelModel):
     likely_camera_count: int | None = None
     compliance_risk: CandidateAssessmentLevel | None = None
     extraction_feasibility: CandidateAssessmentLevel | None = None
+    endpoint_verification_status: EndpointVerificationStatus | None = None
+    candidate_endpoint_url: str | None = None
+    machine_readable_endpoint_url: str | None = None
+    last_endpoint_check_at: str | None = None
+    last_endpoint_http_status: int | None = None
+    last_endpoint_content_type: str | None = None
+    last_endpoint_result: str | None = None
+    last_endpoint_notes: list[str] = Field(default_factory=list)
+    verification_caveat: str | None = None
+    sandbox_import_available: bool = False
+    sandbox_import_mode: Literal["fixture", "live"] | None = None
+    sandbox_connector_id: str | None = None
+    last_sandbox_import_at: str | None = None
+    last_sandbox_import_outcome: str | None = None
+    sandbox_discovered_count: int | None = None
+    sandbox_usable_count: int | None = None
+    sandbox_review_queue_count: int | None = None
+    sandbox_validation_caveat: str | None = None
 
 
 class CameraSourceInventorySummary(CamelModel):
@@ -702,6 +1001,174 @@ class MarineChokepointAnalyticalSummaryResponse(CamelModel):
     inferred_fields: list[str] = Field(default_factory=list)
 
 
+class MarineNoaaCoopsSourceHealth(CamelModel):
+    source_id: str
+    source_label: str
+    enabled: bool
+    source_mode: Literal["fixture", "live", "unknown"]
+    health: Literal["loaded", "empty", "stale", "error", "disabled", "unknown"]
+    loaded_count: int
+    last_fetched_at: str | None = None
+    source_generated_at: str | None = None
+    detail: str
+    error_summary: str | None = None
+    caveat: str | None = None
+
+
+class MarineNoaaCoopsWaterLevelObservation(CamelModel):
+    observed_at: str
+    value_m: float
+    units: Literal["m"] = "m"
+    datum: str
+    trend: str | None = None
+    source_detail: str
+    external_url: str | None = None
+    observed_basis: Literal["observed"] = "observed"
+
+
+class MarineNoaaCoopsCurrentObservation(CamelModel):
+    observed_at: str
+    speed_kts: float
+    direction_deg: float | None = None
+    direction_cardinal: str | None = None
+    bin_depth_m: float | None = None
+    units: Literal["kts"] = "kts"
+    source_detail: str
+    external_url: str | None = None
+    observed_basis: Literal["observed"] = "observed"
+
+
+class MarineNoaaCoopsStationContext(CamelModel):
+    station_id: str
+    station_name: str
+    station_type: Literal["water-level", "currents", "mixed"]
+    latitude: float
+    longitude: float
+    distance_km: float
+    products_available: list[Literal["water_level", "currents"]] = Field(default_factory=list)
+    status_line: str
+    external_url: str | None = None
+    latest_water_level: MarineNoaaCoopsWaterLevelObservation | None = None
+    latest_current: MarineNoaaCoopsCurrentObservation | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class MarineNoaaCoopsContextResponse(CamelModel):
+    fetched_at: str
+    context_kind: Literal["viewport", "chokepoint"]
+    center_lat: float
+    center_lon: float
+    radius_km: float
+    count: int
+    source_health: MarineNoaaCoopsSourceHealth
+    stations: list[MarineNoaaCoopsStationContext] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class MarineNdbcSourceHealth(CamelModel):
+    source_id: str
+    source_label: str
+    enabled: bool
+    source_mode: Literal["fixture", "live", "unknown"]
+    health: Literal["loaded", "empty", "stale", "error", "disabled", "unknown"]
+    loaded_count: int
+    last_fetched_at: str | None = None
+    source_generated_at: str | None = None
+    detail: str
+    error_summary: str | None = None
+    caveat: str | None = None
+
+
+class MarineNdbcObservation(CamelModel):
+    observed_at: str
+    wind_direction_deg: float | None = None
+    wind_direction_cardinal: str | None = None
+    wind_speed_kts: float | None = None
+    wind_gust_kts: float | None = None
+    wave_height_m: float | None = None
+    dominant_period_s: float | None = None
+    pressure_hpa: float | None = None
+    air_temperature_c: float | None = None
+    water_temperature_c: float | None = None
+    source_detail: str
+    external_url: str | None = None
+    observed_basis: Literal["observed"] = "observed"
+
+
+class MarineNdbcStation(CamelModel):
+    station_id: str
+    station_name: str
+    latitude: float
+    longitude: float
+    distance_km: float
+    station_type: Literal["buoy", "cman"]
+    status_line: str
+    external_url: str | None = None
+    latest_observation: MarineNdbcObservation | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class MarineNdbcContextResponse(CamelModel):
+    fetched_at: str
+    context_kind: Literal["viewport", "chokepoint"]
+    center_lat: float
+    center_lon: float
+    radius_km: float
+    count: int
+    source_health: MarineNdbcSourceHealth
+    stations: list[MarineNdbcStation] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class MarineScottishWaterSourceHealth(CamelModel):
+    source_id: str
+    source_label: str
+    enabled: bool
+    source_mode: Literal["fixture", "live", "unknown"]
+    health: Literal["loaded", "empty", "stale", "error", "disabled", "unknown"]
+    loaded_count: int
+    last_fetched_at: str | None = None
+    source_generated_at: str | None = None
+    detail: str
+    error_summary: str | None = None
+    caveat: str | None = None
+
+
+class MarineScottishWaterOverflowEvent(CamelModel):
+    event_id: str
+    monitor_id: str | None = None
+    asset_id: str | None = None
+    site_name: str
+    water_body: str | None = None
+    outfall_label: str | None = None
+    location_label: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    distance_km: float | None = None
+    status: Literal["active", "inactive", "unknown"]
+    started_at: str | None = None
+    ended_at: str | None = None
+    last_updated_at: str | None = None
+    duration_minutes: int | None = None
+    source_url: str | None = None
+    source_detail: str
+    evidence_basis: Literal["source-reported", "contextual"] = "source-reported"
+    caveats: list[str] = Field(default_factory=list)
+
+
+class MarineScottishWaterOverflowResponse(CamelModel):
+    fetched_at: str
+    center_lat: float
+    center_lon: float
+    radius_km: float
+    status_filter: Literal["all", "active", "inactive"]
+    count: int
+    active_count: int
+    source_health: MarineScottishWaterSourceHealth
+    events: list[MarineScottishWaterOverflowEvent] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
 class ReferenceLookupResponse(CamelModel):
     summary: ReferenceObjectSummary
     rank_reason: str
@@ -914,3 +1381,395 @@ class EonetEventsResponse(CamelModel):
     metadata: EonetEventsMetadata
     count: int
     events: list[EonetEvent]
+
+
+class VolcanoStatusEvent(CamelModel):
+    event_id: str
+    source: str
+    source_url: str
+    volcano_name: str
+    title: str
+    volcano_number: str
+    volcano_code: str | None = None
+    observatory_name: str
+    observatory_abbr: str | None = None
+    region: str | None = None
+    latitude: float
+    longitude: float
+    elevation_meters: float | None = None
+    alert_level: str
+    aviation_color_code: str
+    notice_type_code: str | None = None
+    notice_type_label: str | None = None
+    notice_identifier: str
+    issued_at: str
+    status_scope: Literal["elevated", "monitored"]
+    volcano_url: str | None = None
+    nvews_threat: str | None = None
+    caveat: str
+
+
+class VolcanoStatusMetadata(CamelModel):
+    source: str
+    feed_name: str
+    feed_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    fetched_at: str
+    generated_at: str | None = None
+    count: int
+    caveat: str
+
+
+class VolcanoStatusResponse(CamelModel):
+    metadata: VolcanoStatusMetadata
+    count: int
+    events: list[VolcanoStatusEvent]
+
+
+class TsunamiAlertEvent(CamelModel):
+    event_id: str
+    title: str
+    alert_type: Literal["warning", "watch", "advisory", "information", "cancellation", "unknown"]
+    source_center: Literal["NTWC", "PTWC", "unknown"]
+    issued_at: str
+    updated_at: str | None = None
+    effective_at: str | None = None
+    expires_at: str | None = None
+    affected_regions: list[str] = Field(default_factory=list)
+    basin: str | None = None
+    region: str | None = None
+    longitude: float | None = None
+    latitude: float | None = None
+    source_url: str
+    summary: str | None = None
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveat: str
+    evidence_basis: Literal["advisory", "contextual"] = "advisory"
+
+
+class TsunamiAlertMetadata(CamelModel):
+    source: str
+    feed_name: str
+    feed_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    fetched_at: str
+    generated_at: str | None = None
+    count: int
+    caveat: str
+
+
+class TsunamiAlertResponse(CamelModel):
+    metadata: TsunamiAlertMetadata
+    count: int
+    events: list[TsunamiAlertEvent]
+
+
+class UkEaFloodEvent(CamelModel):
+    event_id: str
+    title: str
+    severity: Literal["severe-warning", "warning", "alert", "inactive", "unknown"]
+    severity_level: int | None = None
+    message: str | None = None
+    description: str | None = None
+    area_name: str | None = None
+    flood_area_id: str | None = None
+    river_or_sea: str | None = None
+    county: str | None = None
+    region: str | None = None
+    issued_at: str | None = None
+    updated_at: str | None = None
+    longitude: float | None = None
+    latitude: float | None = None
+    source_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveat: str
+    evidence_basis: Literal["advisory", "contextual"] = "advisory"
+
+
+class UkEaFloodStation(CamelModel):
+    station_id: str
+    station_label: str
+    river_name: str | None = None
+    catchment: str | None = None
+    area_name: str | None = None
+    county: str | None = None
+    longitude: float | None = None
+    latitude: float | None = None
+    parameter: Literal["level", "flow", "rainfall", "unknown"] = "unknown"
+    value: float | None = None
+    unit: str | None = None
+    observed_at: str | None = None
+    qualifier: str | None = None
+    status: str | None = None
+    source_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveat: str
+    evidence_basis: Literal["observed"] = "observed"
+
+
+class UkEaFloodMetadata(CamelModel):
+    source: str
+    feed_name: str
+    feed_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    fetched_at: str
+    generated_at: str | None = None
+    count: int
+    event_count: int = 0
+    station_count: int = 0
+    caveat: str
+
+
+class UkEaFloodResponse(CamelModel):
+    metadata: UkEaFloodMetadata
+    count: int
+    events: list[UkEaFloodEvent]
+    stations: list[UkEaFloodStation]
+
+
+class GeoNetQuakeEvent(CamelModel):
+    event_id: str
+    public_id: str
+    title: str
+    magnitude: float | None = None
+    depth_km: float | None = None
+    event_time: str
+    updated_at: str | None = None
+    longitude: float | None = None
+    latitude: float | None = None
+    locality: str | None = None
+    region: str | None = None
+    quality: str | None = None
+    status: str | None = None
+    source_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveat: str
+    evidence_basis: Literal["observed", "source-reported"] = "source-reported"
+
+
+class GeoNetVolcanoAlert(CamelModel):
+    volcano_id: str
+    volcano_name: str
+    title: str
+    alert_level: int | None = None
+    aviation_color_code: str | None = None
+    activity: str | None = None
+    hazards: str | None = None
+    issued_at: str | None = None
+    updated_at: str | None = None
+    longitude: float | None = None
+    latitude: float | None = None
+    source: str | None = None
+    source_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveat: str
+    evidence_basis: Literal["advisory", "contextual"] = "advisory"
+
+
+class GeoNetMetadata(CamelModel):
+    source: str
+    feed_name: str
+    feed_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    fetched_at: str
+    generated_at: str | None = None
+    count: int
+    quake_count: int = 0
+    volcano_count: int = 0
+    caveat: str
+
+
+class GeoNetHazardsResponse(CamelModel):
+    metadata: GeoNetMetadata
+    count: int
+    quakes: list[GeoNetQuakeEvent]
+    volcano_alerts: list[GeoNetVolcanoAlert]
+
+
+class HkoWeatherWarningEvent(CamelModel):
+    event_id: str
+    warning_type: str
+    warning_level: str | None = None
+    title: str
+    summary: str | None = None
+    issued_at: str | None = None
+    updated_at: str | None = None
+    expires_at: str | None = None
+    affected_area: str | None = None
+    source_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveat: str
+    evidence_basis: Literal["advisory", "contextual"] = "advisory"
+
+
+class HkoTropicalCycloneContext(CamelModel):
+    event_id: str
+    title: str
+    summary: str | None = None
+    issued_at: str | None = None
+    updated_at: str | None = None
+    signal: str | None = None
+    source_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveat: str
+    evidence_basis: Literal["advisory", "contextual"] = "contextual"
+
+
+class HkoWeatherMetadata(CamelModel):
+    source: str
+    feed_name: str
+    feed_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    fetched_at: str
+    generated_at: str | None = None
+    count: int
+    warning_count: int = 0
+    has_tropical_cyclone_context: bool = False
+    caveat: str
+
+
+class HkoWeatherResponse(CamelModel):
+    metadata: HkoWeatherMetadata
+    count: int
+    warnings: list[HkoWeatherWarningEvent]
+    tropical_cyclone: HkoTropicalCycloneContext | None = None
+
+
+class MetNoMetAlertEvent(CamelModel):
+    event_id: str
+    title: str
+    alert_type: str
+    severity: Literal["red", "orange", "yellow", "green", "unknown"] = "unknown"
+    certainty: str | None = None
+    urgency: str | None = None
+    area_description: str | None = None
+    effective_at: str | None = None
+    onset_at: str | None = None
+    expires_at: str | None = None
+    sent_at: str | None = None
+    updated_at: str | None = None
+    status: Literal["Actual", "Test", "Unknown"] = "Unknown"
+    msg_type: Literal["Alert", "Update", "Cancel", "Unknown"] = "Unknown"
+    geometry_summary: str | None = None
+    bbox_min_lon: float | None = None
+    bbox_min_lat: float | None = None
+    bbox_max_lon: float | None = None
+    bbox_max_lat: float | None = None
+    source_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveat: str
+    evidence_basis: Literal["advisory", "contextual"] = "advisory"
+
+
+class MetNoMetAlertsMetadata(CamelModel):
+    source: str
+    feed_name: str
+    feed_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    fetched_at: str
+    generated_at: str | None = None
+    count: int
+    severity_counts: dict[str, int] = Field(default_factory=dict)
+    caveat: str
+    user_agent_required: bool = True
+    backend_live_mode_only: bool = True
+
+
+class MetNoMetAlertsResponse(CamelModel):
+    metadata: MetNoMetAlertsMetadata
+    count: int
+    alerts: list[MetNoMetAlertEvent] = Field(default_factory=list)
+
+
+class CanadaCapAlertEvent(CamelModel):
+    event_id: str
+    title: str
+    alert_type: Literal["warning", "watch", "advisory", "statement", "unknown"] = "unknown"
+    severity: Literal["extreme", "severe", "moderate", "minor", "unknown"] = "unknown"
+    urgency: str | None = None
+    certainty: str | None = None
+    area_description: str | None = None
+    province_or_region: str | None = None
+    effective_at: str | None = None
+    onset_at: str | None = None
+    expires_at: str | None = None
+    sent_at: str
+    updated_at: str | None = None
+    source_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveat: str
+    evidence_basis: Literal["advisory", "contextual"] = "advisory"
+    geometry_summary: str | None = None
+    longitude: float | None = None
+    latitude: float | None = None
+
+
+class CanadaCapMetadata(CamelModel):
+    source: str
+    feed_name: str
+    feed_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    fetched_at: str
+    generated_at: str | None = None
+    count: int
+    caveat: str
+
+
+class CanadaCapAlertResponse(CamelModel):
+    metadata: CanadaCapMetadata
+    count: int
+    alerts: list[CanadaCapAlertEvent]
+
+
+class RssFeedSourceHealth(CamelModel):
+    source_id: str
+    source_label: str
+    enabled: bool
+    source_mode: Literal["fixture", "live", "unknown"]
+    health: Literal["loaded", "empty", "stale", "error", "disabled", "unknown"]
+    loaded_count: int
+    last_fetched_at: str | None = None
+    source_generated_at: str | None = None
+    detail: str
+    error_summary: str | None = None
+    caveat: str | None = None
+
+
+class RssFeedRecord(CamelModel):
+    record_id: str
+    title: str
+    link: str | None = None
+    guid: str | None = None
+    published_at: str | None = None
+    updated_at: str | None = None
+    summary: str | None = None
+    categories: list[str] = Field(default_factory=list)
+    feed_title: str | None = None
+    feed_home_url: str | None = None
+    source_url: str | None = None
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveat: str
+    evidence_basis: Literal["discovery", "contextual"] = "discovery"
+
+
+class RssFeedMetadata(CamelModel):
+    source: str
+    feed_name: str
+    feed_url: str
+    feed_type: Literal["rss", "atom", "unknown"]
+    feed_title: str | None = None
+    feed_home_url: str | None = None
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    fetched_at: str
+    generated_at: str | None = None
+    count: int
+    raw_count: int = 0
+    deduped_count: int = 0
+    caveat: str
+
+
+class RssFeedResponse(CamelModel):
+    metadata: RssFeedMetadata
+    count: int
+    source_health: RssFeedSourceHealth
+    items: list[RssFeedRecord]

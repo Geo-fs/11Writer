@@ -1,0 +1,59 @@
+{
+  "quakes": [
+    {
+      "event_id": "geonet-quake-001",
+      "public_id": "2026p123456",
+      "title": "GeoNet quake near Wellington",
+      "magnitude": 4.6,
+      "depth_km": 18.0,
+      "event_time": "2026-04-28T21:15:00Z",
+      "updated_at": "2026-04-28T21:30:00Z",
+      "latitude": -41.2865,
+      "longitude": 174.7762,
+      "locality": "15 km north of Wellington",
+      "region": "Wellington",
+      "quality": "best",
+      "status": "reviewed",
+      "source_url": "https://www.geonet.org.nz/earthquake/2026p123456"
+    },
+    {
+      "event_id": "geonet-quake-002",
+      "public_id": "2026p654321",
+      "title": "GeoNet quake near Taupo",
+      "magnitude": 3.2,
+      "depth_km": 6.5,
+      "event_time": "2026-04-28T17:05:00Z",
+      "latitude": -38.6878,
+      "longitude": 176.0702,
+      "locality": "12 km east of Taupo",
+      "region": "Waikato",
+      "quality": "preliminary",
+      "source_url": "https://www.geonet.org.nz/earthquake/2026p654321"
+    },
+    {
+      "event_id": "geonet-quake-003",
+      "public_id": "2026p111111",
+      "title": "GeoNet offshore quake",
+      "event_time": "2026-04-27T03:00:00Z",
+      "longitude": 179.112,
+      "latitude": -36.02,
+      "source_url": "https://www.geonet.org.nz/earthquake/2026p111111"
+    }
+  ],
+  "volcano_alerts": [
+    {
+      "volcano_id": "ruapehu",
+      "volcano_name": "Ruapehu",
+      "title": "Ruapehu volcanic alert level",
+      "alert_level": 1,
+      "aviation_color_code": "Green",
+      "activity": "Minor volcanic unrest",
+      "hazards": "Volcanic unrest hazards",
+      "updated_at": "2026-04-28T10:00:00Z",
+      "latitude": -39.281,
+      "longitude": 175.57,
+      "source": "GeoNet",
+      "source_url": "https://www.geonet.org.nz/volcano/ruapehu"
+    }
+  ]
+}

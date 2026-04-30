@@ -537,8 +537,49 @@ async function runWebcamPhase(browser) {
     const candidateText = await candidateCard.textContent();
     assertIncludes(
       candidateText ?? "",
-      ["Candidate only", "interactive-map-html", "Likely camera count 299", "Compliance risk medium"],
+      [
+        "Candidate only",
+        "interactive-map-html",
+        "Likely camera count 299",
+        "Compliance risk medium",
+        "Endpoint verification needs-review",
+        "Candidate endpoint https://weathercams.faa.gov/"
+      ],
       "faa candidate card"
+    );
+
+    const minnesotaCard = page.getByTestId("webcam-source-card-minnesota-511-public-arcgis");
+    const minnesotaText = await minnesotaCard.textContent();
+    assertIncludes(
+      minnesotaText ?? "",
+      [
+        "Candidate only",
+        "Endpoint verification needs-review",
+        "Candidate endpoint https://511mn.org/",
+        "Do not scrape the interactive web app."
+      ],
+      "minnesota candidate card"
+    );
+
+    const finlandCard = page.getByTestId("webcam-source-card-finland-digitraffic-road-cameras");
+    const finlandText = await finlandCard.textContent();
+    assertIncludes(
+      finlandText ?? "",
+      [
+        "Candidate only",
+        "official-dot-api via json-api",
+        "Endpoint verification machine-readable-confirmed",
+        "Machine-readable endpoint https://tie.digitraffic.fi/api/weathercam/v1/stations",
+        "Sandbox connector available",
+        "Mode fixture",
+        "Connector FinlandDigitrafficWeatherCamConnector",
+        "Latest sandbox result needs-review",
+        "Sandbox discovered 2",
+        "Sandbox usable 1",
+        "Sandbox review queue 2",
+        "Sandbox import is not validation or activation. Source remains candidate-only."
+      ],
+      "finland sandbox candidate card"
     );
 
     const reviewPanelText = await page.getByTestId("webcam-review-queue-panel").textContent();
@@ -560,6 +601,27 @@ async function runWebcamPhase(browser) {
       coverageSummaryText ?? "",
       ["Visible Webcam Subset", "clusters", "direct-image", "viewer-only", "sources represented"],
       "webcam coverage summary"
+    );
+
+    const lifecycleSummaryText = await page.getByTestId("webcam-source-lifecycle-summary").textContent();
+    assertIncludes(
+      lifecycleSummaryText ?? "",
+      [
+        "Source Lifecycle Summary",
+        "5 total sources",
+        "1 validated",
+        "3 candidate-only",
+        "2 endpoint-verified",
+        "1 sandbox-importable",
+        "1 credential-blocked",
+        "2 blocked / do-not-scrape",
+        "3 needs review",
+        "Validated active: usgs-ashcam",
+        "Candidate sandbox-importable: finland-digitraffic-road-cameras",
+        "Blocked / do not scrape: minnesota-511-public-arcgis",
+        "Credential blocked: wsdot-cameras"
+      ],
+      "webcam source lifecycle summary"
     );
 
     await page.waitForFunction(
@@ -639,6 +701,33 @@ async function runWebcamPhase(browser) {
     if (!Array.isArray(webcamSnapshotMetadata.referenceSummary.topReferenceHints) || webcamSnapshotMetadata.referenceSummary.topReferenceHints.length < 1) {
       throw new Error("Webcam snapshot metadata did not preserve top reference hints.");
     }
+    const webcamLifecycleMetadata = await page.evaluate(
+      () => window.__worldviewLastSnapshotMetadata?.webcamSourceLifecycleSummary ?? null
+    );
+    if (!webcamLifecycleMetadata) {
+      throw new Error("Webcam snapshot metadata did not include source lifecycle summary.");
+    }
+    if (webcamLifecycleMetadata.validatedCount !== 1 || webcamLifecycleMetadata.candidateCount !== 3) {
+      throw new Error(`Unexpected webcam lifecycle counts: ${JSON.stringify(webcamLifecycleMetadata)}`);
+    }
+    if (webcamLifecycleMetadata.endpointVerifiedCount !== 2 || webcamLifecycleMetadata.sandboxImportableCount !== 1) {
+      throw new Error(`Unexpected webcam lifecycle endpoint/sandbox counts: ${JSON.stringify(webcamLifecycleMetadata)}`);
+    }
+    const sandboxRow = webcamLifecycleMetadata.rows.find((row) => row.bucket === "candidate-sandbox-importable");
+    if (!sandboxRow?.sourceKeys?.includes("finland-digitraffic-road-cameras")) {
+      throw new Error("Webcam lifecycle metadata did not preserve Finland sandbox candidate state.");
+    }
+    const blockedRow = webcamLifecycleMetadata.rows.find((row) => row.bucket === "blocked-do-not-scrape");
+    if (!blockedRow?.sourceKeys?.includes("minnesota-511-public-arcgis")) {
+      throw new Error("Webcam lifecycle metadata did not preserve Minnesota blocked/do-not-scrape state.");
+    }
+    const validatedRow = webcamLifecycleMetadata.rows.find((row) => row.bucket === "validated-active");
+    if (!validatedRow?.sourceKeys?.includes("usgs-ashcam")) {
+      throw new Error("Webcam lifecycle metadata did not preserve Ashcam validated state.");
+    }
+    if (!Array.isArray(webcamLifecycleMetadata.exportLines) || webcamLifecycleMetadata.exportLines.length < 2) {
+      throw new Error("Webcam lifecycle metadata did not preserve compact export lines.");
+    }
 
     await page.getByTestId("webcam-filter-direct-image").check();
     await page.waitForFunction(
@@ -686,6 +775,8 @@ async function runWebcamPhase(browser) {
       selected: "camera:usgs-ashcam:spurr-overlook",
       sourceCard: sourceText,
       candidateCard: candidateText,
+      minnesotaCard: minnesotaText,
+      finlandCard: finlandText,
       clusterDetail: clusterDetailText
     };
   } catch (error) {
@@ -708,13 +799,106 @@ async function runMarinePhase(browser) {
     await page.waitForSelector('[data-testid="marine-anomaly-panel"]', { timeout: 30_000 });
     await page.waitForSelector('[data-testid="marine-chokepoint-priority"]', { timeout: 30_000 });
     await page.waitForSelector('[data-testid="marine-attention-queue"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-context-sources"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-context-timeline"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-context-issues"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-environmental-context"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-noaa-context"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-ndbc-context"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-scottish-water-context"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-environmental-anchor"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-environmental-radius"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-environmental-preset"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-environmental-source-coops"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-environmental-source-ndbc"]', { timeout: 30_000 });
 
     const sectionText = await page.locator('[data-testid="marine-anomaly-section"]').textContent();
     assertIncludes(
       sectionText ?? "",
-      ["Marine Attention Priority", "Observed signals", "Inferred signals", "Scored signals", "Attention priority is a review signal"],
+      ["Marine Attention Priority", "Attention priority is a review signal", "Marine Context Sources", "Marine Environmental Context", "NOAA CO-OPS", "NOAA NDBC"],
       "marine anomaly section"
     );
+    const contextSourcesText = await page.locator('[data-testid="marine-context-sources"]').textContent();
+    assertIncludes(
+      contextSourcesText ?? "",
+      ["NOAA CO-OPS", "NOAA NDBC", "Scottish Water Overflows"],
+      "marine context source summary"
+    );
+    const contextTimelineText = await page.locator('[data-testid="marine-context-timeline"]').textContent();
+    assertIncludes(
+      contextTimelineText ?? "",
+      ["Marine Context Timeline", "snapshot"],
+      "marine context timeline"
+    );
+    const contextIssuesText = await page.locator('[data-testid="marine-context-issues"]').textContent();
+    assertIncludes(
+      contextIssuesText ?? "",
+      ["Marine Context Issues", "fixture/local mode"],
+      "marine context issues"
+    );
+    const environmentalText = await page.locator('[data-testid="marine-environmental-context"]').textContent();
+    assertIncludes(
+      environmentalText ?? "",
+      ["Marine environmental context", "nearby station"],
+      "marine environmental context"
+    );
+    const presetSummaryText = await page.locator('[data-testid="marine-environmental-preset-summary"]').textContent();
+    assertIncludes(
+      presetSummaryText ?? "",
+      ["Preset", "Chokepoint review"],
+      "marine environmental preset summary"
+    );
+    const environmentalCaveatText = await page.locator('[data-testid="marine-environmental-context-caveat"]').textContent();
+    assertIncludes(
+      environmentalCaveatText ?? "",
+      ["Environmental context", "proof of vessel intent"],
+      "marine environmental context caveat"
+    );
+    const noaaText = await page.locator('[data-testid="marine-noaa-context"]').textContent();
+    assertIncludes(noaaText ?? "", ["NOAA CO-OPS", "fixture/local"], "marine NOAA CO-OPS context");
+    const ndbcText = await page.locator('[data-testid="marine-ndbc-context"]').textContent();
+    assertIncludes(ndbcText ?? "", ["NOAA NDBC", "fixture/local"], "marine NOAA NDBC context");
+    const scottishWaterText = await page.locator('[data-testid="marine-scottish-water-context"]').textContent();
+    assertIncludes(
+      scottishWaterText ?? "",
+      ["Scottish Water Overflows", "fixture/local", "active"],
+      "marine Scottish Water overflow context"
+    );
+    await page.locator('[data-testid="marine-environmental-source-ndbc"] input').uncheck();
+    await page.waitForTimeout(300);
+    const ndbcCardCountAfterDisable = await page.locator('[data-testid="marine-ndbc-context"]').count();
+    if (ndbcCardCountAfterDisable !== 0) {
+      throw new Error("Marine NDBC context card remained visible after disabling NDBC source.");
+    }
+    const environmentalAfterDisable = await page.locator('[data-testid="marine-environmental-context"]').textContent();
+    assertIncludes(
+      environmentalAfterDisable ?? "",
+      ["Sources coops"],
+      "marine environmental context after source toggle"
+    );
+    await page.locator('[data-testid="marine-environmental-source-ndbc"] input').check();
+    await page.waitForSelector('[data-testid="marine-ndbc-context"]', { timeout: 30_000 });
+    await page.locator('[data-testid="marine-environmental-preset"] select').selectOption("buoy-weather-focus");
+    await page.waitForTimeout(300);
+    const timelineAfterPreset = await page.locator('[data-testid="marine-context-timeline"]').textContent();
+    assertIncludes(
+      timelineAfterPreset ?? "",
+      ["Buoy/weather focus"],
+      "marine context timeline after preset change"
+    );
+    const coopsCardCountAfterPreset = await page.locator('[data-testid="marine-noaa-context"]').count();
+    if (coopsCardCountAfterPreset !== 0) {
+      throw new Error("Marine NOAA CO-OPS context card remained visible after selecting buoy-weather-focus preset.");
+    }
+    const presetAfterSwitch = await page.locator('[data-testid="marine-environmental-preset-summary"]').textContent();
+    assertIncludes(
+      presetAfterSwitch ?? "",
+      ["Buoy/weather focus"],
+      "marine environmental preset switch"
+    );
+    await page.locator('[data-testid="marine-environmental-preset"] select').selectOption("chokepoint-review");
+    await page.waitForSelector('[data-testid="marine-noaa-context"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="marine-ndbc-context"]', { timeout: 30_000 });
 
     const initialRanks = await page.locator('[data-testid="marine-chokepoint-slice-item"] strong').allTextContents();
     if (initialRanks.length >= 2 && !(initialRanks[0].includes("#1") && initialRanks[1].includes("#2"))) {
@@ -764,6 +948,12 @@ async function runMarinePhase(browser) {
         interpretationText ?? "",
         ["Evidence Interpretation", "Why this was prioritized", "Trust/caveat"],
         "marine evidence interpretation panel"
+      );
+      const focusedEnvironmentalCaveat = await page.locator('[data-testid="marine-focused-environmental-caveat"]').textContent();
+      assertIncludes(
+        focusedEnvironmentalCaveat ?? "",
+        ["Environmental context"],
+        "marine focused environmental caveat"
       );
       const modeSelector = page.locator('[data-testid="marine-evidence-interpretation-mode"] select');
       await modeSelector.selectOption("compact");
@@ -831,6 +1021,124 @@ async function runMarinePhase(browser) {
     }
     if (Number(focusedEvidenceInterpretation.visibleCardCount ?? 0) < 1) {
       throw new Error("Marine snapshot metadata missing visible interpretation card count.");
+    }
+    const noaaCoopsContext = metadata.marineAnomalySummary.noaaCoopsContext ?? null;
+    if (!noaaCoopsContext) {
+      throw new Error("Marine snapshot metadata missing NOAA CO-OPS context summary.");
+    }
+    if (noaaCoopsContext.sourceMode !== "fixture") {
+      throw new Error(`Marine NOAA CO-OPS context expected fixture mode. Received ${noaaCoopsContext.sourceMode}`);
+    }
+    const ndbcContext = metadata.marineAnomalySummary.ndbcContext ?? null;
+    if (!ndbcContext) {
+      throw new Error("Marine snapshot metadata missing NOAA NDBC context summary.");
+    }
+    if (ndbcContext.sourceMode !== "fixture") {
+      throw new Error(`Marine NOAA NDBC context expected fixture mode. Received ${ndbcContext.sourceMode}`);
+    }
+    const scottishWaterContext = metadata.marineAnomalySummary.scottishWaterOverflowContext ?? null;
+    if (!scottishWaterContext) {
+      throw new Error("Marine snapshot metadata missing Scottish Water overflow context summary.");
+    }
+    if (scottishWaterContext.sourceMode !== "fixture") {
+      throw new Error(`Marine Scottish Water context expected fixture mode. Received ${scottishWaterContext.sourceMode}`);
+    }
+    if (Number(scottishWaterContext.activeMonitorCount ?? 0) < 1) {
+      throw new Error("Marine Scottish Water context expected at least one active monitor in fixture metadata.");
+    }
+    const contextSourceSummary = metadata.marineAnomalySummary.contextSourceSummary ?? null;
+    if (!contextSourceSummary) {
+      throw new Error("Marine snapshot metadata missing context source summary.");
+    }
+    if (Number(contextSourceSummary.sourceCount ?? 0) < 3) {
+      throw new Error(`Marine context source summary expected at least 3 rows. Received ${contextSourceSummary.sourceCount}`);
+    }
+    if (!Array.isArray(contextSourceSummary.rows) || contextSourceSummary.rows.length < 3) {
+      throw new Error("Marine context source summary rows missing from snapshot metadata.");
+    }
+    const contextSourceLabels = contextSourceSummary.rows.map((row) => row.label);
+    for (const expectedLabel of ["NOAA CO-OPS", "NOAA NDBC", "Scottish Water Overflows"]) {
+      if (!contextSourceLabels.includes(expectedLabel)) {
+        throw new Error(`Marine context source summary metadata missing row label: ${expectedLabel}`);
+      }
+    }
+    const contextTimeline = metadata.marineAnomalySummary.contextTimeline ?? null;
+    if (!contextTimeline) {
+      throw new Error("Marine snapshot metadata missing context timeline summary.");
+    }
+    if (Number(contextTimeline.snapshotCount ?? 0) < 2) {
+      throw new Error(`Marine context timeline expected at least 2 snapshots after preset changes. Received ${contextTimeline.snapshotCount}`);
+    }
+    if (!contextTimeline.currentSnapshot) {
+      throw new Error("Marine context timeline missing current snapshot.");
+    }
+    if (!("previousSnapshot" in contextTimeline)) {
+      throw new Error("Marine context timeline metadata missing previousSnapshot field.");
+    }
+    await page.locator('[data-testid="marine-context-timeline-clear"]').click();
+    await page.waitForTimeout(150);
+    const timelineAfterClear = await page.locator('[data-testid="marine-context-timeline"]').textContent();
+    assertIncludes(
+      timelineAfterClear ?? "",
+      ["0 snapshots", "No marine context snapshots recorded yet."],
+      "marine context timeline clear action"
+    );
+    const environmentalContext = metadata.marineAnomalySummary.environmentalContext ?? null;
+    if (!environmentalContext) {
+      throw new Error("Marine snapshot metadata missing combined environmental context summary.");
+    }
+    if (Number(environmentalContext.sourceCount ?? 0) < 2) {
+      throw new Error(`Marine environmental context expected 2 sources. Received ${environmentalContext.sourceCount}`);
+    }
+    if (!Array.isArray(environmentalContext.enabledSources) || environmentalContext.enabledSources.length < 1) {
+      throw new Error("Marine environmental context metadata missing enabledSources.");
+    }
+    if (environmentalContext.presetId !== "chokepoint-review") {
+      throw new Error(`Marine environmental context expected chokepoint-review preset. Received ${environmentalContext.presetId}`);
+    }
+    if (!environmentalContext.presetLabel) {
+      throw new Error("Marine environmental context metadata missing presetLabel.");
+    }
+    if (environmentalContext.isCustomPreset !== false) {
+      throw new Error("Marine environmental context expected predefined preset state in exported metadata.");
+    }
+    if (environmentalContext.radiusKm !== 400) {
+      throw new Error(`Marine environmental context expected default radius 400 km. Received ${environmentalContext.radiusKm}`);
+    }
+    if (!environmentalContext.effectiveAnchor) {
+      throw new Error("Marine environmental context metadata missing effectiveAnchor.");
+    }
+    const interpretationEnvironmentalAvailability =
+      focusedEvidenceInterpretation.environmentalContextAvailability ?? null;
+    if (!interpretationEnvironmentalAvailability) {
+      throw new Error("Marine snapshot metadata missing environmental interpretation availability.");
+    }
+    const interpretationEnvironmentalCaveats =
+      focusedEvidenceInterpretation.environmentalCaveats ?? [];
+    if (
+      !interpretationEnvironmentalCaveats.some(
+        (item) =>
+          String(item).toLowerCase().includes("environmental context") &&
+          String(item).toLowerCase().includes("proof of vessel intent")
+      )
+    ) {
+      throw new Error("Marine snapshot metadata missing environmental caveat summary.");
+    }
+    const contextIssueQueue = metadata.marineAnomalySummary.contextIssueQueue ?? null;
+    if (!contextIssueQueue) {
+      throw new Error("Marine snapshot metadata missing context issue queue.");
+    }
+    if (Number(contextIssueQueue.issueCount ?? 0) < 1) {
+      throw new Error("Marine context issue queue expected at least one issue in fixture mode.");
+    }
+    if (Number(contextIssueQueue.infoCount ?? 0) < 1) {
+      throw new Error("Marine context issue queue expected at least one informational fixture-mode issue.");
+    }
+    if (!Array.isArray(contextIssueQueue.topIssues) || contextIssueQueue.topIssues.length < 1) {
+      throw new Error("Marine context issue queue topIssues missing from snapshot metadata.");
+    }
+    if (!contextIssueQueue.topIssues.some((issue) => issue.issueType === "fixture-mode")) {
+      throw new Error("Marine context issue queue expected a fixture-mode issue in snapshot metadata.");
     }
 
     return {

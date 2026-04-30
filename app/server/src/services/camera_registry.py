@@ -8,6 +8,7 @@ from src.types.api import (
     CandidateAssessmentLevel,
     CameraSourceInventoryEntry,
     CameraSourceRegistryEntry,
+    EndpointVerificationStatus,
     InventorySourceType,
     OnboardingState,
     PageStructureType,
@@ -57,6 +58,16 @@ class CameraSourceDefinition:
     likely_camera_count: int | None = None
     compliance_risk: CandidateAssessmentLevel | None = None
     extraction_feasibility: CandidateAssessmentLevel | None = None
+    endpoint_verification_status: EndpointVerificationStatus | None = None
+    candidate_endpoint_url: str | None = None
+    machine_readable_endpoint_url: str | None = None
+    last_endpoint_check_at: str | None = None
+    last_endpoint_http_status: int | None = None
+    last_endpoint_content_type: str | None = None
+    last_endpoint_result: str | None = None
+    last_endpoint_notes: tuple[str, ...] = ()
+    verification_caveat: str | None = None
+    blocked_reason: str | None = None
     notes: tuple[str, ...]
     compliance: CameraComplianceMetadata
 
@@ -396,6 +407,18 @@ _SOURCE_DEFINITIONS: tuple[CameraSourceDefinition, ...] = (
         rate_limit_notes=("Public USGS API; keep polling conservative and metadata-first.",),
         quality_notes=("Official structured federal webcam API with direct image URLs.",),
         stability_notes=("Public JSON API with current-image and newest-image metadata.",),
+        endpoint_verification_status="machine-readable-confirmed",
+        candidate_endpoint_url="https://volcview.wr.usgs.gov/ashcam-api/webcamApi",
+        machine_readable_endpoint_url="https://volcview.wr.usgs.gov/ashcam-api/webcamApi",
+        last_endpoint_check_at="2026-04-28",
+        last_endpoint_http_status=200,
+        last_endpoint_content_type="application/json",
+        last_endpoint_result="Public USGS Ashcam API responded with machine-readable JSON and remains a validated no-auth endpoint.",
+        last_endpoint_notes=(
+            "Validated no-auth source used by the active Ashcam connector.",
+            "Endpoint metadata is retained for source-operations visibility only.",
+        ),
+        verification_caveat="Validated machine-readable endpoint availability does not expand frame-storage rights or bypass source compliance terms.",
         notes=(
             "USGS Ashcam API exposes public webcam metadata and current images without user credentials.",
             "Some cameras are FAA-linked or volcanic-hazard cameras and may have intermittent imagery.",
@@ -459,6 +482,70 @@ _SOURCE_DEFINITIONS: tuple[CameraSourceDefinition, ...] = (
         ),
     ),
     CameraSourceDefinition(
+        key="finland-digitraffic-road-cameras",
+        display_name="Finland Digitraffic Road Weather Cameras",
+        owner="Fintraffic / Digitraffic",
+        source_type="official-dot",
+        inventory_source_type="official-dot-api",
+        source_family="digitraffic-road",
+        access_method="json-api",
+        onboarding_state="candidate",
+        coverage="Finland nationwide road weather camera network",
+        coverage_states=(),
+        coverage_regions=("Finland",),
+        priority=78,
+        authentication="none",
+        default_refresh_interval_seconds=1800,
+        refresh_policy=RefreshPolicy(1800, 1800, 1800, False, 1800, 1800, 7200),
+        provides_exact_coordinates=True,
+        provides_direction_text=False,
+        provides_numeric_heading=False,
+        provides_direct_image=True,
+        provides_viewer_only=False,
+        supports_embed=False,
+        supports_storage=False,
+        rate_limit_notes=(
+            "Digitraffic recommends identifying the application with the Digitraffic-User header.",
+            "General no-header restriction is 60 requests per minute per IP; keep polling conservative until a connector exists.",
+        ),
+        quality_notes=("Official road weather camera API with documented station and image endpoints.",),
+        stability_notes=("Official JSON API documented by Digitraffic road traffic APIs.",),
+        likely_camera_count=470,
+        compliance_risk="low",
+        extraction_feasibility="high",
+        endpoint_verification_status="machine-readable-confirmed",
+        candidate_endpoint_url="https://tie.digitraffic.fi/api/weathercam/v1/stations",
+        machine_readable_endpoint_url="https://tie.digitraffic.fi/api/weathercam/v1/stations",
+        last_endpoint_check_at="2026-04-30",
+        last_endpoint_http_status=200,
+        last_endpoint_content_type="application/json;charset=UTF-8",
+        last_endpoint_result="Official Digitraffic road weather camera endpoint responded with machine-readable JSON and documented direct image URLs for presets.",
+        last_endpoint_notes=(
+            "Narrow first slice is road traffic weather cameras only; rail and marine remain out of scope for webcam ownership.",
+            "Endpoint verification does not justify activation without fixtures, mapping review, and source-health validation.",
+        ),
+        verification_caveat="Machine-readable verification is limited to the road weather camera endpoint and does not activate broader Finland Digitraffic transport coverage.",
+        blocked_reason="Candidate only. Road weather camera endpoint is verified, but connector work, fixtures, capability mapping, and source-health review are still required before activation.",
+        notes=(
+            "Official Finland Digitraffic road traffic API candidate.",
+            "First webcam-owned slice is road weather cameras because the API is documented, no-auth, and machine-readable.",
+        ),
+        compliance=CameraComplianceMetadata(
+            attribution_text="Fintraffic / Digitraffic Road Traffic APIs",
+            attribution_url="https://www.digitraffic.fi/en/road-traffic/",
+            terms_url="https://www.digitraffic.fi/en/terms-of-service/",
+            license_summary="Fintraffic open data under CC BY 4.0 with attribution and conservative operational use requirements.",
+            requires_authentication=False,
+            supports_embedding=False,
+            supports_frame_storage=False,
+            review_required=True,
+            notes=[
+                "Preserve Fintraffic / digitraffic.fi attribution and CC BY 4.0 license notice.",
+                "Do not promote to active ingestion until manual review confirms camera field mapping and operational cadence.",
+            ],
+        ),
+    ),
+    CameraSourceDefinition(
         key="faa-weather-cameras-page",
         display_name="FAA Weather Cameras Page",
         owner="Federal Aviation Administration",
@@ -488,6 +575,19 @@ _SOURCE_DEFINITIONS: tuple[CameraSourceDefinition, ...] = (
         likely_camera_count=299,
         compliance_risk="medium",
         extraction_feasibility="medium",
+        endpoint_verification_status="needs-review",
+        candidate_endpoint_url="https://weathercams.faa.gov/",
+        machine_readable_endpoint_url=None,
+        last_endpoint_check_at="2026-04-29",
+        last_endpoint_http_status=200,
+        last_endpoint_content_type="text/html",
+        last_endpoint_result="Public FAA weather camera site is reachable, but no stable no-auth machine-readable endpoint is verified yet.",
+        last_endpoint_notes=(
+            "Treat the public site as a candidate URL only.",
+            "Do not scrape the interactive app while endpoint verification is unresolved.",
+        ),
+        verification_caveat="Candidate URL reachability does not imply a compliant machine-readable ingest path.",
+        blocked_reason="Candidate only. Compliance and extraction review are still required before any ingest path is enabled.",
         notes=(
             "Official FAA weather camera site candidate.",
             "Worth pursuing because the FAA states the program currently maintains hundreds of sites.",
@@ -502,6 +602,68 @@ _SOURCE_DEFINITIONS: tuple[CameraSourceDefinition, ...] = (
             supports_frame_storage=False,
             review_required=True,
             notes=["Treat as an official viewer/page candidate until a compliant machine-readable path is confirmed."],
+        ),
+    ),
+    CameraSourceDefinition(
+        key="minnesota-511-public-arcgis",
+        display_name="Minnesota 511 Public Endpoint Candidate",
+        owner="Minnesota DOT / 511MN",
+        source_type="public-webcam",
+        inventory_source_type="public-camera-page",
+        source_family="511-public-endpoint-candidate",
+        access_method="html-index",
+        onboarding_state="candidate",
+        coverage="Minnesota statewide 511 cameras and weather operations candidate",
+        coverage_states=("MN",),
+        coverage_regions=("Minnesota",),
+        priority=79,
+        authentication="none",
+        default_refresh_interval_seconds=1800,
+        refresh_policy=RefreshPolicy(1800, 1800, 1800, False, 1800, 1800, 7200),
+        provides_exact_coordinates=False,
+        provides_direction_text=False,
+        provides_numeric_heading=False,
+        provides_direct_image=False,
+        provides_viewer_only=False,
+        supports_embed=False,
+        supports_storage=False,
+        rate_limit_notes=("No stable public machine endpoint has been verified; do not poll the public web app.",),
+        quality_notes=("Potentially high-value statewide traffic camera source if a public machine endpoint is confirmed.",),
+        stability_notes=("Public web app currently requires separate endpoint verification and should not be treated as an API.",),
+        page_structure="interactive-map-html",
+        likely_camera_count=None,
+        compliance_risk="medium",
+        extraction_feasibility="low",
+        endpoint_verification_status="needs-review",
+        candidate_endpoint_url="https://511mn.org/",
+        machine_readable_endpoint_url=None,
+        last_endpoint_check_at="2026-04-29",
+        last_endpoint_http_status=200,
+        last_endpoint_content_type="text/html",
+        last_endpoint_result="Gather registry verified only the public site URL. No stable public no-auth machine endpoint was confirmed.",
+        last_endpoint_notes=(
+            "Interactive app includes separate verification concerns and must not be scraped.",
+            "Graduate only after a stable public machine endpoint is independently confirmed.",
+        ),
+        verification_caveat="Interactive web app availability is not evidence of a stable backend endpoint.",
+        blocked_reason="Needs verification. Gather registry did not confirm a stable public no-auth machine endpoint. Do not scrape the interactive web app.",
+        notes=(
+            "Gather registry candidate only.",
+            "Do not activate ingestion until a documented or otherwise stable public no-auth endpoint is verified.",
+        ),
+        compliance=CameraComplianceMetadata(
+            attribution_text="511MN",
+            attribution_url="https://511mn.org/",
+            terms_url="https://511mn.org/help/index.html",
+            license_summary="Candidate Minnesota 511 source pending endpoint verification and compliance review.",
+            requires_authentication=False,
+            supports_embedding=False,
+            supports_frame_storage=False,
+            review_required=True,
+            notes=[
+                "Do not scrape the interactive map.",
+                "Treat as inventory-only until a compliant machine endpoint is confirmed.",
+            ],
         ),
     ),
     CameraSourceDefinition(
@@ -533,6 +695,19 @@ _SOURCE_DEFINITIONS: tuple[CameraSourceDefinition, ...] = (
         page_structure="interactive-map-html",
         compliance_risk="medium",
         extraction_feasibility="medium",
+        endpoint_verification_status="candidate-url-only",
+        candidate_endpoint_url="https://www.newengland511.org/map",
+        machine_readable_endpoint_url=None,
+        last_endpoint_check_at="2026-04-12",
+        last_endpoint_http_status=200,
+        last_endpoint_content_type="text/html",
+        last_endpoint_result="Reachable public page candidate only. No approved machine-readable endpoint is configured.",
+        last_endpoint_notes=(
+            "Inventory visibility is allowed.",
+            "Do not treat the HTML map as an API.",
+        ),
+        verification_caveat="Reachable HTML does not satisfy the machine-readable endpoint requirement.",
+        blocked_reason="Candidate only. Page/index review is complete enough for inventory visibility, but extraction and compliance approval are still required.",
         notes=(
             "Public camera map/index candidate.",
             "Requires compliance and stability review before active onboarding.",
@@ -578,6 +753,19 @@ _SOURCE_DEFINITIONS: tuple[CameraSourceDefinition, ...] = (
         page_structure="interactive-map-html",
         compliance_risk="medium",
         extraction_feasibility="medium",
+        endpoint_verification_status="candidate-url-only",
+        candidate_endpoint_url="https://www.511pa.com/map/page/psfto",
+        machine_readable_endpoint_url=None,
+        last_endpoint_check_at="2026-04-12",
+        last_endpoint_http_status=200,
+        last_endpoint_content_type="text/html",
+        last_endpoint_result="Reachable public page candidate only. No approved machine-readable endpoint is configured.",
+        last_endpoint_notes=(
+            "Inventory visibility is allowed.",
+            "Do not treat the HTML map as an API.",
+        ),
+        verification_caveat="Reachable HTML does not satisfy the machine-readable endpoint requirement.",
+        blocked_reason="Candidate only. Page/index review is complete enough for inventory visibility, but extraction and compliance approval are still required.",
         notes=(
             "Public camera map/index candidate.",
             "Requires compliance and stability review before active onboarding.",
@@ -623,6 +811,19 @@ _SOURCE_DEFINITIONS: tuple[CameraSourceDefinition, ...] = (
         page_structure="interactive-map-html",
         compliance_risk="medium",
         extraction_feasibility="medium",
+        endpoint_verification_status="candidate-url-only",
+        candidate_endpoint_url="https://publicmap.511nj.org/",
+        machine_readable_endpoint_url=None,
+        last_endpoint_check_at="2026-04-12",
+        last_endpoint_http_status=200,
+        last_endpoint_content_type="text/html",
+        last_endpoint_result="Reachable public page candidate only. No approved machine-readable endpoint is configured.",
+        last_endpoint_notes=(
+            "Inventory visibility is allowed.",
+            "Do not treat the HTML map as an API.",
+        ),
+        verification_caveat="Reachable HTML does not satisfy the machine-readable endpoint requirement.",
+        blocked_reason="Candidate only. Page/index review is complete enough for inventory visibility, but extraction and compliance approval are still required.",
         notes=(
             "Public camera map/index candidate.",
             "Requires compliance and stability review before active onboarding.",
@@ -667,10 +868,20 @@ def _credentials_configured(definition: CameraSourceDefinition, settings: Settin
 def build_camera_source_registry(settings: Settings) -> list[CameraSourceRegistryEntry]:
     entries: list[CameraSourceRegistryEntry] = []
     for definition in sorted(_SOURCE_DEFINITIONS, key=lambda item: item.priority):
-        enabled = is_camera_source_enabled(definition.key, settings)
+        credentials_configured = is_camera_source_enabled(definition.key, settings)
+        enabled = credentials_configured and definition.onboarding_state == "approved"
         onboarding_state: OnboardingState = definition.onboarding_state
         if onboarding_state == "approved" and enabled:
             onboarding_state = "active"
+        if definition.onboarding_state == "candidate":
+            status = "needs-review"
+            detail = definition.blocked_reason or f"{definition.display_name} is inventory-only and not active for import."
+        elif enabled:
+            status = "never-fetched"
+            detail = f"{definition.display_name} is configured for camera ingestion."
+        else:
+            status = "credentials-missing"
+            detail = f"{definition.display_name} requires {definition.authentication} credentials."
         entries.append(
             CameraSourceRegistryEntry(
                 key=definition.key,
@@ -684,13 +895,10 @@ def build_camera_source_registry(settings: Settings) -> list[CameraSourceRegistr
                 default_refresh_interval_seconds=definition.default_refresh_interval_seconds,
                 notes=list(definition.notes),
                 compliance=definition.compliance,
-                status="never-fetched" if enabled else "credentials-missing",
-                detail=(
-                    f"{definition.display_name} is configured for camera ingestion."
-                    if enabled
-                    else f"{definition.display_name} requires {definition.authentication} credentials."
-                ),
-                credentials_configured=enabled,
+                status=status,
+                detail=detail,
+                credentials_configured=credentials_configured,
+                blocked_reason=definition.blocked_reason,
                 next_refresh_at=None,
                 backoff_until=None,
                 retry_count=0,
@@ -718,6 +926,15 @@ def build_camera_source_registry(settings: Settings) -> list[CameraSourceRegistr
                 likely_camera_count=definition.likely_camera_count,
                 compliance_risk=definition.compliance_risk,
                 extraction_feasibility=definition.extraction_feasibility,
+                endpoint_verification_status=definition.endpoint_verification_status,
+                candidate_endpoint_url=definition.candidate_endpoint_url,
+                machine_readable_endpoint_url=definition.machine_readable_endpoint_url,
+                last_endpoint_check_at=definition.last_endpoint_check_at,
+                last_endpoint_http_status=definition.last_endpoint_http_status,
+                last_endpoint_content_type=definition.last_endpoint_content_type,
+                last_endpoint_result=definition.last_endpoint_result,
+                last_endpoint_notes=list(definition.last_endpoint_notes),
+                verification_caveat=definition.verification_caveat,
             )
         )
     return entries
@@ -759,7 +976,16 @@ def build_camera_source_inventory(settings: Settings) -> list[CameraSourceInvent
                 likely_camera_count=definition.likely_camera_count,
                 compliance_risk=definition.compliance_risk,
                 extraction_feasibility=definition.extraction_feasibility,
-                blocked_reason=None,
+                endpoint_verification_status=definition.endpoint_verification_status,
+                candidate_endpoint_url=definition.candidate_endpoint_url,
+                machine_readable_endpoint_url=definition.machine_readable_endpoint_url,
+                last_endpoint_check_at=definition.last_endpoint_check_at,
+                last_endpoint_http_status=definition.last_endpoint_http_status,
+                last_endpoint_content_type=definition.last_endpoint_content_type,
+                last_endpoint_result=definition.last_endpoint_result,
+                last_endpoint_notes=list(definition.last_endpoint_notes),
+                verification_caveat=definition.verification_caveat,
+                blocked_reason=definition.blocked_reason,
                 approximate_camera_count=None,
                 last_catalog_import_at=None,
                 last_catalog_import_status=None,
@@ -801,4 +1027,10 @@ def is_camera_source_enabled(key: str, settings: Settings) -> bool:
     definition = get_camera_source_definition(key)
     if definition is not None and definition.authentication == "none":
         return True
+    return False
+
+
+def is_camera_source_sandbox_importable(key: str, settings: Settings) -> bool:
+    if key == "finland-digitraffic-road-cameras":
+        return settings.finland_digitraffic_weathercam_mode.lower() in {"fixture", "live"}
     return False

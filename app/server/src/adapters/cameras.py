@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from hashlib import sha1
+import json
+from pathlib import Path
 from typing import Any, Literal
 
 import httpx
@@ -672,6 +674,100 @@ def _normalize_ashcam_item(
     )
 
 
+def _normalize_finland_digitraffic_feature(
+    item: Any,
+    *,
+    fetched_at: str,
+    source_name: str,
+    owner: str,
+    compliance: CameraComplianceMetadata,
+    fixture_mode: bool,
+) -> list[CameraEntity] | None:
+    if not isinstance(item, dict):
+        return None
+    properties = item.get("properties") if isinstance(item.get("properties"), dict) else {}
+    station_id = _first_str(item, "id") or _first_str(properties, "id")
+    station_name = _first_str(properties, "name") or station_id or "Digitraffic weather camera station"
+    collection_status = _first_str(properties, "collectionStatus")
+    latitude, longitude, position = _classify_geojson_position(
+        item.get("geometry"),
+        "Digitraffic weather camera coordinates",
+    )
+    if latitude is None or longitude is None:
+        return None
+
+    presets = properties.get("presets")
+    if not isinstance(presets, list) or not presets:
+        presets = [{"id": station_id, "inCollection": False}]
+
+    results: list[CameraEntity] = []
+    for index, preset in enumerate(presets):
+        preset_data = preset if isinstance(preset, dict) else {}
+        preset_id = _first_str(preset_data, "id") or f"{station_id or 'station'}:{index + 1}"
+        in_collection = bool(preset_data.get("inCollection"))
+        image_url = (
+            f"https://weathercam.digitraffic.fi/{preset_id}.jpg"
+            if in_collection and preset_id
+            else None
+        )
+        frame = _classify_frame(
+            image_url=image_url,
+            viewer_url=None,
+            stream_url=None,
+            width=None,
+            height=None,
+        )
+        orientation = _classify_orientation(
+            direction_text=None,
+            degrees=None,
+            source="Digitraffic road weather camera station metadata does not provide verified orientation",
+        )
+        label = f"{station_name} [{preset_id}]"
+        notes: list[str] = []
+        if collection_status:
+            notes.append(f"collectionStatus={collection_status}")
+        if not in_collection:
+            notes.append("Preset is not in collection and does not currently expose a direct image URL.")
+        results.append(
+            _build_camera_entity(
+                source=source_name,
+                entity_id=f"camera:{source_name}:{station_id or 'station'}:{preset_id}",
+                label=label,
+                latitude=latitude,
+                longitude=longitude,
+                fetched_at=fetched_at,
+                external_url=image_url,
+                camera_id=preset_id,
+                source_camera_id=station_id,
+                owner=owner,
+                state=None,
+                county=None,
+                region="Finland",
+                roadway=None,
+                direction=None,
+                location_description=station_name,
+                feed_type="snapshot",
+                position=position,
+                orientation=orientation,
+                frame=frame,
+                compliance=compliance,
+                metadata={
+                    "stationId": station_id,
+                    "stationName": station_name,
+                    "collectionStatus": collection_status,
+                    "dataUpdatedTime": _first_str(properties, "dataUpdatedTime"),
+                    "presetInCollection": in_collection,
+                    "provider": "digitraffic",
+                    "fixtureMode": fixture_mode,
+                    "notes": notes,
+                },
+                reference_hint_text=station_name,
+                facility_code_hint=station_id,
+            )
+        )
+    return results
+
+
 class Structured511CameraConnector(CameraConnector):
     def __init__(
         self,
@@ -776,6 +872,74 @@ class UsgsAshcamConnector(CameraConnector):
         )
 
 
+class FinlandDigitrafficWeatherCamConnector(CameraConnector):
+    source_name = "finland-digitraffic-road-cameras"
+
+    async def fetch(self) -> CameraSourceFetchResult:
+        mode = self._settings.finland_digitraffic_weathercam_mode.lower()
+        if mode == "fixture":
+            payload = self._load_fixture_payload()
+            status_code = 200
+            detail = "Finland Digitraffic road weather camera metadata refreshed from fixture."
+        elif mode == "live":
+            async with httpx.AsyncClient(
+                timeout=20.0,
+                headers={"Digitraffic-User": "11Writer/FinlandWeatherCamConnector 1.0"},
+            ) as client:
+                response = await client.get(
+                    f"{self._settings.finland_digitraffic_weathercam_base_url.rstrip('/')}/stations"
+                )
+                payload = _safe_json(response)
+                status_code = response.status_code
+            detail = "Finland Digitraffic road weather camera metadata refreshed from live endpoint."
+        else:
+            raise RuntimeError(
+                "FINLAND_DIGITRAFFIC_WEATHERCAM_MODE must be 'fixture' or 'live'."
+            )
+
+        features = payload.get("features") if isinstance(payload, dict) else []
+        if not isinstance(features, list):
+            features = []
+
+        fetched_at = _now_iso()
+        cameras: list[CameraEntity] = []
+        warnings: list[str] = []
+        failures = 0
+        total_records = 0
+        for feature in features:
+            normalized = _normalize_finland_digitraffic_feature(
+                feature,
+                fetched_at=fetched_at,
+                source_name=self.source_name,
+                owner="Fintraffic / Digitraffic",
+                compliance=self.compliance,
+                fixture_mode=(mode == "fixture"),
+            )
+            if not normalized:
+                failures += 1
+                continue
+            cameras.extend(normalized)
+            total_records += len(normalized)
+            for camera in normalized:
+                if camera.review.status != "verified":
+                    warnings.append(f"{camera.label}: {camera.review.reason or 'metadata requires review'}")
+
+        return self._result_from_normalization(
+            cameras=cameras,
+            warnings=_dedupe(warnings),
+            total_records=total_records,
+            partial_failure_count=failures,
+            detail=detail,
+            last_http_status=status_code,
+        )
+
+    def _load_fixture_payload(self) -> Any:
+        fixture_path = Path(self._settings.finland_digitraffic_weathercam_fixture_path)
+        if not fixture_path.is_absolute():
+            fixture_path = Path.cwd() / fixture_path
+        return json.loads(fixture_path.read_text(encoding="utf-8"))
+
+
 class WindyWebcamConnector(CameraConnector):
     source_name = "windy-webcams"
 
@@ -876,7 +1040,7 @@ class WindyWebcamConnector(CameraConnector):
                 "operator": _first_str(item, "operator"),
                 "provider": "windy",
             },
-        )
+        ) 
 
 
 def build_camera_connectors(settings: Settings) -> list[CameraConnector]:
@@ -913,6 +1077,7 @@ def build_camera_connectors(settings: Settings) -> list[CameraConnector]:
             api_key=settings.alaska_511_api_key,
         ),
         UsgsAshcamConnector(settings),
+        FinlandDigitrafficWeatherCamConnector(settings),
         WindyWebcamConnector(settings),
     ]
 
@@ -1096,6 +1261,14 @@ def _review_issues(
                 required_action="Confirm whether a compliant direct image path exists or keep viewer-only handling.",
             )
         )
+    if frame.status == "unavailable":
+        issues.append(
+            ConnectorIssue(
+                category="frame-unavailable",
+                reason="Camera metadata does not currently provide a usable image URL.",
+                required_action="Verify whether the source should expose a direct image path or keep the camera review-gated.",
+            )
+        )
     if frame.status == "blocked":
         issues.append(
             ConnectorIssue(
@@ -1143,6 +1316,38 @@ def _classify_position(
             confidence=None,
             source=source_label,
             notes=["No trusted coordinates were available from the upstream payload."],
+        ),
+    )
+
+
+def _classify_geojson_position(
+    geometry: Any,
+    source_label: str,
+) -> tuple[float | None, float | None, CameraPositionMetadata]:
+    if isinstance(geometry, dict):
+        coordinates = geometry.get("coordinates")
+        if isinstance(coordinates, list) and len(coordinates) >= 2:
+            longitude = _float_or_none(coordinates[0])
+            latitude = _float_or_none(coordinates[1])
+            if latitude is not None and longitude is not None:
+                return (
+                    latitude,
+                    longitude,
+                    CameraPositionMetadata(
+                        kind="exact",
+                        confidence=1.0,
+                        source=source_label,
+                        notes=[],
+                    ),
+                )
+    return (
+        None,
+        None,
+        CameraPositionMetadata(
+            kind="unknown",
+            confidence=None,
+            source=source_label,
+            notes=["Source geometry did not include trustworthy coordinates."],
         ),
     )
 
@@ -1337,13 +1542,19 @@ def _first_str(item: dict[str, Any], *keys: str) -> str | None:
 def _first_float(item: dict[str, Any], *keys: str) -> float | None:
     for key in keys:
         value = item.get(key)
-        if value is None or isinstance(value, bool):
-            continue
-        try:
-            return float(value)
-        except (TypeError, ValueError):
-            continue
+        converted = _float_or_none(value)
+        if converted is not None:
+            return converted
     return None
+
+
+def _float_or_none(value: Any) -> float | None:
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def _first_int(item: dict[str, Any], *keys: str) -> int | None:

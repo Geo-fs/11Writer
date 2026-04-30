@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Google Alert - cybersecurity</title>
+    <link>https://www.google.com/alerts/feeds/00000000000000000000/placeholder</link>
+    <description>Discovery-oriented Google Alerts style feed for cybersecurity media search context.</description>
+    <lastBuildDate>Tue, 29 Apr 2026 09:00:00 GMT</lastBuildDate>
+    <item>
+      <title>Ransomware campaign disrupts regional hospital systems</title>
+      <link>https://news.example.com/security/ransomware-hospital-systems</link>
+      <guid isPermaLink="false">ga-cyber-001</guid>
+      <pubDate>Tue, 29 Apr 2026 08:15:00 GMT</pubDate>
+      <description><![CDATA[Multiple regional hospitals shifted to downtime procedures after a ransomware campaign.]]></description>
+      <category>cybersecurity</category>
+      <category>ransomware</category>
+    </item>
+    <item>
+      <title>Ransomware campaign disrupts regional hospital systems</title>
+      <link>https://news.example.com/security/ransomware-hospital-systems</link>
+      <guid isPermaLink="false">ga-cyber-001</guid>
+      <pubDate>Tue, 29 Apr 2026 08:15:00 GMT</pubDate>
+      <description><![CDATA[Duplicate alert item to verify deterministic dedupe behavior.]]></description>
+      <category>cybersecurity</category>
+      <category>ransomware</category>
+    </item>
+    <item>
+      <title>New phishing kit targets logistics providers</title>
+      <link>https://research.example.org/briefs/phishing-kit-logistics</link>
+      <guid isPermaLink="false">ga-cyber-002</guid>
+      <pubDate>Tue, 29 Apr 2026 07:30:00 GMT</pubDate>
+      <description><![CDATA[Researchers describe a phishing kit that imitates freight and customs notifications.]]></description>
+      <category>cybersecurity</category>
+      <category>phishing</category>
+    </item>
+    <item>
+      <title>Advisory roundup: exploited edge appliance vulnerabilities</title>
+      <link>https://analysis.example.net/posts/edge-appliance-vulnerabilities</link>
+      <guid isPermaLink="false">ga-cyber-003</guid>
+      <description><![CDATA[Roundup of open reporting on edge appliance vulnerabilities and patch status discussions.]]></description>
+      <category>cybersecurity</category>
+      <category>vulnerability</category>
+    </item>
+  </channel>
+</rss>

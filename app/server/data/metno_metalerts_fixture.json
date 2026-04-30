@@ -1,0 +1,136 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [10.0, 59.0],
+            [11.2, 59.0],
+            [11.2, 60.1],
+            [10.0, 60.1],
+            [10.0, 59.0]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "metno-red-rain-001",
+        "title": "Red warning for heavy rain in Oslo area",
+        "event": "rain",
+        "awareness_level": "red",
+        "riskMatrixColor": "Red",
+        "severity": "Extreme",
+        "certainty": "Likely",
+        "urgency": "Immediate",
+        "area": "Oslo and nearby land areas",
+        "effective": "2026-04-29T06:00:00Z",
+        "onset": "2026-04-29T08:00:00Z",
+        "expires": "2026-04-29T18:00:00Z",
+        "sent": "2026-04-29T05:10:00Z",
+        "updated": "2026-04-29T05:20:00Z",
+        "status": "Actual",
+        "type": "Alert",
+        "web": "https://www.yr.no/en/weather-warnings"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [4.5, 60.0],
+            [6.1, 60.0],
+            [6.1, 61.0],
+            [4.5, 61.0],
+            [4.5, 60.0]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "metno-orange-wind-002",
+        "title": "Orange warning for strong wind on the west coast",
+        "event": "wind",
+        "awareness_level": "orange",
+        "riskMatrixColor": "Orange",
+        "severity": "Severe",
+        "certainty": "Possible",
+        "urgency": "Expected",
+        "area": "Western coastal counties",
+        "effective": "2026-04-29T07:00:00Z",
+        "onset": "2026-04-29T10:00:00Z",
+        "expires": "2026-04-29T21:00:00Z",
+        "sent": "2026-04-29T04:40:00Z",
+        "updated": "2026-04-29T05:30:00Z",
+        "status": "Actual",
+        "type": "Update",
+        "web": "https://www.yr.no/en/weather-warnings"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [17.0, 68.0],
+            [19.0, 68.0],
+            [19.0, 69.1],
+            [17.0, 69.1],
+            [17.0, 68.0]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "metno-yellow-snow-003",
+        "title": "Yellow warning for snow",
+        "event": "snow",
+        "awareness_level": "yellow",
+        "riskMatrixColor": "Yellow",
+        "severity": "Moderate",
+        "area": "Northern inland regions",
+        "effective": "2026-04-29T03:00:00Z",
+        "expires": "2026-04-29T16:00:00Z",
+        "sent": "2026-04-29T02:20:00Z",
+        "status": "Actual",
+        "type": "Alert",
+        "web": "https://www.yr.no/en/weather-warnings"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [13.0, 63.5],
+            [14.0, 63.5],
+            [14.0, 64.3],
+            [13.0, 64.3],
+            [13.0, 63.5]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "metno-green-ice-004",
+        "title": "Cancelled icy roads notice",
+        "event": "ice",
+        "awareness_level": "green",
+        "riskMatrixColor": "Green",
+        "severity": "Minor",
+        "certainty": "Observed",
+        "urgency": "Past",
+        "area": "Mountain passes",
+        "effective": "2026-04-28T22:00:00Z",
+        "expires": "2026-04-29T04:00:00Z",
+        "sent": "2026-04-28T20:30:00Z",
+        "updated": "2026-04-29T03:50:00Z",
+        "status": "Actual",
+        "type": "Cancel",
+        "web": "https://www.yr.no/en/weather-warnings"
+      }
+    }
+  ]
+}

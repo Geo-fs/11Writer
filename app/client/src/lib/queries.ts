@@ -1,19 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchJson } from "./api";
 import type {
+  AviationWeatherContextResponse,
+  CanadaCapAlertResponse,
   CameraSourceInventoryResponse,
+  CneosContextResponse,
   EonetEventsResponse,
+  FaaNasAirportStatusResponse,
+  OpenSkyStatesResponse,
+  GeoNetHazardsResponse,
+  HkoWeatherResponse,
+  MetNoMetAlertsResponse,
   CameraSourceRegistryResponse,
   EarthquakeEventsResponse,
+  TsunamiAlertResponse,
+  UkEaFloodResponse,
+  VolcanoStatusResponse,
   ReviewQueueResponse,
   MarineChokepointAnalyticalSummaryResponse,
+  MarineNdbcContextResponse,
+  MarineNoaaCoopsContextResponse,
+  MarineScottishWaterOverflowResponse,
   MarineVesselAnalyticalSummaryResponse,
   MarineVesselsResponse,
   MarineViewportAnalyticalSummaryResponse,
   PublicConfigResponse,
   ReferenceNearbyResponse,
   ReferenceResolveLinkResponse,
-  SourceStatusResponse
+  SourceStatusResponse,
+  SwpcContextResponse
 } from "../types/api";
 import type { AircraftEntity } from "../types/entities";
 import type { EnvironmentalEventFilterState } from "./store";
@@ -169,6 +184,129 @@ export function useNearestRunwayThresholdReferenceQuery(
   });
 }
 
+export function useAviationWeatherContextQuery(input: {
+  airportCode: string | null;
+  airportName?: string | null;
+  airportRefId?: string | null;
+  contextType?: "nearest-airport" | "selected-airport";
+}) {
+  return useQuery({
+    queryKey: [
+      "aviation-weather-context",
+      input.airportCode,
+      input.airportName ?? null,
+      input.airportRefId ?? null,
+      input.contextType ?? "nearest-airport"
+    ],
+    queryFn: () => {
+      if (!input.airportCode) {
+        throw new Error("Aviation weather context requires an airport code.");
+      }
+      const params = new URLSearchParams({
+        airport_code: input.airportCode,
+        context_type: input.contextType ?? "nearest-airport"
+      });
+      if (input.airportName) {
+        params.set("airport_name", input.airportName);
+      }
+      if (input.airportRefId) {
+        params.set("airport_ref_id", input.airportRefId);
+      }
+      return fetchJson<AviationWeatherContextResponse>(
+        `/api/aviation-weather/airport-context?${params.toString()}`
+      );
+    },
+    enabled: input.airportCode != null && input.airportCode.length > 0,
+    staleTime: 120_000
+  });
+}
+
+export function useFaaNasAirportStatusQuery(input: {
+  airportCode: string | null;
+  airportName?: string | null;
+}) {
+  return useQuery({
+    queryKey: ["faa-nas-airport-status", input.airportCode, input.airportName ?? null],
+    queryFn: () => {
+      if (!input.airportCode) {
+        throw new Error("FAA NAS airport status requires an airport code.");
+      }
+      const params = new URLSearchParams();
+      if (input.airportName) {
+        params.set("airport_name", input.airportName);
+      }
+      const suffix = params.toString() ? `?${params.toString()}` : "";
+      return fetchJson<FaaNasAirportStatusResponse>(
+        `/api/aerospace/airports/${encodeURIComponent(input.airportCode)}/faa-nas-status${suffix}`
+      );
+    },
+    enabled: input.airportCode != null && input.airportCode.length > 0,
+    staleTime: 60_000
+  });
+}
+
+export function useOpenSkyStatesQuery(input: {
+  enabled: boolean;
+  icao24?: string | null;
+  callsign?: string | null;
+  limit?: number;
+}) {
+  const limit = input.limit ?? 5;
+  return useQuery({
+    queryKey: ["opensky-anonymous-states", input.icao24 ?? null, input.callsign ?? null, limit],
+    queryFn: () => {
+      const params = new URLSearchParams({ limit: String(limit) });
+      if (input.icao24) {
+        params.set("icao24", input.icao24);
+      }
+      if (input.callsign) {
+        params.set("callsign", input.callsign);
+      }
+      return fetchJson<OpenSkyStatesResponse>(
+        `/api/aerospace/aircraft/opensky/states?${params.toString()}`
+      );
+    },
+    enabled: input.enabled && (input.icao24 != null || input.callsign != null),
+    staleTime: 60_000
+  });
+}
+
+export function useCneosEventsQuery(input: {
+  enabled: boolean;
+  eventType?: "all" | "close-approach" | "fireball";
+  limit?: number;
+}) {
+  const eventType = input.eventType ?? "all";
+  const limit = input.limit ?? 3;
+  return useQuery({
+    queryKey: ["cneos-events", eventType, limit],
+    queryFn: () =>
+      fetchJson<CneosContextResponse>(
+        `/api/aerospace/space/cneos-events?event_type=${encodeURIComponent(eventType)}&limit=${limit}`
+      ),
+    enabled: input.enabled,
+    staleTime: 120_000
+  });
+}
+
+export function useSwpcSpaceWeatherContextQuery(input: {
+  enabled: boolean;
+  productType?: "all" | "summary" | "alerts";
+  limit?: number;
+}) {
+  const productType = input.productType ?? "all";
+  const limit = input.limit ?? 3;
+  return useQuery({
+    queryKey: ["swpc-space-weather-context", productType, limit],
+    queryFn: () =>
+      fetchJson<SwpcContextResponse>(
+        `/api/aerospace/space/swpc-context?product_type=${encodeURIComponent(productType)}&limit=${limit}`
+      ),
+    enabled: input.enabled,
+    staleTime: 120_000
+  });
+}
+
 export function useMarineVesselsQuery() {
   return useQuery({
     queryKey: ["marine-vessels"],
@@ -256,6 +394,119 @@ export function useMarineChokepointSummaryQuery(center: { lat: number; lon: numb
   });
 }
 
+export function useMarineNoaaCoopsContextQuery(input: {
+  center: { lat: number; lon: number } | null;
+  contextKind?: "viewport" | "chokepoint";
+  radiusKm?: number;
+  enabled?: boolean;
+}) {
+  const contextKind = input.contextKind ?? "viewport";
+  const radiusKm = input.radiusKm ?? 400;
+  const enabled = input.enabled ?? true;
+  return useQuery({
+    queryKey: [
+      "marine-noaa-coops-context",
+      input.center?.lat ?? null,
+      input.center?.lon ?? null,
+      contextKind,
+      radiusKm,
+      enabled
+    ],
+    queryFn: () => {
+      if (!input.center) {
+        throw new Error("Marine NOAA CO-OPS context requires center coordinates.");
+      }
+      const params = new URLSearchParams({
+        lat: String(input.center.lat),
+        lon: String(input.center.lon),
+        radius_km: String(radiusKm),
+        limit: "3",
+        context_kind: contextKind
+      });
+      return fetchJson<MarineNoaaCoopsContextResponse>(`/api/marine/context/noaa-coops?${params.toString()}`);
+    },
+    enabled: enabled && input.center != null,
+    staleTime: 60_000,
+    refetchInterval: 120_000
+  });
+}
+
+export function useMarineNdbcContextQuery(input: {
+  center: { lat: number; lon: number } | null;
+  contextKind?: "viewport" | "chokepoint";
+  radiusKm?: number;
+  enabled?: boolean;
+}) {
+  const contextKind = input.contextKind ?? "viewport";
+  const radiusKm = input.radiusKm ?? 500;
+  const enabled = input.enabled ?? true;
+  return useQuery({
+    queryKey: [
+      "marine-ndbc-context",
+      input.center?.lat ?? null,
+      input.center?.lon ?? null,
+      contextKind,
+      radiusKm,
+      enabled
+    ],
+    queryFn: () => {
+      if (!input.center) {
+        throw new Error("Marine NDBC context requires center coordinates.");
+      }
+      const params = new URLSearchParams({
+        lat: String(input.center.lat),
+        lon: String(input.center.lon),
+        radius_km: String(radiusKm),
+        limit: "3",
+        context_kind: contextKind
+      });
+      return fetchJson<MarineNdbcContextResponse>(`/api/marine/context/ndbc?${params.toString()}`);
+    },
+    enabled: enabled && input.center != null,
+    staleTime: 60_000,
+    refetchInterval: 120_000
+  });
+}
+
+export function useMarineScottishWaterOverflowsQuery(input: {
+  center: { lat: number; lon: number } | null;
+  radiusKm?: number;
+  status?: "all" | "active" | "inactive";
+  enabled?: boolean;
+}) {
+  const radiusKm = input.radiusKm ?? 250;
+  const status = input.status ?? "all";
+  const enabled = input.enabled ?? true;
+  return useQuery({
+    queryKey: [
+      "marine-scottish-water-overflows",
+      input.center?.lat ?? null,
+      input.center?.lon ?? null,
+      radiusKm,
+      status,
+      enabled
+    ],
+    queryFn: () => {
+      if (!input.center) {
+        throw new Error("Marine Scottish Water overflow context requires center coordinates.");
+      }
+      const params = new URLSearchParams({
+        lat: String(input.center.lat),
+        lon: String(input.center.lon),
+        radius_km: String(radiusKm),
+        status,
+        limit: "5"
+      });
+      return fetchJson<MarineScottishWaterOverflowResponse>(
+        `/api/marine/context/scottish-water-overflows?${params.toString()}`
+      );
+    },
+    enabled: enabled && input.center != null,
+    staleTime: 60_000,
+    refetchInterval: 120_000
+  });
+}
+
 export function useEarthquakeEventsQuery(filters: EnvironmentalEventFilterState, enabled: boolean) {
   return useQuery({
     queryKey: ["earthquakes-recent", filters.window, filters.sort, filters.minMagnitude, filters.limit],
@@ -299,5 +550,156 @@ export function useEonetEventsQuery(filters: EnvironmentalEventFilterState, enab
     enabled,
     staleTime: 45_000,
     refetchInterval: 60_000
+  });
+}
+
+export function useVolcanoStatusQuery(filters: EnvironmentalEventFilterState, enabled: boolean) {
+  return useQuery({
+    queryKey: [
+      "volcano-status",
+      filters.volcanoScope,
+      filters.volcanoAlertLevel,
+      filters.volcanoLimit
+    ],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        scope: filters.volcanoScope,
+        alert_level: filters.volcanoAlertLevel,
+        limit: String(filters.volcanoLimit),
+        sort: "alert"
+      });
+      return fetchJson<VolcanoStatusResponse>(`/api/events/volcanoes/recent?${params.toString()}`);
+    },
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000
+  });
+}
+
+export function useTsunamiAlertsQuery(filters: EnvironmentalEventFilterState, enabled: boolean) {
+  return useQuery({
+    queryKey: [
+      "tsunami-alerts",
+      filters.tsunamiAlertType,
+      filters.tsunamiSourceCenter,
+      filters.tsunamiLimit
+    ],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        alert_type: filters.tsunamiAlertType,
+        source_center: filters.tsunamiSourceCenter,
+        limit: String(filters.tsunamiLimit),
+        sort: "newest"
+      });
+      return fetchJson<TsunamiAlertResponse>(`/api/events/tsunami/recent?${params.toString()}`);
+    },
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000
+  });
+}
+
+export function useUkEaFloodMonitoringQuery(filters: EnvironmentalEventFilterState, enabled: boolean) {
+  return useQuery({
+    queryKey: [
+      "uk-ea-floods",
+      filters.ukFloodSeverity,
+      filters.ukFloodLimit,
+      filters.ukFloodIncludeStations
+    ],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        severity: filters.ukFloodSeverity,
+        limit: String(filters.ukFloodLimit),
+        include_stations: String(filters.ukFloodIncludeStations),
+        sort: "newest"
+      });
+      return fetchJson<UkEaFloodResponse>(`/api/events/uk-floods/recent?${params.toString()}`);
+    },
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000
+  });
+}
+
+export function useGeoNetHazardsQuery(filters: EnvironmentalEventFilterState, enabled: boolean) {
+  return useQuery({
+    queryKey: [
+      "geonet-hazards",
+      filters.geonetEventType,
+      filters.geonetMinMagnitude,
+      filters.geonetLimit,
+      filters.geonetAlertLevel
+    ],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        event_type: filters.geonetEventType,
+        limit: String(filters.geonetLimit),
+        alert_level: filters.geonetAlertLevel,
+        sort: filters.geonetEventType === "volcano" ? "alert_level" : filters.geonetMinMagnitude != null ? "magnitude" : "newest"
+      });
+      if (filters.geonetMinMagnitude != null) {
+        params.set("min_magnitude", String(filters.geonetMinMagnitude));
+      }
+      return fetchJson<GeoNetHazardsResponse>(`/api/events/geonet/recent?${params.toString()}`);
+    },
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000
+  });
+}
+
+export function useHkoWeatherQuery(filters: EnvironmentalEventFilterState, enabled: boolean) {
+  return useQuery({
+    queryKey: ["hko-weather", filters.hkoWarningType, filters.hkoLimit],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        warning_type: filters.hkoWarningType,
+        limit: String(filters.hkoLimit),
+        sort: "newest"
+      });
+      return fetchJson<HkoWeatherResponse>(`/api/events/hko-weather/recent?${params.toString()}`);
+    },
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000
+  });
+}
+
+export function useMetNoMetAlertsQuery(filters: EnvironmentalEventFilterState, enabled: boolean) {
+  return useQuery({
+    queryKey: ["metno-alerts", filters.metnoAlertSeverity, filters.metnoAlertType, filters.metnoLimit],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        severity: filters.metnoAlertSeverity,
+        limit: String(filters.metnoLimit),
+        sort: filters.metnoAlertSeverity === "all" ? "newest" : "severity"
+      });
+      if (filters.metnoAlertType.trim()) {
+        params.set("alert_type", filters.metnoAlertType.trim());
+      }
+      return fetchJson<MetNoMetAlertsResponse>(`/api/events/metno-alerts/recent?${params.toString()}`);
+    },
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000
+  });
+}
+
+export function useCanadaCapAlertsQuery(filters: EnvironmentalEventFilterState, enabled: boolean) {
+  return useQuery({
+    queryKey: ["canada-cap", filters.canadaCapAlertType, filters.canadaCapSeverity, filters.canadaCapLimit],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        alert_type: filters.canadaCapAlertType,
+        severity: filters.canadaCapSeverity,
+        limit: String(filters.canadaCapLimit),
+        sort: "newest",
+      });
+      return fetchJson<CanadaCapAlertResponse>(`/api/events/canada-cap/recent?${params.toString()}`);
+    },
+    enabled,
+    staleTime: 45_000,
+    refetchInterval: 60_000,
   });
 }

@@ -11,6 +11,12 @@
 - Use `python scripts/list_changed_files_by_owner.py --summary` for a concise branch/worktree snapshot with ownership counts, shared-file warnings, and coordination doc links.
 - Use `python scripts/release_dry_run.py` for a larger non-mutating readiness scan covering ownership groups, high-collision files, secret/junk checks, generated-file checks, and validation guidance.
 - Treat scanner output as commit-planning guidance, not absolute ownership truth. Shared and high-collision files still require manual diff review.
+- Current validation truth on this machine:
+  - `python -m compileall app/server/src` passed
+  - `cmd /c npm.cmd run lint` passed
+  - `cmd /c npm.cmd run build` passed
+  - `python app/server/tests/run_playwright_smoke.py webcam` failed before app assertions with `windows-playwright-launch-permission` / `spawn EPERM`
+- Treat that webcam smoke result as a machine and browser-launch issue, not as evidence of stale `dist` output or a current frontend compile failure.
 
 ## Agent lanes
 
@@ -239,6 +245,7 @@ Never:
 - On this Windows machine, Playwright launch failure is an environment and tooling issue, not automatic feature failure.
 - Non-Connect agents should not chase Playwright launch-permission issues unless explicitly assigned.
 - Focused smoke phases may still be validated on another machine or environment later.
+- A pre-assertion webcam smoke failure on this machine does not mean the latest local client bundle is stale if `cmd /c npm.cmd run build` already passed.
 
 ## Recommended later commit order
 

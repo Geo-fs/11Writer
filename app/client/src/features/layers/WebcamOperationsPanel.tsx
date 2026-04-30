@@ -14,6 +14,7 @@ import {
   summarizeWebcamCoverage,
   type WebcamCluster
 } from "../webcams/webcamClustering";
+import { summarizeWebcamSourceLifecycle } from "../webcams/webcamSourceLifecycleSummary";
 import type {
   CameraSourceInventoryEntry,
   CameraSourceRegistryEntry,
@@ -48,6 +49,7 @@ export function WebcamOperationsPanel() {
   const visibleSummary = summarizeVisibleCameras(cameraEntities);
   const coverageSummary = summarizeWebcamCoverage(cameraEntities, webcamClusters);
   const inventorySources = [...(inventoryQuery.data?.sources ?? [])].sort(compareInventorySources);
+  const lifecycleSummary = summarizeWebcamSourceLifecycle(inventorySources);
   const reviewItems = reviewQueueQuery.data?.items ?? [];
   const selectedCluster =
     webcamClusters.find((cluster) => toEntityClusterId(cluster) === selectedWebcamClusterId) ??
@@ -83,6 +85,33 @@ export function WebcamOperationsPanel() {
         {coverageSummary.strongestDirectImageCluster ? (
           <span>Strongest direct-image group {coverageSummary.strongestDirectImageCluster.directImageCount} direct-image</span>
         ) : null}
+      </div>
+
+      <div className="data-card data-card--compact webcam-summary-card" data-testid="webcam-source-lifecycle-summary">
+        <strong>Source Lifecycle Summary</strong>
+        <span>{lifecycleSummary.totalSources} total sources</span>
+        <span>{lifecycleSummary.validatedCount} validated</span>
+        <span>{lifecycleSummary.activeImportCount} actively importing</span>
+        <span>{lifecycleSummary.candidateCount} candidate-only</span>
+        <span>{lifecycleSummary.endpointVerifiedCount} endpoint-verified</span>
+        <span>{lifecycleSummary.sandboxImportableCount} sandbox-importable</span>
+        <span>{lifecycleSummary.credentialBlockedCount} credential-blocked</span>
+        <span>{lifecycleSummary.blockedCount} blocked / do-not-scrape</span>
+        <span>{lifecycleSummary.needsReviewCount} needs review</span>
+        <span>{lifecycleSummary.lowYieldCount} low-yield</span>
+        <span>{lifecycleSummary.poorQualityCount} poor-quality</span>
+        {lifecycleSummary.rows.length > 0 ? (
+          <div className="stack" data-testid="webcam-source-lifecycle-rows">
+            {lifecycleSummary.rows.map((row) => (
+              <span key={row.bucket} data-testid={`webcam-source-lifecycle-${row.bucket}`}>
+                {row.label}: {row.sourceKeys.join(", ")}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        {lifecycleSummary.caveats.map((caveat) => (
+          <span key={caveat}>{caveat}</span>
+        ))}
       </div>
 
       <div className="data-card" data-testid="webcam-filter-panel">
@@ -434,6 +463,42 @@ function SourceOperationsCard({
           <span>Viewer posture {source.providesDirectImage ? "mixed/direct possible" : "viewer-only / candidate"}</span>
         </>
       )}
+      {source.endpointVerificationStatus ? (
+        <span>Endpoint verification {source.endpointVerificationStatus}</span>
+      ) : null}
+      {source.candidateEndpointUrl ? <span>Candidate endpoint {source.candidateEndpointUrl}</span> : null}
+      {source.machineReadableEndpointUrl ? (
+        <span>Machine-readable endpoint {source.machineReadableEndpointUrl}</span>
+      ) : null}
+      {source.lastEndpointResult ? <span>{source.lastEndpointResult}</span> : null}
+      {source.lastEndpointCheckAt || source.lastEndpointHttpStatus || source.lastEndpointContentType ? (
+        <span>
+          Last endpoint check {formatTimestamp(source.lastEndpointCheckAt)} | HTTP {source.lastEndpointHttpStatus ?? "Unknown"} | {source.lastEndpointContentType ?? "Unknown content type"}
+        </span>
+      ) : null}
+      {source.verificationCaveat ? <span>{source.verificationCaveat}</span> : null}
+      {source.lastEndpointNotes.length > 0 ? (
+        <span>{source.lastEndpointNotes.join(" ")}</span>
+      ) : null}
+      {source.sandboxImportAvailable ? (
+        <div className="data-card data-card--compact" data-testid={`webcam-source-sandbox-${source.key}`}>
+          <strong>Sandbox Connector</strong>
+          <span>Sandbox connector available</span>
+          <span>Mode {source.sandboxImportMode ?? "unknown"}</span>
+          <span>Connector {source.sandboxConnectorId ?? "unknown"}</span>
+          <span>
+            Latest sandbox result {source.lastSandboxImportOutcome ?? "not run"}
+          </span>
+          <span>Sandbox discovered {formatCount(source.sandboxDiscoveredCount)}</span>
+          <span>Sandbox usable {formatCount(source.sandboxUsableCount)}</span>
+          <span>Sandbox review queue {formatCount(source.sandboxReviewQueueCount)}</span>
+          {source.lastSandboxImportAt ? (
+            <span>Last sandbox import {formatTimestamp(source.lastSandboxImportAt)}</span>
+          ) : null}
+          {source.sandboxValidationCaveat ? <span>{source.sandboxValidationCaveat}</span> : null}
+          <span>Sandbox import is not validation or activation. Source remains candidate-only.</span>
+        </div>
+      ) : null}
       {runtime?.cadenceSeconds != null ? (
         <span>
           Cadence {runtime.cadenceSeconds}s{runtime.cadenceReason ? ` (${runtime.cadenceReason})` : ""}

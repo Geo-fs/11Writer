@@ -1,8 +1,15 @@
 import { create } from "zustand";
 import type {
   AircraftEntity,
+  CanadaCapAlertEntity,
   CameraEntity,
   EarthquakeEntity,
+  GeoNetHazardEntity,
+  HkoWeatherEntity,
+  MetNoAlertEntity,
+  TsunamiAlertEntity,
+  UkEaFloodEntity,
+  VolcanoEntity,
   EonetEntity,
   EntityHistoryTrack,
   SatelliteEntity,
@@ -25,6 +32,13 @@ export type LayerKey =
   | "cameras"
   | "earthquakes"
   | "eonet"
+  | "volcanoes"
+  | "tsunami"
+  | "ukFloods"
+  | "geonet"
+  | "hkoWeather"
+  | "metnoAlerts"
+  | "canadaCap"
   | "labels"
   | "trails"
   | "debug";
@@ -72,6 +86,27 @@ export interface EnvironmentalEventFilterState {
   eonetStatus: "open" | "closed" | "all";
   eonetSort: "newest" | "category";
   eonetLimit: number;
+  volcanoScope: "elevated" | "monitored";
+  volcanoAlertLevel: "all" | "NORMAL" | "ADVISORY" | "WATCH" | "WARNING";
+  volcanoLimit: number;
+  tsunamiAlertType: "all" | "warning" | "watch" | "advisory" | "information" | "cancellation" | "unknown";
+  tsunamiSourceCenter: "all" | "NTWC" | "PTWC" | "unknown";
+  tsunamiLimit: number;
+  ukFloodSeverity: "all" | "severe-warning" | "warning" | "alert" | "inactive" | "unknown";
+  ukFloodLimit: number;
+  ukFloodIncludeStations: boolean;
+  geonetEventType: "all" | "quake" | "volcano";
+  geonetMinMagnitude: number | null;
+  geonetLimit: number;
+  geonetAlertLevel: "all" | "0" | "1" | "2" | "3" | "4" | "5";
+  hkoWarningType: "all" | "WFIRE" | "WFROST" | "WHOT" | "WCOLD" | "WMSGNL" | "WTCPRE8" | "WRAIN" | "WFNTSA" | "WL" | "WTCSGNL" | "WTMW" | "WTS";
+  hkoLimit: number;
+  metnoAlertSeverity: "all" | "red" | "orange" | "yellow" | "green" | "unknown";
+  metnoAlertType: string;
+  metnoLimit: number;
+  canadaCapAlertType: "all" | "warning" | "watch" | "advisory" | "statement" | "unknown";
+  canadaCapSeverity: "all" | "extreme" | "severe" | "moderate" | "minor" | "unknown";
+  canadaCapLimit: number;
 }
 
 export interface HudState {
@@ -150,6 +185,21 @@ export interface AerospaceFocusSnapshot {
   caveat: string;
 }
 
+export type AerospaceOperationalPresetId =
+  | "full-aerospace-context"
+  | "airport-operations-review"
+  | "weather-review"
+  | "space-context-review"
+  | "selected-target-evidence-review";
+
+export type AerospaceExportProfileId =
+  | "compact-evidence"
+  | "full-aerospace-context"
+  | "airport-weather"
+  | "space-context"
+  | "source-health"
+  | "focus-history";
+
 interface AppState {
   layers: LayerState[];
   filters: FilterState;
@@ -170,9 +220,18 @@ interface AppState {
   webcamClusters: WebcamCluster[];
   earthquakeEntities: EarthquakeEntity[];
   eonetEntities: EonetEntity[];
+  volcanoEntities: VolcanoEntity[];
+  tsunamiEntities: TsunamiAlertEntity[];
+  ukFloodEntities: UkEaFloodEntity[];
+  geonetEntities: GeoNetHazardEntity[];
+  hkoWeatherEntities: HkoWeatherEntity[];
+  metnoAlertEntities: MetNoAlertEntity[];
+  canadaCapEntities: CanadaCapAlertEntity[];
   entityHistoryTracks: Record<string, EntityHistoryTrack>;
   satellitePassWindows: Record<string, PassWindowSummary>;
   selectedReplayIndex: number | null;
+  selectedAerospaceOperationalPreset: AerospaceOperationalPresetId;
+  selectedAerospaceExportProfile: AerospaceExportProfileId;
   aerospaceFocus: AerospaceFocusState;
   aerospaceFocusHistory: AerospaceFocusSnapshot[];
   marineEvidenceLines: string[];
@@ -203,12 +262,21 @@ interface AppState {
   setWebcamClusters: (clusters: WebcamCluster[]) => void;
   setEarthquakeEntities: (entities: EarthquakeEntity[]) => void;
   setEonetEntities: (entities: EonetEntity[]) => void;
+  setVolcanoEntities: (entities: VolcanoEntity[]) => void;
+  setTsunamiEntities: (entities: TsunamiAlertEntity[]) => void;
+  setUkFloodEntities: (entities: UkEaFloodEntity[]) => void;
+  setGeoNetEntities: (entities: GeoNetHazardEntity[]) => void;
+  setHkoWeatherEntities: (entities: HkoWeatherEntity[]) => void;
+  setMetNoAlertEntities: (entities: MetNoAlertEntity[]) => void;
+  setCanadaCapEntities: (entities: CanadaCapAlertEntity[]) => void;
   setEnvironmentalFilters: (filters: Partial<EnvironmentalEventFilterState>) => void;
   setAircraftHistoryTracks: (tracks: Record<string, EntityHistoryTrack>) => void;
   setSatelliteHistoryTracks: (tracks: Record<string, EntityHistoryTrack>) => void;
   setSatellitePassWindows: (passWindows: Record<string, PassWindowSummary>) => void;
   setSelectedReplayIndex: (index: number | null) => void;
   stepSelectedReplayIndex: (delta: number) => void;
+  setSelectedAerospaceOperationalPreset: (presetId: AerospaceOperationalPresetId) => void;
+  setSelectedAerospaceExportProfile: (profileId: AerospaceExportProfileId) => void;
   setAerospaceFocus: (focus: {
     targetId: string;
     targetType: "aircraft" | "satellite";
@@ -240,6 +308,13 @@ const initialLayers: LayerState[] = [
   { key: "cameras", label: "Cameras", enabled: true, available: true },
   { key: "earthquakes", label: "Earthquakes", enabled: false, available: true },
   { key: "eonet", label: "Natural Events (EONET)", enabled: false, available: true },
+  { key: "volcanoes", label: "Volcano Status", enabled: false, available: true },
+  { key: "tsunami", label: "Tsunami Alerts", enabled: false, available: true },
+  { key: "ukFloods", label: "UK Flood Monitoring", enabled: false, available: true },
+  { key: "geonet", label: "GeoNet Hazards", enabled: false, available: true },
+  { key: "hkoWeather", label: "HKO Weather", enabled: false, available: true },
+  { key: "metnoAlerts", label: "MET Norway Alerts", enabled: false, available: true },
+  { key: "canadaCap", label: "Canada CAP Alerts", enabled: false, available: true },
   { key: "labels", label: "Labels", enabled: true, available: true },
   { key: "trails", label: "Trails", enabled: true, available: true },
   { key: "debug", label: "Debug", enabled: false, available: true }
@@ -301,7 +376,28 @@ const initialEnvironmentalFilters: EnvironmentalEventFilterState = {
   eonetCategory: "",
   eonetStatus: "open",
   eonetSort: "newest",
-  eonetLimit: 200
+  eonetLimit: 200,
+  volcanoScope: "elevated",
+  volcanoAlertLevel: "all",
+  volcanoLimit: 100,
+  tsunamiAlertType: "all",
+  tsunamiSourceCenter: "all",
+  tsunamiLimit: 100,
+  ukFloodSeverity: "all",
+  ukFloodLimit: 100,
+  ukFloodIncludeStations: true,
+  geonetEventType: "all",
+  geonetMinMagnitude: null,
+  geonetLimit: 100,
+  geonetAlertLevel: "all",
+  hkoWarningType: "all",
+  hkoLimit: 50,
+  metnoAlertSeverity: "all",
+  metnoAlertType: "",
+  metnoLimit: 50,
+  canadaCapAlertType: "all",
+  canadaCapSeverity: "all",
+  canadaCapLimit: 100
 };
 
 const initialAerospaceFocus: AerospaceFocusState = {
@@ -314,6 +410,9 @@ const initialAerospaceFocus: AerospaceFocusState = {
   startedAt: null,
   relatedEntityIds: []
 };
+
+const initialAerospaceOperationalPreset: AerospaceOperationalPresetId = "full-aerospace-context";
+const initialAerospaceExportProfile: AerospaceExportProfileId = "compact-evidence";
 
 export const useAppStore = create<AppState>((set) => ({
   layers: initialLayers,
@@ -335,9 +434,18 @@ export const useAppStore = create<AppState>((set) => ({
   webcamClusters: [],
   earthquakeEntities: [],
   eonetEntities: [],
+  volcanoEntities: [],
+  tsunamiEntities: [],
+  ukFloodEntities: [],
+  geonetEntities: [],
+  hkoWeatherEntities: [],
+  metnoAlertEntities: [],
+  canadaCapEntities: [],
   entityHistoryTracks: {},
   satellitePassWindows: {},
   selectedReplayIndex: null,
+  selectedAerospaceOperationalPreset: initialAerospaceOperationalPreset,
+  selectedAerospaceExportProfile: initialAerospaceExportProfile,
   aerospaceFocus: initialAerospaceFocus,
   aerospaceFocusHistory: [],
     marineEvidenceLines: [],
@@ -405,12 +513,19 @@ export const useAppStore = create<AppState>((set) => ({
       selectedEntity:
         entityId == null
           ? null
-          : state.aircraftEntities.find((item) => item.id === entityId) ??
-            state.satelliteEntities.find((item) => item.id === entityId) ??
-            state.cameraEntities.find((item) => item.id === entityId) ??
-            state.earthquakeEntities.find((item) => item.id === entityId) ??
-            state.eonetEntities.find((item) => item.id === entityId) ??
-            null
+            : state.aircraftEntities.find((item) => item.id === entityId) ??
+              state.satelliteEntities.find((item) => item.id === entityId) ??
+              state.cameraEntities.find((item) => item.id === entityId) ??
+              state.earthquakeEntities.find((item) => item.id === entityId) ??
+              state.eonetEntities.find((item) => item.id === entityId) ??
+              state.volcanoEntities.find((item) => item.id === entityId) ??
+              state.tsunamiEntities.find((item) => item.id === entityId) ??
+              state.ukFloodEntities.find((item) => item.id === entityId) ??
+              state.geonetEntities.find((item) => item.id === entityId) ??
+              state.hkoWeatherEntities.find((item) => item.id === entityId) ??
+              state.metnoAlertEntities.find((item) => item.id === entityId) ??
+              state.canadaCapEntities.find((item) => item.id === entityId) ??
+              null
     })),
   setSelectedWebcamClusterId: (clusterId) =>
     set((state) => ({
@@ -476,8 +591,8 @@ export const useAppStore = create<AppState>((set) => ({
           : state.selectedEntity
     })),
   setEonetEntities: (entities) =>
-    set((state) => ({
-      eonetEntities: entities,
+      set((state) => ({
+        eonetEntities: entities,
       selectedEntity:
         state.selectedEntityId != null
           ? entities.find((item) => item.id === state.selectedEntityId) ??
@@ -485,8 +600,92 @@ export const useAppStore = create<AppState>((set) => ({
             (state.selectedEntity?.id ?? "").startsWith("eonet:")
               ? null
               : state.selectedEntity)
-          : state.selectedEntity
-    })),
+            : state.selectedEntity
+      })),
+  setVolcanoEntities: (entities) =>
+      set((state) => ({
+        volcanoEntities: entities,
+        selectedEntity:
+          state.selectedEntityId != null
+            ? entities.find((item) => item.id === state.selectedEntityId) ??
+              (state.selectedEntity?.type === "environmental-event" &&
+              (state.selectedEntity?.id ?? "").startsWith("volcano:")
+                ? null
+                : state.selectedEntity)
+            : state.selectedEntity
+      })),
+  setTsunamiEntities: (entities) =>
+      set((state) => ({
+        tsunamiEntities: entities,
+        selectedEntity:
+          state.selectedEntityId != null
+            ? entities.find((item) => item.id === state.selectedEntityId) ??
+              (state.selectedEntity?.type === "environmental-event" &&
+              (state.selectedEntity?.id ?? "").startsWith("tsunami:")
+                ? null
+                : state.selectedEntity)
+            : state.selectedEntity
+      })),
+  setUkFloodEntities: (entities) =>
+      set((state) => ({
+        ukFloodEntities: entities,
+        selectedEntity:
+          state.selectedEntityId != null
+            ? entities.find((item) => item.id === state.selectedEntityId) ??
+              (state.selectedEntity?.type === "environmental-event" &&
+              (state.selectedEntity?.id ?? "").startsWith("ukflood:")
+                ? null
+                : state.selectedEntity)
+            : state.selectedEntity
+      })),
+  setGeoNetEntities: (entities) =>
+      set((state) => ({
+        geonetEntities: entities,
+        selectedEntity:
+          state.selectedEntityId != null
+            ? entities.find((item) => item.id === state.selectedEntityId) ??
+              (state.selectedEntity?.type === "environmental-event" &&
+              (state.selectedEntity?.id ?? "").startsWith("geonet:")
+                ? null
+                : state.selectedEntity)
+            : state.selectedEntity
+      })),
+  setHkoWeatherEntities: (entities) =>
+      set((state) => ({
+        hkoWeatherEntities: entities,
+        selectedEntity:
+          state.selectedEntityId != null
+            ? entities.find((item) => item.id === state.selectedEntityId) ??
+              (state.selectedEntity?.type === "environmental-event" &&
+              (state.selectedEntity?.id ?? "").startsWith("hko:")
+                ? null
+                : state.selectedEntity)
+            : state.selectedEntity
+      })),
+  setMetNoAlertEntities: (entities) =>
+      set((state) => ({
+        metnoAlertEntities: entities,
+        selectedEntity:
+          state.selectedEntityId != null
+            ? entities.find((item) => item.id === state.selectedEntityId) ??
+              (state.selectedEntity?.type === "environmental-event" &&
+              (state.selectedEntity?.id ?? "").startsWith("metno:")
+                ? null
+                : state.selectedEntity)
+            : state.selectedEntity
+      })),
+  setCanadaCapEntities: (entities) =>
+      set((state) => ({
+        canadaCapEntities: entities,
+        selectedEntity:
+          state.selectedEntityId != null
+            ? entities.find((item) => item.id === state.selectedEntityId) ??
+              (state.selectedEntity?.type === "environmental-event" &&
+              (state.selectedEntity?.id ?? "").startsWith("canadacap:")
+                ? null
+                : state.selectedEntity)
+            : state.selectedEntity
+      })),
   setAircraftHistoryTracks: (tracks) =>
     set((state) => {
       const next = { ...state.entityHistoryTracks };
@@ -535,6 +734,14 @@ export const useAppStore = create<AppState>((set) => ({
         selectedReplayIndex:
           next >= track.points.length - 1 ? null : clampReplayIndex(next, state.selectedEntityId, state.entityHistoryTracks)
       };
+    }),
+  setSelectedAerospaceOperationalPreset: (presetId) =>
+    set({
+      selectedAerospaceOperationalPreset: presetId
+    }),
+  setSelectedAerospaceExportProfile: (profileId) =>
+    set({
+      selectedAerospaceExportProfile: profileId
     }),
   setAerospaceFocus: (focus) =>
     set({

@@ -1831,6 +1831,1260 @@
       ],
       "verification_date": "2026-04-29",
       "verification_notes": "Explicit avoid entry per project rules."
+    },
+    {
+      "id": "uk-ea-flood-monitoring",
+      "title": "UK Environment Agency Flood Monitoring API",
+      "region": "England",
+      "owner": "Environment Agency",
+      "domain": "flood monitoring",
+      "status": "tier-1-ready",
+      "tier": "tier-1",
+      "tier_reason": "Official JSON API verified directly with flood and station endpoints and a narrow first implementation slice is clear.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://environment.data.gov.uk/flood-monitoring/id/floods",
+        "https://environment.data.gov.uk/flood-monitoring/id/stations?parameter=level"
+      ],
+      "docs_url": "https://environment.data.gov.uk/flood-monitoring/doc/reference",
+      "sample_url": "https://environment.data.gov.uk/flood-monitoring/id/floods",
+      "output_summary": "Flood warnings, flood alerts, station metadata, and river level observations.",
+      "no_auth_verification_status": "Direct sample requests succeeded without auth on 2026-04-29.",
+      "update_cadence": "near-real-time operational API",
+      "geospatial_scope": "regional",
+      "geometry_type": "mixed",
+      "first_output": "Flood warning and flood alert records plus river-station inspector links.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "marine", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "normalized_field_ideas": [
+        "alert_id",
+        "severity",
+        "time_raised",
+        "time_message_changed",
+        "flood_area_id",
+        "station_id",
+        "message",
+        "polygon_url"
+      ],
+      "source_health_freshness_strategy": [
+        "Probe the floods endpoint and preserve source timestamps.",
+        "Treat alert timestamps and station timestamps separately."
+      ],
+      "data_caveats": [
+        "Alert products and observation products have different cadences.",
+        "Warnings are operational advisories, not impact proof."
+      ],
+      "legal_compliance_notes": [
+        "Preserve Environment Agency attribution."
+      ],
+      "rate_limit_notes": [
+        "Use bounded polling and viewport/site scoping."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Flood warnings and alerts first, then station inspector links for nearby gauges.",
+      "do_not_do": [
+        "Do not merge live warnings and water-level observations into one confidence claim.",
+        "Do not assume all stations imply active flooding."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Docs page returned 200 HTML; sample flood and station endpoints returned 200 JSON."
+    },
+    {
+      "id": "uk-ea-hydrology",
+      "title": "UK Environment Agency Hydrology API",
+      "region": "England",
+      "owner": "Environment Agency",
+      "domain": "hydrology",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Official historic hydrology API verified directly; first slice is clear but should stay baseline-focused rather than alert-focused.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://environment.data.gov.uk/hydrology/id/stations"
+      ],
+      "docs_url": "https://environment.data.gov.uk/hydrology/landing",
+      "sample_url": "https://environment.data.gov.uk/hydrology/id/stations",
+      "output_summary": "Historic and quality-checked river flow and level station records.",
+      "no_auth_verification_status": "Direct sample request succeeded without auth on 2026-04-29.",
+      "update_cadence": "historic and quality-checked data service",
+      "geospatial_scope": "regional",
+      "geometry_type": "station",
+      "first_output": "Baseline river-flow context and anomaly comparison support for a curated station shortlist.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "marine", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "medium",
+      "normalized_field_ideas": [
+        "station_id",
+        "river_name",
+        "parameter",
+        "observed_date",
+        "value",
+        "unit",
+        "quality_flag"
+      ],
+      "source_health_freshness_strategy": [
+        "Use bounded station lists and preserve quality-checked context.",
+        "Treat as baseline context, not real-time alerting."
+      ],
+      "data_caveats": [
+        "Historic and quality-controlled context should not be mislabeled as live flood detection."
+      ],
+      "legal_compliance_notes": [
+        "Preserve Environment Agency attribution."
+      ],
+      "rate_limit_notes": [
+        "Prefer site-scoped pulls, not broad archive harvesting."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Station metadata plus one baseline flow series for anomaly comparison.",
+      "do_not_do": [
+        "Do not present this as a real-time flood warning source."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Landing page and station endpoint both verified publicly; recommended as a baseline context source rather than an alert feed."
+    },
+    {
+      "id": "eea-air-quality",
+      "title": "European Environment Agency Air Quality Download Service",
+      "region": "Europe",
+      "owner": "European Environment Agency",
+      "domain": "air quality",
+      "status": "needs-verification",
+      "tier": "tier-2",
+      "tier_reason": "Official public services exist, but the cleanest backend-safe endpoint for bounded time-series pulls still needs tighter confirmation.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://air.discomap.eea.europa.eu/arcgis/rest/services/AirQuality/AirQualityDownloadServiceEUMonitoringStations/MapServer",
+        "https://eeadmz1-downloads-webapp.azurewebsites.net/"
+      ],
+      "docs_url": "https://aqportal.discomap.eea.europa.eu/download-data/",
+      "sample_url": "https://air.discomap.eea.europa.eu/arcgis/rest/services/AirQuality/AirQualityDownloadServiceEUMonitoringStations/MapServer",
+      "output_summary": "Station metadata and pollutant measurement time series.",
+      "no_auth_verification_status": "Official docs and public service pages verified; backend-safe series endpoint still needs tighter confirmation.",
+      "update_cadence": "verified annual and up-to-date reporting families",
+      "geospatial_scope": "regional",
+      "geometry_type": "station",
+      "first_output": "European air-quality station metadata layer only if a stable bounded endpoint is pinned.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "medium",
+      "normalized_field_ideas": [
+        "station_id",
+        "pollutant",
+        "observed_at",
+        "value",
+        "unit",
+        "verification_mode",
+        "country_code"
+      ],
+      "source_health_freshness_strategy": [
+        "Pin one stable service family before connector work.",
+        "Separate verified annual data from up-to-date data."
+      ],
+      "data_caveats": [
+        "Service family mixes verified annual datasets and more current unverified reporting."
+      ],
+      "legal_compliance_notes": [
+        "Preserve EEA attribution and dataset context."
+      ],
+      "rate_limit_notes": [
+        "Avoid broad Europe-wide pulls until a bounded station-first flow is pinned."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Station metadata only, then one pollutant and one country subset.",
+      "do_not_do": [
+        "Do not start with Europe-wide multi-pollutant live harvesting."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official download page and ArcGIS service page are public; exact low-friction time-series endpoint still needs verification."
+    },
+    {
+      "id": "canada-geomet-ogc",
+      "title": "MSC GeoMet OGC API",
+      "region": "Canada",
+      "owner": "Environment and Climate Change Canada, Meteorological Service of Canada",
+      "domain": "weather climate water",
+      "status": "tier-2-complex",
+      "tier": "tier-2",
+      "tier_reason": "Official public OGC API verified directly, but the collection family is broad and the first connector should stay collection-scoped.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "wms-wfs-ogc",
+      "primary_endpoints": [
+        "https://api.weather.gc.ca/collections?f=json"
+      ],
+      "docs_url": "https://eccc-msc.github.io/open-data/msc-geomet/readme_en/",
+      "sample_url": "https://api.weather.gc.ca/collections?f=json",
+      "output_summary": "Weather, climate, and water collections exposed through an OGC API.",
+      "no_auth_verification_status": "Direct collection request succeeded with certificate verification disabled locally due chain issues in this environment.",
+      "update_cadence": "collection-dependent",
+      "geospatial_scope": "regional",
+      "geometry_type": "mixed",
+      "first_output": "One collection only, such as hydrometric stations or climate stations.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "marine", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "high",
+      "normalized_field_ideas": [
+        "collection_id",
+        "feature_id",
+        "observed_at",
+        "value",
+        "unit",
+        "station_id",
+        "province"
+      ],
+      "source_health_freshness_strategy": [
+        "Probe the collections root and then one pinned collection.",
+        "Keep OGC family breadth out of the first connector."
+      ],
+      "data_caveats": [
+        "This is a broad service family, not one narrow feed."
+      ],
+      "legal_compliance_notes": [
+        "Preserve ECCC/MSC attribution and licensing notes."
+      ],
+      "rate_limit_notes": [
+        "Prefer one collection and bounded queries."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Hydrometric or climate station metadata only.",
+      "do_not_do": [
+        "Do not browse or normalize the entire collection catalog in one patch."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official GeoMet home and collections pages verified; local urllib required an unverified SSL context."
+    },
+    {
+      "id": "canada-cap-alerts",
+      "title": "Environment Canada CAP alerts",
+      "region": "Canada",
+      "owner": "Environment and Climate Change Canada, Meteorological Service of Canada",
+      "domain": "weather alerts",
+      "status": "tier-1-ready",
+      "tier": "tier-1",
+      "tier_reason": "Official CAP directory is public and the first slice is operationally narrow and high value.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "xml",
+      "primary_endpoints": [
+        "https://dd.weather.gc.ca/today/alerts/cap/"
+      ],
+      "docs_url": "https://weather.gc.ca/warnings/index_e.html",
+      "sample_url": "https://dd.weather.gc.ca/today/alerts/cap/",
+      "output_summary": "Official CAP weather warnings, watches, and advisories.",
+      "no_auth_verification_status": "Official public CAP index verified through official search results; direct local probe hit directory-layout friction.",
+      "update_cadence": "operational alert directory",
+      "geospatial_scope": "regional",
+      "geometry_type": "polygon",
+      "first_output": "Alert cards and polygons for one province or one date path.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "marine", "aerospace", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "medium",
+      "normalized_field_ideas": [
+        "identifier",
+        "sent",
+        "event",
+        "urgency",
+        "severity",
+        "area_desc",
+        "polygon",
+        "instruction"
+      ],
+      "source_health_freshness_strategy": [
+        "Pin one dated directory and one CAP file shape first.",
+        "Track sent/onset/expires fields explicitly."
+      ],
+      "data_caveats": [
+        "CAP feeds are authoritative alerts, not direct damage confirmation."
+      ],
+      "legal_compliance_notes": [
+        "Preserve ECCC/MSC attribution."
+      ],
+      "rate_limit_notes": [
+        "Poll one bounded directory family only."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "One province/date CAP family with alert-card rendering and polygon preservation.",
+      "do_not_do": [
+        "Do not build a generic all-Canada CAP crawler on the first pass."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official CAP index is publicly listed; exact dated sample file path still needs to be fixture-pinned before connector work."
+    },
+    {
+      "id": "dwd-open-weather",
+      "title": "Deutscher Wetterdienst Open Data Server",
+      "region": "Germany",
+      "owner": "Deutscher Wetterdienst",
+      "domain": "weather open data",
+      "status": "tier-2-complex",
+      "tier": "tier-2",
+      "tier_reason": "Official open-data tree is public and broad, but the family is too large for anything except a very narrow first slice.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://opendata.dwd.de/weather/"
+      ],
+      "docs_url": "https://opendata.dwd.de/weather/",
+      "sample_url": "https://opendata.dwd.de/weather/",
+      "output_summary": "Observations, forecasts, radar products, marine products, and broader weather files.",
+      "no_auth_verification_status": "Official directory listing verified through public search results; direct local probe needed SSL bypass in this environment.",
+      "update_cadence": "product-family dependent",
+      "geospatial_scope": "regional",
+      "geometry_type": "mixed",
+      "first_output": "One observation or forecast family only.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "marine", "aerospace", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "high",
+      "normalized_field_ideas": [
+        "product_family",
+        "issue_time",
+        "valid_time",
+        "station_or_grid_id",
+        "value",
+        "unit"
+      ],
+      "source_health_freshness_strategy": [
+        "Check one directory family, not the whole tree.",
+        "Preserve product-family-specific timestamps."
+      ],
+      "data_caveats": [
+        "Directory contains mixed formats and product classes."
+      ],
+      "legal_compliance_notes": [
+        "Preserve DWD attribution."
+      ],
+      "rate_limit_notes": [
+        "Stay collection-family scoped."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "One observation family or one text forecast family, not radar and forecasts together.",
+      "do_not_do": [
+        "Do not try to normalize the whole DWD tree in one connector."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official open-data tree is public and indexed; broad scope makes this a Tier 2 source."
+    },
+    {
+      "id": "dwd-cap-alerts",
+      "title": "DWD CAP alert directory",
+      "region": "Germany",
+      "owner": "Deutscher Wetterdienst",
+      "domain": "weather alerts",
+      "status": "tier-1-ready",
+      "tier": "tier-1",
+      "tier_reason": "Official public CAP directory confirmed and a district warning first slice is practical.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "xml",
+      "primary_endpoints": [
+        "https://opendata.dwd.de/weather/alerts/cap/DISTRICT_DWD_STAT/"
+      ],
+      "docs_url": "https://opendata.dwd.de/weather/alerts/cap/",
+      "sample_url": "https://opendata.dwd.de/weather/alerts/cap/DISTRICT_DWD_STAT/",
+      "output_summary": "CAP weather warnings in multiple geographic and diff/static directory families.",
+      "no_auth_verification_status": "Official directory listing verified publicly.",
+      "update_cadence": "operational alert directory",
+      "geospatial_scope": "regional",
+      "geometry_type": "polygon",
+      "first_output": "District warning records only.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "marine", "aerospace", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "medium",
+      "normalized_field_ideas": [
+        "identifier",
+        "sent",
+        "event",
+        "severity",
+        "urgency",
+        "area_desc",
+        "onset",
+        "expires"
+      ],
+      "source_health_freshness_strategy": [
+        "Stick to one directory family, ideally DISTRICT_DWD_STAT.",
+        "Track file naming and alert timestamps explicitly."
+      ],
+      "data_caveats": [
+        "DWD publishes multiple CAP families with different geometry scopes."
+      ],
+      "legal_compliance_notes": [
+        "Preserve DWD attribution."
+      ],
+      "rate_limit_notes": [
+        "Poll one CAP family only."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Static district CAP files with alert-card normalization and polygon preservation.",
+      "do_not_do": [
+        "Do not ingest district, cell, diff, and static families together on day one."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Public directory listings for CAP root and district family were verified through official results."
+    },
+    {
+      "id": "bom-anonymous-ftp",
+      "title": "Australian Bureau of Meteorology anonymous/public data services",
+      "region": "Australia",
+      "owner": "Australian Bureau of Meteorology",
+      "domain": "weather warnings observations",
+      "status": "deferred",
+      "tier": "tier-2",
+      "tier_reason": "Official public service exists, but transport, licensing, and product-family scoping need tighter decisions before connector work.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "public-object-storage",
+      "primary_endpoints": [
+        "ftp://ftp.bom.gov.au/anon/gen/"
+      ],
+      "docs_url": "https://www.bom.gov.au/catalogue/anon-ftp.shtml",
+      "sample_url": "ftp://ftp.bom.gov.au/anon/gen/",
+      "output_summary": "Forecasts, observations, warnings, radar products, and charts via anonymous public product directories.",
+      "no_auth_verification_status": "Official anonymous FTP product page verified publicly.",
+      "update_cadence": "product-family dependent",
+      "geospatial_scope": "regional",
+      "geometry_type": "mixed",
+      "first_output": "No connector until one product family and terms posture are narrowed.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "marine", "aerospace", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "high",
+      "normalized_field_ideas": [
+        "product_id",
+        "issue_time",
+        "region",
+        "headline",
+        "status"
+      ],
+      "source_health_freshness_strategy": [
+        "Choose one product family first and validate transport expectations."
+      ],
+      "data_caveats": [
+        "Catalog is broad and mixed-format.",
+        "Public product reuse terms should be checked before any redistribution-heavy use."
+      ],
+      "legal_compliance_notes": [
+        "Respect BOM terms of use and attribution requirements."
+      ],
+      "rate_limit_notes": [
+        "Keep any future pulls narrowly product-scoped."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "None until one warning or observation family is explicitly selected.",
+      "do_not_do": [
+        "Do not treat the whole anonymous FTP catalog as one connector."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official BOM anonymous FTP page verified; deferred because the first implementation slice is still too broad and terms should be rechecked."
+    },
+    {
+      "id": "geonet-geohazards",
+      "title": "GeoNet public API",
+      "region": "New Zealand",
+      "owner": "GeoNet",
+      "domain": "earthquakes volcano hazards",
+      "status": "tier-1-ready",
+      "tier": "tier-1",
+      "tier_reason": "Official GeoJSON APIs verified directly for both earthquakes and volcanic alert level.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "geojson",
+      "primary_endpoints": [
+        "https://api.geonet.org.nz/quake?MMI=3",
+        "https://api.geonet.org.nz/volcano/val"
+      ],
+      "docs_url": "https://api.geonet.org.nz/",
+      "sample_url": "https://api.geonet.org.nz/quake?MMI=3",
+      "output_summary": "Earthquake records, CAP quake feed, and current volcanic alert levels.",
+      "no_auth_verification_status": "Direct sample requests succeeded without auth on 2026-04-29.",
+      "update_cadence": "near-real-time hazard feeds",
+      "geospatial_scope": "regional",
+      "geometry_type": "point",
+      "first_output": "Recent quakes plus current volcanic alert level layer.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "aerospace", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "normalized_field_ideas": [
+        "public_id",
+        "time",
+        "magnitude",
+        "depth_km",
+        "mmi",
+        "quality",
+        "status",
+        "volcano_id",
+        "aviation_colour_code"
+      ],
+      "source_health_freshness_strategy": [
+        "Use explicit Accept headers and preserve quality/status fields."
+      ],
+      "data_caveats": [
+        "GeoNet quality/status fields should survive normalization."
+      ],
+      "legal_compliance_notes": [
+        "Respect GeoNet data policy and disclaimer."
+      ],
+      "rate_limit_notes": [
+        "Use bounded quake queries and current volcanic feed polling."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Quake and volcanic alert level feeds only.",
+      "do_not_do": [
+        "Do not collapse GeoNet alert context into confirmed impact statements."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Quake and volcano endpoints returned 200 GeoJSON with documented Accept headers."
+    },
+    {
+      "id": "iceland-earthquakes",
+      "title": "Iceland earthquake feed via apis.is",
+      "region": "Iceland",
+      "owner": "apis.is platform, not the official Icelandic Meteorological Office",
+      "domain": "earthquakes",
+      "status": "rejected",
+      "tier": "rejected",
+      "tier_reason": "Current candidate is not the official IMO endpoint and local verification hit certificate problems.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://apis.is/earthquake/is"
+      ],
+      "docs_url": "https://apis.is/",
+      "sample_url": "https://apis.is/earthquake/is",
+      "output_summary": "Recent Iceland earthquake monitoring records through a third-party public platform.",
+      "no_auth_verification_status": "Local request failed due certificate issues; candidate rejected in favor of official IMO-backed alternatives.",
+      "update_cadence": "near-real-time",
+      "geospatial_scope": "regional",
+      "geometry_type": "point",
+      "first_output": "Do not use.",
+      "best_owner_agent": "connect",
+      "consumer_agents": ["geospatial", "connect"],
+      "integration_priority": "low",
+      "implementation_complexity": "low",
+      "normalized_field_ideas": [
+        "event_id",
+        "time",
+        "magnitude",
+        "depth_km",
+        "latitude",
+        "longitude"
+      ],
+      "source_health_freshness_strategy": [
+        "Prefer an official IMO endpoint instead."
+      ],
+      "data_caveats": [
+        "This is not the official source requested by project policy."
+      ],
+      "legal_compliance_notes": [
+        "Use official IMO or EPOS endpoints instead."
+      ],
+      "rate_limit_notes": [
+        "n/a"
+      ],
+      "testing_strategy": [
+        "none"
+      ],
+      "recommended_first_slice": "None.",
+      "do_not_do": [
+        "Do not implement from this third-party endpoint while an official source is pending."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Rejected because the candidate is not the official government/science endpoint and the public sample failed local SSL verification."
+    },
+    {
+      "id": "imo-epos-geohazards",
+      "title": "Icelandic Meteorological Office EPOS API",
+      "region": "Iceland",
+      "owner": "Icelandic Meteorological Office / EPOS",
+      "domain": "geohazards",
+      "status": "needs-verification",
+      "tier": "tier-2",
+      "tier_reason": "Official-looking EPOS path exists, but the exact public endpoint shape still needs confirmation.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://epos.vedur.is/api/"
+      ],
+      "docs_url": "https://epos.vedur.is/api/",
+      "sample_url": "https://epos.vedur.is/api/",
+      "output_summary": "Potential seismic, volcano, GPS, satellite, and hazard records.",
+      "no_auth_verification_status": "Direct local probe failed; keep as needs-verification.",
+      "update_cadence": "unknown until endpoint family is confirmed",
+      "geospatial_scope": "regional",
+      "geometry_type": "mixed",
+      "first_output": "One seismic or volcano metadata family only after endpoint verification.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "aerospace", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "high",
+      "normalized_field_ideas": [
+        "dataset_id",
+        "event_id",
+        "observed_at",
+        "geometry",
+        "status"
+      ],
+      "source_health_freshness_strategy": [
+        "Verify one exact public path before connector work."
+      ],
+      "data_caveats": [
+        "Official EPOS family breadth is still unclear for this task."
+      ],
+      "legal_compliance_notes": [
+        "Use only after the exact public EPOS endpoint is confirmed."
+      ],
+      "rate_limit_notes": [
+        "unknown"
+      ],
+      "testing_strategy": [
+        "fixture-first after endpoint confirmation"
+      ],
+      "recommended_first_slice": "One small public seismic or volcano endpoint only.",
+      "do_not_do": [
+        "Do not build on the assumption that the whole EPOS tree is public and stable."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Direct local probe failed to resolve cleanly; retain as needs-verification."
+    },
+    {
+      "id": "copernicus-ems-rapid-mapping",
+      "title": "Copernicus EMS Rapid Mapping API",
+      "region": "International",
+      "owner": "Copernicus Emergency Management Service",
+      "domain": "disaster mapping",
+      "status": "tier-1-ready",
+      "tier": "tier-1",
+      "tier_reason": "Official public JSON activations endpoint verified directly and the first slice is cleanly metadata-first.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://rapidmapping.emergency.copernicus.eu/backend/dashboard-api/public-activations-info/"
+      ],
+      "docs_url": "https://mapping.emergency.copernicus.eu/about/how-to-harvest-cems-mapping-data/emergency-response-data/",
+      "sample_url": "https://rapidmapping.emergency.copernicus.eu/backend/dashboard-api/public-activations-info/",
+      "output_summary": "Rapid mapping activations, event metadata, centroids, and product context.",
+      "no_auth_verification_status": "Direct sample request succeeded without auth on 2026-04-29.",
+      "update_cadence": "activation-dependent operational API",
+      "geospatial_scope": "global",
+      "geometry_type": "mixed",
+      "first_output": "Activation cards and centroids only.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "medium",
+      "normalized_field_ideas": [
+        "activation_code",
+        "name",
+        "event_time",
+        "activation_time",
+        "category",
+        "countries",
+        "centroid",
+        "closed",
+        "gdacs_id"
+      ],
+      "source_health_freshness_strategy": [
+        "Poll the activations endpoint and preserve lastUpdate."
+      ],
+      "data_caveats": [
+        "Activation metadata is contextual and does not replace local impact assessments."
+      ],
+      "legal_compliance_notes": [
+        "Preserve Copernicus EMS attribution."
+      ],
+      "rate_limit_notes": [
+        "Use small page sizes and activation-specific follow-on requests later."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Public activations list only, no full product crawl.",
+      "do_not_do": [
+        "Do not harvest the entire product corpus in the first connector."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official docs page and public activations JSON endpoint both verified."
+    },
+    {
+      "id": "finland-digitraffic",
+      "title": "Fintraffic Digitraffic",
+      "region": "Finland",
+      "owner": "Fintraffic",
+      "domain": "transport",
+      "status": "tier-2-complex",
+      "tier": "tier-2",
+      "tier_reason": "Official public APIs are documented, but the family spans road, rail, and marine and some endpoints appear header-sensitive.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://tie.digitraffic.fi/api/tms/v1/stations"
+      ],
+      "docs_url": "https://www.digitraffic.fi/en/road-traffic/",
+      "sample_url": "https://tie.digitraffic.fi/api/tms/v1/stations",
+      "output_summary": "Road, rail, and maritime traffic data with multiple real-time and historical API families.",
+      "no_auth_verification_status": "Official docs are public; direct local calls to a TMS endpoint returned 406 and likely need provider-recommended headers or a narrower family choice.",
+      "update_cadence": "near-real-time and family-dependent",
+      "geospatial_scope": "regional",
+      "geometry_type": "mixed",
+      "first_output": "One road-traffic family only, ideally TMS station metadata or traffic messages.",
+      "best_owner_agent": "features-webcam",
+      "consumer_agents": ["features-webcam", "marine", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "high",
+      "normalized_field_ideas": [
+        "station_id",
+        "road_number",
+        "observed_at",
+        "speed",
+        "traffic_volume",
+        "message_type"
+      ],
+      "source_health_freshness_strategy": [
+        "Use the provider guidance on headers and pin one road family first."
+      ],
+      "data_caveats": [
+        "Family sprawl makes this a multi-phase transport source, not one simple feed."
+      ],
+      "legal_compliance_notes": [
+        "Preserve Fintraffic attribution and header guidance."
+      ],
+      "rate_limit_notes": [
+        "Use provider-recommended headers and cache handling."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Road TMS station metadata or traffic messages only.",
+      "do_not_do": [
+        "Do not implement road, rail, and maritime families together."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Docs are public and specific endpoint families are documented; local TMS sample returned 406, so keep first implementation narrow and header-aware."
+    },
+    {
+      "id": "germany-autobahn-api",
+      "title": "Autobahn GmbH / Bund traffic API",
+      "region": "Germany",
+      "owner": "Die Autobahn GmbH des Bundes",
+      "domain": "motorway operations",
+      "status": "tier-1-ready",
+      "tier": "tier-1",
+      "tier_reason": "Official no-auth JSON endpoint verified directly and the first slice is operationally narrow.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://verkehr.autobahn.de/o/autobahn/A1/services/roadworks"
+      ],
+      "docs_url": "https://verkehr.autobahn.de/web/main/karte/",
+      "sample_url": "https://verkehr.autobahn.de/o/autobahn/A1/services/roadworks",
+      "output_summary": "Roadworks, closures, traffic-related operational records, and adjacent motorway service context.",
+      "no_auth_verification_status": "Direct sample request succeeded without auth on 2026-04-29 using an SSL-bypass context locally.",
+      "update_cadence": "operational API",
+      "geospatial_scope": "regional",
+      "geometry_type": "mixed",
+      "first_output": "Roadworks and closure cards for selected motorways.",
+      "best_owner_agent": "features-webcam",
+      "consumer_agents": ["features-webcam", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "medium",
+      "normalized_field_ideas": [
+        "identifier",
+        "road",
+        "service_type",
+        "future",
+        "is_blocked",
+        "extent",
+        "point",
+        "description"
+      ],
+      "source_health_freshness_strategy": [
+        "Probe one road/service endpoint and preserve provider timestamps when present."
+      ],
+      "data_caveats": [
+        "Operational records should remain contextual and transport-focused."
+      ],
+      "legal_compliance_notes": [
+        "Preserve source attribution."
+      ],
+      "rate_limit_notes": [
+        "Scope to one road or one service family."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Roadworks for a small A-road shortlist.",
+      "do_not_do": [
+        "Do not turn the first connector into a Germany-wide route engine."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Sample roadworks endpoint returned 200 JSON; local SSL validation needed bypass in this environment."
+    },
+    {
+      "id": "hko-open-weather",
+      "title": "Hong Kong Observatory Open Data API",
+      "region": "Hong Kong",
+      "owner": "Hong Kong Observatory",
+      "domain": "weather warnings observations",
+      "status": "tier-1-ready",
+      "tier": "tier-1",
+      "tier_reason": "Official JSON endpoint verified directly and the first slice is a clean warning-card integration.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warningInfo&lang=en"
+      ],
+      "docs_url": "https://www.hko.gov.hk/en/weatherAPI/doc/files/HKO_Open_Data_API_Documentation.pdf",
+      "sample_url": "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warningInfo&lang=en",
+      "output_summary": "Weather warnings, rainfall, tropical cyclone messages, forecasts, and observations.",
+      "no_auth_verification_status": "Direct warning-info request succeeded without auth on 2026-04-29.",
+      "update_cadence": "dataset-dependent operational API",
+      "geospatial_scope": "regional",
+      "geometry_type": "mixed",
+      "first_output": "Warning summary cards and linked typhoon/rainfall context.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "marine", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "normalized_field_ideas": [
+        "warning_statement_code",
+        "name",
+        "action_code",
+        "update_time",
+        "contents",
+        "lang"
+      ],
+      "source_health_freshness_strategy": [
+        "Validate each dataType independently; preserve update_time."
+      ],
+      "data_caveats": [
+        "Endpoint parameter shapes vary by dataType."
+      ],
+      "legal_compliance_notes": [
+        "Preserve HKO attribution."
+      ],
+      "rate_limit_notes": [
+        "Bound requests to one dataType family per connector."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "warningInfo only, then one rainfall or cyclone endpoint later.",
+      "do_not_do": [
+        "Do not assume all HKO datasets share the same query parameters."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "warningInfo endpoint returned 200 JSON; rainfall endpoint parameters need dataset-specific handling from HKO docs."
+    },
+    {
+      "id": "singapore-nea-weather",
+      "title": "Singapore NEA / data.gov.sg realtime APIs",
+      "region": "Singapore",
+      "owner": "National Environment Agency / data.gov.sg",
+      "domain": "weather air quality",
+      "status": "approved-candidate",
+      "tier": "tier-1",
+      "tier_reason": "Public realtime API endpoints responded directly, but docs pages still contain some API-key references that should be rechecked before production use.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://api-open.data.gov.sg/v2/real-time/api/pm25",
+        "https://api-open.data.gov.sg/v2/real-time/api/air-temperature"
+      ],
+      "docs_url": "https://guide.data.gov.sg/developer-guide/real-time-apis",
+      "sample_url": "https://api-open.data.gov.sg/v2/real-time/api/pm25",
+      "output_summary": "Station-level or regional temperature, rainfall, PM2.5, wind, humidity, and forecasts.",
+      "no_auth_verification_status": "Direct sample requests succeeded without auth on 2026-04-29, but some public docs pages still mention an API-key auth scheme.",
+      "update_cadence": "dataset-dependent realtime APIs",
+      "geospatial_scope": "regional",
+      "geometry_type": "station",
+      "first_output": "PM2.5 regional cards and one station-observation family.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "normalized_field_ideas": [
+        "dataset",
+        "observed_at",
+        "region_or_station",
+        "value",
+        "unit",
+        "latitude",
+        "longitude"
+      ],
+      "source_health_freshness_strategy": [
+        "Re-verify no-auth access before implementation and pin one dataset family first."
+      ],
+      "data_caveats": [
+        "Dataset families differ between region-level and station-level outputs."
+      ],
+      "legal_compliance_notes": [
+        "Preserve source attribution and open-data license notes."
+      ],
+      "rate_limit_notes": [
+        "Use one or two dataset families only."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "PM2.5 plus air temperature only.",
+      "do_not_do": [
+        "Do not assume every data.gov.sg weather dataset is uniformly keyless without rechecking."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Direct open endpoints returned 200 JSON with no auth; docs inconsistency warrants one more verification pass at implementation time."
+    },
+    {
+      "id": "meteoswiss-open-data",
+      "title": "MeteoSwiss Open Data / STAC",
+      "region": "Switzerland",
+      "owner": "MeteoSwiss",
+      "domain": "weather observations",
+      "status": "tier-1-ready",
+      "tier": "tier-1",
+      "tier_reason": "Official STAC collection verified directly and the station-observation first slice is narrow and well-documented.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "public-object-storage",
+      "primary_endpoints": [
+        "https://data.geo.admin.ch/api/stac/v1/collections/ch.meteoschweiz.ogd-smn"
+      ],
+      "docs_url": "https://opendatadocs.meteoswiss.ch/a-data-groundbased/a1-automatic-weather-stations",
+      "sample_url": "https://data.geo.admin.ch/api/stac/v1/collections/ch.meteoschweiz.ogd-smn",
+      "output_summary": "Automatic station observations and related STAC asset metadata.",
+      "no_auth_verification_status": "Direct collection request succeeded without auth on 2026-04-29.",
+      "update_cadence": "collection and file-family dependent",
+      "geospatial_scope": "regional",
+      "geometry_type": "station",
+      "first_output": "Station metadata and one recent station observation asset family.",
+      "best_owner_agent": "geospatial",
+      "consumer_agents": ["geospatial", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "medium",
+      "normalized_field_ideas": [
+        "station_id",
+        "station_name",
+        "parameter",
+        "observed_at",
+        "value",
+        "granularity",
+        "asset_url"
+      ],
+      "source_health_freshness_strategy": [
+        "Check the STAC collection and then one item/asset family.",
+        "Preserve now/recent/historical file distinctions."
+      ],
+      "data_caveats": [
+        "Recent and historical files differ in quality-control posture."
+      ],
+      "legal_compliance_notes": [
+        "Source citation to MeteoSwiss is required."
+      ],
+      "rate_limit_notes": [
+        "Stay within one collection and one asset family."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Automatic weather station collection only.",
+      "do_not_do": [
+        "Do not attempt to cover all MeteoSwiss open-data categories in one connector."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official open-data docs and STAC collection both verified directly."
+    },
+    {
+      "id": "scottish-water-overflows",
+      "title": "Scottish Water Overflow Map API",
+      "region": "Scotland",
+      "owner": "Scottish Water",
+      "domain": "overflow monitoring",
+      "status": "tier-1-ready",
+      "tier": "tier-1",
+      "tier_reason": "Official public JSON API verified directly and the first slice is narrow and highly caveated.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://api.scottishwater.co.uk/overflow-event-monitoring/v1/near-real-time"
+      ],
+      "docs_url": "https://www.scottishwater.co.uk/Help-and-Resources/Open-Data/Overflow-Map-Data",
+      "sample_url": "https://api.scottishwater.co.uk/overflow-event-monitoring/v1/near-real-time",
+      "output_summary": "Near-real-time monitored sewer overflow activations and rainfall context.",
+      "no_auth_verification_status": "Direct sample request succeeded without auth on 2026-04-29.",
+      "update_cadence": "updated every 60 minutes per official docs",
+      "geospatial_scope": "regional",
+      "geometry_type": "station",
+      "first_output": "Near-real-time overflow status layer with rainfall context and explicit caveats.",
+      "best_owner_agent": "marine",
+      "consumer_agents": ["marine", "geospatial", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "normalized_field_ideas": [
+        "overflow_id",
+        "overflow_status_id",
+        "internal_status_id",
+        "last_event_time",
+        "duration_48h",
+        "rainfall_history",
+        "latitude",
+        "longitude"
+      ],
+      "source_health_freshness_strategy": [
+        "Preserve source timestamps and status-id mappings from the official docs."
+      ],
+      "data_caveats": [
+        "EDM activations do not confirm pollution and are not swim-safety advice."
+      ],
+      "legal_compliance_notes": [
+        "Preserve Scottish Water attribution and caveat language."
+      ],
+      "rate_limit_notes": [
+        "Hourly pull cadence is sufficient."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Near-real-time overflow status records only.",
+      "do_not_do": [
+        "Do not present EDM monitor activation as confirmed contamination."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official docs page and near-real-time JSON endpoint verified."
+    },
+    {
+      "id": "esa-neocc-close-approaches",
+      "title": "ESA NEOCC automated data access",
+      "region": "International / space",
+      "owner": "European Space Agency NEO Coordination Centre",
+      "domain": "near-earth objects",
+      "status": "tier-2-complex",
+      "tier": "tier-2",
+      "tier_reason": "Official public access is documented, but ESA describes the interface as experimental and raw-text oriented.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "mixed",
+      "primary_endpoints": [
+        "https://neo.ssa.esa.int/en/computer-access"
+      ],
+      "docs_url": "https://neo.ssa.esa.int/en/computer-access",
+      "sample_url": "https://neo.ssa.esa.int/en/computer-access",
+      "output_summary": "NEO close approaches, risk list, and observation-priority style automated access families.",
+      "no_auth_verification_status": "Official docs and close-approach help pages are public; exact machine endpoint path should be fixture-pinned before connector work.",
+      "update_cadence": "source-dependent and experimental API",
+      "geospatial_scope": "global",
+      "geometry_type": "non-geographic",
+      "first_output": "One close-approach or risk-list polling flow only.",
+      "best_owner_agent": "aerospace",
+      "consumer_agents": ["aerospace", "connect"],
+      "integration_priority": "medium",
+      "implementation_complexity": "high",
+      "normalized_field_ideas": [
+        "designation",
+        "close_approach_time",
+        "miss_distance_au",
+        "miss_distance_ld",
+        "velocity_km_s",
+        "diameter_estimate",
+        "risk_flag"
+      ],
+      "source_health_freshness_strategy": [
+        "Pin one raw-text endpoint and preserve the source update language."
+      ],
+      "data_caveats": [
+        "ESA explicitly marks the automated interface as experimental.",
+        "Outputs are hazard context, not public-impact claims."
+      ],
+      "legal_compliance_notes": [
+        "Preserve ESA attribution and experimental-interface caveat."
+      ],
+      "rate_limit_notes": [
+        "Use sparse polling and one product family only."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Close-approach list only after exact URL pattern is pinned.",
+      "do_not_do": [
+        "Do not assume the experimental interface is stable across the full NEOCC dataset family."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official public docs and help pages verified; keep Tier 2 because the interface is experimental and exact machine endpoints are still to be pinned."
+    },
+    {
+      "id": "nasa-jpl-cneos",
+      "title": "NASA/JPL SSD-CNEOS APIs",
+      "region": "International / space",
+      "owner": "NASA / Jet Propulsion Laboratory",
+      "domain": "near-earth objects fireballs",
+      "status": "tier-1-ready",
+      "tier": "tier-1",
+      "tier_reason": "Official JSON API verified directly with a clear and narrow close-approach first slice.",
+      "auth": "none",
+      "signup_required": false,
+      "captcha_risk": "none",
+      "machine_readable": true,
+      "endpoint_type": "json",
+      "primary_endpoints": [
+        "https://ssd-api.jpl.nasa.gov/cad.api?dist-max=0.05"
+      ],
+      "docs_url": "https://ssd-api.jpl.nasa.gov/doc/cad.html",
+      "sample_url": "https://ssd-api.jpl.nasa.gov/cad.api?dist-max=0.05",
+      "output_summary": "Close approaches, fireballs, and other small-body records.",
+      "no_auth_verification_status": "Direct sample request succeeded without auth on 2026-04-29.",
+      "update_cadence": "API dataset dependent",
+      "geospatial_scope": "global",
+      "geometry_type": "non-geographic",
+      "first_output": "Close-approach cards and alerts for narrow distance thresholds.",
+      "best_owner_agent": "aerospace",
+      "consumer_agents": ["aerospace", "connect"],
+      "integration_priority": "high",
+      "implementation_complexity": "low",
+      "normalized_field_ideas": [
+        "des",
+        "cd",
+        "dist",
+        "dist_ld",
+        "v_rel",
+        "h",
+        "body",
+        "orbit_id"
+      ],
+      "source_health_freshness_strategy": [
+        "Preserve API signature fields and query parameter provenance."
+      ],
+      "data_caveats": [
+        "Close-approach outputs are space-hazard context and should not be exaggerated into impact predictions."
+      ],
+      "legal_compliance_notes": [
+        "Preserve NASA/JPL attribution."
+      ],
+      "rate_limit_notes": [
+        "Bound query parameters and avoid broad archive pulls."
+      ],
+      "testing_strategy": [
+        "fixture-first",
+        "sample response fixture",
+        "no live dependency"
+      ],
+      "recommended_first_slice": "Close-approach API only.",
+      "do_not_do": [
+        "Do not mix multiple NASA/JPL small-body APIs into one first connector."
+      ],
+      "verification_date": "2026-04-29",
+      "verification_notes": "Official CAD docs page and sample JSON query both verified directly."
     }
   ]
 }
