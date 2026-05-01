@@ -574,6 +574,38 @@ class Settings(BaseSettings):
         default=20,
         alias="GEOSPHERE_AUSTRIA_WARNINGS_HTTP_TIMEOUT_SECONDS",
     )
+    france_georisques_source_mode: str = Field(
+        default="fixture",
+        alias="FRANCE_GEORISQUES_SOURCE_MODE",
+    )
+    france_georisques_fixture_path: str = Field(
+        default="./data/france_georisques_fixture.json",
+        alias="FRANCE_GEORISQUES_FIXTURE_PATH",
+    )
+    france_georisques_seismic_zoning_url: str = Field(
+        default="https://www.georisques.gouv.fr/api/v1/zonage_sismique",
+        alias="FRANCE_GEORISQUES_SEISMIC_ZONING_URL",
+    )
+    france_georisques_http_timeout_seconds: int = Field(
+        default=20,
+        alias="FRANCE_GEORISQUES_HTTP_TIMEOUT_SECONDS",
+    )
+    uk_ea_water_quality_source_mode: str = Field(
+        default="fixture",
+        alias="UK_EA_WATER_QUALITY_SOURCE_MODE",
+    )
+    uk_ea_water_quality_fixture_path: str = Field(
+        default="./data/uk_ea_water_quality_fixture.json",
+        alias="UK_EA_WATER_QUALITY_FIXTURE_PATH",
+    )
+    uk_ea_water_quality_samples_url: str = Field(
+        default="https://environment.data.gov.uk/data/bathing-water-quality/in-season/sample.json",
+        alias="UK_EA_WATER_QUALITY_SAMPLES_URL",
+    )
+    uk_ea_water_quality_http_timeout_seconds: int = Field(
+        default=20,
+        alias="UK_EA_WATER_QUALITY_HTTP_TIMEOUT_SECONDS",
+    )
     nasa_power_source_mode: str = Field(
         default="fixture",
         alias="NASA_POWER_SOURCE_MODE",
@@ -684,6 +716,18 @@ class Settings(BaseSettings):
     nvd_cve_http_timeout_seconds: int = Field(
         default=20,
         alias="NVD_CVE_HTTP_TIMEOUT_SECONDS",
+    )
+    wave_monitor_database_url: str = Field(
+        default="sqlite:///./data/wave_monitor.db",
+        alias="WAVE_MONITOR_DATABASE_URL",
+    )
+    wave_monitor_http_timeout_seconds: int = Field(
+        default=20,
+        alias="WAVE_MONITOR_HTTP_TIMEOUT_SECONDS",
+    )
+    source_discovery_database_url: str = Field(
+        default="sqlite:///./data/source_discovery.db",
+        alias="SOURCE_DISCOVERY_DATABASE_URL",
     )
     webcam_database_url: str | None = Field(default=None, alias="WEBCAM_DATABASE_URL")
     webcam_worker_enabled: bool = Field(default=False, alias="WEBCAM_WORKER_ENABLED")

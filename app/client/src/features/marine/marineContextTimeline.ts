@@ -1,5 +1,6 @@
 import type { MarineContextSourceRegistrySummary } from "./marineContextSourceSummary";
 import type { MarineEnvironmentalContextSummary } from "./marineEnvironmentalContext";
+import type { MarineChokepointReviewPackage } from "./marineChokepointReviewPackage";
 import type { MarineReplayNavigationTarget } from "./marineReplayNavigation";
 
 const MAX_MARINE_CONTEXT_SNAPSHOTS = 8;
@@ -29,6 +30,15 @@ export interface MarineContextSnapshot {
   topSummaryLines: string[];
   caveats: string[];
   focusedTargetLabel?: string | null;
+  reviewOnly: boolean;
+  corridorLabel?: string | null;
+  boundedAreaLabel?: string | null;
+  chokepointTimeWindowStart?: string | null;
+  chokepointTimeWindowEnd?: string | null;
+  focusedEvidenceKinds: string[];
+  contextGapCount: number;
+  dominantLimitationLine?: string | null;
+  sourceHealthLine?: string | null;
 }
 
 export interface MarineContextTimelineSummary {
@@ -48,6 +58,7 @@ export function buildMarineContextSnapshot(input: {
   environmentalContextSummary: MarineEnvironmentalContextSummary | null;
   contextSourceRegistrySummary: MarineContextSourceRegistrySummary | null;
   focusedTarget: MarineReplayNavigationTarget | null;
+  chokepointReviewPackage?: MarineChokepointReviewPackage | null;
   createdAt?: string;
 }): MarineContextSnapshot | null {
   if (!input.environmentalContextSummary || !input.contextSourceRegistrySummary) {
@@ -56,7 +67,9 @@ export function buildMarineContextSnapshot(input: {
 
   const environmental = input.environmentalContextSummary.metadata;
   const registry = input.contextSourceRegistrySummary.metadata;
+  const chokepointReview = input.chokepointReviewPackage?.metadata ?? null;
   const topSummaryLines = [
+    ...(chokepointReview?.reviewSignals.slice(0, 1) ?? []),
     ...environmental.topObservations.slice(0, 2),
     ...registry.rows
       .filter((row) => row.topSummary)
@@ -65,6 +78,7 @@ export function buildMarineContextSnapshot(input: {
   ].slice(0, 3);
   const caveats = Array.from(
     new Set([
+      ...(chokepointReview?.caveats.slice(0, 2) ?? []),
       ...environmental.caveats.slice(0, 2),
       ...registry.caveats.slice(0, 2)
     ])
@@ -89,7 +103,16 @@ export function buildMarineContextSnapshot(input: {
       registry.rows.find((row) => row.sourceId === "scottish-water-overflows")?.activeCount ?? 0,
     topSummaryLines,
     caveats,
-    focusedTargetLabel: input.focusedTarget?.label ?? null
+    focusedTargetLabel: input.focusedTarget?.label ?? null,
+    reviewOnly: chokepointReview?.reviewOnly ?? true,
+    corridorLabel: chokepointReview?.corridorLabel ?? null,
+    boundedAreaLabel: chokepointReview?.boundedAreaLabel ?? null,
+    chokepointTimeWindowStart: chokepointReview?.timeWindowStart ?? null,
+    chokepointTimeWindowEnd: chokepointReview?.timeWindowEnd ?? null,
+    focusedEvidenceKinds: chokepointReview?.focusedEvidenceKinds ?? [],
+    contextGapCount: chokepointReview?.contextGapCount ?? 0,
+    dominantLimitationLine: chokepointReview?.dominantLimitationLine ?? null,
+    sourceHealthLine: chokepointReview?.sourceHealthLine ?? null
   };
 }
 
@@ -152,10 +175,19 @@ function marineContextSnapshotsEquivalent(
     fixtureSourceCount: left.fixtureSourceCount,
     nearbyStationCount: left.nearbyStationCount,
     activeMonitorCount: left.activeMonitorCount,
-    topSummaryLines: left.topSummaryLines,
-    caveats: left.caveats,
-    focusedTargetLabel: left.focusedTargetLabel
-  }) ===
+      topSummaryLines: left.topSummaryLines,
+      caveats: left.caveats,
+      focusedTargetLabel: left.focusedTargetLabel,
+      reviewOnly: left.reviewOnly,
+      corridorLabel: left.corridorLabel,
+      boundedAreaLabel: left.boundedAreaLabel,
+      chokepointTimeWindowStart: left.chokepointTimeWindowStart,
+      chokepointTimeWindowEnd: left.chokepointTimeWindowEnd,
+      focusedEvidenceKinds: left.focusedEvidenceKinds,
+      contextGapCount: left.contextGapCount,
+      dominantLimitationLine: left.dominantLimitationLine,
+      sourceHealthLine: left.sourceHealthLine
+    }) ===
     JSON.stringify({
       presetId: right.presetId,
       presetLabel: right.presetLabel,
@@ -172,7 +204,16 @@ function marineContextSnapshotsEquivalent(
       activeMonitorCount: right.activeMonitorCount,
       topSummaryLines: right.topSummaryLines,
       caveats: right.caveats,
-      focusedTargetLabel: right.focusedTargetLabel
+      focusedTargetLabel: right.focusedTargetLabel,
+      reviewOnly: right.reviewOnly,
+      corridorLabel: right.corridorLabel,
+      boundedAreaLabel: right.boundedAreaLabel,
+      chokepointTimeWindowStart: right.chokepointTimeWindowStart,
+      chokepointTimeWindowEnd: right.chokepointTimeWindowEnd,
+      focusedEvidenceKinds: right.focusedEvidenceKinds,
+      contextGapCount: right.contextGapCount,
+      dominantLimitationLine: right.dominantLimitationLine,
+      sourceHealthLine: right.sourceHealthLine
     });
 }
 

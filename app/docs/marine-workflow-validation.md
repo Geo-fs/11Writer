@@ -88,6 +88,7 @@ These marine-local helpers do not define new backend routes. Their workflow vali
     - `Hydrology context`
     - `Infrastructure context`
   - `marineAnomalySummary.contextFusionSummary` metadata block
+  - degraded/unavailable-dominant smoke posture yields `partial context` / `source-health limitations dominate current source mix` wording rather than severity or impact wording
 - required caveat boundaries:
   - no single severity score across unrelated context families
   - no anomaly-cause, flood-impact, contamination, health-impact, damage, vessel-behavior, or vessel-intent inference
@@ -106,6 +107,7 @@ These marine-local helpers do not define new backend routes. Their workflow vali
   - report title / summary line
   - `marineAnomalySummary.contextReviewReport` metadata block
   - explicit `does not prove` language remains present
+  - degraded/unavailable-dominant smoke posture yields `partial context` / `review caveat` wording and preserves wrongdoing guardrails
 - required caveat boundaries:
   - no severity promotion from context availability
   - no source semantic blur between ocean/met, hydrology, and infrastructure
@@ -115,8 +117,34 @@ These marine-local helpers do not define new backend routes. Their workflow vali
 
 | Workflow | Backend / metadata dependencies | Visible card / helper | Deterministic smoke evidence | Export metadata key | Caveat boundary |
 | --- | --- | --- | --- | --- | --- |
-| Marine Context Fusion Summary | `environmentalContext`, `hydrologyContext`, `scottishWaterOverflowContext`, `contextSourceSummary`, `contextIssueQueue` | `Marine Context Fusion` via `marineContextFusionSummary.ts` | card text includes `Ocean/met context`, `Hydrology context`, `Infrastructure context`, and `Export readiness`; snapshot metadata requires family count, family lines, export readiness, and priority caveats | `marineAnomalySummary.contextFusionSummary` | no cross-family severity score; no anomaly-cause, flood-impact, contamination, health-impact, damage, vessel-behavior, or vessel-intent inference |
-| Marine Context Review Report | `contextFusionSummary`, `contextIssueQueue` | `Marine Context Review Report` via `marineContextReviewReport.ts` | card text includes `Context families`, `Review next:`, and `Does not prove:`; snapshot metadata requires included families, review-needed items, does-not-prove lines, and export readiness | `marineAnomalySummary.contextReviewReport` | no severity promotion from context availability; no source semantic blur; no vessel-intent, wrongdoing, anomaly-cause, flood-impact, contamination, or health-impact inference |
+| Marine Context Fusion Summary | `environmentalContext`, `hydrologyContext`, `scottishWaterOverflowContext`, `contextSourceSummary`, `contextIssueQueue` | `Marine Context Fusion` via `marineContextFusionSummary.ts` | card text includes `Ocean/met context`, `Hydrology context`, `Infrastructure context`, `Export readiness`, and degraded/unavailable-dominant `partial context` wording; snapshot metadata requires family count, family lines, export readiness, priority caveats, and dominant-limitation wording when applicable | `marineAnomalySummary.contextFusionSummary` | no cross-family severity score; no anomaly-cause, flood-impact, contamination, health-impact, damage, vessel-behavior, or vessel-intent inference |
+| Marine Context Review Report | `contextFusionSummary`, `contextIssueQueue` | `Marine Context Review Report` via `marineContextReviewReport.ts` | card text includes `Context families`, `Review next:`, `Does not prove:`, and degraded/unavailable-dominant `partial context` / `review caveat` wording; snapshot metadata requires included families, review-needed items, does-not-prove lines, export readiness, and dominant-limitation wording when applicable | `marineAnomalySummary.contextReviewReport` | no severity promotion from context availability; no source semantic blur; no vessel-intent, wrongdoing, anomaly-cause, flood-impact, contamination, or health-impact inference |
+
+### Helper-Level Regression Coverage
+
+- helper-level deterministic regression coverage now exists outside Playwright smoke:
+  - `app/client/scripts/marineContextHelperRegression.mjs`
+- run with:
+  - from `app/client`:
+    - `cmd /c npm.cmd run test:marine-context-helpers`
+- this coverage guards:
+  - degraded/unavailable-dominant fusion wording
+  - review-report `partial context` / `review caveat` wording
+  - chokepoint-review export wording for bounded corridor label, crossing-count support, source-health gaps, and focused review signals
+  - context-timeline/chokepoint coherence for current and previous review-lens snapshots
+  - `does not prove` guardrails for impact, anomaly cause, vessel behavior, vessel intent, and wrongdoing
+  - chokepoint-specific no-inference guardrails for AIS/signal gaps, reroutes, queue/backlog wording, evasion, escort, toll activity, blockade, targeting, threat, and causation
+  - source-family distinctions in the issue export bundle
+  - full `marineAnomalySummary` export-package coherence across:
+    - `contextFusionSummary`
+    - `contextReviewReport`
+    - `contextSourceSummary`
+    - `contextIssueQueue`
+    - `contextIssueExportBundle`
+    - `hydrologyContext`
+    - `chokepointReviewPackage`
+    - `contextTimeline`
+- this keeps no-severity/no-impact/no-intent phrasing from depending only on browser smoke
 
 ### Context Source Visibility
 
@@ -128,6 +156,7 @@ These marine-local helpers do not define new backend routes. Their workflow vali
   - Ireland OPW Water Level
 - fixture/local mode remains explicit where applicable
 - degraded/unavailable source-health states are now workflow-visible in the deterministic marine smoke path
+- the deterministic smoke posture now also verifies that degraded/unavailable-heavy context mixes are described as partial context and source-health limitation, not event severity
 - nearby counts are visible
 - active counts are visible where applicable
 
@@ -138,7 +167,11 @@ These marine-local helpers do not define new backend routes. Their workflow vali
 - marine context issue queue renders source-health issues without implying vessel behavior
 - marine hydrology context review summary renders Vigicrues and Ireland OPW together without creating a merged severity signal
 - marine context fusion summary renders ocean/met, hydrology, and infrastructure families without collapsing them into one severity model
+- marine context review report renders degraded/unavailable-dominant phrasing as a review caveat rather than impact or anomaly language
 - marine context review report renders review-needed items, caveat lines, and does-not-prove lines from the existing fusion/issue path
+- marine context issue export bundle preserves source family, health state, source mode, evidence basis, allowed review action, and does-not-prove lines across marine context sources
+- marine chokepoint review package preserves bounded corridor label, time window, crossing-count support, source-health limitations, focused replay/context signals, and explicit no-evasion/no-threat/no-causation wording
+- marine context timeline preserves chokepoint review-lens coherence for corridor label, focused target, focused evidence kinds, context-gap count, and source-health caveat wording across current and previous snapshots
 - environmental presets update controls
 - environmental source toggles update the visible context path
 - context timeline records context-lens changes
@@ -159,7 +192,9 @@ Marine export metadata should include:
 - `marineAnomalySummary.environmentalContext`
 - `marineAnomalySummary.contextSourceSummary`
 - `marineAnomalySummary.contextIssueQueue`
+- `marineAnomalySummary.contextIssueExportBundle`
 - `marineAnomalySummary.contextTimeline`
+- `marineAnomalySummary.chokepointReviewPackage`
 
 ### Caveat / Semantics Checks
 

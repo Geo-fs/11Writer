@@ -54,8 +54,16 @@ Interpretation:
 Latest verified local status on this Windows machine:
 
 - `python -m compileall app/server/src`: passed
+- `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`: passed
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q`: passed
+- `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`: passed
+- `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q`: passed
+- `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`: passed
+- `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py app/server/tests/test_ncei_space_weather_portal_contracts.py -q`: passed
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`: passed
 - `cmd /c npm.cmd run lint`: passed
 - `cmd /c npm.cmd run build`: passed
+- `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`: passed
 - `python app/server/tests/run_playwright_smoke.py marine`: passed
 - `python app/server/tests/run_playwright_smoke.py webcam`: passed
 - `python app/server/tests/run_playwright_smoke.py aerospace`: failed before app assertions with `windows-playwright-launch-permission`, narrowed to `windows-browser-launch-permission`
@@ -73,15 +81,127 @@ Interpret this correctly:
 Current checkpoint summary:
 
 - the current broad validation surface is green enough to continue Phase 2 acceleration work
-- the worktree is still mixed and shared-file reconciliation risk remains real
+- the latest full Connect checkpoint found a clean local worktree on `main...origin/main` before subsequent concurrent lane edits resumed
+- that clean checkpoint had `shared-high-collision: 0` and `unknown: 0`
 - the earlier high-priority cross-platform runtime-plan alert has been propagated and the alerts ledger is currently back to zero open alerts
 - the previously reported `AppShell.tsx` `selectedTargetSummary` frontend build blocker did not reproduce in the latest Connect checkpoint sweep
 - the new cross-platform runtime docs are planning artifacts, not implementation evidence
 - the ownership scanner now has dedicated `data-ai` and `atlas-planning` buckets for clear lane-owned implementation vs user-directed planning surfaces
-- the current dirty set is no longer `unknown: 0`; it is down to `unknown: 2`, both intentionally broad backend files:
-  - `app/server/src/app.py`
-  - `app/server/src/services/status_service.py`
-- current shared-file pressure remains real at `shared-high-collision: 8`
+- if future mixed work returns, reassess ownership and shared-file pressure from the live tree rather than assuming this clean checkpoint still holds
+- current live post-checkpoint worktree truth can move quickly under concurrent lane edits:
+  - latest Connect pass observed `modified=18`, `untracked=7`, `shared-high-collision: 1`, and `unknown: 6`
+  - the new Data AI infrastructure/status fixtures still classify correctly under `data-ai`
+  - the analyst workbench route/service/test/doc family is currently broad enough to stay `unknown` until ownership is clearer
+- latest Connect pass after the OSINT bundle and analyst-workbench appearance observed:
+  - `modified=52`
+  - `untracked=27`
+  - `shared-high-collision: 7`
+  - `unknown: 17`
+  - a green validation checkpoint can coexist with a broad mixed tree; do not confuse "build passed" with "commit grouping is easy"
+- latest Connect pass after the rights/civic feed wave plus geospatial risk/water-quality and webcam export-readiness additions observed:
+  - `modified=59`
+  - `untracked=37`
+  - `shared-high-collision: 7`
+  - `unknown: 13`
+  - open alerts are back to `0`
+  - a green validation checkpoint still does not mean commit grouping is easy; the residual `unknown` bucket is now smaller but still intentionally broad
+- latest Connect pass for assignment `2026-05-01 13:04 America/Chicago` observed:
+  - one real repo-wide blocker reproduced and was cleared:
+    - `cmd /c npm.cmd run build` failed on `app/client/src/features/marine/marineContextHelperRegression.ts`
+    - cause: sibling imports used forbidden `.ts` suffixes under the current TypeScript config
+    - fix: import-syntax only; no marine semantics changed
+  - the assigned validation surface is green again:
+    - `python -m compileall app/server/src`
+    - focused Data AI, Geospatial overview/water-quality, Marine source-health, Features/Webcam source-ops, and Aerospace contract suites
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+  - latest live dirty-tree posture at the end of that checkpoint:
+    - `modified=64`
+    - `untracked=45`
+    - `shared-high-collision: 7`
+    - `unknown: 15`
+  - the alerts ledger now has `1` open low-priority `Manager AI` alert; it is coordination state, not a release blocker by itself
+- latest Connect pass for assignment `2026-05-01 13:24 America/Chicago` observed:
+  - no new repo-wide blocker reproduced
+  - the assigned validation surface is green, including:
+    - `python -m compileall app/server/src`
+    - focused Data AI, Geospatial overview/water-quality, Marine, Features/Webcam, Aerospace, and Analyst Workbench suites
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+  - latest live dirty-tree posture at the end of that checkpoint:
+    - `modified=66`
+    - `untracked=55`
+    - `shared-high-collision: 7`
+    - `unknown: 16`
+  - current broad/shared surfaces that should stay visible for later consolidation review:
+    - Analyst Workbench doc/route/service/test
+    - new `wave_monitor` preview route/service/type/test
+    - roadmap / workflow-planning docs
+  - current hypothesis-graph doc remains planning context only; it should not be treated as implemented feature readiness
+- latest Connect pass for assignment `2026-05-01 14:46 America/Chicago` observed:
+  - no repo-wide blocker reproduced
+  - the assigned validation surface is green, including:
+    - `python -m compileall app/server/src`
+    - `python -m pytest app/server/tests/test_wave_monitor.py -q`
+    - focused Data AI, Geospatial overview, Marine, Features/Webcam, and Aerospace contract suites
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+  - latest live dirty-tree posture at the end of that checkpoint:
+    - `modified=66`
+    - `untracked=58`
+    - `shared-high-collision: 7`
+    - `unknown: 17`
+  - the alerts ledger now has `2` open low-priority `Manager AI` alerts; this is coordination state, not a release blocker by itself
+  - current shared architecture recommendation:
+    - keep Wave Monitor preview surfaces broad/shared for now
+    - keep Analyst Workbench broad/shared for now
+    - do not treat either as clean single-lane commit groups until Manager AI or the user intentionally routes ownership
+- latest Connect pass for assignment `2026-05-01 15:03 America/Chicago` observed:
+  - no repo-wide blocker reproduced
+  - the assigned validation surface is green, including:
+    - `python -m compileall app/server/src`
+    - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+    - focused Data AI, environmental source-family overview, Marine, Features/Webcam, and Aerospace suites
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - latest live dirty-tree posture at checkpoint start:
+    - `modified=66`
+    - `untracked=73`
+    - `shared-high-collision: 7`
+    - `unknown: 19`
+  - current Wave Monitor runtime-boundary recommendation:
+    - treat the family as a persistence scaffold plus manual scheduler scaffold, not just a passive fixture preview
+    - current files persist state through SQLite-backed tables and expose manual `run-now` and `scheduler/tick` APIs
+    - live connector execution is now possible only through explicit API-triggered runs when a connector is configured for `source_mode=live`
+    - there is still no autonomous background scheduler and no mounted standalone 7Po8 runtime
+  - current shared architecture recommendation remains:
+    - keep Wave Monitor route/service/type/test plus `app/server/src/wave_monitor/` broad/shared for now
+    - keep Analyst Workbench doc/route/service/test broad/shared for now
+    - do not silently normalize these shared families into a single lane just to reduce ownership-scanner counts
+- latest Connect pass for assignment `2026-05-01 15:44 America/Chicago` observed:
+  - no repo-wide blocker reproduced
+  - the assigned validation surface is green, including:
+    - `python -m compileall app/server/src`
+    - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+    - `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+    - focused Data AI, environmental source-family overview, Marine, and Features/Webcam suites
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - latest live dirty-tree posture at checkpoint start:
+    - `modified=69`
+    - `untracked=84`
+    - `shared-high-collision: 7`
+    - `unknown: 26`
+  - current source-discovery/runtime-boundary recommendation:
+    - treat `source_discovery` as a persistence scaffold with explicit write APIs, not as a planning-only placeholder
+    - current files support candidate-memory upserts, claim-outcome reputation writes, and shared source-memory overview
+    - Wave Monitor now seeds the shared source-memory store from current source-candidate rows
+    - no autonomous promotion, no hidden live polling loop, and no background scheduler were reproduced
+  - current shared architecture recommendation remains:
+    - keep Wave Monitor, Source Discovery, and Analyst Workbench broad/shared for now
+    - do not silently normalize those shared families into a single lane just to reduce ownership-scanner counts
 
 Current checkpoint caution:
 

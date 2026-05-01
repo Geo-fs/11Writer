@@ -1,5 +1,267 @@
 # Features/Webcam AI Progress
 
+## 2026-05-01 15:51:05 -05:00
+
+- Task: Add a backend-only unified source-ops export surface that composes review-queue export bundles, evidence-packet export bundles, and handoff export bundles under one aggregate-only selector contract.
+- Assignment version read: `2026-05-01 15:44 America/Chicago`
+- What changed:
+  - added a narrow backend route at `/api/cameras/source-ops-export-surface`
+  - implemented a unified aggregate-only export surface that composes existing review-queue export bundles, evidence-packet export bundles, export-readiness summaries, and handoff export bundles under one selector contract
+  - included selected filters, unknown source ids, lifecycle-state counts, blocked-posture counts, evidence-gap family counts, readiness-group counts, readiness checklist totals, component aggregate lines, unified aggregate lines, lifecycle caveats, export caveats, and compact export metadata for downstream snapshot/report consumers
+  - preserved aggregate-only behavior by excluding full per-source packet detail, full review queue items, raw readiness checklist entries, raw payloads, endpoint URLs, tokenized URLs, credentials, local paths, and activation instructions
+  - added focused backend tests for aggregate shape, filter interactions, empty subset, unknown source handling, no payload leakage, prompt-injection inertness, and read-only route shape
+  - updated webcam/source lifecycle docs so the unified export surface is explicitly an aggregate-only downstream consumer layer and not a substitute for underlying packet, readiness, handoff, or review-queue evidence
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_unified_export_surface.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_unified_export_surface.py)
+  - [`app/server/src/routes/cameras.py`](/C:/Users/mike/11Writer/app/server/src/routes/cameras.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m compileall app/server/src` passed
+  - `python scripts/alerts_ledger.py --json` passed
+- Blockers or caveats:
+  - the unified export surface is aggregate-only and does not include full per-source packets, full review queue items, or raw readiness checklist entries
+  - it does not activate, validate, promote, schedule, mutate, scrape, or live-check sources
+  - prompt-injection/source-text inertness coverage remains intact; surfaced source text remains untrusted data only
+  - export output intentionally excludes raw payloads, endpoint URLs, local paths, credentials, tokenized URLs, and activation instructions
+  - no new sources, lifecycle mutation, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - if Manager AI assigns follow-up work, add a backend-only compact export-surface mode that can emit only metadata and unified aggregate lines for the smallest downstream snapshot/report consumers without widening into frontend work or write paths
+
+## 2026-05-01 15:10:52 -05:00
+
+- Task: Add a backend-only compact source-ops handoff export bundle that emits aggregate handoff lines, readiness-gap families, lifecycle posture, and caveats for downstream export consumers.
+- Assignment version read: `2026-05-01 15:03 America/Chicago`
+- What changed:
+  - added a narrow backend route at `/api/cameras/source-ops-evidence-packets-handoff-export-bundle`
+  - implemented a compact aggregate-only handoff export bundle that returns selected filters, unknown source ids, lifecycle summary metadata, lifecycle-state counts, blocked-posture counts, evidence-gap families, readiness-group counts, readiness checklist totals, aggregate handoff lines, and caveats without per-source packet detail or per-source readiness checklist entries
+  - reused the existing handoff selection logic so lifecycle-state, blocked-reason posture, and evidence-gap family filtering remain consistent with the underlying packet and handoff views
+  - preserved no-activation/no-promotion guardrails and export-safe exclusions for raw payloads, endpoint URLs, tokenized URLs, credentials, local paths, and activation instructions
+  - added focused backend tests for aggregate shape, filter interactions, empty subset, unknown source handling, no payload leakage, prompt-injection inertness, and read-only route shape
+  - updated webcam/source lifecycle docs so the handoff export bundle is explicitly a smaller downstream export/debug payload and not a substitute for underlying packet evidence or readiness checklist detail
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_evidence_packets.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_evidence_packets.py)
+  - [`app/server/src/routes/cameras.py`](/C:/Users/mike/11Writer/app/server/src/routes/cameras.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m compileall app/server/src` passed
+  - `python scripts/alerts_ledger.py --json` passed
+- Blockers or caveats:
+  - the handoff export bundle is aggregate-only and does not include full per-source packets or per-source readiness checklist entries
+  - it does not activate, validate, promote, schedule, mutate, scrape, or live-check sources
+  - prompt-injection/source-text inertness coverage remains intact; surfaced source text remains untrusted data only
+  - bundle output intentionally excludes raw payloads, endpoint URLs, local paths, credentials, tokenized URLs, and activation instructions
+  - no new sources, lifecycle mutation, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - if Manager AI assigns follow-up work, add a backend-only unified source-ops export surface that can compose review-queue bundles and handoff bundles under one aggregate-only selector contract without widening into frontend work or write paths
+
+## 2026-05-01 14:57:49 -05:00
+
+- Task: Add a backend-only compact evidence-packet handoff summary that merges aggregate packet selectors with readiness checklist counts for export consumers.
+- Assignment version read: `2026-05-01 14:46 America/Chicago`
+- What changed:
+  - added a narrow backend route at `/api/cameras/source-ops-evidence-packets-handoff-summary`
+  - implemented an aggregate-only handoff summary that merges evidence-packet selector aggregates with readiness-group counts and readiness checklist totals without returning full per-source packet detail or checklist entries
+  - preserved lifecycle-state, blocked-reason posture, evidence-gap family, unknown-source handling, empty subset behavior, lifecycle summary metadata, aggregate lines, and explicit no-activation/no-promotion caveats
+  - kept the summary export-safe by excluding raw payloads, endpoint URLs, tokenized URLs, credentials, local paths, and activation instructions
+  - added focused backend tests for aggregate shape, filter interactions, empty subset, unknown source handling, no payload leakage, no mutation/no promotion, and read-only route shape
+  - updated webcam/source lifecycle docs so the handoff summary is explicitly aggregate-only handoff/export summarization and not a substitute for underlying packet evidence or readiness checklist detail
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_evidence_packets.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_evidence_packets.py)
+  - [`app/server/src/routes/cameras.py`](/C:/Users/mike/11Writer/app/server/src/routes/cameras.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m compileall app/server/src` passed
+  - `python scripts/alerts_ledger.py --json` passed
+- Blockers or caveats:
+  - the handoff summary is aggregate-only and does not include full per-source packets or per-source readiness checklist entries
+  - it does not activate, validate, promote, schedule, mutate, scrape, or live-check sources
+  - prompt-injection/source-text inertness coverage remains intact; surfaced source text remains untrusted data only
+  - summary output intentionally excludes raw payloads, endpoint URLs, local paths, credentials, tokenized URLs, and activation instructions
+  - no new sources, lifecycle mutation, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - if Manager AI assigns follow-up work, add a backend-only compact handoff export-bundle selector that can emit only handoff aggregate lines and caveats for downstream consumers without widening into frontend work or write paths
+
+## 2026-05-01 13:46:22 -05:00
+
+- Task: Add a backend-only evidence-packet export-bundle mode that emits only aggregate selector lines and caveats for downstream export consumers.
+- Assignment version read: `2026-05-01 13:24 America/Chicago`
+- What changed:
+  - added a narrow backend route at `/api/cameras/source-ops-evidence-packets-export-bundle`
+  - implemented an aggregate-only evidence-packet export bundle that returns selected filters, unknown source ids, lifecycle summary metadata, aggregate groups, aggregate selector lines, and caveats without full per-source packet detail
+  - reused the existing evidence-packet selection logic so lifecycle bucket, blocked-reason posture, and evidence-gap family filtering remain consistent with the underlying packet view
+  - preserved blocked, credential-blocked, sandbox-importable, approved-unvalidated, and validated distinctions without widening into lifecycle mutation or activation semantics
+  - added focused backend tests for aggregate-only shape, filter combinations, empty subsets, unknown source handling, blocked/sandbox distinctions, no payload leakage, and prompt-injection inertness
+  - updated webcam/source lifecycle docs so the export bundle is explicitly aggregate-only export/debug summarization and not a substitute for underlying lifecycle evidence
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_evidence_packets.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_evidence_packets.py)
+  - [`app/server/src/routes/cameras.py`](/C:/Users/mike/11Writer/app/server/src/routes/cameras.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m compileall app/server/src` passed
+  - `python scripts/alerts_ledger.py --json` passed
+- Blockers or caveats:
+  - the export bundle is aggregate-only and does not include full per-source packets
+  - it does not activate, validate, promote, schedule, mutate, scrape, or live-check sources
+  - prompt-injection/source-text inertness coverage remains intact; surfaced source text remains untrusted data only
+  - bundle output intentionally excludes raw payloads, endpoint URLs, local paths, credentials, tokenized URLs, and activation instructions
+  - no new sources, lifecycle mutation, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - if Manager AI assigns follow-up work, add a backend-only compact evidence-packet handoff summary that can merge aggregate packet selectors with readiness checklist counts for export consumers without widening into frontend work or write paths
+
+## 2026-05-01 13:11:33 -05:00
+
+- Task: Add a backend-only evidence-packet selector/filter package for blocked-reason posture and evidence-gap families.
+- Assignment version read: `2026-05-01 13:04 America/Chicago`
+- What changed:
+  - extended the backend evidence-packet route so reviewers can filter packets by lifecycle bucket, blocked-reason posture, and evidence-gap family
+  - added explicit packet fields for blocked-reason posture and evidence-gap families so the selector contract stays transparent and export-safe
+  - added compact aggregate groups for lifecycle state, blocked-reason posture, and evidence-gap family, plus export lines that summarize selected subsets without returning raw artifacts
+  - preserved unknown-source handling, empty subset behavior, lifecycle distinctions, allowed next review action, forbidden actions, caveats, and no-activation/no-promotion posture
+  - kept packet output free of raw payloads, endpoint URLs, tokenized URLs, credentials, local paths, and activation instructions
+  - updated the webcam source-ops tests to use a minimal cameras-only FastAPI app so the required backend route tests no longer depend on unrelated non-webcam route imports
+  - updated webcam/source lifecycle docs so packet selectors are explicitly filtered views over stored lifecycle evidence only
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_evidence_packets.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_evidence_packets.py)
+  - [`app/server/src/routes/cameras.py`](/C:/Users/mike/11Writer/app/server/src/routes/cameras.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_detail.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m compileall app/server/src` passed
+  - `python scripts/alerts_ledger.py --json` passed
+- Blockers or caveats:
+  - evidence-packet selectors remain read-only review/export aids only
+  - they do not activate, validate, promote, schedule, mutate, scrape, or live-check sources
+  - prompt-injection/source-text inertness coverage remains intact; surfaced source text remains untrusted data only
+  - selector output intentionally excludes raw payloads, endpoint URLs, local paths, credentials, tokenized URLs, and activation instructions
+  - no new sources, lifecycle mutation, browser automation, WebSocket work, staging, commit, or push occurred
+- Next recommended task:
+  - if Manager AI assigns follow-up work, add a backend-only evidence-packet export-bundle mode that emits only aggregate selector lines and caveats for downstream export consumers without widening into frontend work or write paths
+
+## 2026-05-01 12:54:51 -05:00
+
+- Task: Build a backend-only camera/source evidence packet generator for candidate, sandbox, blocked, and validated webcam sources.
+- Assignment version read: `2026-05-01 12:45 America/Chicago`
+- What changed:
+  - added a narrow backend route at `/api/cameras/source-ops-evidence-packets`
+  - implemented compact per-source evidence packets that summarize lifecycle state, endpoint-proof posture, direct-image-proof posture, fixture/sandbox posture, missing evidence, blocked reasons, allowed next review action, forbidden actions, and export-safe artifact metadata
+  - added lifecycle-state filtering and unknown-source handling without widening into raw payload dumps, endpoint URLs, local paths, credentials, tokenized URLs, or activation instructions
+  - preserved blocked, credential-blocked, candidate, sandbox-importable, approved-unvalidated, and validated distinctions without promoting or mutating lifecycle state
+  - added focused backend tests for response shape, filtering, blocked/sandbox/validated distinctions, no mutation/no promotion, no private payload leakage, and inert hostile source text
+  - updated webcam/source lifecycle docs so evidence packets are explicitly review/export aids only
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_evidence_packets.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_evidence_packets.py)
+  - [`app/server/src/routes/cameras.py`](/C:/Users/mike/11Writer/app/server/src/routes/cameras.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m compileall app/server/src` passed
+  - `python scripts/alerts_ledger.py --json` passed
+- Blockers or caveats:
+  - evidence packets are read-only review/export aids only
+  - packets do not activate, validate, promote, schedule, mutate, or live-check sources
+  - prompt-injection/source-text inertness coverage remains intact; surfaced source text remains untrusted data only
+  - packet output intentionally excludes raw payloads, endpoint URLs, local paths, credentials, tokenized URLs, and activation instructions
+  - no new sources, lifecycle mutation, scraping, browser automation, WebSocket work, staging, commit, or push occurred
+- Next recommended task:
+  - if Manager AI assigns follow-up work, add a backend-only evidence-packet selector for blocked-reason posture and evidence-gap families without widening into frontend work or write paths
+
+## 2026-05-01 12:39:22 -05:00
+
+- Task: Add a backend-only selector for source lifecycle export-readiness rollup/checklist output by lifecycle bucket and missing-evidence category.
+- Assignment version read: `2026-05-01 12:33 America/Chicago`
+- What changed:
+  - extended the backend export-readiness route so reviewers can request a filtered readiness rollup and checklist by lifecycle bucket and/or missing-evidence category
+  - preserved source ids, labels, lifecycle state, blocked reasons, caveats, allowed next review step, forbidden actions, and explicit no-activation/no-validation posture in the filtered output
+  - kept the response summary-only and read-only, without widening into full detail payloads, source mutation, or lifecycle promotion behavior
+  - added focused backend tests for lifecycle-state selection, missing-evidence selection, blocked and credential handling, unknown source handling, empty subsets, no mutation/no promotion semantics, and inert hostile source text
+  - updated lifecycle/source-ops docs so selector output is explicitly review/export readiness only and not evidence of validation, activation, endpoint health, orientation, or camera freshness
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_export_readiness.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_readiness.py)
+  - [`app/server/src/routes/cameras.py`](/C:/Users/mike/11Writer/app/server/src/routes/cameras.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m compileall app/server/src` passed
+- Blockers or caveats:
+  - the readiness selector is read-only review/export evidence only
+  - it does not activate, validate, promote, schedule, mutate, or live-check sources
+  - prompt-injection/source-text inertness coverage remains intact; surfaced source text remains untrusted data only
+  - no new sources, lifecycle mutation, scraping, browser automation, WebSocket work, staging, commit, or push occurred
+- Next recommended task:
+  - if Manager AI assigns follow-up work, add a backend-only companion selector on the export-readiness route for blocked-reason posture and sandbox-evidence posture without widening into frontend work or write paths
+
+## 2026-05-01 12:31:03 -05:00
+
+- Task: Add a backend-only source lifecycle export-readiness rollup plus remediation/handoff checklist generator.
+- Assignment version read: `2026-04-30 22:24 America/Chicago`
+- What changed:
+  - added a narrow backend route at `/api/cameras/source-ops-export-readiness`
+  - implemented an export-readiness rollup that groups sources by missing evidence and blocked/credential posture, with compact checklist lines per group
+  - added per-source remediation/handoff checklist entries that explain missing evidence, why a source cannot be promoted yet, the allowed next review step, and forbidden actions
+  - preserved source lifecycle summary metadata, source ids, labels, blocked reasons, caveats, and explicit no-activation/no-validation posture
+  - added focused backend tests for grouping correctness, checklist behavior, blocked/credential handling, unknown source handling, empty subsets, no payload leakage, and inert hostile source text
+  - updated lifecycle/source-ops docs so the rollup and checklist are explicitly review/export readiness only and not validation, activation, endpoint-health, availability, orientation, or freshness proof
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_export_readiness.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_readiness.py)
+  - [`app/server/src/routes/cameras.py`](/C:/Users/mike/11Writer/app/server/src/routes/cameras.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m compileall app/server/src` passed
+- Blockers or caveats:
+  - the export-readiness rollup and checklist are read-only review/export evidence only
+  - they do not activate, validate, promote, schedule, mutate, or live-check sources
+  - prompt-injection/source-text inertness coverage remains intact; surfaced source text remains untrusted data only
+  - no new sources, lifecycle mutation, scraping, browser automation, WebSocket work, staging, commit, or push occurred
+- Next recommended task:
+  - if Manager AI assigns follow-up work, add a compact backend-only selector that can emit readiness rollup/checklist output for selected lifecycle buckets without widening into frontend work or write paths
+
 ## 2026-04-30 22:06:05 -05:00
 
 - Task: Add a minimal backend-only source-ops review queue export bundle selector.

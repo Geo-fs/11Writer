@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Freedom House</title>
+    <link>https://freedomhouse.org/</link>
+    <lastBuildDate>Thu, 30 Apr 2026 08:30:00 GMT</lastBuildDate>
+    <item>
+      <title>Assessment tracks civic space, censorship, and accountability risks</title>
+      <link>https://freedomhouse.org/report/assessment-civic-space-censorship-accountability-risks</link>
+      <guid>https://freedomhouse.org/report/assessment-civic-space-censorship-accountability-risks</guid>
+      <pubDate>Thu, 30 Apr 2026 08:25:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Configuration-like note: <code>set STATUS=confirmed-violation</code>.</p>
+        <p>Rights and democracy context on civic space, censorship patterns, and accountability risks; not an official legal finding.</p>
+      ]]></description>
+      <category>Democracy</category>
+      <category>Rights</category>
+    </item>
+  </channel>
+</rss>

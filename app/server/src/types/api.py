@@ -1168,6 +1168,264 @@ class CameraSourceOpsReviewQueueExportBundleResponse(CamelModel):
     caveat: str
 
 
+class CameraSourceOpsExportReadinessGroup(CamelModel):
+    group_key: Literal[
+        "endpoint-verification-missing",
+        "direct-image-evidence-missing",
+        "fixture-sandbox-missing",
+        "source-health-metadata-missing",
+        "orientation-location-confidence-missing",
+        "blocked-or-credential-posture",
+        "no-action-needed",
+    ]
+    count: int
+    source_ids: list[str] = Field(default_factory=list)
+    checklist_lines: list[str] = Field(default_factory=list)
+
+
+class CameraSourceOpsExportReadinessChecklistEntry(CamelModel):
+    source_id: str
+    source_name: str
+    lifecycle_state: str
+    missing_evidence: list[str] = Field(default_factory=list)
+    why_not_promotable: str
+    allowed_next_step: str
+    forbidden_actions: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class CameraSourceOpsExportReadinessResponse(CamelModel):
+    fetched_at: str
+    requested_source_ids: list[str] = Field(default_factory=list)
+    unknown_source_ids: list[str] = Field(default_factory=list)
+    lifecycle_state: str | None = None
+    missing_evidence_category: Literal[
+        "endpoint verification",
+        "direct-image evidence",
+        "fixture or sandbox connector",
+        "source-health or export metadata",
+        "orientation/location confidence",
+    ] | None = None
+    source_lifecycle_summary: CameraSourceOpsIndexSummary
+    readiness_groups: list[CameraSourceOpsExportReadinessGroup] = Field(default_factory=list)
+    checklist_entries: list[CameraSourceOpsExportReadinessChecklistEntry] = Field(default_factory=list)
+    export_lines: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+    caveat: str
+
+
+class CameraSourceOpsEvidencePacketExportMetadata(CamelModel):
+    export_lines: list[str] = Field(default_factory=list)
+    evidence_statuses: list[CameraSourceOpsReviewEvidenceStatus] = Field(default_factory=list)
+    artifact_timestamps: list[CameraSourceOpsArtifactTimestampSummary] = Field(default_factory=list)
+
+
+class CameraSourceOpsEvidencePacket(CamelModel):
+    source_id: str
+    source_name: str
+    onboarding_state: str
+    import_readiness: str | None = None
+    lifecycle_state: str
+    blocked_reason_posture: Literal["blocked", "credential-blocked", "not-blocked"]
+    endpoint_proof_posture: str
+    direct_image_proof_posture: str
+    fixture_sandbox_posture: str
+    missing_evidence: list[str] = Field(default_factory=list)
+    evidence_gap_families: list[
+        Literal[
+            "missing-endpoint-evidence",
+            "missing-direct-image-proof",
+            "missing-fixture-sandbox-evidence",
+            "missing-graduation-evidence",
+            "missing-source-health-metadata",
+            "sandbox-not-validated",
+        ]
+    ] = Field(default_factory=list)
+    blocked_reasons: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+    allowed_next_review_action: str
+    forbidden_actions: list[str] = Field(default_factory=list)
+    export_metadata: CameraSourceOpsEvidencePacketExportMetadata
+    validated: bool = False
+    activation_eligible_from_packet: bool = False
+
+
+class CameraSourceOpsEvidencePacketAggregateGroup(CamelModel):
+    key: str
+    count: int
+    source_ids: list[str] = Field(default_factory=list)
+
+
+class CameraSourceOpsEvidencePacketResponse(CamelModel):
+    fetched_at: str
+    requested_source_ids: list[str] = Field(default_factory=list)
+    unknown_source_ids: list[str] = Field(default_factory=list)
+    lifecycle_state: str | None = None
+    blocked_reason_posture: Literal["blocked", "credential-blocked", "not-blocked"] | None = None
+    evidence_gap_family: Literal[
+        "missing-endpoint-evidence",
+        "missing-direct-image-proof",
+        "missing-fixture-sandbox-evidence",
+        "missing-graduation-evidence",
+        "missing-source-health-metadata",
+        "sandbox-not-validated",
+    ] | None = None
+    count: int
+    source_lifecycle_summary: CameraSourceOpsIndexSummary
+    packets: list[CameraSourceOpsEvidencePacket] = Field(default_factory=list)
+    aggregate_by_lifecycle_state: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    aggregate_by_blocked_reason_posture: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    aggregate_by_evidence_gap_family: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    export_lines: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+    caveat: str
+
+
+class CameraSourceOpsEvidencePacketExportBundleResponse(CamelModel):
+    fetched_at: str
+    requested_source_ids: list[str] = Field(default_factory=list)
+    unknown_source_ids: list[str] = Field(default_factory=list)
+    lifecycle_state: str | None = None
+    blocked_reason_posture: Literal["blocked", "credential-blocked", "not-blocked"] | None = None
+    evidence_gap_family: Literal[
+        "missing-endpoint-evidence",
+        "missing-direct-image-proof",
+        "missing-fixture-sandbox-evidence",
+        "missing-graduation-evidence",
+        "missing-source-health-metadata",
+        "sandbox-not-validated",
+    ] | None = None
+    count: int
+    source_lifecycle_summary: CameraSourceOpsIndexSummary
+    aggregate_by_lifecycle_state: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    aggregate_by_blocked_reason_posture: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    aggregate_by_evidence_gap_family: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    aggregate_lines: list[str] = Field(default_factory=list)
+    lifecycle_caveats: list[str] = Field(default_factory=list)
+    export_caveats: list[str] = Field(default_factory=list)
+    caveat: str
+
+
+class CameraSourceOpsHandoffReadinessGroup(CamelModel):
+    group_key: Literal[
+        "endpoint-verification-missing",
+        "direct-image-evidence-missing",
+        "fixture-sandbox-missing",
+        "source-health-metadata-missing",
+        "orientation-location-confidence-missing",
+        "blocked-or-credential-posture",
+        "no-action-needed",
+    ]
+    count: int
+    checklist_lines: list[str] = Field(default_factory=list)
+
+
+class CameraSourceOpsEvidencePacketHandoffSummaryResponse(CamelModel):
+    fetched_at: str
+    requested_source_ids: list[str] = Field(default_factory=list)
+    unknown_source_ids: list[str] = Field(default_factory=list)
+    lifecycle_state: str | None = None
+    blocked_reason_posture: Literal["blocked", "credential-blocked", "not-blocked"] | None = None
+    evidence_gap_family: Literal[
+        "missing-endpoint-evidence",
+        "missing-direct-image-proof",
+        "missing-fixture-sandbox-evidence",
+        "missing-graduation-evidence",
+        "missing-source-health-metadata",
+        "sandbox-not-validated",
+    ] | None = None
+    count: int
+    source_lifecycle_summary: CameraSourceOpsIndexSummary
+    aggregate_by_lifecycle_state: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    aggregate_by_blocked_reason_posture: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    aggregate_by_evidence_gap_family: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    readiness_groups: list[CameraSourceOpsHandoffReadinessGroup] = Field(default_factory=list)
+    readiness_checklist_count: int = 0
+    aggregate_lines: list[str] = Field(default_factory=list)
+    lifecycle_caveats: list[str] = Field(default_factory=list)
+    export_caveats: list[str] = Field(default_factory=list)
+    caveat: str
+
+
+class CameraSourceOpsEvidencePacketHandoffExportBundleResponse(CamelModel):
+    fetched_at: str
+    requested_source_ids: list[str] = Field(default_factory=list)
+    unknown_source_ids: list[str] = Field(default_factory=list)
+    lifecycle_state: str | None = None
+    blocked_reason_posture: Literal["blocked", "credential-blocked", "not-blocked"] | None = None
+    evidence_gap_family: Literal[
+        "missing-endpoint-evidence",
+        "missing-direct-image-proof",
+        "missing-fixture-sandbox-evidence",
+        "missing-graduation-evidence",
+        "missing-source-health-metadata",
+        "sandbox-not-validated",
+    ] | None = None
+    count: int
+    source_lifecycle_summary: CameraSourceOpsIndexSummary
+    aggregate_by_lifecycle_state: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    aggregate_by_blocked_reason_posture: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    aggregate_by_evidence_gap_family: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    readiness_groups: list[CameraSourceOpsHandoffReadinessGroup] = Field(default_factory=list)
+    readiness_checklist_count: int = 0
+    aggregate_lines: list[str] = Field(default_factory=list)
+    lifecycle_caveats: list[str] = Field(default_factory=list)
+    export_caveats: list[str] = Field(default_factory=list)
+    caveat: str
+
+
+class CameraSourceOpsUnifiedExportMetadata(CamelModel):
+    aggregate_only: bool = True
+    component_keys: list[str] = Field(default_factory=list)
+    total_aggregate_lines: int = 0
+    future_consumer_role: str
+    caveat: str
+
+
+class CameraSourceOpsUnifiedExportSurfaceResponse(CamelModel):
+    fetched_at: str
+    requested_source_ids: list[str] = Field(default_factory=list)
+    unknown_source_ids: list[str] = Field(default_factory=list)
+    lifecycle_state: str | None = None
+    blocked_reason_posture: Literal["blocked", "credential-blocked", "not-blocked"] | None = None
+    evidence_gap_family: Literal[
+        "missing-endpoint-evidence",
+        "missing-direct-image-proof",
+        "missing-fixture-sandbox-evidence",
+        "missing-graduation-evidence",
+        "missing-source-health-metadata",
+        "sandbox-not-validated",
+    ] | None = None
+    review_queue_priority_band: Literal["review-first", "review", "note"] | None = None
+    review_queue_reason_category: Literal[
+        "blocked",
+        "credential-blocked",
+        "missing-endpoint-evidence",
+        "missing-candidate-report",
+        "missing-graduation-plan",
+        "sandbox-not-validated",
+        "missing-timestamp",
+        "non-ingestable-posture",
+        "validated-posture",
+    ] | None = None
+    count: int
+    source_lifecycle_summary: CameraSourceOpsIndexSummary
+    lifecycle_state_counts: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    blocked_reason_posture_counts: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    evidence_gap_family_counts: list[CameraSourceOpsEvidencePacketAggregateGroup] = Field(default_factory=list)
+    readiness_groups: list[CameraSourceOpsHandoffReadinessGroup] = Field(default_factory=list)
+    readiness_checklist_count: int = 0
+    review_queue_aggregate_lines: list[str] = Field(default_factory=list)
+    evidence_packet_aggregate_lines: list[str] = Field(default_factory=list)
+    readiness_aggregate_lines: list[str] = Field(default_factory=list)
+    handoff_aggregate_lines: list[str] = Field(default_factory=list)
+    aggregate_lines: list[str] = Field(default_factory=list)
+    export_metadata: CameraSourceOpsUnifiedExportMetadata
+    lifecycle_caveats: list[str] = Field(default_factory=list)
+    export_caveats: list[str] = Field(default_factory=list)
+    caveat: str
+
+
 class CameraSourceOpsReviewQueueResponse(CamelModel):
     fetched_at: str
     requested_source_ids: list[str] = Field(default_factory=list)
@@ -3047,6 +3305,330 @@ class NasaPowerMeteorologySolarResponse(CamelModel):
     caveats: list[str] = Field(default_factory=list)
 
 
+class FranceGeorisquesRiskRecord(CamelModel):
+    record_id: str
+    territory_id: str
+    territory_name: str
+    risk_type: str
+    risk_level_code: str | None = None
+    risk_level_label: str | None = None
+    request_basis: Literal["code_insee", "latlon"]
+    source_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveat: str
+    evidence_basis: Literal["reference", "contextual"] = "reference"
+
+
+class FranceGeorisquesSourceHealth(CamelModel):
+    source_id: str
+    source_label: str
+    enabled: bool
+    source_mode: Literal["fixture", "live", "unknown"]
+    health: Literal["loaded", "empty", "stale", "error", "disabled", "unknown"]
+    loaded_count: int
+    last_fetched_at: str | None = None
+    source_generated_at: str | None = None
+    detail: str
+    error_summary: str | None = None
+    caveat: str | None = None
+
+
+class FranceGeorisquesMetadata(CamelModel):
+    source: str
+    source_name: str
+    source_url: str
+    request_url: str
+    request_basis: Literal["code_insee", "latlon"]
+    territory_id: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    fetched_at: str
+    generated_at: str | None = None
+    count: int
+    caveat: str
+
+
+class FranceGeorisquesResponse(CamelModel):
+    metadata: FranceGeorisquesMetadata
+    count: int
+    source_health: FranceGeorisquesSourceHealth
+    records: list[FranceGeorisquesRiskRecord] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class UkEaWaterQualitySample(CamelModel):
+    sample_id: str
+    sampling_point_id: str | None = None
+    sampling_point_label: str | None = None
+    bathing_water_name: str | None = None
+    district: str | None = None
+    sample_date_time: str | None = None
+    record_date: str | None = None
+    sample_year: int | None = None
+    sample_classification: str | None = None
+    intestinal_enterococci_count: int | None = None
+    e_coli_count: int | None = None
+    source_url: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    caveat: str
+    evidence_basis: Literal["observed"] = "observed"
+
+
+class UkEaWaterQualitySourceHealth(CamelModel):
+    source_id: str
+    source_label: str
+    enabled: bool
+    source_mode: Literal["fixture", "live", "unknown"]
+    health: Literal["loaded", "empty", "stale", "error", "disabled", "unknown"]
+    loaded_count: int
+    last_fetched_at: str | None = None
+    source_generated_at: str | None = None
+    detail: str
+    error_summary: str | None = None
+    caveat: str | None = None
+
+
+class UkEaWaterQualityMetadata(CamelModel):
+    source: str
+    source_name: str
+    source_url: str
+    request_url: str
+    point_id: str | None = None
+    sample_year: int | None = None
+    district: str | None = None
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    fetched_at: str
+    generated_at: str | None = None
+    raw_count: int = 0
+    count: int
+    caveat: str
+
+
+class UkEaWaterQualityResponse(CamelModel):
+    metadata: UkEaWaterQualityMetadata
+    count: int
+    source_health: UkEaWaterQualitySourceHealth
+    samples: list[UkEaWaterQualitySample] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class EnvironmentalSourceFamilyMember(CamelModel):
+    family_id: str
+    family_label: str
+    source_id: str
+    source_label: str
+    source_mode: Literal["fixture", "live", "unknown"]
+    health: Literal["loaded", "empty", "stale", "error", "disabled", "unknown"]
+    runtime_state: str | None = None
+    loaded_count: int
+    evidence_basis: str
+    last_fetched_at: str | None = None
+    source_generated_at: str | None = None
+    caveat: str
+    summary_line: str
+    review_lines: list[str] = Field(default_factory=list)
+    export_lines: list[str] = Field(default_factory=list)
+
+
+class EnvironmentalSourceFamilySummary(CamelModel):
+    family_id: str
+    family_label: str
+    family_health: Literal["loaded", "mixed", "empty", "degraded", "unknown"]
+    family_mode: Literal["fixture", "live", "mixed", "unknown"]
+    source_ids: list[str] = Field(default_factory=list)
+    evidence_bases: list[str] = Field(default_factory=list)
+    source_count: int
+    loaded_source_count: int
+    fixture_source_count: int
+    last_fetched_at: str | None = None
+    source_generated_at: str | None = None
+    review_lines: list[str] = Field(default_factory=list)
+    export_lines: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+    sources: list[EnvironmentalSourceFamilyMember] = Field(default_factory=list)
+
+
+class EnvironmentalSourceFamiliesOverviewMetadata(CamelModel):
+    source: str
+    source_name: str
+    source_mode: Literal["fixture", "live", "mixed", "unknown"]
+    fetched_at: str
+    family_count: int
+    source_count: int
+    caveat: str
+
+
+class EnvironmentalSourceFamiliesOverviewResponse(CamelModel):
+    metadata: EnvironmentalSourceFamiliesOverviewMetadata
+    family_count: int
+    source_count: int
+    families: list[EnvironmentalSourceFamilySummary] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class EnvironmentalSourceFamilyExportBundle(CamelModel):
+    family_id: str
+    family_label: str
+    family_health: Literal["loaded", "mixed", "empty", "degraded", "unknown"]
+    family_mode: Literal["fixture", "live", "mixed", "unknown"]
+    source_ids: list[str] = Field(default_factory=list)
+    evidence_bases: list[str] = Field(default_factory=list)
+    source_count: int
+    loaded_source_count: int
+    fixture_source_count: int
+    last_fetched_at: str | None = None
+    source_generated_at: str | None = None
+    caveats: list[str] = Field(default_factory=list)
+    review_lines: list[str] = Field(default_factory=list)
+    export_lines: list[str] = Field(default_factory=list)
+
+
+class EnvironmentalSourceFamiliesExportMetadata(CamelModel):
+    source: str
+    source_name: str
+    profile: Literal["compact"]
+    source_mode: Literal["fixture", "live", "mixed", "unknown"]
+    fetched_at: str
+    requested_family_ids: list[str] = Field(default_factory=list)
+    included_family_ids: list[str] = Field(default_factory=list)
+    missing_family_ids: list[str] = Field(default_factory=list)
+    family_count: int
+    source_count: int
+    caveat: str
+
+
+class EnvironmentalSourceFamiliesExportResponse(CamelModel):
+    metadata: EnvironmentalSourceFamiliesExportMetadata
+    family_count: int
+    source_count: int
+    families: list[EnvironmentalSourceFamilyExportBundle] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class EnvironmentalContextExportSnapshotMetadata(CamelModel):
+    snapshot_type: Literal["environmental-context-export"]
+    captured_at: str
+    requested_family_ids: list[str] = Field(default_factory=list)
+    included_family_ids: list[str] = Field(default_factory=list)
+    missing_family_ids: list[str] = Field(default_factory=list)
+    source_mode: Literal["fixture", "live", "mixed", "unknown"]
+    family_count: int
+    source_count: int
+
+
+class EnvironmentalContextExportPackageMetadata(CamelModel):
+    source: str
+    source_name: str
+    profile: Literal["compact"]
+    source_mode: Literal["fixture", "live", "mixed", "unknown"]
+    fetched_at: str
+    family_count: int
+    source_count: int
+    evidence_bases: list[str] = Field(default_factory=list)
+    caveat: str
+
+
+class EnvironmentalContextExportPackage(CamelModel):
+    metadata: EnvironmentalContextExportPackageMetadata
+    snapshot_metadata: EnvironmentalContextExportSnapshotMetadata
+    family_ids: list[str] = Field(default_factory=list)
+    source_ids: list[str] = Field(default_factory=list)
+    family_count: int
+    source_count: int
+    families: list[EnvironmentalSourceFamilyExportBundle] = Field(default_factory=list)
+    review_lines: list[str] = Field(default_factory=list)
+    export_lines: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class EnvironmentalSourceHealthIssue(CamelModel):
+    issue_id: str
+    issue_type: Literal[
+        "fixture-only",
+        "count-only-health",
+        "source-health-empty",
+        "source-health-stale",
+        "source-health-error",
+        "source-health-disabled",
+        "source-health-unknown",
+        "advisory-only",
+        "forecast-only",
+        "modeled-only",
+        "reference-only",
+        "contextual-only",
+        "missing-family",
+    ]
+    allowed_review_posture: Literal["document-and-monitor", "source-health-review-only"]
+    family_id: str | None = None
+    family_label: str | None = None
+    source_id: str | None = None
+    source_label: str | None = None
+    source_ids: list[str] = Field(default_factory=list)
+    source_mode: Literal["fixture", "live", "mixed", "unknown"]
+    source_health: Literal["loaded", "mixed", "empty", "stale", "error", "disabled", "degraded", "unknown"]
+    evidence_basis: str
+    summary_line: str
+    caveats: list[str] = Field(default_factory=list)
+    review_lines: list[str] = Field(default_factory=list)
+    export_lines: list[str] = Field(default_factory=list)
+
+
+class EnvironmentalSourceHealthIssueQueueMetadata(CamelModel):
+    source: str
+    source_name: str
+    profile: Literal["compact"]
+    source_mode: Literal["fixture", "live", "mixed", "unknown"]
+    fetched_at: str
+    issue_count: int
+    family_count: int
+    source_count: int
+    caveat: str
+
+
+class EnvironmentalSourceHealthIssueQueuePackage(CamelModel):
+    metadata: EnvironmentalSourceHealthIssueQueueMetadata
+    snapshot_metadata: EnvironmentalContextExportSnapshotMetadata
+    family_ids: list[str] = Field(default_factory=list)
+    source_ids: list[str] = Field(default_factory=list)
+    family_count: int
+    source_count: int
+    issue_count: int
+    issues: list[EnvironmentalSourceHealthIssue] = Field(default_factory=list)
+    review_lines: list[str] = Field(default_factory=list)
+    export_lines: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class EnvironmentalSituationSnapshotPackageMetadata(CamelModel):
+    source: str
+    source_name: str
+    profile: Literal["default", "chokepoint-context", "source-health-review"]
+    source_mode: Literal["fixture", "live", "mixed", "unknown"]
+    fetched_at: str
+    family_count: int
+    source_count: int
+    issue_count: int
+    evidence_bases: list[str] = Field(default_factory=list)
+    caveat: str
+
+
+class EnvironmentalSituationSnapshotPackage(CamelModel):
+    metadata: EnvironmentalSituationSnapshotPackageMetadata
+    snapshot_metadata: EnvironmentalContextExportSnapshotMetadata
+    family_ids: list[str] = Field(default_factory=list)
+    source_ids: list[str] = Field(default_factory=list)
+    family_count: int
+    source_count: int
+    issue_count: int
+    families: list[EnvironmentalSourceFamilyExportBundle] = Field(default_factory=list)
+    issues: list[EnvironmentalSourceHealthIssue] = Field(default_factory=list)
+    health_mode_summary: list[str] = Field(default_factory=list)
+    review_lines: list[str] = Field(default_factory=list)
+    export_lines: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
 class UsgsGeomagnetismSample(CamelModel):
     observed_at: str
     values: dict[str, float | None] = Field(default_factory=dict)
@@ -3310,6 +3892,74 @@ class DataAiMultiFeedResponse(CamelModel):
     caveats: list[str] = Field(default_factory=list)
 
 
+class DataAiFeedFamilySourceMember(CamelModel):
+    family_id: str
+    family_label: str
+    source_id: str
+    source_name: str
+    source_category: str
+    feed_url: str
+    final_url: str | None = None
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    source_health: Literal["loaded", "empty", "stale", "error", "disabled", "unknown"] = "unknown"
+    evidence_basis: Literal["advisory", "contextual", "source-reported"]
+    raw_count: int = 0
+    item_count: int = 0
+    dedupe_posture: str
+    tags: list[str] = Field(default_factory=list)
+    last_fetched_at: str | None = None
+    source_generated_at: str | None = None
+    caveat: str
+    summary_line: str
+    export_lines: list[str] = Field(default_factory=list)
+
+
+class DataAiFeedFamilySummary(CamelModel):
+    family_id: str
+    family_label: str
+    family_health: Literal["loaded", "mixed", "empty", "degraded", "unknown"]
+    family_mode: Literal["fixture", "live", "mixed", "unknown"]
+    source_ids: list[str] = Field(default_factory=list)
+    source_labels: list[str] = Field(default_factory=list)
+    source_categories: list[str] = Field(default_factory=list)
+    feed_urls: list[str] = Field(default_factory=list)
+    evidence_bases: list[str] = Field(default_factory=list)
+    source_count: int
+    loaded_source_count: int
+    fixture_source_count: int
+    raw_count: int = 0
+    item_count: int = 0
+    dedupe_posture: str
+    tags: list[str] = Field(default_factory=list)
+    last_fetched_at: str | None = None
+    source_generated_at: str | None = None
+    caveats: list[str] = Field(default_factory=list)
+    export_lines: list[str] = Field(default_factory=list)
+    sources: list[DataAiFeedFamilySourceMember] = Field(default_factory=list)
+
+
+class DataAiFeedFamilyOverviewMetadata(CamelModel):
+    source: str
+    source_name: str
+    source_mode: Literal["fixture", "live", "mixed", "unknown"]
+    fetched_at: str
+    family_count: int
+    source_count: int
+    selected_family_ids: list[str] = Field(default_factory=list)
+    selected_source_ids: list[str] = Field(default_factory=list)
+    guardrail_line: str
+    caveat: str
+
+
+class DataAiFeedFamilyOverviewResponse(CamelModel):
+    metadata: DataAiFeedFamilyOverviewMetadata
+    family_count: int
+    source_count: int
+    families: list[DataAiFeedFamilySummary] = Field(default_factory=list)
+    guardrail_line: str
+    caveats: list[str] = Field(default_factory=list)
+
+
 class NvdLocalizedText(CamelModel):
     lang: str
     value: str
@@ -3515,3 +4165,106 @@ class FinlandDigitrafficRoadWeatherStationDetailResponse(CamelModel):
     source_health: FinlandDigitrafficRoadWeatherSourceHealth
     station: FinlandDigitrafficRoadWeatherStation
     summary: FinlandDigitrafficRoadWeatherStationSummary
+
+
+AnalystEvidenceBasis = Literal[
+    "observed",
+    "derived",
+    "advisory",
+    "contextual",
+    "source-reported",
+    "scored",
+    "fixture-local",
+]
+
+
+class AnalystEvidenceTimelineMetadata(CamelModel):
+    source: str
+    source_mode: Literal["fixture", "live", "mixed", "unknown"] = "unknown"
+    fetched_at: str
+    count: int
+    included_source_ids: list[str] = Field(default_factory=list)
+    caveat: str
+
+
+class AnalystEvidenceTimelineItem(CamelModel):
+    record_id: str
+    title: str
+    source_id: str
+    source_name: str
+    source_category: str
+    domain: str
+    observed_at: str | None = None
+    fetched_at: str
+    evidence_basis: AnalystEvidenceBasis
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    source_health: Literal["loaded", "empty", "stale", "error", "disabled", "unknown"] = "unknown"
+    latitude: float | None = None
+    longitude: float | None = None
+    source_url: str | None = None
+    summary: str | None = None
+    tags: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class AnalystEvidenceTimelineResponse(CamelModel):
+    metadata: AnalystEvidenceTimelineMetadata
+    count: int
+    items: list[AnalystEvidenceTimelineItem] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class AnalystSourceReadinessCard(CamelModel):
+    source_id: str
+    source_name: str
+    source_category: str
+    source_mode: Literal["fixture", "live", "unknown"] = "unknown"
+    health: Literal["loaded", "empty", "stale", "error", "disabled", "unknown"] = "unknown"
+    loaded_count: int
+    evidence_basis: AnalystEvidenceBasis
+    readiness_score: int
+    readiness_label: Literal["ready", "usable-with-caveats", "limited", "unavailable"]
+    issues: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class AnalystSourceReadinessSummary(CamelModel):
+    total_sources: int
+    ready_count: int
+    usable_with_caveats_count: int
+    limited_count: int
+    unavailable_count: int
+    fixture_source_count: int
+
+
+class AnalystSourceReadinessResponse(CamelModel):
+    fetched_at: str
+    source: str
+    summary: AnalystSourceReadinessSummary
+    cards: list[AnalystSourceReadinessCard] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class AnalystSpatialBriefMetadata(CamelModel):
+    source: str
+    latitude: float
+    longitude: float
+    radius_km: float
+    fetched_at: str
+    count: int
+    source_mode: Literal["fixture", "live", "mixed", "unknown"] = "unknown"
+    caveat: str
+
+
+class AnalystSpatialBriefItem(AnalystEvidenceTimelineItem):
+    distance_km: float
+    distance_method: Literal["haversine-representative-point"] = "haversine-representative-point"
+
+
+class AnalystSpatialBriefResponse(CamelModel):
+    metadata: AnalystSpatialBriefMetadata
+    count: int
+    items: list[AnalystSpatialBriefItem] = Field(default_factory=list)
+    source_coverage: list[AnalystSourceReadinessCard] = Field(default_factory=list)
+    analyst_notes: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)

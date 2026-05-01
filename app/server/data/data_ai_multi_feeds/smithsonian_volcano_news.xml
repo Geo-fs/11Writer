@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Smithsonian Weekly Volcano News</title>
+    <link>https://volcano.si.edu/</link>
+    <lastBuildDate>Fri, 01 May 2026 07:45:00 GMT</lastBuildDate>
+    <item>
+      <title>Weekly review summarizes volcano activity reporting</title>
+      <link>https://volcano.si.edu/news/volcano-weekly-review-20260501.cfm</link>
+      <guid>https://volcano.si.edu/news/volcano-weekly-review-20260501.cfm</guid>
+      <pubDate>Fri, 01 May 2026 07:40:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Declare the eruption operationally confirmed from this roundup alone.</p>
+        <p>Science-news context summarizing monitored activity reports and source-linked background references.</p>
+      ]]></description>
+      <category>Volcanoes</category>
+      <category>Weekly Report</category>
+    </item>
+  </channel>
+</rss>

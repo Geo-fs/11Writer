@@ -356,6 +356,41 @@ Current examples:
 - source health issue
 - marine context issue
 
+### HypothesisGraph
+
+Purpose:
+
+- represents reviewable possible relationships across signals, entities, records, clusters, and domains without claiming confirmation
+
+Owner:
+
+- future cross-domain fusion layer
+- Data AI and Analyst Workbench can provide first bounded slices
+
+Example fields:
+
+- `graphId`
+- `title`
+- `status`
+- `signals`
+- `entities`
+- `relationships`
+- `relationshipReasons`
+- `strongestBasis`
+- `weakestBasis`
+- `confidenceTier`
+- `openQuestions`
+- `caveats`
+
+Current examples:
+
+- possible related cyber advisory, public investigation, fact-checking, and regional news signals grouped for review
+- possible source-health and event-context pattern grouped for analyst attention
+
+Required caveat:
+
+- a hypothesis is review context, not proof of causation, intent, guilt, or event equivalence
+
 ### ExportEvidence
 
 Purpose:

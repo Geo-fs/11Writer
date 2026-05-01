@@ -26,6 +26,51 @@
   - `python app/server/tests/run_playwright_smoke.py webcam` passed
   - `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with `windows-playwright-launch-permission`, narrowed to `windows-browser-launch-permission`
 - Treat that aerospace smoke result as a machine and browser-launch issue, not as evidence of stale `dist` output or a current frontend compile failure.
+- Latest Connect checkpoint for assignment `2026-05-01 15:03 America/Chicago`:
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q` passed
+  - focused Data AI, environmental source-family overview, Marine, Features/Webcam, and Aerospace backend suites passed
+  - `cmd /c npm.cmd run lint` passed
+  - `cmd /c npm.cmd run build` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+  - no repo-wide blocker reproduced
+  - current live dirty-tree posture at checkpoint start:
+    - `modified=66`
+    - `untracked=73`
+    - `shared-high-collision: 7`
+    - `unknown: 19`
+  - current Wave Monitor runtime-boundary truth:
+    - it is no longer just a passive fixture-preview contract
+    - current files implement persistent SQLite-backed storage plus manual `run-now` and `scheduler/tick` APIs
+    - live connector execution is possible only through explicit API-triggered runs when a connector is configured for `source_mode=live`
+    - no hidden background loop or standalone 7Po8 runtime is mounted
+  - current ownership recommendation:
+    - keep Wave Monitor route/service/type/test plus `app/server/src/wave_monitor/` broad/shared for now
+    - keep Analyst Workbench doc/route/service/test broad/shared for now
+    - treat both families as shared architecture and consolidation-review territory rather than force-classifying them cosmetically
+- Latest Connect checkpoint for assignment `2026-05-01 15:44 America/Chicago`:
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q` passed
+  - `python -m pytest app/server/tests/test_source_discovery_memory.py -q` passed
+  - focused Data AI, environmental source-family overview, Marine, and Features/Webcam backend suites passed
+  - `cmd /c npm.cmd run lint` passed
+  - `cmd /c npm.cmd run build` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+  - no repo-wide blocker reproduced
+  - current live dirty-tree posture at checkpoint start:
+    - `modified=69`
+    - `untracked=84`
+    - `shared-high-collision: 7`
+    - `unknown: 26`
+  - current source-discovery/runtime-boundary truth:
+    - `source_discovery` is a real persistent SQLite-backed shared-memory family, not a planning-only placeholder
+    - current routes support memory overview plus API-triggered candidate upserts and claim-outcome writes
+    - Wave Monitor now seeds that shared source-memory store from its source-candidate rows
+    - no autonomous source promotion, trust approval, or background polling loop reproduced
+  - current ownership recommendation:
+    - keep Wave Monitor, Source Discovery, and Analyst Workbench broad/shared for now
+    - do not hide those shared families with cosmetic scanner rules
+    - treat them as explicit consolidation-review territory until Manager AI or the user routes stable ownership
 - Current Phase 2 acceleration risk note:
   - the validation surface is green, but the worktree is still heavily mixed
   - shared high-collision files remain active in `AppShell.tsx`, `InspectorPanel.tsx`, `queries.ts`, `api.ts`, `settings.py`, `types/api.py`, and the smoke harness
@@ -43,6 +88,107 @@
   - `app/docs/data-ai-rss-source-candidates-batch3.md` is also Atlas planning input only and now classifies under the dedicated `atlas-planning` bucket rather than disappearing into lane-implementation ownership
   - Atlas runtime-planning docs are architecture input only right now; they still require future implementation validation before any runtime-mode, packaging, pairing/auth, or companion-access work is treated as executed product behavior
   - if future mixed work pushes the residual `unknown` bucket back up again, treat that as commit-planning debt and refresh the scanner before any consolidation push
+  - latest Connect checkpoint truth:
+    - the latest full Connect checkpoint reached a clean local tree on `main...origin/main` before subsequent concurrent lane edits resumed
+    - that clean checkpoint had `shared-high-collision: 0` and `unknown: 0`
+    - the focused validation checkpoint for Data AI, Geospatial reference/seismic, Aerospace NCEI, Features/Webcam source-ops, and Marine source-health was green
+  - current live dirty-tree truth after the post-infrastructure/status Data AI reassignment:
+    - `modified=18`
+    - `untracked=7`
+    - `shared-high-collision: 1`
+    - `unknown: 6`
+    - the newest infrastructure/status feed fixtures still classify correctly under `data-ai`
+    - the current residual `unknown` set is broad on purpose and includes:
+      - `README.md`
+      - `app/server/src/app.py`
+      - analyst workbench route/service/test/doc surfaces
+    - Data AI `Assignment version: 2026-05-01 11:26 America/Chicago` remains in flight; only the earlier infrastructure/status bundle is completed in the current Data progress log
+  - latest post-OSINT / analyst-workbench checkpoint truth:
+    - `modified=52`
+    - `untracked=27`
+    - `shared-high-collision: 7`
+    - `unknown: 17`
+    - current residual `unknown` now includes broad analyst-workbench, risk-context, water-quality, and README/app wiring surfaces
+    - analyst workbench should remain explicitly broad/unknown for now because it composes Geospatial plus Data AI plus shared typed API surfaces and does not yet have a clearly isolated owner
+    - Data AI `Assignment version: 2026-05-01 12:33 America/Chicago` remains in flight unless/until the Data progress doc records completion
+  - latest post-rights-civic / geospatial-risk / export-readiness checkpoint truth:
+    - `modified=59`
+    - `untracked=37`
+    - `shared-high-collision: 7`
+    - `unknown: 13`
+    - open alerts are back to `0`
+    - the newest Data AI feed fixtures still classify correctly under `data-ai`
+    - geospatial France Georisques and UK EA water-quality families now classify as `geospatial-environmental`
+    - webcam export-readiness helpers now classify as `features-webcam`
+    - the residual `unknown` set is still broad on purpose:
+      - roadmap and workflow-planning docs
+      - `README.md`
+      - `app/server/src/app.py`
+      - Analyst Workbench doc/route/service/test
+    - keep Analyst Workbench broad/unknown until Manager AI or the user explicitly assigns a stable owner and validation posture
+  - latest Connect `2026-05-01 13:04 America/Chicago` checkpoint truth:
+    - one real repo-wide blocker reproduced and was cleared:
+      - `cmd /c npm.cmd run build` failed on `app/client/src/features/marine/marineContextHelperRegression.ts` because sibling imports used forbidden `.ts` suffixes
+      - the fix was import-syntax only; no marine semantics changed
+    - current validation truth for the assigned checkpoint surface:
+      - `python -m compileall app/server/src` passed
+      - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` passed
+      - `python -m pytest app/server/tests/test_environmental_source_families_overview.py app/server/tests/test_france_georisques.py app/server/tests/test_uk_ea_water_quality.py -q` passed
+      - `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` passed
+      - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+      - `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed
+      - `cmd /c npm.cmd run lint` passed
+      - `cmd /c npm.cmd run build` passed
+    - current live dirty-tree posture at end of that pass:
+      - `modified=64`
+      - `untracked=45`
+      - `shared-high-collision: 7`
+      - `unknown: 15`
+    - the scanner now classifies the environmental source-family overview route/service/test and the marine regression harness under their obvious lanes
+    - the alerts ledger currently has `1` open low-priority `Manager AI` alert; it is not a validation blocker
+  - latest Connect `2026-05-01 13:24 America/Chicago` checkpoint truth:
+    - no new repo-wide blocker reproduced in the assigned validation surface
+    - current validation truth for that checkpoint surface:
+      - `python -m compileall app/server/src` passed
+      - focused Data AI, Geospatial overview/water-quality, Marine source-health, Features/Webcam source-ops, Aerospace contracts, and Analyst Workbench tests passed
+      - `cmd /c npm.cmd run lint` passed
+      - `cmd /c npm.cmd run build` passed
+    - current live dirty-tree posture at end of that pass:
+      - `modified=66`
+      - `untracked=55`
+      - `shared-high-collision: 7`
+      - `unknown: 16`
+    - the scanner now also classifies the obvious latest-wave planning/routing files:
+      - `data-ai-next-routing-after-family-summary.md`
+      - `data-ai-rss-batch3-routing-packets.md`
+      - `source-quick-assign-packets-data-ai-rss.md`
+      - `7Po8/`
+      - `7po8-integration-plan.md`
+    - keep Analyst Workbench broad/unknown:
+      - current route/service/test/doc surfaces still compose Data AI, Geospatial, and shared route/API wiring
+      - it is not honest to force it into Connect or Data ownership yet
+    - keep cross-source hypothesis graph as planning context:
+      - current doc is safe `atlas-planning`, not implementation proof
+      - the first safe implementation slice should be bounded shared contract scaffolding only, with later lane-specific population and Phase 3 UI integration
+    - new `wave_monitor` preview route/service/type/test surfaces are also broad/shared for now and should remain visible rather than being force-classified cosmetically
+  - latest Connect `2026-05-01 14:46 America/Chicago` checkpoint truth:
+    - no repo-wide blocker reproduced in the assigned validation surface
+    - current validation truth for that checkpoint surface:
+      - `python -m compileall app/server/src` passed
+      - `python -m pytest app/server/tests/test_wave_monitor.py -q` passed
+      - focused Data AI, Geospatial overview, Marine, Features/Webcam, and Aerospace contract suites passed
+      - `cmd /c npm.cmd run lint` passed
+      - `cmd /c npm.cmd run build` passed
+    - current live dirty-tree posture at end of that pass:
+      - `modified=66`
+      - `untracked=58`
+      - `shared-high-collision: 7`
+      - `unknown: 17`
+    - the alerts ledger now has `2` open low-priority `Manager AI` alerts; they are coordination state, not validation blockers
+    - current Wave Monitor recommendation:
+      - keep `wave_monitor` route/service/type/test plus related Analyst Workbench integration broad/shared for now
+      - Connect owns validation and release-readiness visibility only, not Wave Monitor feature semantics
+      - do not mount standalone 7Po8 runtime, do not add scheduler/autonomous behavior, and do not force-route the current preview family into a single lane just to reduce `unknown`
 
 ## Agent lanes
 
@@ -70,6 +216,10 @@
   - user-directed generalist lane
   - docs, source gathering, repo support, and miscellaneous bounded tasks
   - peer-level with Manager AI; not manager-assigned unless the user explicitly asks
+- Wonder AI
+  - user-directed generalist lane
+  - direct user-requested repo tasks, docs, source discovery, review, and miscellaneous bounded support
+  - peer-level with Manager AI and Atlas AI; not manager-assigned unless the user explicitly asks
 
 ## Progress doc rule
 

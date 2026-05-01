@@ -22,6 +22,19 @@ Important rules:
 - `implemented` means the slice exists in code.
 - `workflow-validated` requires explicit workflow evidence.
 - `fully validated` requires workflow evidence plus source-health and export behavior confirmation.
+- Source discovery creates source candidates and starts source-memory learning; a discovered candidate is not an implemented source, validated source, live source, or scheduled connector.
+
+Source discovery platform update:
+
+- [source-discovery-platform-plan.md](/C:/Users/mike/11Writer/app/docs/source-discovery-platform-plan.md:1) defines 7Po8-style source discovery as a core 11Writer platform capability.
+- [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md:1) defines the compact policy boundary for candidate states, reputation observations, claim outcomes, and shared source-memory routing.
+- Discovery outputs must be tracked as candidate/source-review/source-memory evidence, not as source implementation proof.
+- Any discovered candidate must preserve provenance, access result, machine-readability result, caveats, policy state, source-health state, source class, source reputation basis, wave-fit basis, duplicate checks, and owner recommendation before it can be routed for implementation.
+- Correctness reputation must be evaluated separately from mission relevance.
+- Static sources, live sources, full-text articles, social/image evidence, official sources, and community sources need different scoring and validation evidence.
+- Claim outcomes such as confirmed, contradicted, corrected, outdated, unresolved, and not-applicable should drive learned source reputation.
+- Validation promotion still requires the normal workflow-validation bundle below.
+- Current repo-local source-memory routes and persistence are shared candidate/review/runtime evidence only; they do not directly create implemented or workflow-validated source rows.
 
 Marine workflow update:
 
@@ -69,11 +82,109 @@ Data workflow update:
   - `sans-isc-diary`
   - `cloudflare-status`
   - `gdacs-alerts`
-- All three Data slices above have fixture-backed routes, tests, compile evidence, and source-specific docs.
+- Data AI progress now also records a backend-first official cyber advisory wave for:
+  - `ncsc-uk-all`
+  - `cert-fr-alerts`
+  - `cert-fr-advisories`
+- Data AI progress now also records a backend-first infrastructure/status wave for:
+  - `cloudflare-radar`
+  - `netblocks`
+  - `apnic-blog`
+- Data AI progress now also records a backend-first OSINT/investigations wave for:
+  - `bellingcat`
+  - `citizen-lab`
+  - `occrp`
+  - `icij`
+- Data AI progress now also records a backend-first rights/civic/digital-policy wave for:
+  - `eff-updates`
+  - `access-now`
+  - `privacy-international`
+  - `freedom-house`
+- Data AI progress now also records a backend-first fact-checking/disinformation wave for:
+  - `full-fact`
+  - `snopes`
+  - `politifact`
+  - `factcheck-org`
+  - `euvsdisinfo`
+- Data AI progress now also records a backend-first official/public advisories wave for:
+  - `state-travel-advisories`
+  - `eu-commission-press`
+  - `un-press-releases`
+  - `unaids-news`
+- Data AI progress now also records a backend-first scientific/environmental context wave for:
+  - `our-world-in-data`
+  - `carbon-brief`
+  - `eumetsat-news`
+  - `smithsonian-volcano-news`
+  - `eos-news`
+- All implemented Data feed waves above have fixture-backed routes, tests, compile evidence, and source-specific docs.
 - The aggregate starter bundle has a bounded recent-items route, feed definition registry, RSS/Atom/RDF parser coverage, and prompt-injection-like fixture coverage.
+- The official cyber advisory wave, infrastructure/status wave, OSINT/investigations wave, rights/civic/digital-policy wave, fact-checking/disinformation wave, official/public advisories wave, and scientific/environmental context wave use the same bounded recent-items route, feed registry, parser coverage, and prompt-injection-like fixture coverage.
 - The NVD and CVE-context lane also preserves explicit evidence-class separation between metadata, advisory, prioritization, and discovery/feed text.
-- Neither should be treated as `workflow-validated` yet because no explicit consumer-path, smoke, or export-workflow validation is recorded.
-- The active five-feed RSS starter bundle should remain a bounded implementation lane rather than a blanket promotion of additional feed families.
+- None of these Data lanes should be treated as `workflow-validated` yet because no explicit consumer-path, smoke, or export-workflow validation is recorded.
+- The active bounded Data AI feed lane should not be widened into broad polling; use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) plus [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md) for the next grouped Batch 3 expansion only after the implemented waves stay stable, starting with official/public advisories rather than reopening implemented fact-checking, OSINT, or rights/civic families.
+
+Cross-lane helper update:
+
+- Data AI progress now also records a backend-first family-overview helper route at:
+  - `/api/feeds/data-ai/source-families/overview`
+- Geospatial AI progress now also records a backend-first environmental family-overview helper route at:
+  - `/api/context/environmental/source-families-overview`
+- Geospatial AI progress now also records a backend-first environmental family export helper route at:
+  - `/api/context/environmental/source-families-export`
+- Geospatial AI progress now also records a backend-first environmental context export package route at:
+  - `/api/context/environmental/context-export-package`
+- Marine AI progress now also records a workflow-supporting export helper path at:
+  - `marineAnomalySummary.contextIssueExportBundle`
+- Marine AI progress now also records a full review/export coherence regression over `marineAnomalySummary` helper outputs
+- Marine AI progress now also records focused replay-evidence and evidence-interpretation export coherence checks over `marineAnomalySummary`
+- Aerospace AI progress now also records a workflow-supporting review helper path at:
+  - `aerospaceContextGapQueue`
+- Aerospace AI progress now also records a workflow-supporting current-vs-archive separation helper path at:
+  - `aerospaceCurrentArchiveContext`
+- Aerospace AI progress now also records a workflow-supporting export coherence helper path at:
+  - `aerospaceExportCoherence`
+- Features/Webcam AI progress now also records a workflow-supporting evidence-packet selector route at:
+  - `/api/cameras/source-ops-evidence-packets`
+- Features/Webcam AI progress now also records a workflow-supporting aggregate export-bundle route at:
+  - `/api/cameras/source-ops-evidence-packets-export-bundle`
+- Features/Webcam AI progress now also records a workflow-supporting aggregate handoff-summary route at:
+  - `/api/cameras/source-ops-evidence-packets-handoff-summary`
+- Atlas AI progress now also records a fixture-backed Wave Monitor tool surface at:
+  - `/api/tools/waves/overview`
+- Atlas AI progress now also records shared analyst/readiness integration for:
+  - `tool-wave-monitor`
+- Atlas AI progress now also records a shared source-memory backend surface at:
+  - `/api/source-discovery/memory/overview`
+  - `/api/source-discovery/memory/candidates`
+  - `/api/source-discovery/memory/claim-outcomes`
+- These helper paths are implemented and useful for review/export workflows, but they should not be treated as external-source workflow validation proof by themselves.
+- Current evidence split:
+  - scientific/environmental context is implemented and contract-tested on the existing shared Data AI route, but still has no explicit consumer-path or workflow-validation record
+  - official/public advisories is implemented and contract-tested on the existing shared Data AI route, but still has no explicit consumer-path or workflow-validation record
+  - Data family overview helper is contract-tested and metadata-oriented only
+  - environmental family overview helper, environmental family export helper, and environmental context export package are contract-tested and metadata-oriented only
+  - marine issue export bundle plus full export coherence and focused-evidence coherence regressions now have helper regression plus marine smoke/build evidence, but remain helper-package evidence rather than source promotion
+  - aerospace context gap queue, current-vs-archive helper, and export-coherence helper have smoke assertions prepared, but executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`
+  - Features/Webcam evidence-packet selector, aggregate export bundle, and aggregate handoff summary have backend test and documentation evidence, but no explicit end-to-end workflow note yet
+  - Wave Monitor is implemented as a fixture-backed tool surface with focused backend tests and analyst/readiness integration, but it is still not a validated live runtime, scheduler, or source-truth surface
+  - source discovery memory is implemented as a shared backend candidate/reputation surface with focused backend tests, but it is still not source implementation proof, source-truth proof, autonomous discovery proof, or workflow-validation proof
+
+Wave Monitor tool update:
+
+- [7po8-integration-plan.md](/C:/Users/mike/11Writer/app/docs/7po8-integration-plan.md:1) plus Atlas AI progress now record a fixture-backed Wave Monitor route at `/api/tools/waves/overview`.
+- Atlas AI progress now also records `tool-wave-monitor` integration into analyst evidence-timeline and source-readiness surfaces.
+- Treat Wave Monitor as an implemented tool surface and shared architecture input, not a source row and not a separate runtime.
+- Persistent storage, live connector execution, scheduler behavior, and Situation Workspace UI still remain outside current implemented proof.
+- Atlas evidence should inform governance and validation notes, but Atlas remains user-directed and does not by itself assign stable ownership.
+
+Source discovery memory update:
+
+- [source-discovery-platform-plan.md](/C:/Users/mike/11Writer/app/docs/source-discovery-platform-plan.md:1) plus Atlas AI progress now record a shared source-memory backend with overview, candidate-write, and claim-outcome update routes.
+- Current repo evidence supports persistence models, SQLite-backed session wiring, deterministic claim-outcome reputation updates, and Wave Monitor candidate seeding.
+- Treat source discovery memory as an implemented shared candidate/reputation surface and governance input, not a source row and not a validated discovery runtime.
+- Autonomous discovery runners, hidden live polling, full-text collection, and frontend review workflows remain outside current implemented proof.
+- Atlas evidence should inform governance and validation notes, but Atlas remains user-directed and does not by itself assign stable ownership or validation status.
 
 Recent geospatial/aerospace source-build update:
 

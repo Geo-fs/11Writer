@@ -3191,13 +3191,13 @@ async def marine_ireland_opw_waterlevel_context() -> dict[str, Any]:
             "sourceLabel": "Ireland OPW Water Level",
             "enabled": True,
             "sourceMode": "fixture",
-            "health": "loaded",
+            "health": "degraded",
             "loadedCount": 2,
             "lastFetchedAt": _iso(NOW),
             "sourceGeneratedAt": _iso(NOW - timedelta(minutes=7)),
-            "detail": "Fixture Ireland OPW water-level context.",
+            "detail": "Fixture Ireland OPW water-level context includes partial metadata and should be treated as degraded source health.",
             "errorSummary": None,
-            "caveat": "Fixture/local mode. OPW water-level readings are provisional hydrometric context only and do not confirm flood impact or vessel behavior.",
+            "caveat": "Fixture/local mode. OPW water-level readings are provisional hydrometric context only and do not confirm flood impact or vessel behavior. Partial metadata degrades source-health confidence for this review.",
         },
         "stations": [
             {
@@ -3241,6 +3241,7 @@ async def marine_ireland_opw_waterlevel_context() -> dict[str, Any]:
         ],
         "caveats": [
             "OPW water-level readings are provisional hydrometric observations only; do not infer flooding, damage, contamination, or vessel intent from station values alone.",
+            "Partial metadata degrades source-health confidence for this fixture review path.",
             "Reading timestamps and fetch time should remain distinct because provisional source updates may lag publication timing.",
             "Fixture/local mode is explicit in this first slice and should not be mistaken for live national water-level coverage.",
         ],

@@ -56,6 +56,7 @@ Agent files:
 - `features-webcam-ai.md`
 - `data-ai.md`
 - `atlas-ai.md`
+- `wonder-ai.md`
 
 Related:
 

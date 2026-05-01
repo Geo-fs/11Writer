@@ -2,6 +2,12 @@
 
 The geospatial subsystem now summarizes multiple environmental event sources through a shared frontend overview layer. This is a composition helper over already-loaded source state, not a new backend framework.
 
+There is now also a backend fusion helper for source-family review:
+- [environmental-source-family-overview.md](C:/Users/mike/11Writer/app/docs/environmental-source-family-overview.md)
+- this backend helper summarizes source families, source health, evidence basis, caveats, and export-safe review lines across existing environmental/geospatial slices
+- current backend family coverage includes seismic, volcano/reference, tsunami, weather alert/advisory, weather and hydrology context, infrastructure-event context, geomagnetic context, risk/reference, and water-quality context
+- it is not a final UI and does not replace source-specific meaning
+
 ## Current Sources
 
 - USGS Earthquakes

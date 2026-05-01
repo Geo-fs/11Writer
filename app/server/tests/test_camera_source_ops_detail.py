@@ -1,14 +1,16 @@
 from __future__ import annotations
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.app import create_application
 from src.config.settings import Settings, get_settings
+from src.routes.cameras import router as cameras_router
 from src.services.camera_source_ops_detail import build_camera_source_ops_detail
 
 
 def _client() -> TestClient:
-    app = create_application()
+    app = FastAPI()
+    app.include_router(cameras_router)
     app.dependency_overrides[get_settings] = lambda: Settings()
     return TestClient(app)
 

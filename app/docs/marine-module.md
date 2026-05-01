@@ -597,10 +597,19 @@ Snapshot fields include:
 - top summary lines
 - caveats
 - focused target label when present
+- review-only chokepoint lens fields when available:
+  - corridor label
+  - bounded area label
+  - chokepoint time window
+  - focused evidence kinds
+  - context-gap count
+  - dominant limitation line
+  - source-health summary line
 
 Behavior:
 - snapshots are session-local only
 - marine records snapshots when context settings or relevant focused review state changes
+- when a chokepoint review package is active, current and previous timeline snapshots preserve the active chokepoint review lens instead of allowing corridor/target/source-health drift
 - consecutive identical context states are deduplicated
 - the list is capped to a small recent history window
 - clear history removes the session-local timeline only
@@ -608,6 +617,7 @@ Behavior:
 Interpretation rules:
 - the context timeline shows how the analyst's marine context lens changed during the session
 - it does not imply vessel behavior, anomaly cause, or causal relationships between context changes and vessel activity
+- chokepoint timeline/history alignment remains review/context only and does not prove evasion, escort, toll activity, blockade, targeting, threat, intent, wrongdoing, or action need
 
 Export metadata includes:
 - `marineAnomalySummary.contextTimeline`
@@ -615,6 +625,7 @@ Export metadata includes:
   - current snapshot
   - previous snapshot
   - caveats
+  - current/previous chokepoint review-lens fields when available
 
 ### Marine Context Issue Queue
 
@@ -690,6 +701,7 @@ Validation note:
 
 Interpretation rules:
 - the fusion summary helps the operator orient to which context families are available, limited, empty, or unavailable
+- if degraded or unavailable source-health states dominate the current source mix, the fusion summary must describe that as `partial context` / `source-health limitation` only
 - it must not merge hydrology, ocean/met, and infrastructure into a generic risk or anomaly score
 - it must not be presented as proof of vessel intent, vessel behavior, anomaly cause, flooding, contamination, health impact, damage, or wrongdoing
 - export readiness here means context completeness/caveat posture only, not confidence in vessel conclusions
@@ -706,6 +718,7 @@ Current scope:
 - review-needed items
 - export caveat lines
 - source-health summary
+- dominant-limitation line when degraded/unavailable context dominates the current source mix
 - explicit `does not prove` lines
 
 Current dependency chain:
@@ -723,9 +736,71 @@ Validation note:
 
 Interpretation rules:
 - the review/report package helps a user explain what context is available and what needs follow-up
+- if degraded or unavailable source-health states dominate the current source mix, the report must say `partial context` / `review caveat` rather than severity, impact, or anomaly-cause language
 - it must not change anomaly scoring
 - it must not collapse unrelated context families into a single severity signal
 - it must not be presented as proof of vessel intent, vessel behavior, anomaly cause, flooding, contamination, health impact, damage, pollution impact, or wrongdoing
+
+### Marine Source-Health Issue Export Bundle
+
+Marine also derives a compact export/review bundle for source-health issues across the currently loaded marine context sources:
+- helper: `app/client/src/features/marine/marineContextIssueExportBundle.ts`
+- current consumer: `app/client/src/features/marine/marineEvidenceSummary.ts`
+
+Current scope:
+- source family/category
+- source health and availability
+- source mode
+- evidence basis
+- primary caveat
+- allowed review action
+- explicit `does not prove` lines
+- compact export lines and machine-readable metadata
+
+Current source families:
+- `oceanographic`
+- `meteorological`
+- `coastal-infrastructure`
+- `hydrology`
+
+Interpretation rules:
+- this bundle summarizes source-health limitations and allowed review actions only
+- it must not create anomaly severity, impact, or causation language
+- oceanographic/meteorological context must not be reframed as infrastructure context
+- infrastructure context must not be reframed as pollution-impact or health-risk modeling
+- hydrology context must not be reframed as flood-impact confirmation
+- no row should be presented as proof of vessel behavior, vessel intent, anomaly cause, or wrongdoing
+
+Helper-level regression note:
+- deterministic non-Playwright regression coverage now exists at:
+  - `app/client/scripts/marineContextHelperRegression.mjs`
+- run with:
+  - from `app/client`:
+    - `cmd /c npm.cmd run test:marine-context-helpers`
+- this guards degraded/unavailable-dominant fusion/review wording and the issue export bundle guardrails outside browser smoke
+- it also checks that exported `marineAnomalySummary` metadata stays coherent across fusion, review, source-summary, issue-queue, issue-export, hydrology, and chokepoint-review context blocks
+
+### Marine Chokepoint Review Package
+
+Marine also derives a compact chokepoint review/export package from existing replay, context, and source-health helpers:
+- helper: `app/client/src/features/marine/marineChokepointReviewPackage.ts`
+- current consumer: `app/client/src/features/marine/marineEvidenceSummary.ts`
+
+Current scope:
+- bounded corridor/area label support
+- chokepoint review time window
+- deterministic crossing-count support when provided by the caller
+- source-mode and source-health summary
+- focused replay/context review signals
+- context-gap counts from empty/unavailable/disabled source states
+- explicit `reviewOnly`, `doesNotProve`, caveats, export lines, and snapshot metadata
+
+Interpretation rules:
+- chokepoint review package is export/review context only
+- AIS/signal gaps, reroutes, queue/backlog wording, and contextual source-health limits must remain review signals only
+- it must not be presented as proof of evasion, escort, toll activity, blockade, targeting, threat, impact, anomaly cause, vessel behavior, vessel intent, or wrongdoing
+- it must not change anomaly scoring
+- it must not add live AIS ingestion or identity-enrichment behavior
 
 ### Combined Marine Environmental Context
 
@@ -879,6 +954,7 @@ Included export evidence fields:
 - composed marine hydrology context summary (loaded/empty counts, nearby station count, per-source review lines, caveats)
 - composed marine context fusion summary (family availability, export-readiness line, top caveats)
 - composed marine context review report (families included, review-needed items, export caveats, does-not-prove lines)
+- composed marine chokepoint review package (bounded corridor label, crossing-count support, source-health limits, focused review signals, does-not-prove lines)
 - combined environmental context summary (source counts, station counts, health summary, top observations)
 - marine attention queue summary (item count + top item)
 - active controls (`chokepointFilter`, `chokepointSort`)
@@ -976,6 +1052,26 @@ Snapshot/export integration behavior:
   - `doesNotProveLines`
   - `issueCount`
   - `warningCount`
+  - `caveats`
+- `marineAnomalySummary.chokepointReviewPackage` adds compact chokepoint review-package metadata:
+  - `reviewOnly`
+  - `corridorLabel`
+  - `boundedAreaLabel`
+  - `timeWindowStart`
+  - `timeWindowEnd`
+  - `crossingCount`
+  - `sliceCount`
+  - `totalObservedGapEvents`
+  - `totalSuspiciousGapEvents`
+  - `focusedEvidenceRowCount`
+  - `focusedEvidenceKinds`
+  - `focusedTargetLabel`
+  - `reviewSignals`
+  - `sourceModes`
+  - `sourceHealth`
+  - `evidenceBasis`
+  - `contextGapCount`
+  - `doesNotProve`
   - `caveats`
 - `marineAnomalySummary.environmentalContext` adds compact combined marine-context metadata:
   - `sourceCount`

@@ -15,9 +15,14 @@ import type {
 import type { MarineEnvironmentalContextSummary } from "./marineEnvironmentalContext";
 import type { MarineContextFusionSummary, MarineContextFusionFamilyLine } from "./marineContextFusionSummary";
 import type { MarineContextIssue, MarineContextIssueQueueSummary } from "./marineContextIssueQueue";
+import type { MarineContextIssueExportBundle, MarineContextIssueExportRow } from "./marineContextIssueExportBundle";
 import type { MarineContextReviewReportSummary } from "./marineContextReviewReport";
 import type { MarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
 import type { MarineHydrologyContextSummary } from "./marineHydrologyContext";
+import {
+  buildMarineChokepointReviewPackage,
+  type MarineChokepointReviewContext
+} from "./marineChokepointReviewPackage";
 import type { MarineNdbcContextSummary } from "./marineNdbcContext";
 import type { MarineNoaaContextSummary } from "./marineNoaaContext";
 import type { MarineContextSourceRegistrySummary, MarineContextSourceSummaryRow } from "./marineContextSourceSummary";
@@ -266,9 +271,12 @@ export interface MarineAnomalySnapshotMetadata {
       fixtureFamilyCount: number;
       issueCount: number;
       warningCount: number;
+      limitedSourceCount: number;
+      dominatedByLimitedSources: boolean;
       exportReadiness: "ready-with-caveats" | "limited-context" | "unavailable";
       overallAvailabilityLine: string;
       exportReadinessLine: string;
+      dominantLimitationLine: string | null;
       familyLines: MarineContextFusionFamilyLine[];
       highestPriorityCaveats: string[];
       caveats: string[];
@@ -279,6 +287,7 @@ export interface MarineAnomalySnapshotMetadata {
       contextFamiliesIncluded: string[];
       reviewNeededItems: string[];
       sourceHealthSummary: string;
+      dominantLimitationLine: string | null;
       exportReadiness: "ready-with-caveats" | "limited-context" | "unavailable";
       exportCaveatLines: string[];
       doesNotProveLines: string[];
@@ -307,6 +316,20 @@ export interface MarineAnomalySnapshotMetadata {
       noticeCount: number;
       infoCount: number;
       topIssues: MarineContextIssue[];
+      caveats: string[];
+    } | null;
+    contextIssueExportBundle: {
+      sourceCount: number;
+      loadedSourceCount: number;
+      degradedSourceCount: number;
+      unavailableSourceCount: number;
+      disabledSourceCount: number;
+      warningCount: number;
+      noticeCount: number;
+      infoCount: number;
+      dominantLimitationLine: string | null;
+      rows: MarineContextIssueExportRow[];
+      doesNotProveLines: string[];
       caveats: string[];
     } | null;
     environmentalContext: {
@@ -370,6 +393,44 @@ export interface MarineAnomalySnapshotMetadata {
       topObservations: string[];
       caveats: string[];
     } | null;
+    chokepointReviewPackage: {
+      reviewOnly: true;
+      corridorLabel: string;
+      boundedAreaLabel: string | null;
+      timeWindowStart: string | null;
+      timeWindowEnd: string | null;
+      crossingCount: number | null;
+      sliceCount: number;
+      totalObservedGapEvents: number;
+      totalSuspiciousGapEvents: number;
+      focusedEvidenceRowCount: number;
+      focusedEvidenceKinds: string[];
+      focusedTargetLabel: string | null;
+      reviewSignals: string[];
+      sourceModes: Array<"fixture" | "live" | "unknown">;
+      sourceHealth: {
+        loaded: number;
+        empty: number;
+        stale: number;
+        degraded: number;
+        unavailable: number;
+        error: number;
+        disabled: number;
+        unknown: number;
+      };
+      evidenceBasis: Array<
+        "observed" | "inferred" | "scored" | "summary" | "contextual" | "advisory"
+      >;
+      contextGapCount: number;
+      dominantLimitationLine: string | null;
+      sourceHealthLine: string;
+      focusedEvidenceLine: string;
+      contextGapLine: string;
+      contextFamiliesIncluded: string[];
+      reviewReportSummaryLine: string | null;
+      doesNotProve: string[];
+      caveats: string[];
+    } | null;
     caveats: string[];
   };
 }
@@ -401,7 +462,9 @@ export function buildMarineEvidenceSummary(input: {
   contextSourceRegistrySummary: MarineContextSourceRegistrySummary | null;
   contextTimelineSummary: MarineContextTimelineSummary | null;
   contextIssueQueueSummary: MarineContextIssueQueueSummary | null;
+  contextIssueExportBundle: MarineContextIssueExportBundle | null;
   environmentalContextSummary: MarineEnvironmentalContextSummary | null;
+  chokepointReviewContext?: MarineChokepointReviewContext | null;
 }): MarineEvidenceSummaryOutput {
   const selectedVessel = input.selectedVesselSummary
     ? toMiniSummary(input.selectedVesselSummary.anomaly)
@@ -439,6 +502,20 @@ export function buildMarineEvidenceSummary(input: {
   }
   queue.sort((a, b) => b.score - a.score);
   const topQueue = queue[0] ?? null;
+  const chokepointReviewPackage = buildMarineChokepointReviewPackage({
+    chokepointReviewContext: input.chokepointReviewContext ?? null,
+    chokepointSummary: input.chokepointSummary,
+    activeNavigationTarget: input.activeNavigationTarget,
+    focusedEvidenceRows: input.focusedEvidenceRows,
+    focusedEvidenceInterpretation: input.focusedEvidenceInterpretation,
+    contextSourceRegistrySummary: input.contextSourceRegistrySummary,
+    contextIssueQueueSummary: input.contextIssueQueueSummary,
+    contextIssueExportBundle: input.contextIssueExportBundle,
+    contextFusionSummary: input.contextFusionSummary,
+    contextReviewReportSummary: input.contextReviewReportSummary,
+    hydrologyContextSummary: input.hydrologyContextSummary,
+    environmentalContextSummary: input.environmentalContextSummary
+  });
 
   const displayLines: string[] = [];
   if (selectedVessel) {
@@ -496,8 +573,14 @@ export function buildMarineEvidenceSummary(input: {
       `Marine context issues: ${input.contextIssueQueueSummary.issueCount} total | ${input.contextIssueQueueSummary.warningCount} warning | ${input.contextIssueQueueSummary.noticeCount} notice`
     );
   }
+  if (input.contextIssueExportBundle) {
+    displayLines.push(input.contextIssueExportBundle.exportLines[0]);
+  }
   if (input.environmentalContextSummary) {
     displayLines.push(input.environmentalContextSummary.exportLines[0]);
+  }
+  if (chokepointReviewPackage) {
+    displayLines.push(chokepointReviewPackage.exportLines[0]);
   }
   if (input.activeNavigationTarget) {
     const t = input.activeNavigationTarget;
@@ -574,7 +657,9 @@ export function buildMarineEvidenceSummary(input: {
         contextSourceSummary: input.contextSourceRegistrySummary?.metadata ?? null,
         contextTimeline: input.contextTimelineSummary?.metadata ?? null,
         contextIssueQueue: input.contextIssueQueueSummary?.metadata ?? null,
+        contextIssueExportBundle: input.contextIssueExportBundle?.metadata ?? null,
         environmentalContext: input.environmentalContextSummary?.metadata ?? null,
+        chokepointReviewPackage: chokepointReviewPackage?.metadata ?? null,
         caveats: [
           "Anomaly ranking is attention prioritization, not proof of intent or wrongdoing.",
           "AIS gaps/signals are observed/inferred/scored indicators, not proof of intentional disabling."

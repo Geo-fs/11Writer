@@ -108,6 +108,7 @@ node -e "const { chromium } = require('playwright'); chromium.launch({ headless:
 - Data AI is Manager-controlled, receives work through `app/docs/agent-next-tasks/data-ai.md`, and should wait for Manager AI reassignment after each completed task.
 - Data AI does not own source classification/status planning; that remains Gather AI. Data AI does not own repo-wide validation/tooling blockers; that remains Connect AI.
 - Atlas AI is a peer-level, user-directed generalist agent. Manager AI may read Atlas progress and alerts for context, but should not assign Atlas work unless the user explicitly asks for that.
+- Wonder AI is a peer-level, user-directed generalist agent. Manager AI may read Wonder progress and alerts for context, but should not assign Wonder work unless the user explicitly asks for that.
 - Feature agents should report the files they changed and the validation commands they ran.
 - Agents should not be left idle when assignable work exists. Manager AI should bundle adjacent small tasks into one larger assignment when practical so the user does not have to relay excessive micro-prompts.
 - Phase 2 priority is new features, new source slices, and the documentation needed to make Phase 3 consolidation easier. Do not over-index on polish-only work unless it unblocks source expansion or validation truth.
@@ -120,6 +121,7 @@ node -e "const { chromium } = require('playwright'); chromium.launch({ headless:
 - Every next-task doc should include an explicit `Assignment version:` line near the top.
 - Agents should explicitly record in their progress doc which assignment version they read before or when reporting completed work.
 - For user-directed peer agents such as Atlas AI, the next-task doc may be used for onboarding sync or user-owned assignments, but Manager AI should not rewrite it unless the user explicitly asks.
+- For user-directed peer agents such as Atlas AI and Wonder AI, the next-task doc may be used for onboarding sync or user-owned assignments, but Manager AI should not rewrite it unless the user explicitly asks.
 - Every active agent must also use `app/docs/alerts.md` as the shared one-line alert ledger for startup notices, completed-task reassignment notices, and issues the creating agent cannot safely resolve alone.
 - For lightweight manager-facing coordination summaries, pair `scripts/validation_snapshot.py` with `scripts/alerts_ledger.py`.
 - When a task touches runtime packaging, desktop app structure, companion-web access, backend-only runtime, pairing/auth, storage paths, or network exposure assumptions, also read:

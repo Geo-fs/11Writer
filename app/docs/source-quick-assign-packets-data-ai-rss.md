@@ -1,8 +1,14 @@
 # Data AI RSS Quick-Assign Packets
 
-Use this doc for the next bounded Data AI RSS/Atom/RDF handoffs after the active starter slice.
+Use this doc as the historical packet surface for the Data AI official cyber advisory and infrastructure/status waves that followed the starter slice.
 
-Current active first RSS implementation slice:
+Status note:
+
+- the feed families in this doc are now implemented backend-first on the shared Data AI recent-items route
+- do not route them as fresh source-creation work unless Manager explicitly wants a bounded consumer, export, or validation follow-on
+- use [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md) for the next fresh grouped Data AI expansion
+
+Current historical first RSS implementation slice:
 
 - keep the current five-feed parser bundle bounded to:
   - `cisa-cybersecurity-advisories`

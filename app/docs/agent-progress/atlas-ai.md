@@ -1,5 +1,236 @@
 # Atlas AI Progress
 
+## 2026-05-01 14:51 America/Chicago
+
+Task:
+- continue 7Po8 integration by wiring Wave Monitor into shared 11Writer analyst/system surfaces
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added a fresh Manager-facing alert because this touched shared backend/docs surfaces and another AI's coordination area had already completed the prior alert
+- integrated Wave Monitor signals into `GET /api/analyst/evidence-timeline` as `tool-wave-monitor` items behind `include_wave_monitor`
+- integrated Wave Monitor readiness into `GET /api/analyst/source-readiness` as a `tool-wave-monitor` card
+- updated Analyst Workbench docs and the 7Po8 integration plan to describe the shared-system integration
+- updated Analyst Workbench tests to cover Wave Monitor timeline/readiness behavior and disable it explicitly when testing environmental-only output
+
+Files touched:
+- `app/docs/alerts.md`
+- `app/docs/7po8-integration-plan.md`
+- `app/docs/analyst-workbench.md`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/server/src/routes/analyst.py`
+- `app/server/src/services/analyst_workbench_service.py`
+- `app/server/tests/test_analyst_workbench.py`
+
+Validation:
+- `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+- `python -m compileall app/server/src`
+- `git diff --check -- app/server/src/routes/analyst.py app/server/src/services/analyst_workbench_service.py app/server/tests/test_analyst_workbench.py app/docs/analyst-workbench.md app/docs/7po8-integration-plan.md app/docs/alerts.md app/docs/agent-progress/atlas-ai.md`
+- stale artifact scan under `7Po8` for `__pycache__`, `*.pyc`, `*.db`, `*.sqlite3`, and `*.tsbuildinfo`
+
+Blockers or caveats:
+- this is still fixture-backed integration; persistent Wave Monitor storage, live connectors, backend-only scheduling, and frontend Situation Workspace UI remain unimplemented
+- `git diff --check` reported only line-ending warnings for touched docs
+
+Next recommended task:
+- build the frontend Situation Workspace/Analyst consumer for `tool-wave-monitor`, or port persistent Wave Monitor storage using 11Writer runtime user-data paths
+
+## 2026-05-01 13:47 America/Chicago
+
+Task:
+- notify Manager AI and begin 7Po8 cleanup/integration as a 11Writer-native Wave Monitor tool
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- updated the Manager-facing alert with the active 7Po8 Wave Monitor integration status
+- added the first fixture-backed 11Writer-native Wave Monitor backend surface at `GET /api/tools/waves/overview`
+- added Wave Monitor response contracts, service logic, route wiring, and focused tests
+- kept the imported 7Po8 standalone runtime unmounted while exposing 7Po8 concepts through 11Writer contracts
+- updated the 7Po8 integration plan with the current implemented slice
+
+Files touched:
+- `app/docs/alerts.md`
+- `app/docs/7po8-integration-plan.md`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/server/src/app.py`
+- `app/server/src/routes/wave_monitor.py`
+- `app/server/src/services/wave_monitor_service.py`
+- `app/server/src/types/wave_monitor.py`
+- `app/server/tests/test_wave_monitor.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_wave_monitor.py -q`
+- `git diff --check -- app/server/src/app.py app/server/src/routes/wave_monitor.py app/server/src/services/wave_monitor_service.py app/server/src/types/wave_monitor.py app/server/tests/test_wave_monitor.py app/docs/7po8-integration-plan.md app/docs/alerts.md app/docs/agent-progress/atlas-ai.md`
+- stale artifact scan under `7Po8` for `__pycache__`, `*.pyc`, `*.db`, `*.sqlite3`, and `*.tsbuildinfo`
+
+Blockers or caveats:
+- this is a fixture-backed contract/tool surface only; no persistent Wave Monitor database, live connector execution, scheduler, or frontend workspace panel was implemented
+- `git diff --check` reported only line-ending warnings for touched files
+
+Next recommended task:
+- build the Situation Workspace consumer for Wave Monitor cards, or port the first persistent Wave Monitor storage/contracts slice using 11Writer runtime user-data paths
+
+## 2026-05-01 13:39 America/Chicago
+
+Task:
+- assess imported 7Po8 project, remove stale runtime artifacts, and plan integration as a 11Writer tool
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- inspected 7Po8 backend/frontend/docs structure and identified useful concepts: waves, connectors, records, signals, source discovery, source checks, domain trust, policy actions, and scheduler ticks
+- removed generated/runtime artifacts from the imported 7Po8 tree: frontend `node_modules`, `dist`, TypeScript build-info, generated Vite JS/DTS config, backend caches, egg-info, bytecode, and local SQLite runtime/smoke databases
+- added a 7Po8 integration plan that treats the project as a Wave Monitor tool inside 11Writer's shared runtime and Situation Workspace instead of a separate app/runtime
+- linked the plan from unified workflows and source prompt index docs
+
+Files touched:
+- `7Po8/`
+- `app/docs/7po8-integration-plan.md`
+- `app/docs/unified-user-workflows.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/agent-progress/atlas-ai.md`
+
+Validation:
+- stale artifact scan for `__pycache__`, `*.pyc`, `*.db`, `*.sqlite3`, and `*.tsbuildinfo`
+- `python -m compileall 7Po8/apps/backend/app`
+- removed compileall-generated caches after syntax validation
+- `git diff --check -- app/docs/7po8-integration-plan.md app/docs/unified-user-workflows.md app/docs/source-prompt-index.md app/docs/agent-progress/atlas-ai.md`
+
+Blockers or caveats:
+- no 7Po8 backend pytest or frontend npm tests were run because this pass intentionally removed local runtime dependencies/artifacts and did not install dependencies
+- 7Po8 remains an imported reference project until code is ported into 11Writer-native backend/frontend modules
+
+Next recommended task:
+- implement Slice 1 from the integration plan: define 11Writer-native Wave Monitor contracts for Wave/Monitor, Connector, Record, Signal, RunHistory, DiscoveredSource, SourceCheck, and DomainTrust with source health, evidence basis, caveats, and export metadata
+
+## 2026-05-01 13:06 America/Chicago
+
+Task:
+- notify Manager AI and define a safe cross-source hypothesis workflow for connecting seemingly unrelated signals
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added a Manager-facing alert that Atlas is documenting a cross-source hypothesis graph workflow
+- added a hypothesis graph planning doc for surfacing possible relationships across cyber, scam, investigation, regional news, public event, entity, location, and source-health signals
+- linked hypothesis workflow guidance into the unified user workflow, fusion layer architecture, and source prompt index docs
+- defined safety boundaries, evidence ladder, hypothesis states, relationship types, confidence tiers, export rules, and implementation slices
+
+Files touched:
+- `app/docs/alerts.md`
+- `app/docs/cross-source-hypothesis-graph.md`
+- `app/docs/unified-user-workflows.md`
+- `app/docs/fusion-layer-architecture.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/agent-progress/atlas-ai.md`
+
+Validation:
+- `git diff --check -- app/docs/alerts.md app/docs/cross-source-hypothesis-graph.md app/docs/unified-user-workflows.md app/docs/fusion-layer-architecture.md app/docs/source-prompt-index.md app/docs/agent-progress/atlas-ai.md`
+- reference scan for `cross-source-hypothesis-graph`, `HypothesisGraph`, and `Hypothesis`
+
+Blockers or caveats:
+- docs/design only; no backend or frontend implementation was performed
+- `git diff --check` reported only line-ending warnings for touched docs
+
+Next recommended task:
+- implement a bounded first slice: relationship reasons on existing Data AI/Analyst Workbench clusters, with confidence ceilings, caveats, contradiction fixtures, and an inspector display for why records were grouped
+
+## 2026-05-01 12:53 America/Chicago
+
+Task:
+- define unified user workflows across the product without creating separate domain workflow pages
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added a unified workflow planning doc centered on one `Situation Workspace` and the flow `User sees information -> user wants more information -> user can decide or move on`
+- covered the main product domains in the shared workflow model: Now view, Data AI/RSS/cyber/news, environmental/geospatial, marine, aerospace, webcams/source operations, imagery/base layers, reference/entity linking, source health/validation, tasks/monitors/backend-only, companion web, and desktop
+- linked the unified workflow doc from roadmap, strategic roadmap, UI integration, and source prompt index docs so future agents use it as the main workflow target
+
+Files touched:
+- `app/docs/unified-user-workflows.md`
+- `app/docs/roadmap.md`
+- `app/docs/strategic-roadmap.md`
+- `app/docs/ui-integration.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/agent-progress/atlas-ai.md`
+
+Validation:
+- `git diff --check -- app/docs/unified-user-workflows.md app/docs/roadmap.md app/docs/strategic-roadmap.md app/docs/ui-integration.md app/docs/source-prompt-index.md app/docs/agent-progress/atlas-ai.md`
+- link reference scan for `unified-user-workflows`
+
+Blockers or caveats:
+- docs/design only; no backend or frontend implementation was performed
+- `git diff --check` reported only line-ending warnings for touched docs
+
+Next recommended task:
+- assign a large implementation slice for the shared Situation Workspace: unified attention cards, universal inspector detail drawer, and queue/review state across source health, Data AI leads, environmental events, marine anomalies, aerospace context, and webcam operations
+
+## 2026-05-01 12:46 America/Chicago
+
+Task:
+- define user workflows for Data AI RSS/feed tools and confirm Manager AI notification state
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- confirmed the Manager-facing Atlas alert about expanded Data AI RSS resources is present and open
+- added a Data AI user workflow design doc describing how feeds become leads, event clusters, source-health cards, drilldowns, monitors, map/timeline context, and exportable analyst work products
+- linked the workflow doc from the source prompt index and Analyst Workbench docs
+
+Files touched:
+- `app/docs/data-ai-user-workflows.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/analyst-workbench.md`
+- `app/docs/agent-progress/atlas-ai.md`
+
+Validation:
+- `git diff --check -- app/docs/data-ai-user-workflows.md app/docs/source-prompt-index.md app/docs/analyst-workbench.md app/docs/agent-progress/atlas-ai.md`
+- link reference scan for `data-ai-user-workflows`
+
+Blockers or caveats:
+- docs/design only; no backend or frontend implementation was performed
+- `git diff --check` reported only existing line-ending warnings for touched docs
+
+Next recommended task:
+- assign a bounded implementation slice for the Analyst Workbench feed workflow: normalized leads, source-health cards, initial cluster candidates, lead detail drawer, and daily brief endpoint
+
+## 2026-05-01 12:37 America/Chicago
+
+Task:
+- notify Manager AI about Atlas source expansion work and assess current project deficiencies and velocity
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added a Manager-facing alert that Atlas validated 110 additional Batch 3 Data AI RSS/Atom/RDF feeds and that the Data AI validated feed candidate total is now 277
+- reviewed coordination, release-readiness, validation, source assignment, next-task, and active agent progress docs to assess current project state
+- identified current high-level deficiencies around cross-platform implementation, workflow validation depth, source ingestion scale, UI integration, backend-only runtime readiness, and dirty-worktree consolidation risk
+
+Files touched:
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/atlas-ai.md`
+
+Validation:
+- docs/status review only; no test suite was run in this pass
+
+Blockers or caveats:
+- assessment is based on current repo docs, active-task state, validation-status docs, and worktree status rather than a fresh full validation run
+- no staging, commit, or push was performed
+
+Next recommended task:
+- prioritize big-platform work: common analyst workbench/source-health surface, runtime mode foundation, Data AI ingestion platform, and workflow-validation promotion tooling
+
 ## 2026-04-30 22:11 America/Chicago
 
 Task:
@@ -382,3 +613,213 @@ Blockers or caveats:
 
 Next recommended task:
 - wait for direct user instructions
+
+## 2026-05-01 15:04 America/Chicago
+
+Task:
+- implement Phase 2 backend-only Wave Monitor persistence, live connector, and scheduler primitives
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added 11Writer-native Wave Monitor SQLite models and session helpers for monitors, connectors, records, signals, runs, and source candidates
+- moved the Wave Monitor overview from fixture-only service state to persistent backend storage configured by `WAVE_MONITOR_DATABASE_URL`
+- added bounded `run-now` and manual scheduler tick API behavior for enabled RSS connectors, including fixture and live source modes
+- kept Wave Monitor integrated with Analyst Workbench evidence timeline and source-readiness without mounting the standalone 7Po8 runtime
+- documented the new backend slice in the 7Po8 integration plan and kept frontend work deferred
+
+Files touched:
+- `app/docs/7po8-integration-plan.md`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/server/src/config/settings.py`
+- `app/server/src/routes/wave_monitor.py`
+- `app/server/src/services/wave_monitor_service.py`
+- `app/server/src/types/wave_monitor.py`
+- `app/server/src/wave_monitor/__init__.py`
+- `app/server/src/wave_monitor/db.py`
+- `app/server/src/wave_monitor/models.py`
+- `app/server/tests/test_analyst_workbench.py`
+- `app/server/tests/test_wave_monitor.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+
+Blockers or caveats:
+- no frontend work was performed by request
+- no hidden background scheduler loop is enabled yet; scheduler execution is manual/API-triggered
+- create/update APIs for user-authored monitors and connectors are still needed
+
+Next recommended task:
+- add monitor/connector CRUD plus source-check persistence, then register the manual tick with the backend-only runtime task system once that runtime control layer is ready
+
+## 2026-05-01 15:14 America/Chicago
+
+Task:
+- make 7Po8-style source discovery an important 11Writer-wide platform capability and notify Manager AI
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added a dedicated Source Discovery Platform plan that promotes source discovery from a Wave Monitor-only concept into a shared 11Writer source-candidate lifecycle capability
+- documented candidate lifecycle states, source packet fields, allowed discovery inputs, forbidden discovery behavior, ownership routing, user workflow, and implementation slices
+- updated the 7Po8 integration plan so `DiscoveredSource` maps to platform-wide source-candidate packets and future shared source-candidate storage
+- updated the unified user workflow so source discovery fits the single workspace pattern
+- updated the source prompt index, workflow-validation plan, and validation-status report so all agents treat discovery as candidate evidence only, not implementation or validation proof
+- added a Manager-facing alert for the platform priority change
+
+Files touched:
+- `app/docs/source-discovery-platform-plan.md`
+- `app/docs/7po8-integration-plan.md`
+- `app/docs/unified-user-workflows.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/atlas-ai.md`
+
+Validation:
+- docs-only change; no backend or frontend tests required
+- `git diff --check -- app/docs/source-discovery-platform-plan.md app/docs/7po8-integration-plan.md app/docs/unified-user-workflows.md app/docs/source-prompt-index.md app/docs/source-workflow-validation-plan.md app/docs/source-validation-status.md app/docs/alerts.md app/docs/agent-progress/atlas-ai.md`
+
+Blockers or caveats:
+- no source-discovery backend job runner was implemented in this pass
+- autonomous discovery remains a governed candidate-generation workflow, not a hidden crawler, source-truth system, or automatic polling engine
+
+Next recommended task:
+- implement the shared backend source-candidate store and packet contract, then migrate Wave Monitor source candidates toward that shared service
+
+## 2026-05-01 15:37 America/Chicago
+
+Task:
+- correct source discovery platform requirements to include autonomous source-reputation learning, cross-wave source memory, full-text evidence, and source-class-aware scoring
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- revised the Source Discovery Platform plan so automatic discovery is not only a candidate queue, but a long-running learning system that improves source trust over time
+- added explicit global reputation, domain reputation, wave-fit, source-health, and claim-level history concepts
+- added cross-wave source memory so waves can reuse verified, degraded, rejected, low-fit, and domain-specific source knowledge from prior waves
+- separated correctness from mission relevance so a source can be accurate but low-fit for one wave
+- defined different scoring expectations for static sources, live sources, full-text articles, social/image evidence, official sources, and community sources
+- added claim outcomes: confirmed, contradicted, corrected, outdated, unresolved, and not-applicable
+- updated the Wave Monitor integration plan, unified workflow doc, source prompt index, validation plan, and validation-status report to reflect the learning model
+- added a Manager-facing alert for the platform priority change
+
+Files touched:
+- `app/docs/source-discovery-platform-plan.md`
+- `app/docs/7po8-integration-plan.md`
+- `app/docs/unified-user-workflows.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/atlas-ai.md`
+
+Validation:
+- docs-only change; no backend or frontend tests required
+- `git diff --check -- app/docs/source-discovery-platform-plan.md app/docs/7po8-integration-plan.md app/docs/unified-user-workflows.md app/docs/source-prompt-index.md app/docs/source-workflow-validation-plan.md app/docs/source-validation-status.md app/docs/alerts.md app/docs/agent-progress/atlas-ai.md`
+
+Blockers or caveats:
+- no backend source-reputation service or claim tracker was implemented in this pass
+- future implementation needs explicit audit logs for reputation changes so learned trust remains explainable and reversible
+
+Next recommended task:
+- implement shared backend tables/contracts for source memory, source reputation, wave fit, claim outcomes, and cross-wave source sharing
+
+## 2026-05-01 15:47 America/Chicago
+
+Task:
+- implement the first backend systems for shared source memory, source reputation, claim outcomes, and cross-wave wave-fit sharing
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added shared Source Discovery persistence models for source memories, per-wave fit, claim outcomes, and reputation audit events
+- added `SOURCE_DISCOVERY_DATABASE_URL` configuration and a SQLite-backed source discovery session layer
+- added source discovery API contracts and routes:
+  - `GET /api/source-discovery/memory/overview`
+  - `POST /api/source-discovery/memory/candidates`
+  - `POST /api/source-discovery/memory/claim-outcomes`
+- implemented deterministic reputation updates for confirmed, contradicted, corrected, outdated, unresolved, and not-applicable claim outcomes
+- preserved the key separation between correctness reputation and wave-specific mission relevance
+- wired Wave Monitor source candidates into shared Source Discovery memory so existing wave candidates can seed cross-wave source memory
+- added focused backend tests for source-memory scoring, not-applicable low-fit behavior, and Wave Monitor source-candidate seeding
+- updated the Source Discovery and 7Po8 integration docs with current implementation status
+- added a Manager-facing alert for the completed backend slice
+
+Files touched:
+- `app/docs/source-discovery-platform-plan.md`
+- `app/docs/7po8-integration-plan.md`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/server/src/app.py`
+- `app/server/src/config/settings.py`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/services/wave_monitor_service.py`
+- `app/server/src/source_discovery/__init__.py`
+- `app/server/src/source_discovery/db.py`
+- `app/server/src/source_discovery/models.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/test_source_discovery_memory.py`
+- `app/server/tests/test_wave_monitor.py`
+- `app/server/tests/test_analyst_workbench.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+
+Blockers or caveats:
+- no autonomous discovery runner, full-text fetcher, social/image evidence fetcher, or frontend review workflow was implemented in this slice
+- focused tests pass, but Pydantic emitted existing-style schema warnings during the source-discovery route tests; they did not fail validation
+
+Next recommended task:
+- add a bounded discovery job runner that can process explicit seed URLs and allowed feed/catalog links into the shared source memory store without broad crawling
+
+## 2026-05-01 15:56 America/Chicago
+
+Task:
+- build more of the Source Discovery platform and define the framework agents should use
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added persistent Source Discovery job audit storage for bounded discovery work
+- added a bounded seed-url job primitive that classifies explicit HTTP(S) seed URLs into candidate source memory without polling, broad crawling, or automatic trust promotion
+- added rejection behavior for non-HTTP(S) seed URLs so unsafe local/file-style inputs do not create candidates
+- exposed `POST /api/source-discovery/jobs/seed-url` for backend agents and added recent job summaries to the memory overview response
+- added focused tests for completed and rejected seed-url jobs
+- added `app/docs/source-discovery-agent-framework.md` as the required implementation framework for future agents building discovery jobs
+- updated the platform plan and source prompt index to point agents at the new framework
+- updated the Manager-facing alert with the completed framework/backend slice
+
+Files touched:
+- `app/docs/source-discovery-agent-framework.md`
+- `app/docs/source-discovery-platform-plan.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/source_discovery/models.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/test_source_discovery_memory.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+- `git diff --check -- app/server/src/app.py app/server/src/config/settings.py app/server/src/routes/source_discovery.py app/server/src/services/source_discovery_service.py app/server/src/services/wave_monitor_service.py app/server/src/source_discovery app/server/src/types/source_discovery.py app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py app/docs/source-discovery-platform-plan.md app/docs/source-discovery-agent-framework.md app/docs/source-prompt-index.md app/docs/7po8-integration-plan.md app/docs/agent-progress/atlas-ai.md app/docs/alerts.md`
+
+Blockers or caveats:
+- focused tests pass, but Pydantic still emits existing-style schema alias warnings during source-discovery route tests
+- no live fetcher, full-text extraction, source-health scheduler, social/image evidence pipeline, or frontend review workflow was implemented in this slice
+
+Next recommended task:
+- implement source-health checks and a bounded feed/catalog expansion job that can safely discover child feeds from already-approved seed sources

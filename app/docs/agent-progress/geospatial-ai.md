@@ -1,5 +1,341 @@
 # Geospatial AI Progress
 
+## 2026-05-01 15:51:00 -05:00
+
+- Assignment version:
+  - `2026-05-01 15:44 America/Chicago`
+- Task:
+  - Added a backend environmental situation snapshot/report package that composes the existing overview, context export package, and source-health issue queue.
+- What changed:
+  - Added a new backend route, `GET /api/context/environmental/situation-snapshot-package`.
+  - Added typed snapshot/report package contracts that preserve:
+    - selected family filters
+    - included and missing family ids
+    - source counts
+    - issue counts
+    - evidence bases
+    - health/mode summary
+    - family bundles
+    - issue queue items
+    - review lines
+    - export lines
+    - snapshot metadata
+  - Implemented the package as a composition of the existing:
+    - source-family overview
+    - context export package
+    - source-health issue queue
+  - Added profile support:
+    - `default`
+    - `chokepoint-context`
+    - `source-health-review`
+  - Kept profile behavior limited to profile-specific caveat/export/review lines only, without changing source semantics or introducing any threat/impact scoring.
+  - Extended deterministic tests for filtered output, missing family ids, profile behavior, issue-queue inclusion, export metadata preservation, and no global scoring.
+  - Updated the source-family overview doc with the new snapshot/report route, profile examples, and intended future backend report-consumer role.
+- Files touched:
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/src/routes/environmental_context.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m compileall app/server/src`
+  - `python -m pytest app/server/tests/test_hko_weather_events.py app/server/tests/test_canada_cap_events.py app/server/tests/test_metno_metalerts.py app/server/tests/test_ipma_warnings.py app/server/tests/test_met_eireann_warnings.py app/server/tests/test_met_eireann_forecast.py app/server/tests/test_geosphere_austria_warnings.py app/server/tests/test_nrc_event_notifications.py -q`
+- Blockers or caveats:
+  - The snapshot/report package is still a compact backend report input, not a final UI or a full orchestrated export workflow.
+  - `chokepoint-context` remains context-only and explicitly does not prove impact, threat, target status, blockade, evasion, or wrongdoing.
+  - `source-health-review` remains source-limitation review only and does not become event significance scoring.
+  - No hazard/severity/damage/impact/health-risk/threat/target scoring was added.
+- Next recommended task:
+  - The next bounded step should be one shared backend report/export consumer that reads `situation-snapshot-package`, or a new backend source slice if Manager AI shifts back to source expansion.
+
+## 2026-05-01 15:12:10 -05:00
+
+- Assignment version:
+  - `2026-05-01 15:03 America/Chicago`
+- Task:
+  - Added a backend environmental source-health issue queue/export package across implemented environmental source families for future snapshot/report workflows.
+- What changed:
+  - Added a new backend route, `GET /api/context/environmental/source-health-issue-queue`.
+  - Added typed issue-queue contracts that preserve:
+    - issue ids
+    - issue types
+    - family ids
+    - source ids
+    - source mode
+    - source health
+    - evidence basis
+    - caveats
+    - review lines
+    - export lines
+    - snapshot metadata
+    - allowed review posture
+  - Implemented the queue as a conservative consumer of the existing overview and context-export-package contracts rather than another independent source loader.
+  - Added compact issue coverage for currently supportable cases:
+    - `fixture-only`
+    - `count-only-health`
+    - explicit source-health states such as `empty`, `stale`, `error`, `disabled`, `unknown`
+    - evidence-limit issues such as `advisory-only`, `forecast-only`, `modeled-only`, `reference-only`, and `contextual-only`
+    - `missing-family`
+  - Preserved explicit guardrails that the queue is review posture only and does not imply threat, target status, impact, damage, hazard, or health-risk truth.
+  - Kept count-only source families honestly count-only instead of fabricating richer source-health state.
+  - Extended deterministic tests for filtered queue output, missing family ids, inert prompt-like text, source mode/health/evidence preservation, and no global scoring.
+  - Updated the source-family overview doc with the queue route, examples, intended consumer role, and chokepoint/reference-context relevance boundaries.
+- Files touched:
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/src/routes/environmental_context.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m compileall app/server/src`
+  - `python -m pytest app/server/tests/test_hko_weather_events.py app/server/tests/test_canada_cap_events.py app/server/tests/test_metno_metalerts.py app/server/tests/test_ipma_warnings.py app/server/tests/test_met_eireann_warnings.py app/server/tests/test_met_eireann_forecast.py app/server/tests/test_geosphere_austria_warnings.py app/server/tests/test_nrc_event_notifications.py -q`
+- Blockers or caveats:
+  - The queue is still a compact backend review/export consumer, not a live operational queue manager.
+  - Some source families still expose only count-derived health in current contracts; those limitations are surfaced as `count-only-health` rather than hidden.
+  - No hazard/severity/damage/impact/health-risk/threat/target scoring was added.
+- Next recommended task:
+  - The next bounded step should be one downstream report/snapshot builder that consumes the issue queue package, or one new backend environmental source slice if Manager AI shifts back to source expansion.
+
+## 2026-05-01 14:57:44 -05:00
+
+- Assignment version:
+  - `2026-05-01 14:46 America/Chicago`
+- Task:
+  - Added one downstream backend snapshot/report consumer for `source-families-export` that emits a compact environmental context export package for future snapshot/report workflows.
+- What changed:
+  - Added a new backend route, `GET /api/context/environmental/context-export-package`.
+  - Added typed package contracts that preserve:
+    - package metadata
+    - snapshot metadata
+    - selected family filters
+    - included and missing family ids
+    - family ids
+    - source ids
+    - family/source counts
+    - evidence bases
+    - family bundles
+    - review lines
+    - export lines
+    - caveats
+  - Implemented the package builder as a narrow consumer of the existing `source-families-export` contract rather than inventing another parallel family loader.
+  - Preserved explicit guardrails that the package is:
+    - not a common situation UI
+    - not a hazard score
+    - not an impact, damage, or health-risk truth model
+  - Added deterministic tests for filtered package output, missing family ids, snapshot metadata preservation, and no global scoring language.
+  - Updated the source-family overview doc with the new route and intended consumer role.
+- Files touched:
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/src/routes/environmental_context.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m compileall app/server/src`
+  - `python -m pytest app/server/tests/test_hko_weather_events.py app/server/tests/test_canada_cap_events.py app/server/tests/test_metno_metalerts.py app/server/tests/test_ipma_warnings.py app/server/tests/test_met_eireann_warnings.py app/server/tests/test_met_eireann_forecast.py app/server/tests/test_geosphere_austria_warnings.py app/server/tests/test_nrc_event_notifications.py -q`
+- Blockers or caveats:
+  - This package is still a compact backend consumer, not a full snapshot/export orchestrator.
+  - It inherits conservative source-health handling where some family members still expose count-only contracts.
+  - No global hazard, severity, damage, impact, or health-risk score was added.
+- Next recommended task:
+  - The next bounded step should be wiring one server-side report/snapshot builder to consume `context-export-package`, or adding another backend source slice if Manager AI prioritizes source expansion again.
+
+## 2026-05-01 13:46:54 -05:00
+
+- Assignment version:
+  - `2026-05-01 13:24 America/Chicago`
+- Task:
+  - Added a narrow backend export/consumer contract for compact environmental source-family bundles so downstream snapshot/report consumers can request export-safe family summaries without building a Phase 3 UI.
+- What changed:
+  - Added a companion backend route, `GET /api/context/environmental/source-families-export`, alongside the existing overview route.
+  - Added compact export response contracts that preserve:
+    - `family_id`
+    - `family_label`
+    - `family_health`
+    - `family_mode`
+    - `source_ids`
+    - `evidence_bases`
+    - `caveats`
+    - `review_lines`
+    - `export_lines`
+  - Added export metadata that preserves:
+    - `requested_family_ids`
+    - `included_family_ids`
+    - `missing_family_ids`
+    - `family_count`
+    - `source_count`
+    - compact profile/caveat metadata
+  - Added repeated `family` query filtering for narrow consumer requests, with unknown family ids returned in `missing_family_ids` rather than failing the request.
+  - Kept the existing overview route stable and reused the existing family-summary builder instead of introducing a new generic export framework.
+  - Extended deterministic tests for filtered export bundles, missing/unknown families, guardrail preservation, and no fake impact/damage/health-risk scoring.
+  - Updated docs with the new route, filter examples, and export semantics.
+- Files touched:
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/src/routes/environmental_context.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m compileall app/server/src`
+  - `python -m pytest app/server/tests/test_hko_weather_events.py app/server/tests/test_canada_cap_events.py app/server/tests/test_metno_metalerts.py app/server/tests/test_ipma_warnings.py app/server/tests/test_met_eireann_warnings.py app/server/tests/test_met_eireann_forecast.py app/server/tests/test_geosphere_austria_warnings.py app/server/tests/test_nrc_event_notifications.py -q`
+- Blockers or caveats:
+  - The export route is intentionally compact and family-level. It is not a full snapshot/export UI pipeline.
+  - It preserves current conservative source-health handling for count-only source contracts rather than inventing richer health states.
+  - No global hazard, severity, damage, impact, or health-risk score was added.
+- Next recommended task:
+  - The next bounded step should be one downstream backend snapshot/export consumer that reads `source-families-export` directly, rather than further widening UI surfaces.
+
+## 2026-05-01 13:12:52 -05:00
+
+- Assignment version:
+  - `2026-05-01 13:04 America/Chicago`
+- Task:
+  - Widened the backend environmental source-family overview helper to cover the remaining major implemented alert, weather, and infrastructure-context source families in a bounded second pass.
+- What changed:
+  - Extended the backend overview helper to add:
+    - `weather-alert-advisory`
+    - `infrastructure-event-context`
+  - Widened existing family coverage so the helper now includes:
+    - HKO Open Weather
+    - Canada CAP Alerts
+    - MET Norway MetAlerts
+    - IPMA warnings
+    - Met Eireann warnings
+    - GeoSphere Austria warnings
+    - Met Eireann forecast
+    - NRC event notifications
+  - Preserved source-native evidence semantics instead of flattening them:
+    - advisory/contextual
+    - forecast/contextual
+    - modeled/contextual
+    - observed/source-reported
+    - reference/contextual
+  - Kept older count-only contracts conservative by deriving only `loaded` or `empty` when richer source-health objects are not exposed.
+  - Extended deterministic overview tests to verify new family inclusion, evidence-basis preservation, inert free-text handling, and absence of fake damage/health-risk scoring language.
+  - Updated overview docs to distinguish current backend family coverage from overall source implementation status.
+- Files touched:
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/environmental-events.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m pytest app/server/tests/test_hko_weather_events.py app/server/tests/test_canada_cap_events.py app/server/tests/test_metno_metalerts.py app/server/tests/test_ipma_warnings.py app/server/tests/test_met_eireann_warnings.py app/server/tests/test_met_eireann_forecast.py app/server/tests/test_geosphere_austria_warnings.py app/server/tests/test_nrc_event_notifications.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - The helper still remains a bounded backend review/fusion contract, not a final common situation UI.
+  - HKO, MET Norway, and Canada CAP still use conservative count-derived source-health summaries because their current route contracts do not expose richer `source_health` objects.
+  - NRC caveats explicitly warn against promoting source-reported event text into radiological-impact or required-action claims; that warning language is preserved intentionally.
+  - No global hazard, severity, damage, impact, or health-risk score was added.
+- Next recommended task:
+  - If Manager AI wants another widening pass, add only remaining implemented backend slices whose route contracts can be summarized without flattening source-native semantics, or assign one narrow backend consumer of the overview contract before any broader UI work.
+
+## 2026-05-01 12:59:02 -05:00
+
+- Assignment version:
+  - `2026-05-01 12:45 America/Chicago`
+- Task:
+  - Built a backend-first environmental source-family overview helper that summarizes implemented geospatial/environmental source families with source health, evidence basis, caveats, and export-safe review lines.
+- What changed:
+  - Added a new backend fusion helper route, `GET /api/context/environmental/source-families-overview`, plus typed overview contracts and a dedicated helper service.
+  - Grouped existing source-specific backend slices into stable overview families:
+    - `seismic`
+    - `environmental-event-context`
+    - `volcano-reference`
+    - `tsunami-advisory`
+    - `weather-flood-hydrology`
+    - `geomagnetic-context`
+    - `base-earth-reference`
+    - `risk-reference`
+    - `water-quality-context`
+  - Reused existing backend service contracts instead of introducing a new generic source framework.
+  - Preserved per-source `source_id`, `source_mode`, source-health state, evidence basis, last-fetched/source-generated timing where available, caveats, review lines, and export-safe summary lines.
+  - Added conservative family aggregation logic that reports `loaded`, `mixed`, `empty`, `degraded`, or `unknown` without inventing a global hazard, damage, or health-risk score.
+  - Added prompt-injection-aware overview coverage by carrying forward inert-text review language for free-text-bearing sources and verifying that hostile instruction-like fixture text does not leak into family export lines.
+  - Added source/docs coverage for the new overview helper and updated the main environmental overview doc to distinguish this backend fusion helper from the existing frontend event overview.
+- Files touched:
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/src/routes/environmental_context.py`
+  - `app/server/src/app.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/environmental-events.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m pytest app/server/tests/test_france_georisques.py app/server/tests/test_uk_ea_water_quality.py -q`
+  - `python -m pytest app/server/tests/test_bmkg_earthquakes.py app/server/tests/test_ga_recent_earthquakes.py app/server/tests/test_base_earth_reference_bundle.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - The helper is intentionally a backend fusion/review contract, not a common situation dashboard and not a Phase 3 UI.
+  - Older source routes that do not yet expose explicit `source_health` still get only conservative derived `loaded` or `empty` states from current response metadata/counts.
+  - Intentionally excluded from this first slice to keep the family contract bounded:
+    - HKO Open Weather
+    - Canada CAP Alerts
+    - MET Norway MetAlerts
+    - IPMA warnings
+    - Met Eireann warning/forecast
+    - other later alert-wave sources not central to the current validation brief
+  - No fake impact, damage, health-risk, enforcement, or hazard scoring language was added.
+  - No client files were touched, so `cmd /c npm.cmd run lint` and `cmd /c npm.cmd run build` were not required for this assignment.
+- Next recommended task:
+  - Manager AI should either widen this overview helper to the remaining alert-wave sources in a bounded follow-on or assign one narrow backend consumer/export integration path for this overview contract before any broader UI work.
+
+## 2026-05-01 12:38:27 -05:00
+
+- Assignment version:
+  - `2026-04-30 22:24 America/Chicago`
+- Task:
+  - Implemented the backend-first `france-georisques` plus `uk-ea-water-quality` water/environmental context bundle.
+- What changed:
+  - Added a bounded France Géorisques seismic-zoning reference/context slice pinned to the public `api/v1/zonage_sismique` endpoint with either `code_insee` or `latlon` request basis, source health, export-facing metadata, deterministic fixtures, and focused tests.
+  - Added a bounded UK Environment Agency water-quality slice pinned to the official Bathing Water Quality linked-data sample endpoint family, normalized as observed in-season sample assessments rather than broad Water Quality Explorer coverage.
+  - Preserved distinct semantics between static/reference zoning context and observed bathing-water sample results instead of collapsing them into a single certainty model.
+  - Added prompt-injection-like fixture coverage for free-form water-quality point text and sanitized script-like markup while keeping hostile instruction-like text inert source data only.
+  - Added dedicated route modules, app wiring, source-specific docs, and focused backend validation without touching frontend/UI code.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/france_georisques_service.py`
+  - `app/server/src/services/uk_ea_water_quality_service.py`
+  - `app/server/src/routes/risk_context.py`
+  - `app/server/src/routes/water_quality_context.py`
+  - `app/server/src/app.py`
+  - `app/server/data/france_georisques_fixture.json`
+  - `app/server/data/uk_ea_water_quality_fixture.json`
+  - `app/server/tests/test_france_georisques.py`
+  - `app/server/tests/test_uk_ea_water_quality.py`
+  - `app/docs/environmental-events-france-georisques.md`
+  - `app/docs/environmental-events-uk-ea-water-quality.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_france_georisques.py -q`
+  - `python -m pytest app/server/tests/test_uk_ea_water_quality.py -q`
+  - `python -m pytest app/server/tests/test_uk_ea_flood_events.py app/server/tests/test_ireland_epa_wfd_catchments.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - Exact official France Géorisques endpoint used:
+    - `https://www.georisques.gouv.fr/api/v1/zonage_sismique`
+  - Exact official UK Environment Agency endpoint family used for the bounded first slice:
+    - `https://environment.data.gov.uk/data/bathing-water-quality/in-season/sample.json`
+  - France Géorisques remains reference/context only and does not establish live earthquakes, parcel-scale hazard, building safety, or realized damage.
+  - UK EA bathing-water samples remain observed sample results only and do not by themselves establish area-wide contamination, health risk, enforcement action, or public-safety consequence.
+  - Source-provided free text remains inert data only and never changes validation state, source health, or workflow behavior.
+  - The broader UK Water Quality Explorer API family remains more opaque than the bounded bathing-water linked-data endpoint, so this assignment intentionally stayed on the documented machine-readable sample slice.
+  - No client files were touched, so `cmd /c npm.cmd run lint` and `cmd /c npm.cmd run build` were not required for this assignment.
+- Next recommended task:
+  - Manager AI should assign the next bounded backend-first environmental/context source or a narrow consumer/helper follow-on for one of the newer backend slices rather than widening these two sources directly into shared frontend surfaces by default.
+
 ## 2026-04-30 22:12:32 -05:00
 
 - Assignment version:

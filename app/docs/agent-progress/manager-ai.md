@@ -1,5 +1,503 @@
 # Manager AI Progress
 
+## 2026-05-01 15:57 America/Chicago
+
+Task:
+- check in on Features/Webcam AI and redirect it toward global public no-auth camera/webcam source discovery
+
+What changed:
+- confirmed Features/Webcam AI completed assignment `2026-05-01 15:44 America/Chicago`
+- rewrote `app/docs/agent-next-tasks/features-webcam-ai.md` at assignment version `2026-05-01 15:57 America/Chicago`
+- new assignment asks Features/Webcam AI to research 8-12 public no-auth machine-readable camera/webcam source families worldwide and onboard the best 4-6 as candidate-only docs/fixtures/metadata where safe
+- preserved lifecycle boundaries: candidate-only, no activation, no validation promotion, no scheduling, no scraping, no browser automation, no credentialed/tokenized sources
+
+Files touched:
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- Features progress doc review -> pass
+- next-task doc rewrite -> pass
+
+Blockers or caveats:
+- current open Atlas source-discovery alerts remain separate from this Features/Webcam camera-source assignment
+- any new camera source remains candidate-only unless later validation explicitly promotes it
+
+Next recommended task:
+- tell Features/Webcam AI to read `app/docs/agent-next-tasks/features-webcam-ai.md` and start assignment version `2026-05-01 15:57 America/Chicago`
+
+## 2026-05-01 15:44 America/Chicago
+
+Task:
+- perform Manager AI check-in after Wonder startup and the completed `2026-05-01 15:03 America/Chicago` controlled-agent wave
+
+What changed:
+- confirmed Wonder AI startup sync completed:
+  - Wonder read assignment version `2026-05-01 15:40 America/Chicago`
+  - Wonder updated `app/docs/agent-progress/wonder-ai.md`
+  - Wonder added a startup alert
+  - Wonder is user-directed and not Manager-controlled
+- confirmed seven controlled lanes completed the active `2026-05-01 15:03 America/Chicago` assignment:
+  - Connect AI completed Wave Monitor/Analyst Workbench runtime-boundary validation sweep
+  - Gather AI completed chokepoint intelligence governance/routing
+  - Data AI completed policy/think-tank commentary feed-family implementation
+  - Geospatial AI completed environmental source-health issue queue/export package
+  - Marine AI completed marine chokepoint review/export helper
+  - Aerospace AI completed aerospace source-health/readiness issue export bundle
+  - Features/Webcam AI completed source-ops handoff export bundle
+- rewrote all seven controlled next-task docs at assignment version `2026-05-01 15:44 America/Chicago`
+- assigned larger follow-on work:
+  - Connect AI: source-discovery/source-memory integration boundary sweep
+  - Gather AI: source discovery, reputation, claim-outcome, and shared source-memory governance packet
+  - Data AI: cyber vendor/community follow-on feed-family implementation
+  - Geospatial AI: environmental situation snapshot/report package
+  - Marine AI: timeline/history plus chokepoint-review coherence regression
+  - Aerospace AI: aerospace context snapshot/report metadata helper
+  - Features/Webcam AI: unified aggregate-only source-ops export surface
+- marked the three open Atlas source-discovery alerts completed after routing them into Connect/Gather assignments
+
+Files touched:
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+- alerts routed in `app/docs/alerts.md`
+
+Blockers or caveats:
+- Atlas and Wonder remain user-directed peer agents and were not assigned Manager-controlled work
+- current repo remains highly dirty; Connect owns the next integration/ownership truth sweep
+- aerospace smoke remains known launcher-blocked locally if Playwright fails before app assertions
+
+Next recommended task:
+- tell the seven controlled agents to read their next-task docs and start assignment version `2026-05-01 15:44 America/Chicago`
+
+## 2026-05-01 15:40 America/Chicago
+
+Task:
+- create Wonder AI peer-agent infrastructure and startup prompt
+
+What changed:
+- added Wonder AI as a peer-level, user-directed generalist agent
+- created onboarding, next-task, and progress docs for Wonder AI
+- updated agent progress/next-task indexes
+- updated repo workflow and active worktree docs so Manager AI does not treat Wonder AI as a controlled lane
+
+Files touched:
+- `app/docs/wonder-ai-onboarding.md`
+- `app/docs/agent-next-tasks/wonder-ai.md`
+- `app/docs/agent-progress/wonder-ai.md`
+- `app/docs/agent-progress/README.md`
+- `app/docs/agent-next-tasks/README.md`
+- `app/docs/repo-workflow.md`
+- `app/docs/active-agent-worktree.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- docs structure/readback pending
+
+Blockers or caveats:
+- Wonder AI has not started yet, so no startup alert was added by Manager AI
+- Wonder AI is user-directed and should not be assigned controlled-lane work by Manager AI unless the user explicitly asks
+
+Next recommended task:
+- give Wonder AI the startup prompt and have it read `app/docs/agent-next-tasks/wonder-ai.md`
+
+## 2026-05-01 15:03 America/Chicago
+
+Task:
+- perform Manager AI check-in, process completed `2026-05-01 14:46 America/Chicago` controlled-agent wave, route open Atlas Wave Monitor alerts, and rewrite next-task docs with larger Phase 2 assignments
+
+What changed:
+- confirmed seven controlled lanes completed the active `2026-05-01 14:46 America/Chicago` assignment:
+  - Connect AI completed Wave Monitor-inclusive validation/ownership sweep with no repo-wide blocker reproduced
+  - Gather AI completed Wave Monitor governance intake and latest helper/tool-wave status reconciliation
+  - Data AI completed the scientific/environmental context feed family
+  - Geospatial AI completed the environmental context export package route/helper
+  - Marine AI completed focused replay-evidence/evidence-interpretation export regression coverage
+  - Aerospace AI completed aerospace export/coherence helper and prepared smoke assertions
+  - Features/Webcam AI completed compact evidence-packet handoff summary
+- rewrote all seven controlled next-task docs at assignment version `2026-05-01 15:03 America/Chicago`
+- assigned larger follow-on work:
+  - Connect AI: Wave Monitor/Analyst Workbench runtime-boundary validation and dirty-tree ownership sweep
+  - Gather AI: latest status reconciliation plus safe chokepoint intelligence governance/routing packet
+  - Data AI: policy/think-tank commentary feed-family implementation
+  - Geospatial AI: environmental source-health issue queue/export package
+  - Marine AI: generic chokepoint review/export helper with no-intent/no-wrongdoing guardrails
+  - Aerospace AI: aerospace source-health/readiness issue export bundle
+  - Features/Webcam AI: source-ops handoff export-bundle selector
+- marked the two open Atlas Wave Monitor alerts completed after routing them into Connect/Gather assignments
+
+Files touched:
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+- alerts routed in `app/docs/alerts.md`
+
+Blockers or caveats:
+- Atlas remains user-directed and was not assigned work by Manager AI
+- current repo remains highly dirty; Connect owns the next integration/ownership truth sweep
+- aerospace smoke remains known launcher-blocked locally if Playwright fails before app assertions
+
+Next recommended task:
+- tell the seven controlled agents to read their next-task docs and start assignment version `2026-05-01 15:03 America/Chicago`
+
+## 2026-05-01 14:46 America/Chicago
+
+Task:
+- run Manager AI check-in and reassign all completed controlled lanes after the `13:24` wave
+
+What changed:
+- reviewed alert ledger, active assignment versions, latest controlled-agent progress docs, and Atlas Wave Monitor alert
+- accepted completed assignments for:
+  - Data AI
+  - Gather AI
+  - Connect AI
+  - Geospatial AI
+  - Marine AI
+  - Aerospace AI
+  - Features/Webcam AI
+- noted Marine reported a shared AppShell lint warning, while Connect's latest current-state sweep reported lint/build green
+- rewrote all seven controlled next-task docs at assignment version `2026-05-01 14:46 America/Chicago`
+- routed Atlas AI's Wave Monitor integration status into Gather AI governance intake and Connect AI validation/ownership review, without assigning Atlas AI
+- closed the Data AI completion alert and Atlas Wave Monitor alerts, including the later shared-system integration alert because it is covered by the same Connect/Gather routing
+
+Files touched:
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- next-task assignment-version readback -> pass for all seven controlled lanes
+- `python scripts/alerts_ledger.py --json` -> pass, 0 open alerts
+
+Blockers or caveats:
+- Atlas AI remains user-directed and peer-level, not Manager-controlled
+- Wave Monitor is broad/shared until the user or Manager intentionally assigns a stable owner
+- later Atlas shared-system Wave Monitor work is covered by the same `2026-05-01 14:46 America/Chicago` Connect/Gather assignments
+- no production code changed by Manager AI
+
+Next recommended task:
+- tell all controlled agents to read their next-task docs and start from assignment version `2026-05-01 14:46 America/Chicago`
+
+## 2026-05-01 13:24 America/Chicago
+
+Task:
+- run Manager AI check-in and reassign all completed controlled lanes after the `13:04` wave
+
+What changed:
+- reviewed alert ledger, active assignment versions, latest controlled-agent progress docs, and Atlas planning alert
+- accepted completed assignments for:
+  - Data AI
+  - Gather AI
+  - Connect AI
+  - Geospatial AI
+  - Marine AI
+  - Aerospace AI
+  - Features/Webcam AI
+- confirmed Connect AI reproduced and cleared the current marine TypeScript import-suffix build blocker
+- rewrote all seven controlled next-task docs at assignment version `2026-05-01 13:24 America/Chicago`
+- routed Atlas AI's safe hypothesis-graph planning into Gather AI governance and Connect AI ownership/routing work, without assigning Atlas AI
+- closed the Data AI completion alert and Atlas hypothesis-graph planning alert
+
+Files touched:
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- next-task assignment-version readback -> pass for all seven controlled lanes
+- `python scripts/alerts_ledger.py --json` -> pass, 0 open alerts
+
+Blockers or caveats:
+- Atlas AI remains user-directed and peer-level, not Manager-controlled
+- controlled agents were assigned larger bundled tasks; no controlled lane is intentionally idle
+- no production code changed by Manager AI
+
+Next recommended task:
+- tell all controlled agents to read their next-task docs and start from assignment version `2026-05-01 13:24 America/Chicago`
+
+## 2026-05-01 13:04 America/Chicago
+
+Task:
+- run Manager AI check-in and reassign completed controlled lanes after the `12:45` wave
+
+What changed:
+- reviewed alert ledger, next-task assignment versions, latest progress docs, and current client build truth
+- accepted completed current assignments for:
+  - Data AI
+  - Gather AI
+  - Connect AI
+  - Geospatial AI
+  - Aerospace AI
+  - Features/Webcam AI
+- left Marine AI on its existing `2026-05-01 12:45 America/Chicago` assignment because no matching completion entry was present
+- verified current client build from `app/client` now passes, so the Aerospace-reported marine call-site build blocker is stale in the current tree
+- rewrote next-task docs at assignment version `2026-05-01 13:04 America/Chicago` for the six completed controlled lanes
+- closed the Data AI completion alert by routing Data AI into the new feed-family export/status summary task
+
+Files touched:
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- `cmd /c npm.cmd run build` from `app/client` -> pass
+- next-task assignment-version readback -> pass for six reassigned lanes; Marine remains `2026-05-01 12:45 America/Chicago`
+- `python scripts/alerts_ledger.py --json` -> pass, 1 open Atlas planning alert
+
+Blockers or caveats:
+- Marine AI remains in flight, not idle; it should continue its existing `12:45` assignment
+- Atlas AI remains user-directed and was not assigned work
+- Atlas has one open Manager-facing planning alert about safe hypothesis graph workflow planning; no controlled-agent assignment was created from it yet
+- no production code changed by Manager AI
+
+Next recommended task:
+- tell Data, Gather, Connect, Geospatial, Aerospace, and Features/Webcam to read their next-task docs and start from assignment version `2026-05-01 13:04 America/Chicago`; tell Marine to continue its existing `2026-05-01 12:45 America/Chicago` task
+
+## 2026-05-01 12:45 America/Chicago
+
+Task:
+- run Manager AI check-in and reassign all completed controlled lanes to larger Phase 2 tasks
+
+What changed:
+- reviewed alerts, next-task assignment versions, progress docs, and the Manager next-wins backlog
+- accepted completed current assignments for:
+  - Data AI
+  - Connect AI
+  - Gather AI
+  - Geospatial AI
+  - Marine AI
+  - Aerospace AI
+  - Features/Webcam AI
+- rewrote next-task docs at assignment version `2026-05-01 12:45 America/Chicago` for all seven controlled lanes
+- routed Atlas AI's expanded Data AI RSS validation alert into Gather AI governance reconciliation and Data AI fact-checking/disinformation feed implementation
+- marked the handled Data AI completion alert and Atlas expanded-feed alert completed
+
+Files touched:
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- next-task assignment-version readback -> pass for all seven controlled lanes
+- `python scripts/alerts_ledger.py --json` -> pass, 0 open alerts
+
+Blockers or caveats:
+- Atlas AI remains user-directed and was not assigned work
+- active assignments are large bundled tasks by design to avoid idle controlled lanes
+- no production code changed by Manager AI
+
+Next recommended task:
+- tell the controlled agents to read their next-task docs and start from assignment version `2026-05-01 12:45 America/Chicago`
+
+## 2026-05-01 12:38 America/Chicago
+
+Task:
+- create durable next-wins backlog for controlled agents
+
+Assignment version read:
+- `2026-05-01 12:38 America/Chicago`
+
+What changed:
+- created `app/docs/agent-next-wins-backlog.md`
+- documented three high-value follow-up tasks each for:
+  - Connect AI
+  - Gather AI
+  - Geospatial AI
+  - Marine AI
+  - Aerospace AI
+  - Features/Webcam AI
+  - Data AI
+- preserved Atlas AI as user-directed and not assigned from the controlled-agent backlog
+- clarified that backlog items are not active assignments until Manager AI writes them into the relevant next-task doc
+- updated the backlog at `2026-05-01 12:40 America/Chicago` to require `Assignment version read` on assignments generated from this backlog
+
+Files touched:
+- `app/docs/agent-next-wins-backlog.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- docs-only backlog creation
+
+Blockers or caveats:
+- current active next-task docs were not changed by this backlog creation
+- Manager AI should pull from this backlog during future check-ins when agents finish
+
+Next recommended task:
+- use `app/docs/agent-next-wins-backlog.md` as the default source for future reassignments unless current repo state suggests a better immediate blocker/follow-up
+
+## 2026-05-01 12:33 America/Chicago
+
+Task:
+- manager check-in and reassignment for completed controlled lanes
+
+Assignment version read:
+- `2026-05-01 12:33 America/Chicago`
+
+What changed:
+- reviewed alert ledger, dirty-tree status, current next-task versions, and latest progress docs
+- handled one open Data AI completion alert
+- accepted completed current assignments:
+  - Data AI completed `2026-05-01 11:26 America/Chicago`
+  - Connect AI completed `2026-05-01 11:26 America/Chicago`
+  - Features/Webcam AI completed `2026-04-30 22:24 America/Chicago`
+  - Aerospace AI completed `2026-05-01 11:26 America/Chicago`
+- left Marine AI on `2026-05-01 11:26 America/Chicago`
+- left Gather AI on `2026-05-01 11:26 America/Chicago`
+- left Geospatial AI on `2026-04-30 22:24 America/Chicago`
+- rewrote next-task docs at assignment version `2026-05-01 12:33 America/Chicago` for:
+  - Data AI: rights/civic/digital-policy feed bundle
+  - Connect AI: analyst-workbench/Data-feed ownership and validation sweep
+  - Features/Webcam AI: source lifecycle export-readiness selector
+  - Aerospace AI: aerospace source-readiness export bundle selector
+- closed the Data AI completion alert by routing it into the new Data AI assignment
+
+Files touched:
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` initially showed one open Data AI alert; handled by reassignment
+- progress-doc and next-task version readback -> pass
+
+Blockers or caveats:
+- analyst workbench files are present in the dirty tree and are now explicitly routed to Connect for ownership/validation review
+- Geospatial, Marine, and Gather keep their existing assignments until they report completion
+- Atlas remains user-directed and was not assigned work
+
+Next recommended task:
+- tell Data, Connect, Features/Webcam, and Aerospace to read their next-task docs at assignment version `2026-05-01 12:33 America/Chicago`
+- tell Geospatial, Marine, and Gather to continue or report against their current assignment versions
+
+## 2026-05-01 11:26 America/Chicago
+
+Task:
+- anti-idle check-in and reassignment for completed/idle controlled lanes
+
+Assignment version read:
+- `2026-05-01 11:26 America/Chicago`
+
+What changed:
+- reviewed alert ledger, dirty-tree status, current next-task versions, and latest progress docs
+- handled one open Data AI completion alert
+- accepted completed current assignments:
+  - Data AI completed `2026-04-30 22:24 America/Chicago`
+  - Connect AI completed `2026-04-30 22:22 America/Chicago`
+  - Gather AI completed `2026-04-30 22:05 America/Chicago`
+  - Marine AI completed `2026-04-30 22:05 America/Chicago`
+  - Aerospace AI completed `2026-04-30 22:19 America/Chicago`
+- kept Geospatial AI and Features/Webcam AI on their fresh `2026-04-30 22:24 America/Chicago` assignments
+- rewrote next-task docs at assignment version `2026-05-01 11:26 America/Chicago` for:
+  - Data AI: OSINT/investigation feed bundle
+  - Connect AI: post-Data-feed validation/ownership checkpoint
+  - Gather AI: Data feed-family status reconciliation plus Batch 3 routing packet
+  - Marine AI: degraded/unavailable no-severity review/report phrasing safeguards
+  - Aerospace AI: source-readiness phrasing/export guardrails
+- closed the Data AI completion alert by routing it into the new assignment
+
+Files touched:
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` initially showed one open Data AI alert; handled by reassignment
+- progress-doc and next-task version readback -> pass
+
+Blockers or caveats:
+- Geospatial and Features/Webcam remain assigned to fresh anti-idle `2026-04-30 22:24 America/Chicago` tasks
+- Atlas remains user-directed and was not assigned work
+
+Next recommended task:
+- tell Data, Connect, Gather, Marine, and Aerospace to read their next-task docs at assignment version `2026-05-01 11:26 America/Chicago`
+- tell Geospatial and Features/Webcam to continue/read their `2026-04-30 22:24 America/Chicago` assignments
+
+## 2026-05-01 11:24 America/Chicago
+
+Task:
+- perform manager check-in and reassign completed Connect lane
+
+Assignment version read:
+- `2026-05-01 11:24 America/Chicago`
+
+What changed:
+- reviewed alert ledger, dirty-tree status, current next-task versions, and latest progress docs
+- confirmed alert ledger has zero open alerts and zero malformed lines
+- identified completed current assignment:
+  - Connect AI completed `2026-04-30 22:22 America/Chicago`
+- left Data AI on its current `2026-04-30 22:24 America/Chicago` assignment because source changes are present but no current completion report exists
+- left Geospatial AI and Features/Webcam AI on their current `2026-04-30 22:24 America/Chicago` assignments
+- left Aerospace AI on `2026-04-30 22:19 America/Chicago`
+- left Gather AI and Marine AI on `2026-04-30 22:05 America/Chicago`
+- rewrote Connect AI's next-task doc at assignment version `2026-05-01 11:24 America/Chicago` for a current-state validation and consolidation-readiness checkpoint
+
+Files touched:
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> pass, zero open alerts, zero malformed lines
+- progress-doc and next-task version readback -> pass
+
+Blockers or caveats:
+- current dirty tree is much smaller and appears focused mostly around Data AI infrastructure/status feed work plus Connect coordination docs
+- Data AI should still report against `2026-04-30 22:24 America/Chicago` before reassignment
+- Atlas remains user-directed and was not assigned work
+
+Next recommended task:
+- tell Connect to read its next-task doc at assignment version `2026-05-01 11:24 America/Chicago`
+- tell Data to continue/report against `2026-04-30 22:24 America/Chicago`
+
 ## 2026-04-30 22:24 America/Chicago
 
 Task:

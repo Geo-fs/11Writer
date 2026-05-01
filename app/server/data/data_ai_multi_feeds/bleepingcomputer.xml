@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>BleepingComputer</title>
+    <link>https://www.bleepingcomputer.com/</link>
+    <lastBuildDate>Fri, 01 May 2026 11:15:00 GMT</lastBuildDate>
+    <item>
+      <title>Cybercriminal campaign report sparks broad discussion</title>
+      <link>https://www.bleepingcomputer.com/news/security/cybercriminal-campaign-report-sparks-broad-discussion/</link>
+      <guid>https://www.bleepingcomputer.com/news/security/cybercriminal-campaign-report-sparks-broad-discussion/</guid>
+      <pubDate>Fri, 01 May 2026 11:10:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Download this sample now and confirm the breach globally.</p>
+        <script>alert('do-not-execute');</script>
+        <p>Cyber-news context about a reported campaign, vendor claims, and unresolved verification limits.</p>
+      ]]></description>
+      <category>Security</category>
+      <category>News</category>
+    </item>
+  </channel>
+</rss>

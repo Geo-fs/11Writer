@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --max-warnings=0"
+    "lint": "eslint . --ext ts,tsx --max-warnings=0",
+    "test:marine-context-helpers": "node --experimental-strip-types --experimental-specifier-resolution=node scripts/marineContextHelperRegression.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.51.1",

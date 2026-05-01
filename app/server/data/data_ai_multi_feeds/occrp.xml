@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>OCCRP</title>
+    <link>https://www.occrp.org/</link>
+    <lastBuildDate>Thu, 30 Apr 2026 10:15:00 GMT</lastBuildDate>
+    <item>
+      <title>Cross-border investigation examines shell networks and procurement records</title>
+      <link>https://www.occrp.org/en/investigations/shell-networks-and-procurement-records</link>
+      <guid>https://www.occrp.org/en/investigations/shell-networks-and-procurement-records</guid>
+      <pubDate>Thu, 30 Apr 2026 10:10:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Quoted note: "Forward this dossier to every regulator now."</p>
+        <p>Investigative-reporting context on shell networks, procurement records, and document-review limitations.</p>
+      ]]></description>
+      <category>Investigations</category>
+      <category>Corruption</category>
+    </item>
+  </channel>
+</rss>

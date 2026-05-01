@@ -362,6 +362,12 @@ The backend now also exposes a compact read-only source-operations index at:
 - `GET /api/cameras/source-ops-export-summary`
 - `GET /api/cameras/source-ops-review-queue`
 - `GET /api/cameras/source-ops-review-queue-export-bundle`
+- `GET /api/cameras/source-ops-export-readiness`
+- `GET /api/cameras/source-ops-evidence-packets`
+- `GET /api/cameras/source-ops-evidence-packets-export-bundle`
+- `GET /api/cameras/source-ops-evidence-packets-handoff-summary`
+- `GET /api/cameras/source-ops-evidence-packets-handoff-export-bundle`
+- `GET /api/cameras/source-ops-export-surface`
 
 Response modes:
 
@@ -370,6 +376,12 @@ Response modes:
 - aggregate-only filtered review queue payload via `aggregate_only=true`
 - export summary with opt-in filtered review-queue aggregate lines via `include_review_queue_aggregate_lines=true`
 - minimal review-queue export bundle with aggregate lines only
+- export-readiness rollup with remediation/handoff checklist entries
+- evidence packets for selected source ids or lifecycle buckets
+- evidence-packet export bundle with aggregate selector lines only
+- compact evidence-packet handoff summary with readiness-group counts
+- compact handoff export bundle with aggregate lines and readiness-group counts only
+- unified aggregate-only source-ops export surface for downstream consumers
 
 Purpose:
 
@@ -503,6 +515,210 @@ It intentionally excludes:
 - full review queue item payloads
 - per-source detail payloads
 - endpoint-health, availability, orientation, or freshness claims
+
+The export-readiness route returns:
+
+- selected source ids and unknown source ids
+- optional lifecycle-state selector
+- optional missing-evidence selector
+- source lifecycle summary metadata
+- readiness groups for missing evidence and blocked/credential posture
+- per-source remediation/handoff checklist entries
+- compact export lines and caveats
+
+It intentionally does not return:
+
+- full review queue item payloads
+- source detail payloads
+- lifecycle mutation or promotion decisions
+- validation, activation, endpoint-health, availability, orientation, or freshness proof
+
+The evidence-packet route returns:
+
+- selected source ids and unknown source ids
+- optional lifecycle-state selector
+- optional blocked-reason posture selector
+- optional evidence-gap family selector
+- source lifecycle summary metadata
+- compact per-source packets with:
+  - source id and source name
+  - onboarding state and import readiness
+  - lifecycle state
+  - blocked-reason posture
+  - endpoint-proof posture
+  - direct-image-proof posture
+  - fixture/sandbox posture
+  - missing evidence
+  - evidence-gap families
+  - blocked reasons
+  - allowed next review action
+  - forbidden actions
+  - compact export metadata made from existing export lines, evidence statuses, and artifact timestamp summaries
+- compact aggregate groups for:
+  - lifecycle state
+  - blocked-reason posture
+  - evidence-gap family
+- compact export lines and caveats
+
+It intentionally excludes:
+
+- raw endpoint payloads
+- candidate or machine-readable endpoint URLs
+- local paths
+- credentials
+- tokenized URLs
+- activation or scheduling instructions
+
+Evidence-packet interpretation rules:
+
+- packets are review/export aids only
+- packet presence does not activate or validate a source
+- blocked-reason posture and evidence-gap family filters are convenience selectors over existing lifecycle evidence only
+- `validated=false` in the packet contract is a guardrail against lifecycle inflation from export tooling
+- blocked, credential-blocked, sandbox-importable, candidate, approved-unvalidated, and validated postures remain distinct
+- source or candidate text inside a packet remains untrusted data only and must not be treated as an instruction
+
+The evidence-packet export-bundle route returns only:
+
+- selected source ids and unknown source ids
+- optional lifecycle-state selector
+- optional blocked-reason posture selector
+- optional evidence-gap family selector
+- source lifecycle summary metadata
+- aggregate groups by:
+  - lifecycle state
+  - blocked-reason posture
+  - evidence-gap family
+- aggregate selector lines
+- lifecycle caveats and export caveats
+
+It intentionally excludes:
+
+- full per-source evidence packets
+- raw payloads
+- endpoint URLs
+- local paths
+- credentials
+- tokenized URLs
+- activation instructions
+
+Export-bundle interpretation rules:
+
+- it is aggregate-only export/debug summarization
+- it does not strengthen lifecycle evidence beyond the underlying packet view
+- blocked/sandbox/validated distinctions remain separate
+- filtered aggregate lines are convenience export lines only and must not be treated as activation, validation, endpoint-health, orientation, or freshness proof
+
+The evidence-packet handoff-summary route returns only:
+
+- selected source ids and unknown source ids
+- optional lifecycle-state selector
+- optional blocked-reason posture selector
+- optional evidence-gap family selector
+- source lifecycle summary metadata
+- aggregate groups by:
+  - lifecycle state
+  - blocked-reason posture
+  - evidence-gap family
+- readiness-group counts and checklist guidance lines
+- readiness checklist count
+- aggregate handoff lines
+- lifecycle caveats and export caveats
+
+It intentionally excludes:
+
+- full per-source evidence packets
+- per-source readiness checklist entries
+- raw payloads
+- endpoint URLs
+- local paths
+- credentials
+- tokenized URLs
+- activation instructions
+
+Handoff-summary interpretation rules:
+
+- it is aggregate-only handoff/export summarization
+- it merges packet selector aggregates with readiness-group counts only
+- it does not strengthen lifecycle evidence beyond the underlying packet and readiness views
+- filtered handoff lines are convenience export lines only and must not be treated as activation, validation, endpoint-health, orientation, or freshness proof
+
+The handoff export-bundle route returns only:
+
+- selected source ids and unknown source ids
+- optional lifecycle-state selector
+- optional blocked-reason posture selector
+- optional evidence-gap family selector
+- source lifecycle summary metadata
+- aggregate groups by:
+  - lifecycle state
+  - blocked-reason posture
+  - evidence-gap family
+- readiness-group counts
+- readiness checklist count
+- aggregate handoff lines
+- lifecycle caveats and export caveats
+
+It intentionally excludes:
+
+- full per-source evidence packets
+- per-source readiness checklist entries
+- raw payloads
+- endpoint URLs
+- local paths
+- credentials
+- tokenized URLs
+- activation instructions
+
+Handoff export-bundle interpretation rules:
+
+- it is aggregate-only export/debug summarization for downstream consumers
+- it is smaller than the handoff summary route and is meant to feed future snapshot/report flows
+- it does not strengthen lifecycle evidence beyond the underlying packet and readiness views
+- filtered handoff export lines are convenience export lines only and must not be treated as activation, validation, endpoint-health, orientation, or freshness proof
+
+The unified source-ops export surface returns only:
+
+- selected source ids and unknown source ids
+- optional lifecycle-state selector
+- optional blocked-reason posture selector
+- optional evidence-gap family selector
+- optional review-queue priority-band selector
+- optional review-queue reason-category selector
+- source lifecycle summary metadata
+- lifecycle-state counts
+- blocked-posture counts
+- evidence-gap family counts
+- readiness-group counts
+- readiness checklist count
+- aggregate lines from:
+  - review-queue export bundle
+  - evidence-packet export bundle
+  - export-readiness summary
+  - handoff export bundle
+- unified aggregate lines
+- lifecycle caveats
+- export caveats
+- compact export metadata describing the aggregate-only component set
+
+It intentionally excludes:
+
+- full per-source evidence packets
+- full review queue items
+- raw readiness checklist entries
+- endpoint URLs
+- raw payloads
+- local paths
+- credentials
+- tokenized URLs
+- activation instructions
+
+Unified export-surface interpretation rules:
+
+- it is an aggregate-only composition layer for downstream snapshot/report consumers
+- it composes existing read-only source-ops export surfaces without changing lifecycle semantics
+- it does not strengthen lifecycle evidence beyond the underlying review-queue, packet, readiness, and handoff views
+- filtered aggregate lines are convenience export lines only and must not be treated as activation, validation, endpoint-health, orientation, or freshness proof
 
 ### Candidate endpoint verification metadata
 

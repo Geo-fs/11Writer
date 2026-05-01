@@ -10,6 +10,7 @@ The fusion layer is the product.
 This roadmap is the short project map. The full strategic direction lives in:
 
 - [strategic-roadmap.md](/C:/Users/mike/11Writer/app/docs/strategic-roadmap.md)
+- [unified-user-workflows.md](/C:/Users/mike/11Writer/app/docs/unified-user-workflows.md)
 - [spatial-intelligence-loop.md](/C:/Users/mike/11Writer/app/docs/spatial-intelligence-loop.md)
 - [fusion-layer-architecture.md](/C:/Users/mike/11Writer/app/docs/fusion-layer-architecture.md)
 - [safety-boundaries.md](/C:/Users/mike/11Writer/app/docs/safety-boundaries.md)
@@ -74,6 +75,7 @@ Avoid:
 Goal:
 
 - make the platform feel like one product
+- consolidate workflows around the single `Situation Workspace` model in [unified-user-workflows.md](/C:/Users/mike/11Writer/app/docs/unified-user-workflows.md)
 - consolidate inspector, layer, and context presentation patterns
 - build a common situation view from already-fusion-compatible domain outputs
 - reduce duplicated UI logic and badge/card/caveat drift

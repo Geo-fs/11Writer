@@ -1,0 +1,48 @@
+name: Backend Schema Safety
+
+on:
+  push:
+    paths:
+      - "apps/backend/**"
+      - ".github/workflows/backend-schema.yml"
+      - "README.md"
+  pull_request:
+    paths:
+      - "apps/backend/**"
+      - ".github/workflows/backend-schema.yml"
+      - "README.md"
+
+jobs:
+  backend-schema-safety:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/backend
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install backend dependencies
+        run: python -m pip install -e .[dev]
+
+      - name: Lint backend
+        run: python -m ruff check app
+
+      - name: Migration smoke
+        run: |
+          export SEVENPO8_DATABASE_URL="sqlite:///./data/ci_schema.db"
+          rm -f ./data/ci_schema.db
+          python -m alembic upgrade head
+
+      - name: Schema drift check
+        run: python scripts/check_schema_drift.py
+
+      - name: Backend test suite
+        run: python -m pytest

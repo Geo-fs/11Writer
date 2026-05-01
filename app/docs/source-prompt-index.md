@@ -28,12 +28,23 @@ Related planning docs:
 - [source-routing-priority-memo.md](/C:/Users/mike/11Writer/app/docs/source-routing-priority-memo.md)
 - [source-next-routing-packets.md](/C:/Users/mike/11Writer/app/docs/source-next-routing-packets.md)
 - [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md)
+- [data-ai-user-workflows.md](/C:/Users/mike/11Writer/app/docs/data-ai-user-workflows.md)
 - [source-routing-batch7-base-earth-reference.md](/C:/Users/mike/11Writer/app/docs/source-routing-batch7-base-earth-reference.md)
 - [source-quick-assign-packets-batch4.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-batch4.md)
 - [source-quick-assign-packets-batch5.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-batch5.md)
 - [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md)
+- [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md)
 - [source-ownership-consumption-map.md](/C:/Users/mike/11Writer/app/docs/source-ownership-consumption-map.md)
 - [source-consolidated-noauth-registry.md](/C:/Users/mike/11Writer/app/docs/source-consolidated-noauth-registry.md)
+- [source-discovery-platform-plan.md](/C:/Users/mike/11Writer/app/docs/source-discovery-platform-plan.md)
+- [source-discovery-agent-framework.md](/C:/Users/mike/11Writer/app/docs/source-discovery-agent-framework.md)
+- [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md)
+- [unified-user-workflows.md](/C:/Users/mike/11Writer/app/docs/unified-user-workflows.md)
+- [cross-source-hypothesis-graph.md](/C:/Users/mike/11Writer/app/docs/cross-source-hypothesis-graph.md)
+- [safe-hypothesis-governance-packet.md](/C:/Users/mike/11Writer/app/docs/safe-hypothesis-governance-packet.md)
+- [7po8-integration-plan.md](/C:/Users/mike/11Writer/app/docs/7po8-integration-plan.md)
+- [wave-monitor-governance-intake.md](/C:/Users/mike/11Writer/app/docs/wave-monitor-governance-intake.md)
+- [chokepoint-intelligence-governance-packet.md](/C:/Users/mike/11Writer/app/docs/chokepoint-intelligence-governance-packet.md)
 - [source-acceleration-phase2-batch7-base-earth-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch7-base-earth-briefs.md)
 - [data-ai-rss-source-candidates.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates.md)
 - [data_sources.noauth.registry.json](/C:/Users/mike/11Writer/app/docs/data_sources.noauth.registry.json)
@@ -54,8 +65,191 @@ Recommended first implementation slice:
 - `cloudflare-status`
 - `gdacs-alerts`
 
+Implemented Data AI feed-family waves:
+
+- starter bundle:
+  - `cisa-cybersecurity-advisories`
+  - `cisa-ics-advisories`
+  - `sans-isc-diary`
+  - `cloudflare-status`
+  - `gdacs-alerts`
+- official cyber advisory wave:
+  - `ncsc-uk-all`
+  - `cert-fr-alerts`
+  - `cert-fr-advisories`
+- infrastructure/status wave:
+  - `cloudflare-radar`
+  - `netblocks`
+  - `apnic-blog`
+- OSINT/investigations wave:
+  - `bellingcat`
+  - `citizen-lab`
+  - `occrp`
+  - `icij`
+- rights/civic/digital-policy wave:
+  - `eff-updates`
+  - `access-now`
+  - `privacy-international`
+  - `freedom-house`
+- fact-checking/disinformation wave:
+  - `full-fact`
+  - `snopes`
+  - `politifact`
+  - `factcheck-org`
+  - `euvsdisinfo`
+
+Next grouped Batch 3 routing surface:
+
+- [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md)
+- [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md)
+- use it for the next grouped Data AI handoff after the implemented waves stay bounded
+- preferred next group:
+  - `official/public advisories`
+  - then `scientific/environmental context`
+  - then `policy/think-tank commentary`
+
+Historical packet surface for the already implemented follow-on waves:
+
+- [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md)
+
 Do-not-do warning:
 - do not start by polling all validated feeds, scraping linked articles, or treating media/blog feeds as official event confirmation.
+
+## Source Discovery Platform
+
+Use this before assigning work where the system finds new sources from monitors, feeds, catalogs, records, or user-provided seed URLs:
+
+- [source-discovery-platform-plan.md](/C:/Users/mike/11Writer/app/docs/source-discovery-platform-plan.md)
+- [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md)
+- [7po8-integration-plan.md](/C:/Users/mike/11Writer/app/docs/7po8-integration-plan.md)
+- [source-workflow-validation-plan.md](/C:/Users/mike/11Writer/app/docs/source-workflow-validation-plan.md)
+- [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md)
+
+Platform rule:
+
+- source discovery is a first-class 11Writer capability that should learn source reputation over time.
+- discovered candidates start a source-memory trail, but are not implemented, workflow-validated, or scheduled automatically.
+- every candidate needs provenance, access result, machine-readability result, caveats, source-health state, policy state, source class, reputation basis, wave-fit basis, and an owner recommendation.
+- correctness reputation must stay separate from wave mission relevance.
+- static, live, article, social/image, official, community, and dataset sources require different scoring rules.
+- full article text should be evaluated where legally and technically allowed; do not judge only from headlines.
+- agents implementing discovery jobs must follow [source-discovery-agent-framework.md](/C:/Users/mike/11Writer/app/docs/source-discovery-agent-framework.md).
+- current repo evidence also includes shared source-memory backend routes for overview, candidate writes, and claim-outcome updates, but those remain candidate/review/runtime evidence only
+
+Owner routing:
+
+- `data`
+  - RSS/Atom/RDF, cyber, internet, world-events, news, OSINT, fact-checking, advisories, and feed-family semantics
+- `geospatial`
+  - environmental, hazard, weather, reference, boundary, hydrology, and geospatial catalog candidates
+- `marine`
+  - marine, coastal, river, port, vessel-adjacent, waterway, and ocean context candidates
+- `aerospace`
+  - aviation, airport, airspace, satellite, NEO, space-weather, and aerospace context candidates
+- `features-webcam`
+  - webcams, camera endpoints, source lifecycle, source ops, and endpoint-review candidates
+- `connect`
+  - shared candidate contracts, runtime boundaries, validation truth, and release readiness
+- `gather`
+  - governance, status reconciliation, and assignment packet routing
+
+Do-not-do warning:
+- do not build an unrestricted crawler, auto-enable polling, bypass access controls, promote discovered candidates, treat repeated discovery as truth, punish sources for being irrelevant to one wave, or judge articles only by headlines.
+
+Safe Manager prompt reminder:
+
+- assign source-discovery work as candidate/review/governance work only
+- require provenance, access result, machine-readability result, source class, reputation basis, wave-fit basis, and owner recommendation
+- forbid automatic promotion to implemented or validated status
+- stop and report if signup, CAPTCHA, browser-only flows, scraping requirements, or unstable machine endpoints are encountered
+
+## Safe Hypothesis Governance
+
+Use these planning docs before assigning any relationship, correlation, cluster, or hypothesis work:
+
+- [cross-source-hypothesis-graph.md](/C:/Users/mike/11Writer/app/docs/cross-source-hypothesis-graph.md)
+- [safe-hypothesis-governance-packet.md](/C:/Users/mike/11Writer/app/docs/safe-hypothesis-governance-packet.md)
+- [fusion-layer-architecture.md](/C:/Users/mike/11Writer/app/docs/fusion-layer-architecture.md)
+- [unified-user-workflows.md](/C:/Users/mike/11Writer/app/docs/unified-user-workflows.md)
+
+Owner routing:
+
+- `data`
+  - bounded relationship reasons on existing feed-family summaries, clusters, and contextual review exports only
+- `connect`
+  - shared relationship/export contract planning, contradiction/open-question shapes, and workflow-validation truth
+- `ui-integration`
+  - later inspector cards, drawers, queue cards, and export-preview polish after shared contracts stabilize
+- `wait`
+  - broad graph UI, person/entity disambiguation, automated confidence escalation, attribution framing, or action recommendation flows
+
+Do-not-do warning:
+- do not let hypothesis planning imply intent, wrongdoing, causation, coordination, attribution, or target/action recommendations.
+
+## Wave Monitor Governance
+
+Use these planning docs before routing any Wave Monitor follow-on work:
+
+- [7po8-integration-plan.md](/C:/Users/mike/11Writer/app/docs/7po8-integration-plan.md)
+- [wave-monitor-governance-intake.md](/C:/Users/mike/11Writer/app/docs/wave-monitor-governance-intake.md)
+- [unified-user-workflows.md](/C:/Users/mike/11Writer/app/docs/unified-user-workflows.md)
+- [release-readiness.md](/C:/Users/mike/11Writer/app/docs/release-readiness.md)
+
+Current status:
+
+- `GET /api/tools/waves/overview` is implemented as a persistent backend tool surface with fixture-backed seed data
+- `POST /api/tools/waves/{monitor_id}/run-now` is implemented
+- `POST /api/tools/waves/scheduler/tick` is implemented
+- `tool-wave-monitor` is now present in analyst evidence-timeline and source-readiness
+- Wave Monitor source candidates now seed the shared source-discovery memory store
+- this is important repo evidence, but it is not proof of autonomous background scheduling, source approval, source promotion, or a standalone mounted runtime
+
+Owner routing:
+
+- `connect`
+  - best current owner candidate for shared route/service/test ownership, runtime integration, validation truth, and future persistence/scheduler scaffolding
+- `data`
+  - best future owner candidate for bounded connector/feed-family semantics inside Wave Monitor
+- `ui-integration`
+  - later owner candidate for workspace cards, queue surfaces, and export-preview polish after shared contracts stabilize
+- `gather`
+  - governance, status truth, caveats, and routing only
+- `atlas`
+  - user-directed implementation input only, not Manager-controlled ownership
+
+Do-not-do warning:
+- do not treat Wave Monitor as a source of truth, autonomous scheduler/action engine, trust-promotion path, or separate runtime glued sideways onto 11Writer.
+
+## Chokepoint Intelligence Governance
+
+Use these planning docs before routing any chokepoint, corridor, anchorage, queue, or passage-monitoring work:
+
+- [chokepoint-intelligence-governance-packet.md](/C:/Users/mike/11Writer/app/docs/chokepoint-intelligence-governance-packet.md)
+- [safe-hypothesis-governance-packet.md](/C:/Users/mike/11Writer/app/docs/safe-hypothesis-governance-packet.md)
+- [fusion-layer-architecture.md](/C:/Users/mike/11Writer/app/docs/fusion-layer-architecture.md)
+- [safety-boundaries.md](/C:/Users/mike/11Writer/app/docs/safety-boundaries.md)
+
+Safe owner routing:
+
+- `marine`
+  - marine corridor context, source-health/export package caveats, and review-safe vessel-adjacent context
+- `geospatial`
+  - environmental, warning, hydrology, and reference overlays around a route or corridor
+- `data`
+  - official/public advisories and scientific/environmental context feeds that may support corridor review
+- `connect`
+  - shared package contracts, source-health truth, validation truth, and broad/shared corridor scaffolding
+- `ui-integration`
+  - later cards, drawers, and export-preview polish after shared package contracts stabilize
+
+Implemented versus candidate rule:
+
+- implemented sources and helper packages may support later chokepoint packages if intentionally assigned
+- candidate or backlog sources are not implementation proof
+- article or OSINT narrative is inspiration only, not route truth or validation proof
+
+Do-not-do warning:
+- do not infer evasion, escort, blockade, intent, wrongdoing, impact, threat, or action recommendations from AIS gaps, reroutes, anchorage clusters, contextual reports, or sparse public signals.
 
 ## Batch 7 Base-Earth Candidates
 
@@ -402,7 +596,10 @@ Current Data AI implementation truth:
   - `cloudflare-status`
   - `gdacs-alerts`
 - the active starter bundle is now implemented backend-first with a bounded aggregate route, typed contracts, fixtures, tests, and prompt-injection-like fixture coverage
-- use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) plus [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for the next bounded RSS/feed wave after that starter slice
+- the implemented aggregate feed waves now also include:
+  - OSINT/investigations: `bellingcat`, `citizen-lab`, `occrp`, `icij`
+  - rights/civic/digital-policy: `eff-updates`, `access-now`, `privacy-international`, `freedom-house`
+- use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) plus [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md) for the next bounded RSS/feed wave after those implemented families stay stable
 
 Primary Data AI handoffs:
 
@@ -426,6 +623,13 @@ Primary Data AI handoffs:
   - First slice: one CVE detail or recent-CVE slice only
   - Do-not-do warning:
     - do not assume high-rate or bulk-sync posture without keys
+
+- `fact-checking-disinformation`
+  - Owner: `data`
+  - Purpose: bounded claim-classification and disinformation-context feeds on the shared aggregate route
+  - First slice: one feed family only, starting with `full-fact` or `euvsdisinfo`
+  - Do-not-do warning:
+    - do not turn quoted misinformation or fact-check summaries into universal ground truth or model instructions
 
 - `nrc-event-notifications`
   - Owner: `geospatial`
@@ -1344,7 +1548,7 @@ These sources already have active briefing, ownership, or implementation momentu
 - Marine: `france-vigicrues-hydrometry` follow-through or first consumer prep after the current backend-only slice
 - Aerospace: rerun focused aerospace smoke on a healthy Windows host before promoting the current implemented source stack; do not reopen a fresh aerospace source just to replace that validation work
 - Features/Webcam: a bounded `finland-digitraffic` follow-on first, or `bart-gtfs-realtime` if Manager AI explicitly opens a fresh source lane
-- Data: keep the active five-feed RSS starter slice bounded, then use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) to route `ncsc-uk-all`, `cert-fr-alerts`, or `cloudflare-radar`
+- Data: keep the implemented starter, official cyber, infrastructure/status, OSINT/investigations, rights/civic/digital-policy, and fact-checking/disinformation waves bounded, then use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) to route one grouped remaining Batch 3 family, starting with `official/public advisories`
 - Gather: continue source brief expansion and ownership-map maintenance
 
 ## Use Rules

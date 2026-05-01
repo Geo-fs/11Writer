@@ -1,5 +1,288 @@
 # Gather AI Progress
 
+## 2026-05-01 15:44 America/Chicago
+
+Assignment version read:
+- `2026-05-01 15:44 America/Chicago`
+
+Task:
+- reconcile the latest completed controlled-lane wave and create a governed source-discovery, source-reputation, claim-outcome, and shared source-memory policy packet
+
+What changed:
+- created `app/docs/source-discovery-reputation-governance-packet.md` as the compact policy boundary for source discovery, source reputation learning, claim outcomes, and shared source memory, including allowed states, forbidden shortcuts, safe routing, and Atlas/user-directed caveats
+- updated `app/docs/source-validation-status.md` so source discovery memory is recorded as implemented shared candidate/reputation runtime evidence rather than source implementation proof, while preserving the existing helper-wave status language
+- updated `app/docs/source-workflow-validation-plan.md` so the source-discovery platform update and cross-lane helper update now explicitly record the shared source-memory backend without treating it as workflow validation proof
+- updated `app/docs/source-assignment-board.md` so Manager-facing status/routing now includes a Source Discovery Governance section and explicit caution that candidate/reputation memory does not promote a source to `implemented`, `workflow-validated`, `validated`, or `fully validated`
+- updated `app/docs/source-prompt-index.md`, `app/docs/source-routing-priority-memo.md`, and `app/docs/source-ownership-consumption-map.md` so future Manager prompts can route source-discovery work safely across Gather, Connect, Data, and domain agents
+
+Files touched:
+- `app/docs/source-discovery-reputation-governance-packet.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json`
+
+Blockers or caveats:
+- no helper surface or Atlas-created source-memory surface was promoted beyond repo-local evidence
+- source discovery, reputation, and claim-outcome memory remain explicitly below source implementation proof, validation proof, attribution, causation, intent, wrongdoing, reliability proof, or action recommendation
+- Atlas implementation evidence was treated as important user-directed input, not Manager-controlled ownership proof
+
+Next recommended task:
+- wait for Manager AI reassignment; if the source-discovery lane stays open, the cleanest next Gather task is a compact candidate-state/export-field memo that Connect can use for shared contracts and later UI Integration can consume safely
+
+## 2026-05-01 15:03 America/Chicago
+
+Assignment version read:
+- `2026-05-01 15:03 America/Chicago`
+
+Task:
+- reconcile the latest source/helper wave and add a safe governance/routing packet for future Chokepoint Intelligence Packages
+
+What changed:
+- created `app/docs/chokepoint-intelligence-governance-packet.md` as the compact governance/routing surface for future chokepoint work, including safe use cases, owner routing, evidence classes, required caveats, forbidden inferences, implemented-versus-candidate source guidance, export metadata expectations, and explicit non-targeting boundaries
+- updated `app/docs/source-validation-status.md` to record the latest controlled-lane helper/source wave without over-promoting anything, including:
+  - `data-ai-rss-scientific-environmental-context-wave`
+  - `environmental-context-export-package-helper`
+  - `marine-focused-evidence-export-coherence-regression`
+  - `aerospace-export-coherence-helper`
+  - `features-source-ops-evidence-packets-handoff-summary`
+- updated `app/docs/source-workflow-validation-plan.md` so the latest Data, Geospatial, Marine, Aerospace, and Features/Webcam helper/source work is reflected as implemented and contract-tested where appropriate, while keeping all new helper surfaces below workflow validation
+- updated `app/docs/source-assignment-board.md` so the recently-implemented section and inconsistency notes reflect the newest helper wave plus the chokepoint routing guardrail
+- updated `app/docs/source-prompt-index.md` so future Manager prompts can route chokepoint work safely across Marine, Geospatial, Data, Connect, and later UI Integration
+
+Files touched:
+- `app/docs/chokepoint-intelligence-governance-packet.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json`
+
+Blockers or caveats:
+- no helper package or source family was promoted beyond repo-local evidence
+- the user-provided Hormuz/chokepoint article was treated as strategic inspiration only, not as source truth or implementation proof
+- chokepoint planning remains explicitly below targeting, evasion assistance, blockade inference, escort proof, wrongdoing, intent, causation, impact, threat, or action-recommendation territory
+- Wave Monitor remains a fixture-backed shared tool surface, not source truth or validated live scheduler evidence
+
+Next recommended task:
+- wait for Manager AI reassignment; if chokepoint work stays open, the cleanest next Gather task is a compact shared contract memo for Chokepoint Intelligence Package fields that Connect can own and later UI Integration can consume
+
+## 2026-05-01 14:46 America/Chicago
+
+Assignment version read:
+- `2026-05-01 14:46 America/Chicago`
+
+Task:
+- reconcile source/status docs after the latest helper/tool wave and create a Wave Monitor governance/ownership intake packet
+
+What changed:
+- created `app/docs/wave-monitor-governance-intake.md` as the compact governance/ownership intake packet for Wave Monitor, covering current implemented route/surfaces, fixture-backed status, evidence basis, source mode/health expectations, export metadata expectations, owner candidates, and do-not-do rules
+- updated `app/docs/source-validation-status.md` to record the latest helper/tool-wave evidence without over-promoting it, including:
+  - `data-ai-rss-official-public-advisories-wave`
+  - `environmental-source-family-export-helper`
+  - `marine-full-export-coherence-regression`
+  - `aerospace-current-archive-context-helper`
+  - `features-source-ops-evidence-packets-export-bundle`
+  - `wave-monitor-tool-surface`
+- updated `app/docs/source-workflow-validation-plan.md` so the Data update now includes `official-public-advisories`, the cross-lane helper update reflects the newest Geospatial/Marine/Aerospace/Features work, and Wave Monitor is explicitly tracked as implemented shared tool-surface evidence only
+- updated `app/docs/source-assignment-board.md` so the recently-implemented section and inconsistency notes reflect the latest helper/tool wave without treating helper packages or Wave Monitor as workflow-validated source proof
+- updated `app/docs/source-prompt-index.md` so future Manager routing can send Wave Monitor work safely to Connect, Data, or later UI Integration while keeping Atlas marked as user-directed input only
+
+Files touched:
+- `app/docs/wave-monitor-governance-intake.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json`
+
+Blockers or caveats:
+- no helper package or tool surface was promoted beyond repo-local evidence
+- Wave Monitor remains an implemented fixture-backed shared tool surface, not a source row, not a validated live runtime, and not a separate mounted app
+- Atlas implementation evidence was treated as important project input, but not as Manager-controlled ownership proof
+
+Next recommended task:
+- wait for Manager AI reassignment; if the Wave Monitor lane stays open, the cleanest next Gather task is a compact shared ownership memo that separates Connect runtime ownership, Data connector/feed semantics, and later UI Integration presentation ownership
+
+## 2026-05-01 13:24 America/Chicago
+
+Assignment version read:
+- `2026-05-01 13:24 America/Chicago`
+
+Task:
+- reconcile cross-lane source/fusion helper status after the latest Data, Geospatial, Marine, Aerospace, and Features/Webcam helper wave, and create a compact safe-hypothesis governance packet
+
+What changed:
+- created `app/docs/safe-hypothesis-governance-packet.md` as the compact cross-lane governance surface for safe relationship and hypothesis work, including relationship states, evidence-basis rules, confidence ceilings, contradiction handling, export rules, owner routing, and wait boundaries
+- updated `app/docs/source-validation-status.md` to add explicit implemented-not-fully-validated helper notes for the Data AI source-family overview helper, environmental source-family overview helper, marine context issue export bundle, aerospace context gap queue, and Features/Webcam evidence-packet selector
+- updated `app/docs/source-workflow-validation-plan.md` with a cross-lane helper update that keeps the new helper surfaces below workflow validation while recording the real evidence split for Data, Geospatial, Marine, Aerospace, and Features/Webcam
+- updated `app/docs/source-assignment-board.md` so the recently-implemented section and inconsistency notes now reflect the new helper packages without treating them as external-source validation proof
+- updated `app/docs/source-prompt-index.md` to link the new safe-hypothesis governance packet and route future relationship/hypothesis assignments across Data, Connect, and UI Integration without reopening unsafe scope
+
+Files touched:
+- `app/docs/safe-hypothesis-governance-packet.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json`
+
+Blockers or caveats:
+- no helper package was promoted into workflow validation or external-source validation proof
+- Atlas planning docs remain planning input only and were not treated as implementation evidence
+- relationship/hypothesis planning remains explicitly below attribution, causation, wrongdoing, campaign, or action-recommendation territory
+
+Next recommended task:
+- wait for Manager AI reassignment; if the fusion/hypothesis lane stays open, the cleanest next Gather task is a bounded shared contract memo for contradiction/open-question/export fields that Connect and later UI Integration can consume
+
+## 2026-05-01 13:24 America/Chicago
+
+Assignment version read:
+- `2026-05-01 13:04 America/Chicago`
+
+Task:
+- reconcile Data AI governance/status after the completed fact-checking/disinformation bundle and produce a concise post-summary routing surface for the next grouped Data AI waves
+
+What changed:
+- created a new compact post-summary routing memo at `app/docs/data-ai-next-routing-after-family-summary.md` that ranks the next bounded Data AI families after the implemented fact-checking/disinformation wave
+- updated the rollout ladder so fact-checking/disinformation now reads as implemented backend-first and the next grouped routing order starts with `official/public advisories`, then `scientific/environmental context`, then `policy/think-tank commentary`
+- updated the validation-status doc so the fact-checking/disinformation wave now has explicit implemented-and-contract-tested evidence notes alongside the other Data AI aggregate families
+- updated the workflow-validation plan so the Data AI implemented-family list now includes fact-checking/disinformation and the next grouped expansion no longer points at fact-check as fresh source-creation work
+- updated the assignment board, prompt index, backlog refresh, and ownership map so Manager-facing routing points to the new post-summary handoff surface instead of reopening already implemented fact-checking work
+
+Files touched:
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/data-ai-rss-batch3-routing-packets.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-backlog-phase2-refresh.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- no Data AI family was promoted beyond repo-local evidence
+- the fact-checking/disinformation wave remains implemented backend-first and contract-tested, not workflow-validated
+- fact-checking, advisory, science, policy, vendor, media, civic, and investigative feeds remain contextual only and must not be treated as event proof, universal truth, attribution proof, or action guidance
+
+Next recommended task:
+- wait for Manager AI reassignment; if the Data lane stays open, the cleanest next bounded governance handoff is `official/public advisories`, with `scientific/environmental context` as the next follow-on after the family-summary lane remains stable
+
+## 2026-05-01 12:58 America/Chicago
+
+Assignment version read:
+- `2026-05-01 12:45 America/Chicago`
+
+Task:
+- reconcile Data AI source-governance status after the completed OSINT and rights/civic feed waves and refresh the Manager-facing Batch 3 next-wave routing docs
+
+What changed:
+- updated the Batch 3 routing packet so it no longer routes OSINT/investigations or rights/civic/digital-policy as fresh source-creation work
+- moved the preferred next Data AI grouped handoff to `fact-checking/disinformation`, with `official/public advisories` as the next follow-on after that active lane stays bounded
+- updated the assignment board so Data-next routing and the Data AI intake note now reflect the implemented starter, official cyber, infrastructure/status, OSINT/investigations, and rights/civic/digital-policy waves
+- updated the assignment board intake table so the RSS parser and implemented Data feed families are treated as stable implemented lanes rather than fresh source-build work
+- added validation-traceability sections for the implemented `data-ai-rss-osint-investigations-wave` and `data-ai-rss-rights-civic-digital-policy-wave`
+- extended the workflow-validation plan so the Data workflow update now includes the implemented OSINT/investigations and rights/civic/digital-policy waves and keeps them below `workflow-validated`
+- updated the prompt, backlog, and ownership docs so future Manager routing starts from the remaining safe Batch 3 families rather than reopening already shipped Data AI bundles
+
+Files touched:
+- `app/docs/data-ai-rss-batch3-routing-packets.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-backlog-phase2-refresh.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- no implemented Data AI feed family was promoted beyond repo-local evidence
+- OSINT/investigations and rights/civic/digital-policy remain implemented backend-first and contract-tested, not workflow-validated
+- media, investigations, advocacy, policy, and fact-checking feeds remain contextual only and must not be treated as event proof, attribution proof, or operational guidance
+
+Next recommended task:
+- wait for Manager AI reassignment; if the Data lane stays open, the cleanest next bounded governance handoff is the active `fact-checking/disinformation` Batch 3 family with the same prompt-injection and caveat discipline
+
+
+## 2026-05-01 12:34 America/Chicago
+
+Assignment version read:
+- `2026-05-01 11:26 America/Chicago`
+
+Task:
+- reconcile Data AI feed-family status after the latest completed bundles and create a compact Batch 3 routing/governance packet for safe future Data AI expansion
+
+What changed:
+- created a new compact Batch 3 Data AI routing/governance packet doc that groups future feed-family work into:
+  - OSINT/investigations
+  - official/public advisories
+  - rights/civic/NGO context
+  - fact-checking/disinformation context
+  - policy/think-tank commentary
+  - scientific/environmental context
+  - held/deferred feeds
+- updated the Data AI rollout ladder so it no longer treats the official cyber advisory wave or the infrastructure/status wave as merely upcoming; both now read as implemented backend-first waves on the shared recent-items route
+- updated the assignment board so Data-next routing no longer points at `ncsc-uk-all`, `cert-fr-alerts`, or `cloudflare-radar` as fresh next-wave source builds and instead points at one bounded Batch 3 family, starting with official/public advisories
+- added validation-traceability notes for the implemented Data AI official-cyber and infrastructure/status waves so those families now show up explicitly as implemented-but-not-workflow-validated rather than as vague future work
+- updated the workflow-validation plan so the Data AI starter, official cyber, and infrastructure/status waves are all tracked as implemented backend-first lanes with the same remaining workflow gap: no stable consumer-path or explicit workflow-validation evidence yet
+- updated the prompt, backlog, routing, and ownership surfaces so Manager AI can route the next Data AI handoff from a compact grouped packet instead of reopening the 110-feed Batch 3 candidate doc
+- converted the older Data AI RSS quick-assign packet doc into a historical implemented-wave surface so it no longer reads like `ncsc-uk-all`, `cert-fr-*`, `cloudflare-radar`, `netblocks`, or `apnic-blog` are still fresh source-creation work
+
+Files touched:
+- `app/docs/data-ai-rss-batch3-routing-packets.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/source-quick-assign-packets-data-ai-rss.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-backlog-phase2-refresh.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+
+Blockers or caveats:
+- no source or feed family was over-promoted beyond repo-local evidence
+- the five-feed starter bundle, official cyber advisory wave, and infrastructure/status wave remain below `workflow-validated`
+- prompt-injection and source-governance expectations were preserved for titles, summaries, descriptions, advisory text, release text, and linked snippets
+- Atlas validation remains routing/backlog context only and was not treated as implementation or workflow-validation proof
+- no production code changed
+
+Next recommended task:
+- if Manager AI wants a follow-on Gather pass, reconcile any remaining older Data AI quick-assign or batch-brief wording that still implies fresh source creation for already implemented feed families, or produce a very short Manager-facing “next 3 Data AI groups” handoff note based on the new Batch 3 packet
+
 ## 2026-04-30 22:22 America/Chicago
 
 Assignment version read:

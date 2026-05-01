@@ -23,6 +23,7 @@ export interface AerospaceExportProfileSummary {
     profileId: AerospaceExportProfileId;
     profileLabel: string;
     includedSections: string[];
+    includedMetadataKeys: string[];
     caveat: string;
   };
 }
@@ -32,48 +33,48 @@ export const AEROSPACE_EXPORT_PROFILES: AerospaceExportProfileDefinition[] = [
     id: "compact-evidence",
     label: "Compact Evidence",
     description: "Prioritizes selected-target evidence and the most important trust caveats.",
-    includedMetadataKeys: ["selectedTargetSummary", "aerospaceDataHealth", "aerospaceOperationalContext", "aerospaceExportReadiness"],
-    preferredFooterSections: ["selected-target", "context-report", "data-health", "readiness", "source-readiness", "review-queue", "issue-summary", "operational-context", "availability"],
+    includedMetadataKeys: ["selectedTargetSummary", "aerospaceDataHealth", "aerospaceOperationalContext", "aerospaceExportReadiness", "aerospaceCurrentArchiveContext", "aerospaceSourceReadinessBundle", "aerospaceContextGapQueue", "aerospaceExportCoherence", "aerospaceIssueExportBundle", "aerospaceContextSnapshotReport"],
+    preferredFooterSections: ["selected-target", "context-report", "data-health", "readiness", "snapshot-report-package", "export-coherence", "issue-export-bundle", "current-archive-space-weather", "context-gap-queue", "source-readiness-bundle", "source-readiness", "review-queue", "issue-summary", "operational-context", "availability"],
     caveat: "Compact evidence keeps footer output short but does not remove full machine metadata."
   },
   {
     id: "full-aerospace-context",
     label: "Full Aerospace Context",
     description: "Prioritizes the combined operational context with weather, airport, and space context together.",
-    includedMetadataKeys: ["aerospaceOperationalContext", "aerospaceContextAvailability", "aerospaceDataHealth", "aerospaceExportReadiness", "nceiSpaceWeatherArchiveContext", "aerospaceSourceReadiness"],
-    preferredFooterSections: ["context-report", "operational-context", "readiness", "source-readiness", "review-queue", "issue-summary", "availability", "selected-target", "data-health", "airport-weather", "space-context", "space-weather-archive", "focus-history"],
+    includedMetadataKeys: ["aerospaceOperationalContext", "aerospaceContextAvailability", "aerospaceDataHealth", "aerospaceExportReadiness", "nceiSpaceWeatherArchiveContext", "aerospaceCurrentArchiveContext", "aerospaceSourceReadiness", "aerospaceSourceReadinessBundle", "aerospaceContextGapQueue", "aerospaceExportCoherence", "aerospaceIssueExportBundle", "aerospaceContextSnapshotReport"],
+    preferredFooterSections: ["context-report", "operational-context", "readiness", "snapshot-report-package", "export-coherence", "issue-export-bundle", "current-archive-space-weather", "context-gap-queue", "source-readiness-bundle", "source-readiness", "review-queue", "issue-summary", "availability", "selected-target", "data-health", "airport-weather", "space-context", "space-weather-archive", "focus-history"],
     caveat: "Full context footer lines remain summary-only and do not imply causation between sources."
   },
   {
     id: "airport-weather",
     label: "Airport / Weather",
     description: "Prioritizes airport-context weather and airport operational status for aircraft workflows.",
-    includedMetadataKeys: ["aviationWeatherContext", "faaNasAirportStatus", "aerospaceOperationalContext", "aerospaceExportReadiness"],
-    preferredFooterSections: ["context-report", "airport-weather", "readiness", "source-readiness", "review-queue", "issue-summary", "selected-target", "data-health", "operational-context", "availability"],
+    includedMetadataKeys: ["aviationWeatherContext", "faaNasAirportStatus", "aerospaceOperationalContext", "aerospaceExportReadiness", "aerospaceCurrentArchiveContext", "aerospaceSourceReadinessBundle", "aerospaceContextGapQueue", "aerospaceExportCoherence", "aerospaceIssueExportBundle", "aerospaceContextSnapshotReport"],
+    preferredFooterSections: ["context-report", "airport-weather", "readiness", "snapshot-report-package", "issue-export-bundle", "context-gap-queue", "source-readiness-bundle", "source-readiness", "review-queue", "issue-summary", "selected-target", "data-health", "operational-context", "availability"],
     caveat: "Airport and weather context remain advisory/contextual and do not explain aircraft behavior."
   },
   {
     id: "space-context",
     label: "Space Context",
     description: "Prioritizes CNEOS, SWPC, VAAC, and derived satellite context for aerospace review.",
-    includedMetadataKeys: ["cneosSpaceContext", "swpcSpaceWeatherContext", "nceiSpaceWeatherArchiveContext", "vaacContext", "aerospaceOperationalContext", "aerospaceExportReadiness", "aerospaceSourceReadiness"],
-    preferredFooterSections: ["context-report", "space-context", "space-weather-archive", "geomagnetism-context", "readiness", "source-readiness", "review-queue", "issue-summary", "selected-target", "data-health", "operational-context", "availability"],
+    includedMetadataKeys: ["cneosSpaceContext", "swpcSpaceWeatherContext", "nceiSpaceWeatherArchiveContext", "aerospaceCurrentArchiveContext", "vaacContext", "aerospaceOperationalContext", "aerospaceExportReadiness", "aerospaceSourceReadiness", "aerospaceSourceReadinessBundle", "aerospaceContextGapQueue", "aerospaceExportCoherence", "aerospaceIssueExportBundle", "aerospaceContextSnapshotReport"],
+    preferredFooterSections: ["context-report", "space-context", "snapshot-report-package", "export-coherence", "issue-export-bundle", "current-archive-space-weather", "space-weather-archive", "geomagnetism-context", "readiness", "context-gap-queue", "source-readiness-bundle", "source-readiness", "review-queue", "issue-summary", "selected-target", "data-health", "operational-context", "availability"],
     caveat: "Space context remains contextual/advisory and does not imply target-specific failure or impact."
   },
   {
     id: "source-health",
     label: "Source Health",
     description: "Prioritizes selected-target data health and context availability coverage.",
-    includedMetadataKeys: ["aerospaceDataHealth", "aerospaceContextAvailability", "aerospaceOperationalContext", "aerospaceExportReadiness", "aerospaceSourceReadiness"],
-    preferredFooterSections: ["context-report", "data-health", "readiness", "source-readiness", "review-queue", "issue-summary", "availability", "selected-target", "operational-context"],
+    includedMetadataKeys: ["aerospaceDataHealth", "aerospaceContextAvailability", "aerospaceOperationalContext", "aerospaceExportReadiness", "aerospaceCurrentArchiveContext", "aerospaceSourceReadiness", "aerospaceSourceReadinessBundle", "aerospaceContextGapQueue", "aerospaceExportCoherence", "aerospaceIssueExportBundle", "aerospaceContextSnapshotReport"],
+    preferredFooterSections: ["context-report", "data-health", "readiness", "snapshot-report-package", "export-coherence", "issue-export-bundle", "current-archive-space-weather", "context-gap-queue", "source-readiness-bundle", "source-readiness", "review-queue", "issue-summary", "availability", "selected-target", "operational-context"],
     caveat: "Source-health emphasis summarizes trust and coverage, not behavior or causation."
   },
   {
     id: "focus-history",
     label: "Focus / History",
     description: "Prioritizes focus state, focus history, and selected-target evidence for analyst workflows.",
-    includedMetadataKeys: ["aerospaceFocus", "aerospaceFocusHistory", "selectedTargetSummary", "aerospaceDataHealth", "aerospaceExportReadiness"],
-    preferredFooterSections: ["context-report", "focus-history", "selected-target", "data-health", "readiness", "source-readiness", "review-queue", "issue-summary", "operational-context", "availability"],
+    includedMetadataKeys: ["aerospaceFocus", "aerospaceFocusHistory", "selectedTargetSummary", "aerospaceDataHealth", "aerospaceExportReadiness", "aerospaceCurrentArchiveContext", "aerospaceSourceReadinessBundle", "aerospaceContextGapQueue", "aerospaceExportCoherence", "aerospaceIssueExportBundle", "aerospaceContextSnapshotReport"],
+    preferredFooterSections: ["context-report", "focus-history", "selected-target", "data-health", "readiness", "snapshot-report-package", "issue-export-bundle", "context-gap-queue", "source-readiness-bundle", "source-readiness", "review-queue", "issue-summary", "operational-context", "availability"],
     caveat: "Focus/history emphasis is an analysis aid only and does not prove operational relationships."
   }
 ];
@@ -90,12 +91,18 @@ export function buildAerospaceExportProfileSummary(input: {
   cneosSpaceContextLines?: string[];
   swpcSpaceWeatherLines?: string[];
   nceiSpaceWeatherArchiveLines?: string[];
+  currentArchiveSpaceWeatherLines?: string[];
   vaacContextLines?: string[];
   operationalContextLines?: string[];
   operationalAvailabilityLine?: string | null;
   issueSummaryLines?: string[];
   readinessLines?: string[];
   sourceReadinessLines?: string[];
+  sourceReadinessBundleLines?: string[];
+  contextGapQueueLines?: string[];
+  exportCoherenceLines?: string[];
+  issueExportBundleLines?: string[];
+  snapshotReportPackageLines?: string[];
   reviewQueueLines?: string[];
   contextReportLines?: string[];
   focusLines?: string[];
@@ -122,6 +129,7 @@ export function buildAerospaceExportProfileSummary(input: {
       ...(input.swpcSpaceWeatherLines ?? []).slice(0, 2),
       ...(input.vaacContextLines ?? []).slice(0, 2)
     ],
+    "current-archive-space-weather": (input.currentArchiveSpaceWeatherLines ?? []).slice(0, 3),
     "space-weather-archive": (input.nceiSpaceWeatherArchiveLines ?? []).slice(0, 2),
     "geomagnetism-context": (input.geomagnetismLines ?? []).slice(0, 2),
     "operational-context": (input.operationalContextLines ?? []).slice(0, 3),
@@ -129,6 +137,11 @@ export function buildAerospaceExportProfileSummary(input: {
     "issue-summary": (input.issueSummaryLines ?? []).slice(0, 2),
     "readiness": (input.readinessLines ?? []).slice(0, 2),
     "source-readiness": (input.sourceReadinessLines ?? []).slice(0, 2),
+    "source-readiness-bundle": (input.sourceReadinessBundleLines ?? []).slice(0, 3),
+    "context-gap-queue": (input.contextGapQueueLines ?? []).slice(0, 3),
+    "export-coherence": (input.exportCoherenceLines ?? []).slice(0, 3),
+    "issue-export-bundle": (input.issueExportBundleLines ?? []).slice(0, 3),
+    "snapshot-report-package": (input.snapshotReportPackageLines ?? []).slice(0, 3),
     "review-queue": (input.reviewQueueLines ?? []).slice(0, 2),
     "context-report": (input.contextReportLines ?? []).slice(0, 2),
     "focus-history": (input.focusLines ?? []).slice(0, 3),
@@ -154,6 +167,7 @@ export function buildAerospaceExportProfileSummary(input: {
       profileId: profile.id,
       profileLabel: profile.label,
       includedSections: profile.preferredFooterSections,
+      includedMetadataKeys: profile.includedMetadataKeys,
       caveat: profile.caveat,
     }
   };

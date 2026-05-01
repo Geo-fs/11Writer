@@ -30,8 +30,10 @@ Suggested file set:
 - `features-webcam-ai.md`
 - `data-ai.md`
 - `atlas-ai.md`
+- `wonder-ai.md`
 
 Special case:
 
 - `data-ai.md` is a normal Manager-controlled lane. Manager AI owns rewriting it during check-ins after Data AI reports completion.
 - `atlas-ai.md` is user-directed. Manager AI may help prepare or sync it when the user asks, but should not treat Atlas AI as a normal manager-assigned lane by default.
+- `wonder-ai.md` is user-directed. Manager AI may help prepare or sync it when the user asks, but should not treat Wonder AI as a normal manager-assigned lane by default.

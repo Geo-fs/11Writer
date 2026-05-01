@@ -27,9 +27,11 @@ import {
 } from "./marineEnvironmentalContext";
 import { buildMarineEvidenceSummary } from "./marineEvidenceSummary";
 import { buildMarineContextIssueQueue } from "./marineContextIssueQueue";
+import { buildMarineContextIssueExportBundle } from "./marineContextIssueExportBundle";
 import { buildMarineContextFusionSummary } from "./marineContextFusionSummary";
 import { buildMarineContextReviewReport } from "./marineContextReviewReport";
 import { buildMarineContextSourceRegistrySummary } from "./marineContextSourceSummary";
+import { buildMarineChokepointReviewPackage } from "./marineChokepointReviewPackage";
 import { buildMarineHydrologyContextSummary } from "./marineHydrologyContext";
 import {
   buildMarineContextSnapshot,
@@ -431,20 +433,14 @@ export function MarineAnomalySection() {
       }),
     [contextFusionSummary, contextIssueQueueSummary]
   );
-  const currentContextSnapshot = useMemo(
+  const contextIssueExportBundle = useMemo(
     () =>
-      buildMarineContextSnapshot({
-        environmentalContextSummary,
-        contextSourceRegistrySummary,
-        focusedTarget
+      buildMarineContextIssueExportBundle({
+        sourceRegistrySummary: contextSourceRegistrySummary,
+        issueQueueSummary: contextIssueQueueSummary
       }),
-    [environmentalContextSummary, contextSourceRegistrySummary, focusedTarget]
+    [contextSourceRegistrySummary, contextIssueQueueSummary]
   );
-  const contextTimelineSummary = useMemo(
-    () => buildMarineContextTimelineSummary(marineContextSnapshots),
-    [marineContextSnapshots]
-  );
-
   const focusedEvidenceInterpretation = useMemo(
     () =>
       buildMarineEvidenceInterpretation({
@@ -468,6 +464,55 @@ export function MarineAnomalySection() {
   const visibleInterpretationCards = useMemo(
     () => getMarineEvidenceInterpretationCards(focusedEvidenceInterpretation, interpretationMode),
     [focusedEvidenceInterpretation, interpretationMode]
+  );
+
+  const chokepointReviewPackage = useMemo(
+    () =>
+      buildMarineChokepointReviewPackage({
+        chokepointReviewContext: {
+          corridorLabel: "Current marine chokepoint review corridor",
+          boundedAreaLabel: "Current chokepoint review area"
+        },
+        chokepointSummary: chokepointSummaryQuery.data ?? null,
+        activeNavigationTarget: focusedTarget,
+        focusedEvidenceRows,
+        focusedEvidenceInterpretation,
+        contextSourceRegistrySummary,
+        contextIssueQueueSummary,
+        contextIssueExportBundle,
+        contextFusionSummary,
+        contextReviewReportSummary,
+        hydrologyContextSummary,
+        environmentalContextSummary
+      }),
+    [
+      chokepointSummaryQuery.data,
+      focusedTarget,
+      focusedEvidenceRows,
+      focusedEvidenceInterpretation,
+      contextSourceRegistrySummary,
+      contextIssueQueueSummary,
+      contextIssueExportBundle,
+      contextFusionSummary,
+      contextReviewReportSummary,
+      hydrologyContextSummary,
+      environmentalContextSummary
+    ]
+  );
+
+  const currentContextSnapshot = useMemo(
+    () =>
+      buildMarineContextSnapshot({
+        environmentalContextSummary,
+        contextSourceRegistrySummary,
+        focusedTarget,
+        chokepointReviewPackage
+      }),
+    [environmentalContextSummary, contextSourceRegistrySummary, focusedTarget, chokepointReviewPackage]
+  );
+  const contextTimelineSummary = useMemo(
+    () => buildMarineContextTimelineSummary(marineContextSnapshots),
+    [marineContextSnapshots]
   );
 
   const exportSummary = useMemo(
@@ -494,7 +539,13 @@ export function MarineAnomalySection() {
         contextSourceRegistrySummary,
         contextTimelineSummary,
         contextIssueQueueSummary,
-        environmentalContextSummary
+        contextIssueExportBundle,
+        environmentalContextSummary,
+        chokepointReviewContext: {
+          corridorLabel: chokepointReviewPackage?.metadata.corridorLabel ?? "Current marine chokepoint review corridor",
+          boundedAreaLabel: chokepointReviewPackage?.metadata.boundedAreaLabel ?? "Current chokepoint review area",
+          crossingCount: chokepointReviewPackage?.metadata.crossingCount ?? null
+        }
       }),
     [
       vesselSummaryQuery.data,
@@ -519,7 +570,9 @@ export function MarineAnomalySection() {
       contextSourceRegistrySummary,
       contextTimelineSummary,
       contextIssueQueueSummary,
-      environmentalContextSummary
+      contextIssueExportBundle,
+      environmentalContextSummary,
+      chokepointReviewPackage
     ]
   );
 
@@ -843,6 +896,11 @@ export function MarineAnomalySection() {
           <strong>Marine Context Fusion</strong>
           <span>{contextFusionSummary.overallAvailabilityLine}</span>
           <span className="marine-anomaly-muted">{contextFusionSummary.exportReadinessLine}</span>
+          {contextFusionSummary.dominantLimitationLine ? (
+            <span className="marine-anomaly-muted">
+              Review caveat: {contextFusionSummary.dominantLimitationLine}
+            </span>
+          ) : null}
           {contextFusionSummary.familyLines.map((line) => (
             <div key={line.family} className="stack stack--tight">
               <span>

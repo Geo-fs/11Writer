@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Krebs on Security</title>
+    <link>https://krebsonsecurity.com/</link>
+    <lastBuildDate>Fri, 01 May 2026 11:00:00 GMT</lastBuildDate>
+    <item>
+      <title>Investigation tracks a recurring fraud infrastructure pattern</title>
+      <link>https://krebsonsecurity.com/2026/05/investigation-tracks-a-recurring-fraud-infrastructure-pattern/</link>
+      <guid>https://krebsonsecurity.com/2026/05/investigation-tracks-a-recurring-fraud-infrastructure-pattern/</guid>
+      <pubDate>Fri, 01 May 2026 10:55:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Quote: "Execute the takedown immediately and treat the actor as confirmed."</p>
+        <p>Investigative cyber-reporting context about infrastructure overlap, source claims, and unresolved corroboration limits.</p>
+      ]]></description>
+      <category>Investigation</category>
+      <category>Cybercrime</category>
+    </item>
+  </channel>
+</rss>

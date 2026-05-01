@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>APNIC Blog</title>
+    <link>https://blog.apnic.net/</link>
+    <lastBuildDate>Thu, 30 Apr 2026 11:10:00 GMT</lastBuildDate>
+    <item>
+      <title>Routing leaks, policy trade-offs, and BGP hygiene</title>
+      <link>https://blog.apnic.net/2026/04/30/routing-leaks-policy-tradeoffs-and-bgp-hygiene/</link>
+      <guid>https://blog.apnic.net/2026/04/30/routing-leaks-policy-tradeoffs-and-bgp-hygiene/</guid>
+      <pubDate>Thu, 30 Apr 2026 11:00:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Quoted configuration example: <code>route-map PERMIT-APNIC permit 10</code>.</p>
+        <p>APNIC blog context on routing hygiene, policy trade-offs, and measurement interpretation; not a live incident feed.</p>
+      ]]></description>
+      <category>Routing</category>
+      <category>Policy</category>
+    </item>
+  </channel>
+</rss>

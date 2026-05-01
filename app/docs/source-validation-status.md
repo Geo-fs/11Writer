@@ -18,6 +18,17 @@ Important rules:
 - Do not mark a source `validated` unless validation evidence is explicit.
 - Route presence, tests, hooks, and minimal UI are enough for `implemented`.
 - They are not enough by themselves for `validated`.
+- Discovered source candidates are not source implementations. Source discovery can create review evidence and source-memory evidence, but it cannot promote a source to `implemented`, `workflow-validated`, or `fully validated`.
+
+Source discovery note:
+
+- [source-discovery-platform-plan.md](/C:/Users/mike/11Writer/app/docs/source-discovery-platform-plan.md:1) makes 7Po8-style source discovery a core 11Writer platform capability.
+- [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md:1) is the compact policy boundary for candidate states, reputation observations, claim outcomes, and shared source-memory routing.
+- This status report should classify discovered sources as candidates or backlog items until implementation and validation evidence exists.
+- Repeated discovery, relevance scoring, or source count does not make a source authoritative or workflow-validated.
+- Learned source reputation should be based on claim outcomes, correction behavior, source health, corroboration, and static/live source class handling.
+- Correctness reputation is different from wave mission relevance; a correct source can be low-fit for a specific wave without being a bad source.
+- Current repo-local source-memory evidence is backend/shared-runtime evidence only and does not by itself create implemented, workflow-validated, or fully validated source rows.
 
 ## Validation Levels
 
@@ -88,6 +99,183 @@ Important rules:
 - Next validation action:
   - validate one bounded consumer or export path for the aggregate route before treating the starter bundle as anything stronger than implemented
 
+### `data-ai-rss-official-cyber-wave`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/recent`
+- Current board status:
+  - backend-first implemented bundle, tracked as part of the active bounded Data AI lane rather than as separate promoted source rows
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/tests/test_rss_feed_service.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - feed definitions and fixtures for `ncsc-uk-all`, `cert-fr-alerts`, and `cert-fr-advisories`
+  - prompt-injection-like fixture coverage for free-form advisory text
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - the official cyber advisory wave is contract-tested and parser-hardened, but no explicit workflow validation or stable frontend consumer record is recorded
+  - multilingual advisory text remains untrusted source text and must stay advisory/contextual only
+  - the current lane must not turn guidance or advisory text into exploit, victim, or impact confirmation
+- Next validation action:
+  - validate one bounded consumer or export path for the aggregate route and preserve advisory-only semantics before treating this wave as anything stronger than implemented
+
+### `data-ai-rss-infrastructure-status-wave`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/recent`
+- Current board status:
+  - backend-first implemented bundle, tracked as part of the active bounded Data AI lane rather than as separate promoted source rows
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/tests/test_rss_feed_service.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - feed definitions and fixtures for `cloudflare-radar`, `netblocks`, and `apnic-blog`
+  - prompt-injection-like fixture coverage for provider-analysis and infrastructure-context free-form text
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - the infrastructure/status wave is contract-tested and parser-hardened, but no explicit workflow validation or stable frontend consumer record is recorded
+  - provider-methodology and measurement caveats must survive any downstream consumer or export path
+  - the current lane must not turn provider analysis into whole-internet truth
+- Next validation action:
+  - validate one bounded consumer or export path for the aggregate route and preserve provider-methodology caveats before treating this wave as anything stronger than implemented
+
+### `data-ai-rss-osint-investigations-wave`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/recent`
+- Current board status:
+  - backend-first implemented bundle, tracked as part of the active bounded Data AI lane rather than as separate promoted source rows
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/tests/test_rss_feed_service.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - feed definitions and fixtures for `bellingcat`, `citizen-lab`, `occrp`, and `icij`
+  - prompt-injection-like fixture coverage for investigative, quoted, and HTML-bearing free-form text
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - the OSINT/investigations wave is contract-tested and parser-hardened, but no explicit workflow validation or stable frontend consumer record is recorded
+  - investigations remain contextual reporting, not official event confirmation, attribution proof, or legal conclusion
+  - quoted or imperative-looking source text remains untrusted data and must stay inert
+- Next validation action:
+  - validate one bounded consumer or export path for the aggregate route and preserve contextual-only semantics before treating this wave as anything stronger than implemented
+
+### `data-ai-rss-rights-civic-digital-policy-wave`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/recent`
+- Current board status:
+  - backend-first implemented bundle, tracked as part of the active bounded Data AI lane rather than as separate promoted source rows
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/tests/test_rss_feed_service.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - feed definitions and fixtures for `eff-updates`, `access-now`, `privacy-international`, and `freedom-house`
+  - prompt-injection-like fixture coverage for advocacy, policy-call, quoted, and HTML-bearing free-form text
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - the rights/civic/digital-policy wave is contract-tested and parser-hardened, but no explicit workflow validation or stable frontend consumer record is recorded
+  - advocacy, rights, and digital-policy commentary remain contextual or normative, not neutral incident confirmation or operational guidance
+  - quoted or imperative-looking source text remains untrusted data and must stay inert
+- Next validation action:
+  - validate one bounded consumer or export path for the aggregate route and preserve contextual-only semantics before treating this wave as anything stronger than implemented
+
+### `data-ai-rss-fact-checking-disinformation-wave`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/recent`
+- Current board status:
+  - backend-first implemented bundle, tracked as part of the active bounded Data AI lane rather than as separate promoted source rows
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/tests/test_rss_feed_service.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - feed definitions and fixtures for `full-fact`, `snopes`, `politifact`, `factcheck-org`, and `euvsdisinfo`
+  - prompt-injection-like fixture coverage for quoted false claims, adjudication text, and other HTML-bearing or free-form summary fields
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - the fact-checking/disinformation wave is contract-tested and parser-hardened, but no explicit workflow validation or stable frontend consumer record is recorded
+  - verdict language, quoted claims, and source summaries remain untrusted data and must stay inert
+  - the wave remains contextual only and must not be treated as universal truth adjudication, legal proof, attribution proof, or required-action guidance
+- Next validation action:
+  - validate one bounded consumer or export path for the aggregate route and preserve contextual-only and untrusted-text caveats before treating this wave as anything stronger than implemented
+
+### `data-ai-rss-official-public-advisories-wave`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/recent`
+- Current board status:
+  - backend-first implemented bundle on the shared Data AI lane, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/tests/test_rss_feed_service.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - feed definitions and fixtures for `state-travel-advisories`, `eu-commission-press`, `un-press-releases`, and `unaids-news`
+  - bounded family definition `official-public-advisories` on the shared family-overview route
+  - prompt-injection-like fixture coverage for directive-style advisory and press text
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this wave is contract-tested and parser-hardened, but no explicit workflow validation or stable frontend consumer record is recorded
+  - travel, institutional, and public-health press/advisory text remains contextual only and must not become required-action, legal, field-confirmation, or attribution truth
+  - free-form advisory and press text remains untrusted data and must stay inert
+- Next validation action:
+  - validate one bounded consumer or export path for the aggregate route and preserve contextual-only semantics before treating this wave as anything stronger than implemented
+
+### `data-ai-rss-scientific-environmental-context-wave`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/recent`
+- Current board status:
+  - backend-first implemented bundle on the shared Data AI lane, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/tests/test_rss_feed_service.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - feed definitions and fixtures for `our-world-in-data`, `carbon-brief`, `eumetsat-news`, `smithsonian-volcano-news`, and `eos-news`
+  - bounded family definition `scientific-environmental-context` on the shared family-overview route
+  - prompt-injection-like fixture coverage for research-style, policy-style, hazard-style, and recommendation-style text
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this wave is contract-tested and parser-hardened, but no explicit workflow validation or stable frontend consumer record is recorded
+  - science/news/reporting text remains contextual only and must not become hazard confirmation, scientific certainty proof, or required-action guidance
+  - free-form feed text remains untrusted data and must stay inert
+- Next validation action:
+  - validate one bounded consumer or export path for the aggregate route and preserve contextual-only semantics before treating this wave as anything stronger than implemented
+
+### `data-ai-source-family-overview-helper`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/source-families/overview`
+- Current board status:
+  - workflow-supporting backend helper route, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - `app/docs/cyber-context-sources.md`
+  - Data AI progress records implemented source-family summaries for official advisories, community context, infrastructure/status, investigations, rights/civic, fact-checking, and world-events/disaster-alert families
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is a metadata/family-accounting helper, not a new source of truth and not a credibility, severity, or attribution scorer
+  - family export lines intentionally exclude free-form feed text and keep prompt-like source text inert
+  - no explicit consumer-path or workflow-validation record is recorded yet
+- Next validation action:
+  - validate one bounded family-summary consumer or export path before treating the helper as anything stronger than implemented
+
 ### `cve-context-composition`
 
 - Aggregate route:
@@ -110,6 +298,128 @@ Important rules:
 - Next validation action:
   - validate one bounded consumer or export path that keeps NVD, CISA, EPSS, and feed-context semantics distinct
 
+### `environmental-source-family-overview-helper`
+
+- Aggregate route:
+  - `/api/context/environmental/source-families-overview`
+- Current board status:
+  - workflow-supporting backend helper route, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/docs/environmental-source-family-overview.md`
+  - Geospatial AI progress records family coverage across seismic, volcano, tsunami, hydrology, weather-alert/advisory, environmental-event-context, geomagnetic, base-earth, risk-reference, water-quality, and infrastructure-event-context slices
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is a backend review/fusion helper, not a generic situation-scoring framework or cross-source proof engine
+  - family summaries preserve source health, source mode, evidence basis, and caveat lines but do not imply impact, damage, or causation
+  - no explicit consumer-path or workflow-validation record is recorded yet
+- Next validation action:
+  - validate one bounded environmental family-summary consumer or export path before treating the helper as anything stronger than implemented
+
+### `environmental-source-family-export-helper`
+
+- Aggregate route:
+  - `/api/context/environmental/source-families-export`
+- Current board status:
+  - workflow-supporting backend helper route, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/docs/environmental-source-family-overview.md`
+  - Geospatial AI progress records compact export response contracts with bounded `family` filtering, review lines, export lines, and missing-family handling
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is a compact family export helper, not a full snapshot/export UI pipeline and not a generic situation-scoring or impact model
+  - export lines remain family-level metadata only and do not invent damage, health-risk, severity, or causation claims
+  - no explicit downstream consumer or workflow-validation record is recorded yet
+- Next validation action:
+  - validate one bounded downstream snapshot/export consumer before treating the helper as anything stronger than implemented
+
+### `environmental-context-export-package-helper`
+
+- Aggregate route:
+  - `/api/context/environmental/context-export-package`
+- Current board status:
+  - workflow-supporting backend helper route, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/docs/environmental-source-family-overview.md`
+  - Geospatial AI progress records a compact downstream package consumer over `source-families-export` with snapshot metadata, selected filters, family bundles, review lines, export lines, and caveats
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is still a compact backend consumer, not a full snapshot/export orchestrator and not a common-situation or hazard-scoring UI
+  - it preserves explicit guardrails against damage, impact, health-risk, or severity truth models
+  - no explicit downstream workflow-validation note is recorded yet
+- Next validation action:
+  - validate one server-side report or snapshot consumer path before treating the helper as anything stronger than implemented
+
+### `marine-context-issue-export-bundle`
+
+- Aggregate helper path:
+  - `marineAnomalySummary.contextIssueExportBundle`
+- Current board status:
+  - workflow-supporting helper package, not a promoted source row
+- Existing evidence:
+  - `app/client/scripts/marineContextHelperRegression.mjs`
+  - `app/docs/marine-workflow-validation.md`
+  - `app/docs/marine-module.md`
+  - `app/docs/marine-context-source-contract-matrix.md`
+  - Marine AI progress records export-bundle wiring plus passing marine smoke, build, lint, and backend contract validation
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this strengthens marine review/export workflow evidence but is still not external-source validation proof by itself
+  - the bundle must preserve contextual-only semantics and must not imply anomaly cause, vessel intent, wrongdoing, or impact
+  - no separate fully validated export-archive review note is recorded yet
+- Next validation action:
+  - keep the helper under marine workflow evidence and record any later stale/unavailable export checks before treating it as anything stronger than implemented helper support
+
+### `marine-full-export-coherence-regression`
+
+- Aggregate helper path:
+  - `marineAnomalySummary` coherence via `buildMarineEvidenceSummary(...)`
+- Current board status:
+  - workflow-supporting helper regression, not a promoted source row
+- Existing evidence:
+  - `app/client/scripts/marineContextHelperRegression.mjs`
+  - `app/docs/marine-workflow-validation.md`
+  - `app/docs/marine-module.md`
+  - Marine AI progress records deterministic coherence assertions across `contextFusionSummary`, `contextReviewReport`, `contextSourceSummary`, `contextIssueQueue`, `contextIssueExportBundle`, and `hydrologyContext`
+  - marine smoke, build, and helper test evidence remain recorded for the current lane
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this regression strengthens marine workflow/export integrity but is still not external-source validation proof by itself
+  - exported marine review metadata remains review/context only and does not prove severity, impact, anomaly cause, vessel behavior, intent, or wrongdoing
+  - current lint blockage reported by Marine AI was non-marine/shared and does not change the helper's bounded evidence posture
+- Next validation action:
+  - keep this under marine workflow evidence and add later focused-evidence branch coherence checks before treating it as anything stronger than implemented helper support
+
+### `marine-focused-evidence-export-coherence-regression`
+
+- Aggregate helper path:
+  - `marineAnomalySummary` focused replay evidence and evidence-interpretation coherence via `buildMarineEvidenceSummary(...)`
+- Current board status:
+  - workflow-supporting helper regression, not a promoted source row
+- Existing evidence:
+  - `app/client/scripts/marineContextHelperRegression.mjs`
+  - `app/docs/marine-workflow-validation.md`
+  - `app/docs/marine-module.md`
+  - Marine AI progress records deterministic focused replay-evidence and evidence-interpretation coherence checks across exported marine review metadata
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this strengthens marine helper/export integrity but is still not external-source validation proof by itself
+  - focused evidence, chokepoint summaries, and exported review lines remain review/context only and do not prove severity, impact, anomaly cause, vessel behavior, intent, or wrongdoing
+  - current lint blockage reported by Marine AI was non-marine/shared and does not change the helper's bounded evidence posture
+- Next validation action:
+  - keep this under marine workflow evidence and add any later context-timeline export coherence checks before treating it as anything stronger than implemented helper support
+
 ### `features-source-ops-export-package`
 
 - Aggregate routes:
@@ -129,6 +439,183 @@ Important rules:
   - current evidence is backend-first and operational, not end-to-end workflow validation
 - Next validation action:
   - record one bounded source-ops workflow/export-path validation note before treating the package as anything stronger than implemented
+
+### `features-source-ops-evidence-packet-selector`
+
+- Aggregate route:
+  - `/api/cameras/source-ops-evidence-packets`
+- Current board status:
+  - workflow-supporting backend helper package, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_camera_source_ops_export_summary.py`
+  - `app/server/tests/test_camera_source_ops_report_index.py`
+  - `app/server/tests/test_camera_source_ops_detail.py`
+  - `app/docs/webcams.md`
+  - Features/Webcam AI progress records lifecycle-bucket, blocked-reason, and evidence-gap selector coverage on the evidence-packet route
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is a review/export selector helper and should not be mistaken for source implementation or external-source validation proof
+  - packet filtering must preserve blocked-reason, evidence-gap, and lifecycle semantics without implying source culpability or causal failure
+  - no end-to-end workflow-validation record is recorded yet
+- Next validation action:
+  - record one bounded evidence-packet selection/export workflow note before treating the package as anything stronger than implemented
+
+### `features-source-ops-evidence-packets-export-bundle`
+
+- Aggregate route:
+  - `/api/cameras/source-ops-evidence-packets-export-bundle`
+- Current board status:
+  - workflow-supporting backend helper package, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_camera_source_ops_export_summary.py`
+  - `app/server/tests/test_camera_source_ops_report_index.py`
+  - `app/server/tests/test_camera_source_ops_detail.py`
+  - `app/docs/webcams.md`
+  - `app/docs/webcam-source-lifecycle-policy.md`
+  - Features/Webcam AI progress records an aggregate-only export bundle over the evidence-packet selection logic
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is an aggregate-only review/export helper and should not be mistaken for source implementation or external-source validation proof
+  - output intentionally excludes raw payloads, endpoint URLs, local paths, credentials, tokenized URLs, and activation instructions
+  - no explicit end-to-end workflow-validation record is recorded yet
+- Next validation action:
+  - record one bounded aggregate evidence-packet export workflow note before treating the package as anything stronger than implemented
+
+### `features-source-ops-evidence-packets-handoff-summary`
+
+- Aggregate route:
+  - `/api/cameras/source-ops-evidence-packets-handoff-summary`
+- Current board status:
+  - workflow-supporting backend helper package, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_camera_source_ops_export_summary.py`
+  - `app/server/tests/test_camera_source_ops_report_index.py`
+  - `app/server/tests/test_camera_source_ops_detail.py`
+  - `app/docs/webcams.md`
+  - `app/docs/webcam-source-lifecycle-policy.md`
+  - Features/Webcam AI progress records an aggregate-only handoff summary that merges selector aggregates with readiness checklist counts
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is an aggregate-only handoff/export helper and should not be mistaken for source implementation or external-source validation proof
+  - output intentionally excludes full per-source packet detail, endpoint URLs, credentials, tokenized URLs, local paths, and activation instructions
+  - no explicit end-to-end workflow-validation record is recorded yet
+- Next validation action:
+  - record one bounded aggregate handoff-summary export workflow note before treating the package as anything stronger than implemented
+
+### `aerospace-context-gap-queue`
+
+- Aggregate helper path:
+  - `aerospaceContextGapQueue`
+- Current board status:
+  - workflow-supporting helper package, not a promoted source row
+- Existing evidence:
+  - `app/docs/aerospace-workflow-validation.md`
+  - `app/client/scripts/playwright_smoke.mjs`
+  - Aerospace AI progress records export-aware gap-queue wiring and smoke assertions prepared for the current aerospace workflow
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - the helper explains missing evidence and review gaps, but it is not itself workflow-validation proof for AWC, FAA NAS, CNEOS, SWPC, or OpenSky
+  - executed browser smoke remains unrecorded on this host because Playwright launch is blocked by `windows-browser-launch-permission`
+  - gap summaries must remain review-safe and must not imply incident certainty, attribution, or causation
+- Next validation action:
+  - rerun aerospace smoke on a host where Playwright can launch and record successful gap-queue/export assertions before treating the helper as anything stronger than implemented
+
+### `aerospace-current-archive-context-helper`
+
+- Aggregate helper path:
+  - `aerospaceCurrentArchiveContext`
+- Current board status:
+  - workflow-supporting helper package, not a promoted source row
+- Existing evidence:
+  - `app/docs/aerospace-workflow-validation.md`
+  - `app/docs/aircraft-satellite-smoke.md`
+  - `app/client/scripts/playwright_smoke.mjs`
+  - Aerospace AI progress records bounded current-vs-archive space-weather context wiring in inspector and export metadata
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this helper preserves current SWPC advisory context separately from NCEI archive context and must not be treated as source validation proof by itself
+  - archive metadata is not current warning truth, and current advisories do not prove GPS, radio, satellite, or aircraft failure
+  - executed browser smoke remains unrecorded on this host because Playwright launch is blocked by `windows-browser-launch-permission`
+- Next validation action:
+  - rerun aerospace smoke on a host where Playwright can launch and record successful current-vs-archive helper assertions before treating the helper as anything stronger than implemented
+
+### `aerospace-export-coherence-helper`
+
+- Aggregate helper path:
+  - `aerospaceExportCoherence`
+- Current board status:
+  - workflow-supporting helper package, not a promoted source row
+- Existing evidence:
+  - `app/docs/aerospace-workflow-validation.md`
+  - `app/docs/aircraft-satellite-smoke.md`
+  - `app/client/scripts/playwright_smoke.mjs`
+  - Aerospace AI progress records bounded export-coherence metadata over source-readiness, context-gap, current/archive separation, and export-profile metadata
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this helper is metadata-alignment/accounting only and must not be treated as source validation proof by itself
+  - it does not certify source reliability and does not imply severity, operational consequence, failure proof, causation, or action recommendation
+  - executed browser smoke remains unrecorded on this host because Playwright launch is blocked by `windows-browser-launch-permission`
+- Next validation action:
+  - rerun aerospace smoke on a host where Playwright can launch and record successful export-coherence assertions before treating the helper as anything stronger than implemented
+
+### `wave-monitor-tool-surface`
+
+- Aggregate routes:
+  - `/api/tools/waves/overview`
+  - `/api/analyst/evidence-timeline`
+  - `/api/analyst/source-readiness`
+- Current board status:
+  - fixture-backed implemented tool surface, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_wave_monitor.py`
+  - `app/server/tests/test_analyst_workbench.py`
+  - `app/server/src/routes/wave_monitor.py`
+  - `app/server/src/services/wave_monitor_service.py`
+  - `app/server/src/routes/analyst.py`
+  - `app/server/src/services/analyst_workbench_service.py`
+  - `app/docs/7po8-integration-plan.md`
+  - Atlas AI progress records `tool-wave-monitor` timeline and readiness integration
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - Wave Monitor is a fixture-backed tool surface and review context path, not a new source of truth and not a mounted standalone runtime
+  - persistent storage, live connectors, scheduler behavior, and frontend Situation Workspace UI remain unimplemented in current repo evidence
+  - Atlas implementation evidence is important, but Atlas remains user-directed and is not Manager-controlled ownership proof
+- Next validation action:
+  - keep the tool at implemented fixture-backed status until persistence/runtime ownership is intentionally assigned and explicit workflow validation is recorded
+
+### `source-discovery-memory-tool-surface`
+
+- Aggregate routes:
+  - `/api/source-discovery/memory/overview`
+  - `/api/source-discovery/memory/candidates`
+  - `/api/source-discovery/memory/claim-outcomes`
+- Current board status:
+  - implemented shared candidate/reputation tool surface, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_source_discovery_memory.py`
+  - `app/server/src/routes/source_discovery.py`
+  - `app/server/src/services/source_discovery_service.py`
+  - `app/server/src/source_discovery/db.py`
+  - `app/server/src/source_discovery/models.py`
+  - `app/server/src/types/source_discovery.py`
+  - `app/docs/source-discovery-platform-plan.md`
+  - `app/docs/source-discovery-reputation-governance-packet.md`
+  - Atlas AI progress records shared source-memory storage, claim-outcome updates, wave-fit separation, and Wave Monitor source-candidate seeding
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is a candidate/reputation/review surface and must not be mistaken for source implementation proof or external-source validation proof
+  - source reputation observations are not claim truth, source truth, attribution proof, causation proof, intent proof, wrongdoing proof, or action guidance
+  - no autonomous discovery runner, hidden live polling, full-text fetcher, or frontend review workflow is recorded in current repo evidence
+- Next validation action:
+  - keep the surface at implemented shared-tool status until Connect records the runtime/storage boundary truth and any later review workflow is explicitly validated without bypassing the normal source lifecycle
 
 ## Per-Source Status
 
@@ -846,6 +1333,16 @@ If repo-wide lint or build failures unrelated to a source are later reported, th
 
 - `data-ai-rss-starter-bundle`
   - backend-first implementation evidence is clear for the aggregate route and parser/test foundation, but no stable frontend consumer or workflow-validation note is recorded yet
+- `data-ai-rss-official-cyber-wave`
+  - backend-first implementation evidence is clear for `ncsc-uk-all`, `cert-fr-alerts`, and `cert-fr-advisories`, but no stable frontend consumer or workflow-validation note is recorded yet
+- `data-ai-rss-infrastructure-status-wave`
+  - backend-first implementation evidence is clear for `cloudflare-radar`, `netblocks`, and `apnic-blog`, but no stable frontend consumer or workflow-validation note is recorded yet
+- `data-ai-rss-osint-investigations-wave`
+  - backend-first implementation evidence is clear for `bellingcat`, `citizen-lab`, `occrp`, and `icij`, but no stable frontend consumer or workflow-validation note is recorded yet
+- `data-ai-rss-rights-civic-digital-policy-wave`
+  - backend-first implementation evidence is clear for `eff-updates`, `access-now`, `privacy-international`, and `freedom-house`, but no stable frontend consumer or workflow-validation note is recorded yet
+- `data-ai-rss-fact-checking-disinformation-wave`
+  - backend-first implementation evidence is clear for `full-fact`, `snopes`, `politifact`, `factcheck-org`, and `euvsdisinfo`, but no stable frontend consumer or workflow-validation note is recorded yet
 - `usgs-geomagnetism`
   - backend-first implementation evidence is clear, but no stable frontend consumer or workflow-validation note is recorded yet
 - `taiwan-cwa-aws-opendata`

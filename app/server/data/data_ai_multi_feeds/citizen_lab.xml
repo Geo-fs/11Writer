@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Citizen Lab</title>
+    <link>https://citizenlab.ca/</link>
+    <lastBuildDate>Thu, 30 Apr 2026 10:35:00 GMT</lastBuildDate>
+    <item>
+      <title>Research note on spyware delivery infrastructure and civil-society risk</title>
+      <link>https://citizenlab.ca/2026/04/research-note-spyware-delivery-infrastructure/</link>
+      <guid>https://citizenlab.ca/2026/04/research-note-spyware-delivery-infrastructure/</guid>
+      <pubDate>Thu, 30 Apr 2026 10:30:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Download this archive and run the indicators immediately.</p>
+        <script>alert('do-not-run');</script>
+        <p>Research and digital-rights context on spyware delivery infrastructure, civil-society targeting risks, and measurement limitations.</p>
+      ]]></description>
+      <category>Research</category>
+      <category>Digital Rights</category>
+    </item>
+  </channel>
+</rss>

@@ -1,5 +1,287 @@
 # Aerospace AI Progress
 
+## 2026-05-01 15:51 America/Chicago
+
+- Assignment version:
+  2026-05-01 15:44 America/Chicago
+- Task:
+  Add an aerospace context snapshot/report metadata package that composes readiness, gap queue, current/archive context, export coherence, and issue-export-bundle outputs into a compact report-facing export helper.
+- What changed:
+  Added a new pure helper [aerospaceContextSnapshotReport.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceContextSnapshotReport.ts) that composes the existing source-readiness bundle, context gap queue, current/archive separation, export coherence, and issue-export-bundle summaries into one bounded snapshot/report metadata package.
+  The new helper preserves package profile, source ids, source modes, source health states, evidence bases, review lines, export lines, caveats, guardrail wording, missing metadata keys, and missing footer sections without re-implementing the underlying readiness/gap/current-archive/coherence logic.
+  Added an internal bounded package-profile option:
+  `default`,
+  `source-health-review`,
+  and `space-weather-context`.
+  This stays pure and is mapped from the existing aerospace export-profile selection inside [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx), so there is no new UI or store state.
+  Extended [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts) so all aerospace export profiles now preserve the new `aerospaceContextSnapshotReport` machine metadata key and can prioritize compact `snapshot-report-package` footer lines.
+  Wired the new package narrowly into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) under `aerospaceContextSnapshotReport` plus export-footer shaping only.
+  Extended prepared aerospace smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so aircraft and satellite metadata checks now require `aerospaceContextSnapshotReport`, require review lines and guardrail wording, require profile metadata coverage, and require zero unguarded operational-phrase findings.
+  Updated [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md) and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) to document the new snapshot/report package behavior and keep the local Playwright launcher limitation explicit.
+- Files touched:
+  [aerospaceContextSnapshotReport.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceContextSnapshotReport.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  `cmd /c npm.cmd run lint` passed from `app/client`.
+  `cmd /c npm.cmd run build` passed from `app/client`.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before browser assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  The new snapshot/report package remains compact report/export metadata only. It does not imply severity, operational consequence, failure proof, route impact, target exposure, threat, causation, or action recommendation.
+  Executed aerospace smoke evidence for the new `aerospaceContextSnapshotReport` assertions is still blocked on this Windows host because Playwright cannot launch before browser assertions.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Playwright Chromium can launch, then convert the prepared `aerospaceContextSnapshotReport` assertions into executed workflow evidence if they pass.
+
+## 2026-05-01 15:14 America/Chicago
+
+- Assignment version:
+  2026-05-01 15:03 America/Chicago
+- Task:
+  Add an aerospace source-health/readiness issue export bundle that composes readiness bundle, context gap queue, current/archive separation, and export coherence into compact review-only export items.
+- What changed:
+  Added a new pure helper [aerospaceIssueExportBundle.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceIssueExportBundle.ts) that builds a compact review-only issue export bundle from the existing source-readiness bundle, context gap queue, current/archive space-weather separation summary, and export-coherence summary.
+  The new bundle preserves item category, source ids, source modes, source health states, evidence bases, caveats, guardrail lines, and any missing metadata-key or footer-section findings already surfaced by export coherence.
+  Added explicit unguarded operational-phrase scanning for `operational consequence`, `severity`, `failure proof`, `route impact`, `target exposure`, `causation`, `threat`, and action-recommendation wording, while still allowing guarded caveat phrasing such as `does not imply severity`.
+  Extended [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts) so aerospace export profiles can preserve the new machine metadata key and optionally prioritize compact issue-bundle footer lines without changing source semantics or adding new UI sections.
+  Wired the new bundle narrowly into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) under `aerospaceIssueExportBundle` and as an export-footer input only; no new inspector surface was added in this assignment.
+  Hardened the prepared aerospace smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so aircraft and satellite export metadata now require `aerospaceIssueExportBundle`, require current/archive separation coverage inside the bundle, require per-item review-only guardrails, and require zero unguarded operational-phrase findings.
+  Updated [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md) and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) to document the new issue-export-bundle behavior and keep the local Playwright launcher limitation explicit.
+- Files touched:
+  [aerospaceIssueExportBundle.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceIssueExportBundle.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  `cmd /c npm.cmd run lint` passed from `app/client`.
+  `cmd /c npm.cmd run build` passed from `app/client`.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before browser assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  The issue export bundle remains export-accounting only. It does not imply severity, operational consequence, failure proof, route impact, target exposure, threat, causation, or action recommendation.
+  Executed aerospace smoke evidence for the new `aerospaceIssueExportBundle` assertions is still blocked on this Windows host because Playwright cannot launch before browser assertions.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Playwright Chromium can launch, then convert the prepared `aerospaceIssueExportBundle` assertions into executed workflow evidence if they pass.
+
+## 2026-05-01 15:01 America/Chicago
+
+- Assignment version:
+  2026-05-01 14:46 America/Chicago
+- Task:
+  Add an aerospace export/coherence helper that checks source-readiness bundle, context gap queue, current/archive separation, and export profile metadata stay aligned without adding operational inference.
+- What changed:
+  Added a new pure helper [aerospaceExportCoherence.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportCoherence.ts) that summarizes export coherence across the existing source-readiness bundle, context gap queue, current/archive separation helper, and export-profile metadata.
+  The helper preserves source ids, source modes, source health states, evidence bases, guardrail lines, caveats, aligned metadata keys, missing metadata keys, missing footer sections, and any unguarded operational-phrase findings.
+  Tightened [aerospaceSourceReadiness.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceSourceReadiness.ts) bundle metadata so coherence checks can see per-family source ids and evidence bases.
+  Extended [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts) metadata to preserve `includedMetadataKeys` and added an `export-coherence` footer section so the helper can measure alignment against the profile's declared export shape instead of inferring it indirectly.
+  Wired coherence narrowly into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) as snapshot/export metadata under `aerospaceExportCoherence` and as optional footer-line input. No new inspector UI section was added.
+  Extended prepared aerospace smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so aircraft and satellite export metadata now require `aerospaceExportCoherence`, require an `aligned` coherence state under the default export profile, and require zero unguarded operational-phrase findings.
+  Updated aerospace workflow and smoke docs to document coherence behavior and the continuing local Playwright launcher limitation.
+- Files touched:
+  [aerospaceExportCoherence.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportCoherence.ts)
+  [aerospaceSourceReadiness.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceSourceReadiness.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  `cmd /c npm.cmd run lint` passed from `app/client`.
+  `cmd /c npm.cmd run build` passed from `app/client`.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-browser-launch-permission`.
+- Blockers or caveats:
+  The coherence helper is metadata-alignment/accounting only. It does not certify source reliability and does not imply severity, operational consequence, failure proof, causation, or action recommendation.
+  Executed aerospace smoke evidence for the new `aerospaceExportCoherence` assertions is still blocked on this Windows host because Playwright cannot launch before browser assertions.
+- Next recommended task:
+  On a Windows host where Playwright Chromium can launch, rerun `python app/server/tests/run_playwright_smoke.py aerospace` to convert the prepared `aerospaceExportCoherence` assertions into executed workflow evidence.
+
+## 2026-05-01 13:51 America/Chicago
+
+- Assignment version:
+  2026-05-01 13:24 America/Chicago
+- Task:
+  Build an aerospace current-versus-archive context helper that keeps current NOAA SWPC advisory context separate from archival NOAA NCEI space-weather metadata in inspector/export summaries and smoke-prep coverage.
+- What changed:
+  Added a new pure helper [aerospaceCurrentArchiveContext.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceCurrentArchiveContext.ts) that composes already-loaded SWPC and NCEI archive summaries without changing source semantics.
+  The helper preserves separate current and archive source ids, source modes, source health states, evidence-basis labels, current advisory timing labels, archive temporal-coverage labels, bounded display/export lines, and an explicit guardrail line that archive metadata is not current warning truth and current advisories do not prove GPS, radio, satellite, or aircraft failure.
+  Wired the helper narrowly into the aerospace inspector as a compact `Current vs Archive Space-Weather Context` section, into export footer shaping, and into snapshot/export metadata under `aerospaceCurrentArchiveContext`.
+  Extended prepared aerospace smoke assertions so aircraft and satellite metadata checks now expect the new inspector label, metadata key, separation state, and guardrail wording when Playwright can launch.
+  Updated aerospace workflow and smoke docs to document the new separation helper, metadata key, and no-inference boundaries.
+- Files touched:
+  [aerospaceCurrentArchiveContext.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceCurrentArchiveContext.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  `cmd /c npm.cmd run lint` passed from `app/client`.
+  `cmd /c npm.cmd run build` passed from `app/client`.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-browser-launch-permission`.
+- Blockers or caveats:
+  The new helper remains source-separation and timestamp/coverage accounting only. It does not imply severity, route impact, target exposure, GPS/radio/satellite failure, aircraft behavior, causation, or action recommendation.
+  Executed aerospace smoke evidence for the new metadata key is still blocked on this Windows host because Playwright cannot launch before browser assertions.
+- Next recommended task:
+  On a Windows host where Playwright Chromium can launch, rerun `python app/server/tests/run_playwright_smoke.py aerospace` to convert the prepared `aerospaceCurrentArchiveContext` assertions into executed workflow evidence.
+
+## 2026-05-01 13:09 America/Chicago
+
+- Assignment version:
+  2026-05-01 13:04 America/Chicago
+- Task:
+  Run a validation recovery and hardening pass for the aerospace source-readiness bundle plus context gap queue, and convert prepared smoke assertions into executed evidence if local Playwright launch permits it.
+- What changed:
+  Re-ran the aerospace backend contract suite, server compile, client lint, client build, and the aerospace Playwright smoke lane against the current tree.
+  No aerospace code or doc semantics needed to change in this recovery pass because the source-readiness bundle and context gap queue assertions were already prepared correctly.
+  Confirmed that the aerospace smoke lane still does not reach app assertions on this Windows host. It fails before browser launch with the known Playwright `spawn EPERM` / `windows-browser-launch-permission` boundary, so there is still no executed smoke evidence to promote in the docs.
+  A new non-aerospace client build blocker also surfaced during recovery: [marineContextHelperRegression.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineContextHelperRegression.ts) is using `.ts` extension imports that TypeScript rejects under current settings. Per assignment, I did not touch marine files and am routing that blocker to Connect AI.
+- Files touched:
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  `cmd /c npm.cmd run lint` passed from `app/client`.
+  `cmd /c npm.cmd run build` did not complete because of the unrelated marine TypeScript import-extension blocker in [marineContextHelperRegression.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineContextHelperRegression.ts).
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before browser assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  Prepared aerospace smoke assertions for `aerospaceSourceReadinessBundle` and `aerospaceContextGapQueue` still exist, but there is still no executed smoke evidence on this Windows host because the browser cannot launch.
+  The current client build blocker is outside aerospace ownership and should go to Connect AI.
+- Next recommended task:
+  After Connect AI clears the unrelated marine import-extension build blocker and on a Windows host where Playwright Chromium can launch, rerun `cmd /c npm.cmd run build` and `python app/server/tests/run_playwright_smoke.py aerospace` to convert the prepared bundle/gap-queue assertions into executed workflow evidence if they pass.
+
+## 2026-05-01 12:55 America/Chicago
+
+- Assignment version:
+  2026-05-01 12:45 America/Chicago
+- Task:
+  Build an aerospace context gap review queue that summarizes unavailable, stale, fixture-backed, empty, degraded, or archive/current-separation context families with export-ready caveats and no operational inference.
+- What changed:
+  Added a new pure helper `aerospaceContextGapQueue.ts` that builds a bounded aerospace context gap queue from existing context availability and source-readiness summaries plus selected-target/export-profile inputs.
+  The queue emits review items for unavailable expected context, degraded source health, stale or limited freshness, empty optional windows, fixture-backed context, and current/archive space-weather separation gaps.
+  Each queue item preserves family label, source ids, source modes, source health, evidence basis, summary text, export-ready line, caveat, and an explicit no-severity/no-consequence `guardrailLine`.
+  Wired the queue into the aerospace inspector as a compact `Aerospace Context Gap Queue` section, into export profile footer prioritization, and into snapshot/export metadata under `aerospaceContextGapQueue`.
+  Extended prepared aerospace smoke assertions so aircraft and satellite paths now expect the new inspector label, queue metadata, queue items, and guardrail line when Playwright can launch.
+  Updated aerospace workflow and smoke docs to document the gap queue, its metadata key, and its no-inference boundaries.
+- Files touched:
+  [aerospaceContextGapQueue.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceContextGapQueue.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  `cmd /c npm.cmd run lint` passed from `app/client`.
+  `cmd /c npm.cmd run build` did not complete because of an unrelated marine-side TypeScript blocker in [MarineAnomalySection.tsx](/C:/Users/mike/11Writer/app/client/src/features/marine/MarineAnomalySection.tsx): missing required `contextIssueExportBundle` in a marine call site.
+- Blockers or caveats:
+  Stopped after the unrelated marine build failure as required by the assignment. I did not modify marine files.
+  Because build is currently blocked outside aerospace, I did not continue to the Playwright smoke step in this pass.
+  The new gap queue remains review-oriented and non-operational. It does not imply severity, flight intent, route impact, aircraft exposure, GPS/radio/satellite failure, causation, operational consequence, or action recommendation.
+- Next recommended task:
+  Wait for Connect AI to clear the unrelated marine build blocker, then rerun `cmd /c npm.cmd run build` and `python app/server/tests/run_playwright_smoke.py aerospace` to convert the prepared `aerospaceContextGapQueue` assertions into executed workflow evidence.
+
+## 2026-05-01 12:42 America/Chicago
+
+- Assignment version:
+  2026-05-01 12:33 America/Chicago
+- Task:
+  Add an aerospace-local export bundle selector for source-readiness context so compact family-specific readiness/caveat/export lines can be emitted without drifting into severity semantics.
+- What changed:
+  Added aerospace-local bundle state in `store.ts` for `selectedAerospaceSourceReadinessBundle`, with default `all-families` and a dedicated setter so export behavior stays deterministic across inspector and snapshot metadata.
+  Extended `aerospaceSourceReadiness.ts` with predefined export bundles and a new pure helper `buildAerospaceSourceReadinessBundleSummary(...)`. The bundle summary preserves bundle id/label, selected family ids, per-family readiness labels, family posture, source modes, health states, summary lines, caveats, a top review note, and an explicit no-severity/no-action `guardrailLine`.
+  Wired the bundle selector into the aerospace inspector as a compact `Readiness bundle` control and bundle summary card inside the existing `Aerospace Source Readiness` section.
+  Wired compact bundle export lines into the existing export-profile helper and preserved machine-readable snapshot metadata under `aerospaceSourceReadinessBundle`.
+  Extended prepared aerospace smoke assertions so aircraft and satellite metadata checks now expect `aerospaceSourceReadinessBundle`, bundled family rows, and the bundle-specific guardrail wording.
+  Updated aerospace workflow/smoke docs to document bundle behavior, preserved fields, and the no-severity/no-action boundary.
+- Files touched:
+  [store.ts](/C:/Users/mike/11Writer/app/client/src/lib/store.ts)
+  [aerospaceSourceReadiness.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceSourceReadiness.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_cneos_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_opensky_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_aviation_weather_contracts.py -q` passed (`3 passed`).
+  `python -m pytest app/server/tests/test_faa_nas_status_contracts.py -q` passed (`5 passed`).
+  `python -m compileall app/server/src` passed.
+  `cmd /c npm.cmd run lint` passed from `app/client`.
+  `cmd /c npm.cmd run build` passed from `app/client`.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before browser assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  Executed aerospace smoke evidence for the new export-bundle metadata remains blocked on this Windows host by the same Playwright launcher permission boundary before any browser assertions run.
+  The new bundle selector remains review-oriented and non-operational. It does not create a severity score and does not imply flight intent, route impact, aircraft exposure, GPS/radio/satellite failure, causation, operational consequence, or action recommendation.
+  Source-provided text remains inert input data only; no source text is executed, followed, or promoted into instructions.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Playwright Chromium can launch, then convert the prepared `aerospaceSourceReadinessBundle` assertions into executed workflow evidence if they pass.
+
+## 2026-05-01 12:31 America/Chicago
+
+- Assignment version:
+  2026-05-01 11:26 America/Chicago
+- Task:
+  Add review/report phrasing safeguards and export-readiness caveat checks for the aerospace source-readiness federation so it stays review-oriented rather than reading like operational severity.
+- What changed:
+  Hardened `aerospaceSourceReadiness.ts` so the federation now emits an explicit `guardrailLine` stating that source readiness is review-oriented context accounting only, not operational severity or a recommended action.
+  Tightened family readiness labels to preserve review phrasing under degraded, unavailable, stale, or fixture-backed conditions, for example `review degraded context`, `review unavailable context`, `review fixture-backed context`, and `review freshness-limited context`.
+  Updated source-readiness display/export lines so they now say `families need review`, `family coverage`, and `top review note` rather than leaning on raw degraded-family phrasing alone.
+  Hardened prepared smoke assertions so aerospace smoke now expects `aerospaceSourceReadiness.guardrailLine` to contain `review-oriented` and expects the source-readiness caveats to preserve the no-severity boundary.
+  Updated aerospace workflow and smoke docs to record the new phrasing guardrails and smoke-prep evidence for the source-readiness federation.
+- Files touched:
+  [aerospaceSourceReadiness.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceSourceReadiness.ts)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_cneos_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_opensky_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_aviation_weather_contracts.py -q` passed (`3 passed`).
+  `python -m pytest app/server/tests/test_faa_nas_status_contracts.py -q` passed (`5 passed`).
+  `python -m compileall app/server/src` passed.
+  `cmd /c npm.cmd run lint` passed from `app/client`.
+  `cmd /c npm.cmd run build` passed from `app/client`.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before browser assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  Executed aerospace smoke evidence for the strengthened source-readiness phrasing checks remains blocked on this Windows host by the same Playwright launcher permission boundary before any browser assertions can run.
+  The helper remains explanatory and review-oriented only. It still does not create a global severity score and does not imply flight intent, route impact, aircraft exposure, GPS/radio/satellite failure, causation, operational consequence, or action recommendation.
+  Source-provided text remains inert input data only; no source text is executed, followed, or promoted into instructions.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Playwright Chromium can launch, then convert the prepared `aerospaceSourceReadiness` wording/assertion coverage into executed workflow evidence if it passes.
+
 ## 2026-04-30 22:28 America/Chicago
 
 - Assignment version:

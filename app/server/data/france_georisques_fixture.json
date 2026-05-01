@@ -1,0 +1,79 @@
+{
+  "fixtures": {
+    "code_insee": {
+      "06088": {
+        "results": 1,
+        "page": 1,
+        "total_pages": 1,
+        "data": [
+          {
+            "code_insee": "06088",
+            "libelle_commune": "NICE",
+            "code_zone": "4",
+            "zone_sismicite": "4 - MOYENNE"
+          }
+        ],
+        "response_code": 200,
+        "message": null,
+        "next": null,
+        "previous": null
+      },
+      "97113": {
+        "results": 1,
+        "page": 1,
+        "total_pages": 1,
+        "data": [
+          {
+            "code_insee": "97113",
+            "libelle_commune": "LE GOSIER",
+            "code_zone": "5",
+            "zone_sismicite": "5 - FORTE"
+          }
+        ],
+        "response_code": 200,
+        "message": null,
+        "next": null,
+        "previous": null
+      },
+      "75056": {
+        "results": 0,
+        "page": 1,
+        "total_pages": 0,
+        "data": [],
+        "response_code": 200,
+        "message": null,
+        "next": null,
+        "previous": null
+      }
+    },
+    "latlon": {
+      "48.8566,2.3522": {
+        "results": 0,
+        "page": 1,
+        "total_pages": 0,
+        "data": [],
+        "response_code": 200,
+        "message": null,
+        "next": null,
+        "previous": null
+      },
+      "43.7102,7.262": {
+        "results": 1,
+        "page": 1,
+        "total_pages": 1,
+        "data": [
+          {
+            "code_insee": "06088",
+            "libelle_commune": "NICE",
+            "code_zone": "4",
+            "zone_sismicite": "4 - MOYENNE"
+          }
+        ],
+        "response_code": 200,
+        "message": null,
+        "next": null,
+        "previous": null
+      }
+    }
+  }
+}

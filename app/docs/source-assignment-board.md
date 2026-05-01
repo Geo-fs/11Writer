@@ -25,10 +25,16 @@ Related docs:
 - [source-routing-batch7-base-earth-reference.md](/C:/Users/mike/11Writer/app/docs/source-routing-batch7-base-earth-reference.md)
 - [source-ownership-consumption-map.md](/C:/Users/mike/11Writer/app/docs/source-ownership-consumption-map.md)
 - [source-prompt-index.md](/C:/Users/mike/11Writer/app/docs/source-prompt-index.md)
+- [safe-hypothesis-governance-packet.md](/C:/Users/mike/11Writer/app/docs/safe-hypothesis-governance-packet.md)
+- [wave-monitor-governance-intake.md](/C:/Users/mike/11Writer/app/docs/wave-monitor-governance-intake.md)
+- [chokepoint-intelligence-governance-packet.md](/C:/Users/mike/11Writer/app/docs/chokepoint-intelligence-governance-packet.md)
+- [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md)
 - [data-ai-rss-source-candidates.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates.md)
 - [data-ai-rss-source-candidates-batch2.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates-batch2.md)
 - [data-ai-rss-source-candidates-batch3.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates-batch3.md)
 - [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md)
+- [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md)
+- [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md)
 
 ## Current Next Assignments
 
@@ -36,11 +42,11 @@ Related docs:
 - Marine next: complete the current backend-only `france-vigicrues-hydrometry` source-expansion lane, then use the next marine pass for explicit `unavailable` or selective `degraded` smoke/export truth before assigning a different fresh marine source
 - Aerospace next: keep the current implemented source stack stable, including the three-VAAC consumer package and the `noaa-ncei-space-weather-portal` archive/context consumer path, and rerun focused aerospace smoke on a Windows host where Playwright can launch before promoting any aerospace source beyond `implemented`
 - Features/Webcam next: prefer one bounded `finland-digitraffic` consumer or status-classification follow-on first, or the minimal source-ops export-bundle selector/export-readout lane; if Manager AI opens a fresh source lane instead, route `bart-gtfs-realtime`
-- Data next: preserve the active five-feed RSS starter slice plus the bounded `nist-nvd-cve` and conservative CVE-context lane, use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) as the next-wave sequencing surface, and route only the next bounded official/advisory wave after that, starting with `ncsc-uk-all`, `cert-fr-alerts`, and `cloudflare-radar`
+- Data next: preserve the implemented five-feed starter bundle plus the implemented official-cyber, infrastructure/status, OSINT/investigations, rights/civic/digital-policy, and fact-checking/disinformation waves, keep the bounded `nist-nvd-cve` and conservative CVE-context lane stable, finish the active family-summary/export-status task, and then use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) for the next grouped expansion, starting with one official/public advisory family such as `state-travel-advisories`
 - Gather next: verify `eea-air-quality`, `singapore-nea-weather`, `esa-neocc-close-approaches`, `imo-epos-geohazards`, and the remaining Batch 5 `needs-verification` sources before promoting any of them to assignment-ready
-- Connect next: checkpoint sweeps, smoke reruns, release-readiness truth, and narrow cross-domain governance cleanup
+- Connect next: checkpoint sweeps, smoke reruns, release-readiness truth, narrow cross-domain governance cleanup, and shared source-memory runtime-boundary truth when that lane is intentionally reopened
 - Base-earth note: Batch 7 geography/base-earth sources are now in the registry, but should be assigned as narrow static/reference slices only; do not combine bathymetry, relief, soil, land-cover, hydrography, glaciers, tectonics, and volcano references into one broad platform task.
-- Data AI note: RSS/Atom source candidates now exist for cybersecurity, internet infrastructure, world news, and world events; first implementation should use only a small fixture-first parser slice before enabling broader polling.
+- Data AI note: RSS/Atom source candidates now exist across the starter, official cyber, infrastructure/status, OSINT/investigations, rights/civic/digital-policy, fact-checking/disinformation, and broader Batch 3 context families; the implemented waves above are already backend-first, so the next expansion should be one bounded remaining family only rather than broader polling.
 
 Status caution:
 
@@ -51,6 +57,30 @@ Status caution:
 - It does not mean fully validated, live validated, or upstream-source-live validated.
 - `data` is now a distinct implementation lane from `gather` and `connect`.
 - `gather` owns governance and status truth; `data` owns bounded implementation for assigned public internet-information sources; `connect` owns repo-wide validation and blocker truth.
+- source discovery, source reputation, claim-outcome memory, and shared source-memory surfaces create candidates and review evidence only; they do not promote a source to `implemented`, `workflow-validated`, `validated`, or `fully validated`.
+
+## Source Discovery Governance
+
+Use these docs before routing any source-discovery, source-reputation, claim-outcome, or shared source-memory work:
+
+- [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md)
+- [source-discovery-platform-plan.md](/C:/Users/mike/11Writer/app/docs/source-discovery-platform-plan.md)
+- [wave-monitor-governance-intake.md](/C:/Users/mike/11Writer/app/docs/wave-monitor-governance-intake.md)
+- [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md)
+- [source-workflow-validation-plan.md](/C:/Users/mike/11Writer/app/docs/source-workflow-validation-plan.md)
+
+Routing rule:
+
+- `gather` owns governance, allowed states, and status truth
+- `connect` owns shared runtime/storage boundary truth and release-readiness truth
+- `data` owns feed-family and public-internet source-candidate semantics
+- domain agents own domain-specific candidate evaluation
+- `ui-integration` is later-only after shared contracts stabilize
+- Atlas remains important user-directed implementation input, not Manager-controlled ownership proof
+
+Do-not-do warning:
+
+- do not treat candidate discovery, reputation learning, or claim-outcome memory as automatic source validation or automatic permission to schedule, poll, or trust a source
 
 ## Data AI RSS Intake
 
@@ -66,23 +96,28 @@ Manager note:
   4. `cloudflare-status`
   5. `gdacs-alerts`
 - Active-lane rule:
-  - keep the current five-feed starter slice bounded and use [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for the next wave only
+  - keep the currently implemented feed families bounded and use [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md) for the next remaining wave only
 - Current repo-local implementation truth:
   - the five-feed starter bundle is now implemented backend-first with a bounded aggregate route, typed contracts, fixtures, tests, and prompt-injection fixture coverage
+  - the official cyber advisory wave is implemented backend-first on the same bounded aggregate route
+  - the infrastructure/status wave is implemented backend-first on the same bounded aggregate route
+  - the OSINT/investigations wave is implemented backend-first on the same bounded aggregate route
+  - the rights/civic/digital-policy wave is implemented backend-first on the same bounded aggregate route
+  - the fact-checking/disinformation wave is implemented backend-first on the same bounded aggregate route
   - treat it as contract-tested, not workflow-validated
-  - use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) for staged follow-on sequencing instead of widening the current bundle into broad polling
+  - use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) plus [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) for staged follow-on sequencing instead of widening the current bundle into broad polling
 
 ### Assignment-ready
 
 | Source family | Owner agent | Consumer agents | Next action | Implementation priority | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `data-ai-rss-core-parser` | `data-ai` | `connect` | Add generic RSS/Atom/RDF fixture-first parser and one normalized `DataFeedItem` contract. | `high` | Required before broad feed onboarding. |
-| `data-ai-cyber-official-feeds` | `data-ai` | `connect` | Assign the first official cyber feed subset: CISA advisories, CISA ICS advisories, NCSC UK, CERT-FR alerts/advisories. | `high` | Advisory context only; do not infer exploitation or impact unless source text supports it. |
-| `data-ai-internet-status-feeds` | `data-ai` | `connect` | Assign Cloudflare status/Radar, NetBlocks, APNIC, RIPE Labs, and Internet Society after parser lands. | `medium` | Preserve provider-methodology caveats and avoid whole-internet claims. |
+| `data-ai-rss-core-parser` | `data-ai` | `connect` | Keep the implemented RSS/Atom/RDF parser and normalized `DataFeedItem` contract stable; use follow-on work for bounded consumer or validation needs, not parser re-creation. | `high` | Parser and aggregate contract already exist in repo code; do not reopen them as fresh source-creation work. |
+| `data-ai-cyber-official-feeds` | `data-ai` | `connect` | Keep the implemented official cyber advisory wave stable and use any next Data AI work for bounded consumer, export, or validation follow-on rather than a fresh advisory rebuild. | `medium` | Advisory context only; do not infer exploitation or impact unless source text supports it. |
+| `data-ai-internet-status-feeds` | `data-ai` | `connect` | Keep the implemented infrastructure/status wave stable and use any next Data AI work for bounded consumer, export, or validation follow-on rather than a fresh provider rebuild. | `medium` | Preserve provider-methodology caveats and avoid whole-internet claims. |
 | `data-ai-world-event-feeds` | `data-ai` | `geospatial`, `connect` | Assign GDACS, USGS earthquake Atom, NOAA NHC RSS, WHO news, and UNDRR after parser lands. | `medium` | Disaster/health/event context; impact claims require source support. |
 | `data-ai-world-news-feeds` | `data-ai` | `connect` | Assign a media-awareness subset only after official/event feeds are stable. | `low` | Media feeds are contextual awareness, not source-of-truth confirmation. |
 | `data-ai-rss-batch2-feeds` | `data-ai` | `connect` | Use Batch 2 feeds only after the core parser and source-health model are stable. | `low` | Batch 2 adds 115 more feeds; dedupe across same-publisher section feeds before polling broadly. |
-| `data-ai-rss-batch3-global-feeds` | `data-ai` | `connect` | Use Batch 3 feeds only after the core parser and source-health model are stable. | `low` | Batch 3 adds 110 global-coverage feeds, including OSINT/investigations, rights, fact-checking, conflict analysis, environment, travel/security, regional, economics, energy, and geodata. |
+| `data-ai-rss-batch3-global-feeds` | `data-ai` | `connect` | Use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) and assign one grouped remaining family only after the implemented starter, official cyber, infrastructure/status, OSINT, rights/civic, and fact-checking waves remain stable. | `medium` | The remaining Data AI families are high-context global feeds; group by evidence class and keep prompt-injection/dedupe rules explicit. |
 
 Data AI feed-safety rule:
 
@@ -295,7 +330,7 @@ Batch 4 statuses below are classification-only intake decisions from [source-acc
 
 ## Batch 3 Intake
 
-Batch 3 statuses below are classification-only intake decisions from [source-acceleration-phase2-batch3-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch3-briefs.md). They do not imply code exists yet.
+Batch 3 statuses below are classification-only intake decisions from [source-acceleration-phase2-batch3-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch3-briefs.md). They do not imply code exists yet unless repo-local evidence is explicitly called out elsewhere in this board or in the Data AI progress docs.
 
 ### Assignment-ready
 
@@ -831,15 +866,66 @@ Recently implemented or clearly code-present in the repo:
 - NIST NVD CVE
   - Data AI progress now records a backend-first implemented bounded CVE-detail slice plus conservative CVE-context composition with explicit evidence-class separation and prompt-injection-safe fixture coverage.
   - The board keeps it at `implemented`, not `workflow-validated`, because no stable consumer or explicit workflow-validation record is recorded yet.
+- Data AI RSS implemented waves
+  - Data AI progress now records the five-feed starter bundle, the official cyber advisory wave (`ncsc-uk-all`, `cert-fr-alerts`, `cert-fr-advisories`), the infrastructure/status wave (`cloudflare-radar`, `netblocks`, `apnic-blog`), the OSINT/investigations wave (`bellingcat`, `citizen-lab`, `occrp`, `icij`), the rights/civic/digital-policy wave (`eff-updates`, `access-now`, `privacy-international`, `freedom-house`), and the fact-checking/disinformation wave (`full-fact`, `snopes`, `politifact`, `factcheck-org`, `euvsdisinfo`) on the bounded shared recent-items route.
+  - These waves are implemented backend-first and contract-tested, but they remain below `workflow-validated` because no stable consumer-path or explicit workflow-validation record is recorded yet.
+- Data AI Official/Public Advisories Wave
+  - Data AI progress now records `state-travel-advisories`, `eu-commission-press`, `un-press-releases`, and `unaids-news` on the same bounded shared recent-items route plus the `official-public-advisories` family definition on the family overview helper.
+  - This wave is implemented backend-first and contract-tested, but it remains below `workflow-validated` because no stable consumer-path or explicit workflow-validation record is recorded yet.
+- Data AI Scientific/Environmental Context Wave
+  - Data AI progress now records `our-world-in-data`, `carbon-brief`, `eumetsat-news`, `smithsonian-volcano-news`, and `eos-news` on the same bounded shared recent-items route plus the `scientific-environmental-context` family definition on the family overview helper.
+  - This wave is implemented backend-first and contract-tested, but it remains below `workflow-validated` because no stable consumer-path or explicit workflow-validation record is recorded yet.
+- Data AI Source-Family Overview Helper
+  - Data AI progress now records `/api/feeds/data-ai/source-families/overview` as a bounded metadata/family-accounting helper for the implemented feed families.
+  - This is helper-package evidence only and must not be treated as a credibility, severity, attribution, or action-scoring surface.
 - Features/Webcam Source-Ops Export Package
   - Features/Webcam AI progress now records source-ops export-summary aggregate-line bundling and a minimal review-queue export bundle.
   - This is workflow-supporting package evidence only, not external-source implementation or validation proof.
+- Features/Webcam Evidence Packet Selector
+  - Features/Webcam AI progress now records `/api/cameras/source-ops-evidence-packets` selector coverage for lifecycle bucket, blocked-reason posture, and evidence-gap family filtering.
+  - This is workflow-supporting review/export package evidence only and must not be treated as external-source validation proof.
+- Environmental Source-Family Overview Helper
+  - Geospatial AI progress now records `/api/context/environmental/source-families-overview` as a bounded backend review/fusion helper across implemented environmental source families.
+  - This is helper-package evidence only and must not be treated as a generic situation-scoring or cross-source proof surface.
+- Environmental Source-Family Export Helper
+  - Geospatial AI progress now records `/api/context/environmental/source-families-export` as a compact backend export helper for downstream family-summary consumers.
+  - This is helper-package evidence only and must not be treated as a full snapshot/export UI or a scoring/impact surface.
+- Environmental Context Export Package
+  - Geospatial AI progress now records `/api/context/environmental/context-export-package` as a narrow downstream backend consumer over the existing family-export contract.
+  - This is helper-package evidence only and must not be treated as a common-situation UI, hazard score, or impact model.
+- Marine Context Issue Export Bundle
+  - Marine AI progress now records `marineAnomalySummary.contextIssueExportBundle` with helper regression, smoke, build, lint, and export-aware review coverage.
+  - This is workflow-supporting helper evidence only and must not be treated as source validation proof or anomaly-cause proof.
+- Marine Full Export Coherence Regression
+  - Marine AI progress now records deterministic coherence checks across exported `marineAnomalySummary` review-package branches, including fusion, review, source-summary, issue-queue, issue-export, and hydrology context coherence.
+  - This is workflow-supporting helper-regression evidence only and does not promote marine sources beyond their current status levels.
+- Marine Focused-Evidence Export Coherence Regression
+  - Marine AI progress now records deterministic focused replay-evidence and evidence-interpretation export coherence checks across exported `marineAnomalySummary` metadata.
+  - This is workflow-supporting helper-regression evidence only and does not promote marine sources beyond their current status levels.
 - Aerospace Context Review Summary
   - Aerospace AI progress now records an export-aware `Aerospace Context Review` helper and `aerospaceContextIssues` metadata coverage.
   - This strengthens the current implemented aerospace workflow, but it does not promote AWC, FAA NAS, CNEOS, SWPC, or OpenSky beyond `implemented` because browser smoke remains launcher-blocked on this host.
+- Aerospace Context Gap Queue
+  - Aerospace AI progress now records an export-aware `aerospaceContextGapQueue` helper plus prepared smoke assertions for missing-context review.
+  - This remains helper-package evidence only and does not promote aerospace sources beyond `implemented` because executed browser smoke is still missing on this host.
+- Aerospace Current vs Archive Space-Weather Context
+  - Aerospace AI progress now records an export-aware `aerospaceCurrentArchiveContext` helper that keeps current SWPC advisory context separate from archive-oriented NCEI metadata.
+  - This remains helper-package evidence only and does not promote SWPC or NCEI beyond `implemented` because executed browser smoke is still missing on this host.
+- Aerospace Export Coherence Helper
+  - Aerospace AI progress now records an export-aware `aerospaceExportCoherence` helper that checks alignment across source-readiness, context-gap, current/archive, and export-profile metadata.
+  - This remains helper-package evidence only and does not promote aerospace sources beyond `implemented` because executed browser smoke is still missing on this host.
 - Three-VAAC Aerospace Consumer Package
   - Aerospace AI progress now records bounded consumer/export coverage for Washington, Anchorage, and Tokyo VAAC advisories plus smoke fixture support.
   - The board keeps all three VAAC sources at `implemented`, not `workflow-validated`, because executed browser smoke is still missing on this host.
+- Features/Webcam Evidence Packet Export Bundle
+  - Features/Webcam AI progress now records `/api/cameras/source-ops-evidence-packets-export-bundle` as an aggregate-only selector/export helper over existing evidence packets.
+  - This remains workflow-supporting helper evidence only and does not promote lifecycle/source surfaces beyond current status.
+- Features/Webcam Evidence Packet Handoff Summary
+  - Features/Webcam AI progress now records `/api/cameras/source-ops-evidence-packets-handoff-summary` as an aggregate-only handoff/export helper over existing selector and readiness metadata.
+  - This remains workflow-supporting helper evidence only and does not promote lifecycle/source surfaces beyond current status.
+- Wave Monitor Tool Surface
+  - Atlas AI progress now records a fixture-backed `GET /api/tools/waves/overview` tool surface plus `tool-wave-monitor` integration into analyst evidence-timeline and source-readiness.
+  - This is implemented shared tool-surface evidence only, not a source row, not workflow validation, and not proof of persistent storage, live connector execution, scheduler behavior, or a mounted standalone runtime.
 
 ## Inconsistency Notes
 
@@ -899,6 +985,15 @@ Current planning docs are now closer to aligned, but a few notes remain:
 - Features/Webcam source-ops packaging
   - Source-ops export-summary aggregate-line bundling and the minimal review-queue export bundle now exist as backend-only workflow helpers.
   - They are workflow-supporting package evidence, not source validation proof for any external source.
+- Cross-lane helper packages
+  - Data AI family-overview, environmental family-overview/export, marine issue-export/coherence, aerospace gap-queue/current-vs-archive, and Features/Webcam evidence-packet selector/export helpers now exist as workflow-supporting planning surfaces.
+  - They help review and export flows, but they are not external-source validation proof and must not be read as relationship, causation, or action-recommendation engines.
+- Wave Monitor ownership
+  - Current repo evidence supports Wave Monitor as an implemented fixture-backed tool surface with shared analyst/readiness integration.
+  - It remains broad/shared until ownership is intentionally assigned; Atlas progress is important implementation input, not Manager-controlled ownership proof.
+- Chokepoint intelligence routing
+  - Any future chokepoint package must stay source-backed, caveated, and non-targeting.
+  - Route it through [chokepoint-intelligence-governance-packet.md](/C:/Users/mike/11Writer/app/docs/chokepoint-intelligence-governance-packet.md) rather than improvising corridor, reroute, anchorage, or blockade semantics from sparse public signals.
 - `noaa-tsunami-alerts`
   - Earlier planning treated it as started from registry and prompt readiness.
   - Repo evidence now supports `implemented`.

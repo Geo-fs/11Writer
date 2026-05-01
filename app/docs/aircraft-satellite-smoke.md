@@ -34,8 +34,12 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   and `aerospaceSourceReadiness`
   and `aerospaceContextReport`
   and `aerospaceReviewQueue`
+  and `aerospaceCurrentArchiveContext`
   and `nceiSpaceWeatherArchiveContext`
   and `vaacContext`
+  and `aerospaceExportCoherence`
+  and `aerospaceIssueExportBundle`
+  and `aerospaceContextSnapshotReport`
   in the aerospace export path.
   Local execution note for 2026-04-30:
   the aerospace smoke harness on this Windows host did not reach browser assertions because Playwright Chromium launch failed up front with `spawn EPERM`;
@@ -136,6 +140,42 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   NCEI archive metadata is treated as archival/contextual collection evidence only.
   It remains explicitly separate from current NOAA SWPC advisory context and must not be used to claim current GPS, radio, aircraft, or satellite failure.
   The provider is tracked separately in source status as `noaa-ncei-space-weather-portal`.
+- Current-versus-archive space-weather separation helper:
+  selected aircraft and satellites now also render a compact `Current vs Archive Space-Weather Context` inspector section.
+  This helper keeps current NOAA SWPC advisory context separate from archival NOAA NCEI collection metadata in both inspector lines and snapshot/export metadata.
+  It preserves current and archive source ids, source mode, source health, current advisory timing labels, archive temporal-coverage labels, and a guardrail line that archive metadata is not current warning truth.
+  It also preserves the guardrail that current advisories do not prove GPS, radio, satellite, or aircraft failure.
+  Snapshot metadata stores this separation summary under `aerospaceCurrentArchiveContext`.
+- Aerospace export-coherence helper:
+  snapshot/export metadata now also preserves an `aerospaceExportCoherence` summary that checks whether
+  `aerospaceSourceReadinessBundle`,
+  `aerospaceContextGapQueue`,
+  `aerospaceCurrentArchiveContext`,
+  and `aerospaceExportProfile`
+  stay aligned on metadata keys, footer-section inclusion, source ids, source modes, source health states, evidence bases, caveats, and guardrail lines.
+  This helper is export-accounting only.
+  It does not certify source reliability and it does not imply severity, operational consequence, or failure proof.
+- Aerospace issue-export-bundle helper:
+  snapshot/export metadata now also preserves an `aerospaceIssueExportBundle` summary that composes
+  `aerospaceSourceReadinessBundle`,
+  `aerospaceContextGapQueue`,
+  `aerospaceCurrentArchiveContext`,
+  and `aerospaceExportCoherence`
+  into review-only export items.
+  Those items preserve source ids, source modes, source health states, evidence bases, caveats, guardrail lines, and any missing metadata-key or footer-section findings already surfaced by export coherence.
+  This helper is export-accounting only.
+  It does not imply severity, operational consequence, failure proof, route impact, target exposure, threat, causation, or action recommendation.
+- Aerospace context snapshot/report package helper:
+  snapshot/export metadata now also preserves an `aerospaceContextSnapshotReport` package that composes
+  `aerospaceSourceReadinessBundle`,
+  `aerospaceContextGapQueue`,
+  `aerospaceCurrentArchiveContext`,
+  `aerospaceExportCoherence`,
+  and `aerospaceIssueExportBundle`
+  into a compact report-facing metadata package.
+  The package preserves package profile, source ids, source modes, source health states, evidence bases, review lines, export lines, missing metadata keys, missing footer sections, caveats, and guardrail wording.
+  This helper is report/export accounting only.
+  It does not imply source certification, severity, operational consequence, failure proof, route impact, target exposure, threat, causation, or action recommendation.
 - OpenSky anonymous states first slice:
   selected aircraft can now consume optional read-only anonymous OpenSky state-vector context through
   `/api/aerospace/aircraft/opensky/states`.
@@ -228,7 +268,16 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   aerospace now also builds a compact `Aerospace Source Readiness` summary from already-loaded context availability, context review, export readiness, and selected-target data health.
   It groups the major aerospace context families into bounded review-oriented families such as airport operations, OpenSky comparison, space events, current space-weather context, archive context, and selected-target evidence.
   Each family preserves per-source availability, source mode, source health, evidence posture, caveats, and a bounded readiness label.
+  Snapshot metadata now also preserves an explicit review-oriented `guardrailLine`, and prepared smoke assertions check that the source-readiness caveats still include the no-severity boundary.
   It does not create a global severity score and does not imply target behavior, route impact, GPS/radio/satellite failure, causation, or action recommendation.
+- Aerospace source readiness export bundle:
+  aerospace now also exposes a compact source-readiness export bundle selector over already-loaded families.
+  The bundle preserves `bundleId`, bundled family ids, per-family readiness labels, source modes, health states, a `topReviewNote`, caveats, and a separate no-severity/no-action `guardrailLine`.
+  Export profiles can prioritize those compact bundle lines, but the bundle remains review-oriented export context only.
+- Aerospace context gap queue:
+  aerospace now also builds a compact `Aerospace Context Gap Queue` from already-loaded context availability and source-readiness families.
+  It surfaces review items for unavailable expected context, degraded source health, stale or limited freshness, empty optional windows, fixture-backed context, and current/archive separation gaps.
+  Each queue item preserves source family, source ids, source modes, source health, evidence basis, caveats, an export-ready line, and an explicit no-severity/no-consequence guardrail.
 - Aerospace context report summary:
   aerospace now also builds a compact `Aerospace Context Report` summary from already-loaded selected-target evidence, context availability, export readiness, review queue, and selected-target data health.
   It is an explainability/export aid only.

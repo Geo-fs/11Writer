@@ -106,6 +106,10 @@ def is_gather_ui_integration(path: str) -> bool:
         or path == "app/docs/source-validation-status.md"
         or path == "app/docs/source-workflow-validation-plan.md"
         or path == "app/docs/source-routing-priority-memo.md"
+        or path == "app/docs/data-ai-next-routing-after-family-summary.md"
+        or path == "app/docs/data-ai-rss-batch3-routing-packets.md"
+        or path == "app/docs/safe-hypothesis-governance-packet.md"
+        or path == "app/docs/source-quick-assign-packets-data-ai-rss.md"
         or path == "app/docs/source-consolidated-noauth-registry.md"
         or path == "app/docs/source-quick-assign-packets-batch5.md"
         or path.startswith("app/docs/source-acceleration-phase2-")
@@ -146,12 +150,16 @@ def is_geospatial_environmental(path: str) -> bool:
         return True
     if path.startswith("app/docs/environmental-events"):
         return True
+    if path == "app/docs/environmental-source-family-overview.md":
+        return True
     if path in {
         "app/server/src/routes/weather_context.py",
         "app/server/src/routes/geomagnetism.py",
         "app/server/src/routes/catchments_context.py",
+        "app/server/src/routes/environmental_context.py",
         "app/server/src/services/bmkg_earthquakes_service.py",
         "app/server/src/services/dmi_forecast_service.py",
+        "app/server/src/services/environmental_source_families_overview_service.py",
         "app/server/src/services/ipma_warnings_service.py",
         "app/server/src/services/ireland_wfd_service.py",
         "app/server/src/services/ga_recent_earthquakes_service.py",
@@ -161,11 +169,17 @@ def is_geospatial_environmental(path: str) -> bool:
         "app/server/src/services/geosphere_austria_warnings_service.py",
         "app/server/src/services/nasa_power_meteorology_solar_service.py",
         "app/server/src/services/noaa_global_volcano_service.py",
+        "app/server/src/services/france_georisques_service.py",
+        "app/server/src/services/uk_ea_water_quality_service.py",
         "app/server/src/services/usgs_geomagnetism_service.py",
         "app/server/src/routes/base_earth_context.py",
+        "app/server/src/routes/risk_context.py",
+        "app/server/src/routes/water_quality_context.py",
         "app/server/tests/test_bmkg_earthquakes.py",
         "app/server/tests/test_base_earth_reference_bundle.py",
         "app/server/tests/test_dmi_forecast.py",
+        "app/server/tests/test_environmental_source_families_overview.py",
+        "app/server/tests/test_france_georisques.py",
         "app/server/tests/test_ga_recent_earthquakes.py",
         "app/server/tests/test_geosphere_austria_warnings.py",
         "app/server/tests/test_ipma_warnings.py",
@@ -173,6 +187,7 @@ def is_geospatial_environmental(path: str) -> bool:
         "app/server/tests/test_met_eireann_forecast.py",
         "app/server/tests/test_met_eireann_warnings.py",
         "app/server/tests/test_nasa_power_meteorology_solar.py",
+        "app/server/tests/test_uk_ea_water_quality.py",
         "app/server/tests/test_usgs_geomagnetism.py",
     }:
         return True
@@ -197,6 +212,8 @@ def is_geospatial_environmental(path: str) -> bool:
         or "ipma" in path.lower()
         or "geomagnetism" in path.lower()
         or "catchments" in path.lower()
+        or "georisques" in path.lower()
+        or "water_quality" in path.lower()
         or "cap_alert" in path.lower()
         or "geosphere_austria" in path.lower()
         or "met_eireann_forecast" in path.lower()
@@ -249,7 +266,8 @@ def is_aerospace(path: str) -> bool:
 
 def is_marine(path: str) -> bool:
     return (
-        path.startswith("app/client/src/features/marine/")
+        path == "app/client/scripts/marineContextHelperRegression.mjs"
+        or path.startswith("app/client/src/features/marine/")
         or path == "app/docs/marine-module.md"
         or path == "app/docs/marine-context-source-contract-matrix.md"
         or path == "app/docs/marine-workflow-validation.md"
@@ -278,6 +296,8 @@ def is_features_webcam(path: str) -> bool:
         or path == "app/server/src/services/camera_source_ops_detail.py"
         or path == "app/server/src/services/camera_source_ops_artifact_timestamps.py"
         or path == "app/server/src/services/camera_source_ops_export_summary.py"
+        or path == "app/server/src/services/camera_source_ops_export_readiness.py"
+        or path == "app/server/src/services/camera_source_ops_evidence_packets.py"
         or path == "app/server/src/services/camera_source_ops_report_index.py"
         or path == "app/server/src/services/camera_source_ops_review_prerequisites.py"
         or path == "app/server/src/services/camera_source_ops_review_queue.py"
@@ -294,10 +314,12 @@ def is_features_webcam(path: str) -> bool:
 
 def is_atlas_planning(path: str) -> bool:
     return path in {
+        "app/docs/7po8-integration-plan.md",
+        "app/docs/cross-source-hypothesis-graph.md",
         "app/docs/data-ai-rss-source-candidates.md",
         "app/docs/data-ai-rss-source-candidates-batch2.md",
         "app/docs/data-ai-rss-source-candidates-batch3.md",
-    }
+    } or path.startswith("7Po8/")
 
 
 def is_shared_high_collision(path: str) -> bool:

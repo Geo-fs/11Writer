@@ -79,7 +79,42 @@ Data AI owns bounded backend-only public internet-information source slices that
   - `cert-fr-advisories`
   - `sans-isc-diary`
   - `cloudflare-status`
+  - `cloudflare-radar`
+  - `netblocks`
+  - `apnic-blog`
+  - `bellingcat`
+  - `citizen-lab`
+  - `occrp`
+  - `icij`
+  - `eff-updates`
+  - `access-now`
+  - `privacy-international`
+  - `freedom-house`
+  - `full-fact`
+  - `snopes`
+  - `politifact`
+  - `factcheck-org`
+  - `euvsdisinfo`
   - `gdacs-alerts`
+  - `state-travel-advisories`
+  - `eu-commission-press`
+  - `un-press-releases`
+  - `unaids-news`
+  - `our-world-in-data`
+  - `carbon-brief`
+  - `eumetsat-news`
+  - `smithsonian-volcano-news`
+  - `eos-news`
+  - `atlantic-council`
+  - `ecfr`
+  - `war-on-the-rocks`
+  - `modern-war-institute`
+  - `irregular-warfare`
+  - `google-security-blog`
+  - `bleepingcomputer`
+  - `krebs-on-security`
+  - `securityweek`
+  - `dfrlab`
 - Exact feed URLs used:
   - `cisa-cybersecurity-advisories` -> `https://www.cisa.gov/cybersecurity-advisories/all.xml`
   - `cisa-ics-advisories` -> `https://www.cisa.gov/cybersecurity-advisories/ics-advisories.xml`
@@ -88,7 +123,42 @@ Data AI owns bounded backend-only public internet-information source slices that
   - `cert-fr-advisories` -> `https://www.cert.ssi.gouv.fr/avis/feed/`
   - `sans-isc-diary` -> `https://isc.sans.edu/rssfeed.xml`
   - `cloudflare-status` -> `https://www.cloudflarestatus.com/history.rss`
+  - `cloudflare-radar` -> `https://blog.cloudflare.com/tag/cloudflare-radar/rss/`
+  - `netblocks` -> `https://netblocks.org/feed`
+  - `apnic-blog` -> `https://blog.apnic.net/feed/`
+  - `bellingcat` -> `https://www.bellingcat.com/feed/`
+  - `citizen-lab` -> `https://citizenlab.ca/feed/`
+  - `occrp` -> `https://www.occrp.org/en/feed`
+  - `icij` -> `https://www.icij.org/feed/`
+  - `eff-updates` -> `https://www.eff.org/rss/updates.xml`
+  - `access-now` -> `https://www.accessnow.org/feed/`
+  - `privacy-international` -> `https://privacyinternational.org/rss.xml`
+  - `freedom-house` -> `https://freedomhouse.org/rss.xml`
+  - `full-fact` -> `https://fullfact.org/feed/`
+  - `snopes` -> `https://www.snopes.com/feed/`
+  - `politifact` -> `https://www.politifact.com/rss/all/`
+  - `factcheck-org` -> `https://www.factcheck.org/feed/`
+  - `euvsdisinfo` -> `https://euvsdisinfo.eu/feed/`
   - `gdacs-alerts` -> `https://www.gdacs.org/xml/rss.xml`
+  - `state-travel-advisories` -> `https://travel.state.gov/_res/rss/TAsTWs.xml`
+  - `eu-commission-press` -> `https://ec.europa.eu/commission/presscorner/api/rss`
+  - `un-press-releases` -> `https://press.un.org/en/rss.xml`
+  - `unaids-news` -> `https://www.unaids.org/en/rss.xml`
+  - `our-world-in-data` -> `https://ourworldindata.org/atom.xml`
+  - `carbon-brief` -> `https://www.carbonbrief.org/feed/`
+  - `eumetsat-news` -> `https://www.eumetsat.int/rss.xml`
+  - `smithsonian-volcano-news` -> `https://volcano.si.edu/news/WeeklyVolcanoRSS.xml`
+  - `eos-news` -> `https://eos.org/feed`
+  - `atlantic-council` -> `https://www.atlanticcouncil.org/feed/`
+  - `ecfr` -> `https://ecfr.eu/feed/`
+  - `war-on-the-rocks` -> `https://warontherocks.com/feed/`
+  - `modern-war-institute` -> `https://mwi.westpoint.edu/feed/`
+  - `irregular-warfare` -> `https://irregularwarfare.org/feed/`
+  - `google-security-blog` -> `https://security.googleblog.com/feeds/posts/default`
+  - `bleepingcomputer` -> `https://www.bleepingcomputer.com/feed/`
+  - `krebs-on-security` -> `https://krebsonsecurity.com/feed/`
+  - `securityweek` -> `https://www.securityweek.com/feed/`
+  - `dfrlab` -> `https://dfrlab.org/feed/`
 - Normalized item fields preserved:
   - source id
   - source name
@@ -110,18 +180,123 @@ Data AI owns bounded backend-only public internet-information source slices that
   - the aggregate route reuses the single existing registry/service path
   - `source` accepts a comma-separated subset of configured source ids
   - official cyber-advisory family queries can stay bounded with `source=ncsc-uk-all,cert-fr-alerts,cert-fr-advisories`
+  - official/public advisory family queries can stay bounded with `source=state-travel-advisories,eu-commission-press,un-press-releases,unaids-news`
+  - scientific/environmental family queries can stay bounded with `source=our-world-in-data,carbon-brief,eumetsat-news,smithsonian-volcano-news,eos-news`
+  - policy/think-tank family queries can stay bounded with `source=atlantic-council,ecfr,war-on-the-rocks,modern-war-institute,irregular-warfare`
+  - cyber vendor/community follow-on queries can stay bounded with `source=google-security-blog,bleepingcomputer,krebs-on-security,securityweek,dfrlab`
+  - infrastructure/status family queries can stay bounded with `source=cloudflare-radar,netblocks,apnic-blog`
+  - OSINT/investigation family queries can stay bounded with `source=bellingcat,citizen-lab,occrp,icij`
+  - rights/civic family queries can stay bounded with `source=eff-updates,access-now,privacy-international,freedom-house`
+  - fact-checking/disinformation family queries can stay bounded with `source=full-fact,snopes,politifact,factcheck-org,euvsdisinfo`
   - unknown source ids return `400`
 - Prompt-injection handling:
   - suspicious source text is stored as inert text only
   - HTML/script markup is stripped from normalized summaries
   - source text does not change evidence basis, source health, validation state, or repo behavior
+
+### Data AI feed-family overview
+
+- Route: `GET /api/feeds/data-ai/source-families/overview`
+- Query params:
+  - `family`
+  - `source`
+- Purpose in the Spatial Intelligence Loop:
+  - `Observe`: account for which Data AI feeds are configured and available without reopening item text
+  - `Orient`: group implemented feeds into bounded source families with source mode, source health, evidence basis, safe feed URLs, and caveats
+  - `Prioritize`: expose family health, empty/mixed states, and fixture-backed item counts without inventing a credibility or severity score
+  - `Explain`: provide compact export-safe family lines for review workflows
+  - `Act`: support analyst/export routing only; no action recommendation is implied
+- Implemented family ids:
+  - `official-advisories`
+  - `official-public-advisories`
+  - `scientific-environmental-context`
+  - `policy-thinktank-commentary`
+  - `cyber-vendor-community-follow-on`
+  - `cyber-community-context`
+  - `infrastructure-status`
+  - `osint-investigations`
+  - `rights-civic-digital-policy`
+  - `fact-checking-disinformation`
+  - `world-events-disaster-alerts`
+- Route behavior:
+  - summarizes the existing Data AI feed registry rather than adding a second feed framework
+  - supports bounded `family=` filtering, for example `family=official-advisories,infrastructure-status`
+  - supports bounded `source=` filtering, for example `source=cert-fr-alerts,full-fact,snopes`
+  - intersects `family=` and `source=` when both are present
+  - returns `400` for unknown family ids or unknown source ids
+- Summary/export metadata preserved per family:
+  - family id and label
+  - family health and combined source mode
+  - source ids and source labels
+  - source categories
+  - configured feed URLs
+  - evidence bases
+  - source count, loaded source count, fixture source count
+  - raw item count and deduped item count
+  - dedupe posture
+  - tags
+  - last fetched/source generated timestamps when available
+  - family caveats
+  - export-safe lines
+- Summary/export metadata preserved per source row:
+  - source id, source name, and source category
+  - configured feed URL and final URL
+  - source mode and source health
+  - evidence basis
+  - raw item count and deduped item count
+  - dedupe posture
+  - tags
+  - source caveat
+  - export-safe lines
+- Guardrail boundary:
+  - the overview `guardrailLine` states that the summary is source-availability/context accounting only
+  - it is not credibility scoring, event proof, attribution proof, impact proof, legal conclusion, or required action
+- Export-safe behavior:
+  - family export lines intentionally summarize metadata only
+  - free-form feed text does not get copied into family export lines
+  - prompt-like source text remains inert and cannot change source mode, source health, evidence basis, validation state, or repo behavior
 - Per-source caveat boundaries:
   - CISA feeds remain official advisory context
   - NCSC UK all-feed items remain mixed official guidance/news/advisory context, not exploit or incident proof
   - CERT-FR alerts remain official French alert context, not exploit proof, victim proof, or action ranking
   - CERT-FR advisories remain official French advisory context, not incident certainty or derived severity
+  - U.S. State travel advisories remain official travel-guidance context, not universal safety truth, field confirmation, or required action
+  - European Commission Press Corner remains official institutional policy/announcement context, not field confirmation or legal conclusion
+  - UN press releases remain official institutional statement context, not independent field confirmation, legal conclusion, or attribution proof
+  - UNAIDS news remains official public-health/program context, not diagnosis, field confirmation, or required-action guidance
+  - Our World in Data remains research and explanatory context, not primary event truth, field confirmation, or required-action guidance
+  - Carbon Brief remains climate/environmental reporting context, not primary hazard confirmation, scientific certainty proof, or required-action guidance
+  - EUMETSAT news remains weather/climate/Earth-observation context, not live hazard confirmation or operational forecast truth
+  - Smithsonian Volcano News remains volcano/science-news context, not live eruption confirmation or geospatial event truth
+  - Eos News remains Earth/space science reporting context, not primary event confirmation, scientific certainty proof, or required-action guidance
+  - Atlantic Council remains policy/strategy commentary context, not event confirmation, intent proof, or required-action guidance
+  - ECFR remains policy-analysis context, not event confirmation, geopolitical truth, escalation prediction, or required-action guidance
+  - War on the Rocks remains strategy/security commentary context, not event confirmation, threat rating, or operational recommendation
+  - Modern War Institute remains military-analysis commentary context, not event confirmation, operational truth, targeting support, or required-action guidance
+  - Irregular Warfare Initiative remains analysis/commentary context, not event confirmation, attribution proof, escalation prediction, or operational recommendation
+  - Google Security Blog remains vendor security update/research context, not independent incident confirmation, exploitation proof, or required-action guidance
+  - BleepingComputer remains cyber-news context, not direct incident confirmation, compromise proof, or required-action guidance
+  - Krebs on Security remains investigative cyber-reporting context, not direct incident confirmation, attribution proof, or required-action guidance
+  - SecurityWeek remains cyber-industry news context, not incident confirmation, exploitation proof, or required-action guidance
+  - DFRLab remains research/disinformation-monitoring context, not direct incident confirmation, attribution proof, or required-action guidance
   - SANS ISC remains community/analyst context, not official government truth
   - Cloudflare Status remains Cloudflare service status only, not whole-internet status
+  - Cloudflare Radar remains provider-specific internet-analysis context, not neutral whole-internet truth or outage proof
+  - NetBlocks remains methodology-dependent measurement context, not operator-confirmed outage truth
+  - APNIC blog remains routing, measurement, and policy context, not a live incident feed
+  - Bellingcat remains investigative/OSINT context, not official incident truth, attribution proof, or legal conclusion
+  - Citizen Lab remains research and digital-rights context, not official incident confirmation or universal attribution proof
+  - OCCRP remains investigative-reporting context, not official source truth or standalone proof of culpability
+  - ICIJ remains investigative/public-interest context, not official incident confirmation or legal finding
+  - EFF updates remain civic and digital-rights context, not official incident truth or required-action policy
+  - Access Now remains advocacy and digital-rights context, not official source truth or incident confirmation
+  - Privacy International remains civic and privacy-rights context, not official incident truth or legal conclusion
+  - Freedom House remains rights and democracy context, not official source truth or legal finding
+  - Full Fact remains fact-checking context about claims, not universal ground truth or required-action policy
+  - Snopes remains misinformation-review context, not universal truth adjudication or legal proof
+  - PolitiFact remains claim-rating context, not binding policy guidance or legal conclusion
+  - FactCheck.org remains fact-checking context, not enforcement guidance or universal truth adjudication
+  - EUvsDisinfo remains disinformation-monitoring context, not attribution proof, legal conclusion, or required-action policy
   - GDACS remains disaster alert context, not impact/damage proof
 
 ### NIST NVD CVE

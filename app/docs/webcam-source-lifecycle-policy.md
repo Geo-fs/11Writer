@@ -344,6 +344,7 @@ What may not trigger a transition by itself:
 - aggregate-only export selector output alone
 - export-summary review-queue aggregate-line mode alone
 - minimal review-queue export bundle output alone
+- export-readiness rollup/checklist output alone
 
 ## Required checks before promotion
 
@@ -437,3 +438,12 @@ What may not trigger a transition by itself:
 - do not treat aggregate-only export mode as stronger evidence than the full filtered queue; it is only a smaller read-only response shape
 - do not treat export-summary aggregate-line mode as a substitute for lifecycle evidence review; it is only a compact export bundle
 - do not treat the minimal review-queue export bundle as a substitute for the underlying lifecycle evidence; it is only a summary payload for export/debug consumers
+- do not treat the export-readiness rollup or checklist as promotion authority; it is only a handoff summary of missing evidence and allowed next review steps
+- do not treat lifecycle-state or missing-evidence selectors on the export-readiness route as evidence upgrades; they are only read-only views over existing review data
+- do not treat source-ops evidence packets as activation, validation, endpoint-health, orientation, availability, or freshness proof; they are compact review/export packets only
+- do not include raw payloads, endpoint URLs, credentials, tokenized URLs, or local paths in source-ops evidence packets
+- do not treat blocked-reason posture selectors or evidence-gap family selectors on source-ops evidence packets as authority to reinterpret lifecycle state; they are only filtered views over stored lifecycle evidence
+- do not treat the source-ops evidence-packet export bundle as a substitute for the underlying packet evidence; it is aggregate-only export/debug summarization
+- do not treat the source-ops evidence-packet handoff summary as a substitute for the underlying packet evidence or readiness checklist; it is aggregate-only handoff/export summarization
+- do not treat the source-ops evidence-packet handoff export bundle as a substitute for the underlying packet evidence or readiness checklist; it is a smaller aggregate-only export/debug payload for downstream consumers
+- do not treat the unified source-ops export surface as a substitute for the underlying review-queue, evidence-packet, readiness, or handoff views; it is an aggregate-only composition layer for downstream export consumers

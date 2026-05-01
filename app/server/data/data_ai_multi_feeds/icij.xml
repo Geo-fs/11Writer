@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>ICIJ</title>
+    <link>https://www.icij.org/</link>
+    <lastBuildDate>Thu, 30 Apr 2026 09:55:00 GMT</lastBuildDate>
+    <item>
+      <title>Data project maps cross-border ownership trails and policy blind spots</title>
+      <link>https://www.icij.org/investigations/data-project-cross-border-ownership-trails/</link>
+      <guid>https://www.icij.org/investigations/data-project-cross-border-ownership-trails/</guid>
+      <pubDate>Thu, 30 Apr 2026 09:50:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Configuration-like note: <code>export CASE_STATUS=confirmed</code>.</p>
+        <p>Public-interest investigative context on ownership trails, data collaboration, and policy blind spots; not an official legal finding.</p>
+      ]]></description>
+      <category>Investigations</category>
+      <category>Data</category>
+    </item>
+  </channel>
+</rss>

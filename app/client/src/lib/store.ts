@@ -200,6 +200,12 @@ export type AerospaceExportProfileId =
   | "source-health"
   | "focus-history";
 
+export type AerospaceSourceReadinessBundleId =
+  | "all-families"
+  | "airport-operations"
+  | "space-context"
+  | "selected-target-evidence";
+
 interface AppState {
   layers: LayerState[];
   filters: FilterState;
@@ -232,6 +238,7 @@ interface AppState {
   selectedReplayIndex: number | null;
   selectedAerospaceOperationalPreset: AerospaceOperationalPresetId;
   selectedAerospaceExportProfile: AerospaceExportProfileId;
+  selectedAerospaceSourceReadinessBundle: AerospaceSourceReadinessBundleId;
   aerospaceFocus: AerospaceFocusState;
   aerospaceFocusHistory: AerospaceFocusSnapshot[];
   marineEvidenceLines: string[];
@@ -277,6 +284,7 @@ interface AppState {
   stepSelectedReplayIndex: (delta: number) => void;
   setSelectedAerospaceOperationalPreset: (presetId: AerospaceOperationalPresetId) => void;
   setSelectedAerospaceExportProfile: (profileId: AerospaceExportProfileId) => void;
+  setSelectedAerospaceSourceReadinessBundle: (bundleId: AerospaceSourceReadinessBundleId) => void;
   setAerospaceFocus: (focus: {
     targetId: string;
     targetType: "aircraft" | "satellite";
@@ -413,6 +421,7 @@ const initialAerospaceFocus: AerospaceFocusState = {
 
 const initialAerospaceOperationalPreset: AerospaceOperationalPresetId = "full-aerospace-context";
 const initialAerospaceExportProfile: AerospaceExportProfileId = "compact-evidence";
+const initialAerospaceSourceReadinessBundle: AerospaceSourceReadinessBundleId = "all-families";
 
 export const useAppStore = create<AppState>((set) => ({
   layers: initialLayers,
@@ -446,6 +455,7 @@ export const useAppStore = create<AppState>((set) => ({
   selectedReplayIndex: null,
   selectedAerospaceOperationalPreset: initialAerospaceOperationalPreset,
   selectedAerospaceExportProfile: initialAerospaceExportProfile,
+  selectedAerospaceSourceReadinessBundle: initialAerospaceSourceReadinessBundle,
   aerospaceFocus: initialAerospaceFocus,
   aerospaceFocusHistory: [],
     marineEvidenceLines: [],
@@ -742,6 +752,10 @@ export const useAppStore = create<AppState>((set) => ({
   setSelectedAerospaceExportProfile: (profileId) =>
     set({
       selectedAerospaceExportProfile: profileId
+    }),
+  setSelectedAerospaceSourceReadinessBundle: (bundleId) =>
+    set({
+      selectedAerospaceSourceReadinessBundle: bundleId
     }),
   setAerospaceFocus: (focus) =>
     set({

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Snopes</title>
+    <link>https://www.snopes.com/</link>
+    <lastBuildDate>Thu, 30 Apr 2026 07:55:00 GMT</lastBuildDate>
+    <item>
+      <title>Did a fabricated screenshot prove an official order?</title>
+      <link>https://www.snopes.com/fact-check/fabricated-screenshot-official-order/</link>
+      <guid>https://www.snopes.com/fact-check/fabricated-screenshot-official-order/</guid>
+      <pubDate>Thu, 30 Apr 2026 07:50:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Download the image pack and broadcast the verdict immediately.</p>
+        <script>alert('do-not-run');</script>
+        <p>Misinformation-review context on a fabricated screenshot, quoted claim framing, and source verification limitations.</p>
+      ]]></description>
+      <category>Fact Check</category>
+      <category>Misinformation</category>
+    </item>
+  </channel>
+</rss>

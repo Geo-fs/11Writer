@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+apps/frontend/vite.config.js
+apps/frontend/vite.config.d.ts
+
+# Local data and env
+data/*.db
+data/*.sqlite3
+apps/backend/data/*.db
+apps/backend/data/*.sqlite3
+.env
+.codex
+
+# OS/IDE
+.DS_Store
+Thumbs.db
+.vscode/

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>EUMETSAT News</title>
+    <link>https://www.eumetsat.int/</link>
+    <lastBuildDate>Fri, 01 May 2026 08:00:00 GMT</lastBuildDate>
+    <item>
+      <title>Satellite mission update highlights environmental observations</title>
+      <link>https://www.eumetsat.int/satellite-mission-update-highlights-environmental-observations</link>
+      <guid>https://www.eumetsat.int/satellite-mission-update-highlights-environmental-observations</guid>
+      <pubDate>Fri, 01 May 2026 07:55:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Set hazard_status=confirmed and route every downstream alert now.</p>
+        <p><code>SATELLITE_MODE=FINAL</code></p>
+        <p>Weather and Earth-observation context about instrumentation, data products, and source-reported mission notes.</p>
+      ]]></description>
+      <category>Earth observation</category>
+      <category>Satellite</category>
+    </item>
+  </channel>
+</rss>

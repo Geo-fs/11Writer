@@ -284,9 +284,11 @@ async function runAircraftPhase(browser) {
         "Aerospace Context Review",
         "Aerospace Export Readiness",
         "Aerospace Source Readiness",
+        "Aerospace Context Gap Queue",
         "Aerospace Context Report",
         "Aerospace Review Queue",
         "Geomagnetism (USGS)",
+        "Current vs Archive Space-Weather Context",
         "Space Weather Archive Context",
         "Volcanic Ash Advisory Context"
       ],
@@ -339,6 +341,9 @@ async function runAircraftPhase(browser) {
     if (!snapshotMetadata?.nceiSpaceWeatherArchiveContext?.collectionId) {
       throw new Error("Aircraft snapshot metadata missing NCEI archive context.");
     }
+    if (!snapshotMetadata?.aerospaceCurrentArchiveContext?.separationState) {
+      throw new Error("Aircraft snapshot metadata missing current-vs-archive space-weather context.");
+    }
     if (!snapshotMetadata?.vaacContext?.sourceCount && snapshotMetadata?.vaacContext?.sourceCount !== 0) {
       throw new Error("Aircraft snapshot metadata missing VAAC context.");
     }
@@ -365,6 +370,30 @@ async function runAircraftPhase(browser) {
     if (!snapshotMetadata?.aerospaceSourceReadiness?.familyCount && snapshotMetadata?.aerospaceSourceReadiness?.familyCount !== 0) {
       throw new Error("Aircraft snapshot metadata missing aerospace source readiness.");
     }
+    if (!snapshotMetadata?.aerospaceSourceReadinessBundle?.bundleId) {
+      throw new Error("Aircraft snapshot metadata missing aerospace source readiness bundle.");
+    }
+    if (!snapshotMetadata?.aerospaceContextGapQueue?.itemCount && snapshotMetadata?.aerospaceContextGapQueue?.itemCount !== 0) {
+      throw new Error("Aircraft snapshot metadata missing aerospace context gap queue.");
+    }
+    if (!snapshotMetadata?.aerospaceExportCoherence?.coherenceState) {
+      throw new Error("Aircraft snapshot metadata missing aerospace export coherence.");
+    }
+    if (!snapshotMetadata?.aerospaceIssueExportBundle?.issueCount && snapshotMetadata?.aerospaceIssueExportBundle?.issueCount !== 0) {
+      throw new Error("Aircraft snapshot metadata missing aerospace issue export bundle.");
+    }
+    if (!snapshotMetadata?.aerospaceContextSnapshotReport?.profileId) {
+      throw new Error("Aircraft snapshot metadata missing aerospace context snapshot/report package.");
+    }
+    if (snapshotMetadata.aerospaceExportCoherence.coherenceState !== "aligned") {
+      throw new Error(`Aircraft aerospace export coherence expected aligned state. Received ${snapshotMetadata.aerospaceExportCoherence.coherenceState}`);
+    }
+    if (!String(snapshotMetadata?.aerospaceSourceReadiness?.guardrailLine ?? "").includes("review-oriented")) {
+      throw new Error("Aircraft aerospace source readiness metadata missing the review-oriented guardrail.");
+    }
+    if (!String(snapshotMetadata?.aerospaceSourceReadinessBundle?.guardrailLine ?? "").includes("not severity scores")) {
+      throw new Error("Aircraft aerospace source readiness bundle metadata missing the no-severity guardrail.");
+    }
     if (!snapshotMetadata?.aerospaceContextReport?.sourceCount && snapshotMetadata?.aerospaceContextReport?.sourceCount !== 0) {
       throw new Error("Aircraft snapshot metadata missing aerospace context report.");
     }
@@ -380,6 +409,9 @@ async function runAircraftPhase(browser) {
     if (!Array.isArray(snapshotMetadata?.nceiSpaceWeatherArchiveContext?.displayLines)) {
       throw new Error("Aircraft NCEI archive metadata missing display lines.");
     }
+    if (!String(snapshotMetadata?.aerospaceCurrentArchiveContext?.guardrailLine ?? "").includes("not current warning truth")) {
+      throw new Error("Aircraft current-vs-archive metadata missing the current/archive guardrail.");
+    }
     if (!Array.isArray(snapshotMetadata?.vaacContext?.sources)) {
       throw new Error("Aircraft VAAC metadata missing sources.");
     }
@@ -394,6 +426,60 @@ async function runAircraftPhase(browser) {
     }
     if (!Array.isArray(snapshotMetadata?.aerospaceSourceReadiness?.families)) {
       throw new Error("Aircraft aerospace source readiness metadata missing families.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceSourceReadinessBundle?.families)) {
+      throw new Error("Aircraft aerospace source readiness bundle metadata missing families.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceContextGapQueue?.items)) {
+      throw new Error("Aircraft aerospace context gap queue metadata missing items.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceExportCoherence?.alignedMetadataKeys)) {
+      throw new Error("Aircraft aerospace export coherence metadata missing alignedMetadataKeys.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceIssueExportBundle?.items)) {
+      throw new Error("Aircraft aerospace issue export bundle metadata missing items.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceContextSnapshotReport?.reviewLines)) {
+      throw new Error("Aircraft aerospace context snapshot/report metadata missing reviewLines.");
+    }
+    if (!snapshotMetadata.aerospaceIssueExportBundle.items.some((item) => item.category === "current-archive-separation")) {
+      throw new Error("Aircraft aerospace issue export bundle metadata missing current/archive separation review coverage.");
+    }
+    if (!snapshotMetadata.aerospaceIssueExportBundle.items.every((item) => String(item.guardrailLines?.join(" ") ?? "").includes("do not imply severity"))) {
+      throw new Error("Aircraft aerospace issue export bundle metadata missing review-only guardrails on one or more items.");
+    }
+    if ((snapshotMetadata?.aerospaceExportCoherence?.bannedOperationalPhrasesPresent?.length ?? 0) !== 0) {
+      throw new Error("Aircraft aerospace export coherence metadata flagged unguarded operational wording.");
+    }
+    if ((snapshotMetadata?.aerospaceIssueExportBundle?.bannedOperationalPhrasesPresent?.length ?? 0) !== 0) {
+      throw new Error("Aircraft aerospace issue export bundle metadata flagged unguarded operational wording.");
+    }
+    if ((snapshotMetadata?.aerospaceContextSnapshotReport?.bannedOperationalPhrasesPresent?.length ?? 0) !== 0) {
+      throw new Error("Aircraft aerospace context snapshot/report metadata flagged unguarded operational wording.");
+    }
+    if (!snapshotMetadata?.aerospaceExportProfile?.includedMetadataKeys?.includes("aerospaceCurrentArchiveContext")) {
+      throw new Error("Aircraft export profile metadata missing current/archive metadata-key coverage.");
+    }
+    if (!snapshotMetadata?.aerospaceExportProfile?.includedMetadataKeys?.includes("aerospaceIssueExportBundle")) {
+      throw new Error("Aircraft export profile metadata missing issue export bundle metadata-key coverage.");
+    }
+    if (!snapshotMetadata?.aerospaceExportProfile?.includedMetadataKeys?.includes("aerospaceContextSnapshotReport")) {
+      throw new Error("Aircraft export profile metadata missing context snapshot/report metadata-key coverage.");
+    }
+    if (!String(snapshotMetadata?.aerospaceContextGapQueue?.guardrailLine ?? "").includes("do not imply severity")) {
+      throw new Error("Aircraft aerospace context gap queue metadata missing the no-consequence guardrail.");
+    }
+    if (!String(snapshotMetadata?.aerospaceIssueExportBundle?.guardrailLine ?? "").includes("do not imply severity")) {
+      throw new Error("Aircraft aerospace issue export bundle metadata missing the no-severity guardrail.");
+    }
+    if (!String(snapshotMetadata?.aerospaceContextSnapshotReport?.guardrailLine ?? "").includes("do not imply severity")) {
+      throw new Error("Aircraft aerospace context snapshot/report metadata missing the no-inference guardrail.");
+    }
+    if (
+      !Array.isArray(snapshotMetadata?.aerospaceSourceReadiness?.caveats) ||
+      !snapshotMetadata.aerospaceSourceReadiness.caveats.some((line) => line.includes("does not create a global severity score"))
+    ) {
+      throw new Error("Aircraft aerospace source readiness metadata missing the no-severity caveat.");
     }
 
     const beforeHeight = await page.evaluate(
@@ -498,9 +584,11 @@ async function runSatellitePhase(browser) {
         "Aerospace Context Review",
         "Aerospace Export Readiness",
         "Aerospace Source Readiness",
+        "Aerospace Context Gap Queue",
         "Aerospace Context Report",
         "Aerospace Review Queue",
         "Geomagnetism (USGS)",
+        "Current vs Archive Space-Weather Context",
         "Space Weather Archive Context",
         "Volcanic Ash Advisory Context"
       ],
@@ -559,6 +647,9 @@ async function runSatellitePhase(browser) {
     if (!snapshotMetadata?.nceiSpaceWeatherArchiveContext?.collectionId) {
       throw new Error("Satellite snapshot metadata missing NCEI archive context.");
     }
+    if (!snapshotMetadata?.aerospaceCurrentArchiveContext?.separationState) {
+      throw new Error("Satellite snapshot metadata missing current-vs-archive space-weather context.");
+    }
     if (!snapshotMetadata?.vaacContext?.sourceCount && snapshotMetadata?.vaacContext?.sourceCount !== 0) {
       throw new Error("Satellite snapshot metadata missing VAAC context.");
     }
@@ -577,6 +668,30 @@ async function runSatellitePhase(browser) {
     if (!snapshotMetadata?.aerospaceSourceReadiness?.familyCount && snapshotMetadata?.aerospaceSourceReadiness?.familyCount !== 0) {
       throw new Error("Satellite snapshot metadata missing aerospace source readiness.");
     }
+    if (!snapshotMetadata?.aerospaceSourceReadinessBundle?.bundleId) {
+      throw new Error("Satellite snapshot metadata missing aerospace source readiness bundle.");
+    }
+    if (!snapshotMetadata?.aerospaceContextGapQueue?.itemCount && snapshotMetadata?.aerospaceContextGapQueue?.itemCount !== 0) {
+      throw new Error("Satellite snapshot metadata missing aerospace context gap queue.");
+    }
+    if (!snapshotMetadata?.aerospaceExportCoherence?.coherenceState) {
+      throw new Error("Satellite snapshot metadata missing aerospace export coherence.");
+    }
+    if (!snapshotMetadata?.aerospaceIssueExportBundle?.issueCount && snapshotMetadata?.aerospaceIssueExportBundle?.issueCount !== 0) {
+      throw new Error("Satellite snapshot metadata missing aerospace issue export bundle.");
+    }
+    if (!snapshotMetadata?.aerospaceContextSnapshotReport?.profileId) {
+      throw new Error("Satellite snapshot metadata missing aerospace context snapshot/report package.");
+    }
+    if (snapshotMetadata.aerospaceExportCoherence.coherenceState !== "aligned") {
+      throw new Error(`Satellite aerospace export coherence expected aligned state. Received ${snapshotMetadata.aerospaceExportCoherence.coherenceState}`);
+    }
+    if (!String(snapshotMetadata?.aerospaceSourceReadiness?.guardrailLine ?? "").includes("review-oriented")) {
+      throw new Error("Satellite aerospace source readiness metadata missing the review-oriented guardrail.");
+    }
+    if (!String(snapshotMetadata?.aerospaceSourceReadinessBundle?.guardrailLine ?? "").includes("not severity scores")) {
+      throw new Error("Satellite aerospace source readiness bundle metadata missing the no-severity guardrail.");
+    }
     if (!snapshotMetadata?.aerospaceContextReport?.sourceCount && snapshotMetadata?.aerospaceContextReport?.sourceCount !== 0) {
       throw new Error("Satellite snapshot metadata missing aerospace context report.");
     }
@@ -592,6 +707,9 @@ async function runSatellitePhase(browser) {
     if (!Array.isArray(snapshotMetadata?.nceiSpaceWeatherArchiveContext?.displayLines)) {
       throw new Error("Satellite NCEI archive metadata missing display lines.");
     }
+    if (!String(snapshotMetadata?.aerospaceCurrentArchiveContext?.guardrailLine ?? "").includes("not current warning truth")) {
+      throw new Error("Satellite current-vs-archive metadata missing the current/archive guardrail.");
+    }
     if (!Array.isArray(snapshotMetadata?.vaacContext?.sources)) {
       throw new Error("Satellite VAAC metadata missing sources.");
     }
@@ -606,6 +724,60 @@ async function runSatellitePhase(browser) {
     }
     if (!Array.isArray(snapshotMetadata?.aerospaceSourceReadiness?.families)) {
       throw new Error("Satellite aerospace source readiness metadata missing families.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceSourceReadinessBundle?.families)) {
+      throw new Error("Satellite aerospace source readiness bundle metadata missing families.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceContextGapQueue?.items)) {
+      throw new Error("Satellite aerospace context gap queue metadata missing items.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceExportCoherence?.alignedMetadataKeys)) {
+      throw new Error("Satellite aerospace export coherence metadata missing alignedMetadataKeys.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceIssueExportBundle?.items)) {
+      throw new Error("Satellite aerospace issue export bundle metadata missing items.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceContextSnapshotReport?.reviewLines)) {
+      throw new Error("Satellite aerospace context snapshot/report metadata missing reviewLines.");
+    }
+    if (!snapshotMetadata.aerospaceIssueExportBundle.items.some((item) => item.category === "current-archive-separation")) {
+      throw new Error("Satellite aerospace issue export bundle metadata missing current/archive separation review coverage.");
+    }
+    if (!snapshotMetadata.aerospaceIssueExportBundle.items.every((item) => String(item.guardrailLines?.join(" ") ?? "").includes("do not imply severity"))) {
+      throw new Error("Satellite aerospace issue export bundle metadata missing review-only guardrails on one or more items.");
+    }
+    if ((snapshotMetadata?.aerospaceExportCoherence?.bannedOperationalPhrasesPresent?.length ?? 0) !== 0) {
+      throw new Error("Satellite aerospace export coherence metadata flagged unguarded operational wording.");
+    }
+    if ((snapshotMetadata?.aerospaceIssueExportBundle?.bannedOperationalPhrasesPresent?.length ?? 0) !== 0) {
+      throw new Error("Satellite aerospace issue export bundle metadata flagged unguarded operational wording.");
+    }
+    if ((snapshotMetadata?.aerospaceContextSnapshotReport?.bannedOperationalPhrasesPresent?.length ?? 0) !== 0) {
+      throw new Error("Satellite aerospace context snapshot/report metadata flagged unguarded operational wording.");
+    }
+    if (!snapshotMetadata?.aerospaceExportProfile?.includedMetadataKeys?.includes("aerospaceCurrentArchiveContext")) {
+      throw new Error("Satellite export profile metadata missing current/archive metadata-key coverage.");
+    }
+    if (!snapshotMetadata?.aerospaceExportProfile?.includedMetadataKeys?.includes("aerospaceIssueExportBundle")) {
+      throw new Error("Satellite export profile metadata missing issue export bundle metadata-key coverage.");
+    }
+    if (!snapshotMetadata?.aerospaceExportProfile?.includedMetadataKeys?.includes("aerospaceContextSnapshotReport")) {
+      throw new Error("Satellite export profile metadata missing context snapshot/report metadata-key coverage.");
+    }
+    if (!String(snapshotMetadata?.aerospaceContextGapQueue?.guardrailLine ?? "").includes("do not imply severity")) {
+      throw new Error("Satellite aerospace context gap queue metadata missing the no-consequence guardrail.");
+    }
+    if (!String(snapshotMetadata?.aerospaceIssueExportBundle?.guardrailLine ?? "").includes("do not imply severity")) {
+      throw new Error("Satellite aerospace issue export bundle metadata missing the no-severity guardrail.");
+    }
+    if (!String(snapshotMetadata?.aerospaceContextSnapshotReport?.guardrailLine ?? "").includes("do not imply severity")) {
+      throw new Error("Satellite aerospace context snapshot/report metadata missing the no-inference guardrail.");
+    }
+    if (
+      !Array.isArray(snapshotMetadata?.aerospaceSourceReadiness?.caveats) ||
+      !snapshotMetadata.aerospaceSourceReadiness.caveats.some((line) => line.includes("does not create a global severity score"))
+    ) {
+      throw new Error("Satellite aerospace source readiness metadata missing the no-severity caveat.");
     }
 
     return {
@@ -990,7 +1162,7 @@ async function runMarinePhase(browser) {
     const contextIssuesText = await page.locator('[data-testid="marine-context-issues"]').textContent();
     assertIncludes(
       contextIssuesText ?? "",
-      ["Marine Context Issues", "fixture/local mode", "degraded", "unavailable"],
+      ["Marine Context Issues", "degraded", "unavailable", "source-health limitation"],
       "marine context issues"
     );
     const environmentalText = await page.locator('[data-testid="marine-environmental-context"]').textContent();
@@ -1030,7 +1202,7 @@ async function runMarinePhase(browser) {
     const irelandOpwText = await page.locator('[data-testid="marine-ireland-opw-context"]').textContent();
     assertIncludes(
       irelandOpwText ?? "",
-      ["Ireland OPW Water Level", "fixture/local"],
+      ["Ireland OPW Water Level", "fixture/local", "degraded"],
       "marine Ireland OPW water-level context"
     );
     const hydrologyText = await page.locator('[data-testid="marine-hydrology-context"]').textContent();
@@ -1042,13 +1214,28 @@ async function runMarinePhase(browser) {
     const fusionText = await page.locator('[data-testid="marine-context-fusion"]').textContent();
     assertIncludes(
       fusionText ?? "",
-      ["Marine Context Fusion", "Ocean/met context", "Hydrology context", "Infrastructure context", "Export readiness"],
+      [
+        "Marine Context Fusion",
+        "Ocean/met context",
+        "Hydrology context",
+        "Infrastructure context",
+        "Export readiness",
+        "source-health limitations dominate current source mix",
+        "partial context"
+      ],
       "marine context fusion"
     );
     const reviewReportText = await page.locator('[data-testid="marine-context-review-report"]').textContent();
     assertIncludes(
       reviewReportText ?? "",
-      ["Marine Context Review Report", "Context families", "Review next:", "Does not prove:"],
+      [
+        "Marine Context Review Report",
+        "Context families",
+        "Review next:",
+        "Does not prove:",
+        "source-health limitations dominate the current source mix",
+        "partial context"
+      ],
       "marine context review report"
     );
     await page.locator('[data-testid="marine-environmental-source-ndbc"] input').uncheck();
@@ -1260,6 +1447,13 @@ async function runMarinePhase(browser) {
     if (Number(contextSourceSummary.degradedSourceCount ?? 0) < 1) {
       throw new Error("Marine context source summary expected at least one degraded source.");
     }
+    if (
+      Number(contextSourceSummary.degradedSourceCount ?? 0) +
+        Number(contextSourceSummary.unavailableSourceCount ?? 0) <=
+      Number(contextSourceSummary.availableSourceCount ?? 0)
+    ) {
+      throw new Error("Marine context source summary expected degraded/unavailable sources to dominate the smoke source mix.");
+    }
     const vigicruesContext = metadata.marineAnomalySummary.vigicruesHydrometryContext ?? null;
     if (!vigicruesContext) {
       throw new Error("Marine snapshot metadata missing Vigicrues hydrometry context summary.");
@@ -1300,6 +1494,12 @@ async function runMarinePhase(browser) {
     if (Number(contextFusionSummary.familyCount ?? 0) < 3) {
       throw new Error(`Marine context fusion summary expected 3 families. Received ${contextFusionSummary.familyCount}`);
     }
+    if (contextFusionSummary.dominatedByLimitedSources !== true) {
+      throw new Error("Marine context fusion summary expected limited-source dominance in the smoke fixture mix.");
+    }
+    if (!String(contextFusionSummary.dominantLimitationLine ?? "").toLowerCase().includes("source-health limitations dominate")) {
+      throw new Error("Marine context fusion summary missing dominant limitation wording.");
+    }
     if (!Array.isArray(contextFusionSummary.familyLines) || contextFusionSummary.familyLines.length < 3) {
       throw new Error("Marine context fusion summary missing family lines.");
     }
@@ -1325,8 +1525,14 @@ async function runMarinePhase(browser) {
     if (!Array.isArray(contextReviewReport.reviewNeededItems) || contextReviewReport.reviewNeededItems.length < 1) {
       throw new Error("Marine context review report missing review-needed items.");
     }
+    if (!String(contextReviewReport.dominantLimitationLine ?? "").toLowerCase().includes("source-health limitations dominate")) {
+      throw new Error("Marine context review report missing dominant limitation wording.");
+    }
     if (!Array.isArray(contextReviewReport.doesNotProveLines) || contextReviewReport.doesNotProveLines.length < 1) {
       throw new Error("Marine context review report missing does-not-prove lines.");
+    }
+    if (!contextReviewReport.doesNotProveLines.some((line) => String(line).toLowerCase().includes("wrongdoing"))) {
+      throw new Error("Marine context review report missing wrongdoing guardrail.");
     }
     if (!["ready-with-caveats", "limited-context", "unavailable"].includes(contextReviewReport.exportReadiness)) {
       throw new Error(`Marine context review report export readiness was not recognized: ${contextReviewReport.exportReadiness}`);
@@ -1409,11 +1615,27 @@ async function runMarinePhase(browser) {
     if (!Array.isArray(contextIssueQueue.topIssues) || contextIssueQueue.topIssues.length < 1) {
       throw new Error("Marine context issue queue topIssues missing from snapshot metadata.");
     }
-    if (!contextIssueQueue.topIssues.some((issue) => issue.issueType === "fixture-mode")) {
-      throw new Error("Marine context issue queue expected a fixture-mode issue in snapshot metadata.");
-    }
     if (!contextIssueQueue.topIssues.some((issue) => issue.issueType === "degraded" || issue.issueType === "unavailable")) {
       throw new Error("Marine context issue queue expected degraded or unavailable source-health coverage in snapshot metadata.");
+    }
+    const contextIssueExportBundle = metadata.marineAnomalySummary.contextIssueExportBundle ?? null;
+    if (!contextIssueExportBundle) {
+      throw new Error("Marine snapshot metadata missing context issue export bundle.");
+    }
+    if (Number(contextIssueExportBundle.sourceCount ?? 0) < 5) {
+      throw new Error("Marine context issue export bundle expected all marine context sources.");
+    }
+    if (!String(contextIssueExportBundle.dominantLimitationLine ?? "").toLowerCase().includes("source-health limitations dominate")) {
+      throw new Error("Marine context issue export bundle missing dominant limitation wording.");
+    }
+    if (!Array.isArray(contextIssueExportBundle.rows) || contextIssueExportBundle.rows.length < 5) {
+      throw new Error("Marine context issue export bundle rows missing from snapshot metadata.");
+    }
+    if (!contextIssueExportBundle.rows.some((row) => row.sourceId === "scottish-water-overflows" && row.evidenceBasis === "contextual")) {
+      throw new Error("Marine context issue export bundle missing Scottish Water contextual-evidence row.");
+    }
+    if (!Array.isArray(contextIssueExportBundle.doesNotProveLines) || !contextIssueExportBundle.doesNotProveLines.some((line) => String(line).toLowerCase().includes("wrongdoing"))) {
+      throw new Error("Marine context issue export bundle missing wrongdoing guardrail.");
     }
 
     return {

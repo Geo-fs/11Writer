@@ -1,3 +1,366 @@
+## 2026-05-01 15:56 America/Chicago
+
+Assignment version:
+- 2026-05-01 15:44 America/Chicago
+
+Task:
+- extend deterministic regression coverage and helper metadata so marine context timeline/history snapshots stay coherent with chokepoint review packages and source-health caveats
+
+What changed:
+- extended pp/client/src/features/marine/marineContextTimeline.ts
+  - marine context snapshots now preserve active chokepoint review-lens metadata when available:
+    - eviewOnly
+    - corridorLabel
+    - oundedAreaLabel
+    - chokepoint review time window
+    - ocusedEvidenceKinds
+    - contextGapCount
+    - dominantLimitationLine
+    - sourceHealthLine
+  - top summary lines and caveats now inherit bounded chokepoint review-lens context where available
+  - snapshot dedupe now includes the new chokepoint/timeline coherence fields
+- updated pp/client/src/features/marine/MarineAnomalySection.tsx
+  - builds the existing marine chokepoint review package in a narrow metadata-only path
+  - passes that package into uildMarineContextSnapshot(...)
+  - keeps current export wiring intact while ensuring timeline snapshots and export metadata are derived from the same active review lens
+- extended pp/client/scripts/marineContextHelperRegression.mjs
+  - builds deterministic current and previous marine context snapshots for a chokepoint review scenario
+  - verifies coherence between:
+    - current/previous context timeline snapshots
+    - chokepoint review package metadata
+    - context source summary
+    - issue export bundle
+    - top-level marineAnomalySummary caveats
+  - asserts alignment for:
+    - corridor label
+    - focused target label
+    - focused evidence kinds
+    - context-gap count
+    - source-health line
+    - dominant limitation line
+    - review-only posture
+    - current/previous snapshot history preservation
+  - preserves no-severity/no-impact/no-vessel-intent/no-wrongdoing/no-evasion/no-escort/no-threat/no-action guardrails in the deterministic helper path
+- updated marine docs so timeline/chokepoint coherence behavior is now explicitly documented in workflow validation and module/export guidance
+
+Files touched:
+- pp/client/src/features/marine/marineContextTimeline.ts
+- pp/client/src/features/marine/MarineAnomalySection.tsx
+- pp/client/scripts/marineContextHelperRegression.mjs
+- pp/docs/marine-workflow-validation.md
+- pp/docs/marine-module.md
+- pp/docs/agent-progress/marine-ai.md
+
+Validation:
+- python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q -> pass
+- python -m compileall app/server/src -> pass
+- cmd /c npm.cmd run test:marine-context-helpers -> pass
+- cmd /c npm.cmd run lint -> pass
+- cmd /c npm.cmd run build -> pass
+- python app/server/tests/run_playwright_smoke.py marine -> pass
+
+Blockers or caveats:
+- 	est:marine-context-helpers still emits Node's experimental type-stripping warning, but the regression passes deterministically
+- this slice was metadata/regression hardening only; it did not add a new chokepoint or timeline UI section
+- no anomaly scoring changed and no source semantics changed
+- timeline/chokepoint coherence remains review/context only and does not prove severity, impact, anomaly cause, vessel behavior, vessel intent, wrongdoing, evasion, escort, toll activity, blockade, targeting, threat, or action need
+
+Next recommended task:
+- if Manager AI wants the next marine hardening slice, extend deterministic regression and export coherence into focused evidence interpretation mode-switch behavior so visible interpretation-card selections and exported metadata cannot drift under compact/detailed/evidence-only/caveats-first modes
+## 2026-05-01 15:24 America/Chicago
+
+Assignment version:
+- 2026-05-01 15:03 America/Chicago
+
+Task:
+- build a deterministic marine chokepoint review/export helper that composes existing replay/context helpers, exposes review-only chokepoint metadata, and locks down no-intent/no-wrongdoing/no-impact wording through helper regression and export metadata coherence checks
+
+What changed:
+- added pp/client/src/features/marine/marineChokepointReviewPackage.ts
+  - builds a compact review-only chokepoint package from existing chokepoint summary, focused replay evidence, focused interpretation, source summary, issue queue, issue export bundle, fusion summary, review report, hydrology context, and environmental context
+  - supports deterministic caller-provided corridorLabel, oundedAreaLabel, and crossingCount
+  - exports review-only fields for:
+    - bounded corridor / area label
+    - time window
+    - crossing-count support
+    - source modes
+    - source-health counts
+    - evidence-basis coverage
+    - context-gap count
+    - focused review signals
+    - does-not-prove lines
+    - caveats
+- extended pp/client/src/features/marine/marineEvidenceSummary.ts
+  - adds marineAnomalySummary.chokepointReviewPackage
+  - appends a compact chokepoint-review export line when the package is available
+  - wires optional chokepointReviewContext into the export builder without adding a new UI surface
+- extended pp/client/scripts/marineContextHelperRegression.mjs
+  - builds a deterministic chokepoint review scenario with:
+    - bounded corridor label
+    - bounded area label
+    - crossing count
+    - focused AIS/signal-gap wording
+    - reroute wording
+    - queue/backlog wording
+    - degraded/unavailable context-source mix
+  - proves the helper and exported marineAnomalySummary keep those signals review-only and preserve no-evasion/no-escort/no-toll/no-blockade/no-targeting/no-threat/no-intent/no-wrongdoing/no-causation guardrails
+  - adds metadata-coherence checks so marineAnomalySummary.chokepointReviewPackage matches the direct helper output without drift
+- updated marine docs so the new chokepoint review/export package is documented in workflow validation and export metadata guidance
+- added marine-local Node-resolution shims for the deterministic helper regression path:
+  - pp/client/src/features/marine/marineChokepointReviewPackage
+  - pp/client/src/features/marine/marineChokepointReviewPackage.js
+- updated pp/client/package.json so 	est:marine-context-helpers runs with Node's specifier-resolution flag needed by the marine helper regression path
+
+Files touched:
+- pp/client/src/features/marine/marineChokepointReviewPackage.ts
+- pp/client/src/features/marine/marineChokepointReviewPackage
+- pp/client/src/features/marine/marineChokepointReviewPackage.js
+- pp/client/src/features/marine/marineEvidenceSummary.ts
+- pp/client/scripts/marineContextHelperRegression.mjs
+- pp/client/package.json
+- pp/docs/marine-workflow-validation.md
+- pp/docs/marine-module.md
+- pp/docs/agent-progress/marine-ai.md
+
+Validation:
+- python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q -> pass
+- python -m compileall app/server/src -> pass
+- cmd /c npm.cmd run test:marine-context-helpers -> pass
+- cmd /c npm.cmd run lint -> pass
+- cmd /c npm.cmd run build -> pass
+- python app/server/tests/run_playwright_smoke.py marine -> pass
+
+Blockers or caveats:
+- the deterministic helper regression still emits Node's experimental type-stripping warning, but the regression passes deterministically
+- the chokepoint review package is export/review metadata only in this slice; no new UI card was added
+- no anomaly scoring changed
+- no marine source semantics changed
+- chokepoint review/export wording remains review/context only and does not prove severity, impact, anomaly cause, vessel behavior, vessel intent, wrongdoing, evasion, escort, toll activity, blockade, targeting, or threat
+
+Next recommended task:
+- if Manager AI wants the next marine hardening slice, extend deterministic regression coverage into context-timeline plus chokepoint-review coherence so timeline snapshots and chokepoint review metadata stay aligned when the active review lens changes
+## 2026-05-01 14:57 America/Chicago
+
+Assignment version:
+- 2026-05-01 14:46 America/Chicago
+
+Task:
+- extend deterministic marine helper regression coverage so focused replay evidence and evidence interpretation export metadata stay coherent with the broader marine context review package outside browser-only smoke
+
+What changed:
+- extended pp/client/scripts/marineContextHelperRegression.mjs so it now builds a real uildMarineEvidenceSummary(...) package with deterministic focused replay evidence, focused evidence interpretation, selected vessel, viewport, chokepoint, NOAA CO-OPS, NOAA NDBC, Scottish Water, Vigicrues, Ireland OPW, hydrology, environmental context, source summary, issue queue, issue export bundle, fusion summary, and review report inputs
+- added regression assertions that exported marineAnomalySummary preserves exact metadata coherence for:
+  - contextFusionSummary
+  - contextReviewReport
+  - contextSourceSummary
+  - contextIssueQueue
+  - contextIssueExportBundle
+  - hydrologyContext
+- added count-alignment checks for:
+  - fusion limited-source count vs degraded/unavailable/disabled source totals
+  - review-report warning count vs issue-queue warning count
+  - issue-export warning/source counts vs issue-queue/source-summary totals
+- added focused-evidence/export guardrail checks so the regression now confirms:
+  - hydrology category coverage remains present in source-health export rows
+  - CO-OPS/NDBC/Scottish Water evidence-basis distinctions remain intact
+  - exported top-level caveats keep the review-only no-intent/no-wrongdoing wording
+  - exported display lines preserve partial context, issue-export, and focused-evidence interpretation caveat wording
+- updated marine docs so helper-level regression coverage explicitly includes focused replay-evidence/evidence-interpretation export-package coherence
+
+Files touched:
+- pp/client/scripts/marineContextHelperRegression.mjs
+- pp/docs/marine-workflow-validation.md
+- pp/docs/marine-module.md
+- pp/docs/agent-progress/marine-ai.md
+
+Validation:
+- python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q -> pass
+- python -m compileall app/server/src -> pass
+- cmd /c npm.cmd run test:marine-context-helpers -> pass
+- cmd /c npm.cmd run build -> pass
+- python app/server/tests/run_playwright_smoke.py marine -> pass
+- cmd /c npm.cmd run lint -> blocked outside marine by pp/client/src/features/app-shell/AppShell.tsx:2243 (eact-hooks/exhaustive-deps warning for erospaceCurrentArchiveContextSummary)
+
+Blockers or caveats:
+- the only current validation blocker is a non-marine lint warning in AppShell.tsx; this assignment stayed marine-scoped and did not touch shared frontend files
+- no anomaly scoring changed and no marine source semantics changed in this slice
+- the helper regression and exported summary remain review/context only and do not prove severity, impact, anomaly cause, vessel behavior, vessel intent, or wrongdoing
+
+Next recommended task:
+- if Manager AI wants the next marine hardening slice, extend deterministic helper regression coverage into context timeline/history export coherence so timeline snapshots stay aligned with context source summary and review-package caveats outside browser smoke
+## 2026-05-01 13:51 America/Chicago
+
+Assignment version:
+- 2026-05-01 13:24 America/Chicago
+
+Task:
+- extend the marine helper regression so it validates full exported `marineAnomalySummary` review-package coherence rather than only the individual fusion/review/export helpers
+
+What changed:
+- extended `app/client/scripts/marineContextHelperRegression.mjs` so it now builds the real marine review/export package through `buildMarineEvidenceSummary(...)`
+- added deterministic fixture-summary inputs for:
+  - NOAA CO-OPS
+  - NOAA NDBC
+  - Scottish Water Overflows
+  - France Vigicrues Hydrometry
+  - Ireland OPW Water Level
+  - hydrology context
+  - environmental context
+  - focused evidence interpretation
+  - selected vessel / viewport / chokepoint attention summaries
+- the regression now checks exported `marineAnomalySummary` coherence across:
+  - `contextFusionSummary`
+  - `contextReviewReport`
+  - `contextSourceSummary`
+  - `contextIssueQueue`
+  - `contextIssueExportBundle`
+  - `hydrologyContext`
+- added coherence assertions for:
+  - fusion limited-source count vs degraded/unavailable/disabled source totals
+  - review-report warning count vs issue-queue warning count
+  - issue-export warning/source counts vs issue-queue/source-summary totals
+  - preserved source-family distinctions across oceanographic, meteorological, coastal-infrastructure, and hydrology rows
+  - preserved evidence-basis distinctions for CO-OPS, NDBC, and Scottish Water
+  - preserved top-level review-only caveats in `marineAnomalySummary`
+  - preserved `partial context` wording in exported display lines
+  - preserved no-severity / no-impact / no-vessel-intent / no-wrongdoing guardrails in exported metadata
+- updated marine docs so helper-level regression coverage now explicitly includes full exported `marineAnomalySummary` coherence checks
+
+Files touched:
+- `app/client/scripts/marineContextHelperRegression.mjs`
+- `app/docs/marine-workflow-validation.md`
+- `app/docs/marine-module.md`
+- `app/docs/agent-progress/marine-ai.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass (`60 passed`)
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run test:marine-context-helpers` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python app/server/tests/run_playwright_smoke.py marine` -> pass
+- `cmd /c npm.cmd run lint` -> blocked outside marine by `app/client/src/features/app-shell/AppShell.tsx:2243` (`react-hooks/exhaustive-deps` warning for `aerospaceCurrentArchiveContextSummary`)
+
+Blockers or caveats:
+- the only current validation blocker is a non-marine lint warning in `AppShell.tsx`; this assignment stayed marine-scoped and did not touch shared frontend files
+- helper regression still uses Node's experimental type-stripping path and prints the Node experimental warning, but the regression itself passes deterministically
+- no anomaly scoring changed and no source semantics changed in this slice
+- the exported marine review package remains review/context only and does not prove severity, impact, anomaly cause, vessel behavior, vessel intent, or wrongdoing
+
+Next recommended task:
+- if Manager AI wants the next marine hardening slice, add deterministic regression coverage for the focused-evidence interpretation/export branch so context review metadata and focused replay-evidence metadata stay aligned outside browser smoke
+
+## 2026-05-01 13:15 America/Chicago
+
+Assignment version:
+- 2026-05-01 12:45 America/Chicago
+
+Task:
+- add a marine source-health issue export bundle plus helper-level regression coverage so degraded/unavailable-dominant marine context mixes keep no-severity/no-impact/no-intent guardrails outside Playwright smoke
+
+What changed:
+- added `marineContextIssueExportBundle.ts` to emit compact source-health export rows across CO-OPS, NDBC, Scottish Water, Vigicrues, and OPW with:
+  - source family/category
+  - source health and availability
+  - source mode
+  - evidence basis
+  - primary caveat
+  - allowed review action
+  - explicit `does not prove` guardrails
+- wired `marineEvidenceSummary.ts` and `MarineAnomalySection.tsx` so `marineAnomalySummary.contextIssueExportBundle` is exported with marine snapshot metadata and a compact export line
+- added deterministic helper-level regression coverage in `app/client/scripts/marineContextHelperRegression.mjs` that exercises a degraded/unavailable-dominant source mix against the real marine helpers:
+  - `marineContextFusionSummary.ts`
+  - `marineContextReviewReport.ts`
+  - `marineContextIssueQueue.ts`
+  - `marineContextIssueExportBundle.ts`
+- the regression now guards:
+  - `partial context` dominant-limitation wording
+  - no-severity / no-impact / no-vessel-intent phrasing
+  - wrongdoing guardrails
+  - family distinctions between oceanographic, meteorological, coastal-infrastructure, and hydrology rows
+  - contextual-evidence preservation for Scottish Water and unavailable-state handling for Vigicrues
+- updated marine docs so the helper-level regression path and `marineAnomalySummary.contextIssueExportBundle` are recorded as workflow-validation evidence
+
+Files touched:
+- `app/client/src/features/marine/marineContextIssueExportBundle.ts`
+- `app/client/src/features/marine/marineEvidenceSummary.ts`
+- `app/client/src/features/marine/MarineAnomalySection.tsx`
+- `app/client/scripts/marineContextHelperRegression.mjs`
+- `app/client/scripts/playwright_smoke.mjs`
+- `app/client/package.json`
+- `app/server/tests/smoke_fixture_app.py`
+- `app/docs/marine-workflow-validation.md`
+- `app/docs/marine-module.md`
+- `app/docs/marine-context-source-contract-matrix.md`
+- `app/docs/agent-progress/marine-ai.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass (`60 passed`)
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run test:marine-context-helpers` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python app/server/tests/run_playwright_smoke.py marine` -> pass
+
+Blockers or caveats:
+- the helper regression runs through Node's experimental type-stripping path and emits Node's experimental warning, but the regression itself passes deterministically
+- this task did not change anomaly scoring, source semantics, or backend source-truth behavior
+- the issue export bundle remains review/export context only and does not prove severity, impact, anomaly cause, vessel behavior, vessel intent, or wrongdoing
+
+Next recommended task:
+- if Manager AI wants the next marine hardening slice, add helper-level regression coverage for the full exported `marineAnomalySummary` review package so fusion/report/export bundle metadata coherence is checked without relying only on browser smoke
+
+## 2026-05-01 12:14 America/Chicago
+
+Assignment version:
+- 2026-05-01 11:26 America/Chicago
+
+Task:
+- add marine-local review/report phrasing safeguards so degraded or unavailable-heavy context mixes stay framed as partial context and source-health limitation rather than severity, impact, or anomaly-cause language
+
+What changed:
+- hardened `marineContextFusionSummary` so degraded/unavailable-heavy source mixes now emit explicit dominant-limitation phrasing:
+  - `partial context`
+  - `source-health limitations dominate current source mix`
+  - review-caveat wording instead of severity wording
+- fixed a marine semantic bug where degraded Scottish Water infrastructure context could previously collapse into `unavailable` instead of `limited`
+- extended `marineContextReviewReport` so summary/export lines now preserve:
+  - dominant-limitation phrasing when limited sources dominate
+  - explicit review-caveat language
+  - explicit `does not prove` guardrails covering impact, anomaly cause, vessel behavior, vessel intent, and wrongdoing
+- updated deterministic marine smoke fixture posture so `Ireland OPW Water Level` is also surfaced as degraded, creating a marine-local smoke mix where degraded/unavailable sources dominate loaded sources
+- hardened marine smoke assertions so the fusion/review surfaces and exported metadata must preserve:
+  - partial-context wording
+  - dominant-limitation wording
+  - wrongdoing guardrail wording
+- updated marine workflow/module/contract docs to record the new phrasing boundary and the degraded/unavailable-dominant smoke posture
+
+Files touched:
+- `app/client/src/features/marine/marineContextFusionSummary.ts`
+- `app/client/src/features/marine/marineContextReviewReport.ts`
+- `app/client/src/features/marine/marineEvidenceSummary.ts`
+- `app/client/src/features/marine/MarineAnomalySection.tsx`
+- `app/client/scripts/playwright_smoke.mjs`
+- `app/server/tests/smoke_fixture_app.py`
+- `app/docs/marine-workflow-validation.md`
+- `app/docs/marine-module.md`
+- `app/docs/marine-context-source-contract-matrix.md`
+- `app/docs/agent-progress/marine-ai.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass (`60 passed`)
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run lint` -> blocked outside marine by `app/client/src/features/app-shell/AppShell.tsx:2218` (`react-hooks/exhaustive-deps` warning on `selectedAerospaceSourceReadinessBundle`)
+- `cmd /c npm.cmd run build` -> pass
+- `python app/server/tests/run_playwright_smoke.py marine` -> pass
+
+Blockers or caveats:
+- marine smoke executed successfully; it was not launcher-blocked before assertions
+- the current deterministic smoke posture now proves review/report safeguards against severity drift when degraded/unavailable context dominates the source mix, but it does not change backend source-truth semantics
+- degraded/unavailable context remains a source-health limitation and review caveat only; it is not anomaly severity, impact proof, anomaly-cause proof, vessel-behavior evidence, vessel-intent evidence, or wrongdoing evidence
+- `degraded` remains intentionally absent for NOAA CO-OPS and NOAA NDBC because the current slice still has no honest partial-ingest/source-quality degradation signal there
+
+Next recommended task:
+- if Manager AI wants the next marine hardening slice, add targeted helper-level regression coverage for fusion/review phrasing so the dominant-limitation wording is tested outside the browser smoke path
 ## 2026-04-30 23:14 America/Chicago
 
 Assignment version:
@@ -787,6 +1150,12 @@ Blockers or caveats:
 
 Next recommended task:
 - extend marine source-health validation for stale or unavailable source behavior without broadening semantics or touching shared frontend files
+
+
+
+
+
+
 
 
 

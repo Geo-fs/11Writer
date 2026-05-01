@@ -21,13 +21,33 @@ Scope:
 - [source-next-routing-packets.md](/C:/Users/mike/11Writer/app/docs/source-next-routing-packets.md)
 - [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md)
 - [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md)
+- [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md)
 - [source-routing-batch7-base-earth-reference.md](/C:/Users/mike/11Writer/app/docs/source-routing-batch7-base-earth-reference.md)
+- [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md)
+
+## Source Discovery / Shared Memory Addendum
+
+These mappings define safe ownership for source-discovery candidates, source-reputation observations, claim outcomes, and shared source-memory surfaces. They do not imply that a discovered candidate is an implemented source.
+
+| Surface | Primary owner agent | Secondary consumer agents | First safe slice | Shared-or-local guidance | Collision risk |
+| --- | --- | --- | --- | --- | --- |
+| `source-discovery-governance` | `gather` | `connect`, `data`, domain agents | candidate states, do-not-do rules, status truth, routing packets | Keep governance with Gather; do not let implementation lanes redefine lifecycle states ad hoc | `high` |
+| `source-discovery-memory-runtime` | `connect` | `gather`, `data`, domain agents | runtime/storage boundary truth, release-readiness truth, validation truth | Keep as broad/shared runtime evidence, not source-validation proof | `high` |
+| `source-discovery-feed-semantics` | `data` | `gather`, `connect` | feed-family and public-internet source-candidate semantics | Data may evaluate feed/source candidates, but must not auto-promote them into implemented sources | `medium` |
+| `source-discovery-domain-review` | `geospatial`, `marine`, `aerospace`, `features-webcam` | `gather`, `connect` | domain-specific candidate review only | Domain agents may review fit and caveats, but should consume shared memory instead of inventing parallel candidate stores | `medium` |
+
+Boundary rules:
+
+- source discovery creates candidates and review evidence only
+- source memory does not create implemented or validated source rows
+- source reputation is not claim truth
+- Atlas remains important user-directed implementation input, not Manager-controlled ownership proof
 
 ## Data AI Ownership Addendum
 
 These mappings define the new Data AI implementation lane for bounded public internet-information sources. They do not imply implementation has started unless a source already has repo-local evidence elsewhere in this map.
 
-Use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) plus [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for the next bounded feed wave after the active starter slice.
+Use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) plus [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md) for the next bounded feed wave after the currently implemented Data AI families stay stable.
 
 | Source id | Primary owner agent | Secondary consumer agents | First implementation slice | Shared-or-local guidance | Collision risk |
 | --- | --- | --- | --- | --- | --- |
@@ -47,6 +67,8 @@ Repo-local status note:
 
 - `nist-nvd-cve` is now implemented backend-first with a bounded CVE-detail route plus conservative CVE-context composition.
 - Keep ownership with `data`, but treat the next handoff as consumer/validation follow-on work rather than raw connector creation.
+- the Data AI starter bundle, official cyber advisory wave, infrastructure/status wave, OSINT/investigations wave, rights/civic/digital-policy wave, and fact-checking/disinformation wave are now all implemented backend-first on the shared recent-items route.
+- use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) for the next grouped expansion instead of reopening those implemented waves as fresh source-creation work.
 
 ## Batch 6 Ownership Addendum
 

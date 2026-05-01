@@ -113,6 +113,7 @@ Frontend smoke/build confirmation remains a separate layer and may depend on Con
 Current deterministic marine smoke fixture posture:
 - `Scottish Water Overflows` is surfaced as a degraded workflow example so marine export/source-summary paths visibly preserve partial-metadata limitations
 - `France Vigicrues Hydrometry` is surfaced as an unavailable workflow example so marine export/source-summary paths visibly preserve missing-context semantics
+- `Ireland OPW Water Level` is surfaced as an additional degraded workflow example so review/report helpers see a source mix where degraded/unavailable context dominates loaded context
 - these smoke examples do not change the backend contract truth for the source families; they only ensure degraded/unavailable states stay visible in marine-owned workflow surfaces
 
 ## Downstream Fusion / Review Consumers
@@ -125,7 +126,13 @@ These frontend-local marine helpers do not define new backend routes, but they d
 - `app/client/src/features/marine/marineContextReviewReport.ts`
   - consumes context-fusion summary plus issue-queue output
   - exports `marineAnomalySummary.contextReviewReport`
+  - when degraded/unavailable source-health dominates the current source mix, review phrasing must remain `partial context` / `review caveat` only and must not imply event severity, impact, anomaly cause, vessel behavior, or wrongdoing
+- `app/client/src/features/marine/marineContextIssueExportBundle.ts`
+  - consumes source-summary rows plus issue-queue output
+  - exports `marineAnomalySummary.contextIssueExportBundle`
+  - must preserve source family distinctions, allowed review actions, and `does not prove` guardrails without turning source-health limitations into severity or impact language
 
 Contract implication:
 - if any source above loses required source health, source mode, caveat, or evidence-basis semantics, the fusion/review package becomes less trustworthy even if the frontend still renders
+- if any source above loses category, evidence-basis, or caveat truth, the issue export bundle becomes less trustworthy even if the frontend still renders
 - shared frontend smoke should re-confirm these downstream helpers only after Connect AI clears repo-wide build blockers

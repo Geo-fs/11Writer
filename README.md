@@ -18,6 +18,7 @@ The current repository is still the local development foundation for that plan. 
 - Marine replay, transmission-gap review, and anomaly-ranking workflows
 - Webcam and public camera source operations with inventory and source-health handling
 - Canonical reference subsystem for facilities, navigation objects, and place linkage 
+- Analyst workbench endpoints for evidence timelines, source readiness, and spatial context briefs with provenance/caveats preserved
 
 ## Repository layout
 
@@ -119,6 +120,7 @@ npm run build
 - `app/docs/marine-module.md`
 - `app/docs/webcams.md`
 - `app/docs/reference-module.md`
+- `app/docs/analyst-workbench.md`
 - `app/docs/repo-workflow.md`
 - `app/docs/cross-platform-desktop-app-plan.md`
 - `app/docs/runtime-interface-requirements.md`

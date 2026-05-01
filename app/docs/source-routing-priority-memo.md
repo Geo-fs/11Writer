@@ -17,6 +17,7 @@ Status note:
 - Atlas backlog and registry docs remain candidate context only, not implementation proof.
 - [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) is the short sequencing surface for the next Data AI feed-family wave.
 - [source-next-routing-packets.md](/C:/Users/mike/11Writer/app/docs/source-next-routing-packets.md) is the compact cross-lane handoff packet surface for the next 8-12 bounded Manager assignments.
+- [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md) is the routing boundary for source discovery, source reputation, claim outcomes, and shared source memory.
 
 ## Current Domain Availability
 
@@ -45,10 +46,25 @@ Status note:
 - `data`
   - Best current use is bounded internet-information sources that are public, no-auth, machine-readable, and clearly not owned by Geospatial, Marine, Aerospace, or Features/Webcam.
   - `cisa-cyber-advisories` and `first-epss` are already implemented backend-first.
-  - The active Data AI lane is now the bounded five-feed RSS/Atom parser slice using `cisa-cybersecurity-advisories`, `cisa-ics-advisories`, `sans-isc-diary`, `cloudflare-status`, and `gdacs-alerts`.
-  - Use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) to sequence the next feed-family wave after the active starter bundle.
+  - The implemented Data AI feed lane now includes the bounded five-feed starter bundle, the official cyber advisory wave, and the infrastructure/status wave on the shared recent-items route.
+  - Use [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md) to route the next grouped Batch 3 expansion after those implemented waves.
   - Data AI should own source implementation for cybersecurity advisories, CVE/risk context, RSS/Atom/news/press-release feeds, and other assigned information-context feeds.
   - Data AI should not inherit Gather's governance work or Connect's repo-wide blocker lane.
+- `source-discovery/shared-memory`
+  - Treat as governance-plus-shared-runtime work, not as a fresh source-implementation lane.
+  - Atlas implementation evidence is important, but Manager routing should keep `gather` on governance/status, `connect` on runtime/storage boundary truth, `data` on feed-family semantics, and domain agents on domain-specific candidate evaluation.
+  - Do not route source-discovery memory as automatic source validation or as permission to start broad polling.
+
+## Source Discovery Routing
+
+- assign source discovery as candidate/review/governance work only
+- use [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md) before any source-memory, reputation, or claim-outcome task
+- keep candidate states separate from implemented-source states
+- require provenance, access result, machine-readability result, source class, caveats, reputation basis, wave-fit basis, and owner recommendation
+- route shared runtime/storage truth to `connect`
+- route feed-family/source-candidate semantics to `data`
+- route domain-specific candidate evaluation to the domain owner
+- do not route autonomous discovery runners, hidden live polling, unrestricted crawling, or trust-score promotion work
 
 ## Ranked Next 10 Handoffs
 
@@ -62,8 +78,8 @@ Status note:
 | 6 | `noaa-aviation-weather-center-data-api` | `aerospace` | executed smoke plus export-path confirmation for the existing airport-context slice | Aerospace already has contract-tested implementation and prepared smoke assertions; closing the workflow gap is more valuable than starting a fresh aerospace connector. | Keep METAR observed and TAF forecast semantics separate. | build/lint green, but browser smoke unexecuted on this host | `workflow hardening` | No runtime expansion; validation-only follow-on |
 | 7 | `washington-vaac-advisories` | `aerospace` | one bounded frontend/export consumer on top of the implemented backend slice | The backend source slice now exists, so the best next move is a bounded consumer or validation path rather than reopening raw source creation. | Advisory ash context only; no route-impact or plume-precision claims. | implemented but not workflow-validated | `source consumer` | Shared backend/core only; no companion/runtime exposure changes |
 | 8 | `finland-digitraffic` | `features-webcam` | one bounded consumer or status-classification follow-on on top of station/detail/freshness coverage | The source already exists backend-first, so a bounded consumer or operational-summary layer is a better next step than raw source recreation. | Keep road-weather scope separate from cameras, rail, and marine feeds. | implemented but not workflow-validated | `source consumer` | Likely low-risk desktop/backend-only follow-on; avoid large new frontend surface |
-| 9 | `ncsc-uk-all` | `data` | one official RSS feed family only | Best official cyber follow-on after the active five-feed starter slice because it stays bounded, official, and parser-friendly. | Mixed guidance, news, and advisory content; not every item is an incident signal. | next-wave Data feed work; wording discipline and feed-text handling matter more than UI complexity | `source build` | Shared backend/core only; no runtime exposure changes |
-| 10 | `cloudflare-radar` | `data` | one provider-analysis RSS feed family only | Strong next-wave internet-context follow-on after the starter slice if methodology caveats stay explicit. | Provider-specific analysis, not whole-internet truth. | next-wave Data feed work; caveat/export wording matters more than parser difficulty | `source build` | Shared backend/core only; likely backend-first |
+| 9 | `state-travel-advisories` | `data` | one official/public advisory feed family only | Clean next Batch 3 Data AI handoff after the implemented cyber and infrastructure waves because the source stays official, machine-readable, and advisory-bounded. | Official advisory text is still source-claimed/contextual, not field confirmation. | next-wave Data feed work; wording discipline and advisory-text handling matter more than UI complexity | `source build` | Shared backend/core only; no runtime exposure changes |
+| 10 | `bellingcat` | `data` | one investigations feed family only | High-value Batch 3 follow-on if Data AI needs a more contextual lane after official/public advisories and the prompt-injection guardrails stay strong. | Investigations are contextual reporting, not direct official event truth. | next-wave Data feed work; dedupe and quoted-text handling matter more than parser difficulty | `source build` | Shared backend/core only; likely backend-first |
 
 ## Short Routing Guidance
 
@@ -81,8 +97,8 @@ Status note:
   - extend `finland-digitraffic` with one bounded consumer or status/classification path
   - use `bart-gtfs-realtime` only if a fresh source lane is explicitly preferred
 - If Manager wants the first clean Data AI implementation lane:
-  - keep the active five-feed starter slice bounded
-  - then use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) plus [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for `ncsc-uk-all`, `cert-fr-alerts`, `cloudflare-radar`, and the next narrow feed wave
+  - keep the implemented starter, official cyber, and infrastructure/status waves bounded
+  - then use [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md) for the next grouped Batch 3 family, starting with official/public advisories
 
 ## Data AI Routing Surface
 
@@ -115,9 +131,19 @@ Current active starter slice:
 - `cloudflare-status`
 - `gdacs-alerts`
 
-Next-wave packet surface:
+Current additional implemented feed families:
 
-- use [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for the next bounded feed handoffs after the active starter slice
+- `ncsc-uk-all`
+- `cert-fr-alerts`
+- `cert-fr-advisories`
+- `cloudflare-radar`
+- `netblocks`
+- `apnic-blog`
+
+Packet surfaces:
+
+- use [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) as the historical packet surface for the already implemented official cyber and infrastructure/status waves
+- use [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md) for the next grouped Batch 3 expansion after the implemented cyber and infrastructure waves
 
 Boundary rules:
 
@@ -139,18 +165,18 @@ Source-safety rules for Data AI:
 
 ## Next Data AI Handoffs
 
-1. `ncsc-uk-all`
-   - first safe slice: one official RSS feed family only
-   - validation/status risk: medium wording risk because mixed guidance, news, and advisory items must not be overclassified
-2. `cert-fr-alerts`
-   - first safe slice: one official alert feed family only
-   - validation/status risk: medium because multilingual advisory text and caveats need careful preservation
-3. `cloudflare-radar`
-   - first safe slice: one provider-analysis RSS feed family only
-   - validation/status risk: medium because provider-methodology caveats must stay explicit
-4. `usgs-earthquakes-atom`
-   - first safe slice: one Atom event-feed family only
-   - validation/status risk: medium because Data AI must not bypass existing Geospatial ownership or imply impact from feed text
+1. `state-travel-advisories`
+   - first safe slice: one official/public advisory feed family only
+   - validation/status risk: medium wording risk because official guidance must remain contextual rather than incident truth
+2. `bellingcat`
+   - first safe slice: one investigations feed family only
+   - validation/status risk: high because quoted and investigative free-form text must remain inert and contextual
+3. `full-fact`
+   - first safe slice: one fact-checking feed family only
+   - validation/status risk: high because quoted misinformation must not become instructions or model truth
+4. `carbon-brief`
+   - first safe slice: one science/environment commentary feed family only
+   - validation/status risk: medium because contextual climate/science content must not bypass geospatial event ownership
 
 ## Current Availability Warning
 

@@ -5,6 +5,7 @@ import type {
 import type { AerospaceContextIssueSummary } from "./aerospaceContextIssues";
 import type { AerospaceExportReadinessSummary } from "./aerospaceExportReadiness";
 import type { AerospaceSourceHealthSummary } from "./aerospaceSourceHealth";
+import type { AerospaceSourceReadinessBundleId } from "../../lib/store";
 
 export type AerospaceSourceReadinessFamilyId =
   | "airport-operations"
@@ -54,6 +55,7 @@ export interface AerospaceSourceReadinessSummary {
   degradedFamilyCount: number;
   unavailableFamilyCount: number;
   fixtureFamilyCount: number;
+  guardrailLine: string;
   topFamilies: AerospaceSourceReadinessFamily[];
   displayLines: string[];
   exportLines: string[];
@@ -64,7 +66,49 @@ export interface AerospaceSourceReadinessSummary {
     degradedFamilyCount: number;
     unavailableFamilyCount: number;
     fixtureFamilyCount: number;
+    guardrailLine: string;
     families: AerospaceSourceReadinessFamily[];
+    caveats: string[];
+  };
+}
+
+export interface AerospaceSourceReadinessBundleDefinition {
+  id: AerospaceSourceReadinessBundleId;
+  label: string;
+  description: string;
+  familyIds: AerospaceSourceReadinessFamilyId[];
+  caveat: string;
+}
+
+export interface AerospaceSourceReadinessBundleSummary {
+  bundleId: AerospaceSourceReadinessBundleId;
+  bundleLabel: string;
+  selectedFamilyCount: number;
+  familyIds: AerospaceSourceReadinessFamilyId[];
+  guardrailLine: string;
+  topReviewNote: string | null;
+  displayLines: string[];
+  exportLines: string[];
+  caveats: string[];
+  metadata: {
+    bundleId: AerospaceSourceReadinessBundleId;
+    bundleLabel: string;
+    selectedFamilyCount: number;
+    familyIds: AerospaceSourceReadinessFamilyId[];
+    guardrailLine: string;
+    topReviewNote: string | null;
+    families: Array<{
+      familyId: AerospaceSourceReadinessFamilyId;
+      label: string;
+      sourceIds: string[];
+      evidenceBases: Array<AerospaceSourceReadinessSource["evidenceBasis"]>;
+      readinessLabel: string;
+      posture: AerospaceSourceReadinessPosture;
+      sourceModes: Array<AerospaceSourceReadinessSource["sourceMode"]>;
+      healthStates: string[];
+      summaryLine: string;
+      caveats: string[];
+    }>;
     caveats: string[];
   };
 }
@@ -106,6 +150,37 @@ const FAMILY_DEFINITIONS: Array<{
   },
 ];
 
+export const AEROSPACE_SOURCE_READINESS_BUNDLES: AerospaceSourceReadinessBundleDefinition[] = [
+  {
+    id: "all-families",
+    label: "All Families",
+    description: "Includes the current review posture for every aerospace readiness family.",
+    familyIds: FAMILY_DEFINITIONS.map((definition) => definition.familyId),
+    caveat: "All-families bundles remain review-oriented summaries only and do not imply cross-family severity."
+  },
+  {
+    id: "airport-operations",
+    label: "Airport Operations",
+    description: "Focuses on airport operations, aviation weather, and comparison context relevant to selected aircraft review.",
+    familyIds: ["airport-operations", "air-traffic-comparison"],
+    caveat: "Airport-operations bundles do not explain aircraft behavior or route impact."
+  },
+  {
+    id: "space-context",
+    label: "Space Context",
+    description: "Focuses on current and archival space-weather context plus space-event advisory families.",
+    familyIds: ["space-events", "space-weather-current", "space-weather-archive"],
+    caveat: "Space-context bundles do not prove target-specific danger, failure, or operational consequence."
+  },
+  {
+    id: "selected-target-evidence",
+    label: "Selected-Target Evidence",
+    description: "Focuses on selected-target evidence posture and the most immediate contextual caveats.",
+    familyIds: ["selected-target-evidence", "airport-operations", "space-weather-current"],
+    caveat: "Selected-target-evidence bundles remain evidence/accounting aids only and are not action recommendations."
+  }
+];
+
 export function buildAerospaceSourceReadinessSummary(input: {
   availabilitySummary?: AerospaceContextAvailabilitySummary | null;
   issueSummary?: AerospaceContextIssueSummary | null;
@@ -135,9 +210,12 @@ export function buildAerospaceSourceReadinessSummary(input: {
   const fixtureFamilyCount = families.filter((family) => family.fixtureCount > 0).length;
   const sortedFamilies = [...families].sort(compareFamilies);
   const topFamilies = sortedFamilies.slice(0, 4);
+  const guardrailLine =
+    "Source readiness is review-oriented context accounting only; it is not operational severity or a recommended action.";
   const caveats = uniqueStrings([
     "Aerospace source readiness is a review-oriented summary across already-loaded context families only.",
     "It does not create a global severity score and does not imply intent, failure, causation, impact, or action recommendation.",
+    guardrailLine,
     readiness?.topReason ?? null,
     ...topFamilies.flatMap((family) => family.caveats),
   ]).slice(0, 6);
@@ -148,16 +226,19 @@ export function buildAerospaceSourceReadinessSummary(input: {
     degradedFamilyCount,
     unavailableFamilyCount,
     fixtureFamilyCount,
+    guardrailLine,
     topFamilies,
     displayLines: [
-      `Source families: ${families.length} | ${reviewRecommendedCount} review recommended`,
-      `Family posture: ${degradedFamilyCount} degraded | ${unavailableFamilyCount} unavailable | ${fixtureFamilyCount} fixture-backed`,
-      topFamilies[0] ? `Top family note: ${topFamilies[0].summaryLine}` : "Top family note: none",
+      `Source-readiness review: ${families.length} families | ${reviewRecommendedCount} need review`,
+      `Family coverage: ${degradedFamilyCount} degraded | ${unavailableFamilyCount} unavailable | ${fixtureFamilyCount} fixture-backed`,
+      topFamilies[0] ? `Top review note: ${topFamilies[0].summaryLine}` : "Top review note: none",
     ],
     exportLines: [
-      `Source readiness: ${reviewRecommendedCount} review recommended | ${degradedFamilyCount} degraded families`,
+      `Source-readiness review: ${reviewRecommendedCount} families need review | ${unavailableFamilyCount} unavailable`,
       topFamilies[0] ? `Top source family: ${topFamilies[0].label} | ${topFamilies[0].summaryLine}` : null,
-      fixtureFamilyCount > 0 ? `Fixture-backed families: ${fixtureFamilyCount}` : null,
+      degradedFamilyCount > 0 || fixtureFamilyCount > 0
+        ? `Context caveat families: ${degradedFamilyCount} degraded | ${fixtureFamilyCount} fixture-backed`
+        : guardrailLine,
     ].filter((value): value is string => Boolean(value)).slice(0, 3),
     caveats,
     metadata: {
@@ -166,7 +247,82 @@ export function buildAerospaceSourceReadinessSummary(input: {
       degradedFamilyCount,
       unavailableFamilyCount,
       fixtureFamilyCount,
+      guardrailLine,
       families,
+      caveats,
+    },
+  };
+}
+
+export function buildAerospaceSourceReadinessBundleSummary(input: {
+  summary?: AerospaceSourceReadinessSummary | null;
+  bundleId?: AerospaceSourceReadinessBundleId;
+}): AerospaceSourceReadinessBundleSummary | null {
+  const summary = input.summary ?? null;
+  if (!summary) {
+    return null;
+  }
+
+  const definition =
+    AEROSPACE_SOURCE_READINESS_BUNDLES.find(
+      (bundle) => bundle.id === (input.bundleId ?? "all-families")
+    ) ?? AEROSPACE_SOURCE_READINESS_BUNDLES[0];
+  const selectedFamilies = summary.metadata.families.filter((family) =>
+    definition.familyIds.includes(family.familyId)
+  );
+  if (selectedFamilies.length === 0) {
+    return null;
+  }
+
+  const topReviewFamily =
+    selectedFamilies.find((family) => family.reviewRecommended) ?? selectedFamilies[0] ?? null;
+  const guardrailLine =
+    "Source-readiness bundles are compact export summaries only; they are not severity scores or action recommendations.";
+  const topReviewNote = topReviewFamily ? topReviewFamily.summaryLine : null;
+  const caveats = uniqueStrings([
+    guardrailLine,
+    definition.caveat,
+    summary.guardrailLine,
+    ...selectedFamilies.flatMap((family) => family.caveats),
+  ]).slice(0, 6);
+
+  return {
+    bundleId: definition.id,
+    bundleLabel: definition.label,
+    selectedFamilyCount: selectedFamilies.length,
+    familyIds: definition.familyIds,
+    guardrailLine,
+    topReviewNote,
+    displayLines: [
+      `Readiness bundle: ${definition.label} | ${selectedFamilies.length} families`,
+      topReviewNote ? `Bundle review note: ${topReviewNote}` : "Bundle review note: none",
+      guardrailLine,
+    ],
+    exportLines: [
+      `Source-readiness bundle: ${definition.label} | ${selectedFamilies.length} families`,
+      topReviewNote ? `Bundle review note: ${topReviewNote}` : null,
+      guardrailLine,
+    ].filter((value): value is string => Boolean(value)).slice(0, 3),
+    caveats,
+    metadata: {
+      bundleId: definition.id,
+      bundleLabel: definition.label,
+      selectedFamilyCount: selectedFamilies.length,
+      familyIds: definition.familyIds,
+      guardrailLine,
+      topReviewNote,
+      families: selectedFamilies.map((family) => ({
+        familyId: family.familyId,
+        label: family.label,
+        sourceIds: family.sources.map((source) => source.sourceId),
+        evidenceBases: uniqueEvidenceBases(family.sources),
+        readinessLabel: family.readinessLabel,
+        posture: family.posture,
+        sourceModes: uniqueModes(family.sources),
+        healthStates: uniqueHealthStates(family.sources),
+        summaryLine: family.summaryLine,
+        caveats: family.caveats,
+      })),
       caveats,
     },
   };
@@ -287,16 +443,16 @@ function determineFamilyReadinessLabel(input: {
     input.includesSelectedTargetData &&
     (input.dataHealth?.freshness === "stale" || input.dataHealth?.freshness === "unknown")
   ) {
-    return "freshness limited";
+    return "review freshness-limited context";
   }
   if (input.posture === "degraded") {
-    return "degraded context";
+    return "review degraded context";
   }
   if (input.posture === "unavailable") {
-    return "context unavailable";
+    return "review unavailable context";
   }
   if (input.fixtureCount > 0) {
-    return "fixture-backed context";
+    return "review fixture-backed context";
   }
   if (input.issueCount > 0 || input.posture === "mixed") {
     return "review with caveats";
@@ -367,4 +523,16 @@ function familyScore(family: AerospaceSourceReadinessFamily) {
 
 function uniqueStrings(values: Array<string | null | undefined>) {
   return Array.from(new Set(values.filter((value): value is string => Boolean(value))));
+}
+
+function uniqueModes(sources: AerospaceSourceReadinessSource[]) {
+  return Array.from(new Set(sources.map((source) => source.sourceMode)));
+}
+
+function uniqueHealthStates(sources: AerospaceSourceReadinessSource[]) {
+  return Array.from(new Set(sources.map((source) => source.health)));
+}
+
+function uniqueEvidenceBases(sources: AerospaceSourceReadinessSource[]) {
+  return Array.from(new Set(sources.map((source) => source.evidenceBasis)));
 }

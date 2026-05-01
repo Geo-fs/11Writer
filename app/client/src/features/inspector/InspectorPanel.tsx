@@ -23,7 +23,13 @@ import { buildAerospaceContextIssueSummary } from "./aerospaceContextIssues";
 import { buildAerospaceExportReadinessSummary } from "./aerospaceExportReadiness";
 import { buildAerospaceReviewQueueSummary } from "./aerospaceReviewQueue";
 import { buildAerospaceContextReportSummary } from "./aerospaceContextReport";
-import { buildAerospaceSourceReadinessSummary } from "./aerospaceSourceReadiness";
+import { buildAerospaceContextGapQueueSummary } from "./aerospaceContextGapQueue";
+import { buildAerospaceCurrentArchiveContextSummary } from "./aerospaceCurrentArchiveContext";
+import {
+  AEROSPACE_SOURCE_READINESS_BUNDLES,
+  buildAerospaceSourceReadinessBundleSummary,
+  buildAerospaceSourceReadinessSummary
+} from "./aerospaceSourceReadiness";
 import { buildAerospaceAirportStatusSummary } from "./aerospaceAirportStatusContext";
 import { buildAerospaceGeomagnetismContextSummary } from "./aerospaceGeomagnetismContext";
 import {
@@ -102,6 +108,9 @@ export function InspectorPanel() {
   const selectedAerospaceExportProfile = useAppStore(
     (state) => state.selectedAerospaceExportProfile
   );
+  const selectedAerospaceSourceReadinessBundle = useAppStore(
+    (state) => state.selectedAerospaceSourceReadinessBundle
+  );
   const aerospaceFocus = useAppStore((state) => state.aerospaceFocus);
   const aerospaceFocusHistory = useAppStore((state) => state.aerospaceFocusHistory);
   const hud = useAppStore((state) => state.hud);
@@ -113,6 +122,9 @@ export function InspectorPanel() {
   );
   const setSelectedAerospaceExportProfile = useAppStore(
     (state) => state.setSelectedAerospaceExportProfile
+  );
+  const setSelectedAerospaceSourceReadinessBundle = useAppStore(
+    (state) => state.setSelectedAerospaceSourceReadinessBundle
   );
   const stepSelectedReplayIndex = useAppStore((state) => state.stepSelectedReplayIndex);
   const setAerospaceFocus = useAppStore((state) => state.setAerospaceFocus);
@@ -287,6 +299,10 @@ export function InspectorPanel() {
     context: nceiSpaceWeatherArchiveQuery.data,
     sourceHealth: nceiSpaceWeatherArchiveSourceHealth
   });
+  const aerospaceCurrentArchiveContextSummary = buildAerospaceCurrentArchiveContextSummary({
+    currentSummary: swpcSpaceWeatherSummary,
+    archiveSummary: nceiSpaceWeatherArchiveSummary
+  });
   const vaacContextSummary = buildAerospaceVaacContextSummary({
     washingtonContext: washingtonVaacQuery.data,
     washingtonSourceHealth: washingtonVaacSourceHealth,
@@ -401,6 +417,16 @@ export function InspectorPanel() {
     issueSummary: aerospaceContextIssueSummary,
     readinessSummary: aerospaceExportReadinessSummary,
     dataHealthSummary: selectedDataHealthSummary
+  });
+  const aerospaceSourceReadinessBundleSummary = buildAerospaceSourceReadinessBundleSummary({
+    summary: aerospaceSourceReadinessSummary,
+    bundleId: selectedAerospaceSourceReadinessBundle
+  });
+  const aerospaceContextGapQueueSummary = buildAerospaceContextGapQueueSummary({
+    selectedTargetLabel: selectedEvidenceSummary?.label ?? null,
+    exportProfileId: selectedAerospaceExportProfile,
+    availabilitySummary: operationalContextAvailabilitySummary,
+    sourceReadinessSummary: aerospaceSourceReadinessSummary
   });
   const aerospaceContextReportSummary = buildAerospaceContextReportSummary({
     selectedTargetSummary: selectedEvidenceSummary,
@@ -1190,6 +1216,24 @@ export function InspectorPanel() {
                 {aerospaceSourceReadinessSummary ? (
                   <div className="panel__section">
                     <p className="panel__eyebrow">Aerospace Source Readiness</p>
+                    <label className="field-row">
+                      <span>Readiness bundle</span>
+                      <select
+                        className="panel__input"
+                        value={selectedAerospaceSourceReadinessBundle}
+                        onChange={(event) =>
+                          setSelectedAerospaceSourceReadinessBundle(
+                            event.currentTarget.value as typeof selectedAerospaceSourceReadinessBundle
+                          )
+                        }
+                      >
+                        {AEROSPACE_SOURCE_READINESS_BUNDLES.map((bundle) => (
+                          <option key={bundle.id} value={bundle.id}>
+                            {bundle.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                     <div className="data-card data-card--compact">
                       <strong>
                         {aerospaceSourceReadinessSummary.familyCount} families | {aerospaceSourceReadinessSummary.reviewRecommendedCount} review recommended
@@ -1242,8 +1286,54 @@ export function InspectorPanel() {
                         </div>
                       ))}
                     </div>
+                    {aerospaceSourceReadinessBundleSummary ? (
+                      <div className="data-card data-card--compact">
+                        <strong>{aerospaceSourceReadinessBundleSummary.bundleLabel}</strong>
+                        {aerospaceSourceReadinessBundleSummary.displayLines.map((line) => (
+                          <span key={line}>{line}</span>
+                        ))}
+                      </div>
+                    ) : null}
                     {aerospaceSourceReadinessSummary.caveats.slice(0, 2).map((caveat) => (
                       <CaveatBlock key={caveat} heading="Source-readiness caveat" tone="evidence" compact>
+                        {caveat}
+                      </CaveatBlock>
+                    ))}
+                    {aerospaceSourceReadinessBundleSummary?.caveats.slice(0, 1).map((caveat) => (
+                      <CaveatBlock key={caveat} heading="Bundle caveat" tone="evidence" compact>
+                        {caveat}
+                      </CaveatBlock>
+                    ))}
+                  </div>
+                ) : null}
+
+                {aerospaceContextGapQueueSummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aerospace Context Gap Queue</p>
+                    <div className="data-card data-card--compact">
+                      {aerospaceContextGapQueueSummary.displayLines.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                      {aerospaceContextGapQueueSummary.topItems.map((item) => (
+                        <div key={item.itemId} className="data-card data-card--compact">
+                          <strong>{item.familyLabel}</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge tone={issueCategoryTone("availability-gap")}>
+                              {item.category}
+                            </StatusBadge>
+                            <StatusBadge tone="info">
+                              {item.sourceModes.join(", ") || "unknown mode"}
+                            </StatusBadge>
+                          </div>
+                          <span>{item.summary}</span>
+                          <span>Sources: {item.sourceIds.join(", ") || "unavailable"}</span>
+                          <span>Health: {item.sourceHealth.join(" | ") || "unknown"}</span>
+                          {item.caveat ? <span>{item.caveat}</span> : null}
+                        </div>
+                      ))}
+                    </div>
+                    {aerospaceContextGapQueueSummary.caveats.slice(0, 2).map((caveat) => (
+                      <CaveatBlock key={caveat} heading="Gap-queue caveat" tone="evidence" compact>
                         {caveat}
                       </CaveatBlock>
                     ))}
@@ -1923,6 +2013,29 @@ export function InspectorPanel() {
                         <span>No NOAA NCEI space-weather archive metadata is currently loaded.</span>
                       </div>
                     )}
+                  </div>
+                ) : null}
+
+                {entity && (entity.type === "aircraft" || entity.type === "satellite") && aerospaceCurrentArchiveContextSummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Current vs Archive Space-Weather Context</p>
+                    <div className="data-card data-card--compact">
+                      <strong>{aerospaceCurrentArchiveContextSummary.displayLines[0]}</strong>
+                      <div className="stack stack--actions">
+                        <StatusBadge tone="info">
+                          {aerospaceCurrentArchiveContextSummary.separationState}
+                        </StatusBadge>
+                        <DataBasisBadge basis="contextual" prefix="Current/archive basis" />
+                      </div>
+                      {aerospaceCurrentArchiveContextSummary.displayLines.slice(1).map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                    </div>
+                    {aerospaceCurrentArchiveContextSummary.caveats.slice(0, 2).map((caveat) => (
+                      <CaveatBlock key={caveat} heading="Separation caveat" tone="evidence" compact>
+                        {caveat}
+                      </CaveatBlock>
+                    ))}
                   </div>
                 ) : null}
 

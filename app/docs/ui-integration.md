@@ -6,6 +6,8 @@
 
 This document defines the first consolidation slice, the current duplication hotspots, and the rules domain agents should follow when adding UI.
 
+Workflow consolidation should follow the single workspace model in [unified-user-workflows.md](/C:/Users/mike/11Writer/app/docs/unified-user-workflows.md): `User sees information -> user wants more information -> user can decide or move on`.
+
 For rollout sequencing and section-by-section migration targets, see [ui-primitive-migration-map.md](/C:/Users/mike/11Writer/app/docs/ui-primitive-migration-map.md).
 
 ## Current Audit

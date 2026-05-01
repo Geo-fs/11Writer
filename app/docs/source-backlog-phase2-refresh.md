@@ -25,6 +25,7 @@ Status note:
 - [source-next-routing-packets.md](/C:/Users/mike/11Writer/app/docs/source-next-routing-packets.md)
 - [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md)
 - [source-routing-batch7-base-earth-reference.md](/C:/Users/mike/11Writer/app/docs/source-routing-batch7-base-earth-reference.md)
+- [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md)
 - [data_sources.noauth.registry.json](/C:/Users/mike/11Writer/app/docs/data_sources.noauth.registry.json)
 
 ## Recommended Next 8 Assignments
@@ -61,10 +62,11 @@ Owner follow-ons:
 - Gather:
   - verify `eea-air-quality`, `singapore-nea-weather`, `esa-neocc-close-approaches`, and `imo-epos-geohazards`
 - Data:
-  - keep the active five-feed RSS starter slice bounded
-  - then route `ncsc-uk-all`
-  - then `cert-fr-alerts`
-  - then `cloudflare-radar`
+  - keep the implemented starter, official cyber, infrastructure/status, OSINT/investigations, rights/civic/digital-policy, and fact-checking/disinformation waves bounded
+  - then route one grouped Batch 3 family from [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md)
+  - start with `state-travel-advisories`
+  - then `carbon-brief`
+  - then one policy/think-tank or cyber-vendor/community follow-on family
 - Connect:
   - cross-repo blocker fixing and release dry-run support
 
@@ -81,8 +83,8 @@ For a cross-batch manager-facing ranking that also includes workflow-hardening a
 Data AI note:
 
 - `cisa-cyber-advisories` and `first-epss` are already backend-first implemented Data AI slices.
-- the current active Data AI feed-parser starter wave should remain bounded to five feeds.
-- use [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for the next feed wave after that active slice.
+- the current implemented Data AI feed lane now includes the starter, official cyber, infrastructure/status, OSINT/investigations, rights/civic/digital-policy, and fact-checking/disinformation waves.
+- use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) for the next grouped Batch 3 family rather than routing `full-fact`, `ncsc-uk-all`, `cert-fr-*`, or `cloudflare-radar` as fresh work.
 
 ## Ranked Backlog
 

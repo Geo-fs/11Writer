@@ -19,6 +19,7 @@ export interface MarineContextFusionFamilyLine {
 export interface MarineContextFusionSummary {
   overallAvailabilityLine: string;
   exportReadinessLine: string;
+  dominantLimitationLine: string | null;
   familyLines: MarineContextFusionFamilyLine[];
   highestPriorityCaveats: string[];
   exportLines: string[];
@@ -30,9 +31,12 @@ export interface MarineContextFusionSummary {
     fixtureFamilyCount: number;
     issueCount: number;
     warningCount: number;
+    limitedSourceCount: number;
+    dominatedByLimitedSources: boolean;
     exportReadiness: ExportReadiness;
     overallAvailabilityLine: string;
     exportReadinessLine: string;
+    dominantLimitationLine: string | null;
     familyLines: MarineContextFusionFamilyLine[];
     highestPriorityCaveats: string[];
     caveats: string[];
@@ -63,6 +67,13 @@ export function buildMarineContextFusionSummary(input: {
   const fixtureFamilyCount = countFixtureFamilies(input);
   const issueCount = input.contextIssueQueueSummary?.issueCount ?? 0;
   const warningCount = input.contextIssueQueueSummary?.warningCount ?? 0;
+  const availableSourceCount = input.contextSourceRegistrySummary?.availableSourceCount ?? 0;
+  const limitedSourceCount =
+    (input.contextSourceRegistrySummary?.degradedSourceCount ?? 0) +
+    (input.contextSourceRegistrySummary?.unavailableSourceCount ?? 0) +
+    (input.contextSourceRegistrySummary?.disabledSourceCount ?? 0);
+  const dominatedByLimitedSources =
+    limitedSourceCount > 0 && limitedSourceCount > availableSourceCount;
   const exportReadiness = classifyExportReadiness({
     familyCount,
     availableFamilyCount,
@@ -70,22 +81,32 @@ export function buildMarineContextFusionSummary(input: {
     unavailableFamilyCount,
     warningCount
   });
+  const dominantLimitationLine = dominatedByLimitedSources
+    ? "Source-health limitations dominate the current marine context mix; treat this as partial context and a review caveat, not anomaly severity or impact proof."
+    : null;
 
-  const overallAvailabilityLine =
-    `Marine context fusion: ${availableFamilyCount}/${familyCount} families available` +
-    ` | ${limitedFamilyCount} limited` +
-    ` | ${issueCount} source issue${issueCount === 1 ? "" : "s"}`;
-  const exportReadinessLine = buildExportReadinessLine(exportReadiness, fixtureFamilyCount, warningCount);
+  const overallAvailabilityLine = dominatedByLimitedSources
+    ? `Marine context fusion: partial context | source-health limitations dominate current source mix | ${availableFamilyCount}/${familyCount} families available`
+    : `Marine context fusion: ${availableFamilyCount}/${familyCount} families available` +
+      ` | ${limitedFamilyCount} limited` +
+      ` | ${issueCount} source issue${issueCount === 1 ? "" : "s"}`;
+  const exportReadinessLine = buildExportReadinessLine(
+    exportReadiness,
+    fixtureFamilyCount,
+    warningCount,
+    dominatedByLimitedSources
+  );
 
   const highestPriorityCaveats = collectPriorityCaveats(input, familyLines);
   const exportLines = [
     overallAvailabilityLine,
     exportReadinessLine,
+    ...(dominantLimitationLine ? [`Review caveat: ${dominantLimitationLine}`] : []),
     ...familyLines.map((line) => `${line.label}: ${line.detail}`),
     ...highestPriorityCaveats.slice(0, 2).map((caveat) => `Caveat: ${caveat}`)
   ];
   const caveats = Array.from(
-    new Set([
+    new Set<string>([
       ...highestPriorityCaveats,
       "Marine context fusion summarizes availability, source health, and export readiness only.",
       "Context families remain semantically separate and do not imply anomaly cause, flood impact, or vessel intent."
@@ -95,6 +116,7 @@ export function buildMarineContextFusionSummary(input: {
   return {
     overallAvailabilityLine,
     exportReadinessLine,
+    dominantLimitationLine,
     familyLines,
     highestPriorityCaveats,
     exportLines,
@@ -106,9 +128,12 @@ export function buildMarineContextFusionSummary(input: {
       fixtureFamilyCount,
       issueCount,
       warningCount,
+      limitedSourceCount,
+      dominatedByLimitedSources,
       exportReadiness,
       overallAvailabilityLine,
       exportReadinessLine,
+      dominantLimitationLine,
       familyLines,
       highestPriorityCaveats,
       caveats
@@ -210,7 +235,9 @@ function buildInfrastructureFamilyLine(
       ? "available"
       : summary.metadata.health === "empty"
         ? "empty"
-        : summary.metadata.health === "stale" || summary.metadata.health === "error"
+        : summary.metadata.health === "stale" ||
+            summary.metadata.health === "degraded" ||
+            summary.metadata.health === "error"
           ? "limited"
           : "unavailable";
 
@@ -245,13 +272,17 @@ function classifyExportReadiness(input: {
 function buildExportReadinessLine(
   readiness: ExportReadiness,
   fixtureFamilyCount: number,
-  warningCount: number
+  warningCount: number,
+  dominatedByLimitedSources: boolean
 ) {
   if (readiness === "unavailable") {
     return "Export readiness: unavailable | one or more context families are missing from the current review lens.";
   }
   if (readiness === "limited-context") {
-    return `Export readiness: limited context | ${warningCount} warning${warningCount === 1 ? "" : "s"} | ${fixtureFamilyCount} fixture/local family`;
+    const limitLine = dominatedByLimitedSources
+      ? "source-health limitations dominate current source mix"
+      : `${warningCount} warning${warningCount === 1 ? "" : "s"}`;
+    return `Export readiness: limited context | ${limitLine} | ${fixtureFamilyCount} fixture/local family`;
   }
   return `Export readiness: ready with caveats | ${fixtureFamilyCount} fixture/local family${fixtureFamilyCount === 1 ? "" : "ies"}`;
 }
@@ -290,22 +321,30 @@ function collectPriorityCaveats(
   },
   familyLines: MarineContextFusionFamilyLine[]
 ) {
-  const issueCaveats =
+  const issueCaveats: string[] =
     input.contextIssueQueueSummary?.topIssues
       .sort((left, right) => severityWeight(right.severity) - severityWeight(left.severity))
       .map((issue) => issue.caveat) ?? [];
   const familyCaveats = familyLines.map((line) => line.caveat).filter((value): value is string => Boolean(value));
   const registryCaveats = input.contextSourceRegistrySummary?.caveats.slice(0, 2) ?? [];
+  const dominantSourceMixCaveat =
+    input.contextSourceRegistrySummary &&
+    input.contextSourceRegistrySummary.degradedSourceCount +
+      input.contextSourceRegistrySummary.unavailableSourceCount +
+      input.contextSourceRegistrySummary.disabledSourceCount >
+      input.contextSourceRegistrySummary.availableSourceCount
+      ? "Source-health limitations dominate the current marine context mix; treat marine context as partial and review caveats before export or briefing text."
+      : null;
+  const combinedCaveats = [
+    dominantSourceMixCaveat,
+    ...issueCaveats,
+    ...familyCaveats,
+    ...registryCaveats,
+    "Marine context fusion does not create a single severity score across unrelated sources.",
+    "Context families support orient/prioritize/explain/act workflows only; they do not prove impact, anomaly cause, vessel behavior, vessel intent, or wrongdoing."
+  ].filter((value): value is string => Boolean(value));
 
-  return Array.from(
-    new Set([
-      ...issueCaveats,
-      ...familyCaveats,
-      ...registryCaveats,
-      "Marine context fusion does not create a single severity score across unrelated sources.",
-      "Context families support orient/prioritize/explain/act workflows only; they do not prove vessel intent or anomaly cause."
-    ])
-  ).slice(0, 4);
+  return Array.from(new Set<string>(combinedCaveats)).slice(0, 4);
 }
 
 function severityWeight(severity: "info" | "notice" | "warning") {
