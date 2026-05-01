@@ -59,7 +59,7 @@ Latest verified local status on this Windows machine:
 - `python app/server/tests/run_playwright_smoke.py marine`: passed
 - `python app/server/tests/run_playwright_smoke.py webcam`: passed
 - `python app/server/tests/run_playwright_smoke.py aerospace`: failed before app assertions with `windows-playwright-launch-permission`, narrowed to `windows-browser-launch-permission`
-- representative backend checks for the latest Geospatial, Marine, Features/Webcam, and Aerospace completions also passed in the current Phase 2 checkpoint sweep, including the newest GeoSphere Austria, NASA POWER, Washington VAAC, and webcam source-ops detail/export packages
+- representative backend checks for the latest Geospatial, Marine, Features/Webcam, Aerospace, and Data AI completions also passed in the current Phase 2 checkpoint sweep, including the newest GeoSphere Austria, NASA POWER, Washington VAAC, webcam source-ops detail/export packages, CISA advisories, FIRST EPSS, and the bounded five-feed Data AI aggregate route
 
 Interpret this correctly:
 
@@ -77,7 +77,11 @@ Current checkpoint summary:
 - the earlier high-priority cross-platform runtime-plan alert has been propagated and the alerts ledger is currently back to zero open alerts
 - the previously reported `AppShell.tsx` `selectedTargetSummary` frontend build blocker did not reproduce in the latest Connect checkpoint sweep
 - the new cross-platform runtime docs are planning artifacts, not implementation evidence
-- the ownership scanner remains directionally useful, but the newest source wave pushed the residual `unknown` bucket back up again; reconcile those paths before any serious consolidation push
+- the ownership scanner now has dedicated `data-ai` and `atlas-planning` buckets for clear lane-owned implementation vs user-directed planning surfaces
+- the current dirty set is no longer `unknown: 0`; it is down to `unknown: 2`, both intentionally broad backend files:
+  - `app/server/src/app.py`
+  - `app/server/src/services/status_service.py`
+- current shared-file pressure remains real at `shared-high-collision: 8`
 
 Current checkpoint caution:
 

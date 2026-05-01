@@ -1,5 +1,43 @@
 # Atlas AI Progress
 
+## 2026-04-30 22:11 America/Chicago
+
+Task:
+- find and validate 100 more RSS feeds for Data AI with broader global coverage beyond news
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- validated 110 additional RSS/Atom/RDF feeds for Data AI Batch 3
+- added trusted and important global-coverage sources including Bellingcat, Citizen Lab, EFF, Access Now, Privacy International, Freedom House, DFRLab, Full Fact, Snopes, PolitiFact, FactCheck.org, EUvsDisinfo, OCCRP, ICIJ, ProPublica, Lighthouse Reports, CPJ, Atlantic Council, ECFR, FDD, War on the Rocks, Oxfam, Our World in Data, Carbon Brief, Mongabay, Smithsonian volcano updates, U.S. travel advisories, UN press releases, OpenStreetMap, and more
+- linked Batch 3 from the main Data AI RSS doc, source prompt index, assignment board, data-source registry, and consolidated source registry
+- updated Data AI validated feed counts from 167 to 277 total
+- updated the combined approved/feed candidate total to 425
+
+Files touched:
+- `app/docs/data-ai-rss-source-candidates-batch3.md`
+- `app/docs/data-ai-rss-source-candidates.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/data-source-registry.md`
+- `app/docs/source-consolidated-noauth-registry.md`
+- `app/docs/agent-progress/atlas-ai.md`
+
+Validation:
+- validated candidate URLs with normal backend-style HTTP requests and XML parsing as RSS, Atom, or RDF
+- accepted 110 feeds with HTTP 200, parseable XML, and non-empty item/entry counts
+- `rg` scan for Batch 3 doc links/counts/source IDs
+- `git diff --check` on touched docs
+
+Blockers or caveats:
+- no implementation was performed
+- Batch 3 contains many high-context media, NGO, think-tank, investigative, and regional feeds; these must stay contextual unless the source is authoritative for the specific record
+- same-publisher and same-region feeds can duplicate stories and require GUID/link/hash dedupe
+
+Next recommended task:
+- after Data AI's core parser lands, onboard Batch 3 by category, starting with OSINT/investigations and official/travel/security feeds before broad regional media feeds
+
 ## 2026-04-30 17:08 America/Chicago
 
 Task:

@@ -23,6 +23,7 @@ import { buildAerospaceContextIssueSummary } from "./aerospaceContextIssues";
 import { buildAerospaceExportReadinessSummary } from "./aerospaceExportReadiness";
 import { buildAerospaceReviewQueueSummary } from "./aerospaceReviewQueue";
 import { buildAerospaceContextReportSummary } from "./aerospaceContextReport";
+import { buildAerospaceSourceReadinessSummary } from "./aerospaceSourceReadiness";
 import { buildAerospaceAirportStatusSummary } from "./aerospaceAirportStatusContext";
 import { buildAerospaceGeomagnetismContextSummary } from "./aerospaceGeomagnetismContext";
 import {
@@ -31,6 +32,7 @@ import {
 } from "./aerospaceOperationalContext";
 import { buildAerospaceVaacContextSummary } from "./aerospaceVaacContext";
 import { buildAerospaceSpaceContextSummary } from "./aerospaceSpaceContext";
+import { buildAerospaceSpaceWeatherArchiveContextSummary } from "./aerospaceSpaceWeatherArchiveContext";
 import { buildAerospaceSpaceWeatherContextSummary } from "./aerospaceSpaceWeatherContext";
 import {
   buildAerospaceOpenSkyContextSummary
@@ -52,6 +54,7 @@ import {
   useNearestAirportReferenceQuery,
   useNearestRunwayThresholdReferenceQuery,
   useOpenSkyStatesQuery,
+  useNceiSpaceWeatherArchiveQuery,
   useSourceStatusQuery,
   useAnchorageVaacAdvisoriesQuery,
   useUsgsGeomagnetismContextQuery,
@@ -205,6 +208,9 @@ export function InspectorPanel() {
     productType: "all",
     limit: 3
   });
+  const nceiSpaceWeatherArchiveQuery = useNceiSpaceWeatherArchiveQuery({
+    enabled: entity?.type === "aircraft" || entity?.type === "satellite",
+  });
   const washingtonVaacQuery = useWashingtonVaacAdvisoriesQuery({
     enabled: entity?.type === "aircraft" || entity?.type === "satellite",
     limit: 2
@@ -239,6 +245,10 @@ export function InspectorPanel() {
     entity?.type === "aircraft" || entity?.type === "satellite"
       ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "noaa-swpc") ?? null
       : null;
+  const nceiSpaceWeatherArchiveSourceHealth =
+    entity?.type === "aircraft" || entity?.type === "satellite"
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "noaa-ncei-space-weather-portal") ?? null
+      : null;
   const washingtonVaacSourceHealth =
     entity?.type === "aircraft" || entity?.type === "satellite"
       ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "washington-vaac") ?? null
@@ -272,6 +282,10 @@ export function InspectorPanel() {
   const swpcSpaceWeatherSummary = buildAerospaceSpaceWeatherContextSummary({
     context: swpcContextQuery.data,
     sourceHealth: swpcSourceHealth
+  });
+  const nceiSpaceWeatherArchiveSummary = buildAerospaceSpaceWeatherArchiveContextSummary({
+    context: nceiSpaceWeatherArchiveQuery.data,
+    sourceHealth: nceiSpaceWeatherArchiveSourceHealth
   });
   const vaacContextSummary = buildAerospaceVaacContextSummary({
     washingtonContext: washingtonVaacQuery.data,
@@ -342,6 +356,7 @@ export function InspectorPanel() {
     geomagnetismSummary,
     spaceContextSummary: cneosSpaceContextSummary,
     spaceWeatherSummary: swpcSpaceWeatherSummary,
+    spaceWeatherArchiveSummary: nceiSpaceWeatherArchiveSummary,
     vaacContextSummary,
     dataHealthSummary: selectedDataHealthSummary
   });
@@ -358,6 +373,7 @@ export function InspectorPanel() {
     openSkySourceHealth,
     spaceContextSummary: cneosSpaceContextSummary,
     spaceWeatherSummary: swpcSpaceWeatherSummary,
+    spaceWeatherArchiveSummary: nceiSpaceWeatherArchiveSummary,
     vaacContextSummary,
     dataHealthSummary: selectedDataHealthSummary
   });
@@ -379,6 +395,12 @@ export function InspectorPanel() {
     availabilitySummary: operationalContextAvailabilitySummary,
     dataHealthSummary: selectedDataHealthSummary,
     openSkySummary: openSkyContextSummary
+  });
+  const aerospaceSourceReadinessSummary = buildAerospaceSourceReadinessSummary({
+    availabilitySummary: operationalContextAvailabilitySummary,
+    issueSummary: aerospaceContextIssueSummary,
+    readinessSummary: aerospaceExportReadinessSummary,
+    dataHealthSummary: selectedDataHealthSummary
   });
   const aerospaceContextReportSummary = buildAerospaceContextReportSummary({
     selectedTargetSummary: selectedEvidenceSummary,
@@ -1165,6 +1187,69 @@ export function InspectorPanel() {
                   </div>
                 ) : null}
 
+                {aerospaceSourceReadinessSummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aerospace Source Readiness</p>
+                    <div className="data-card data-card--compact">
+                      <strong>
+                        {aerospaceSourceReadinessSummary.familyCount} families | {aerospaceSourceReadinessSummary.reviewRecommendedCount} review recommended
+                      </strong>
+                      {aerospaceSourceReadinessSummary.displayLines.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                      {aerospaceSourceReadinessSummary.topFamilies.map((family) => (
+                        <div key={family.familyId} className="data-card data-card--compact">
+                          <strong>{family.label}</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge
+                              tone={availabilityTone(
+                                family.posture === "mixed"
+                                  ? "degraded"
+                                  : family.posture === "available"
+                                    ? "available"
+                                    : family.posture === "unavailable"
+                                      ? "unavailable"
+                                      : "degraded"
+                              )}
+                            >
+                              {family.posture}
+                            </StatusBadge>
+                            <StatusBadge tone={family.reviewRecommended ? "warning" : "info"}>
+                              {family.readinessLabel}
+                            </StatusBadge>
+                          </div>
+                          <span>{family.summaryLine}</span>
+                          {family.sources.map((source) => (
+                            <div key={source.sourceId} className="data-card data-card--compact">
+                              <strong>{source.label}</strong>
+                              <div className="stack stack--actions">
+                                <StatusBadge tone={availabilityTone(source.availability)}>
+                                  {source.availability}
+                                </StatusBadge>
+                                <StatusBadge tone={healthTone(normalizeAvailabilityHealth(source.health))}>
+                                  {source.sourceMode} | {source.health}
+                                </StatusBadge>
+                                <DataBasisBadge
+                                  basis={source.evidenceBasis === "advisory" ? "contextual" : source.evidenceBasis}
+                                  prefix="Basis"
+                                />
+                              </div>
+                              <span>{source.reason}</span>
+                              {source.freshnessLabel ? <span>Freshness: {source.freshnessLabel}</span> : null}
+                              {source.caveat ? <span>{source.caveat}</span> : null}
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                    {aerospaceSourceReadinessSummary.caveats.slice(0, 2).map((caveat) => (
+                      <CaveatBlock key={caveat} heading="Source-readiness caveat" tone="evidence" compact>
+                        {caveat}
+                      </CaveatBlock>
+                    ))}
+                  </div>
+                ) : null}
+
                 {aerospaceContextReportSummary ? (
                   <div className="panel__section">
                     <p className="panel__eyebrow">Aerospace Context Report</p>
@@ -1777,6 +1862,65 @@ export function InspectorPanel() {
                       <div className="data-card data-card--compact">
                         <strong>Space-weather context unavailable</strong>
                         <span>No NOAA SWPC summary or advisory context is currently loaded.</span>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                {entity && (entity.type === "aircraft" || entity.type === "satellite") ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Space Weather Archive Context</p>
+                    {nceiSpaceWeatherArchiveQuery.isLoading ? (
+                      <div className="data-card data-card--compact">
+                        <span>Loading archival space-weather collection metadata.</span>
+                      </div>
+                    ) : nceiSpaceWeatherArchiveQuery.isError ? (
+                      <div className="data-card data-card--compact">
+                        <strong>Archive context unavailable</strong>
+                        <span>
+                          {nceiSpaceWeatherArchiveQuery.error instanceof Error
+                            ? nceiSpaceWeatherArchiveQuery.error.message
+                            : "NOAA NCEI archive context request failed."}
+                        </span>
+                        <span>Do not treat missing archive metadata as proof of current SWPC conditions.</span>
+                      </div>
+                    ) : nceiSpaceWeatherArchiveSummary ? (
+                      <>
+                        <div className="data-card data-card--compact">
+                          <strong>Archived collection metadata</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge
+                              tone={healthTone(
+                                nceiSpaceWeatherArchiveSourceHealth?.state === "healthy"
+                                  ? "normal"
+                                  : nceiSpaceWeatherArchiveSourceHealth?.state === "stale"
+                                    ? "stale"
+                                    : nceiSpaceWeatherArchiveSourceHealth?.state === "degraded" ||
+                                        nceiSpaceWeatherArchiveSourceHealth?.state === "rate-limited"
+                                      ? "degraded"
+                                      : nceiSpaceWeatherArchiveSourceHealth?.state === "never-fetched"
+                                        ? "unknown"
+                                        : "partial"
+                              )}
+                            >
+                              Source: {nceiSpaceWeatherArchiveSummary.sourceState}
+                            </StatusBadge>
+                            <DataBasisBadge basis="contextual" prefix="Basis" />
+                          </div>
+                          {nceiSpaceWeatherArchiveSummary.displayLines.map((line) => (
+                            <span key={line}>{line}</span>
+                          ))}
+                        </div>
+                        {nceiSpaceWeatherArchiveSummary.caveats.slice(0, 3).map((caveat) => (
+                          <CaveatBlock key={caveat} heading="Archive caveat" tone="evidence" compact>
+                            {caveat}
+                          </CaveatBlock>
+                        ))}
+                      </>
+                    ) : (
+                      <div className="data-card data-card--compact">
+                        <strong>Archive context unavailable</strong>
+                        <span>No NOAA NCEI space-weather archive metadata is currently loaded.</span>
                       </div>
                     )}
                   </div>

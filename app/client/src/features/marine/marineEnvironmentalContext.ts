@@ -3,7 +3,15 @@ import type {
   MarineNoaaCoopsContextResponse
 } from "../../types/api";
 
-type HealthState = "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+type HealthState =
+  | "loaded"
+  | "empty"
+  | "stale"
+  | "degraded"
+  | "unavailable"
+  | "error"
+  | "disabled"
+  | "unknown";
 type SourceMode = "fixture" | "live" | "unknown";
 export type MarineEnvironmentalContextAnchor = "selected-vessel" | "viewport" | "chokepoint";
 export type MarineEnvironmentalContextEffectiveAnchor =

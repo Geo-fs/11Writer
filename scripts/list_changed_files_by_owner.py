@@ -18,6 +18,8 @@ from pathlib import Path
 GROUPS = [
     "connect-tooling",
     "gather-ui-integration",
+    "atlas-planning",
+    "data-ai",
     "geospatial-environmental",
     "aerospace",
     "marine",
@@ -74,7 +76,6 @@ def is_connect_tooling(path: str) -> bool:
         "app/docs/validation-matrix.md",
         "app/docs/release-readiness.md",
         "app/docs/alerts.md",
-        "app/docs/data-ai-onboarding.md",
         "app/docs/fusion-layer-architecture.md",
         "app/docs/intelligence-loop.md",
         "app/docs/prompt-injection-defense.md",
@@ -104,9 +105,39 @@ def is_gather_ui_integration(path: str) -> bool:
         or path == "app/docs/source-prompt-index.md"
         or path == "app/docs/source-validation-status.md"
         or path == "app/docs/source-workflow-validation-plan.md"
+        or path == "app/docs/source-routing-priority-memo.md"
         or path == "app/docs/source-consolidated-noauth-registry.md"
         or path == "app/docs/source-quick-assign-packets-batch5.md"
         or path.startswith("app/docs/source-acceleration-phase2-")
+    )
+
+
+def is_data_ai(path: str) -> bool:
+    return (
+        path == "app/docs/cyber-context-sources.md"
+        or path == "app/docs/data-ai-onboarding.md"
+        or path == "app/docs/data-ai-feed-rollout-ladder.md"
+        or path == "app/docs/agent-next-tasks/data-ai.md"
+        or path == "app/docs/agent-progress/data-ai.md"
+        or path == "app/server/src/routes/cisa_cyber_advisories.py"
+        or path == "app/server/src/routes/nvd_cve.py"
+        or path == "app/server/src/routes/first_epss.py"
+        or path == "app/server/src/routes/data_ai_feeds.py"
+        or path == "app/server/src/services/cisa_cyber_advisories_service.py"
+        or path == "app/server/src/services/cve_context_service.py"
+        or path == "app/server/src/services/first_epss_service.py"
+        or path == "app/server/src/services/data_ai_feed_registry.py"
+        or path == "app/server/src/services/data_ai_multi_feed_service.py"
+        or path == "app/server/src/services/nvd_cve_service.py"
+        or path == "app/server/tests/test_cisa_cyber_advisories.py"
+        or path == "app/server/tests/test_cve_context.py"
+        or path == "app/server/tests/test_first_epss.py"
+        or path == "app/server/tests/test_data_ai_multi_feed.py"
+        or path == "app/server/tests/test_nvd_cve.py"
+        or path == "app/server/data/cisa_cybersecurity_advisories_fixture.xml"
+        or path == "app/server/data/first_epss_fixture.json"
+        or path == "app/server/data/nvd_cve_fixture.json"
+        or path.startswith("app/server/data/data_ai_multi_feeds/")
     )
 
 
@@ -123,13 +154,19 @@ def is_geospatial_environmental(path: str) -> bool:
         "app/server/src/services/dmi_forecast_service.py",
         "app/server/src/services/ipma_warnings_service.py",
         "app/server/src/services/ireland_wfd_service.py",
+        "app/server/src/services/ga_recent_earthquakes_service.py",
+        "app/server/src/services/natural_earth_physical_service.py",
         "app/server/src/services/met_eireann_forecast_service.py",
         "app/server/src/services/met_eireann_warnings_service.py",
         "app/server/src/services/geosphere_austria_warnings_service.py",
         "app/server/src/services/nasa_power_meteorology_solar_service.py",
+        "app/server/src/services/noaa_global_volcano_service.py",
         "app/server/src/services/usgs_geomagnetism_service.py",
+        "app/server/src/routes/base_earth_context.py",
         "app/server/tests/test_bmkg_earthquakes.py",
+        "app/server/tests/test_base_earth_reference_bundle.py",
         "app/server/tests/test_dmi_forecast.py",
+        "app/server/tests/test_ga_recent_earthquakes.py",
         "app/server/tests/test_geosphere_austria_warnings.py",
         "app/server/tests/test_ipma_warnings.py",
         "app/server/tests/test_ireland_epa_wfd_catchments.py",
@@ -153,6 +190,9 @@ def is_geospatial_environmental(path: str) -> bool:
         "eonet" in path.lower()
         or "earthquake" in path.lower()
         or "bmkg" in path.lower()
+        or "ga_recent_earthquakes" in path.lower()
+        or "natural_earth_physical" in path.lower()
+        or "noaa_global_volcano" in path.lower()
         or "dmi_forecast" in path.lower()
         or "ipma" in path.lower()
         or "geomagnetism" in path.lower()
@@ -177,24 +217,29 @@ def is_aerospace(path: str) -> bool:
             "app/docs/aerospace-source-contract-matrix.md",
             "app/docs/aerospace-workflow-validation.md",
             "app/server/src/adapters/anchorage_vaac.py",
+            "app/server/src/adapters/ncei_space_weather_portal.py",
             "app/server/src/adapters/tokyo_vaac.py",
             "app/server/src/adapters/vaac_text_common.py",
             "app/server/src/adapters/washington_vaac.py",
             "app/server/src/routes/anchorage_vaac.py",
+            "app/server/src/routes/ncei_space_weather_portal.py",
             "app/server/src/routes/tokyo_vaac.py",
             "app/server/src/routes/washington_vaac.py",
             "app/server/src/services/anchorage_vaac_service.py",
+            "app/server/src/services/ncei_space_weather_portal_service.py",
             "app/server/src/services/tokyo_vaac_service.py",
             "app/server/src/services/washington_vaac_service.py",
             "app/server/tests/test_anchorage_vaac_contracts.py",
             "app/server/tests/test_aviation_weather_contracts.py",
             "app/server/tests/test_cneos_contracts.py",
             "app/server/tests/test_faa_nas_status_contracts.py",
+            "app/server/tests/test_ncei_space_weather_portal_contracts.py",
             "app/server/tests/test_opensky_contracts.py",
             "app/server/tests/test_swpc_contracts.py",
             "app/server/tests/test_tokyo_vaac_contracts.py",
             "app/server/tests/test_washington_vaac_contracts.py",
         }
+        or path == "app/server/data/ncei_space_weather_portal_fixture.xml"
         or path.startswith("app/server/data/anchorage_vaac_")
         or path.startswith("app/server/data/tokyo_vaac_")
         or path.startswith("app/server/data/washington_vaac_")
@@ -247,6 +292,14 @@ def is_features_webcam(path: str) -> bool:
     )
 
 
+def is_atlas_planning(path: str) -> bool:
+    return path in {
+        "app/docs/data-ai-rss-source-candidates.md",
+        "app/docs/data-ai-rss-source-candidates-batch2.md",
+        "app/docs/data-ai-rss-source-candidates-batch3.md",
+    }
+
+
 def is_shared_high_collision(path: str) -> bool:
     return path in {
         "app/client/src/features/app-shell/AppShell.tsx",
@@ -269,6 +322,10 @@ def classify(path: str) -> str:
         return "connect-tooling"
     if is_gather_ui_integration(path):
         return "gather-ui-integration"
+    if is_atlas_planning(path):
+        return "atlas-planning"
+    if is_data_ai(path):
+        return "data-ai"
     if is_geospatial_environmental(path):
         return "geospatial-environmental"
     if is_aerospace(path):

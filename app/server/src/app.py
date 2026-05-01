@@ -8,6 +8,7 @@ from src.config.settings import get_settings
 from src.routes.aircraft import router as aircraft_router
 from src.routes.anchorage_vaac import router as anchorage_vaac_router
 from src.routes.aviation_weather import router as aviation_weather_router
+from src.routes.base_earth_context import router as base_earth_context_router
 from src.routes.cameras import router as cameras_router
 from src.routes.catchments_context import router as catchments_context_router
 from src.routes.cisa_cyber_advisories import router as cisa_cyber_advisories_router
@@ -21,6 +22,8 @@ from src.routes.features import router as features_router
 from src.routes.geomagnetism import router as geomagnetism_router
 from src.routes.health import router as health_router
 from src.routes.marine import router as marine_router
+from src.routes.ncei_space_weather_portal import router as ncei_space_weather_portal_router
+from src.routes.nvd_cve import router as nvd_cve_router
 from src.routes.opensky_states import router as opensky_states_router
 from src.routes.first_epss import router as first_epss_router
 from src.routes.reference import router as reference_router
@@ -72,6 +75,7 @@ def create_application() -> FastAPI:
 
     application.include_router(health_router)
     application.include_router(config_router)
+    application.include_router(base_earth_context_router)
     application.include_router(catchments_context_router)
     application.include_router(cisa_cyber_advisories_router)
     application.include_router(data_ai_feeds_router)
@@ -88,12 +92,14 @@ def create_application() -> FastAPI:
     application.include_router(faa_nas_status_router)
     application.include_router(cneos_router)
     application.include_router(swpc_router)
+    application.include_router(ncei_space_weather_portal_router)
     application.include_router(anchorage_vaac_router)
     application.include_router(tokyo_vaac_router)
     application.include_router(washington_vaac_router)
     application.include_router(weather_context_router)
     application.include_router(satellite_router)
     application.include_router(marine_router)
+    application.include_router(nvd_cve_router)
     application.include_router(cameras_router)
 
     return application

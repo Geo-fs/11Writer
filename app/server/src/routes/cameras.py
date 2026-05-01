@@ -5,6 +5,7 @@ from src.services.camera_source_ops_detail import build_camera_source_ops_detail
 from src.services.camera_source_ops_export_summary import build_camera_source_ops_export_summary
 from src.services.camera_source_ops_report_index import build_camera_source_ops_report_index
 from src.services.camera_source_ops_review_queue import build_filtered_camera_source_ops_review_queue
+from src.services.camera_source_ops_review_queue import build_camera_source_ops_review_queue_export_bundle
 from src.services.camera_service import CameraService
 from src.types.api import (
     CameraQuery,
@@ -13,6 +14,7 @@ from src.types.api import (
     CameraSourceOpsDetailResponse,
     CameraSourceOpsExportSummaryResponse,
     CameraSourceOpsIndexResponse,
+    CameraSourceOpsReviewQueueExportBundleResponse,
     CameraSourceOpsReviewQueueResponse,
     CameraSourceRegistryResponse,
     ReviewQueueResponse,
@@ -85,10 +87,26 @@ async def get_camera_source_ops_detail(
 @router.get("/source-ops-export-summary", response_model=CameraSourceOpsExportSummaryResponse)
 async def get_camera_source_ops_export_summary(
     source_ids: str | None = Query(default=None, description="Comma-separated source ids for detail export lines"),
+    include_review_queue_aggregate_lines: bool = Query(default=False),
+    review_queue_priority_band: str | None = Query(default=None),
+    review_queue_reason_category: str | None = Query(default=None),
+    review_queue_lifecycle_state: str | None = Query(default=None),
+    review_queue_source_ids: str | None = Query(default=None, description="Comma-separated source ids for filtered review queue aggregate lines"),
+    review_queue_limit: int = Query(default=50, ge=1, le=200),
     settings: Settings = Depends(get_settings),
 ) -> CameraSourceOpsExportSummaryResponse:
     requested_ids = [item.strip() for item in (source_ids or "").split(",") if item.strip()]
-    return build_camera_source_ops_export_summary(settings, requested_ids or None)
+    review_queue_requested_ids = [item.strip() for item in (review_queue_source_ids or "").split(",") if item.strip()]
+    return build_camera_source_ops_export_summary(
+        settings,
+        requested_ids or None,
+        include_review_queue_aggregate_lines=include_review_queue_aggregate_lines,
+        review_queue_priority_band=review_queue_priority_band,
+        review_queue_reason_category=review_queue_reason_category,
+        review_queue_lifecycle_state=review_queue_lifecycle_state,
+        review_queue_source_ids=review_queue_requested_ids or None,
+        review_queue_limit=review_queue_limit,
+    )
 
 
 @router.get("/source-ops-review-queue", response_model=CameraSourceOpsReviewQueueResponse)
@@ -98,10 +116,32 @@ async def get_camera_source_ops_review_queue(
     lifecycle_state: str | None = Query(default=None),
     source_ids: str | None = Query(default=None, description="Comma-separated source ids to constrain review items"),
     limit: int = Query(default=50, ge=1, le=200),
+    aggregate_only: bool = Query(default=False),
     settings: Settings = Depends(get_settings),
 ) -> CameraSourceOpsReviewQueueResponse:
     requested_ids = [item.strip() for item in (source_ids or "").split(",") if item.strip()]
     return build_filtered_camera_source_ops_review_queue(
+        settings,
+        priority_band=priority_band,
+        reason_category=reason_category,
+        lifecycle_state=lifecycle_state,
+        source_ids=requested_ids or None,
+        limit=limit,
+        aggregate_only=aggregate_only,
+    )
+
+
+@router.get("/source-ops-review-queue-export-bundle", response_model=CameraSourceOpsReviewQueueExportBundleResponse)
+async def get_camera_source_ops_review_queue_export_bundle(
+    priority_band: str | None = Query(default=None),
+    reason_category: str | None = Query(default=None),
+    lifecycle_state: str | None = Query(default=None),
+    source_ids: str | None = Query(default=None, description="Comma-separated source ids to constrain review aggregate lines"),
+    limit: int = Query(default=50, ge=1, le=200),
+    settings: Settings = Depends(get_settings),
+) -> CameraSourceOpsReviewQueueExportBundleResponse:
+    requested_ids = [item.strip() for item in (source_ids or "").split(",") if item.strip()]
+    return build_camera_source_ops_review_queue_export_bundle(
         settings,
         priority_band=priority_band,
         reason_category=reason_category,

@@ -55,11 +55,16 @@ Related contract doc:
 - disabled-mode behavior remains explicit for non-fixture mode in this phase:
   - health `disabled`
   - live mode not fabricated
-- stale/unavailable boundary remains explicit in this phase:
+- source-health boundary remains explicit in this phase:
   - fixture mode can now emit `stale` when returned observation/update timestamps honestly exceed source freshness thresholds
-  - current services validate `loaded`, `empty`, `stale`, and `disabled`
-  - CO-OPS, NDBC, Scottish Water, Vigicrues, and Ireland OPW all have dedicated regression coverage for this boundary
-  - current services still do not emit `unavailable` or `degraded`
+  - fixture mode can now emit `unavailable` when source retrieval fails inside the backend service path
+  - current services validate `loaded`, `empty`, `stale`, `disabled`, and `unavailable`
+  - current services validate `degraded` for:
+    - Scottish Water Overflows
+    - France Vigicrues Hydrometry
+    - Ireland OPW Water Level
+  - CO-OPS and NDBC still do not emit `degraded` because the current slice has no honest partial-ingest/source-quality degradation signal
+  - CO-OPS, NDBC, Scottish Water, Vigicrues, and Ireland OPW all have dedicated regression coverage for these boundaries
 - route validation should reject invalid coordinates/radius values with request validation errors
 
 ### Context Fusion / Review Contract Dependencies
@@ -122,6 +127,7 @@ These marine-local helpers do not define new backend routes. Their workflow vali
   - France Vigicrues Hydrometry
   - Ireland OPW Water Level
 - fixture/local mode remains explicit where applicable
+- degraded/unavailable source-health states are now workflow-visible in the deterministic marine smoke path
 - nearby counts are visible
 - active counts are visible where applicable
 
@@ -271,4 +277,9 @@ Marine export metadata should include:
 - The marine-only smoke path now explicitly confirms the composed marine hydrology context card and the `marineAnomalySummary.hydrologyContext` export metadata block.
 - The marine-only smoke path now explicitly confirms the composed marine context fusion card and the `marineAnomalySummary.contextFusionSummary` export metadata block.
 - The marine-only smoke path now explicitly confirms the composed marine context review report card and the `marineAnomalySummary.contextReviewReport` export metadata block.
-- A remaining semantics gap stays documented rather than “fixed”: `stale` / `unavailable` source-health states are not yet emitted by the current deterministic marine context services because doing so honestly requires a real source-health path rather than fabricated fixture behavior.
+- The marine-only smoke path now explicitly surfaces:
+  - one degraded source-health example via Scottish Water Overflows
+  - one unavailable source-health example via France Vigicrues Hydrometry
+  - corresponding `contextSourceSummary` counts/rows and `contextIssueQueue` warnings in export metadata
+- A remaining semantics gap stays documented rather than "fixed": `degraded` is still not emitted for CO-OPS or NDBC because the current slice has no honest partial-ingest/source-quality degradation signal to surface at the source-health layer.
+

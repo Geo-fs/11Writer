@@ -104,7 +104,7 @@ export function buildMarineContextIssueQueue(
         severity: "warning",
         issueType: "degraded",
         title: `${row.label} source health is degraded`,
-        detail: "The source reported a degraded, stale, or errored state in the current marine session.",
+        detail: "The source reported a degraded, stale, or errored state in the current marine session. This is a source-health limitation, not anomaly severity.",
         caveat: row.caveats[0] ?? "Degraded source health limits workflow confidence for this context source.",
         recommendedAction: "Review source health and caveats before relying on this context source.",
         evidenceBasis: row.evidenceBasis
@@ -134,7 +134,7 @@ export function buildMarineContextIssueQueue(
         severity: "warning",
         issueType: "unavailable",
         title: `${row.label} is unavailable`,
-        detail: "The source summary is not currently available in the marine review view.",
+        detail: "The source summary is not currently available in the marine review view because the source-health path is unavailable. This is missing context, not negative evidence.",
         caveat: row.caveats[0] ?? "Unavailable source state should be treated as missing context, not negative evidence.",
         recommendedAction: "Verify source settings or query center before relying on this context source.",
         evidenceBasis: row.evidenceBasis

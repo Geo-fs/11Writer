@@ -9,6 +9,7 @@ from src.types.api import (
     CameraSourceOpsReviewQueueAggregate,
     CameraSourceOpsReviewQueueAggregateGroup,
     CameraSourceOpsDetailResponse,
+    CameraSourceOpsReviewQueueExportBundleResponse,
     CameraSourceOpsReviewQueueItem,
     CameraSourceOpsReviewQueueResponse,
     CameraSourceOpsReviewQueueSummary,
@@ -41,6 +42,7 @@ def build_filtered_camera_source_ops_review_queue(
     lifecycle_state: str | None = None,
     source_ids: list[str] | None = None,
     limit: int = 50,
+    aggregate_only: bool = False,
 ) -> CameraSourceOpsReviewQueueResponse:
     index = build_camera_source_ops_report_index(settings)
     requested = list(dict.fromkeys(source_ids or []))
@@ -64,8 +66,8 @@ def build_filtered_camera_source_ops_review_queue(
     limited_items = filtered_items[:limit]
     filtered_summary = CameraSourceOpsReviewQueueSummary(
         total_items=len(filtered_items),
-        items=limited_items,
-        export_lines=[item.review_line for item in limited_items[:5]],
+        items=[] if aggregate_only else limited_items,
+        export_lines=[] if aggregate_only else [item.review_line for item in limited_items[:5]],
         caveats=list(summary.caveats),
     )
     aggregate = build_camera_source_ops_review_queue_aggregate(
@@ -76,6 +78,7 @@ def build_filtered_camera_source_ops_review_queue(
         fetched_at=_now_iso(),
         requested_source_ids=requested,
         unknown_source_ids=unknown_source_ids,
+        aggregate_only=aggregate_only,
         priority_band=priority_band,  # type: ignore[arg-type]
         reason_category=reason_category,  # type: ignore[arg-type]
         lifecycle_state=lifecycle_state,
@@ -85,6 +88,52 @@ def build_filtered_camera_source_ops_review_queue(
         caveat=(
             "This filtered source-ops review queue is read-only prioritization only. "
             "It must not be used to infer source activation, validation, or lifecycle promotion."
+        ),
+    )
+
+
+def build_camera_source_ops_review_queue_export_bundle(
+    settings: Settings,
+    *,
+    priority_band: str | None = None,
+    reason_category: str | None = None,
+    lifecycle_state: str | None = None,
+    source_ids: list[str] | None = None,
+    limit: int = 50,
+) -> CameraSourceOpsReviewQueueExportBundleResponse:
+    index = build_camera_source_ops_report_index(settings)
+    filtered = build_filtered_camera_source_ops_review_queue(
+        settings,
+        priority_band=priority_band,
+        reason_category=reason_category,
+        lifecycle_state=lifecycle_state,
+        source_ids=source_ids,
+        limit=limit,
+        aggregate_only=True,
+    )
+    return CameraSourceOpsReviewQueueExportBundleResponse(
+        fetched_at=filtered.fetched_at,
+        priority_band=priority_band,  # type: ignore[arg-type]
+        reason_category=reason_category,  # type: ignore[arg-type]
+        lifecycle_state=lifecycle_state,
+        requested_source_ids=list(filtered.requested_source_ids),
+        unknown_source_ids=list(filtered.unknown_source_ids),
+        limit=limit,
+        source_lifecycle_summary=index.summary,
+        aggregate_lines=list(filtered.aggregate.export_lines),
+        source_ops_lines=list(index.export_lines),
+        lifecycle_caveats=[
+            index.caveat,
+            "This minimal bundle is export/debug summarization only.",
+            "It does not include full review queue items or per-source detail payloads.",
+        ],
+        queue_caveats=[
+            *filtered.aggregate.caveats,
+            filtered.caveat,
+        ],
+        caveat=(
+            "This minimal source-ops export bundle is read-only summarization only. "
+            "It must not be used to infer source activation, validation, endpoint health, or scheduling eligibility."
         ),
     )
 

@@ -13,7 +13,15 @@ export interface MarineNoaaContextSummary {
   metadata: {
     sourceId: string;
     sourceMode: "fixture" | "live" | "unknown";
-    health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+    health:
+      | "loaded"
+      | "empty"
+      | "stale"
+      | "degraded"
+      | "unavailable"
+      | "error"
+      | "disabled"
+      | "unknown";
     nearbyStationCount: number;
     contextKind: "viewport" | "chokepoint";
     topStation:

@@ -341,6 +341,9 @@ What may not trigger a transition by itself:
 - source-ops review queue prioritization alone
 - filtered source-ops review queue views alone
 - filtered source-ops review queue aggregates alone
+- aggregate-only export selector output alone
+- export-summary review-queue aggregate-line mode alone
+- minimal review-queue export bundle output alone
 
 ## Required checks before promotion
 
@@ -431,3 +434,6 @@ What may not trigger a transition by itself:
 - do not treat source-ops review queue priority as validation, activation, or promotion authority
 - do not treat filtered queue results or injected source text as instructions, source-health proof, or lifecycle authority
 - do not treat filtered queue aggregate counts as lifecycle authority or as proof of ingest readiness for a subset
+- do not treat aggregate-only export mode as stronger evidence than the full filtered queue; it is only a smaller read-only response shape
+- do not treat export-summary aggregate-line mode as a substitute for lifecycle evidence review; it is only a compact export bundle
+- do not treat the minimal review-queue export bundle as a substitute for the underlying lifecycle evidence; it is only a summary payload for export/debug consumers

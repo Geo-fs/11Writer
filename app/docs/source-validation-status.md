@@ -35,10 +35,17 @@ Important rules:
 | Source id | Actual route | Actual test file | Actual docs file | Fixture file if known | Client helper/hook if known | Validation status | Evidence caveat |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `usgs-volcano-hazards` | `/api/events/volcanoes/recent` | `app/server/tests/test_volcano_events.py` | `app/docs/source-acceleration-phase2-briefs.md` | `app/server/data/usgs_volcano_status_fixture.json` | `useVolcanoStatusQuery` | `implemented-not-fully-validated` | Workflow validation not explicitly recorded |
+| `natural-earth-physical` | `/api/context/reference/natural-earth/physical/land` | `app/server/tests/test_base_earth_reference_bundle.py` | `app/docs/environmental-events-natural-earth-physical.md` | `app/server/data/natural_earth_physical_land_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first static/reference slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `noaa-global-volcano-locations` | `/api/context/reference/noaa-global-volcanoes` | `app/server/tests/test_base_earth_reference_bundle.py` | `app/docs/environmental-events-noaa-global-volcano-locations.md` | `app/server/data/noaa_global_volcano_locations_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first static/reference slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `geosphere-austria-warnings` | `/api/events/geosphere-austria/warnings` | `app/server/tests/test_geosphere_austria_warnings.py` | `app/docs/environmental-events-geosphere-austria-warnings.md` | `app/server/data/geosphere_austria_warnings_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first advisory slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `nasa-power-meteorology-solar` | `/api/context/weather/nasa-power` | `app/server/tests/test_nasa_power_meteorology_solar.py` | `app/docs/environmental-events-nasa-power-meteorology-solar.md` | `app/server/data/nasa_power_meteorology_solar_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first modeled-context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `cisa-cyber-advisories` | `/api/context/cyber/cisa-advisories/recent` | `app/server/tests/test_cisa_cyber_advisories.py` | `app/docs/cyber-context-sources.md` | `app/server/data/cisa_cybersecurity_advisories_fixture.xml` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first advisory/context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `first-epss` | `/api/context/cyber/first-epss` | `app/server/tests/test_first_epss.py` | `app/docs/cyber-context-sources.md` | `app/server/data/first_epss_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first scored/context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `nist-nvd-cve` | `/api/context/cyber/nvd-cve` | `app/server/tests/test_nvd_cve.py` | `app/docs/cyber-context-sources.md` | `app/server/data/nvd_cve_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first NVD metadata/context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `taiwan-cwa-aws-opendata` | `/api/context/weather/taiwan-cwa` | `app/server/tests/test_taiwan_cwa_weather.py` | `app/docs/environmental-events-taiwan-cwa-weather.md` | `app/server/data/taiwan_cwa_current_weather_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first observed/context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `nrc-event-notifications` | `/api/events/nrc/recent` | `app/server/tests/test_nrc_event_notifications.py` | `app/docs/environmental-events-nrc-event-notifications.md` | `app/server/data/nrc_event_notifications_fixture.xml` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first source-reported/context slice is explicit and contract-tested, with prompt-injection-safe free-text fixture coverage, but no workflow validation or stable frontend consumer record is explicit yet |
+| `bmkg-earthquakes` | `/api/events/bmkg-earthquakes/recent` | `app/server/tests/test_bmkg_earthquakes.py` | `app/docs/environmental-events-bmkg-earthquakes.md` | `app/server/data/bmkg_earthquakes_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first regional-authority earthquake slice is explicit and contract-tested, with source-health and prompt-injection-safe free-text coverage, but no workflow validation or stable frontend consumer record is explicit yet |
+| `ga-recent-earthquakes` | `/api/events/ga-earthquakes/recent` | `app/server/tests/test_ga_recent_earthquakes.py` | `app/docs/environmental-events-ga-recent-earthquakes.md` | `app/server/data/ga_recent_earthquakes_fixture.kml` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first regional-authority KML earthquake slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `noaa-coops-tides-currents` | `/api/marine/context/noaa-coops` | `app/server/tests/test_marine_contracts.py` | `app/docs/source-acceleration-phase2-briefs.md` | fixture-backed context in `app/server/tests/smoke_fixture_app.py` | `useMarineNoaaCoopsContextQuery` | `workflow-validated` | Workflow validation is explicit in [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md:1), and contract hardening now explicitly covers `health=empty`, explicit fixture `sourceMode` on empty responses, `health=disabled` for disabled behavior, source-level caveats, and request validation errors; still not fully validated or live validated |
 | `usgs-geomagnetism` | `/api/context/geomagnetism/usgs` | `app/server/tests/test_usgs_geomagnetism.py` | `app/docs/environmental-events-usgs-geomagnetism.md` | `app/server/data/usgs_geomagnetism_fixture.json` | `useUsgsGeomagnetismContextQuery` | `implemented-not-fully-validated` | Backend-first slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `noaa-aviation-weather-center-data-api` | `/api/aviation-weather/airport-context` | `app/server/tests/test_aviation_weather_contracts.py` | `app/docs/source-acceleration-phase2-briefs.md` | mocked contract payloads, no dedicated `app/server/data` fixture identified in this audit | `useAviationWeatherContextQuery` | `implemented-not-fully-validated` | No explicit workflow validation record |
@@ -51,8 +58,77 @@ Important rules:
 | `uk-ea-flood-monitoring` | `/api/events/uk-floods/recent` | `app/server/tests/test_uk_ea_flood_events.py` | `app/docs/source-acceleration-phase2-international-briefs.md` | `app/server/data/uk_ea_flood_monitoring_fixture.json` | `useUkEaFloodMonitoringQuery` | `implemented-not-fully-validated` | Implementation evidence is clear; remaining gap is workflow validation |
 | `nasa-jpl-cneos` | `/api/aerospace/space/cneos-events` | `app/server/tests/test_cneos_contracts.py` | `app/docs/source-acceleration-phase2-international-briefs.md` | `app/server/data/cneos_space_context_fixture.json` | `useCneosEventsQuery` | `implemented-not-fully-validated` | UI and export integration are less explicit than backend and hook evidence |
 | `noaa-swpc-space-weather` | `/api/aerospace/space/swpc-context` | `app/server/tests/test_swpc_contracts.py` | `app/docs/aerospace-workflow-validation.md` | fixture-backed context in `app/server/tests/smoke_fixture_app.py` | `useSwpcSpaceWeatherContextQuery` | `implemented-not-fully-validated` | Contract tests, compile, lint, and build are explicit; browser smoke remains unexecuted on this host because Playwright launch is blocked by `windows-browser-launch-permission` |
+| `noaa-ncei-space-weather-portal` | `/api/aerospace/space/ncei-space-weather-archive` | `app/server/tests/test_ncei_space_weather_portal_contracts.py` | `app/docs/aerospace-workflow-validation.md` | `app/server/data/ncei_space_weather_portal_fixture.xml` | `useNceiSpaceWeatherArchiveQuery` | `implemented-not-fully-validated` | Contract tests, compile, client lint/build, and consumer/export-path wiring are explicit; browser smoke remains unexecuted on this host because Playwright launch is blocked by `windows-browser-launch-permission` |
 | `opensky-anonymous-states` | `/api/aerospace/aircraft/opensky/states` | `app/server/tests/test_opensky_contracts.py` | `app/docs/aerospace-workflow-validation.md` | fixture-backed context in `app/server/tests/smoke_fixture_app.py` | `useOpenSkyStatesQuery` | `implemented-not-fully-validated` | Contract tests, compile, lint, and build are explicit; browser smoke remains unexecuted on this host because Playwright launch is blocked by `windows-browser-launch-permission` |
-| `washington-vaac-advisories` | `/api/aerospace/space/washington-vaac-advisories` | `app/server/tests/test_washington_vaac_contracts.py` | `app/docs/aerospace-workflow-validation.md` | `app/server/data/washington_vaac_advisories_fixture.json`, `app/server/data/washington_vaac_advisories_empty_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first advisory slice is explicit and contract-tested, but no frontend consumer, export-path validation, or executed browser smoke is recorded yet |
+| `washington-vaac-advisories` | `/api/aerospace/space/washington-vaac-advisories` | `app/server/tests/test_washington_vaac_contracts.py` | `app/docs/aerospace-workflow-validation.md` | `app/server/data/washington_vaac_advisories_fixture.json`, `app/server/data/washington_vaac_advisories_empty_fixture.json` | bounded VAAC client consumer via `aerospaceVaacContext.ts` | `implemented-not-fully-validated` | Contract tests, compile, lint, build, and bounded consumer/export wiring are explicit; executed browser smoke remains unrecorded on this host because Playwright launch is blocked by `windows-browser-launch-permission` |
+| `anchorage-vaac-advisories` | `/api/aerospace/space/anchorage-vaac-advisories` | `app/server/tests/test_anchorage_vaac_contracts.py` | `app/docs/aerospace-workflow-validation.md` | `app/server/data/anchorage_vaac_advisories_fixture.json`, `app/server/data/anchorage_vaac_advisories_empty_fixture.json` | `useAnchorageVaacAdvisoriesQuery` | `implemented-not-fully-validated` | Contract tests, compile, lint, build, and bounded consumer/export wiring are explicit through the three-VAAC package; executed browser smoke remains unrecorded on this host because Playwright launch is blocked by `windows-browser-launch-permission` |
+| `tokyo-vaac-advisories` | `/api/aerospace/space/tokyo-vaac-advisories` | `app/server/tests/test_tokyo_vaac_contracts.py` | `app/docs/aerospace-workflow-validation.md` | `app/server/data/tokyo_vaac_advisories_fixture.json`, `app/server/data/tokyo_vaac_advisories_empty_fixture.json` | `useTokyoVaacAdvisoriesQuery` | `implemented-not-fully-validated` | Contract tests, compile, lint, build, and bounded consumer/export wiring are explicit through the three-VAAC package; executed browser smoke remains unrecorded on this host because Playwright launch is blocked by `windows-browser-launch-permission` |
+
+## Multi-Source Implementation Notes
+
+### `data-ai-rss-starter-bundle`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/recent`
+- Current board status:
+  - backend-first implemented bundle, tracked as an active bounded lane rather than a single promoted source row
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/tests/test_rss_feed_service.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - fixtures for `cisa-cybersecurity-advisories`, `cisa-ics-advisories`, `sans-isc-diary`, `cloudflare-status`, and `gdacs-alerts`
+  - prompt-injection-like fixture coverage for free-form feed text
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - the bundle is contract-tested and parser-hardened, but no explicit workflow validation or stable frontend consumer record is recorded
+  - mixed authority classes remain explicit and must not be collapsed into one severity or truth model
+  - feed titles, summaries, descriptions, advisory text, and linked snippets remain untrusted data
+- Next validation action:
+  - validate one bounded consumer or export path for the aggregate route before treating the starter bundle as anything stronger than implemented
+
+### `cve-context-composition`
+
+- Aggregate route:
+  - `/api/context/cyber/cve-context`
+- Current board status:
+  - backend-first implemented helper route, not a standalone promoted source row
+- Existing evidence:
+  - `app/server/tests/test_cve_context.py`
+  - `app/server/tests/test_nvd_cve.py`
+  - `app/server/tests/test_cisa_cyber_advisories.py`
+  - `app/server/tests/test_first_epss.py`
+  - Data AI progress records explicit evidence-class separation between NVD metadata, CISA advisory/source-reported fields, EPSS prioritization, and feed/discovery text
+  - prompt-injection-like fixture coverage exists for NVD free-text descriptions and references
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is a conservative composition helper, not a new source of truth
+  - the helper must not collapse metadata, advisory, prioritization, and discovery text into one incident or exploitation claim
+  - no explicit workflow validation or stable frontend consumer record is recorded yet
+- Next validation action:
+  - validate one bounded consumer or export path that keeps NVD, CISA, EPSS, and feed-context semantics distinct
+
+### `features-source-ops-export-package`
+
+- Aggregate routes:
+  - `/api/cameras/source-ops/export-summary`
+  - `/api/cameras/source-ops-review-queue-export-bundle`
+- Current board status:
+  - workflow-supporting backend helper package, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_camera_source_ops_export_summary.py`
+  - `app/server/tests/test_camera_source_ops_report_index.py`
+  - `app/server/tests/test_camera_source_ops_detail.py`
+  - Features/Webcam AI progress records aggregate-line export-summary support and a minimal review-queue export bundle
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - these are workflow/export helpers and should not be mistaken for source implementation or external-source validation proof
+  - current evidence is backend-first and operational, not end-to-end workflow validation
+- Next validation action:
+  - record one bounded source-ops workflow/export-path validation note before treating the package as anything stronger than implemented
 
 ## Per-Source Status
 
@@ -75,6 +151,50 @@ Important rules:
   - No explicit workflow-level validation record was found in this pass.
 - Next validation action:
   - run the volcano tests and record a workflow check covering map layer, inspector, and export text
+
+### `natural-earth-physical`
+
+- Current board status: `implemented`
+- Backend route present?: yes
+- Typed contracts present?: yes
+- Fixture present?: yes
+- Backend tests present?: yes
+- Client hook/types present?: no explicit stable consumer recorded
+- Minimal UI present?: no explicit stable consumer recorded
+- Export metadata present?: backend response fields exist for later export preservation
+- Docs present?: yes
+- Known validation commands reported:
+  - `python -m pytest app/server/tests/test_base_earth_reference_bundle.py -q`
+  - `python -m compileall app/server/src`
+- Full validation status: `implemented-not-fully-validated`
+- Blockers / caveats:
+  - Geospatial AI progress records a real backend-first static/reference slice with route, fixture, tests, and docs.
+  - Current evidence is still backend-first; no explicit workflow validation or stable frontend consumer path is recorded.
+  - Static physical cartography must not be promoted into live hazard, impact, or legal-boundary truth.
+- Next validation action:
+  - record one bounded consumer or export-path check before treating the source as anything stronger than implemented
+
+### `noaa-global-volcano-locations`
+
+- Current board status: `implemented`
+- Backend route present?: yes
+- Typed contracts present?: yes
+- Fixture present?: yes
+- Backend tests present?: yes
+- Client hook/types present?: no explicit stable consumer recorded
+- Minimal UI present?: no explicit stable consumer recorded
+- Export metadata present?: backend response fields exist for later export preservation
+- Docs present?: yes
+- Known validation commands reported:
+  - `python -m pytest app/server/tests/test_base_earth_reference_bundle.py -q`
+  - `python -m compileall app/server/src`
+- Full validation status: `implemented-not-fully-validated`
+- Blockers / caveats:
+  - Geospatial AI progress records a real backend-first static volcano-reference slice with route, fixture, tests, and docs.
+  - Current evidence is still backend-first; no explicit workflow validation or stable frontend consumer path is recorded.
+  - Static volcano-location metadata must not be treated as current eruption, ash, plume, or route-impact truth.
+- Next validation action:
+  - record one bounded consumer or export-path check before treating the source as anything stronger than implemented
 
 ### `geosphere-austria-warnings`
 
@@ -165,6 +285,119 @@ Important rules:
 - Next validation action:
   - record one bounded consumer or export-path check before treating the source as anything stronger than implemented
 
+### `nist-nvd-cve`
+
+- Current board status: `implemented`
+- Backend route present?: yes
+- Typed contracts present?: yes
+- Fixture present?: yes
+- Backend tests present?: yes
+- Client hook/types present?: no explicit stable consumer recorded
+- Minimal UI present?: no explicit stable consumer recorded
+- Export metadata present?: backend response fields exist for later export preservation
+- Docs present?: yes
+- Known validation commands reported:
+  - `python -m pytest app/server/tests/test_nvd_cve.py -q`
+  - `python -m pytest app/server/tests/test_cve_context.py -q`
+  - `python -m compileall app/server/src`
+- Full validation status: `implemented-not-fully-validated`
+- Blockers / caveats:
+  - Data AI progress records a real backend-first bounded CVE-detail slice plus conservative CVE-context composition with explicit evidence-class separation.
+  - Current evidence is still backend-first; no explicit workflow validation or stable frontend consumer path is recorded.
+  - NVD metadata remains source-reported/contextual only and must not be promoted into exploit, incident, victim, or impact confirmation.
+  - Prompt-injection guardrails matter here because descriptions, references, and linked text remain untrusted source data.
+- Next validation action:
+  - record one bounded consumer or export-path check that keeps NVD metadata, CISA advisories, EPSS scores, and feed/discovery context semantically separate
+
+### `taiwan-cwa-aws-opendata`
+
+- Current board status: `implemented`
+- Backend route present?: yes
+- Typed contracts present?: yes
+- Fixture present?: yes
+- Backend tests present?: yes
+- Client hook/types present?: no explicit stable consumer recorded
+- Minimal UI present?: no explicit stable consumer recorded
+- Export metadata present?: backend response fields exist for later export preservation
+- Docs present?: yes
+- Known validation commands reported:
+  - `python -m pytest app/server/tests/test_taiwan_cwa_weather.py -q`
+  - `python -m compileall app/server/src`
+- Full validation status: `implemented-not-fully-validated`
+- Blockers / caveats:
+  - Geospatial AI progress records a real backend-first public AWS-backed weather slice with route, fixture, tests, and source-specific docs.
+  - Current evidence is still backend-first; no explicit workflow validation or stable frontend consumer path is recorded.
+  - The slice remains observed/context only and must not be promoted into warning, impact, damage, disruption, flooding, or realized-consequence claims.
+- Next validation action:
+  - record one bounded consumer or export-path check before treating the source as anything stronger than implemented
+
+### `nrc-event-notifications`
+
+- Current board status: `implemented`
+- Backend route present?: yes
+- Typed contracts present?: yes
+- Fixture present?: yes
+- Backend tests present?: yes
+- Client hook/types present?: no explicit stable consumer recorded
+- Minimal UI present?: no explicit stable consumer recorded
+- Export metadata present?: backend response fields exist for later export preservation
+- Docs present?: yes
+- Known validation commands reported:
+  - `python -m pytest app/server/tests/test_nrc_event_notifications.py -q`
+  - `python -m compileall app/server/src`
+- Full validation status: `implemented-not-fully-validated`
+- Blockers / caveats:
+  - Geospatial AI progress records a real backend-first RSS/event-notification slice with route, fixture, tests, docs, and prompt-injection-safe free-text fixture coverage.
+  - Current evidence is still backend-first; no explicit workflow validation or stable frontend consumer path is recorded.
+  - NRC event text remains source-reported/context only and must not be promoted into radiological impact, public-safety consequence, damage, disruption, closures, or required-action proof.
+  - Free-form title and summary text remain inert source data only.
+- Next validation action:
+  - record one bounded consumer or export-path check before treating the source as anything stronger than implemented
+
+### `bmkg-earthquakes`
+
+- Current board status: `implemented`
+- Backend route present?: yes
+- Typed contracts present?: yes
+- Fixture present?: yes
+- Backend tests present?: yes
+- Client hook/types present?: no explicit stable consumer recorded
+- Minimal UI present?: no explicit stable consumer recorded
+- Export metadata present?: backend response fields exist for later export preservation
+- Docs present?: yes
+- Known validation commands reported:
+  - `python -m pytest app/server/tests/test_bmkg_earthquakes.py -q`
+  - `python -m compileall app/server/src`
+- Full validation status: `implemented-not-fully-validated`
+- Blockers / caveats:
+  - Geospatial AI progress records a real backend-first regional-authority earthquake slice with route, fixture, tests, docs, source-health fields, and prompt-injection-safe free-text handling.
+  - Current evidence is still backend-first; no explicit workflow validation or stable frontend consumer path is recorded.
+  - BMKG records remain observed/source-reported event context only and must not be promoted into impact, damage, tsunami, or casualty claims without source support.
+- Next validation action:
+  - record one bounded consumer or export-path check before treating the source as anything stronger than implemented
+
+### `ga-recent-earthquakes`
+
+- Current board status: `implemented`
+- Backend route present?: yes
+- Typed contracts present?: yes
+- Fixture present?: yes
+- Backend tests present?: yes
+- Client hook/types present?: no explicit stable consumer recorded
+- Minimal UI present?: no explicit stable consumer recorded
+- Export metadata present?: backend response fields exist for later export preservation
+- Docs present?: yes
+- Known validation commands reported:
+  - `python -m pytest app/server/tests/test_ga_recent_earthquakes.py -q`
+  - `python -m compileall app/server/src`
+- Full validation status: `implemented-not-fully-validated`
+- Blockers / caveats:
+  - Geospatial AI progress records a real backend-first Geoscience Australia KML event slice with route, fixture, tests, and docs.
+  - Current evidence is still backend-first; no explicit workflow validation or stable frontend consumer path is recorded.
+  - KML-derived coordinates and labels must remain source-bounded and must not be enriched into more precise event semantics than the source supports.
+- Next validation action:
+  - record one bounded consumer or export-path check before treating the source as anything stronger than implemented
+
 ### `noaa-coops-tides-currents`
 
 - Current board status: `workflow-validated`
@@ -188,10 +421,10 @@ Important rules:
   - Repo evidence is through marine context integration rather than a standalone source-specific test file.
   - Contract hardening is explicit: empty nearby results return `health=empty`, empty responses keep explicit fixture `sourceMode`, disabled/non-fixture behavior returns `health=disabled`, source-level caveats remain present, and invalid coordinates/radius return request validation errors.
   - Workflow validation is explicit through marine smoke and export-metadata evidence, not standalone source-only smoke.
-  - Remaining gap is still full validation of stale/unavailable behavior and any live-mode confirmation.
+  - Timestamp-backed `stale` behavior is now explicitly covered in the marine lane; the remaining gap is full validation of `unavailable` or `degraded` behavior and any live-mode confirmation.
   - This is not fully validated or live validated.
 - Next validation action:
-  - keep contract path stable and add explicit source-health stale/unavailable validation before any promotion beyond workflow-validated
+  - keep contract path stable and add explicit `unavailable` or `degraded` source-health validation before any promotion beyond workflow-validated
 
 ### `usgs-geomagnetism`
 
@@ -244,20 +477,68 @@ Important rules:
 - Typed contracts present?: yes
 - Fixture present?: yes
 - Backend tests present?: yes
-- Client hook/types present?: no explicit stable consumer recorded
-- Minimal UI present?: no explicit stable consumer recorded
-- Export metadata present?: no explicit export consumer recorded
+- Client hook/types present?: yes
+- Minimal UI present?: yes
+- Export metadata present?: yes
 - Docs present?: yes
 - Known validation commands reported:
   - `python -m pytest app/server/tests/test_washington_vaac_contracts.py -q`
   - `python -m compileall app/server/src`
 - Full validation status: `implemented-not-fully-validated`
 - Blockers / caveats:
-  - Aerospace AI progress records a real backend-first VAAC advisory slice with route, fixtures, tests, and docs.
-  - Current evidence is still backend-first; no explicit frontend consumer or workflow validation path is recorded.
+  - Aerospace AI progress records a real VAAC advisory route plus bounded client consumer/export wiring through the three-VAAC package.
+  - Contract tests, compile, lint, and build are explicit, but executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`.
   - Washington VAAC remains advisory/contextual source text only and must not imply route impact, aircraft exposure, or plume precision beyond source messaging.
 - Next validation action:
-  - add one bounded frontend or export consumer and record workflow validation before treating the source as anything stronger than implemented
+  - rerun aerospace smoke on a host where Playwright can launch and record workflow evidence before treating the source as anything stronger than implemented
+
+### `anchorage-vaac-advisories`
+
+- Current board status: `implemented`
+- Backend route present?: yes
+- Typed contracts present?: yes
+- Fixture present?: yes
+- Backend tests present?: yes
+- Client hook/types present?: yes
+- Minimal UI present?: yes
+- Export metadata present?: yes
+- Docs present?: yes
+- Known validation commands reported:
+  - `python -m pytest app/server/tests/test_anchorage_vaac_contracts.py -q`
+  - `python -m compileall app/server/src`
+  - `cmd /c npm.cmd run lint`
+  - `cmd /c npm.cmd run build`
+- Full validation status: `implemented-not-fully-validated`
+- Blockers / caveats:
+  - Aerospace AI progress records the bounded three-VAAC consumer/export package, including Anchorage query, inspector consumption, export metadata, and smoke-fixture support.
+  - Executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`.
+  - Anchorage VAAC remains advisory/contextual source text only and must not imply route impact, aircraft exposure, or plume precision beyond source messaging.
+- Next validation action:
+  - rerun aerospace smoke on a host where Playwright can launch and record workflow evidence before treating the source as anything stronger than implemented
+
+### `tokyo-vaac-advisories`
+
+- Current board status: `implemented`
+- Backend route present?: yes
+- Typed contracts present?: yes
+- Fixture present?: yes
+- Backend tests present?: yes
+- Client hook/types present?: yes
+- Minimal UI present?: yes
+- Export metadata present?: yes
+- Docs present?: yes
+- Known validation commands reported:
+  - `python -m pytest app/server/tests/test_tokyo_vaac_contracts.py -q`
+  - `python -m compileall app/server/src`
+  - `cmd /c npm.cmd run lint`
+  - `cmd /c npm.cmd run build`
+- Full validation status: `implemented-not-fully-validated`
+- Blockers / caveats:
+  - Aerospace AI progress records the bounded three-VAAC consumer/export package, including Tokyo query, inspector consumption, export metadata, and smoke-fixture support.
+  - Executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`.
+  - Tokyo VAAC remains advisory/contextual source text only and must not imply route impact, aircraft exposure, or plume precision beyond source messaging.
+- Next validation action:
+  - rerun aerospace smoke on a host where Playwright can launch and record workflow evidence before treating the source as anything stronger than implemented
 
 ### `faa-nas-airport-status`
 
@@ -302,10 +583,10 @@ Important rules:
   - Repo evidence is through marine context integration rather than a standalone source-specific test file.
   - Contract hardening is explicit: empty nearby results return `health=empty`, empty responses keep explicit fixture `sourceMode`, disabled/non-fixture behavior returns `health=disabled`, source-level caveats remain present, and invalid coordinates/radius return request validation errors.
   - Workflow validation is explicit through marine smoke and export-metadata evidence, not standalone source-only smoke.
-  - Remaining gap is still full validation of stale/unavailable behavior and any live-mode confirmation.
+  - Timestamp-backed `stale` behavior is now explicitly covered in the marine lane; the remaining gap is full validation of `unavailable` or `degraded` behavior and any live-mode confirmation.
   - This is not fully validated or live validated.
 - Next validation action:
-  - keep contract path stable and add explicit source-health stale/unavailable validation before any promotion beyond workflow-validated
+  - keep contract path stable and add explicit `unavailable` or `degraded` source-health validation before any promotion beyond workflow-validated
 
 ### `noaa-tsunami-alerts`
 
@@ -377,10 +658,10 @@ Important rules:
   - Contract hardening is explicit: empty nearby results return `health=empty`, empty responses keep explicit fixture `sourceMode`, disabled/non-fixture behavior returns `health=disabled`, source-level caveats remain present, and invalid coordinates/radius return request validation errors.
   - Workflow validation is explicit through combined marine smoke and export-metadata evidence rather than a standalone source-only smoke path.
   - Scottish Water semantics remain contextual only and must not be treated as confirmed contamination or health impact evidence.
-  - Remaining gap is still full validation of stale/unavailable behavior and any live-mode confirmation.
+  - Timestamp-backed `stale` behavior is now explicitly covered in the marine lane; the remaining gap is full validation of `unavailable` or `degraded` behavior and any live-mode confirmation.
   - This is not fully validated or live validated.
 - Next validation action:
-  - add explicit stale/unavailable source-health validation and any live-mode caveat confirmation before any promotion beyond workflow-validated
+  - add explicit `unavailable` or `degraded` source-health validation and any live-mode caveat confirmation before any promotion beyond workflow-validated
 
 ### `france-vigicrues-hydrometry`
 
@@ -399,6 +680,7 @@ Important rules:
 - Full validation status: `in-progress`
 - Blockers / caveats:
   - Marine AI progress shows a real backend-only first slice with pinned public Hub'Eau endpoint family, deterministic fixtures, route, contracts, and backend tests.
+  - Marine AI progress now also records timestamp-backed stale semantics for returned hydrometry observation timestamps; the remaining source-health gap is `unavailable` or `degraded`, not fabricated stale handling.
   - Current evidence is still backend-only, so this source does not meet the board bar for `implemented`.
   - Hydrometry station values remain context only and must not be treated as flood-impact truth, inundation confirmation, damage assessment, pollution evidence, health-risk evidence, or vessel-behavior evidence.
 - Next validation action:
@@ -471,6 +753,31 @@ Important rules:
 - Next validation action:
   - rerun focused aerospace smoke on a host where Playwright can launch and record the resulting workflow evidence before any promotion
 
+### `noaa-ncei-space-weather-portal`
+
+- Current board status: `implemented`
+- Backend route present?: yes
+- Typed contracts present?: yes
+- Fixture present?: yes
+- Backend tests present?: yes
+- Client hook/types present?: yes
+- Minimal UI present?: yes
+- Export metadata present?: yes
+- Docs present?: yes
+- Known validation commands reported:
+  - `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q`
+  - `python -m compileall app/server/src`
+- `cmd /c npm.cmd run lint`
+- `cmd /c npm.cmd run build`
+- Full validation status: `implemented-not-fully-validated`
+- Blockers / caveats:
+  - This slice is intentionally archival/contextual metadata only and remains separate from current NOAA SWPC advisories.
+  - The frontend consumer is bounded and archival-only; it does not merge archive metadata into current SWPC truth.
+  - Executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`.
+  - The free-text title and summary fields are treated as untrusted source text and are sanitized in contract coverage.
+- Next validation action:
+  - rerun focused aerospace smoke on a host where Playwright can launch and record the resulting workflow evidence before any promotion
+
 ### `opensky-anonymous-states`
 
 - Current board status: `implemented`
@@ -521,7 +828,8 @@ Evidence basis:
 - `cmd /c npm.cmd run lint`
 - `python app/server/tests/run_playwright_smoke.py marine`
 - explicit workflow/export coverage recorded in [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md:1)
-- marine contract hardening now explicitly covers empty, disabled, caveat, evidence-basis, and request-validation behavior
+- marine contract hardening now explicitly covers empty, disabled, caveat, evidence-basis, request-validation behavior, and timestamp-backed `stale` semantics
+- marine backend evidence now also records honest `unavailable` handling across the active context families and honest `degraded` handling only where partial-metadata evidence exists
 
 ### Sources implemented but blocked by repo-wide issues
 
@@ -536,10 +844,26 @@ If repo-wide lint or build failures unrelated to a source are later reported, th
 
 ### Sources with unclear evidence
 
+- `data-ai-rss-starter-bundle`
+  - backend-first implementation evidence is clear for the aggregate route and parser/test foundation, but no stable frontend consumer or workflow-validation note is recorded yet
 - `usgs-geomagnetism`
+  - backend-first implementation evidence is clear, but no stable frontend consumer or workflow-validation note is recorded yet
+- `taiwan-cwa-aws-opendata`
+  - backend-first implementation evidence is clear, but no stable frontend consumer or workflow-validation note is recorded yet
+- `nrc-event-notifications`
   - backend-first implementation evidence is clear, but no stable frontend consumer or workflow-validation note is recorded yet
 - `france-vigicrues-hydrometry`
   - backend-only implementation evidence is clear, but there is no client or workflow evidence yet, so the source remains `in-progress`
+- `natural-earth-physical`
+  - backend-first static/reference implementation evidence is clear, but no stable consumer or workflow-validation note is recorded yet
+- `noaa-global-volcano-locations`
+  - backend-first static/reference implementation evidence is clear, but no stable consumer or workflow-validation note is recorded yet
+- `nist-nvd-cve`
+  - backend-first NVD implementation evidence is clear, but no stable consumer or workflow-validation note is recorded yet
+- `bmkg-earthquakes`
+  - backend-first regional-authority earthquake implementation evidence is clear, but no stable consumer or workflow-validation note is recorded yet
+- `ga-recent-earthquakes`
+  - backend-first KML regional-authority earthquake implementation evidence is clear, but no stable consumer or workflow-validation note is recorded yet
 - `finland-digitraffic`
   - implementation evidence is clear at the backend route/detail/freshness level, but there is no explicit workflow validation or stable frontend consumer record yet
 - `noaa-coops-tides-currents`
@@ -558,11 +882,22 @@ If repo-wide lint or build failures unrelated to a source are later reported, th
   - implemented with contract tests, compile, lint, and build evidence, but executed browser smoke is still missing on this host
 - `opensky-anonymous-states`
   - implemented with contract tests, compile, lint, and build evidence, but executed browser smoke is still missing on this host
+- `anchorage-vaac-advisories`
+  - implemented with contract tests, compile, lint, build, and bounded consumer/export evidence, but executed browser smoke is still missing on this host
+- `tokyo-vaac-advisories`
+  - implemented with contract tests, compile, lint, build, and bounded consumer/export evidence, but executed browser smoke is still missing on this host
 
 ### Recommended next verification commands
 
 - `python -m pytest app/server/tests/test_volcano_events.py -q`
+- `python -m pytest app/server/tests/test_base_earth_reference_bundle.py -q`
 - `python -m pytest app/server/tests/test_usgs_geomagnetism.py -q`
+- `python -m pytest app/server/tests/test_bmkg_earthquakes.py -q`
+- `python -m pytest app/server/tests/test_ga_recent_earthquakes.py -q`
+- `python -m pytest app/server/tests/test_nvd_cve.py -q`
+- `python -m pytest app/server/tests/test_cve_context.py -q`
+- `python -m pytest app/server/tests/test_taiwan_cwa_weather.py -q`
+- `python -m pytest app/server/tests/test_nrc_event_notifications.py -q`
 - `python -m pytest app/server/tests/test_tsunami_events.py -q`
 - `python -m pytest app/server/tests/test_uk_ea_flood_events.py -q`
 - `python -m pytest app/server/tests/test_aviation_weather_contracts.py -q`
@@ -573,6 +908,9 @@ If repo-wide lint or build failures unrelated to a source are later reported, th
 - `python -m pytest app/server/tests/test_cneos_contracts.py -q`
 - `python -m pytest app/server/tests/test_swpc_contracts.py -q`
 - `python -m pytest app/server/tests/test_opensky_contracts.py -q`
+- `python -m pytest app/server/tests/test_washington_vaac_contracts.py -q`
+- `python -m pytest app/server/tests/test_anchorage_vaac_contracts.py -q`
+- `python -m pytest app/server/tests/test_tokyo_vaac_contracts.py -q`
 
 Recommended workflow-level follow-on:
 

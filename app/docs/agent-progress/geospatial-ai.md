@@ -1,5 +1,97 @@
 # Geospatial AI Progress
 
+## 2026-04-30 22:12:32 -05:00
+
+- Assignment version:
+  - `2026-04-30 22:01 America/Chicago`
+- Task:
+  - Implemented the backend-first `ga-recent-earthquakes` regional-authority seismic slice and reconciled the existing `bmkg-earthquakes` slice to the current source-health and prompt-injection contract bar.
+- What changed:
+  - Verified that `bmkg-earthquakes` already existed in repo code, then hardened it with explicit `source_health`, response-level `caveats`, and prompt-injection-like fixture coverage for free-form BMKG text fields.
+  - Added the missing `ga-recent-earthquakes` backend slice with fixture-first settings, typed contracts, KML parsing service, route wiring, deterministic KML fixture, focused tests, and source-specific docs.
+  - Pinned the GA live endpoint to the direct official Geoscience Australia KML snapshot request because the public `all_recent.kml` discovery file currently resolves to a NetworkLink wrapper rather than earthquake placemarks.
+  - Preserved source-native semantics separately for BMKG and GA instead of collapsing them into a generic global earthquake authority model.
+  - Added prompt-injection-safe parsing checks for both sources where free-form text is present, ensuring hostile instruction-like text remains inert record content only.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/routes/events.py`
+  - `app/server/src/services/bmkg_earthquakes_service.py`
+  - `app/server/src/services/ga_recent_earthquakes_service.py`
+  - `app/server/src/types/api.py`
+  - `app/server/data/bmkg_earthquakes_fixture.json`
+  - `app/server/data/ga_recent_earthquakes_fixture.kml`
+  - `app/server/tests/test_bmkg_earthquakes.py`
+  - `app/server/tests/test_ga_recent_earthquakes.py`
+  - `app/docs/environmental-events-bmkg-earthquakes.md`
+  - `app/docs/environmental-events-ga-recent-earthquakes.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_bmkg_earthquakes.py -q`
+  - `python -m pytest app/server/tests/test_ga_recent_earthquakes.py -q`
+  - `python -m pytest app/server/tests/test_earthquake_events.py app/server/tests/test_geonet_events.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - Exact official BMKG endpoints preserved:
+    - `https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json`
+    - `https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json`
+  - Exact official Geoscience Australia live endpoint used in this implementation:
+    - `https://earthquakes.ga.gov.au/geoserver/earthquakes/wms?service=wms&request=GetMap&version=1.1.1&format=application/vnd.google-earth.kml+xml&layers=earthquakes_seven_days&styles=earthquakes:earthquakes_seven_days&cql_filter=display_flag=%27Y%27&height=2048&width=2048&transparent=false&srs=EPSG:4326&bbox=-180,-90,180,90&format_options=AUTOFIT:true;KMATTR:true;KMPLACEMARK:false;KMSCORE:40;MODE:refresh;SUPEROVERLAY:false`
+  - GA discovery file context:
+    - `http://www.ga.gov.au/earthquakes/all_recent.kml`
+    - currently returns a NetworkLink wrapper and not direct placemarks, so it was not used as the pinned live parser endpoint
+  - BMKG and GA remain regional-authority source-reported seismic context only.
+  - No fake precision, impact, casualty, tsunami-consequence, or live-hazard claims were added.
+  - GA event times are preserved from source text and are not promoted into stronger timezone precision than the source explicitly provides.
+  - Free-form source text remains inert data only and never changes validation state, source health, or workflow behavior.
+  - No client files were touched, so `cmd /c npm.cmd run lint` and `cmd /c npm.cmd run build` were not required for this assignment.
+- Next recommended task:
+  - Manager AI should assign the next unimplemented bounded geospatial source or a narrow backend consumer/helper follow-on rather than widening BMKG or GA directly into shared frontend environmental shells by default.
+
+## 2026-04-30 21:57:35 -05:00
+
+- Assignment version:
+  - `2026-04-30 21:43 America/Chicago`
+- Task:
+  - Implemented the backend-first `natural-earth-physical` plus `noaa-global-volcano-locations` static/reference bundle.
+- What changed:
+  - Added a bounded Natural Earth physical reference slice pinned to the official `ne_110m_land.zip` land dataset only.
+  - Normalized fixture-backed land feature summary records with generalized bbox metadata, source health, provenance, public-domain licensing fields, and reference-only caveats without widening into shapefile ingestion or legal-boundary semantics.
+  - Added a bounded NOAA global volcano locations reference slice pinned to the official HazEL `volcanolocs` JSON API only.
+  - Normalized volcano reference records with identifiers, location text, source-provided coordinates when present, elevation/morphology/holocene fields, source health, provenance, and reference-only caveats without implying live volcano status or eruption activity.
+  - Added deterministic fixtures, focused backend tests, dedicated reference routes, app wiring, and source-specific docs for both slices.
+  - Hardened the reference tests to run on minimal router-only FastAPI apps so focused geospatial validation no longer depends on unrelated global app imports.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/natural_earth_physical_service.py`
+  - `app/server/src/services/noaa_global_volcano_service.py`
+  - `app/server/src/routes/base_earth_context.py`
+  - `app/server/src/app.py`
+  - `app/server/data/natural_earth_physical_land_fixture.json`
+  - `app/server/data/noaa_global_volcano_locations_fixture.json`
+  - `app/server/tests/test_base_earth_reference_bundle.py`
+  - `app/server/tests/test_ireland_epa_wfd_catchments.py`
+  - `app/docs/environmental-events-natural-earth-physical.md`
+  - `app/docs/environmental-events-noaa-global-volcano-locations.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_base_earth_reference_bundle.py -q`
+  - `python -m pytest app/server/tests/test_ireland_epa_wfd_catchments.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - Natural Earth exact official file used:
+    - `https://naturalearth.s3.amazonaws.com/110m_physical/ne_110m_land.zip`
+  - NOAA exact official API used:
+    - `https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/volcanolocs`
+    - live request shape in this slice:
+      - `https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/volcanolocs?itemsPerPage=2000&page=1`
+  - Natural Earth remains static reference/context only and does not establish legal boundaries, current land extent truth, or live environmental conditions.
+  - Natural Earth bbox fields are generalized feature summaries only and must not be treated as precise geometry.
+  - NOAA volcano records remain static/reference context only and do not establish eruption status, monitoring state, or current hazard conditions.
+  - No client files were touched, so `cmd /c npm.cmd run lint` and `cmd /c npm.cmd run build` were not required for this assignment.
+- Next recommended task:
+  - Manager AI should assign the next unimplemented bounded geospatial source or a small backend consumer/helper follow-on rather than widening these static reference slices into shared frontend surfaces by default.
+
 ## 2026-04-30 17:06:28 -05:00
 
 - Assignment version:

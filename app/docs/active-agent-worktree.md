@@ -9,7 +9,11 @@
 - Use `app/docs/commit-groups.current.md` when planning future task-by-task commit consolidation.
 - Use `python scripts/list_changed_files_by_owner.py` for a quick heuristic ownership scan before staging. It does not replace manual diff review.
 - Use `python scripts/list_changed_files_by_owner.py --summary` for a concise branch/worktree snapshot with ownership counts, shared-file warnings, and coordination doc links.
-- The scanner now also classifies many lane-owned source docs, backend services, tests, and fixtures for Geospatial, Marine, Aerospace, Features/Webcam, Gather, and Connect workflow paths. Broad architecture docs, roadmap docs, cross-lane app wiring, and user-directed Atlas docs may still remain `unknown` on purpose.
+- The scanner now also classifies many lane-owned source docs, backend services, tests, and fixtures for Geospatial, Marine, Aerospace, Features/Webcam, Data AI, Gather, Connect workflow paths, and a dedicated `atlas-planning` bucket for user-directed Atlas Batch 2/3 RSS planning docs.
+- Current ownership truth is no longer `unknown: 0`; the latest mixed Phase 2 dirty set is down to `unknown: 2`, both of which are intentionally broad backend surfaces:
+  - `app/server/src/app.py`
+  - `app/server/src/services/status_service.py`
+- Treat those two files as real ambiguity, not scanner debt.
 - Use `python scripts/release_dry_run.py` for a larger non-mutating readiness scan covering ownership groups, high-collision files, secret/junk checks, generated-file checks, and validation guidance.
 - Use `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke aerospace=known-local-caveat:windows-browser-launch-permission --smoke webcam=passed` for a compact manager-facing validation and smoke summary.
 - Use `python scripts/alerts_ledger.py` for a compact manager-facing alerts summary and ledger validation.
@@ -27,13 +31,18 @@
   - shared high-collision files remain active in `AppShell.tsx`, `InspectorPanel.tsx`, `queries.ts`, `api.ts`, `settings.py`, `types/api.py`, and the smoke harness
   - a small residual `unknown` bucket is acceptable, but if it starts growing again during rapid source expansion, treat that as commit-planning debt and refresh the ownership scanner before any consolidation push
 - Phase 2 checkpoint:
-  - the current broad validation surface is green for compile, client lint/build, representative Geospatial, Marine, Features/Webcam, and Aerospace backend tests, plus focused `marine` and `webcam` smoke
+  - the current broad validation surface is green for compile, client lint/build, representative Geospatial, Marine, Features/Webcam, Aerospace, and Data AI backend tests, plus focused `marine` and `webcam` smoke
   - the newest validated source wave includes GeoSphere Austria warnings, NASA POWER meteorology/solar context, Washington VAAC advisories, and the latest webcam source-ops detail/export rollups
+  - Data AI now has a dedicated ownership bucket for its first implementation wave, covering the CISA advisories slice, FIRST EPSS slice, and the bounded five-feed aggregate route while leaving the older generic RSS foundation outside that lane-specific bucket
+  - on the current live dirty set, the ownership scanner is reporting:
+    - `shared-high-collision: 8`
+    - `unknown: 2`
   - the earlier high-priority cross-platform coordination alert has been consumed into agent next-task docs; the alerts ledger is currently back to zero open alerts
   - the previously reported `AppShell.tsx` `selectedTargetSummary` build blocker did not reproduce in the latest Connect sweep
   - `app/docs/data-ai-rss-source-candidates.md` is planning input from Atlas AI, not implementation or validation proof and not a mandate to ingest all listed feeds
+  - `app/docs/data-ai-rss-source-candidates-batch3.md` is also Atlas planning input only and now classifies under the dedicated `atlas-planning` bucket rather than disappearing into lane-implementation ownership
   - Atlas runtime-planning docs are architecture input only right now; they still require future implementation validation before any runtime-mode, packaging, pairing/auth, or companion-access work is treated as executed product behavior
-  - the ownership scanner is useful again, but the rapid source wave has pushed the residual `unknown` bucket back up; treat that as commit-planning debt until the newest route/service/doc families are classified cleanly
+  - if future mixed work pushes the residual `unknown` bucket back up again, treat that as commit-planning debt and refresh the scanner before any consolidation push
 
 ## Agent lanes
 

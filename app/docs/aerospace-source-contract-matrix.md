@@ -150,6 +150,56 @@ It does not change source semantics.
 - Do-not-infer rules:
   do not claim satellite, GPS, or radio failure unless the source explicitly says so
 
+## NOAA NCEI Space Weather Portal
+
+- Route:
+  `/api/aerospace/space/ncei-space-weather-archive`
+- Source category:
+  archival space-weather collection metadata
+- Evidence basis:
+  archival / contextual
+- Official upstream endpoint:
+  `https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ngdc.stp.swx:space_weather_products;view=xml;responseType=text/xml`
+- Source health fields:
+  `sourceHealth.sourceName`
+  `sourceHealth.sourceMode`
+  `sourceHealth.health`
+  `sourceHealth.detail`
+  `sourceHealth.metadataSourceUrl`
+  `sourceHealth.landingPageUrl`
+  `sourceHealth.lastUpdatedAt`
+  `sourceHealth.state`
+  `sourceHealth.caveats`
+- Source mode fields:
+  `sourceHealth.sourceMode`
+  per-record `sourceMode`
+- Empty behavior:
+  empty `records` is valid and explicit, not a route failure
+- Primary observations/events:
+  archived collection metadata including collection id,
+  dataset identifier,
+  title,
+  summary,
+  temporal coverage,
+  metadata update date,
+  progress status,
+  and update frequency
+- Export metadata key:
+  `nceiSpaceWeatherArchiveContext`
+- UI card currently exists:
+  yes;
+  compact aerospace-local `Space Weather Archive Context` section
+- Smoke coverage status:
+  metadata/text assertions prepared in aerospace smoke;
+  execution still depends on host Playwright launch health
+- Caveats:
+  archival/contextual only,
+  separate from NOAA SWPC current advisories,
+  not operational target-state truth
+- Do-not-infer rules:
+  do not infer current GPS, radio, aircraft, or satellite failure from archival metadata alone,
+  do not treat NCEI archive metadata as a replacement for current NOAA SWPC advisory context
+
 ## OpenSky Anonymous States
 
 - Route:

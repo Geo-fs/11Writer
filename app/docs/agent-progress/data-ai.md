@@ -1,5 +1,105 @@
 # Data AI Progress
 
+## 2026-04-30 22:23 America/Chicago
+
+Task:
+- Implement the backend-only official cyber advisory feed expansion bundle using the existing Data AI aggregate feed foundation.
+
+Assignment version read:
+- `2026-04-30 22:01 America/Chicago`
+
+What changed:
+- Expanded the existing `GET /api/feeds/data-ai/recent` aggregate bundle by adding three official cyber advisory source definitions to the shared registry rather than creating a parallel feed framework.
+- Added these exact source definitions and fixture-backed feed URLs:
+  - `ncsc-uk-all` -> `https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml`
+  - `cert-fr-alerts` -> `https://www.cert.ssi.gouv.fr/alerte/feed/`
+  - `cert-fr-advisories` -> `https://www.cert.ssi.gouv.fr/avis/feed/`
+- Preserved the shared aggregate contract and export surface for the new sources: source id, source name, source category, feed URL, final URL, guid/link, title, summary, published/updated timestamps, fetched timestamp, evidence basis, source mode, source health, caveats, and tags.
+- Reused the existing bounded `source` filtering path so callers can query the official advisory family without polling every configured feed, for example with `source=ncsc-uk-all,cert-fr-alerts,cert-fr-advisories`.
+- Added deterministic fixtures for the new official feeds with English and French advisory/guidance text, including HTML-bearing and imperative-looking content.
+
+Prompt-injection coverage:
+- Added English instruction-like fixture text in `ncsc_uk_all.xml`.
+- Added French instruction-like fixture text and script markup in `cert_fr_alerts.xml`.
+- Added quoted command-like text and HTML-bearing content in `cert_fr_advisories.xml`.
+- Focused tests prove that the new source text stayed inert data only: summaries preserve the text, strip markup like `<script>` or `<code>`, and do not alter source health, evidence basis, validation state, or repo behavior.
+
+CVE-context behavior:
+- No new CVE-context matching framework was added.
+- The existing feed-mention composition path now safely surfaces newly local official feed mentions when a normalized feed item itself contains the queried CVE id; fixture coverage now shows `cert-fr-alerts` can appear in `feedMentions` for `CVE-2021-40438` without changing the explainability-only posture.
+
+Files touched:
+- `app/server/src/services/data_ai_feed_registry.py`
+- `app/server/data/data_ai_multi_feeds/ncsc_uk_all.xml`
+- `app/server/data/data_ai_multi_feeds/cert_fr_alerts.xml`
+- `app/server/data/data_ai_multi_feeds/cert_fr_advisories.xml`
+- `app/server/tests/test_data_ai_multi_feed.py`
+- `app/server/tests/test_cve_context.py`
+- `app/docs/cyber-context-sources.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m pytest app/server/tests/test_nvd_cve.py app/server/tests/test_cve_context.py -q` -> pass
+- `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+
+Blockers or caveats:
+- Preserved caveat boundaries against exploit/compromise/impact/attribution/action/severity overclaiming: NCSC remains mixed official guidance/news/advisory context, CERT-FR alerts and advisories remain official French advisory context, and all feed items remain advisory/contextual mentions rather than incident proof or action ranking.
+- No secrets, tokenized feeds, live-network tests, article scraping, linked-page scraping, broad polling, or runtime exposure changes were added.
+- Updated `app/docs/agent-progress/data-ai.md`; awaiting Manager AI reassignment.
+
+## 2026-04-30 21:59 America/Chicago
+
+Task:
+- Implement the backend-only fixture-first `nist-nvd-cve` first slice plus a bounded cyber context composition helper.
+
+Assignment version read:
+- `2026-04-30 21:43 America/Chicago`
+
+What changed:
+- Added a fixture-first NIST NVD CVE backend slice at `GET /api/context/cyber/nvd-cve` with bounded settings, typed API contracts, request metadata, source health, caveats, and deterministic single-CVE fixture coverage.
+- Pinned the exact no-key endpoint shape used for this first slice as `https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2021-40438`, with the service building the request shape from `NVD_CVE_API_URL` plus a single `cveId` query parameter.
+- Preserved bounded NVD fields: CVE id, source identifier, published/modified timestamps, vulnerability status, localized descriptions, CVSS v3.1/v3.0/v2 fields when present, weakness metadata, reference metadata, source URL, request URL, source mode, source health, evidence basis, caveats, and export metadata counts.
+- Added a conservative backend composition route at `GET /api/context/cyber/cve-context` that summarizes one CVE across only already-local Data AI contexts: NVD metadata, EPSS score if present, CISA advisory references if present, and recent feed mentions if present.
+- Kept the composition output explainability-only: it reports matched local contexts plus `available_contexts`, but does not invent exploit proof, compromise proof, impact proof, attribution, remediation priority, required action, or any cross-source severity score.
+- Updated cyber-context docs for the new NVD route and the conservative composition route, including fixture behavior, caveats, endpoint shape, export metadata, and validation commands.
+
+Prompt-injection coverage:
+- Added prompt-injection-like text to the NVD fixture description and reference set for `CVE-2021-40438`, including imperative-looking text and script markup.
+- Added focused assertions proving the hostile text stayed inert source data only: normalized descriptions retained the plain text, stripped script markup, and did not alter validation state, source health, or repo behavior.
+- Preserved the same inert-text rule in the composition surface by treating all source-provided descriptions, titles, summaries, links, and references as untrusted text/data rather than instructions.
+
+Files touched:
+- `app/server/src/config/settings.py`
+- `app/server/src/app.py`
+- `app/server/src/types/api.py`
+- `app/server/src/services/nvd_cve_service.py`
+- `app/server/src/services/cve_context_service.py`
+- `app/server/src/routes/nvd_cve.py`
+- `app/server/data/nvd_cve_fixture.json`
+- `app/server/data/cisa_cybersecurity_advisories_fixture.xml`
+- `app/server/data/data_ai_multi_feeds/cisa_cybersecurity_advisories.xml`
+- `app/server/data/data_ai_multi_feeds/sans_isc_diary.xml`
+- `app/server/tests/test_nvd_cve.py`
+- `app/server/tests/test_cve_context.py`
+- `app/docs/cyber-context-sources.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_nvd_cve.py -q` -> pass
+- `python -m pytest app/server/tests/test_cve_context.py -q` -> pass
+- `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py app/server/tests/test_data_ai_multi_feed.py -q` -> pass
+- `python -m pytest app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+
+Blockers or caveats:
+- Preserved source-honesty boundaries: NVD remains vulnerability metadata/context, EPSS remains scored prioritization context, CISA advisories remain advisory/source-reported context, and feed mentions remain contextual/discovery mentions rather than proof of exploitation, compromise, impact, attribution, or actionability.
+- No secrets, API keys, tokenized feeds, live-network tests, browser scraping, article scraping, broad polling, or runtime exposure changes were added.
+- Updated `app/docs/agent-progress/data-ai.md` and the shared alert ledger; awaiting Manager AI reassignment.
+
 ## 2026-04-30 17:05 America/Chicago
 
 Task:

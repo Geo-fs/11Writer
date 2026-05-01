@@ -16,7 +16,9 @@ Validation method:
 Additional validated feed batch:
 - `app/docs/data-ai-rss-source-candidates-batch2.md`
 - 115 more working RSS/Atom/RDF feeds validated on `2026-04-30 America/Chicago`
-- Data AI now has 167 validated feed candidates across the first list and Batch 2.
+- `app/docs/data-ai-rss-source-candidates-batch3.md`
+- 110 more working RSS/Atom/RDF feeds validated on `2026-04-30 America/Chicago`
+- Data AI now has 277 validated feed candidates across the first list, Batch 2, and Batch 3.
 
 General ingestion rules:
 - Preserve feed URL, final URL after redirects, source name, source category, published timestamp, fetched timestamp, GUID/link, title, summary, source health, and caveats.

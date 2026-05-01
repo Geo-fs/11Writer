@@ -29,7 +29,7 @@ from src.types.api import (
     MarineVigicruesHydrometryStation,
 )
 
-MarineContextSourceHealthState = Literal["loaded", "empty", "stale"]
+MarineContextSourceHealthState = Literal["loaded", "empty", "stale", "degraded", "unavailable"]
 
 _COOPS_STALE_AFTER = timedelta(minutes=30)
 _NDBC_STALE_AFTER = timedelta(minutes=45)
@@ -154,8 +154,39 @@ class MarineNoaaCoopsService:
             )
 
         generated_at = (now - timedelta(minutes=4)).isoformat()
+        try:
+            fixture_stations = self._fixture_stations(now)
+        except Exception as exc:
+            error_summary = _error_summary(exc)
+            return MarineNoaaCoopsContextResponse(
+                fetched_at=fetched_at,
+                context_kind=context_kind,
+                center_lat=center_lat,
+                center_lon=center_lon,
+                radius_km=radius_km,
+                count=0,
+                source_health=MarineNoaaCoopsSourceHealth(
+                    source_id="noaa-coops-tides-currents",
+                    source_label="NOAA CO-OPS Tides & Currents",
+                    enabled=True,
+                    source_mode="fixture",
+                    health="unavailable",
+                    loaded_count=0,
+                    last_fetched_at=fetched_at,
+                    source_generated_at=None,
+                    detail="Fixture NOAA CO-OPS coastal context is unavailable because source retrieval failed.",
+                    error_summary=error_summary,
+                    caveat="Fixture/local mode. NOAA CO-OPS retrieval failed, so current coastal context is unavailable and should not be treated as negative vessel evidence.",
+                ),
+                stations=[],
+                caveats=[
+                    "NOAA CO-OPS context is currently unavailable because source retrieval failed in fixture mode.",
+                    "Missing coastal context is not evidence of vessel intent or anomaly cause.",
+                ],
+            )
+
         stations: list[MarineNoaaCoopsStationContext] = []
-        for station in self._fixture_stations(now):
+        for station in fixture_stations:
             distance_km = haversine_meters(center_lat, center_lon, station.latitude, station.longitude) / 1000.0
             if distance_km > radius_km:
                 continue
@@ -191,7 +222,7 @@ class MarineNoaaCoopsService:
             ],
             stale_after=_COOPS_STALE_AFTER,
         )
-        detail, caveat = _with_staleness_note(
+        detail, caveat = _with_health_note(
             detail=(
                 "Fixture NOAA CO-OPS coastal context using curated station metadata and latest sample "
                 "water level/current observations."
@@ -199,6 +230,7 @@ class MarineNoaaCoopsService:
             caveat="Fixture/local mode. NOAA CO-OPS is coastal context only and does not prove vessel behavior.",
             health=health,
             stale_after=_COOPS_STALE_AFTER,
+            degraded_note=None,
         )
         return MarineNoaaCoopsContextResponse(
             fetched_at=fetched_at,
@@ -358,8 +390,39 @@ class MarineNdbcService:
             )
 
         generated_at = (now - timedelta(minutes=12)).isoformat()
+        try:
+            fixture_stations = self._fixture_stations(now)
+        except Exception as exc:
+            error_summary = _error_summary(exc)
+            return MarineNdbcContextResponse(
+                fetched_at=fetched_at,
+                context_kind=context_kind,
+                center_lat=center_lat,
+                center_lon=center_lon,
+                radius_km=radius_km,
+                count=0,
+                source_health=MarineNdbcSourceHealth(
+                    source_id="noaa-ndbc-realtime",
+                    source_label="NOAA NDBC Realtime Buoys",
+                    enabled=True,
+                    source_mode="fixture",
+                    health="unavailable",
+                    loaded_count=0,
+                    last_fetched_at=fetched_at,
+                    source_generated_at=None,
+                    detail="Fixture NOAA NDBC marine context is unavailable because source retrieval failed.",
+                    error_summary=error_summary,
+                    caveat="Fixture/local mode. NOAA NDBC retrieval failed, so current buoy context is unavailable and should not be treated as negative vessel evidence.",
+                ),
+                stations=[],
+                caveats=[
+                    "NOAA NDBC context is currently unavailable because source retrieval failed in fixture mode.",
+                    "Missing buoy context is not evidence of vessel intent or anomaly cause.",
+                ],
+            )
+
         stations: list[MarineNdbcStation] = []
-        for station in self._fixture_stations(now):
+        for station in fixture_stations:
             distance_km = haversine_meters(center_lat, center_lon, station.latitude, station.longitude) / 1000.0
             if distance_km > radius_km:
                 continue
@@ -389,7 +452,7 @@ class MarineNdbcService:
             ],
             stale_after=_NDBC_STALE_AFTER,
         )
-        detail, caveat = _with_staleness_note(
+        detail, caveat = _with_health_note(
             detail=(
                 "Fixture NOAA NDBC marine context using curated buoy metadata and latest sample "
                 "meteorological and wave observations."
@@ -397,6 +460,7 @@ class MarineNdbcService:
             caveat="Fixture/local mode. NOAA NDBC is environmental context only and does not prove vessel behavior.",
             health=health,
             stale_after=_NDBC_STALE_AFTER,
+            degraded_note=None,
         )
         return MarineNdbcContextResponse(
             fetched_at=fetched_at,
@@ -548,8 +612,40 @@ class MarineScottishWaterOverflowService:
             )
 
         generated_at = (now - timedelta(minutes=9)).isoformat()
+        try:
+            fixture_events = self._fixture_events(now)
+        except Exception as exc:
+            error_summary = _error_summary(exc)
+            return MarineScottishWaterOverflowResponse(
+                fetched_at=fetched_at,
+                center_lat=center_lat,
+                center_lon=center_lon,
+                radius_km=radius_km,
+                status_filter=status,
+                count=0,
+                active_count=0,
+                source_health=MarineScottishWaterSourceHealth(
+                    source_id="scottish-water-overflows",
+                    source_label="Scottish Water Overflows",
+                    enabled=True,
+                    source_mode="fixture",
+                    health="unavailable",
+                    loaded_count=0,
+                    last_fetched_at=fetched_at,
+                    source_generated_at=None,
+                    detail="Fixture Scottish Water overflow context is unavailable because source retrieval failed.",
+                    error_summary=error_summary,
+                    caveat="Fixture/local mode. Scottish Water retrieval failed, so current infrastructure context is unavailable and should not be treated as negative vessel evidence.",
+                ),
+                events=[],
+                caveats=[
+                    "Scottish Water overflow context is currently unavailable because source retrieval failed in fixture mode.",
+                    "Missing infrastructure context is not evidence of pollution impact, vessel intent, or anomaly cause.",
+                ],
+            )
+
         events: list[MarineScottishWaterOverflowEvent] = []
-        for event in self._fixture_events(now):
+        for event in fixture_events:
             if status != "all" and event.status != status:
                 continue
             distance_km: float | None = None
@@ -588,9 +684,16 @@ class MarineScottishWaterOverflowService:
             source_generated_at=generated_at,
             evidence_timestamps=[event.last_updated_at for event in events],
             stale_after=_SCOTTISH_WATER_STALE_AFTER,
+            degraded=any(
+                event.latitude is None
+                or event.longitude is None
+                or event.status == "unknown"
+                or event.last_updated_at is None
+                for event in events
+            ),
         )
         active_count = sum(1 for event in events if event.status == "active")
-        detail, caveat = _with_staleness_note(
+        detail, caveat = _with_health_note(
             detail=(
                 "Fixture Scottish Water overflow context using curated overflow monitor status records "
                 "for nearby coastal infrastructure review."
@@ -601,6 +704,7 @@ class MarineScottishWaterOverflowService:
             ),
             health=health,
             stale_after=_SCOTTISH_WATER_STALE_AFTER,
+            degraded_note="Returned overflow monitor records include partial metadata or unknown status detail, so source health is degraded for this review.",
         )
         return MarineScottishWaterOverflowResponse(
             fetched_at=fetched_at,
@@ -745,8 +849,39 @@ class MarineVigicruesHydrometryService:
             )
 
         generated_at = (now - timedelta(minutes=10)).isoformat()
+        try:
+            fixture_stations = self._fixture_stations(now)
+        except Exception as exc:
+            error_summary = _error_summary(exc)
+            return MarineVigicruesHydrometryContextResponse(
+                fetched_at=fetched_at,
+                center_lat=center_lat,
+                center_lon=center_lon,
+                radius_km=radius_km,
+                parameter_filter=parameter_filter,
+                count=0,
+                source_health=MarineVigicruesHydrometrySourceHealth(
+                    source_id="france-vigicrues-hydrometry",
+                    source_label="France Vigicrues Hydrometry",
+                    enabled=True,
+                    source_mode="fixture",
+                    health="unavailable",
+                    loaded_count=0,
+                    last_fetched_at=fetched_at,
+                    source_generated_at=None,
+                    detail="Fixture Vigicrues hydrometry context is unavailable because source retrieval failed.",
+                    error_summary=error_summary,
+                    caveat="Fixture/local mode. Vigicrues retrieval failed, so current hydrology context is unavailable and should not be treated as negative vessel evidence.",
+                ),
+                stations=[],
+                caveats=[
+                    "Vigicrues hydrometry context is currently unavailable because source retrieval failed in fixture mode.",
+                    "Missing hydrology context is not evidence of flood impact, vessel intent, or anomaly cause.",
+                ],
+            )
+
         stations: list[MarineVigicruesHydrometryStation] = []
-        for station in self._fixture_stations(now):
+        for station in fixture_stations:
             if (
                 parameter_filter != "all"
                 and station.latest_observation is not None
@@ -781,8 +916,9 @@ class MarineVigicruesHydrometryService:
                 for station in stations
             ],
             stale_after=_VIGICRUES_STALE_AFTER,
+            degraded=any(station.river_basin is None for station in stations),
         )
-        detail, caveat = _with_staleness_note(
+        detail, caveat = _with_health_note(
             detail=(
                 "Fixture Vigicrues hydrometry context using curated Hub'Eau station metadata and latest sample "
                 "realtime water-height or flow observations."
@@ -792,6 +928,7 @@ class MarineVigicruesHydrometryService:
             ),
             health=health,
             stale_after=_VIGICRUES_STALE_AFTER,
+            degraded_note="Returned station records include partial metadata, so source health is degraded for this review.",
         )
         return MarineVigicruesHydrometryContextResponse(
             fetched_at=fetched_at,
@@ -928,8 +1065,38 @@ class MarineIrelandOpwWaterLevelService:
             )
 
         generated_at = (now - timedelta(minutes=7)).isoformat()
+        try:
+            fixture_stations = self._fixture_stations(now)
+        except Exception as exc:
+            error_summary = _error_summary(exc)
+            return MarineIrelandOpwWaterLevelContextResponse(
+                fetched_at=fetched_at,
+                center_lat=center_lat,
+                center_lon=center_lon,
+                radius_km=radius_km,
+                count=0,
+                source_health=MarineIrelandOpwWaterLevelSourceHealth(
+                    source_id="ireland-opw-waterlevel",
+                    source_label="Ireland OPW Water Level",
+                    enabled=True,
+                    source_mode="fixture",
+                    health="unavailable",
+                    loaded_count=0,
+                    last_fetched_at=fetched_at,
+                    source_generated_at=None,
+                    detail="Fixture Ireland OPW water-level context is unavailable because source retrieval failed.",
+                    error_summary=error_summary,
+                    caveat="Fixture/local mode. Ireland OPW retrieval failed, so current hydrology context is unavailable and should not be treated as negative vessel evidence.",
+                ),
+                stations=[],
+                caveats=[
+                    "Ireland OPW water-level context is currently unavailable because source retrieval failed in fixture mode.",
+                    "Missing hydrology context is not evidence of flooding, vessel intent, or anomaly cause.",
+                ],
+            )
+
         stations: list[MarineIrelandOpwWaterLevelStation] = []
-        for station in self._fixture_stations(now):
+        for station in fixture_stations:
             distance_km = haversine_meters(center_lat, center_lon, station.latitude, station.longitude) / 1000.0
             if distance_km > radius_km:
                 continue
@@ -959,8 +1126,9 @@ class MarineIrelandOpwWaterLevelService:
                 for station in stations
             ],
             stale_after=_IRELAND_OPW_STALE_AFTER,
+            degraded=any(station.waterbody is None for station in stations),
         )
-        detail, caveat = _with_staleness_note(
+        detail, caveat = _with_health_note(
             detail=(
                 "Fixture Ireland OPW water-level context using curated station metadata and latest published "
                 "water-level readings from the documented GeoJSON endpoint family."
@@ -970,6 +1138,7 @@ class MarineIrelandOpwWaterLevelService:
             ),
             health=health,
             stale_after=_IRELAND_OPW_STALE_AFTER,
+            degraded_note="Returned station records include partial metadata, so source health is degraded for this review.",
         )
         return MarineIrelandOpwWaterLevelContextResponse(
             fetched_at=fetched_at,
@@ -1111,6 +1280,7 @@ def _classify_context_health(
     source_generated_at: str | None,
     evidence_timestamps: list[str | None],
     stale_after: timedelta,
+    degraded: bool = False,
 ) -> MarineContextSourceHealthState:
     if loaded_count == 0:
         return "empty"
@@ -1118,9 +1288,11 @@ def _classify_context_health(
     freshest_evidence_at = _latest_timestamp(evidence_timestamps)
     freshness_anchor = freshest_evidence_at or _parse_timestamp(source_generated_at)
     if freshness_anchor is None:
-        return "loaded"
+        return "degraded" if degraded else "loaded"
     if now - freshness_anchor > stale_after:
         return "stale"
+    if degraded:
+        return "degraded"
     return "loaded"
 
 
@@ -1140,15 +1312,24 @@ def _parse_timestamp(value: str | None) -> datetime | None:
         return None
 
 
-def _with_staleness_note(
+def _with_health_note(
     *,
     detail: str,
     caveat: str,
     health: MarineContextSourceHealthState,
     stale_after: timedelta,
+    degraded_note: str | None,
 ) -> tuple[str, str]:
-    if health != "stale":
-        return detail, caveat
-    threshold_minutes = int(stale_after.total_seconds() // 60)
-    stale_note = f" Latest available source-observation timestamps exceed the {threshold_minutes}-minute freshness threshold."
-    return f"{detail}{stale_note}", f"{caveat}{stale_note}"
+    if health == "stale":
+        threshold_minutes = int(stale_after.total_seconds() // 60)
+        stale_note = (
+            f" Latest available source-observation timestamps exceed the {threshold_minutes}-minute freshness threshold."
+        )
+        return f"{detail}{stale_note}", f"{caveat}{stale_note}"
+    if health == "degraded" and degraded_note:
+        return f"{detail} {degraded_note}", f"{caveat} {degraded_note}"
+    return detail, caveat
+
+
+def _error_summary(exc: Exception) -> str:
+    return f"{type(exc).__name__}: {exc}"

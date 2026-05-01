@@ -11,6 +11,7 @@ import type {
   MetEireannWarningsResponse,
   EonetEventsResponse,
   FaaNasAirportStatusResponse,
+  NceiSpaceWeatherPortalResponse,
   OpenSkyStatesResponse,
   GeoNetHazardsResponse,
   HkoWeatherResponse,
@@ -313,6 +314,19 @@ export function useSwpcSpaceWeatherContextQuery(input: {
       ),
     enabled: input.enabled,
     staleTime: 120_000
+  });
+}
+
+export function useNceiSpaceWeatherArchiveQuery(input?: {
+  enabled?: boolean;
+}) {
+  const enabled = input?.enabled ?? true;
+  return useQuery({
+    queryKey: ["ncei-space-weather-archive"],
+    queryFn: () =>
+      fetchJson<NceiSpaceWeatherPortalResponse>("/api/aerospace/space/ncei-space-weather-archive"),
+    enabled,
+    staleTime: 300_000
   });
 }
 

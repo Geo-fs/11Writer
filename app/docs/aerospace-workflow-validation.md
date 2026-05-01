@@ -15,6 +15,7 @@ It does not validate marine, webcam, reference-subsystem internals, or broader g
 - Confirm aerospace context-report accounting is present without implying proof, certainty, or action recommendation.
 - Confirm optional geomagnetism context remains contextual-only and export-aware.
 - Confirm bounded VAAC advisory context remains contextual-only, provenance-preserving, and export-aware.
+- Confirm NOAA NCEI archive metadata remains archival/contextual, export-aware, and explicitly separate from NOAA SWPC current advisories.
 - Confirm OpenSky anonymous comparison remains optional, guarded, and non-authoritative.
 - Confirm no source slice introduces flight-intent, failure, impact, or causation claims.
 
@@ -24,6 +25,7 @@ It does not validate marine, webcam, reference-subsystem internals, or broader g
   - `python -m pytest app/server/tests/test_anchorage_vaac_contracts.py -q`
   - `python -m pytest app/server/tests/test_tokyo_vaac_contracts.py -q`
   - `python -m pytest app/server/tests/test_washington_vaac_contracts.py -q`
+  - `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q`
   - `python -m pytest app/server/tests/test_opensky_contracts.py -q`
   - `python -m pytest app/server/tests/test_aviation_weather_contracts.py -q`
   - `python -m pytest app/server/tests/test_faa_nas_status_contracts.py -q`
@@ -66,6 +68,13 @@ The following aerospace source slices are contract-tested at the backend layer:
   empty result behavior,
   source-status degradation reporting,
   no failure/risk overclaim fields
+- NOAA NCEI Space Weather Portal:
+  fixture serialization,
+  explicit archival/contextual caveats,
+  empty result behavior,
+  source-status degradation reporting,
+  untrusted free-text sanitization,
+  missing optional metadata-field handling
 - OpenSky Anonymous States:
   fixture serialization,
   missing-coordinate handling,
@@ -106,6 +115,7 @@ Required contract fields and caveats:
 - Fixture-backed routes must expose explicit fixture mode where the slice contract includes source mode.
 - Empty-result behavior must remain explicit and non-fatal where the slice supports empty results.
 - OpenSky must keep anonymous/rate-limited/non-authoritative caveats visible.
+- NOAA NCEI space-weather portal must keep archival/contextual caveats visible and must not drift into current SWPC or failure semantics.
 - Washington VAAC must keep advisory/contextual provenance and no-route-impact/no-aircraft-exposure caveats visible.
 - Anchorage VAAC must keep advisory/contextual provenance and no-route-impact/no-aircraft-exposure caveats visible.
 - Tokyo VAAC must keep advisory/contextual provenance and no-route-impact/no-aircraft-exposure caveats visible.
@@ -159,6 +169,23 @@ Required contract fields and caveats:
 - Workflow note:
   contract-tested.
   Workflow-validated when smoke confirms inspector presence and export metadata.
+
+### NOAA NCEI Space Weather Portal
+
+- Inspector shows `Space Weather Archive Context` for selected aircraft or satellites with:
+  - collection id and dataset identifier
+  - title/name
+  - temporal coverage
+  - metadata update date
+  - source mode and source health
+  - metadata-source and landing-page provenance URLs
+  - progress status and update frequency when available
+  - explicit archival/contextual caveats
+  - explicit separation from NOAA SWPC current advisories
+- Snapshot metadata preserves `nceiSpaceWeatherArchiveContext`.
+- Workflow note:
+  contract-tested.
+  Smoke assertions are prepared, but executed browser evidence still depends on local Playwright launch health.
 
 ### OpenSky Anonymous States
 
@@ -257,6 +284,7 @@ Required contract fields and caveats:
 - `Volcanic Ash Advisory Context` is present for selected aircraft/satellites and preserves per-VAAC provenance without implying route impact or aircraft exposure.
 - `Aerospace Context Review` is present and summarizes trust/coverage issues only.
 - `Aerospace Export Readiness` is present and summarizes export-context completeness/caveats only.
+- `Aerospace Source Readiness` is present and summarizes family-level availability, source mode/health, evidence posture, and export-readiness caveats only.
 - `Aerospace Context Report` is present and summarizes selected-target evidence, availability, readiness, review-queue state, and bounded caveats only.
 - `Aerospace Review Queue` is present and summarizes review ordering only.
 - Operational-context presets are present and remain display/emphasis-only.
@@ -280,6 +308,7 @@ Snapshot metadata should preserve, when applicable:
 - `aerospaceContextAvailability`
 - `aerospaceContextIssues`
 - `aerospaceExportReadiness`
+- `aerospaceSourceReadiness`
 - `aerospaceContextReport`
 - `aerospaceReviewQueue`
 - `aerospaceExportProfile`
@@ -311,6 +340,7 @@ When the aerospace Playwright environment is healthy, smoke should validate meta
 - aerospace context availability
 - aerospace context issues
 - aerospace export readiness
+- aerospace source readiness
 - aerospace context report
 - aerospace review queue
 - aerospace export profile
@@ -345,6 +375,7 @@ Workflow evidence that still waits on successful smoke execution:
   `aerospaceContextAvailability`,
   `aerospaceContextIssues`,
   `aerospaceExportReadiness`,
+  `aerospaceSourceReadiness`,
   `aerospaceReviewQueue`,
   and `aerospaceExportProfile`
 
@@ -360,6 +391,7 @@ Workflow evidence that still waits on successful smoke execution:
 - Anchorage VAAC remains advisory/contextual volcanic-ash source text only, not route-impact, aircraft-exposure, engine-risk, threat, or operational-consequence truth.
 - Tokyo VAAC remains advisory/contextual volcanic-ash source text only, not route-impact, aircraft-exposure, engine-risk, threat, or operational-consequence truth.
 - Aerospace context-review notes remain trust/coverage summaries only.
+- Aerospace source-readiness families remain review-oriented context-family summaries only, not severity scores or operational consequence statements.
 - Aerospace export-readiness notes remain export-context completeness summaries only; they are not source reliability certification.
 - Aerospace context-report notes remain bounded explainability/export summaries only; they are not proof statements or action guidance.
 - Aerospace review-queue notes remain review-ordering summaries only; they are not operational urgency or action guidance.

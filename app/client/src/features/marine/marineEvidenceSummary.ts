@@ -93,7 +93,15 @@ export interface MarineAnomalySnapshotMetadata {
     noaaCoopsContext: {
       sourceId: string;
       sourceMode: "fixture" | "live" | "unknown";
-      health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+      health:
+        | "loaded"
+        | "empty"
+        | "stale"
+        | "degraded"
+        | "unavailable"
+        | "error"
+        | "disabled"
+        | "unknown";
       nearbyStationCount: number;
       contextKind: "viewport" | "chokepoint";
       topStation:
@@ -109,7 +117,15 @@ export interface MarineAnomalySnapshotMetadata {
     ndbcContext: {
       sourceId: string;
       sourceMode: "fixture" | "live" | "unknown";
-      health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+      health:
+        | "loaded"
+        | "empty"
+        | "stale"
+        | "degraded"
+        | "unavailable"
+        | "error"
+        | "disabled"
+        | "unknown";
       nearbyStationCount: number;
       contextKind: "viewport" | "chokepoint";
       topStation:
@@ -126,7 +142,15 @@ export interface MarineAnomalySnapshotMetadata {
     scottishWaterOverflowContext: {
       sourceId: string;
       sourceMode: "fixture" | "live" | "unknown";
-      health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+      health:
+        | "loaded"
+        | "empty"
+        | "stale"
+        | "degraded"
+        | "unavailable"
+        | "error"
+        | "disabled"
+        | "unknown";
       nearbyMonitorCount: number;
       activeMonitorCount: number;
       topMonitor:
@@ -142,7 +166,15 @@ export interface MarineAnomalySnapshotMetadata {
     vigicruesHydrometryContext: {
       sourceId: string;
       sourceMode: "fixture" | "live" | "unknown";
-      health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+      health:
+        | "loaded"
+        | "empty"
+        | "stale"
+        | "degraded"
+        | "unavailable"
+        | "error"
+        | "disabled"
+        | "unknown";
       nearbyStationCount: number;
       parameterFilter: "all" | "water-height" | "flow";
       topStation:
@@ -160,7 +192,15 @@ export interface MarineAnomalySnapshotMetadata {
     irelandOpwWaterLevelContext: {
       sourceId: string;
       sourceMode: "fixture" | "live" | "unknown";
-      health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+      health:
+        | "loaded"
+        | "empty"
+        | "stale"
+        | "degraded"
+        | "unavailable"
+        | "error"
+        | "disabled"
+        | "unknown";
       nearbyStationCount: number;
       topStation:
         | {
@@ -185,7 +225,15 @@ export interface MarineAnomalySnapshotMetadata {
       healthSummary: string;
       vigicrues: {
         sourceMode: "fixture" | "live" | "unknown";
-        health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
         nearbyStationCount: number;
         parameterFilter: "all" | "water-height" | "flow";
         topStationName?: string | null;
@@ -194,7 +242,15 @@ export interface MarineAnomalySnapshotMetadata {
       } | null;
       irelandOpw: {
         sourceMode: "fixture" | "live" | "unknown";
-        health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
         nearbyStationCount: number;
         topStationName?: string | null;
         topReadingAt?: string | null;

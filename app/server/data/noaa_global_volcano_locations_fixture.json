@@ -1,0 +1,56 @@
+{
+  "items": [
+    {
+      "id": 10102,
+      "num": "0101-02=",
+      "newNum": 211020,
+      "name": "Vesuvius",
+      "country": "Italy",
+      "region": "01",
+      "latitude": 40.821,
+      "longitude": 14.426,
+      "elevation": 1281,
+      "morphology": "Complex volcano",
+      "status": "Historical",
+      "timeErupt": "D2",
+      "location": "Italy",
+      "objectId": 758
+    },
+    {
+      "id": 341020,
+      "num": "0601-04=",
+      "newNum": 341020,
+      "name": "Fuji",
+      "country": "Japan",
+      "region": "06",
+      "latitude": 35.361,
+      "longitude": 138.728,
+      "elevation": 3776,
+      "morphology": "Stratovolcano",
+      "status": "Historical",
+      "timeErupt": "D4",
+      "location": "Honshu-Japan",
+      "objectId": 999
+    },
+    {
+      "id": 283170,
+      "num": "0304-02-",
+      "newNum": 283170,
+      "name": "Crater Lake",
+      "country": "United States",
+      "region": "03",
+      "latitude": 42.93,
+      "longitude": -122.12,
+      "elevation": null,
+      "morphology": null,
+      "status": "Holocene",
+      "timeErupt": "D7",
+      "location": "Oregon",
+      "objectId": 1444
+    }
+  ],
+  "page": 1,
+  "totalPages": 1,
+  "itemsPerPage": 3,
+  "totalItems": 3
+}

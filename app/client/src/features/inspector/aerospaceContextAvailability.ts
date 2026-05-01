@@ -4,6 +4,7 @@ import type { AerospaceGeomagnetismContextSummary } from "./aerospaceGeomagnetis
 import type { AerospaceOpenSkyContextSummary } from "./aerospaceOpenSkyContext";
 import type { AerospaceSourceHealthSummary } from "./aerospaceSourceHealth";
 import type { AerospaceSpaceContextSummary } from "./aerospaceSpaceContext";
+import type { AerospaceSpaceWeatherArchiveContextSummary } from "./aerospaceSpaceWeatherArchiveContext";
 import type { AerospaceSpaceWeatherContextSummary } from "./aerospaceSpaceWeatherContext";
 import type { AerospaceVaacContextSummary } from "./aerospaceVaacContext";
 import type { AerospaceWeatherContextSummary } from "./aerospaceWeatherContext";
@@ -65,6 +66,7 @@ export function buildAerospaceContextAvailabilitySummary(input: {
   openSkySourceHealth?: SourceStatus | null;
   spaceContextSummary?: AerospaceSpaceContextSummary | null;
   spaceWeatherSummary?: AerospaceSpaceWeatherContextSummary | null;
+  spaceWeatherArchiveSummary?: AerospaceSpaceWeatherArchiveContextSummary | null;
   vaacContextSummary?: AerospaceVaacContextSummary | null;
   dataHealthSummary?: AerospaceSourceHealthSummary | null;
 }): AerospaceContextAvailabilitySummary | null {
@@ -74,6 +76,7 @@ export function buildAerospaceContextAvailabilitySummary(input: {
     !input.airportStatusSummary &&
     !input.spaceContextSummary &&
     !input.spaceWeatherSummary &&
+    !input.spaceWeatherArchiveSummary &&
     !input.dataHealthSummary
   ) {
     return null;
@@ -86,6 +89,7 @@ export function buildAerospaceContextAvailabilitySummary(input: {
     buildOpenSkyRow(input),
     buildSpaceEventsRow(input),
     buildSpaceWeatherRow(input),
+    buildSpaceWeatherArchiveRow(input),
     buildVaacRow(input),
     buildDataHealthRow(input),
     buildReferenceContextRow(input),
@@ -486,6 +490,54 @@ function buildSpaceWeatherRow(input: {
         : "source empty",
     caveat: input.spaceWeatherSummary.caveats[0] ?? null,
     evidenceBasis: "advisory",
+  };
+}
+
+function buildSpaceWeatherArchiveRow(input: {
+  selectedTargetType: "aircraft" | "satellite" | null;
+  spaceWeatherArchiveSummary?: AerospaceSpaceWeatherArchiveContextSummary | null;
+}): AerospaceContextAvailabilityRow {
+  if (input.selectedTargetType == null) {
+    return unavailableRow(
+      "noaa-ncei-space-weather-portal",
+      "NCEI Space-Weather Archive",
+      "space-weather-archive",
+      "no selected target"
+    );
+  }
+  if (!input.spaceWeatherArchiveSummary) {
+    return {
+      sourceId: "noaa-ncei-space-weather-portal",
+      label: "NCEI Space-Weather Archive",
+      contextType: "space-weather-archive",
+      availability: "unavailable",
+      sourceMode: "unknown",
+      health: "unknown",
+      reason: "global archive context unavailable",
+      caveat: "NCEI archive metadata remains optional archival/contextual collection evidence only.",
+      evidenceBasis: "contextual",
+    };
+  }
+  return {
+    sourceId: "noaa-ncei-space-weather-portal",
+    label: "NCEI Space-Weather Archive",
+    contextType: "space-weather-archive",
+    availability:
+      input.spaceWeatherArchiveSummary.sourceHealth === "degraded" ||
+      input.spaceWeatherArchiveSummary.sourceState === "degraded" ||
+      input.spaceWeatherArchiveSummary.sourceState === "stale"
+        ? "degraded"
+        : input.spaceWeatherArchiveSummary.recordCount > 0
+          ? "available"
+          : "empty",
+    sourceMode: input.spaceWeatherArchiveSummary.sourceMode,
+    health: `${input.spaceWeatherArchiveSummary.sourceHealth}/${input.spaceWeatherArchiveSummary.sourceState}`,
+    reason:
+      input.spaceWeatherArchiveSummary.recordCount > 0
+        ? "archival collection metadata available independent of target"
+        : "source empty",
+    caveat: input.spaceWeatherArchiveSummary.caveats[0] ?? null,
+    evidenceBasis: "contextual",
   };
 }
 

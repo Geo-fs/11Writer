@@ -297,6 +297,8 @@ Current limits:
 Source health semantics:
 - `loaded`: nearby station context returned
 - `empty`: source responded but no nearby station matched the query radius
+- `stale`: returned water-level/current observation timestamps exceeded the freshness threshold
+- `unavailable`: source retrieval failed inside the backend service path
 - `disabled`: non-fixture mode requested before live implementation exists
 
 Interpretation rules:
@@ -326,6 +328,8 @@ Current limits:
 Source health semantics:
 - `loaded`: nearby station context returned
 - `empty`: source responded but no nearby buoy matched the query radius
+- `stale`: returned buoy/station observation timestamps exceeded the freshness threshold
+- `unavailable`: source retrieval failed inside the backend service path
 - `disabled`: non-fixture mode requested before live implementation exists
 
 Interpretation rules:
@@ -359,6 +363,9 @@ Current limits:
 Source health semantics:
 - `loaded`: nearby overflow monitor context returned
 - `empty`: source responded but no nearby monitor matched the query radius
+- `stale`: returned monitor `lastUpdatedAt` timestamps exceeded the freshness threshold
+- `degraded`: returned monitor records include partial metadata or unknown status detail
+- `unavailable`: source retrieval failed inside the backend service path
 - `disabled`: non-fixture mode requested before live implementation exists
 
 Interpretation rules:
@@ -399,6 +406,9 @@ Current limits:
 Source health semantics:
 - `loaded`: nearby station context returned
 - `empty`: source responded but no nearby station matched the query radius/filter
+- `stale`: returned hydrometry observation timestamps exceeded the freshness threshold
+- `degraded`: returned station records include partial metadata such as missing `riverBasin`
+- `unavailable`: source retrieval failed inside the backend service path
 - `disabled`: non-fixture mode requested before live implementation exists
 
 Interpretation rules:
@@ -434,6 +444,9 @@ Current limits:
 Source health semantics:
 - `loaded`: nearby station context returned
 - `empty`: source responded but no nearby station matched the query radius
+- `stale`: returned water-level reading timestamps exceeded the freshness threshold
+- `degraded`: returned station records include partial metadata such as missing `waterbody`
+- `unavailable`: source retrieval failed inside the backend service path
 - `disabled`: non-fixture mode requested before live implementation exists
 
 Interpretation rules:
@@ -480,11 +493,23 @@ Current marine source-health thresholds:
 - France Vigicrues Hydrometry: stale after 60 minutes based on returned observation timestamps
 - Ireland OPW Water Level: stale after 60 minutes based on returned reading timestamps
 
-States still not emitted in this slice:
-- `unavailable`
-- `degraded`
+Current emitted health-state boundaries:
+- all five current marine context sources can emit:
+  - `loaded`
+  - `empty`
+  - `stale`
+  - `disabled`
+  - `unavailable`
+- `degraded` is currently emitted only for:
+  - Scottish Water Overflows
+  - France Vigicrues Hydrometry
+  - Ireland OPW Water Level
+- `degraded` is intentionally not emitted for:
+  - NOAA CO-OPS
+  - NOAA NDBC
 
-These remain intentionally undocumented as active backend outputs until a real endpoint-error or partial-ingest health path exists.
+The remaining semantics gap is intentional:
+- CO-OPS and NDBC do not currently have an honest partial-ingest/source-quality degradation signal at the source-health layer, so they do not emit `degraded`
 
 Route validation expectations:
 - invalid latitude/longitude requests must be rejected by request validation
@@ -545,10 +570,14 @@ Export metadata includes:
   - source count
   - available source count
   - degraded source count
+  - unavailable source count
   - fixture source count
   - disabled source count
   - per-source rows
   - caveats
+
+Workflow note:
+- the deterministic marine smoke path now surfaces one degraded example (`Scottish Water Overflows`) and one unavailable example (`France Vigicrues Hydrometry`) so source-health limitations are visible/exportable without being promoted into anomaly severity
 
 ### Marine Context Timeline
 

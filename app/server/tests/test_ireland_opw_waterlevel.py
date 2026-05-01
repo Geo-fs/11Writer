@@ -57,7 +57,7 @@ def test_ireland_opw_waterlevel_contract_loaded(tmp_path: Path) -> None:
     payload = response.json()
     assert payload["sourceHealth"]["sourceId"] == "ireland-opw-waterlevel"
     assert payload["sourceHealth"]["sourceMode"] == "fixture"
-    assert payload["sourceHealth"]["health"] in {"loaded", "empty"}
+    assert payload["sourceHealth"]["health"] in {"loaded", "empty", "degraded"}
     assert payload["sourceHealth"]["loadedCount"] == payload["count"]
     assert "provisional hydrometric context only" in payload["sourceHealth"]["caveat"].lower()
     assert payload["caveats"]
@@ -126,8 +126,8 @@ def test_ireland_opw_waterlevel_fixture_mode_does_not_fabricate_stale_or_unavail
         params={"lat": 52.45, "lon": -9.66, "radius_km": 250, "limit": 5},
     ).json()
 
-    assert payload["sourceHealth"]["health"] in {"loaded", "empty"}
-    assert payload["sourceHealth"]["health"] not in {"stale", "error", "unknown"}
+    assert payload["sourceHealth"]["health"] in {"loaded", "empty", "degraded"}
+    assert payload["sourceHealth"]["health"] not in {"stale", "error", "unknown", "unavailable"}
 
 
 def test_ireland_opw_waterlevel_unknown_mode_normalizes_to_disabled(tmp_path: Path) -> None:
@@ -176,6 +176,40 @@ def test_ireland_opw_waterlevel_can_honestly_emit_stale_from_old_reading_timesta
     assert payload["sourceHealth"]["health"] == "stale"
     assert "freshness threshold" in (payload["sourceHealth"]["detail"] or "").lower()
     assert "freshness threshold" in (payload["sourceHealth"]["caveat"] or "").lower()
+
+
+def test_ireland_opw_waterlevel_can_honestly_emit_degraded_from_partial_metadata(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+
+    payload = client.get(
+        "/api/marine/context/ireland-opw-waterlevel",
+        params={"lat": 52.66, "lon": -8.62, "radius_km": 100, "limit": 10},
+    ).json()
+
+    assert payload["count"] >= 1
+    assert payload["sourceHealth"]["health"] == "degraded"
+    assert "partial metadata" in (payload["sourceHealth"]["detail"] or "").lower()
+    assert "partial metadata" in (payload["sourceHealth"]["caveat"] or "").lower()
+
+
+def test_ireland_opw_waterlevel_can_honestly_emit_unavailable_from_retrieval_failure(
+    tmp_path: Path, monkeypatch
+) -> None:
+    def broken_fixture(self: MarineIrelandOpwWaterLevelService, now: datetime):
+        raise OSError("fixture opw unavailable")
+
+    monkeypatch.setattr(MarineIrelandOpwWaterLevelService, "_fixture_stations", broken_fixture)
+    client = _client(tmp_path)
+
+    payload = client.get(
+        "/api/marine/context/ireland-opw-waterlevel",
+        params={"lat": 52.45, "lon": -9.66, "radius_km": 250, "limit": 5},
+    ).json()
+
+    assert payload["count"] == 0
+    assert payload["sourceHealth"]["health"] == "unavailable"
+    assert payload["sourceHealth"]["errorSummary"]
+    assert "retrieval failed" in (payload["sourceHealth"]["detail"] or "").lower()
 
 
 def test_ireland_opw_waterlevel_route_validation(tmp_path: Path) -> None:

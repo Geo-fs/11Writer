@@ -199,12 +199,14 @@ Data AI has a dedicated RSS/Atom candidate list for cybersecurity, internet infr
 
 - `app/docs/data-ai-rss-source-candidates.md`
 - `app/docs/data-ai-rss-source-candidates-batch2.md`
+- `app/docs/data-ai-rss-source-candidates-batch3.md`
 
 Validated working feeds found in the first pass:
 
 - 52 RSS/Atom/RDF feeds
 - 115 additional Batch 2 RSS/Atom/RDF feeds
-- 167 total validated Data AI feed candidates
+- 110 additional Batch 3 RSS/Atom/RDF feeds
+- 277 total validated Data AI feed candidates
 
 First implementation should not enable all feeds at once. Start with:
 

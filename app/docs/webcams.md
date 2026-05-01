@@ -361,6 +361,15 @@ The backend now also exposes a compact read-only source-operations index at:
 - `GET /api/cameras/source-ops-index/{source_id}`
 - `GET /api/cameras/source-ops-export-summary`
 - `GET /api/cameras/source-ops-review-queue`
+- `GET /api/cameras/source-ops-review-queue-export-bundle`
+
+Response modes:
+
+- normal source-ops export summary
+- full filtered review queue payload
+- aggregate-only filtered review queue payload via `aggregate_only=true`
+- export summary with opt-in filtered review-queue aggregate lines via `include_review_queue_aggregate_lines=true`
+- minimal review-queue export bundle with aggregate lines only
 
 Purpose:
 
@@ -402,6 +411,17 @@ The filtered review-queue route supports bounded query filters for:
 - `lifecycle_state`
 - `source_ids`
 - `limit`
+
+For export/debug consumers that only need aggregate lines, the same route supports:
+
+- `aggregate_only=true`
+
+In that mode:
+
+- item payloads are omitted
+- aggregate lines and caveats remain present
+- selected filters and unknown source ids remain present
+- no lifecycle semantics change
 
 It also returns a compact aggregate over the filtered subset:
 
@@ -452,6 +472,37 @@ Interpretation rules:
 - filtered queue results are convenience views over the same inert source-ops evidence; filtering does not change source state or queue semantics
 - source or candidate text returned in queue items remains untrusted data only and must not be treated as instructions
 - filtered queue aggregates are review/export summarization only and do not imply source activation, validation, endpoint health, or scheduling eligibility
+- aggregate-only mode is an export/debug selector only; omitting item payloads does not change review semantics or source state
+
+The broader export summary can also opt in to filtered review-queue aggregate lines without duplicating queue items:
+
+- `include_review_queue_aggregate_lines=true`
+- `review_queue_priority_band=...`
+- `review_queue_reason_category=...`
+- `review_queue_lifecycle_state=...`
+- `review_queue_source_ids=...`
+- `review_queue_limit=...`
+
+This export-summary mode:
+
+- keeps the normal export summary payload
+- adds only filtered review-queue aggregate lines plus filter metadata and caveats
+- does not duplicate the filtered queue item payload
+- remains read-only export/debug summarization only
+
+The minimal review-queue export bundle route returns only:
+
+- selected filter metadata
+- aggregate review lines
+- unknown source ids
+- shared lifecycle/source-ops caveats
+- source lifecycle summary metadata
+
+It intentionally excludes:
+
+- full review queue item payloads
+- per-source detail payloads
+- endpoint-health, availability, orientation, or freshness claims
 
 ### Candidate endpoint verification metadata
 

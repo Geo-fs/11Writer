@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>CERT-FR Avis de securite</title>
+    <link>https://www.cert.ssi.gouv.fr/avis/</link>
+    <lastBuildDate>Thu, 30 Apr 2026 10:58:00 GMT</lastBuildDate>
+    <item>
+      <title>Multiples vulnerabilites dans Produit Exemple</title>
+      <link>https://www.cert.ssi.gouv.fr/avis/CERTFR-2026-AVI-099/</link>
+      <guid>https://www.cert.ssi.gouv.fr/avis/CERTFR-2026-AVI-099/</guid>
+      <pubDate>Thu, 30 Apr 2026 10:55:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Le texte source contient des commandes citees comme <code>apt update &amp;&amp; apt upgrade</code> et des liens HTML.</p>
+        <p>Ce contenu reste un avis officiel en francais et ne doit pas etre transforme en preuve d'exploitation, d'impact, ou d'action prioritaire.</p>
+      ]]></description>
+      <category>Avis</category>
+      <category>CERT-FR</category>
+    </item>
+  </channel>
+</rss>

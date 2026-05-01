@@ -31,8 +31,10 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   `geomagnetismContext`
   and `aerospaceContextIssues`
   and `aerospaceExportReadiness`
+  and `aerospaceSourceReadiness`
   and `aerospaceContextReport`
   and `aerospaceReviewQueue`
+  and `nceiSpaceWeatherArchiveContext`
   and `vaacContext`
   in the aerospace export path.
   Local execution note for 2026-04-30:
@@ -126,6 +128,14 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   and surfaces a compact `Space Weather (NOAA SWPC)` inspector section.
   SWPC context is treated as advisory/contextual only and must not be used to claim actual satellite, GPS, or radio failure unless the source explicitly states that impact.
   The provider is tracked separately in source status as `noaa-swpc`.
+- NOAA NCEI archive metadata consumer:
+  selected aircraft and satellites can now consume optional read-only archival space-weather collection metadata through
+  `/api/aerospace/space/ncei-space-weather-archive`.
+  This consumer is fixture-first, source-health-aware, and export-aware.
+  It surfaces a compact `Space Weather Archive Context` inspector section with collection id, dataset identifier, temporal coverage, metadata update date, and provenance URLs.
+  NCEI archive metadata is treated as archival/contextual collection evidence only.
+  It remains explicitly separate from current NOAA SWPC advisory context and must not be used to claim current GPS, radio, aircraft, or satellite failure.
+  The provider is tracked separately in source status as `noaa-ncei-space-weather-portal`.
 - OpenSky anonymous states first slice:
   selected aircraft can now consume optional read-only anonymous OpenSky state-vector context through
   `/api/aerospace/aircraft/opensky/states`.
@@ -214,6 +224,11 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   or `selected-target freshness limited`.
   This summary is about export-context completeness and caveat visibility only.
   It is not a certification of source reliability and does not imply target behavior, threat, failure, causation, or impact.
+- Aerospace source readiness summary:
+  aerospace now also builds a compact `Aerospace Source Readiness` summary from already-loaded context availability, context review, export readiness, and selected-target data health.
+  It groups the major aerospace context families into bounded review-oriented families such as airport operations, OpenSky comparison, space events, current space-weather context, archive context, and selected-target evidence.
+  Each family preserves per-source availability, source mode, source health, evidence posture, caveats, and a bounded readiness label.
+  It does not create a global severity score and does not imply target behavior, route impact, GPS/radio/satellite failure, causation, or action recommendation.
 - Aerospace context report summary:
   aerospace now also builds a compact `Aerospace Context Report` summary from already-loaded selected-target evidence, context availability, export readiness, review queue, and selected-target data health.
   It is an explainability/export aid only.

@@ -5,11 +5,11 @@
     <link>https://www.cisa.gov/</link>
     <lastBuildDate>Wed, 30 Apr 2026 10:30:00 GMT</lastBuildDate>
     <item>
-      <title>CISA and Partners Publish Joint Advisory on Credential Theft Activity</title>
+      <title>CISA and Partners Publish Joint Advisory on CVE-2021-40438 Activity</title>
       <link>https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-120a</link>
       <guid>https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-120a</guid>
       <pubDate>Thu, 30 Apr 2026 10:15:00 GMT</pubDate>
-      <description><![CDATA[<p>Official advisory summary with technical context and mitigations.</p>]]></description>
+      <description><![CDATA[<p>Official advisory summary with technical context and mitigations for CVE-2021-40438.</p>]]></description>
       <category>Cybersecurity Advisory</category>
       <category>Threats and Advisories</category>
     </item>

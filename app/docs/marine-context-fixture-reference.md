@@ -20,7 +20,8 @@ Shared across all current marine context sources:
 - caveats are required
 - context sources do not imply vessel behavior, intent, anomaly cause, pollution impact, or health risk
 - fixture mode may emit `stale` only when returned observation/update timestamps honestly age past the source freshness threshold
-- fixture mode does not fabricate `unavailable`
+- fixture mode may emit `unavailable` only when the backend source-retrieval step fails
+- fixture mode may emit `degraded` only when returned records carry real partial-metadata evidence
 
 ## NOAA CO-OPS
 
@@ -33,6 +34,7 @@ Fixture mode behavior:
 - `sourceHealth.health=loaded` when at least one station matches radius
 - `sourceHealth.health=empty` when no station matches radius
 - `sourceHealth.health=stale` when returned station observation timestamps age beyond the 30-minute freshness threshold
+- `sourceHealth.health=unavailable` when fixture source retrieval fails inside the backend service path
 
 Representative fixture records:
 - water-level-only station
@@ -78,7 +80,7 @@ What this fixture protects against:
 - accidental change from observed evidence basis
 - accidental fabrication of live behavior in non-fixture mode
 - accidental loss of timestamp-based stale classification
-- accidental introduction of synthetic unavailable source-health states without real backend support
+- accidental removal of honest retrieval-failure `unavailable` handling
 
 ## NOAA NDBC
 
@@ -91,6 +93,7 @@ Fixture mode behavior:
 - `sourceHealth.health=loaded` when at least one station matches radius
 - `sourceHealth.health=empty` when no station matches radius
 - `sourceHealth.health=stale` when returned buoy/station observations age beyond the 45-minute freshness threshold
+- `sourceHealth.health=unavailable` when fixture source retrieval fails inside the backend service path
 
 Representative fixture records:
 - offshore buoy
@@ -143,7 +146,7 @@ What this fixture protects against:
 - accidental change from observed evidence basis
 - accidental fabrication of live behavior in non-fixture mode
 - accidental loss of timestamp-based stale classification
-- accidental introduction of synthetic unavailable source-health states without real backend support
+- accidental removal of honest retrieval-failure `unavailable` handling
 
 ## Scottish Water Overflows
 
@@ -156,6 +159,8 @@ Fixture mode behavior:
 - `sourceHealth.health=loaded` when at least one event matches radius/status
 - `sourceHealth.health=empty` when no event matches radius/status
 - `sourceHealth.health=stale` when returned monitor `lastUpdatedAt` timestamps age beyond the 2-hour freshness threshold
+- `sourceHealth.health=degraded` when returned monitor records carry partial metadata or unknown status detail
+- `sourceHealth.health=unavailable` when fixture source retrieval fails inside the backend service path
 
 Representative fixture records:
 - active overflow monitor
@@ -208,7 +213,8 @@ What this fixture protects against:
 - accidental change from source-reported evidence basis
 - accidental introduction of pollution/health/vessel-behavior claims
 - accidental loss of timestamp-based stale classification
-- accidental introduction of synthetic unavailable source-health states without real backend support
+- accidental removal of honest degraded handling for partial metadata / unknown status records
+- accidental removal of honest retrieval-failure `unavailable` handling
 
 ## France Vigicrues Hydrometry
 
@@ -226,6 +232,8 @@ Fixture mode behavior:
 - `sourceHealth.health=loaded` when at least one station matches radius/parameter filter
 - `sourceHealth.health=empty` when no station matches radius/parameter filter
 - `sourceHealth.health=stale` when returned observation timestamps age beyond the 60-minute freshness threshold
+- `sourceHealth.health=degraded` when returned station records carry partial metadata such as missing `riverBasin`
+- `sourceHealth.health=unavailable` when fixture source retrieval fails inside the backend service path
 
 Representative fixture records:
 - water-height station
@@ -270,6 +278,8 @@ What this fixture protects against:
 - accidental change from observed evidence basis
 - accidental fabrication of live behavior in non-fixture mode
 - accidental loss of timestamp-based stale classification
+- accidental removal of honest degraded handling for partial metadata
+- accidental removal of honest retrieval-failure `unavailable` handling
 - accidental introduction of flood-impact, damage, or vessel-behavior claims
 
 ## Ireland OPW Water Level
@@ -287,6 +297,8 @@ Fixture mode behavior:
 - `sourceHealth.health=loaded` when at least one station matches radius
 - `sourceHealth.health=empty` when no station matches radius
 - `sourceHealth.health=stale` when returned reading timestamps age beyond the 60-minute freshness threshold
+- `sourceHealth.health=degraded` when returned station records carry partial metadata such as missing `waterbody`
+- `sourceHealth.health=unavailable` when fixture source retrieval fails inside the backend service path
 
 Representative fixture records:
 - station on River Feale
@@ -330,6 +342,8 @@ What this fixture protects against:
 - accidental change from observed evidence basis
 - accidental fabrication of live behavior in non-fixture mode
 - accidental loss of timestamp-based stale classification
+- accidental removal of honest degraded handling for partial metadata
+- accidental removal of honest retrieval-failure `unavailable` handling
 - accidental introduction of flooding, contamination, damage, or vessel-behavior claims
 
 ## Fixture Regression Checklist
@@ -357,6 +371,7 @@ Do not change casually:
 - water-height vs flow separation
 - current timestamp-based stale thresholds
 - current no-fabrication boundary for `unavailable` source-health states
+- current no-fabrication boundary for `degraded` source-health states on CO-OPS and NDBC
 
 ## Fusion / Review Fixture Expectations
 

@@ -7,7 +7,10 @@ from src.config.settings import Settings
 from src.services.camera_source_ops_artifact_timestamps import build_export_summary_timestamp
 from src.services.camera_source_ops_detail import build_camera_source_ops_detail
 from src.services.camera_source_ops_report_index import build_camera_source_ops_report_index
-from src.services.camera_source_ops_review_queue import build_camera_source_ops_review_queue
+from src.services.camera_source_ops_review_queue import (
+    build_camera_source_ops_review_queue,
+    build_filtered_camera_source_ops_review_queue,
+)
 from src.types.api import (
     CameraSourceOpsCaveatRollupEntry,
     CameraSourceOpsArtifactStatusCount,
@@ -16,12 +19,20 @@ from src.types.api import (
     CameraSourceOpsExportSummaryResponse,
     CameraSourceOpsReviewHintEntry,
     CameraSourceOpsReviewHintSummary,
+    CameraSourceOpsReviewQueueExportSelection,
 )
 
 
 def build_camera_source_ops_export_summary(
     settings: Settings,
     source_ids: list[str] | None = None,
+    *,
+    include_review_queue_aggregate_lines: bool = False,
+    review_queue_priority_band: str | None = None,
+    review_queue_reason_category: str | None = None,
+    review_queue_lifecycle_state: str | None = None,
+    review_queue_source_ids: list[str] | None = None,
+    review_queue_limit: int = 50,
 ) -> CameraSourceOpsExportSummaryResponse:
     generated_at = _now_iso()
     index = build_camera_source_ops_report_index(settings)
@@ -58,6 +69,15 @@ def build_camera_source_ops_export_summary(
     caveat_frequency_rollup = _build_caveat_frequency_rollup(index.sources, per_source_details)
     review_hint_summary = _build_review_hint_summary(index.sources, per_source_details)
     review_queue = build_camera_source_ops_review_queue(per_source_details)
+    review_queue_export_selection = _build_review_queue_export_selection(
+        settings,
+        include_review_queue_aggregate_lines=include_review_queue_aggregate_lines,
+        priority_band=review_queue_priority_band,
+        reason_category=review_queue_reason_category,
+        lifecycle_state=review_queue_lifecycle_state,
+        source_ids=review_queue_source_ids,
+        limit=review_queue_limit,
+    )
     return CameraSourceOpsExportSummaryResponse(
         fetched_at=generated_at,
         requested_source_ids=requested,
@@ -70,10 +90,49 @@ def build_camera_source_ops_export_summary(
         caveat_frequency_rollup=caveat_frequency_rollup,
         review_hint_summary=review_hint_summary,
         review_queue=review_queue,
+        review_queue_export_selection=review_queue_export_selection,
         caveat=(
             "This export/debug summary is compact operational evidence only. "
             "It must not be used to infer source activation, validation, or lifecycle promotion."
         ),
+    )
+
+
+def _build_review_queue_export_selection(
+    settings: Settings,
+    *,
+    include_review_queue_aggregate_lines: bool,
+    priority_band: str | None,
+    reason_category: str | None,
+    lifecycle_state: str | None,
+    source_ids: list[str] | None,
+    limit: int,
+) -> CameraSourceOpsReviewQueueExportSelection:
+    if not include_review_queue_aggregate_lines:
+        return CameraSourceOpsReviewQueueExportSelection()
+    filtered = build_filtered_camera_source_ops_review_queue(
+        settings,
+        priority_band=priority_band,
+        reason_category=reason_category,
+        lifecycle_state=lifecycle_state,
+        source_ids=source_ids,
+        limit=limit,
+        aggregate_only=True,
+    )
+    return CameraSourceOpsReviewQueueExportSelection(
+        included=True,
+        priority_band=priority_band,  # type: ignore[arg-type]
+        reason_category=reason_category,  # type: ignore[arg-type]
+        lifecycle_state=lifecycle_state,
+        requested_source_ids=list(filtered.requested_source_ids),
+        unknown_source_ids=list(filtered.unknown_source_ids),
+        limit=limit,
+        aggregate_lines=list(filtered.aggregate.export_lines),
+        caveats=[
+            "This export selection includes filtered review-queue aggregate lines only.",
+            "It does not include duplicate full queue items and does not change lifecycle state.",
+            *filtered.aggregate.caveats,
+        ],
     )
 
 

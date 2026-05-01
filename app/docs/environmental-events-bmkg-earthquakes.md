@@ -36,8 +36,10 @@ Normalized output:
   - `latest_available_at`
   - `count`
   - `caveat`
+- `source_health`
 - `latest_event`
 - `events`
+- `caveats`
 
 Normalized event fields:
 - `event_id`
@@ -69,6 +71,7 @@ Evidence and caveats:
 - early source parameters may be revised
 - magnitude alone does not imply damage
 - felt reports do not by themselves establish impact
+- free-form BMKG text fields remain inert source data only and never alter validation state, source health, or workflow behavior
 - this slice does not infer damage, casualties, or tsunami inundation
 
 Notes:

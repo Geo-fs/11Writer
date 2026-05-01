@@ -377,6 +377,45 @@ export interface SwpcContextResponse {
   caveats: string[];
 }
 
+export interface NceiSpaceWeatherPortalSourceHealth {
+  sourceName: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "normal" | "degraded" | "unavailable" | "unknown";
+  detail: string;
+  metadataSourceUrl: string;
+  landingPageUrl: string;
+  lastUpdatedAt?: string | null;
+  state?: SourceStatus["state"] | null;
+  caveats: string[];
+}
+
+export interface NceiSpaceWeatherPortalRecord {
+  collectionId: string;
+  datasetIdentifier?: string | null;
+  title: string;
+  summary?: string | null;
+  temporalStart?: string | null;
+  temporalEnd?: string | null;
+  metadataUpdatedAt?: string | null;
+  progressStatus?: string | null;
+  updateFrequency?: string | null;
+  sourceUrl: string;
+  landingPageUrl: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "normal" | "degraded" | "unavailable" | "unknown";
+  caveats: string[];
+  evidenceBasis: "archival" | "contextual";
+}
+
+export interface NceiSpaceWeatherPortalResponse {
+  fetchedAt: string;
+  source: string;
+  count: number;
+  records: NceiSpaceWeatherPortalRecord[];
+  sourceHealth: NceiSpaceWeatherPortalSourceHealth;
+  caveats: string[];
+}
+
 export interface WashingtonVaacSourceHealth {
   sourceName: string;
   sourceMode: "fixture" | "live" | "unknown";
@@ -1155,7 +1194,7 @@ export interface MarineNoaaCoopsSourceHealth {
   sourceLabel: string;
   enabled: boolean;
   sourceMode: "fixture" | "live" | "unknown";
-  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  health: "loaded" | "empty" | "stale" | "degraded" | "unavailable" | "error" | "disabled" | "unknown";
   loadedCount: number;
   lastFetchedAt?: string | null;
   sourceGeneratedAt?: string | null;
@@ -1219,7 +1258,7 @@ export interface MarineNdbcSourceHealth {
   sourceLabel: string;
   enabled: boolean;
   sourceMode: "fixture" | "live" | "unknown";
-  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  health: "loaded" | "empty" | "stale" | "degraded" | "unavailable" | "error" | "disabled" | "unknown";
   loadedCount: number;
   lastFetchedAt?: string | null;
   sourceGeneratedAt?: string | null;
@@ -1274,7 +1313,7 @@ export interface MarineScottishWaterSourceHealth {
   sourceLabel: string;
   enabled: boolean;
   sourceMode: "fixture" | "live" | "unknown";
-  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  health: "loaded" | "empty" | "stale" | "degraded" | "unavailable" | "error" | "disabled" | "unknown";
   loadedCount: number;
   lastFetchedAt?: string | null;
   sourceGeneratedAt?: string | null;
@@ -1323,7 +1362,7 @@ export interface MarineVigicruesHydrometrySourceHealth {
   sourceLabel: string;
   enabled: boolean;
   sourceMode: "fixture" | "live" | "unknown";
-  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  health: "loaded" | "empty" | "stale" | "degraded" | "unavailable" | "error" | "disabled" | "unknown";
   loadedCount: number;
   lastFetchedAt?: string | null;
   sourceGeneratedAt?: string | null;
@@ -1372,7 +1411,7 @@ export interface MarineIrelandOpwWaterLevelSourceHealth {
   sourceLabel: string;
   enabled: boolean;
   sourceMode: "fixture" | "live" | "unknown";
-  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  health: "loaded" | "empty" | "stale" | "degraded" | "unavailable" | "error" | "disabled" | "unknown";
   loadedCount: number;
   lastFetchedAt?: string | null;
   sourceGeneratedAt?: string | null;

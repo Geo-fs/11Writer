@@ -1,5 +1,129 @@
 # Aerospace AI Progress
 
+## 2026-04-30 22:28 America/Chicago
+
+- Assignment version:
+  2026-04-30 22:19 America/Chicago
+- Task:
+  Add an aerospace-local source-health/context issue federation package that summarizes availability, caveats, and export readiness across the major aerospace context families without inventing a severity score.
+- What changed:
+  Added a new pure helper `aerospaceSourceReadiness.ts` that federates already-loaded aerospace context availability, context-review issues, export readiness, and selected-target data health into bounded family summaries for airport operations, OpenSky comparison, space events, current space-weather context, archive context, and selected-target evidence.
+  Each family preserves per-source availability, source mode, source health, evidence basis, reasons, caveats, and selected-target freshness where applicable, then emits a bounded review-oriented readiness label such as `available with caveats`, `review with caveats`, `fixture-backed context`, `degraded context`, `context unavailable`, or `freshness limited`.
+  Wired the new federation into the aerospace inspector as a compact `Aerospace Source Readiness` section, into export footer prioritization through `aerospaceExportProfiles.ts`, and into snapshot metadata as `aerospaceSourceReadiness`.
+  Extended prepared aerospace smoke assertions to expect the new inspector label and metadata key when Playwright can launch, and updated aerospace workflow/smoke docs to describe the new family summary and its no-severity/no-inference boundaries.
+- Files touched:
+  [aerospaceSourceReadiness.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceSourceReadiness.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_cneos_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_opensky_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_aviation_weather_contracts.py -q` passed (`3 passed`).
+  `python -m pytest app/server/tests/test_faa_nas_status_contracts.py -q` passed (`5 passed`).
+  `python -m compileall app/server/src` passed.
+  `cmd /c npm.cmd run lint` passed from `app/client`.
+  `cmd /c npm.cmd run build` passed from `app/client`.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before browser assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  Executed aerospace smoke evidence for the new federation summary remains blocked on this Windows host by the same Playwright launcher permission boundary before any browser assertions run.
+  The federation remains explanatory and review-oriented only. It does not create a global severity score and does not imply flight intent, route impact, aircraft exposure, GPS/radio/satellite failure, causation, operational consequence, or action recommendation.
+  Source-provided text remains inert input data only; no source text is executed, followed, or promoted into instructions.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Playwright Chromium can launch, then convert the prepared `aerospaceSourceReadiness` smoke assertions into executed workflow evidence if they pass.
+
+## 2026-04-30 22:15 America/Chicago
+
+- Assignment version:
+  2026-04-30 22:01 America/Chicago
+- Task:
+  Add the bounded aerospace-local NOAA NCEI space-weather archive consumer/export package, keeping archive metadata separate from current SWPC advisory truth.
+- What changed:
+  Added typed client contracts and a dedicated `useNceiSpaceWeatherArchiveQuery(...)` hook for the existing `/api/aerospace/space/ncei-space-weather-archive` backend route.
+  Added a new pure helper `aerospaceSpaceWeatherArchiveContext.ts` that composes compact archival/contextual `Space Weather Archive Context` summaries from the route output while preserving collection id, dataset identifier, title, temporal coverage, metadata update date, progress status, update frequency, source mode, source health, provenance URLs, and explicit archive-vs-current caveats.
+  Wired the new archive summary into the aerospace inspector as a narrow `Space Weather Archive Context` section, aerospace operational-context composition, context-availability rows, export-profile footer prioritization, and snapshot/export metadata under `nceiSpaceWeatherArchiveContext`.
+  Added deterministic smoke-fixture coverage for the NCEI archive route and `noaa-ncei-space-weather-portal` source status in `smoke_fixture_app.py`, then extended prepared aerospace smoke assertions to expect the new inspector label and metadata key when Playwright can launch.
+  Updated aerospace docs and validation tracking to record the new consumer/export path, the prepared smoke coverage, and the explicit boundary that NOAA NCEI archive metadata is archival/contextual only and must not be treated as current SWPC warning truth or proof of GPS, radio, aircraft, or satellite failure.
+- Files touched:
+  [api.ts](/C:/Users/mike/11Writer/app/client/src/types/api.ts)
+  [queries.ts](/C:/Users/mike/11Writer/app/client/src/lib/queries.ts)
+  [aerospaceSpaceWeatherArchiveContext.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceSpaceWeatherArchiveContext.ts)
+  [aerospaceOperationalContext.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceOperationalContext.ts)
+  [aerospaceContextAvailability.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceContextAvailability.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [smoke_fixture_app.py](/C:/Users/mike/11Writer/app/server/tests/smoke_fixture_app.py)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/aerospace-source-contract-matrix.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_cneos_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_opensky_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_aviation_weather_contracts.py -q` passed (`3 passed`).
+  `python -m pytest app/server/tests/test_faa_nas_status_contracts.py -q` passed (`5 passed`).
+  `python -m compileall app/server/src` passed.
+  `cmd /c npm.cmd run lint` passed from `app/client`.
+  `cmd /c npm.cmd run build` passed from `app/client`.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before browser assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  Executed aerospace smoke evidence for the new NCEI archive consumer remains blocked on this Windows host by the same Playwright launcher-permission boundary before any browser assertions run.
+  The new consumer remains archival/contextual only. It is explicitly separate from current SWPC advisory truth and does not imply GPS failure, radio failure, satellite failure, aviation impact, causation, operational consequence, or a recommended action.
+  The frontend helper treats archive title and summary text as inert source data only. No source text is executed, followed, or promoted to instructions.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Playwright Chromium can launch, then convert the prepared `nceiSpaceWeatherArchiveContext` smoke assertions into executed workflow evidence if they pass.
+
+## 2026-04-30 21:56 America/Chicago
+
+- Assignment version:
+  2026-04-30 21:43 America/Chicago
+- Task:
+  Add the backend-only `noaa-ncei-space-weather-portal` first slice as bounded archival/product metadata context for aerospace, with fixture-first contracts, source health, prompt-injection-safe free-text handling, and aerospace docs updates.
+- What changed:
+  Pinned the public no-auth NOAA NCEI XML metadata endpoint `https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ngdc.stp.swx:space_weather_products;view=xml;responseType=text/xml` for the `Space Weather Products` collection and added backend settings for source mode, URL, timeout, and fixture path.
+  Added typed API contracts, a fixture-first adapter, a cached service, and a new route at `/api/aerospace/space/ncei-space-weather-archive` that returns bounded archival collection metadata only: collection id, dataset identifier, title, summary, temporal coverage, metadata update date, progress status, update frequency, source mode, source health, provenance URLs, and explicit archival/context caveats.
+  Added deterministic XML fixture coverage, explicit empty-result handling, degraded source-status handling, missing optional-field handling, and untrusted free-text sanitization coverage for title and summary fields so archive metadata remains inert source text rather than executable instructions or UI markup.
+  Updated aerospace contract/workflow docs and source-validation tracking to record that this slice is backend-only, contract-tested, separate from NOAA SWPC current advisories, and not yet a frontend/export consumer.
+- Files touched:
+  [settings.py](/C:/Users/mike/11Writer/app/server/src/config/settings.py)
+  [api.py](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  [ncei_space_weather_portal.py](/C:/Users/mike/11Writer/app/server/src/adapters/ncei_space_weather_portal.py)
+  [ncei_space_weather_portal_service.py](/C:/Users/mike/11Writer/app/server/src/services/ncei_space_weather_portal_service.py)
+  [ncei_space_weather_portal.py](/C:/Users/mike/11Writer/app/server/src/routes/ncei_space_weather_portal.py)
+  [status_service.py](/C:/Users/mike/11Writer/app/server/src/services/status_service.py)
+  [app.py](/C:/Users/mike/11Writer/app/server/src/app.py)
+  [ncei_space_weather_portal_fixture.xml](/C:/Users/mike/11Writer/app/server/data/ncei_space_weather_portal_fixture.xml)
+  [test_ncei_space_weather_portal_contracts.py](/C:/Users/mike/11Writer/app/server/tests/test_ncei_space_weather_portal_contracts.py)
+  [aerospace-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/aerospace-source-contract-matrix.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_cneos_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_opensky_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_aviation_weather_contracts.py -q` passed (`3 passed`).
+  `python -m pytest app/server/tests/test_faa_nas_status_contracts.py -q` passed (`5 passed`).
+  `python -m compileall app/server/src` passed.
+- Blockers or caveats:
+  This slice is intentionally backend-only. There is no frontend card, export-profile consumer, or smoke assertion yet, and none were added in this pass.
+  NOAA NCEI archive metadata remains archival/contextual only. It is explicitly separate from NOAA SWPC current advisories and must not be used to infer current GPS, radio, aircraft, or satellite failure.
+  Free-text title and summary fields are sanitized and truncated before entering the route contract, but they still remain untrusted source text rather than instructions.
+- Next recommended task:
+  Wait for the next-task doc to assign whether the NCEI archive slice should stay backend-only or gain a bounded aerospace-local consumer later. Do not merge it into SWPC current-advisory semantics.
+
 ## 2026-04-30 17:19 America/Chicago
 
 - Assignment version:

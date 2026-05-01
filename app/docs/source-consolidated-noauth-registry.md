@@ -240,11 +240,13 @@ Batch 7 needs-verification:
 Detailed feed URLs, validation notes, caveats, and first-slice guidance live in:
 - `app/docs/data-ai-rss-source-candidates.md`
 - `app/docs/data-ai-rss-source-candidates-batch2.md`
+- `app/docs/data-ai-rss-source-candidates-batch3.md`
 
 Validated working RSS/Atom/RDF feeds found:
-- 167 total
+- 277 total
 - 52 in the first Data AI RSS list
 - 115 in Batch 2
+- 110 in Batch 3
 
 Recommended first implementation slice:
 - `cisa-cybersecurity-advisories`
@@ -407,8 +409,8 @@ Data AI RSS guardrails:
 | Status | Count |
 | --- | ---: |
 | Approved / backlog candidates in core source registry | 148 |
-| Validated Data AI RSS/Atom feed candidates | 167 |
-| Combined approved/feed candidate total | 315 |
+| Validated Data AI RSS/Atom feed candidates | 277 |
+| Combined approved/feed candidate total | 425 |
 | Approved only with guardrails | Included inside the combined total |
 | New needs-verification Batch 7 candidates | 2 |
 | Not approved / rejected named sources and categories | 50+ |

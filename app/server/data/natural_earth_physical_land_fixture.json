@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "theme": "land",
+    "scale": "110m",
+    "source_file": "ne_110m_land.zip",
+    "dataset_version": null,
+    "license_name": "Public Domain",
+    "public_domain": true,
+    "generated_at": null
+  },
+  "features": [
+    {
+      "record_id": "land-001",
+      "feature_type": "land",
+      "geometry_type": "Polygon",
+      "bbox_min_lon": -168.12,
+      "bbox_min_lat": 5.47,
+      "bbox_max_lon": -52.62,
+      "bbox_max_lat": 83.65
+    },
+    {
+      "record_id": "land-002",
+      "feature_type": "land",
+      "geometry_type": "Polygon",
+      "bbox_min_lon": -81.41,
+      "bbox_min_lat": -55.98,
+      "bbox_max_lon": -34.79,
+      "bbox_max_lat": 12.46
+    },
+    {
+      "record_id": "land-003",
+      "feature_type": "land",
+      "geometry_type": "MultiPolygon",
+      "bbox_min_lon": -17.63,
+      "bbox_min_lat": -34.82,
+      "bbox_max_lon": 180.0,
+      "bbox_max_lat": 77.7
+    }
+  ]
+}

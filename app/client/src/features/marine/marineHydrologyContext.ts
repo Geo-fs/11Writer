@@ -2,7 +2,15 @@ import type { MarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
 import type { MarineVigicruesContextSummary } from "./marineVigicruesContext";
 
 type SourceMode = "fixture" | "live" | "unknown";
-type SourceHealth = "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+type SourceHealth =
+  | "loaded"
+  | "empty"
+  | "stale"
+  | "degraded"
+  | "unavailable"
+  | "error"
+  | "disabled"
+  | "unknown";
 
 export interface MarineHydrologyContextSummary {
   sourceLine: string;
@@ -55,7 +63,11 @@ export function buildMarineHydrologyContextSummary(input: {
   const loadedSourceCount = countHealth(sources, "loaded");
   const emptySourceCount = countHealth(sources, "empty");
   const degradedSourceCount = sources.filter(
-    (source) => source.metadata.health === "stale" || source.metadata.health === "error"
+    (source) =>
+      source.metadata.health === "stale" ||
+      source.metadata.health === "degraded" ||
+      source.metadata.health === "error" ||
+      source.metadata.health === "unavailable"
   ).length;
   const disabledSourceCount = countHealth(sources, "disabled");
   const fixtureSourceCount = sources.filter((source) => source.metadata.sourceMode === "fixture").length;

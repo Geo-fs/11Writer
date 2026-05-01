@@ -5,7 +5,15 @@ import type { MarineScottishWaterContextSummary } from "./marineScottishWaterCon
 import type { MarineVigicruesContextSummary } from "./marineVigicruesContext";
 
 type SourceMode = "fixture" | "live" | "unknown";
-type SourceHealth = "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+type SourceHealth =
+  | "loaded"
+  | "empty"
+  | "stale"
+  | "degraded"
+  | "unavailable"
+  | "error"
+  | "disabled"
+  | "unknown";
 type SourceAvailability = "loaded" | "empty" | "disabled" | "unavailable" | "degraded" | "unknown";
 
 export interface MarineContextSourceSummaryRow {
@@ -27,6 +35,7 @@ export interface MarineContextSourceRegistrySummary {
   sourceCount: number;
   availableSourceCount: number;
   degradedSourceCount: number;
+  unavailableSourceCount: number;
   fixtureSourceCount: number;
   disabledSourceCount: number;
   caveats: string[];
@@ -35,6 +44,7 @@ export interface MarineContextSourceRegistrySummary {
     sourceCount: number;
     availableSourceCount: number;
     degradedSourceCount: number;
+    unavailableSourceCount: number;
     fixtureSourceCount: number;
     disabledSourceCount: number;
     rows: MarineContextSourceSummaryRow[];
@@ -67,6 +77,7 @@ export function buildMarineContextSourceRegistrySummary(input: {
   const sourceCount = rows.length;
   const availableSourceCount = rows.filter((row) => row.availability === "loaded").length;
   const degradedSourceCount = rows.filter((row) => row.availability === "degraded").length;
+  const unavailableSourceCount = rows.filter((row) => row.availability === "unavailable").length;
   const fixtureSourceCount = rows.filter((row) => row.sourceMode === "fixture").length;
   const disabledSourceCount = rows.filter((row) => row.availability === "disabled").length;
   const caveats = Array.from(
@@ -77,10 +88,10 @@ export function buildMarineContextSourceRegistrySummary(input: {
   ).filter(Boolean);
 
   const exportLines = [
-    `Marine context sources: ${availableSourceCount}/${sourceCount} loaded | ${degradedSourceCount} degraded | ${fixtureSourceCount} fixture`,
+    `Marine context sources: ${availableSourceCount}/${sourceCount} loaded | ${degradedSourceCount} degraded | ${unavailableSourceCount} unavailable | ${fixtureSourceCount} fixture`,
     ...rows.slice(0, 3).map(
       (row) =>
-        `${row.label}: ${row.availability} | ${row.sourceMode} | ${row.nearbyCount} nearby${row.activeCount != null ? ` | ${row.activeCount} active` : ""}`
+        `${row.label}: ${row.availability} (${row.health}) | ${row.sourceMode} | ${row.nearbyCount} nearby${row.activeCount != null ? ` | ${row.activeCount} active` : ""}`
     )
   ];
 
@@ -89,6 +100,7 @@ export function buildMarineContextSourceRegistrySummary(input: {
     sourceCount,
     availableSourceCount,
     degradedSourceCount,
+    unavailableSourceCount,
     fixtureSourceCount,
     disabledSourceCount,
     caveats,
@@ -97,6 +109,7 @@ export function buildMarineContextSourceRegistrySummary(input: {
       sourceCount,
       availableSourceCount,
       degradedSourceCount,
+      unavailableSourceCount,
       fixtureSourceCount,
       disabledSourceCount,
       rows,
@@ -213,6 +226,7 @@ function availabilityFromHealth(health: SourceHealth): SourceAvailability {
   if (health === "loaded") return "loaded";
   if (health === "empty") return "empty";
   if (health === "disabled") return "disabled";
-  if (health === "stale" || health === "error") return "degraded";
+  if (health === "unavailable") return "unavailable";
+  if (health === "stale" || health === "degraded" || health === "error") return "degraded";
   return "unknown";
 }

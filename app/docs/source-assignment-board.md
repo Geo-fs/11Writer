@@ -20,20 +20,23 @@ Related docs:
 - [source-quick-assign-packets-batch6.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-batch6.md)
 - [source-acceleration-phase2-batch5-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch5-briefs.md)
 - [source-routing-priority-memo.md](/C:/Users/mike/11Writer/app/docs/source-routing-priority-memo.md)
+- [source-next-routing-packets.md](/C:/Users/mike/11Writer/app/docs/source-next-routing-packets.md)
+- [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md)
 - [source-routing-batch7-base-earth-reference.md](/C:/Users/mike/11Writer/app/docs/source-routing-batch7-base-earth-reference.md)
 - [source-ownership-consumption-map.md](/C:/Users/mike/11Writer/app/docs/source-ownership-consumption-map.md)
 - [source-prompt-index.md](/C:/Users/mike/11Writer/app/docs/source-prompt-index.md)
 - [data-ai-rss-source-candidates.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates.md)
 - [data-ai-rss-source-candidates-batch2.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates-batch2.md)
+- [data-ai-rss-source-candidates-batch3.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates-batch3.md)
 - [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md)
 
 ## Current Next Assignments
 
-- Geospatial next: `geonet-geohazards` or `hko-open-weather`, with `dmi-forecast-aws` as the next clean weather-context follow-on
-- Marine next: complete the current backend-only `france-vigicrues-hydrometry` source-expansion lane with any required follow-on validation or first consumer handoff before assigning a different fresh marine source
-- Aerospace next: keep the current implemented source stack stable and rerun focused aerospace smoke on a Windows host where Playwright can launch before promoting any aerospace source beyond `implemented`
-- Features/Webcam next: prefer one bounded `finland-digitraffic` consumer or status-classification follow-on first; if Manager AI opens a fresh source lane instead, route `bart-gtfs-realtime`
-- Data next: preserve the active five-feed RSS starter slice and route only the next bounded wave after that, starting with `ncsc-uk-all`, `cert-fr-alerts`, and `cloudflare-radar`
+- Geospatial next: `geonet-geohazards` or `hko-open-weather`, with `dmi-forecast-aws` as the next clean fresh weather-context follow-on after the newly implemented `taiwan-cwa-aws-opendata`, `nrc-event-notifications`, `bmkg-earthquakes`, `ga-recent-earthquakes`, `natural-earth-physical`, and `noaa-global-volcano-locations` slices
+- Marine next: complete the current backend-only `france-vigicrues-hydrometry` source-expansion lane, then use the next marine pass for explicit `unavailable` or selective `degraded` smoke/export truth before assigning a different fresh marine source
+- Aerospace next: keep the current implemented source stack stable, including the three-VAAC consumer package and the `noaa-ncei-space-weather-portal` archive/context consumer path, and rerun focused aerospace smoke on a Windows host where Playwright can launch before promoting any aerospace source beyond `implemented`
+- Features/Webcam next: prefer one bounded `finland-digitraffic` consumer or status-classification follow-on first, or the minimal source-ops export-bundle selector/export-readout lane; if Manager AI opens a fresh source lane instead, route `bart-gtfs-realtime`
+- Data next: preserve the active five-feed RSS starter slice plus the bounded `nist-nvd-cve` and conservative CVE-context lane, use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) as the next-wave sequencing surface, and route only the next bounded official/advisory wave after that, starting with `ncsc-uk-all`, `cert-fr-alerts`, and `cloudflare-radar`
 - Gather next: verify `eea-air-quality`, `singapore-nea-weather`, `esa-neocc-close-approaches`, `imo-epos-geohazards`, and the remaining Batch 5 `needs-verification` sources before promoting any of them to assignment-ready
 - Connect next: checkpoint sweeps, smoke reruns, release-readiness truth, and narrow cross-domain governance cleanup
 - Base-earth note: Batch 7 geography/base-earth sources are now in the registry, but should be assigned as narrow static/reference slices only; do not combine bathymetry, relief, soil, land-cover, hydrography, glaciers, tectonics, and volcano references into one broad platform task.
@@ -55,7 +58,7 @@ Data AI RSS candidates live in [data-ai-rss-source-candidates.md](/C:/Users/mike
 
 Manager note:
 
-- Validated working RSS/Atom feeds found: 167 total, including 115 additional Batch 2 feeds
+- Validated working RSS/Atom feeds found: 277 total, including 115 additional Batch 2 feeds and 110 additional Batch 3 feeds
 - Recommended first code slice:
   1. `cisa-cybersecurity-advisories`
   2. `cisa-ics-advisories`
@@ -64,6 +67,10 @@ Manager note:
   5. `gdacs-alerts`
 - Active-lane rule:
   - keep the current five-feed starter slice bounded and use [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for the next wave only
+- Current repo-local implementation truth:
+  - the five-feed starter bundle is now implemented backend-first with a bounded aggregate route, typed contracts, fixtures, tests, and prompt-injection fixture coverage
+  - treat it as contract-tested, not workflow-validated
+  - use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) for staged follow-on sequencing instead of widening the current bundle into broad polling
 
 ### Assignment-ready
 
@@ -75,6 +82,7 @@ Manager note:
 | `data-ai-world-event-feeds` | `data-ai` | `geospatial`, `connect` | Assign GDACS, USGS earthquake Atom, NOAA NHC RSS, WHO news, and UNDRR after parser lands. | `medium` | Disaster/health/event context; impact claims require source support. |
 | `data-ai-world-news-feeds` | `data-ai` | `connect` | Assign a media-awareness subset only after official/event feeds are stable. | `low` | Media feeds are contextual awareness, not source-of-truth confirmation. |
 | `data-ai-rss-batch2-feeds` | `data-ai` | `connect` | Use Batch 2 feeds only after the core parser and source-health model are stable. | `low` | Batch 2 adds 115 more feeds; dedupe across same-publisher section feeds before polling broadly. |
+| `data-ai-rss-batch3-global-feeds` | `data-ai` | `connect` | Use Batch 3 feeds only after the core parser and source-health model are stable. | `low` | Batch 3 adds 110 global-coverage feeds, including OSINT/investigations, rights, fact-checking, conflict analysis, environment, travel/security, regional, economics, energy, and geodata. |
 
 Data AI feed-safety rule:
 
@@ -89,7 +97,7 @@ Data AI feed-safety rule:
 
 ## Batch 7 Base-Earth Intake
 
-Batch 7 statuses below are classification-only intake decisions from [source-acceleration-phase2-batch7-base-earth-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch7-base-earth-briefs.md). They do not imply code exists yet.
+Batch 7 rows below originate from the intake decisions in [source-acceleration-phase2-batch7-base-earth-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch7-base-earth-briefs.md). Current repo-local status truth overrides the original intake wording where later implementation has landed.
 
 Manager note:
 
@@ -105,11 +113,11 @@ Manager note:
 | Source id | Owner agent | Consumer agents | Next action | Implementation priority | Notes |
 | --- | --- | --- | --- | --- | --- |
 | `gshhg-shorelines` | `geospatial` | `marine`, `connect` | Assign one low/intermediate resolution shoreline or land-water mask helper only. | `medium` | Static reference geometry; not legal shoreline or navigation truth. |
-| `natural-earth-physical` | `geospatial` | `connect` | Assign one 110m or 50m physical theme only. | `medium` | Physical cartography slice related to existing `natural-earth-reference`; avoid duplicate connector work. |
+| `natural-earth-physical` | `geospatial` | `connect` | Backend-first static/reference slice already exists; next step is a bounded consumer or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Physical cartography slice is now repo-present and contract-tested; avoid duplicate connector work or live-hazard framing. |
 | `glims-glacier-outlines` | `geospatial` | `marine`, `connect` | Assign selected-AOI glacier outline lookup with GLIMS IDs and analysis metadata. | `medium` | Multi-temporal outlines; do not imply current glacier extent without dates. |
 | `rgi-glacier-inventory` | `geospatial` | `marine`, `connect` | Assign one region-scoped glacier inventory summary. | `medium` | Snapshot inventory; not glacier-by-glacier change-rate evidence. |
 | `pb2002-plate-boundaries` | `geospatial` | `aerospace`, `connect` | Assign generalized plate-boundary reference layer with model citation. | `medium` | Static scientific model; not live hazard truth. |
-| `noaa-global-volcano-locations` | `geospatial` | `aerospace`, `connect` | Assign static volcano reference layer only. | `medium` | Reference metadata, not current eruptive status. |
+| `noaa-global-volcano-locations` | `geospatial` | `aerospace`, `connect` | Backend-first static/reference slice already exists; next step is a bounded consumer or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Reference metadata is now repo-present and contract-tested, not current eruptive status. |
 | `smithsonian-gvp-volcanoes` | `geospatial` | `aerospace`, `connect` | Assign public export/search metadata enrichment keyed by GVP ID/name. | `medium` | Use public export/search data only; do not scrape volcano profile pages. |
 
 ### Tier-2 Complex
@@ -137,7 +145,7 @@ Manager note:
 
 ## Batch 5 Intake
 
-Batch 5 statuses below are classification-only intake decisions from [source-acceleration-phase2-batch5-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch5-briefs.md). They do not imply code exists yet.
+Batch 5 rows below originate from the intake decisions in [source-acceleration-phase2-batch5-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch5-briefs.md). Current repo-local status truth overrides the original intake wording where later implementation has landed.
 
 Manager note:
 
@@ -174,7 +182,7 @@ Manager note:
 | --- | --- | --- |
 | `canada-open-data-registry` | `gather` | Discovery/catalog source only; not final source truth. |
 | `noaa-ncei-access-data` | `geospatial` | Public APIs exist, but the family is too broad for a safe first connector slice. |
-| `noaa-ncei-space-weather-portal` | `aerospace` | Useful later archival/space-context follow-on, but not an immediate Phase 2 connector priority. |
+| `noaa-ncei-space-weather-portal` | `aerospace` | Backend-first archival/context slice plus bounded consumer/export path already exist; next step is workflow evidence, not a fresh connector assignment. |
 | `fdsn-public-seismic-metadata` | `gather` | Better treated as standards/discovery work than as a generic multi-provider connector. |
 
 ### Rejected
@@ -188,18 +196,19 @@ Manager note:
 
 ## Batch 6 Intake
 
-Batch 6 statuses below are classification-only intake decisions from [source-acceleration-phase2-batch6-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md). They do not imply code exists yet.
+Batch 6 rows below originate from the intake decisions in [source-acceleration-phase2-batch6-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md). Current repo-local status truth overrides the original intake wording where later implementation has landed.
 
 Compact handoff packets for the top Batch 6 sources now live in [source-quick-assign-packets-batch6.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-batch6.md).
 
 Manager note:
 
-- Top 5 newly assignment-ready Batch 6 handoffs after this governance pass:
+- Historical top 5 Batch 6 intake handoffs from the classification pass:
   1. `geosphere-austria-warnings`
   2. `washington-vaac-advisories`
   3. `taiwan-cwa-aws-opendata`
   4. `bart-gtfs-realtime`
   5. `nasa-power-meteorology-solar`
+- Current repo-local status truth overrides that intake ranking where implementation has since landed.
 
 ### Assignment-ready
 
@@ -208,13 +217,13 @@ Manager note:
 | `geosphere-austria-warnings` | `geospatial` | `connect`, `marine` | Assign current warning feed parsing only. | `medium` | Advisory/contextual only; do not infer impact or damage from warning severity alone. |
 | `nasa-power-meteorology-solar` | `geospatial` | `connect`, `marine` | Assign one bounded point-based meteorology or solar context query only. | `medium` | Modeled context only; do not present it as observed local event truth. |
 | `first-epss` | `data` | `gather`, `connect` | Backend-first slice already exists; next Data AI work should stay on the active five-feed parser lane and later validation or export-path checks, not a fresh EPSS rebuild. | `low` | Priority context only; do not treat EPSS as exploit proof. |
-| `nist-nvd-cve` | `data` | `gather`, `connect` | Assign one bounded CVE detail or recent-CVE slice only. | `low` | No-key lower-rate use only; do not assume high-rate sync posture. |
+| `nist-nvd-cve` | `data` | `gather`, `connect` | Backend-first bounded CVE-detail slice plus conservative CVE-context composition already exist; next step is a bounded consumer or explicit workflow-validation note, not a fresh connector assignment. | `low` | No-key lower-rate use only; preserve evidence-class separation and do not assume high-rate sync posture. |
 | `cisa-cyber-advisories` | `data` | `gather`, `connect` | Backend-first slice already exists; next Data AI work should stay on the active five-feed parser lane and later validation or export-path checks, not a fresh advisory rebuild. | `low` | Advisory context only; not exploit or incident confirmation. |
-| `nrc-event-notifications` | `geospatial` | `connect` | Assign one RSS or event-notification family only. | `medium` | Infrastructure event context only; do not infer radiological impact beyond source text. |
-| `washington-vaac-advisories` | `aerospace` | `geospatial`, `connect` | Assign one volcanic ash advisory feed family only. | `medium` | Advisory ash context only; do not claim dispersion precision beyond source messaging. |
-| `anchorage-vaac-advisories` | `aerospace` | `geospatial`, `connect` | Assign one volcanic ash advisory feed family only. | `medium` | Advisory ash context only; do not overstate route impact from text alone. |
-| `tokyo-vaac-advisories` | `aerospace` | `geospatial`, `connect` | Assign one volcanic ash advisory feed family only. | `medium` | Keep VAAC provenance explicit; do not flatten products into a fake global severity scale. |
-| `taiwan-cwa-aws-opendata` | `geospatial` | `connect`, `marine` | Assign one public AWS-backed warning or weather file family only. | `medium` | Public-bucket-only approval; do not drift into key-gated CWA APIs. |
+| `nrc-event-notifications` | `geospatial` | `connect` | Backend-first slice already exists; next step is a bounded consumer or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Infrastructure event context only; do not infer radiological impact beyond source text. |
+| `washington-vaac-advisories` | `aerospace` | `geospatial`, `connect` | Backend-first slice already exists; next step is a bounded consumer or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Advisory ash context only; do not claim dispersion precision beyond source messaging. |
+| `anchorage-vaac-advisories` | `aerospace` | `geospatial`, `connect` | Bounded consumer/export package already exists; next step is workflow evidence, not a fresh connector assignment. | `medium` | Advisory ash context only; do not overstate route impact from text alone. |
+| `tokyo-vaac-advisories` | `aerospace` | `geospatial`, `connect` | Bounded consumer/export package already exists; next step is workflow evidence, not a fresh connector assignment. | `medium` | Keep VAAC provenance explicit; do not flatten products into a fake global severity scale. |
+| `taiwan-cwa-aws-opendata` | `geospatial` | `connect`, `marine` | Backend-first slice already exists; next step is a bounded consumer or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Public-bucket-only approval; do not drift into key-gated CWA APIs. |
 | `bart-gtfs-realtime` | `features-webcam` | `connect` | Assign one realtime feed family only, such as vehicles, trips, or alerts. | `medium` | Bounded transit operational context only; not a full transit analytics platform. |
 
 ### Needs-verification
@@ -253,8 +262,8 @@ Batch 4 statuses below are classification-only intake decisions from [source-acc
 | `worldbank-indicators` | `geospatial` | `connect` | Assign one country indicator family only for baseline environmental or infrastructure context. | `medium` | Annual or periodic baseline context only, not live event evidence. |
 | `uk-police-crime` | `geospatial` | `connect` | Assign one bounded street-crime or outcome slice with strong approximation caveats. | `medium` | Approximate/anonymized civic context only; not live incident reporting. |
 | `london-air-quality-network` | `geospatial` | `connect` | Assign station metadata plus latest validated observation/index slice only. | `medium` | Keep observed station values separate from any modeled or objective summaries. |
-| `bmkg-earthquakes` | `geospatial` | `connect` | Assign latest and recent public earthquake JSON feed ingestion as a regional-authority layer. | `high` | One of the cleanest new Batch 4 event feeds. |
-| `ga-recent-earthquakes` | `geospatial` | `connect` | Assign recent public earthquake KML ingestion only. | `medium` | Useful regional-authority supplement if KML parsing stays narrow. |
+| `bmkg-earthquakes` | `geospatial` | `connect` | Backend-first regional-authority earthquake slice already exists; next step is a bounded consumer or explicit workflow-validation note, not a fresh connector assignment. | `high` | One of the cleanest new Batch 4 event feeds and now repo-present with source-health and free-text hardening. |
+| `ga-recent-earthquakes` | `geospatial` | `connect` | Backend-first regional-authority KML earthquake slice already exists; next step is a bounded consumer or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Useful regional-authority supplement and now repo-present if KML parsing stays narrow. |
 | `gb-carbon-intensity` | `geospatial` | `connect` | Assign current regional carbon-intensity context plus bounded forecast window. | `medium` | Grid context only; do not infer outages or operational failures. |
 | `elexon-insights-grid` | `geospatial` | `connect` | Assign one official public dataset family only. | `medium` | Keep the first slice narrow to avoid catalog sprawl. |
 
@@ -619,6 +628,10 @@ Next action:
 | `noaa-swpc-space-weather` | `implemented` | `aerospace` | `geospatial`, `connect` | [Batch 3 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch3-briefs.md:1) | Keep advisory/context-only semantics stable and rerun focused aerospace smoke before any promotion beyond `implemented` | Do not claim actual GPS, radio, satellite, or infrastructure failure from SWPC context alone | `medium` | Repo evidence found: dedicated route, tests, client hook, inspector/app-shell usage, and export-aware aerospace context review coverage; build/lint passed, but executed browser smoke is still blocked by `windows-browser-launch-permission` on this host |
 | `opensky-anonymous-states` | `implemented` | `aerospace` | `reference`, `connect` | [Batch 3 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch3-briefs.md:699) | Keep anonymous/rate-limited/non-authoritative caveats stable and rerun focused aerospace smoke before any promotion beyond `implemented` | Do not treat OpenSky as authoritative or as a replacement for the primary aircraft source | `medium` | Repo evidence found: dedicated route, tests, client hook, inspector/app-shell usage, comparison-guardrail coverage, and export-aware aerospace context review coverage; build/lint passed, but executed browser smoke is still blocked by `windows-browser-launch-permission` on this host |
 | `washington-vaac-advisories` | `implemented` | `aerospace` | `geospatial`, `connect` | [Batch 6 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md:143) | Keep the backend advisory slice bounded and add only a narrow consumer or explicit workflow note before any promotion beyond `implemented` | Do not claim route impact, aircraft exposure, or ash-dispersion precision beyond source text | `medium` | Aerospace AI progress records a real backend-first advisory route, fixtures, tests, and docs; current evidence is still backend-first rather than workflow-validated |
+| `anchorage-vaac-advisories` | `implemented` | `aerospace` | `geospatial`, `connect` | [Batch 6 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md:153) | Keep the bounded consumer/export package stable and rerun aerospace smoke before any promotion beyond `implemented` | Do not claim route impact, aircraft exposure, or ash-dispersion precision beyond source text | `medium` | Aerospace AI progress records the three-VAAC consumer/export package as complete for Washington, Anchorage, and Tokyo; browser-smoke evidence is still missing on this host |
+| `tokyo-vaac-advisories` | `implemented` | `aerospace` | `geospatial`, `connect` | [Batch 6 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md:163) | Keep the bounded consumer/export package stable and rerun aerospace smoke before any promotion beyond `implemented` | Do not claim route impact, aircraft exposure, or ash-dispersion precision beyond source text | `medium` | Aerospace AI progress records the three-VAAC consumer/export package as complete for Washington, Anchorage, and Tokyo; browser-smoke evidence is still missing on this host |
+| `nrc-event-notifications` | `implemented` | `geospatial` | `connect` | [Batch 6 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md:116) | Keep the backend RSS slice bounded and add only a narrow consumer or explicit workflow note before any promotion beyond `implemented` | Do not infer radiological impact, release severity, or offsite consequences beyond source text | `medium` | Geospatial AI progress records a real backend-first RSS/event-notification slice with fixtures, tests, docs, and prompt-injection-safe free-text coverage; current evidence is still backend-first rather than workflow-validated |
+| `taiwan-cwa-aws-opendata` | `implemented` | `geospatial` | `connect`, `marine` | [Batch 6 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md:121) | Keep the backend AWS-file slice bounded and add only a narrow consumer or explicit workflow note before any promotion beyond `implemented` | Do not drift into key-gated normal CWA APIs or overstate sparse station context | `medium` | Geospatial AI progress records a real backend-first AWS-backed weather slice with fixtures, tests, and docs; current evidence is still backend-first rather than workflow-validated |
 | `canada-cap-alerts` | `assignment-ready` | `geospatial` | `marine`, `connect` | [International briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md:386) | Assign current CAP directory discovery plus bounded CAP XML parsing | Do not traverse the full archive by default | `medium` | Directory-oriented but still considered assignment-ready |
 | `dwd-cap-alerts` | `assignment-ready` | `geospatial` | `connect` | [International briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md:504) | Assign one snapshot family, recommended `DISTRICT_DWD_STAT` | Do not mix snapshot and diff feeds | `medium` | Safe if kept to one family only |
 | `finland-digitraffic` | `implemented` | `features-webcam` | `geospatial`, `connect` | [International briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md:620) | Keep the existing list/detail/freshness interpretation slice stable and add only a bounded consumer or follow-on status-classification field before any higher promotion | Do not combine road weather with cameras, AIS, and rail in one patch | `medium` | Features/Webcam AI progress now records route coverage for station list and detail, endpoint health, per-station freshness interpretation, fixtures, tests, and updated docs; current evidence is still backend-first and not workflow-validated |
@@ -646,11 +659,19 @@ Current interpretation:
 
 - these sources are implemented, contract-tested, smoke-covered, and export-metadata-covered
 - they are not yet `validated` or `fully validated`
+- timestamp-backed `stale` semantics are now explicit for current marine context families
+- `unavailable` is now honestly backend-supported in the marine lane where retrieval-failure evidence exists
+- `degraded` is now honestly backend-supported only for Scottish Water, France Vigicrues, and Ireland OPW where partial-metadata evidence exists
+- CO-OPS and NDBC still should not be described as `degraded` because no honest partial-ingest signal is recorded there
 - they should not be treated as live validated from fixture-backed workflow evidence alone
 
 ### Implemented
 
 - `usgs-volcano-hazards`
+- `bmkg-earthquakes`
+- `ga-recent-earthquakes`
+- `natural-earth-physical`
+- `noaa-global-volcano-locations`
 - `geosphere-austria-warnings`
 - `nasa-power-meteorology-solar`
 - `usgs-geomagnetism`
@@ -660,14 +681,21 @@ Current interpretation:
 - `uk-ea-flood-monitoring`
 - `nasa-jpl-cneos`
 - `noaa-swpc-space-weather`
+- `noaa-ncei-space-weather-portal`
 - `opensky-anonymous-states`
 - `washington-vaac-advisories`
+- `anchorage-vaac-advisories`
+- `tokyo-vaac-advisories`
+- `nrc-event-notifications`
+- `taiwan-cwa-aws-opendata`
+- `nist-nvd-cve`
 - `finland-digitraffic`
 
 Current interpretation:
 
 - these sources are implemented
 - most are contract-tested
+- several remain backend-first or consumer-first slices below workflow validation
 - none are promoted to `validated` by this board without explicit workflow-validation evidence
 
 ### In Progress
@@ -693,8 +721,6 @@ Current interpretation:
 - `worldbank-indicators`
 - `uk-police-crime`
 - `london-air-quality-network`
-- `bmkg-earthquakes`
-- `ga-recent-earthquakes`
 - `gb-carbon-intensity`
 - `elexon-insights-grid`
 
@@ -731,8 +757,8 @@ Related registry-side rejected example outside this board scope:
 
 - Geospatial: `geonet-geohazards` or `hko-open-weather`, with `dmi-forecast-aws` as the cleanest weather-context follow-on after those
 - Aerospace: rerun focused aerospace smoke on a healthy Windows host before any source promotion; next fresh aerospace source should stay out of the current implemented stack unless Manager AI explicitly reopens it
-- Marine: finish the current `france-vigicrues-hydrometry` backend-only lane and record any first consumer or workflow evidence before handing out a different fresh marine source
-- Features/Webcam: add a bounded `finland-digitraffic` follow-on only if it stays on road-weather status interpretation or a first consumer path; otherwise route the next fresh assignment elsewhere
+- Marine: finish the current `france-vigicrues-hydrometry` backend-only lane and record any first consumer or marine `unavailable` / selective `degraded` workflow evidence before handing out a different fresh marine source
+- Features/Webcam: add a bounded `finland-digitraffic` follow-on only if it stays on road-weather status interpretation or a first consumer path; otherwise use the source-ops export-summary/export-bundle lane or route the next fresh assignment elsewhere
 - Gather: verify `needs-verification` sources
 - Connect: repo-wide blocker fixing and release dry-run support
 
@@ -770,20 +796,50 @@ Recently implemented or clearly code-present in the repo:
 - USGS Geomagnetism
   - Geospatial AI progress now records a backend-first implemented slice with settings, route, service, fixture, tests, source-health/export fields, and source-specific docs.
   - The board keeps it at `implemented`, not `workflow-validated`, because no frontend or workflow-validation record is explicit yet.
+- BMKG Earthquakes
+  - Geospatial AI progress now records a backend-first implemented regional-authority earthquake slice with route, fixture, tests, source-health fields, and prompt-injection-safe free-text coverage.
+  - The board keeps it at `implemented`, not `workflow-validated`, because no frontend or workflow-validation record is explicit yet.
+- Geoscience Australia Recent Earthquakes
+  - Geospatial AI progress now records a backend-first implemented KML regional-authority earthquake slice with route, fixture, tests, and source-specific docs.
+  - The board keeps it at `implemented`, not `workflow-validated`, because no frontend or workflow-validation record is explicit yet.
+- Natural Earth Physical
+  - Geospatial AI progress now records a backend-first implemented static/reference slice with route, fixture, shared tests, and source-specific docs.
+  - The board keeps it at `implemented`, not `workflow-validated`, because no stable consumer or workflow-validation record is explicit yet.
+- NOAA Global Volcano Locations
+  - Geospatial AI progress now records a backend-first implemented static/reference volcano slice with route, fixture, shared tests, and source-specific docs.
+  - The board keeps it at `implemented`, not `workflow-validated`, because no stable consumer or workflow-validation record is explicit yet.
 - NOAA AWC
   - Route, adapter, service, tests, query hook, and inspector/app-shell usage are present.
 - FAA NAS
   - Dedicated route, contracts tests, query hook, and inspector/app-shell usage are present.
 - NOAA SWPC
   - Route, tests, query hook, inspector/app-shell usage, and export-aware aerospace context review coverage are present.
+- NOAA NCEI Space Weather Portal
+  - Aerospace AI progress now records a backend-first implemented archival/context slice plus bounded client/query, inspector, and export-aware consumer wiring.
+  - The board keeps it at `implemented`, not `workflow-validated`, because executed browser smoke is still missing on this host.
 - OpenSky Anonymous States
   - Route, tests, query hook, inspector/app-shell usage, comparison guardrails, and export-aware aerospace context review coverage are present.
+- Taiwan CWA OpenData on AWS
+  - Geospatial AI progress now records a backend-first public AWS-backed weather slice with fixtures, tests, docs, and a bounded official file family.
+  - The board keeps it at `implemented`, not `workflow-validated`, because current evidence is still backend-first.
+- NRC Event Notifications
+  - Geospatial AI progress now records a backend-first RSS/event-notification slice with fixtures, tests, docs, and prompt-injection-safe free-text coverage.
+  - The board keeps it at `implemented`, not `workflow-validated`, because current evidence is still backend-first.
 - Finland Digitraffic
   - Features/Webcam AI progress now records station-list and single-station detail routes, endpoint health, per-station freshness interpretation, fixtures, tests, and updated source docs.
   - The board keeps it at `implemented`, not `workflow-validated`, because the current evidence is still backend-first and there is no explicit workflow-validation record yet.
+- NIST NVD CVE
+  - Data AI progress now records a backend-first implemented bounded CVE-detail slice plus conservative CVE-context composition with explicit evidence-class separation and prompt-injection-safe fixture coverage.
+  - The board keeps it at `implemented`, not `workflow-validated`, because no stable consumer or explicit workflow-validation record is recorded yet.
+- Features/Webcam Source-Ops Export Package
+  - Features/Webcam AI progress now records source-ops export-summary aggregate-line bundling and a minimal review-queue export bundle.
+  - This is workflow-supporting package evidence only, not external-source implementation or validation proof.
 - Aerospace Context Review Summary
   - Aerospace AI progress now records an export-aware `Aerospace Context Review` helper and `aerospaceContextIssues` metadata coverage.
   - This strengthens the current implemented aerospace workflow, but it does not promote AWC, FAA NAS, CNEOS, SWPC, or OpenSky beyond `implemented` because browser smoke remains launcher-blocked on this host.
+- Three-VAAC Aerospace Consumer Package
+  - Aerospace AI progress now records bounded consumer/export coverage for Washington, Anchorage, and Tokyo VAAC advisories plus smoke fixture support.
+  - The board keeps all three VAAC sources at `implemented`, not `workflow-validated`, because executed browser smoke is still missing on this host.
 
 ## Inconsistency Notes
 
@@ -807,12 +863,42 @@ Current planning docs are now closer to aligned, but a few notes remain:
 - `usgs-geomagnetism`
   - Earlier Batch 5 planning treated this as assignment-ready.
   - Geospatial AI progress now supports `implemented`, but only as a backend-first context slice; no workflow validation is implied.
+- `bmkg-earthquakes`
+  - Earlier Batch 4 planning treated this as assignment-ready.
+  - Geospatial AI progress now supports `implemented`, but only as a backend-first regional-authority event slice with stronger source-health and free-text hardening.
+- `ga-recent-earthquakes`
+  - Earlier Batch 4 planning treated this as assignment-ready.
+  - Geospatial AI progress now supports `implemented`, but only as a backend-first KML regional-authority event slice; no workflow validation is implied.
+- `natural-earth-physical` and `noaa-global-volcano-locations`
+  - Earlier Batch 7 planning treated these as assignment-ready static/reference candidates.
+  - Geospatial AI progress now supports `implemented`, but only as backend-first static/reference slices and not as workflow-validated map/reference packages.
+- `nist-nvd-cve`
+  - Earlier Batch 6 planning treated this as assignment-ready.
+  - Data AI progress now supports `implemented`, but only as a backend-first bounded CVE-detail slice with conservative CVE-context composition and prompt-injection-safe fixture coverage.
+- `noaa-ncei-space-weather-portal`
+  - Earlier Batch 5 planning treated this as deferred archive/context backlog work.
+  - Aerospace AI progress now supports `implemented`, with backend contracts plus a bounded client/context/export consumer path, but not workflow validation.
+- `nrc-event-notifications`
+  - Earlier Batch 6 planning treated this as assignment-ready.
+  - Geospatial AI progress now supports `implemented`, but only as a backend-first RSS/event-notification slice with prompt-injection-safe free-text handling.
+- `taiwan-cwa-aws-opendata`
+  - Earlier Batch 6 planning treated this as assignment-ready.
+  - Geospatial AI progress now supports `implemented`, but only as a backend-first AWS-file slice; no workflow validation is implied.
+- `anchorage-vaac-advisories` and `tokyo-vaac-advisories`
+  - Earlier Batch 6 planning treated these as assignment-ready.
+  - Aerospace AI progress now supports `implemented` because the bounded three-VAAC consumer/export package is in repo code, but workflow-validation evidence is still missing.
 - `finland-digitraffic`
   - Earlier planning treated this as assignment-ready and still used `candidate prep` wording in a few routing notes.
   - Features/Webcam AI progress now supports `implemented`, with list/detail/freshness interpretation coverage already in repo code.
 - Aerospace validation wording
   - Older routing language implied generic build drift as the main blocker.
   - Current Connect and Aerospace progress now narrow the blocker to executed browser smoke on a host where Playwright can launch, currently classified as `windows-browser-launch-permission` on this machine.
+- Marine source-health wording
+  - Older docs treated `unavailable` and `degraded` as mostly future-state gaps.
+  - Current Marine AI progress now supports honest backend `unavailable` handling across the five active marine context families and honest `degraded` handling only for Scottish Water, France Vigicrues, and Ireland OPW.
+- Features/Webcam source-ops packaging
+  - Source-ops export-summary aggregate-line bundling and the minimal review-queue export bundle now exist as backend-only workflow helpers.
+  - They are workflow-supporting package evidence, not source validation proof for any external source.
 - `noaa-tsunami-alerts`
   - Earlier planning treated it as started from registry and prompt readiness.
   - Repo evidence now supports `implemented`.

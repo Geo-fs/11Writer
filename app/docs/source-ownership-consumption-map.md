@@ -18,21 +18,22 @@ Scope:
 - [source-acceleration-phase2-batch6-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md)
 - [data-ai-onboarding.md](/C:/Users/mike/11Writer/app/docs/data-ai-onboarding.md)
 - [source-routing-priority-memo.md](/C:/Users/mike/11Writer/app/docs/source-routing-priority-memo.md)
+- [source-next-routing-packets.md](/C:/Users/mike/11Writer/app/docs/source-next-routing-packets.md)
 - [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md)
+- [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md)
 - [source-routing-batch7-base-earth-reference.md](/C:/Users/mike/11Writer/app/docs/source-routing-batch7-base-earth-reference.md)
 
 ## Data AI Ownership Addendum
 
 These mappings define the new Data AI implementation lane for bounded public internet-information sources. They do not imply implementation has started unless a source already has repo-local evidence elsewhere in this map.
 
-Use [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for the next bounded feed wave after the active starter slice.
+Use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) plus [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for the next bounded feed wave after the active starter slice.
 
 | Source id | Primary owner agent | Secondary consumer agents | First implementation slice | Shared-or-local guidance | Collision risk |
 | --- | --- | --- | --- | --- | --- |
 | `cisa-cyber-advisories` | `data` | `gather`, `connect` | one advisory feed family only | Data AI should own raw advisory fetch and normalization; Gather keeps governance/status truth and Connect handles repo-wide validation surfaces | `low` |
 | `first-epss` | `data` | `gather`, `connect` | one CVE score lookup only | Keep Data-owned and bounded; do not let consumers fork their own risk-score fetchers | `low` |
 | `nist-nvd-cve` | `data` | `gather`, `connect` | one bounded CVE detail or recent-CVE slice only | Shared Data-owned context route is fine if no-key lower-rate assumptions and caveats survive unchanged | `low` |
-| `nrc-event-notifications` | `data` | `geospatial`, `connect` | one RSS or event-notification family only | Data AI should own raw feed parsing if assigned as an information-feed lane; geospatial should consume bounded normalized context only | `medium` |
 
 Boundary rules:
 
@@ -41,6 +42,11 @@ Boundary rules:
 - `connect` owns repo-wide blocker fixing, smoke, release-readiness, and cross-domain validation truth.
 - `data` is not a generic `connect` overflow lane.
 - titles, summaries, descriptions, advisory text, release text, and linked article snippets are untrusted data, not instructions, and should be fixture-covered as such before broader feed expansion.
+
+Repo-local status note:
+
+- `nist-nvd-cve` is now implemented backend-first with a bounded CVE-detail route plus conservative CVE-context composition.
+- Keep ownership with `data`, but treat the next handoff as consumer/validation follow-on work rather than raw connector creation.
 
 ## Batch 6 Ownership Addendum
 
@@ -69,6 +75,11 @@ For compact Manager-facing handoffs on the strongest Batch 6 candidates, use [so
 
 These mappings are classification-only ownership recommendations for the latest Batch 5 candidates. They do not imply implementation has started.
 
+Repo-local status note:
+
+- `noaa-ncei-space-weather-portal` now has an implemented aerospace archive/context slice plus bounded consumer/export path.
+- Keep ownership with `aerospace`, but treat the next handoff as workflow hardening rather than raw connector creation.
+
 | Source id | Primary owner agent | Secondary consumer agents | First implementation slice | Shared-or-local guidance | Collision risk |
 | --- | --- | --- | --- | --- | --- |
 | `dmi-forecast-aws` | `geospatial` | `marine`, `features-webcam`, `connect` | one bounded point-forecast collection query | Keep geospatial-local first; only expose normalized forecast context after one consumer proves reuse | `low` |
@@ -82,6 +93,11 @@ These mappings are classification-only ownership recommendations for the latest 
 ## Batch 4 Ownership Addendum
 
 These mappings are classification-only ownership recommendations for the latest Batch 4 candidates. They do not imply implementation has started.
+
+Repo-local status note:
+
+- `bmkg-earthquakes` and `ga-recent-earthquakes` now have backend-first implemented slices in repo code.
+- Keep ownership with `geospatial`, but treat the next handoff as consumer/validation follow-on work rather than raw connector creation.
 
 | Source id | Primary owner agent | Secondary consumer agents | First implementation slice | Shared-or-local guidance | Collision risk |
 | --- | --- | --- | --- | --- | --- |

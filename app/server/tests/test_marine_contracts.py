@@ -304,7 +304,7 @@ def test_scottish_water_overflow_context_route(tmp_path: Path) -> None:
     payload = response.json()
     assert payload["sourceHealth"]["sourceId"] == "scottish-water-overflows"
     assert payload["sourceHealth"]["sourceMode"] == "fixture"
-    assert payload["sourceHealth"]["health"] == "loaded"
+    assert payload["sourceHealth"]["health"] in {"loaded", "degraded"}
     assert payload["count"] >= 1
     assert payload["activeCount"] >= 1
     first = payload["events"][0]
@@ -731,8 +731,8 @@ def test_fixture_context_sources_do_not_fabricate_stale_or_unavailable_states(tm
         "/api/marine/context/scottish-water-overflows",
         params={"lat": 55.95, "lon": -3.10, "radius_km": 400},
     ).json()
-    assert scottish_water["sourceHealth"]["health"] in {"loaded", "empty"}
-    assert scottish_water["sourceHealth"]["health"] not in {"stale", "error", "unknown"}
+    assert scottish_water["sourceHealth"]["health"] in {"loaded", "empty", "degraded"}
+    assert scottish_water["sourceHealth"]["health"] not in {"stale", "error", "unknown", "unavailable"}
 
 
 def test_disabled_non_fixture_context_sources_do_not_fabricate_unavailable_states(tmp_path: Path) -> None:
@@ -844,6 +844,77 @@ def test_scottish_water_context_can_honestly_emit_stale_from_old_update_timestam
     assert payload["sourceHealth"]["health"] == "stale"
     assert "freshness threshold" in (payload["sourceHealth"]["detail"] or "").lower()
     assert "freshness threshold" in (payload["sourceHealth"]["caveat"] or "").lower()
+
+
+def test_coops_context_can_honestly_emit_unavailable_from_retrieval_failure(tmp_path: Path, monkeypatch) -> None:
+    def broken_fixture(self: MarineNoaaCoopsService, now: datetime):
+        raise TimeoutError("fixture co-ops timeout")
+
+    monkeypatch.setattr(MarineNoaaCoopsService, "_fixture_stations", broken_fixture)
+    client = _client(tmp_path)
+
+    payload = client.get(
+        "/api/marine/context/noaa-coops",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 250, "limit": 5},
+    ).json()
+
+    assert payload["count"] == 0
+    assert payload["sourceHealth"]["health"] == "unavailable"
+    assert payload["sourceHealth"]["errorSummary"]
+    assert "retrieval failed" in (payload["sourceHealth"]["detail"] or "").lower()
+
+
+def test_ndbc_context_can_honestly_emit_unavailable_from_retrieval_failure(tmp_path: Path, monkeypatch) -> None:
+    def broken_fixture(self: MarineNdbcService, now: datetime):
+        raise OSError("fixture ndbc unavailable")
+
+    monkeypatch.setattr(MarineNdbcService, "_fixture_stations", broken_fixture)
+    client = _client(tmp_path)
+
+    payload = client.get(
+        "/api/marine/context/ndbc",
+        params={"lat": 29.76, "lon": -95.36, "radius_km": 250, "limit": 5},
+    ).json()
+
+    assert payload["count"] == 0
+    assert payload["sourceHealth"]["health"] == "unavailable"
+    assert payload["sourceHealth"]["errorSummary"]
+    assert "retrieval failed" in (payload["sourceHealth"]["detail"] or "").lower()
+
+
+def test_scottish_water_context_can_honestly_emit_unavailable_from_retrieval_failure(
+    tmp_path: Path, monkeypatch
+) -> None:
+    def broken_fixture(self: MarineScottishWaterOverflowService, now: datetime):
+        raise ConnectionError("fixture scottish water unavailable")
+
+    monkeypatch.setattr(MarineScottishWaterOverflowService, "_fixture_events", broken_fixture)
+    client = _client(tmp_path)
+
+    payload = client.get(
+        "/api/marine/context/scottish-water-overflows",
+        params={"lat": 55.95, "lon": -3.10, "radius_km": 1000, "status": "all", "limit": 10},
+    ).json()
+
+    assert payload["count"] == 0
+    assert payload["activeCount"] == 0
+    assert payload["sourceHealth"]["health"] == "unavailable"
+    assert payload["sourceHealth"]["errorSummary"]
+    assert "retrieval failed" in (payload["sourceHealth"]["detail"] or "").lower()
+
+
+def test_scottish_water_context_can_honestly_emit_degraded_from_partial_metadata(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+
+    payload = client.get(
+        "/api/marine/context/scottish-water-overflows",
+        params={"lat": 55.95, "lon": -3.10, "radius_km": 1000, "status": "all", "limit": 10},
+    ).json()
+
+    assert payload["count"] >= 1
+    assert payload["sourceHealth"]["health"] == "degraded"
+    assert "partial metadata" in (payload["sourceHealth"]["detail"] or "").lower()
+    assert "partial metadata" in (payload["sourceHealth"]["caveat"] or "").lower()
 
 
 def test_context_source_evidence_basis_contracts(tmp_path: Path) -> None:

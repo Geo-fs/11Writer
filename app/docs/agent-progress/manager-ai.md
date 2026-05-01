@@ -1,5 +1,301 @@
 # Manager AI Progress
 
+## 2026-04-30 22:24 America/Chicago
+
+Task:
+- handle explicit anti-idle override for Geospatial and Features/Webcam, then handle Data AI completion alert
+
+Assignment version read:
+- `2026-04-30 22:24 America/Chicago`
+
+What changed:
+- rewrote Geospatial AI and Features/Webcam AI next-task docs after user reported those lanes idle
+- identified a new Data AI completion alert for assignment `2026-04-30 22:01 America/Chicago`
+- read Data AI's latest progress report and accepted the official cyber advisory feed expansion as complete
+- rewrote next-task docs at assignment version `2026-04-30 22:24 America/Chicago` for:
+  - Geospatial AI: `france-georisques` plus `uk-ea-water-quality` environmental/water context bundle
+  - Features/Webcam AI: source lifecycle export-readiness rollup plus reviewer checklist/handoff generator
+  - Data AI: infrastructure/status feed bundle for `cloudflare-radar`, `netblocks`, and `apnic-blog`
+- closed the Data AI completion alert by routing it into the new Data AI assignment
+
+Files touched:
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- next-task doc assignment-version readback -> pass
+- `python scripts/alerts_ledger.py --json` initially showed one open Data AI alert; handled by reassignment
+
+Blockers or caveats:
+- this was an explicit anti-idle override from the user for Geospatial and Features/Webcam
+- Atlas remains user-directed and was not assigned work
+
+Next recommended task:
+- tell Geospatial AI, Features/Webcam AI, and Data AI to read their next-task docs at assignment version `2026-04-30 22:24 America/Chicago`
+
+## 2026-04-30 22:22 America/Chicago
+
+Task:
+- perform manager check-in and reassign completed Connect lane
+
+Assignment version read:
+- `2026-04-30 22:22 America/Chicago`
+
+What changed:
+- reviewed alert ledger, dirty-tree status, current next-task versions, and latest progress docs
+- confirmed alert ledger has zero open alerts and zero malformed lines
+- identified completed current assignment:
+  - Connect AI completed `2026-04-30 21:52 America/Chicago`
+- left Data AI on its current `2026-04-30 22:01 America/Chicago` assignment because no current completion report exists yet
+- left Aerospace AI, Geospatial AI, and Features/Webcam AI on their current `2026-04-30 22:19 America/Chicago` assignments
+- left Gather AI and Marine AI on their current `2026-04-30 22:05 America/Chicago` assignments
+- noted Atlas AI's user-directed Batch 3 RSS candidate set as routing/governance input only, not implementation proof
+- rewrote Connect AI's next-task doc at assignment version `2026-04-30 22:22 America/Chicago` for:
+  - ownership scanner refinement across the newest NVD/NCEI/base-earth/seismic/Data feed/marine/webcam families
+  - current-state validation checkpoint
+  - smallest safe repo-wide blocker fix only if one reproduces
+
+Files touched:
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> pass, zero open alerts, zero malformed lines
+- progress-doc and next-task version readback -> pass
+
+Blockers or caveats:
+- Data AI appears to have source changes for the `22:01` feed expansion but has not written a current progress completion yet
+- Marine has not reported against `22:05`
+- Gather has not reported against `22:05`
+- Atlas remains user-directed and was not assigned work
+
+Next recommended task:
+- tell Connect to read its next-task doc at assignment version `2026-04-30 22:22 America/Chicago`
+- tell Data to continue/report against `2026-04-30 22:01 America/Chicago`
+- tell Aerospace, Geospatial, and Features/Webcam to continue/report against `2026-04-30 22:19 America/Chicago`
+- tell Gather and Marine to continue/report against `2026-04-30 22:05 America/Chicago`
+
+## 2026-04-30 22:19 America/Chicago
+
+Task:
+- perform manager check-in and reassign completed Aerospace, Geospatial, and Features/Webcam lanes
+
+Assignment version read:
+- `2026-04-30 22:19 America/Chicago`
+
+What changed:
+- reviewed alert ledger, dirty-tree status, current next-task versions, and latest progress docs
+- confirmed alert ledger has zero open alerts and zero malformed lines
+- identified completed current assignments:
+  - Aerospace AI completed `2026-04-30 22:01 America/Chicago`
+  - Geospatial AI completed `2026-04-30 22:01 America/Chicago`
+  - Features/Webcam AI completed `2026-04-30 22:01 America/Chicago`
+- left Connect AI on its current `2026-04-30 21:52 America/Chicago` assignment
+- left Data AI on its current `2026-04-30 22:01 America/Chicago` assignment
+- left Gather AI and Marine AI on their current `2026-04-30 22:05 America/Chicago` assignments
+- rewrote next-task docs at assignment version `2026-04-30 22:19 America/Chicago` for:
+  - Aerospace AI: aerospace-local source-health/context issue federation package
+  - Geospatial AI: seismic source-family context and export summary helper
+  - Features/Webcam AI: source lifecycle export-readiness rollup
+
+Files touched:
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> pass, zero open alerts, zero malformed lines
+- progress-doc and next-task version readback -> pass
+
+Blockers or caveats:
+- Aerospace smoke remains blocked before app assertions by the known Windows Playwright launcher permission issue
+- Connect remains in flight on `2026-04-30 21:52 America/Chicago`
+- Data remains in flight on `2026-04-30 22:01 America/Chicago`
+- Gather and Marine remain in flight on `2026-04-30 22:05 America/Chicago`
+- Atlas remains user-directed and was not assigned work
+
+Next recommended task:
+- tell Aerospace, Geospatial, and Features/Webcam to read their next-task docs at assignment version `2026-04-30 22:19 America/Chicago`
+- tell Connect, Data, Gather, and Marine to continue or report against their current assignment versions
+
+## 2026-04-30 22:05 America/Chicago
+
+Task:
+- perform manager check-in and reassign completed Gather and Marine lanes
+
+Assignment version read:
+- `2026-04-30 22:05 America/Chicago`
+
+What changed:
+- reviewed alert ledger, dirty-tree status, current next-task versions, and latest progress docs
+- confirmed alert ledger has zero open alerts and zero malformed lines
+- identified completed current assignments:
+  - Gather AI completed `2026-04-30 21:43 America/Chicago`
+  - Marine AI completed `2026-04-30 21:43 America/Chicago`
+- left Connect AI on its current `2026-04-30 21:52 America/Chicago` assignment
+- left Data, Geospatial, Aerospace, and Features/Webcam on their current `2026-04-30 22:01 America/Chicago` assignments
+- rewrote next-task docs at assignment version `2026-04-30 22:05 America/Chicago` for:
+  - Gather AI: post-wave source/status governance cleanup plus next-routing packet surface
+  - Marine AI: degraded/unavailable workflow, export, and smoke-prep coverage without anomaly-severity drift
+
+Files touched:
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> pass, zero open alerts, zero malformed lines
+- progress-doc and next-task version readback -> pass
+
+Blockers or caveats:
+- Connect remains in flight on `2026-04-30 21:52 America/Chicago`
+- Data, Geospatial, Aerospace, and Features/Webcam remain in flight on `2026-04-30 22:01 America/Chicago`
+- Atlas remains user-directed and was not assigned work
+
+Next recommended task:
+- tell Gather and Marine to read their next-task docs at assignment version `2026-04-30 22:05 America/Chicago`
+- tell Connect to continue/report against `2026-04-30 21:52 America/Chicago`
+- tell Data, Geospatial, Aerospace, and Features/Webcam to continue/report against `2026-04-30 22:01 America/Chicago`
+
+## 2026-04-30 22:01 America/Chicago
+
+Task:
+- perform manager check-in and reassign completed Data, Geospatial, Aerospace, and Features/Webcam lanes
+
+Assignment version read:
+- `2026-04-30 22:01 America/Chicago`
+
+What changed:
+- reviewed alert ledger, dirty-tree status, current next-task versions, and latest progress docs
+- handled one open low-priority Data AI completion alert
+- identified completed current assignments:
+  - Data AI completed `2026-04-30 21:43 America/Chicago`
+  - Geospatial AI completed `2026-04-30 21:43 America/Chicago`
+  - Aerospace AI completed `2026-04-30 21:43 America/Chicago`
+  - Features/Webcam AI completed `2026-04-30 21:52 America/Chicago`
+- left Connect AI on its current `2026-04-30 21:52 America/Chicago` assignment
+- left Gather AI on its current `2026-04-30 21:43 America/Chicago` assignment because no current completion entry exists
+- left Marine AI on its current `2026-04-30 21:43 America/Chicago` assignment because no current completion entry exists, even though marine files are changing in the worktree
+- rewrote next-task docs at assignment version `2026-04-30 22:01 America/Chicago` for:
+  - Data AI: official cyber advisory feed expansion bundle for NCSC UK and CERT-FR
+  - Geospatial AI: BMKG plus Geoscience Australia seismic event bundle
+  - Aerospace AI: NCEI archive metadata client/context/export consumer package
+  - Features/Webcam AI: minimal source-ops export bundle selector
+- closed the Data AI completion alert by routing it into the new Data AI assignment
+
+Files touched:
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- alert ledger check before reassignment showed one open Data AI alert
+- progress-doc and next-task version readback -> pass
+
+Blockers or caveats:
+- Connect remains in flight on `2026-04-30 21:52 America/Chicago`
+- Gather remains in flight until it records completion against `2026-04-30 21:43 America/Chicago`
+- Marine remains in flight until it records completion against `2026-04-30 21:43 America/Chicago`
+- Atlas remains user-directed and was not assigned work
+
+Next recommended task:
+- tell Data, Geospatial, Aerospace, and Features/Webcam to read their next-task docs at assignment version `2026-04-30 22:01 America/Chicago`
+- tell Connect to continue/report against `2026-04-30 21:52 America/Chicago`
+- tell Gather and Marine to continue/report against `2026-04-30 21:43 America/Chicago`
+
+## 2026-04-30 21:52 America/Chicago
+
+Task:
+- perform manager check-in and reassign completed Connect and Features/Webcam lanes
+
+Assignment version read:
+- `2026-04-30 21:52 America/Chicago`
+
+What changed:
+- reviewed the alert ledger, current next-task versions, progress docs, and dirty-tree status
+- confirmed the alert ledger has zero open alerts and zero malformed lines
+- identified completed current assignments:
+  - Connect AI completed `2026-04-30 17:05 America/Chicago`
+  - Features/Webcam AI completed `2026-04-30 17:05 America/Chicago`
+- left Data, Geospatial, Marine, Gather, and Aerospace on their current `2026-04-30 21:43 America/Chicago` assignments
+- did not reassign Gather because `app/docs/data-ai-feed-rollout-ladder.md` exists but the Gather progress doc has not yet recorded completion against the current assignment
+- rewrote next-task docs at assignment version `2026-04-30 21:52 America/Chicago` for:
+  - Connect AI: current-state dirty-tree validation/consolidation checkpoint after scanner and Features/Webcam changes
+  - Features/Webcam AI: backend-only source-ops export-summary aggregate-line bundle
+
+Files touched:
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> pass, zero open alerts, zero malformed lines
+- progress-doc and next-task version readback -> pass
+
+Blockers or caveats:
+- `app/docs/data-ai-feed-rollout-ladder.md` is present but remains pending Gather handoff evidence until Gather updates its progress doc
+- Atlas remains user-directed and was not assigned work
+- the repo has expected uncommitted changes from active agents and Manager task rewrites
+
+Next recommended task:
+- tell Connect and Features/Webcam to read their next-task docs at assignment version `2026-04-30 21:52 America/Chicago`
+- tell Data, Geospatial, Marine, Gather, and Aerospace to continue or report against assignment version `2026-04-30 21:43 America/Chicago`
+
+## 2026-04-30 21:43 America/Chicago
+
+Task:
+- perform post-push manager check-in and reassign completed Data, Geospatial, Marine, Gather, and Aerospace lanes
+
+Assignment version read:
+- `2026-04-30 21:43 America/Chicago`
+
+What changed:
+- reviewed alert ledger and current progress docs for all controlled lanes
+- confirmed the repo was clean and synced with `origin/main` after the earlier push
+- identified completed current assignments:
+  - Data AI completed `2026-04-30 16:54 America/Chicago`
+  - Geospatial AI completed `2026-04-30 16:54 America/Chicago`
+  - Marine AI completed `2026-04-30 16:54 America/Chicago`
+  - Gather AI completed `2026-04-30 17:00 America/Chicago`
+  - Aerospace AI completed `2026-04-30 17:00 America/Chicago`
+- left Connect AI and Features/Webcam AI on their current `2026-04-30 17:05 America/Chicago` assignments
+- rewrote next-task docs at assignment version `2026-04-30 21:43 America/Chicago` for:
+  - Data AI: NVD CVE backend slice plus conservative CISA/EPSS/NVD/feed context composition
+  - Geospatial AI: `natural-earth-physical` plus `noaa-global-volcano-locations` static/reference bundle
+  - Marine AI: honest backend-supported `unavailable` / `degraded` marine source-health semantics
+  - Gather AI: status reconciliation plus Data AI feed-family rollout ladder
+  - Aerospace AI: backend-only NOAA NCEI space-weather portal/archive metadata slice
+- closed the open Data AI completion alert by routing it into the new Data AI assignment
+
+Files touched:
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> initial check showed one open Data AI completion alert; handled by reassignment
+- progress-doc readback -> pass
+
+Blockers or caveats:
+- Connect AI remains in flight on `2026-04-30 17:05 America/Chicago`
+- Features/Webcam AI remains in flight on `2026-04-30 17:05 America/Chicago`
+- Aerospace smoke remains likely blocked locally by Windows Playwright launcher permissions
+
+Next recommended task:
+- tell Data, Geospatial, Marine, Gather, and Aerospace to read their next-task docs at assignment version `2026-04-30 21:43 America/Chicago`
+- let Connect and Features/Webcam continue their existing `2026-04-30 17:05 America/Chicago` assignments
+
 ## 2026-04-30 17:05 America/Chicago
 
 Task:

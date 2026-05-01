@@ -1,5 +1,86 @@
 # Gather AI Progress
 
+## 2026-04-30 22:22 America/Chicago
+
+Assignment version read:
+- `2026-04-30 22:05 America/Chicago`
+
+Task:
+- run a post-wave source/status governance cleanup, reconcile newly implemented repo-local slices across the main status docs, and create a compact next-routing packet surface for Manager AI
+
+What changed:
+- created a new compact cross-lane routing doc for the next 8-12 strongest handoffs across Geospatial, Data, Marine, Aerospace, Features/Webcam, and Connect
+- reconciled the assignment board so `bmkg-earthquakes`, `ga-recent-earthquakes`, `natural-earth-physical`, `noaa-global-volcano-locations`, `noaa-ncei-space-weather-portal`, and `nist-nvd-cve` no longer read like fresh assignment-ready or deferred intake-only work when repo-local implementation evidence already exists
+- updated validation status truth for the newly implemented backend-first slices, including exact route/test/doc/fixture references for Natural Earth physical, NOAA global volcano locations, NVD CVE, BMKG earthquakes, and Geoscience Australia recent earthquakes
+- added explicit validation-traceability notes for conservative CVE-context composition and the Features/Webcam source-ops export-summary plus review-queue export-bundle package so those workflow helpers are not mistaken for external-source validation proof
+- tightened the workflow-validation plan so the new backend-first Geospatial, Data, and Aerospace archive/context slices have explicit missing-evidence criteria before any promotion beyond `implemented`
+- updated prompt, backlog, routing, and ownership docs to point at the new routing packet surface and to remove stale intake-era wording where completed slices were still described as fresh connector work
+- preserved the honest marine source-health posture: `unavailable` is now recorded as backend-supported where retrieval-failure evidence exists, and `degraded` remains honest only where partial-metadata evidence exists
+
+Files touched:
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-backlog-phase2-refresh.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/source-next-routing-packets.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+
+Blockers or caveats:
+- no source or feature was over-promoted beyond repo-local evidence
+- `implemented`, `contract-tested`, `workflow-validated`, and `fully validated` remain distinct across the updated docs
+- the new Geospatial, Data, and Aerospace slices remain backend-first or contract-tested until explicit workflow evidence is recorded
+- marine source-health wording now reflects honest backend `unavailable` handling and selective `degraded` handling without promoting either into anomaly severity or event truth
+- prompt-injection and source-governance expectations were preserved for advisory text, feed text, release text, linked snippets, and other untrusted free-form source content
+
+Next recommended task:
+- if Manager AI wants another Gather pass, reconcile the older batch brief docs and any remaining quick-assign packet sets that still imply fresh connector creation for newly implemented backend-first slices
+
+## 2026-04-30 21:50 America/Chicago
+
+Assignment version read:
+- `2026-04-30 21:43 America/Chicago`
+
+Task:
+- reconcile source/status docs after the latest implementation wave and add a compact Data AI feed-family rollout ladder for Manager AI routing
+
+What changed:
+- created a new Data AI rollout ladder doc that sequences the active five-feed starter bundle, the next official cyber advisory wave, the next internet-status wave, later cyber media/vendor feeds, later world event/news feeds, and held or excluded feeds
+- updated the assignment board so the Data AI starter bundle is treated as implemented backend-first and contract-tested, not workflow-validated, and so the next Data wave points at the new ladder instead of broad feed expansion
+- reconciled newly implemented repo-local source truth for `taiwan-cwa-aws-opendata`, `nrc-event-notifications`, `anchorage-vaac-advisories`, and `tokyo-vaac-advisories` so they no longer read as fresh assignment-ready connectors
+- tightened aerospace planning language so the completed three-VAAC consumer/export package is visible across status, validation, and workflow docs without promoting any VAAC source beyond `implemented`
+- tightened marine validation wording so timestamp-backed `stale` semantics are recognized as explicit evidence while `unavailable` and `degraded` remain the narrower remaining source-health gap
+- updated routing, prompt, backlog, and ownership surfaces so Manager AI can assign the next Data, Geospatial, Aerospace, or Marine follow-on without rereading stale intake notes
+
+Files touched:
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-backlog-phase2-refresh.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+
+Blockers or caveats:
+- no source was over-promoted beyond repo-local evidence
+- the Data AI five-feed starter bundle remains bounded and should not be widened into broad polling
+- prompt-injection/source-governance expectations were preserved for RSS, Atom, advisory, and free-text feed content
+- the three-VAAC package remains below workflow validation because executed browser smoke is still blocked on this host by `windows-browser-launch-permission`
+- marine source-health wording now recognizes honest timestamp-backed `stale` handling, but does not claim honest `unavailable` or `degraded` behavior where that evidence is still missing
+
+Next recommended task:
+- if Manager AI wants another Gather pass, do a small cross-doc cleanup for any remaining stale intake-era owner/status wording in older prompt or brief docs now that the rollout ladder and status-truth surfaces are aligned
+
 ## 2026-04-30 17:04 America/Chicago
 
 Assignment version read:

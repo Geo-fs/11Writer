@@ -42,6 +42,39 @@ DATA_AI_MULTI_FEED_DEFINITIONS: tuple[DataAiFeedSourceDefinition, ...] = (
         ),
     ),
     DataAiFeedSourceDefinition(
+        source_id="ncsc-uk-all",
+        source_name="NCSC UK All RSS Feed",
+        source_category="cyber-official",
+        feed_url="https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml",
+        fixture_file_name="ncsc_uk_all.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "Official NCSC UK feed items mix guidance, advisories, and news context; do not infer exploitation, victimization, incident confirmation, attribution, impact, or required action from feed text alone."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="cert-fr-alerts",
+        source_name="CERT-FR Alertes de securite",
+        source_category="cyber-official",
+        feed_url="https://www.cert.ssi.gouv.fr/alerte/feed/",
+        fixture_file_name="cert_fr_alerts.xml",
+        evidence_basis="advisory",
+        caveat=(
+            "Official CERT-FR alert context in French only; preserve source wording and do not infer exploitation, compromise, victim impact, attribution, or required action beyond what the source explicitly supports."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="cert-fr-advisories",
+        source_name="CERT-FR Avis de securite",
+        source_category="cyber-official",
+        feed_url="https://www.cert.ssi.gouv.fr/avis/feed/",
+        fixture_file_name="cert_fr_advisories.xml",
+        evidence_basis="advisory",
+        caveat=(
+            "Official CERT-FR advisory context in French only; preserve advisory wording without inventing urgency, incident certainty, or a cross-source severity claim."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
         source_id="sans-isc-diary",
         source_name="SANS Internet Storm Center Diary",
         source_category="cyber-community",

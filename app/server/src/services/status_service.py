@@ -19,6 +19,7 @@ def build_source_status(settings: Settings) -> SourceStatusResponse:
     faa_nas_runtime = get_source_runtime_status("faa-nas-status")
     cneos_runtime = get_source_runtime_status("cneos-space-events")
     swpc_runtime = get_source_runtime_status("noaa-swpc")
+    ncei_space_weather_portal_runtime = get_source_runtime_status("noaa-ncei-space-weather-portal")
     anchorage_vaac_runtime = get_source_runtime_status("anchorage-vaac-advisories")
     tokyo_vaac_runtime = get_source_runtime_status("tokyo-vaac-advisories")
     washington_vaac_runtime = get_source_runtime_status("washington-vaac-advisories")
@@ -105,6 +106,13 @@ def build_source_status(settings: Settings) -> SourceStatusResponse:
             default_freshness=1_800,
             default_stale_after=21_600,
             detail="NOAA SWPC space-weather advisory context is available for selected-target aerospace situational awareness.",
+        ),
+        _runtime_to_status(
+            name="noaa-ncei-space-weather-portal",
+            runtime=ncei_space_weather_portal_runtime,
+            default_freshness=86_400,
+            default_stale_after=604_800,
+            detail="NOAA NCEI space-weather portal metadata is available as archival/contextual collection evidence and does not replace current NOAA SWPC advisory context.",
         ),
         _runtime_to_status(
             name="anchorage-vaac-advisories",

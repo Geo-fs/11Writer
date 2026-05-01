@@ -36,6 +36,8 @@ Marine workflow update:
   - source-level caveat presence
   - request validation errors for invalid radius/coordinates
   - source-specific evidence-basis semantics
+  - honest backend `unavailable` handling across the active marine context families
+  - honest backend `degraded` handling only where partial-metadata evidence exists
 - Treat those three as `workflow-validated` for status-tracking purposes.
 - They still remain below `fully validated` and should not be treated as live validated from this evidence alone.
 - `france-vigicrues-hydrometry` is not promoted into this workflow plan yet because current repo evidence is still backend-only and better classified as `in-progress`.
@@ -58,7 +60,18 @@ Data workflow update:
 - Data AI progress now records backend-first implemented slices for:
   - `cisa-cyber-advisories`
   - `first-epss`
-- Both have fixture-backed routes, tests, compile evidence, and source-specific docs.
+  - `nist-nvd-cve`
+- Data AI progress now also records a conservative composition helper route for:
+  - `cve-context`
+- Data AI progress now also records a backend-first five-feed aggregate starter bundle for:
+  - `cisa-cybersecurity-advisories`
+  - `cisa-ics-advisories`
+  - `sans-isc-diary`
+  - `cloudflare-status`
+  - `gdacs-alerts`
+- All three Data slices above have fixture-backed routes, tests, compile evidence, and source-specific docs.
+- The aggregate starter bundle has a bounded recent-items route, feed definition registry, RSS/Atom/RDF parser coverage, and prompt-injection-like fixture coverage.
+- The NVD and CVE-context lane also preserves explicit evidence-class separation between metadata, advisory, prioritization, and discovery/feed text.
 - Neither should be treated as `workflow-validated` yet because no explicit consumer-path, smoke, or export-workflow validation is recorded.
 - The active five-feed RSS starter bundle should remain a bounded implementation lane rather than a blanket promotion of additional feed families.
 
@@ -66,8 +79,14 @@ Recent geospatial/aerospace source-build update:
 
 - `geosphere-austria-warnings` now exists as a backend-first implemented geospatial warning slice with fixture-backed contracts and docs.
 - `nasa-power-meteorology-solar` now exists as a backend-first implemented geospatial modeled-context slice with fixture-backed contracts and docs.
-- `washington-vaac-advisories` now exists as a backend-first implemented aerospace advisory slice with fixture-backed contracts and docs.
-- None of the three should be treated as `workflow-validated` yet because no executed consumer-path or smoke/export validation record is explicit.
+- `natural-earth-physical` now exists as a backend-first implemented geospatial static/reference slice with fixture-backed contracts and docs.
+- `noaa-global-volcano-locations` now exists as a backend-first implemented geospatial static/reference slice with fixture-backed contracts and docs.
+- `taiwan-cwa-aws-opendata` now exists as a backend-first implemented geospatial observed/context slice with fixture-backed contracts and docs.
+- `nrc-event-notifications` now exists as a backend-first implemented geospatial source-reported/context slice with fixture-backed contracts, docs, and prompt-injection-safe free-text coverage.
+- `bmkg-earthquakes` now exists as a backend-first implemented geospatial regional-authority earthquake slice with fixture-backed contracts, source-health fields, and prompt-injection-safe free-text coverage.
+- `ga-recent-earthquakes` now exists as a backend-first implemented geospatial regional-authority KML earthquake slice with fixture-backed contracts and docs.
+- `washington-vaac-advisories`, `anchorage-vaac-advisories`, and `tokyo-vaac-advisories` now exist as an implemented aerospace advisory package with fixture-backed contracts plus bounded client/export consumption.
+- None of the geospatial/aerospace updates above should be treated as `workflow-validated` yet because no executed consumer-path or smoke/export validation record is explicit on this host.
 
 ## Suggested Validation Ownership
 
@@ -205,6 +224,90 @@ Required:
 - Known blockers:
   - no explicit workflow-validation record exists yet
 
+### `natural-earth-physical`
+
+- Owner agent:
+  - `Geospatial AI`
+- Current validation level:
+  - `implemented`
+- Existing evidence:
+  - route `/api/context/reference/natural-earth/physical/land`
+  - test `app/server/tests/test_base_earth_reference_bundle.py`
+  - fixture `app/server/data/natural_earth_physical_land_fixture.json`
+  - source-specific doc `app/docs/environmental-events-natural-earth-physical.md`
+  - Geospatial AI progress records explicit backend-first static/reference behavior and source-caveat preservation
+- Missing workflow evidence:
+  - explicit consumer-path validation note
+  - explicit export-metadata validation note
+  - explicit source-health or source-mode rendering confirmation in any frontend path
+- Required UI/smoke checks:
+  - one bounded consumer path shows theme, version, feature counts or selected feature context, and caveat text
+  - no consumer path turns static physical vectors into live hazard or legal-boundary truth
+  - empty or unavailable branch remains intelligible
+- Required export metadata checks:
+  - export includes source id, theme or layer identifier, fetched time, release/version metadata when present, and caveat text
+  - export preserves static/reference semantics only
+- Source health checks:
+  - empty, unavailable, and invalid-filter behavior remain distinct where surfaced
+  - source-health wording does not imply live observation freshness
+- Fixture/live mode checks:
+  - fixture remains deterministic and aligned with `test_base_earth_reference_bundle.py`
+  - any live-mode verification stays manual and bounded to the pinned Natural Earth physical theme only
+- Exact validation commands to run:
+  - `python -m pytest app/server/tests/test_base_earth_reference_bundle.py -q`
+- Pass criteria for `workflow-validated`:
+  - contract tests pass
+  - one bounded consumer path is exercised successfully
+  - export metadata is checked and recorded once
+- Pass criteria for `fully validated`:
+  - `workflow-validated` criteria pass
+  - source-health wording and empty/unavailable behavior are explicitly validated
+  - caveat language is confirmed in both UI and export
+- Known blockers:
+  - no explicit workflow-validation record exists yet
+
+### `noaa-global-volcano-locations`
+
+- Owner agent:
+  - `Geospatial AI`
+- Current validation level:
+  - `implemented`
+- Existing evidence:
+  - route `/api/context/reference/noaa-global-volcanoes`
+  - test `app/server/tests/test_base_earth_reference_bundle.py`
+  - fixture `app/server/data/noaa_global_volcano_locations_fixture.json`
+  - source-specific doc `app/docs/environmental-events-noaa-global-volcano-locations.md`
+  - Geospatial AI progress records explicit backend-first static/reference volcano metadata behavior and source-caveat preservation
+- Missing workflow evidence:
+  - explicit consumer-path validation note
+  - explicit export-metadata validation note
+  - explicit source-health or source-mode rendering confirmation in any frontend path
+- Required UI/smoke checks:
+  - one bounded consumer path shows volcano name, location, type, and caveat text
+  - no consumer path turns static volcano-reference data into current eruption or ash-impact truth
+  - empty or unavailable branch remains intelligible
+- Required export metadata checks:
+  - export includes source id, volcano identifier or name, fetched time, static/reference metadata fields, and caveat text
+  - export preserves static/reference semantics only
+- Source health checks:
+  - empty, unavailable, and invalid-filter behavior remain distinct where surfaced
+  - source-health wording does not imply live volcano-status freshness
+- Fixture/live mode checks:
+  - fixture remains deterministic and aligned with `test_base_earth_reference_bundle.py`
+  - any live-mode verification stays manual and bounded to the pinned NOAA global volcano reference file only
+- Exact validation commands to run:
+  - `python -m pytest app/server/tests/test_base_earth_reference_bundle.py -q`
+- Pass criteria for `workflow-validated`:
+  - contract tests pass
+  - one bounded consumer path is exercised successfully
+  - export metadata is checked and recorded once
+- Pass criteria for `fully validated`:
+  - `workflow-validated` criteria pass
+  - source-health wording and empty/unavailable behavior are explicitly validated
+  - caveat language is confirmed in both UI and export
+- Known blockers:
+  - no explicit workflow-validation record exists yet
+
 ### `geosphere-austria-warnings`
 
 - Owner agent:
@@ -331,6 +434,218 @@ Required:
 - Known blockers:
   - no explicit workflow-validation record exists yet
 
+### `nist-nvd-cve`
+
+- Owner agent:
+  - `Data AI`
+- Current validation level:
+  - `implemented`
+- Existing evidence:
+  - route `/api/context/cyber/nvd-cve`
+  - supporting composition route `/api/context/cyber/cve-context`
+  - tests `app/server/tests/test_nvd_cve.py` and `app/server/tests/test_cve_context.py`
+  - fixture `app/server/data/nvd_cve_fixture.json`
+  - source-specific doc `app/docs/cyber-context-sources.md`
+  - Data AI progress records explicit evidence-class separation between NVD metadata, CISA advisory fields, EPSS scoring, and feed/discovery text
+- Missing workflow evidence:
+  - explicit consumer-path validation note
+  - explicit export-metadata validation note
+  - explicit source-health rendering or operational-consumer confirmation
+- Required UI/smoke checks:
+  - one bounded consumer path shows CVE id, published/updated time, CVSS metadata when present, and caveat text
+  - the consumer path keeps NVD metadata, CISA advisories, EPSS scores, and feed/discovery context semantically separate
+  - empty or unavailable branch remains intelligible
+- Required export metadata checks:
+  - export includes source id, request parameters, NVD item identifiers, published or updated time, fetched time, evidence basis, and caveat text
+  - export preserves metadata/context semantics only
+- Source health checks:
+  - invalid request, empty result, and unavailable-source behavior remain distinct where surfaced
+  - source-health wording does not imply high-rate completeness or bulk-sync coverage
+- Fixture/live mode checks:
+  - fixtures remain deterministic and aligned with `test_nvd_cve.py` and `test_cve_context.py`
+  - prompt-injection-like fixture coverage for NVD free-text descriptions and references remains part of the bounded validation path
+- Exact validation commands to run:
+  - `python -m pytest app/server/tests/test_nvd_cve.py -q`
+  - `python -m pytest app/server/tests/test_cve_context.py -q`
+- Pass criteria for `workflow-validated`:
+  - contract tests pass
+  - one bounded consumer path is exercised successfully
+  - export metadata is checked and recorded once
+- Pass criteria for `fully validated`:
+  - `workflow-validated` criteria pass
+  - source-health wording and empty/unavailable behavior are explicitly validated
+  - evidence-class separation and caveat language are confirmed in both UI and export
+- Known blockers:
+  - no explicit workflow-validation record exists yet
+
+### `taiwan-cwa-aws-opendata`
+
+- Owner agent:
+  - `Geospatial AI`
+- Current validation level:
+  - `implemented`
+- Existing evidence:
+  - route `/api/context/weather/taiwan-cwa`
+  - test `app/server/tests/test_taiwan_cwa_weather.py`
+  - fixture `app/server/data/taiwan_cwa_current_weather_fixture.json`
+  - source-specific doc `app/docs/environmental-events-taiwan-cwa-weather.md`
+  - Geospatial AI progress records bounded AWS-file-family behavior, observed/context semantics, and explicit source-health fields
+- Missing workflow evidence:
+  - explicit consumer-path validation note
+  - explicit export-metadata validation note
+  - explicit source-health rendering confirmation in any frontend path
+- Required UI/smoke checks:
+  - one bounded consumer path shows station id, observed time, coordinates when present, weather values, and caveat text
+  - no consumer path turns the slice into warning, impact, damage, flooding, or disruption claims
+  - empty or unavailable branch remains intelligible
+- Required export metadata checks:
+  - export includes source id, station id, observed time, fetched time, file-family metadata, and caveat text
+  - export preserves observed/context semantics only
+- Source health checks:
+  - freshness or source-generated-time wording is visible if surfaced
+  - empty and invalid-filter behavior remain distinct from unavailable or disabled states
+- Fixture/live mode checks:
+  - fixture remains deterministic and aligned with `test_taiwan_cwa_weather.py`
+  - any live-mode verification stays manual and bounded to the documented AWS-backed file family only
+- Exact validation commands to run:
+  - `python -m pytest app/server/tests/test_taiwan_cwa_weather.py -q`
+- Pass criteria for `workflow-validated`:
+  - contract tests pass
+  - one bounded consumer path is exercised successfully
+  - export metadata is checked and recorded once
+- Pass criteria for `fully validated`:
+  - `workflow-validated` criteria pass
+  - source-health wording and empty/unavailable behavior are explicitly validated
+  - caveat language is confirmed in both UI and export
+- Known blockers:
+  - no explicit workflow-validation record exists yet
+
+### `nrc-event-notifications`
+
+- Owner agent:
+  - `Geospatial AI`
+- Current validation level:
+  - `implemented`
+- Existing evidence:
+  - route `/api/events/nrc/recent`
+  - test `app/server/tests/test_nrc_event_notifications.py`
+  - fixture `app/server/data/nrc_event_notifications_fixture.xml`
+  - source-specific doc `app/docs/environmental-events-nrc-event-notifications.md`
+  - Geospatial AI progress records bounded RSS/event-notification behavior and prompt-injection-safe free-text fixture coverage
+- Missing workflow evidence:
+  - explicit consumer-path validation note
+  - explicit export-metadata validation note
+  - explicit source-health rendering confirmation in any frontend path
+- Required UI/smoke checks:
+  - one bounded consumer path shows title, organization or facility text, event time when present, and caveat text
+  - no consumer path turns source-reported event notices into radiological impact, closure, or public-safety proof
+  - empty or unavailable branch remains intelligible
+- Required export metadata checks:
+  - export includes source id, source URL, item id or GUID, published time when present, fetched time, and caveat text
+  - export preserves source-reported/context semantics only
+- Source health checks:
+  - parse failure, empty feed, and unavailable-source behavior remain distinct where surfaced
+  - source-health wording must not overstate operational certainty
+- Fixture/live mode checks:
+  - fixture remains deterministic and aligned with `test_nrc_event_notifications.py`
+  - injection-like fixture coverage remains part of the bounded validation path
+- Exact validation commands to run:
+  - `python -m pytest app/server/tests/test_nrc_event_notifications.py -q`
+- Pass criteria for `workflow-validated`:
+  - contract tests pass
+  - one bounded consumer path is exercised successfully
+  - export metadata is checked and recorded once
+- Pass criteria for `fully validated`:
+  - `workflow-validated` criteria pass
+  - source-health wording and empty/unavailable behavior are explicitly validated
+  - caveat language and injection-safe text handling are confirmed in both UI and export
+- Known blockers:
+  - no explicit workflow-validation record exists yet
+
+### `bmkg-earthquakes`
+
+- Owner agent:
+  - `Geospatial AI`
+- Current validation level:
+  - `implemented`
+- Existing evidence:
+  - route `/api/events/bmkg-earthquakes/recent`
+  - test `app/server/tests/test_bmkg_earthquakes.py`
+  - fixture `app/server/data/bmkg_earthquakes_fixture.json`
+  - source-specific doc `app/docs/environmental-events-bmkg-earthquakes.md`
+  - Geospatial AI progress records explicit source-health fields, caveats, and prompt-injection-safe free-text coverage
+- Missing workflow evidence:
+  - explicit consumer-path validation note
+  - explicit export-metadata validation note
+  - explicit source-health rendering confirmation in any frontend path
+- Required UI/smoke checks:
+  - one bounded consumer path shows magnitude, location text, time, and caveat text
+  - no consumer path turns BMKG records into tsunami, damage, or casualty claims without source support
+  - empty or unavailable branch remains intelligible
+- Required export metadata checks:
+  - export includes source id, event identifier, event time, fetched time, source URL, and caveat text
+  - export preserves observed/source-reported earthquake semantics only
+- Source health checks:
+  - freshness or source-generated-time wording is visible if surfaced
+  - empty and invalid-filter behavior remain distinct from unavailable or disabled states
+- Fixture/live mode checks:
+  - fixture remains deterministic and aligned with `test_bmkg_earthquakes.py`
+  - prompt-injection-like fixture coverage for free-text location fields remains part of the bounded validation path
+- Exact validation commands to run:
+  - `python -m pytest app/server/tests/test_bmkg_earthquakes.py -q`
+- Pass criteria for `workflow-validated`:
+  - contract tests pass
+  - one bounded consumer path is exercised successfully
+  - export metadata is checked and recorded once
+- Pass criteria for `fully validated`:
+  - `workflow-validated` criteria pass
+  - source-health wording and empty/unavailable behavior are explicitly validated
+  - caveat language and injection-safe text handling are confirmed in both UI and export
+- Known blockers:
+  - no explicit workflow-validation record exists yet
+
+### `ga-recent-earthquakes`
+
+- Owner agent:
+  - `Geospatial AI`
+- Current validation level:
+  - `implemented`
+- Existing evidence:
+  - route `/api/events/ga-earthquakes/recent`
+  - test `app/server/tests/test_ga_recent_earthquakes.py`
+  - fixture `app/server/data/ga_recent_earthquakes_fixture.kml`
+  - source-specific doc `app/docs/environmental-events-ga-recent-earthquakes.md`
+  - Geospatial AI progress records bounded KML parsing and regional-authority provenance
+- Missing workflow evidence:
+  - explicit consumer-path validation note
+  - explicit export-metadata validation note
+  - explicit source-health rendering confirmation in any frontend path
+- Required UI/smoke checks:
+  - one bounded consumer path shows event location, time, magnitude when present, and caveat text
+  - no consumer path turns sparse KML records into richer impact semantics than the source supports
+  - empty or unavailable branch remains intelligible
+- Required export metadata checks:
+  - export includes source id, event identifier or title, event time, fetched time, source URL, and caveat text
+  - export preserves KML regional-authority event semantics only
+- Source health checks:
+  - freshness or source-generated-time wording is visible if surfaced
+  - empty and invalid-filter behavior remain distinct from unavailable or disabled states
+- Fixture/live mode checks:
+  - fixture remains deterministic and aligned with `test_ga_recent_earthquakes.py`
+  - any live-mode verification stays manual and bounded to the documented Geoscience Australia KML feed only
+- Exact validation commands to run:
+  - `python -m pytest app/server/tests/test_ga_recent_earthquakes.py -q`
+- Pass criteria for `workflow-validated`:
+  - contract tests pass
+  - one bounded consumer path is exercised successfully
+  - export metadata is checked and recorded once
+- Pass criteria for `fully validated`:
+  - `workflow-validated` criteria pass
+  - source-health wording and empty/unavailable behavior are explicitly validated
+  - caveat language is confirmed in both UI and export
+- Known blockers:
+  - no explicit workflow-validation record exists yet
+
 ### `nasa-power-meteorology-solar`
 
 - Owner agent:
@@ -389,7 +704,7 @@ Required:
   - explicit workflow evidence in [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md:1)
   - CO-OPS observations preserve `observed` evidence basis semantics
 - Missing workflow evidence:
-  - remaining gap is full-validation confirmation for stale/unavailable source-health behavior and any live-mode caveat handling
+  - remaining gap is full-validation confirmation for `unavailable` or `degraded` source-health behavior and any live-mode caveat handling
 - Required UI/smoke checks:
   - marine context path displays station metadata and latest observation values
   - no prediction text is presented as observation
@@ -415,7 +730,7 @@ Required:
   - `workflow-validated` criteria pass
   - stale station behavior and source-health wording are explicitly checked
   - deterministic fixture path and live-mode assumptions are documented together
-  - stale/unavailable behavior confirmation and live-mode assumption confirmation are explicitly recorded
+  - `unavailable` or `degraded` behavior confirmation and live-mode assumption confirmation are explicitly recorded
 - Known blockers:
   - no blocker for workflow-validated status
   - remaining work is only for any promotion beyond workflow-validated
@@ -519,11 +834,10 @@ Required:
   - route `/api/aerospace/space/washington-vaac-advisories`
   - test `app/server/tests/test_washington_vaac_contracts.py`
   - fixtures `app/server/data/washington_vaac_advisories_fixture.json` and `app/server/data/washington_vaac_advisories_empty_fixture.json`
-  - aerospace docs now record the backend-first source slice and its no-inference boundaries
-  - backend contracts and compile are explicitly recorded as passing
+  - client/export consumer coverage now exists through `aerospaceVaacContext.ts`, inspector wiring, export metadata, and smoke-fixture support
+  - aerospace docs now record the implemented source slice and its no-inference boundaries
+  - backend contracts, compile, lint, and build are explicitly recorded as passing
 - Missing workflow evidence:
-  - explicit frontend or export consumer validation
-  - explicit export metadata validation
   - executed smoke/manual workflow evidence
 - Required UI/smoke checks:
   - one bounded consumer path renders advisory number, volcano or region context, issue timing, and caveat text
@@ -540,6 +854,8 @@ Required:
   - any live-mode verification stays manual and bounded to the documented NOAA OSPO listing plus advisory XML path
 - Exact validation commands to run:
   - `python -m pytest app/server/tests/test_washington_vaac_contracts.py -q`
+  - `cmd /c npm.cmd run lint`
+  - `cmd /c npm.cmd run build`
 - Pass criteria for `workflow-validated`:
   - contract tests pass
   - one bounded consumer path is exercised successfully
@@ -549,7 +865,91 @@ Required:
   - source-health wording and empty/unavailable behavior are explicitly validated
   - caveat language is confirmed in both UI and export
 - Known blockers:
-  - no explicit workflow-validation record exists yet
+  - executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`
+
+### `anchorage-vaac-advisories`
+
+- Owner agent:
+  - `Aerospace AI`
+- Current validation level:
+  - `implemented`
+- Existing evidence:
+  - route `/api/aerospace/space/anchorage-vaac-advisories`
+  - test `app/server/tests/test_anchorage_vaac_contracts.py`
+  - fixtures `app/server/data/anchorage_vaac_advisories_fixture.json` and `app/server/data/anchorage_vaac_advisories_empty_fixture.json`
+  - client/export consumer coverage now exists through `useAnchorageVaacAdvisoriesQuery`, `aerospaceVaacContext.ts`, inspector wiring, export metadata, and smoke-fixture support
+  - backend contracts, compile, lint, and build are explicitly recorded as passing
+- Missing workflow evidence:
+  - executed smoke/manual workflow evidence
+- Required UI/smoke checks:
+  - one bounded consumer path renders advisory number, volcano or region context, issue timing, and caveat text
+  - advisory status remains clearly contextual and does not imply route impact or aircraft exposure
+  - empty branch remains intelligible
+- Required export metadata checks:
+  - export includes source id, source URL, advisory identifiers, advisory timing, volcano or region summary, and caveat text
+  - export preserves advisory/contextual semantics only
+- Source health checks:
+  - fixture empty behavior and degraded source status remain visible where surfaced
+  - unavailable or disabled wording stays distinct from empty results
+- Fixture/live mode checks:
+  - fixtures remain deterministic and aligned with `test_anchorage_vaac_contracts.py`
+  - any live-mode verification stays manual and bounded to the documented advisory text-product path
+- Exact validation commands to run:
+  - `python -m pytest app/server/tests/test_anchorage_vaac_contracts.py -q`
+  - `cmd /c npm.cmd run lint`
+  - `cmd /c npm.cmd run build`
+- Pass criteria for `workflow-validated`:
+  - contract tests pass
+  - one bounded consumer path is exercised successfully
+  - export metadata is checked and recorded once
+- Pass criteria for `fully validated`:
+  - `workflow-validated` criteria pass
+  - source-health wording and empty/unavailable behavior are explicitly validated
+  - caveat language is confirmed in both UI and export
+- Known blockers:
+  - executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`
+
+### `tokyo-vaac-advisories`
+
+- Owner agent:
+  - `Aerospace AI`
+- Current validation level:
+  - `implemented`
+- Existing evidence:
+  - route `/api/aerospace/space/tokyo-vaac-advisories`
+  - test `app/server/tests/test_tokyo_vaac_contracts.py`
+  - fixtures `app/server/data/tokyo_vaac_advisories_fixture.json` and `app/server/data/tokyo_vaac_advisories_empty_fixture.json`
+  - client/export consumer coverage now exists through `useTokyoVaacAdvisoriesQuery`, `aerospaceVaacContext.ts`, inspector wiring, export metadata, and smoke-fixture support
+  - backend contracts, compile, lint, and build are explicitly recorded as passing
+- Missing workflow evidence:
+  - executed smoke/manual workflow evidence
+- Required UI/smoke checks:
+  - one bounded consumer path renders advisory number, volcano or region context, issue timing, and caveat text
+  - advisory status remains clearly contextual and does not imply route impact or aircraft exposure
+  - empty branch remains intelligible
+- Required export metadata checks:
+  - export includes source id, source URL, advisory identifiers, advisory timing, volcano or region summary, and caveat text
+  - export preserves advisory/contextual semantics only
+- Source health checks:
+  - fixture empty behavior and degraded source status remain visible where surfaced
+  - unavailable or disabled wording stays distinct from empty results
+- Fixture/live mode checks:
+  - fixtures remain deterministic and aligned with `test_tokyo_vaac_contracts.py`
+  - any live-mode verification stays manual and bounded to the documented advisory text-product path
+- Exact validation commands to run:
+  - `python -m pytest app/server/tests/test_tokyo_vaac_contracts.py -q`
+  - `cmd /c npm.cmd run lint`
+  - `cmd /c npm.cmd run build`
+- Pass criteria for `workflow-validated`:
+  - contract tests pass
+  - one bounded consumer path is exercised successfully
+  - export metadata is checked and recorded once
+- Pass criteria for `fully validated`:
+  - `workflow-validated` criteria pass
+  - source-health wording and empty/unavailable behavior are explicitly validated
+  - caveat language is confirmed in both UI and export
+- Known blockers:
+  - executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`
 
 ### `noaa-ndbc-realtime`
 
@@ -567,7 +967,7 @@ Required:
   - explicit workflow evidence in [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md:1)
   - NDBC observations preserve `observed` evidence basis semantics
 - Missing workflow evidence:
-  - remaining gap is full-validation confirmation for stale/unavailable source-health behavior and any live-mode caveat handling
+  - remaining gap is full-validation confirmation for `unavailable` or `degraded` source-health behavior and any live-mode caveat handling
 - Required UI/smoke checks:
   - marine context path renders buoy observations and station metadata
   - unavailable station/file-family cases do not imply global outage
@@ -593,7 +993,7 @@ Required:
   - `workflow-validated` criteria pass
   - stale-state wording and source-health behavior are explicitly validated
   - fixture path and live-mode caveats are documented together
-  - stale/unavailable behavior confirmation and live-mode assumption confirmation are explicitly recorded
+  - `unavailable` or `degraded` behavior confirmation and live-mode assumption confirmation are explicitly recorded
 - Known blockers:
   - no blocker for workflow-validated status
   - remaining work is only for any promotion beyond workflow-validated
@@ -614,7 +1014,7 @@ Required:
   - explicit workflow evidence in [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md:1)
   - Scottish Water overflow events preserve `source-reported` evidence basis semantics
 - Missing workflow evidence:
-  - remaining gap is full-validation confirmation for stale/unavailable source-health behavior and any live-mode caveat handling
+  - remaining gap is full-validation confirmation for `unavailable` or `degraded` source-health behavior and any live-mode caveat handling
 - Required UI/smoke checks:
   - marine context path renders nearby overflow monitor status records
   - active, inactive, and unknown monitor states remain intelligible
@@ -640,7 +1040,7 @@ Required:
   - `workflow-validated` criteria pass
   - source-health wording for inactive, empty, stale, and unavailable cases is explicitly validated
   - fixture path and live-mode caveats are documented together
-  - stale/unavailable behavior confirmation and live-mode assumption confirmation are explicitly recorded
+  - `unavailable` or `degraded` behavior confirmation and live-mode assumption confirmation are explicitly recorded
 - Known blockers:
   - no blocker for workflow-validated status
   - remaining work is only for any promotion beyond workflow-validated
@@ -854,6 +1254,50 @@ Required:
 - Known blockers:
   - executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`
 
+### `noaa-ncei-space-weather-portal`
+
+- Owner agent:
+  - `Aerospace AI`
+- Current validation level:
+  - `implemented`
+- Existing evidence:
+  - route `/api/aerospace/space/ncei-space-weather-archive`
+  - test `app/server/tests/test_ncei_space_weather_portal_contracts.py`
+  - fixture `app/server/data/ncei_space_weather_portal_fixture.xml`
+  - client hook `useNceiSpaceWeatherArchiveQuery`
+  - aerospace workflow docs record the bounded archive/context consumer path and export expectations
+  - backend contracts, compile, lint, and build are explicitly recorded as passing
+- Missing workflow evidence:
+  - executed browser smoke for the current archive/context consumer path
+  - explicit export metadata validation note beyond checklist presence
+- Required UI/smoke checks:
+  - current consumer path shows bounded archival space-weather metadata without merging it into current SWPC advisory truth
+  - empty or unavailable branch is intelligible
+  - free-text title and summary content remains inert source text
+- Required export metadata checks:
+  - export includes source id, archive item identifiers, source/generated time when present, fetched time, and caveat text
+  - export preserves archival/context semantics only
+- Source health checks:
+  - archive feed freshness and empty results remain distinct from current-advisory availability
+  - source-health wording does not imply live operational weather coverage
+- Fixture/live mode checks:
+  - deterministic XML fixture remains the authoritative contract basis
+  - live validation stays separate from automated tests
+- Exact validation commands to run:
+  - `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q`
+  - `cmd /c npm.cmd run lint`
+  - `cmd /c npm.cmd run build`
+- Pass criteria for `workflow-validated`:
+  - contract tests pass
+  - current UI or operational consumer path is exercised successfully
+  - export metadata is checked and recorded
+- Pass criteria for `fully validated`:
+  - `workflow-validated` criteria pass
+  - source-health wording and caveat survival are explicitly validated
+  - fixture/live-mode assumptions are documented together
+- Known blockers:
+  - executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`
+
 ### `opensky-anonymous-states`
 
 - Owner agent:
@@ -899,21 +1343,34 @@ Required:
 ## Recommended Validation Order
 
 1. `usgs-volcano-hazards`
-2. `noaa-tsunami-alerts`
-3. `uk-ea-flood-monitoring`
-4. `noaa-coops-tides-currents`
-5. `noaa-ndbc-realtime`
-6. `usgs-geomagnetism`
-7. `noaa-aviation-weather-center-data-api`
-8. `faa-nas-airport-status`
-9. `nasa-jpl-cneos`
-10. `noaa-swpc-space-weather`
-11. `opensky-anonymous-states`
-12. `finland-digitraffic`
+2. `taiwan-cwa-aws-opendata`
+3. `nrc-event-notifications`
+4. `bmkg-earthquakes`
+5. `ga-recent-earthquakes`
+6. `noaa-tsunami-alerts`
+7. `uk-ea-flood-monitoring`
+8. `noaa-coops-tides-currents`
+9. `noaa-ndbc-realtime`
+10. `usgs-geomagnetism`
+11. `natural-earth-physical`
+12. `noaa-global-volcano-locations`
+13. `nist-nvd-cve`
+14. `noaa-aviation-weather-center-data-api`
+15. `faa-nas-airport-status`
+16. `washington-vaac-advisories`
+17. `anchorage-vaac-advisories`
+18. `tokyo-vaac-advisories`
+19. `nasa-jpl-cneos`
+20. `noaa-swpc-space-weather`
+21. `noaa-ncei-space-weather-portal`
+22. `opensky-anonymous-states`
+23. `finland-digitraffic`
 
 Rationale:
 
-- start with geospatial event layers that already show clearer layer and inspector consumption
+- start with geospatial event and context layers that can gain a first consumer fastest
 - validate marine context pair together because they share contract tests and smoke-fixture structure
+- validate new backend-first static/reference and CVE-context slices only after one bounded consumer or export path exists
 - validate backend-first geospatial and features slices once they gain a first stable consumer path
+- validate the three-VAAC package together because the bounded consumer/export wiring is shared
 - validate aerospace context sources after marine because their export and workflow evidence is stronger now, but executed browser smoke is still launcher-blocked on this host

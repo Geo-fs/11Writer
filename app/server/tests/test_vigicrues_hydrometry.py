@@ -56,7 +56,7 @@ def test_vigicrues_hydrometry_contract_loaded(tmp_path: Path) -> None:
     payload = response.json()
     assert payload["sourceHealth"]["sourceId"] == "france-vigicrues-hydrometry"
     assert payload["sourceHealth"]["sourceMode"] == "fixture"
-    assert payload["sourceHealth"]["health"] in {"loaded", "empty"}
+    assert payload["sourceHealth"]["health"] in {"loaded", "empty", "degraded"}
     assert payload["sourceHealth"]["loadedCount"] == payload["count"]
     assert "hydrometry observations are river-condition context only" in payload["sourceHealth"]["caveat"].lower()
     assert payload["caveats"]
@@ -155,8 +155,8 @@ def test_vigicrues_hydrometry_fixture_mode_does_not_fabricate_stale_or_unavailab
         params={"lat": 49.3, "lon": 1.24, "radius_km": 300, "parameter": "all", "limit": 5},
     ).json()
 
-    assert payload["sourceHealth"]["health"] in {"loaded", "empty"}
-    assert payload["sourceHealth"]["health"] not in {"stale", "error", "unknown"}
+    assert payload["sourceHealth"]["health"] in {"loaded", "empty", "degraded"}
+    assert payload["sourceHealth"]["health"] not in {"stale", "error", "unknown", "unavailable"}
 
 
 def test_vigicrues_hydrometry_unknown_mode_normalizes_to_disabled(tmp_path: Path) -> None:
@@ -205,6 +205,40 @@ def test_vigicrues_hydrometry_can_honestly_emit_stale_from_old_observation_times
     assert payload["sourceHealth"]["health"] == "stale"
     assert "freshness threshold" in (payload["sourceHealth"]["detail"] or "").lower()
     assert "freshness threshold" in (payload["sourceHealth"]["caveat"] or "").lower()
+
+
+def test_vigicrues_hydrometry_can_honestly_emit_degraded_from_partial_metadata(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+
+    payload = client.get(
+        "/api/marine/context/vigicrues-hydrometry",
+        params={"lat": 44.84, "lon": -0.58, "radius_km": 100, "parameter": "all", "limit": 10},
+    ).json()
+
+    assert payload["count"] >= 1
+    assert payload["sourceHealth"]["health"] == "degraded"
+    assert "partial metadata" in (payload["sourceHealth"]["detail"] or "").lower()
+    assert "partial metadata" in (payload["sourceHealth"]["caveat"] or "").lower()
+
+
+def test_vigicrues_hydrometry_can_honestly_emit_unavailable_from_retrieval_failure(
+    tmp_path: Path, monkeypatch
+) -> None:
+    def broken_fixture(self: MarineVigicruesHydrometryService, now: datetime):
+        raise TimeoutError("fixture vigicrues unavailable")
+
+    monkeypatch.setattr(MarineVigicruesHydrometryService, "_fixture_stations", broken_fixture)
+    client = _client(tmp_path)
+
+    payload = client.get(
+        "/api/marine/context/vigicrues-hydrometry",
+        params={"lat": 49.3, "lon": 1.24, "radius_km": 300, "parameter": "all", "limit": 5},
+    ).json()
+
+    assert payload["count"] == 0
+    assert payload["sourceHealth"]["health"] == "unavailable"
+    assert payload["sourceHealth"]["errorSummary"]
+    assert "retrieval failed" in (payload["sourceHealth"]["detail"] or "").lower()
 
 
 def test_vigicrues_hydrometry_route_validation(tmp_path: Path) -> None:

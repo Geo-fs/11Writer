@@ -15,12 +15,15 @@ Status note:
 - [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md) remains the validation-traceability truth.
 - This memo is a routing layer only.
 - Atlas backlog and registry docs remain candidate context only, not implementation proof.
+- [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) is the short sequencing surface for the next Data AI feed-family wave.
+- [source-next-routing-packets.md](/C:/Users/mike/11Writer/app/docs/source-next-routing-packets.md) is the compact cross-lane handoff packet surface for the next 8-12 bounded Manager assignments.
 
 ## Current Domain Availability
 
 - `geospatial`
   - Best current lane for a fresh bounded source build.
   - Met Eireann warning and forecast work is already implemented and revalidated.
+  - `taiwan-cwa-aws-opendata` and `nrc-event-notifications` now also exist as backend-first implemented slices, so they should be treated as follow-on consumer or validation targets rather than fresh source assignments.
   - `geosphere-austria-warnings` and `nasa-power-meteorology-solar` now also exist as backend-first implemented slices, so the next geospatial assignment should be a fresh bounded source or a very small consumer follow-on, not another broad shared UI pass.
   - Prefer backend-first or low-collision environmental/context sources before another broad shared UI pass.
 - `marine`
@@ -30,7 +33,7 @@ Status note:
 - `aerospace`
   - Best current use is workflow hardening, not a broad new source.
   - Backend contracts, compile, lint, and build are green for the current stack.
-  - `washington-vaac-advisories` now exists as a backend-first implemented slice, so the next aerospace source move should still be validation/consumer work before another wider expansion.
+  - the bounded three-VAAC consumer/export package is now implemented for Washington, Anchorage, and Tokyo, so the next aerospace move should still be workflow validation before another wider expansion.
   - Browser smoke is still blocked by `windows-browser-launch-permission`, so fresh aerospace source work is lower priority than executing that prepared validation path.
 - `features-webcam`
   - Best current use is bounded follow-on work, not another large frontend surface.
@@ -43,6 +46,7 @@ Status note:
   - Best current use is bounded internet-information sources that are public, no-auth, machine-readable, and clearly not owned by Geospatial, Marine, Aerospace, or Features/Webcam.
   - `cisa-cyber-advisories` and `first-epss` are already implemented backend-first.
   - The active Data AI lane is now the bounded five-feed RSS/Atom parser slice using `cisa-cybersecurity-advisories`, `cisa-ics-advisories`, `sans-isc-diary`, `cloudflare-status`, and `gdacs-alerts`.
+  - Use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) to sequence the next feed-family wave after the active starter bundle.
   - Data AI should own source implementation for cybersecurity advisories, CVE/risk context, RSS/Atom/news/press-release feeds, and other assigned information-context feeds.
   - Data AI should not inherit Gather's governance work or Connect's repo-wide blocker lane.
 
@@ -78,7 +82,7 @@ Status note:
   - use `bart-gtfs-realtime` only if a fresh source lane is explicitly preferred
 - If Manager wants the first clean Data AI implementation lane:
   - keep the active five-feed starter slice bounded
-  - then use [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for `ncsc-uk-all`, `cert-fr-alerts`, `cloudflare-radar`, and the next narrow feed wave
+  - then use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) plus [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for `ncsc-uk-all`, `cert-fr-alerts`, `cloudflare-radar`, and the next narrow feed wave
 
 ## Data AI Routing Surface
 

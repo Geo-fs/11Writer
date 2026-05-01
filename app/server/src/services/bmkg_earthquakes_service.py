@@ -9,7 +9,12 @@ from typing import Any, Literal
 import httpx
 
 from src.config.settings import Settings
-from src.types.api import BmkgEarthquakeEvent, BmkgEarthquakesMetadata, BmkgEarthquakesResponse
+from src.types.api import (
+    BmkgEarthquakeEvent,
+    BmkgEarthquakesMetadata,
+    BmkgEarthquakesResponse,
+    BmkgEarthquakesSourceHealth,
+)
 
 BmkgSort = Literal["newest", "magnitude"]
 
@@ -26,8 +31,50 @@ class BmkgEarthquakesService:
         self._settings = settings
 
     async def list_recent(self, query: BmkgEarthquakesQuery) -> BmkgEarthquakesResponse:
-        payload = await self._load_payload()
         fetched_at = datetime.now(tz=timezone.utc).isoformat()
+        source_mode = self._source_mode_label()
+        try:
+            payload = await self._load_payload()
+        except Exception as exc:
+            return BmkgEarthquakesResponse(
+                metadata=BmkgEarthquakesMetadata(
+                    source="bmkg-earthquakes",
+                    latest_feed_url=self._settings.bmkg_earthquakes_latest_url,
+                    recent_feed_url=self._settings.bmkg_earthquakes_recent_url,
+                    source_mode=source_mode,
+                    fetched_at=fetched_at,
+                    generated_at=None,
+                    count=0,
+                    latest_available_at=None,
+                    caveat=(
+                        "BMKG earthquake records are regional-authority source-reported earthquake data. "
+                        "Early parameters may be revised, and magnitude alone does not imply damage or local impact."
+                    ),
+                ),
+                latest_event=None,
+                count=0,
+                source_health=BmkgEarthquakesSourceHealth(
+                    source_id="bmkg-earthquakes",
+                    source_label="BMKG Earthquakes",
+                    enabled=True,
+                    source_mode=source_mode,
+                    health="error",
+                    loaded_count=0,
+                    last_fetched_at=fetched_at,
+                    source_generated_at=None,
+                    detail="BMKG earthquake feeds could not be parsed.",
+                    error_summary=str(exc),
+                    caveat=(
+                        "BMKG earthquake records are regional-authority source-reported earthquake data. "
+                        "Early parameters may be revised, and magnitude alone does not imply damage or local impact."
+                    ),
+                ),
+                events=[],
+                caveats=[
+                    "BMKG earthquake records are regional-authority source-reported earthquake data only.",
+                    "External source text remains inert data only and never changes validation state, source health, or workflow behavior.",
+                ],
+            )
 
         latest_raw = payload.get("latest") if isinstance(payload, dict) else None
         recent_raw = payload.get("recent") if isinstance(payload, dict) else None
@@ -42,12 +89,18 @@ class BmkgEarthquakesService:
             filtered.sort(key=lambda event: _iso_sort_key(event.event_time), reverse=True)
 
         limited = filtered[: query.limit]
+        health = "loaded" if limited or latest_event is not None else "empty"
+        detail = (
+            "BMKG earthquake feeds loaded successfully."
+            if limited or latest_event is not None
+            else "BMKG earthquake feeds loaded but no recent records matched the current filters."
+        )
         return BmkgEarthquakesResponse(
             metadata=BmkgEarthquakesMetadata(
                 source="bmkg-earthquakes",
                 latest_feed_url=self._settings.bmkg_earthquakes_latest_url,
                 recent_feed_url=self._settings.bmkg_earthquakes_recent_url,
-                source_mode=self._source_mode_label(),
+                source_mode=source_mode,
                 fetched_at=fetched_at,
                 generated_at=None,
                 count=len(limited),
@@ -59,7 +112,27 @@ class BmkgEarthquakesService:
             ),
             latest_event=latest_event,
             count=len(limited),
+            source_health=BmkgEarthquakesSourceHealth(
+                source_id="bmkg-earthquakes",
+                source_label="BMKG Earthquakes",
+                enabled=True,
+                source_mode=source_mode,
+                health=health,
+                loaded_count=len(limited),
+                last_fetched_at=fetched_at,
+                source_generated_at=None,
+                detail=detail,
+                error_summary=None,
+                caveat=(
+                    "BMKG earthquake records are regional-authority source-reported earthquake data. "
+                    "Early parameters may be revised, and magnitude alone does not imply damage or local impact."
+                ),
+            ),
             events=limited,
+            caveats=[
+                "BMKG earthquake records are regional-authority source-reported earthquake data only.",
+                "External source text remains inert data only and never changes validation state, source health, or workflow behavior.",
+            ],
         )
 
     async def _load_payload(self) -> dict[str, Any]:

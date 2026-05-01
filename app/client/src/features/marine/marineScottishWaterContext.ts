@@ -13,7 +13,15 @@ export interface MarineScottishWaterContextSummary {
   metadata: {
     sourceId: string;
     sourceMode: "fixture" | "live" | "unknown";
-    health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+    health:
+      | "loaded"
+      | "empty"
+      | "stale"
+      | "degraded"
+      | "unavailable"
+      | "error"
+      | "disabled"
+      | "unknown";
     nearbyMonitorCount: number;
     activeMonitorCount: number;
     topMonitor:

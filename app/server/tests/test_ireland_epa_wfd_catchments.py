@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.app import create_application
 from src.config.settings import Settings, get_settings
+from src.routes.catchments_context import router as catchments_context_router
 
 
 def _settings() -> Settings:
@@ -18,7 +19,8 @@ def _settings() -> Settings:
 
 
 def _client() -> TestClient:
-    app = create_application()
+    app = FastAPI()
+    app.include_router(catchments_context_router)
     app.dependency_overrides[get_settings] = _settings
     return TestClient(app)
 

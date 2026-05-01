@@ -62,6 +62,12 @@ from src.services.metno_metalerts_service import (
 )
 from src.services.canada_cap_service import CanadaCapAlertType, CanadaCapQuery, CanadaCapService, CanadaCapSeverity, CanadaCapSort
 from src.services.bmkg_earthquakes_service import BmkgEarthquakesQuery, BmkgEarthquakesService, BmkgSort
+from src.services.ga_recent_earthquakes_service import (
+    GaRecentEarthquakesQuery,
+    GaRecentEarthquakesService,
+    GaSort,
+    parse_bbox as parse_ga_bbox,
+)
 from src.services.ipma_warnings_service import IpmaWarningLevel, IpmaWarningSort, IpmaWarningsQuery, IpmaWarningsService
 from src.services.met_eireann_warnings_service import (
     MetEireannWarningLevel,
@@ -81,6 +87,7 @@ from src.types.api import (
     CanadaCapAlertResponse,
     EarthquakeEventsResponse,
     EonetEventsResponse,
+    GaRecentEarthquakesResponse,
     GeosphereAustriaWarningsResponse,
     GeoNetHazardsResponse,
     HkoWeatherResponse,
@@ -411,6 +418,32 @@ async def recent_bmkg_earthquakes(
             min_magnitude=min_magnitude,
             limit=limit,
             sort=cast(BmkgSort, sort),
+        )
+    )
+
+
+@router.get("/ga-earthquakes/recent", response_model=GaRecentEarthquakesResponse)
+async def recent_ga_earthquakes(
+    min_magnitude: float | None = Query(default=None, ge=0.0, le=10.0),
+    limit: int = Query(default=50, ge=1, le=500),
+    bbox: str | None = Query(default=None, description="minLon,minLat,maxLon,maxLat"),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> GaRecentEarthquakesResponse:
+    if sort not in {"newest", "magnitude"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, magnitude")
+    try:
+        parsed_bbox = parse_ga_bbox(bbox)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    service = GaRecentEarthquakesService(settings)
+    return await service.list_recent(
+        GaRecentEarthquakesQuery(
+            min_magnitude=min_magnitude,
+            limit=limit,
+            bbox=parsed_bbox,
+            sort=cast(GaSort, sort),
         )
     )
 

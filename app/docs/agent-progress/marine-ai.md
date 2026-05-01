@@ -1,3 +1,119 @@
+## 2026-04-30 23:14 America/Chicago
+
+Assignment version:
+- 2026-04-30 22:05 America/Chicago
+
+Task:
+- add marine workflow/export/smoke coverage that visibly distinguishes degraded and unavailable context-source states without promoting them into anomaly severity, vessel behavior, or impact claims
+
+What changed:
+- updated marine-local source summary/export helpers so source-health rows and export lines now preserve explicit state labels across:
+  - `loaded`
+  - `empty`
+  - `stale`
+  - `degraded`
+  - `unavailable`
+  - `disabled`
+- extended `marineContextSourceSummary` metadata/export lines with explicit unavailable counting and state-bearing row lines
+- tightened `marineContextIssueQueue` wording so degraded/unavailable issues are described as source-health/context limitations rather than anomaly severity
+- updated deterministic marine smoke fixtures to expose:
+  - one degraded source-health example via `Scottish Water Overflows`
+  - one unavailable source-health example via `France Vigicrues Hydrometry`
+- added marine smoke assertions that confirm degraded/unavailable state visibility in:
+  - source-specific cards
+  - marine context source summary
+  - marine context issue queue
+  - exported `marineAnomalySummary` metadata
+- updated marine docs so workflow validation now records degraded/unavailable workflow visibility and the remaining family-level limitation that CO-OPS/NDBC still do not emit `degraded`
+
+Files touched:
+- `app/client/src/features/marine/marineContextSourceSummary.ts`
+- `app/client/src/features/marine/marineContextIssueQueue.ts`
+- `app/client/scripts/playwright_smoke.mjs`
+- `app/server/tests/smoke_fixture_app.py`
+- `app/docs/marine-workflow-validation.md`
+- `app/docs/marine-module.md`
+- `app/docs/marine-context-source-contract-matrix.md`
+- `app/docs/agent-progress/marine-ai.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass (`60 passed`)
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python app/server/tests/run_playwright_smoke.py marine` -> pass
+
+Blockers or caveats:
+- smoke now proves degraded/unavailable workflow visibility, but it does not change backend source-truth semantics
+- `degraded` still remains intentionally absent for NOAA CO-OPS and NOAA NDBC because the current slice has no honest partial-ingest/source-quality degradation signal there
+- degraded/unavailable source health remains a context limitation only; it is not anomaly severity, vessel-behavior evidence, impact proof, or wrongdoing evidence
+- no anomaly scoring changes, no severity merging across source families, and no vessel-intent / flooding / pollution / health-impact inference was added
+
+Next recommended task:
+- if Manager AI wants the next marine workflow hardening slice, add marine-local review/report phrasing tests that explicitly preserve no-severity and no-impact wording when degraded or unavailable context dominates the current source mix
+## 2026-04-30 22:16 America/Chicago
+
+Assignment version:
+- 2026-04-30 21:43 America/Chicago
+
+Task:
+- add backend-supported unavailable/degraded source-health semantics for current marine context sources where those states can be represented honestly, then align docs and marine-local type contracts
+
+What changed:
+- extended marine backend source-health handling in `app/server/src/services/marine_context_service.py` so current marine context sources can now emit:
+  - `unavailable` for honest source-retrieval failure across NOAA CO-OPS, NOAA NDBC, Scottish Water Overflows, France Vigicrues Hydrometry, and Ireland OPW Water Level
+  - `degraded` for honest partial-metadata source-health conditions on Scottish Water Overflows, France Vigicrues Hydrometry, and Ireland OPW Water Level
+- preserved existing `loaded`, `empty`, `stale`, and `disabled` behavior
+- kept `degraded` intentionally unimplemented for NOAA CO-OPS and NOAA NDBC because the current slice still has no honest partial-ingest/source-quality degradation signal there
+- added deterministic backend regression coverage for:
+  - retrieval-failure `unavailable` behavior
+  - partial-metadata `degraded` behavior where supported
+  - stale thresholds remaining timestamp-based rather than fetch-time theater
+- updated marine contract docs so they now distinguish:
+  - states emitted by all five source families
+  - states emitted only by Scottish Water, Vigicrues, and Ireland OPW
+  - the remaining documented gap for CO-OPS/NDBC degraded semantics
+- widened marine-local client/type unions that consume backend source-health metadata so the updated contract still lint/builds cleanly
+
+Files touched:
+- `app/server/src/services/marine_context_service.py`
+- `app/server/src/types/api.py`
+- `app/server/tests/test_marine_contracts.py`
+- `app/server/tests/test_vigicrues_hydrometry.py`
+- `app/server/tests/test_ireland_opw_waterlevel.py`
+- `app/client/src/types/api.ts`
+- `app/client/src/features/marine/marineEnvironmentalContext.ts`
+- `app/client/src/features/marine/marineNoaaContext.ts`
+- `app/client/src/features/marine/marineNdbcContext.ts`
+- `app/client/src/features/marine/marineScottishWaterContext.ts`
+- `app/client/src/features/marine/marineVigicruesContext.ts`
+- `app/client/src/features/marine/marineIrelandOpwContext.ts`
+- `app/client/src/features/marine/marineContextSourceSummary.ts`
+- `app/client/src/features/marine/marineHydrologyContext.ts`
+- `app/client/src/features/marine/marineEvidenceSummary.ts`
+- `app/docs/marine-context-source-contract-matrix.md`
+- `app/docs/marine-context-fixture-reference.md`
+- `app/docs/marine-workflow-validation.md`
+- `app/docs/marine-module.md`
+- `app/docs/agent-progress/marine-ai.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass (`60 passed`)
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+
+Blockers or caveats:
+- `degraded` is now emitted only where the backend has honest partial-metadata evidence at the source-health layer:
+  - Scottish Water Overflows
+  - France Vigicrues Hydrometry
+  - Ireland OPW Water Level
+- NOAA CO-OPS and NOAA NDBC still do not emit `degraded`; that remains intentional and documented
+- `unavailable` is now emitted only for actual backend retrieval failure, not fabricated live-network theater
+- no anomaly scoring changes, no severity merging across source families, and no vessel-intent / wrongdoing / impact inference was added
+
+Next recommended task:
+- if Manager AI wants the next hardening slice, add marine smoke/export assertions that distinguish `degraded` versus `unavailable` context-source states without promoting either into anomaly severity
 # Marine AI Progress
 
 ## 2026-04-30 17:24 America/Chicago
@@ -671,6 +787,8 @@ Blockers or caveats:
 
 Next recommended task:
 - extend marine source-health validation for stale or unavailable source behavior without broadening semantics or touching shared frontend files
+
+
 
 
 

@@ -236,6 +236,22 @@ class Settings(BaseSettings):
         default="./data/swpc_space_weather_fixture.json",
         alias="SWPC_FIXTURE_PATH",
     )
+    ncei_space_weather_portal_source_mode: str = Field(
+        default="fixture",
+        alias="NCEI_SPACE_WEATHER_PORTAL_SOURCE_MODE",
+    )
+    ncei_space_weather_portal_metadata_url: str = Field(
+        default="https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ngdc.stp.swx:space_weather_products;view=xml;responseType=text/xml",
+        alias="NCEI_SPACE_WEATHER_PORTAL_METADATA_URL",
+    )
+    ncei_space_weather_portal_http_timeout_seconds: int = Field(
+        default=20,
+        alias="NCEI_SPACE_WEATHER_PORTAL_HTTP_TIMEOUT_SECONDS",
+    )
+    ncei_space_weather_portal_fixture_path: str = Field(
+        default="./data/ncei_space_weather_portal_fixture.xml",
+        alias="NCEI_SPACE_WEATHER_PORTAL_FIXTURE_PATH",
+    )
     washington_vaac_source_mode: str = Field(
         default="fixture",
         alias="WASHINGTON_VAAC_SOURCE_MODE",
@@ -362,6 +378,38 @@ class Settings(BaseSettings):
         alias="HKO_TROPICAL_CYCLONE_URL",
     )
     hko_http_timeout_seconds: int = Field(default=20, alias="HKO_HTTP_TIMEOUT_SECONDS")
+    natural_earth_physical_source_mode: str = Field(
+        default="fixture",
+        alias="NATURAL_EARTH_PHYSICAL_SOURCE_MODE",
+    )
+    natural_earth_physical_fixture_path: str = Field(
+        default="./data/natural_earth_physical_land_fixture.json",
+        alias="NATURAL_EARTH_PHYSICAL_FIXTURE_PATH",
+    )
+    natural_earth_physical_source_url: str = Field(
+        default="https://naturalearth.s3.amazonaws.com/110m_physical/ne_110m_land.zip",
+        alias="NATURAL_EARTH_PHYSICAL_SOURCE_URL",
+    )
+    natural_earth_physical_http_timeout_seconds: int = Field(
+        default=20,
+        alias="NATURAL_EARTH_PHYSICAL_HTTP_TIMEOUT_SECONDS",
+    )
+    noaa_global_volcano_source_mode: str = Field(
+        default="fixture",
+        alias="NOAA_GLOBAL_VOLCANO_SOURCE_MODE",
+    )
+    noaa_global_volcano_fixture_path: str = Field(
+        default="./data/noaa_global_volcano_locations_fixture.json",
+        alias="NOAA_GLOBAL_VOLCANO_FIXTURE_PATH",
+    )
+    noaa_global_volcano_api_url: str = Field(
+        default="https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/volcanolocs",
+        alias="NOAA_GLOBAL_VOLCANO_API_URL",
+    )
+    noaa_global_volcano_http_timeout_seconds: int = Field(
+        default=20,
+        alias="NOAA_GLOBAL_VOLCANO_HTTP_TIMEOUT_SECONDS",
+    )
     taiwan_cwa_source_mode: str = Field(default="fixture", alias="TAIWAN_CWA_SOURCE_MODE")
     taiwan_cwa_fixture_path: str = Field(
         default="./data/taiwan_cwa_current_weather_fixture.json",
@@ -428,6 +476,19 @@ class Settings(BaseSettings):
     bmkg_earthquakes_http_timeout_seconds: int = Field(
         default=20,
         alias="BMKG_EARTHQUAKES_HTTP_TIMEOUT_SECONDS",
+    )
+    ga_recent_earthquakes_source_mode: str = Field(default="fixture", alias="GA_RECENT_EARTHQUAKES_SOURCE_MODE")
+    ga_recent_earthquakes_fixture_path: str = Field(
+        default="./data/ga_recent_earthquakes_fixture.kml",
+        alias="GA_RECENT_EARTHQUAKES_FIXTURE_PATH",
+    )
+    ga_recent_earthquakes_feed_url: str = Field(
+        default="https://earthquakes.ga.gov.au/geoserver/earthquakes/wms?service=wms&request=GetMap&version=1.1.1&format=application/vnd.google-earth.kml+xml&layers=earthquakes_seven_days&styles=earthquakes:earthquakes_seven_days&cql_filter=display_flag=%27Y%27&height=2048&width=2048&transparent=false&srs=EPSG:4326&bbox=-180,-90,180,90&format_options=AUTOFIT:true;KMATTR:true;KMPLACEMARK:false;KMSCORE:40;MODE:refresh;SUPEROVERLAY:false",
+        alias="GA_RECENT_EARTHQUAKES_FEED_URL",
+    )
+    ga_recent_earthquakes_http_timeout_seconds: int = Field(
+        default=20,
+        alias="GA_RECENT_EARTHQUAKES_HTTP_TIMEOUT_SECONDS",
     )
     ipma_source_mode: str = Field(default="fixture", alias="IPMA_SOURCE_MODE")
     ipma_fixture_path: str = Field(
@@ -607,6 +668,22 @@ class Settings(BaseSettings):
     data_ai_multi_feed_stale_after_seconds: int = Field(
         default=172800,
         alias="DATA_AI_MULTI_FEED_STALE_AFTER_SECONDS",
+    )
+    nvd_cve_source_mode: str = Field(
+        default="fixture",
+        alias="NVD_CVE_SOURCE_MODE",
+    )
+    nvd_cve_fixture_path: str = Field(
+        default="./data/nvd_cve_fixture.json",
+        alias="NVD_CVE_FIXTURE_PATH",
+    )
+    nvd_cve_api_url: str = Field(
+        default="https://services.nvd.nist.gov/rest/json/cves/2.0",
+        alias="NVD_CVE_API_URL",
+    )
+    nvd_cve_http_timeout_seconds: int = Field(
+        default=20,
+        alias="NVD_CVE_HTTP_TIMEOUT_SECONDS",
     )
     webcam_database_url: str | None = Field(default=None, alias="WEBCAM_DATABASE_URL")
     webcam_worker_enabled: bool = Field(default=False, alias="WEBCAM_WORKER_ENABLED")

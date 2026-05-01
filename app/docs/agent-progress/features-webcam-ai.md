@@ -1,5 +1,96 @@
 # Features/Webcam AI Progress
 
+## 2026-04-30 22:06:05 -05:00
+
+- Task: Add a minimal backend-only source-ops review queue export bundle selector.
+- Assignment version read: `2026-04-30 22:01 America/Chicago`
+- What changed:
+  - added a narrow backend route at `/api/cameras/source-ops-review-queue-export-bundle`
+  - implemented a minimal summary payload that returns selected filter metadata, aggregate review lines, unknown source ids, shared lifecycle/source-ops caveats, and source lifecycle summary metadata without full queue items or per-source detail payloads
+  - preserved existing export summary and filtered review queue behavior unchanged
+  - added focused backend tests for minimal bundle response shape, filter interaction, unknown source handling, empty selected subsets, no full payload leakage, and preserved inert-source-text behavior
+  - updated lifecycle/source-ops docs so the minimal bundle is explicitly export/debug summarization only and not validation, activation, endpoint-health, availability, orientation, or freshness proof
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_review_queue.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_review_queue.py)
+  - [`app/server/src/routes/cameras.py`](/C:/Users/mike/11Writer/app/server/src/routes/cameras.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m compileall app/server/src` passed
+- Blockers or caveats:
+  - the minimal export bundle is read-only export/debug summarization only
+  - it does not activate, validate, promote, schedule, mutate, or live-check sources
+  - prompt-injection/source-text inertness coverage remains intact; surfaced source text remains untrusted data only
+  - no new sources, lifecycle mutation, scraping, browser automation, WebSocket work, staging, commit, or push occurred
+- Next recommended task:
+  - if Manager AI assigns follow-up work, add a compact backend-only export bundle mode on the broader source-ops export summary that can emit only the minimal review queue bundle fields without the rest of the summary payload
+
+## 2026-04-30 21:58:25 -05:00
+
+- Task: Add an opt-in source-ops export-summary aggregate-line bundle for filtered review queue subsets.
+- Assignment version read: `2026-04-30 21:52 America/Chicago`
+- What changed:
+  - extended the backend export/debug summary with an opt-in `reviewQueueExportSelection` package that can include filtered review-queue aggregate lines without duplicating full queue item payloads
+  - added export-summary query support for review-queue aggregate-line filters, including priority band, reason category, lifecycle state, selected source ids, and limit
+  - preserved filter metadata, unknown source ids, lifecycle caveats, no-activation/no-validation caveats, and aggregate-only semantics inside the export-summary mode
+  - kept normal export summary behavior unchanged when the opt-in flag is absent
+  - updated focused backend tests to cover normal export summary behavior, export-summary-with-aggregate-lines mode, filter interaction, unknown source handling, empty selected subsets, and no duplicate full queue item behavior
+  - updated lifecycle docs so this mode is explicitly export summarization only and not lifecycle, validation, activation, endpoint-health, availability, orientation, or freshness proof
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_summary.py)
+  - [`app/server/src/routes/cameras.py`](/C:/Users/mike/11Writer/app/server/src/routes/cameras.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m compileall app/server/src` passed
+- Blockers or caveats:
+  - the export-summary aggregate-line bundle is read-only export/debug summarization only
+  - it does not activate, validate, promote, schedule, mutate, or live-check sources
+  - prompt-injection/source-text inertness coverage remains intact; surfaced source text remains untrusted data only
+  - no new sources, lifecycle mutation, scraping, browser automation, WebSocket work, staging, commit, or push occurred
+- Next recommended task:
+  - if Manager AI assigns follow-up work, add a compact backend-only export bundle selector that can emit just review-queue aggregate lines and shared caveats as a minimal payload for downstream export consumers
+
+## 2026-04-30 21:49:55 -05:00
+
+- Task: Add a compact read-only source-ops review queue export selector.
+- Assignment version read: `2026-04-30 17:05 America/Chicago`
+- What changed:
+  - extended the existing filtered source-ops review queue route with `aggregate_only=true` so export/debug consumers can request aggregate-only output without full queue items
+  - preserved selected filters, unknown source ids, aggregate lines, lifecycle caveats, and no-activation/no-validation caveats in aggregate-only mode
+  - kept the full-plus-aggregate response shape intact when `aggregate_only` is not set
+  - updated focused backend tests to cover aggregate-only response shape, full-plus-aggregate response shape, filter interaction, unknown source handling, empty selected subsets, and preserved inert-source-text behavior
+  - updated lifecycle docs so the export selector is clearly export/debug summarization only and not stronger evidence than the full filtered queue
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_review_queue.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_review_queue.py)
+  - [`app/server/src/routes/cameras.py`](/C:/Users/mike/11Writer/app/server/src/routes/cameras.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m compileall app/server/src` passed
+- Blockers or caveats:
+  - aggregate-only mode is still read-only export/debug summarization only
+  - it does not activate, validate, promote, schedule, or mutate sources
+  - prompt-injection/source-text inertness coverage remains intact; surfaced source text remains untrusted data only
+  - no new sources, lifecycle mutation, scraping, browser automation, WebSocket work, activation, or validation promotion were added
+- Next recommended task:
+  - if Manager AI assigns follow-up work, add a compact backend-only export line bundle that can merge filtered review queue aggregate lines into the broader source-ops export summary on demand without returning duplicate detail payloads
+
 ## 2026-04-30 17:04:12 -05:00
 
 - Task: Add a compact read-only aggregate over filtered source-ops review queue results.

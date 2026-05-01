@@ -26,6 +26,8 @@ Related planning docs:
 - [source-acceleration-phase2-batch6-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md)
 - [source-acceleration-phase2-batch7-base-earth-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch7-base-earth-briefs.md)
 - [source-routing-priority-memo.md](/C:/Users/mike/11Writer/app/docs/source-routing-priority-memo.md)
+- [source-next-routing-packets.md](/C:/Users/mike/11Writer/app/docs/source-next-routing-packets.md)
+- [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md)
 - [source-routing-batch7-base-earth-reference.md](/C:/Users/mike/11Writer/app/docs/source-routing-batch7-base-earth-reference.md)
 - [source-quick-assign-packets-batch4.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-batch4.md)
 - [source-quick-assign-packets-batch5.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-batch5.md)
@@ -42,6 +44,7 @@ Use the full Data AI feed list for source ids, URLs, verification notes, caveats
 
 - [data-ai-rss-source-candidates.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates.md)
 - [data-ai-rss-source-candidates-batch2.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates-batch2.md)
+- [data-ai-rss-source-candidates-batch3.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates-batch3.md)
 
 Recommended first implementation slice:
 
@@ -67,6 +70,7 @@ Use the full brief pack for scope, caveats, and classification detail:
   - Owner: `geospatial`
   - Purpose: lightweight physical geography base layers from Natural Earth
   - First slice: one 110m or 50m physical theme only, such as land/ocean/coastlines/rivers
+  - Status note: backend-first static/reference route, fixtures, tests, and docs now exist in repo code, so treat this as a bounded consumer or workflow-validation follow-on rather than a fresh connector request
   - Do-not-do warning:
     - do not treat static cartographic vectors as live or legal geographic truth
 
@@ -81,6 +85,7 @@ Use the full brief pack for scope, caveats, and classification detail:
   - Owner: `geospatial`
   - Purpose: global static volcano reference points from NOAA/NCEI
   - First slice: volcano reference layer with name, location, elevation, type, last eruption, and Holocene certainty
+  - Status note: backend-first static/reference route, fixtures, tests, and docs now exist in repo code, so treat this as a bounded consumer or workflow-validation follow-on rather than a fresh connector request
   - Do-not-do warning:
     - do not treat static location metadata as current eruption or ash-impact status
 
@@ -261,7 +266,7 @@ New compact packets added in the latest Batch 5 routing pass:
 - `noaa-ncei-access-data`
   - `deferred` because the family is too broad for a safe first connector slice
 - `noaa-ncei-space-weather-portal`
-  - `deferred` because it is better treated as a later archive/context follow-on than an immediate source assignment
+  - backend-first archive/context route plus bounded consumer/export path now exist in repo code, so treat this as workflow follow-on work rather than a fresh assignment
 - `fdsn-public-seismic-metadata`
   - `deferred` because a generic multi-center metadata connector would sprawl too quickly
 - `gadm-boundaries`
@@ -298,58 +303,58 @@ Compact quick-assign packets are now available for the strongest Batch 6 handoff
     - do not present modeled climatology as observed local event truth
 
 - `first-epss`
-  - Owner: `connect`
+  - Owner: `data`
   - Purpose: bounded exploit-prioritization context for one CVE lookup slice
-  - First slice: one CVE score lookup only
+  - First slice: backend-first score lookup already exists; next work should be bounded consumer or validation follow-on only
   - Do-not-do warning:
     - do not treat EPSS as exploit proof or incident confirmation
 
 - `nist-nvd-cve`
-  - Owner: `connect`
+  - Owner: `data`
   - Purpose: bounded CVE detail context from the no-key lower-rate NVD API
-  - First slice: one CVE detail or recent-CVE slice only
+  - First slice: backend-first bounded CVE-detail slice plus conservative CVE-context composition already exist; next work should be bounded consumer or validation follow-on only
   - Do-not-do warning:
     - do not assume high-rate or full-sync behavior without keys
 
 - `cisa-cyber-advisories`
-  - Owner: `connect`
+  - Owner: `data`
   - Purpose: bounded U.S. cyber advisory context
-  - First slice: one advisory feed family only
+  - First slice: backend-first advisory slice already exists; next work should be bounded workflow or consumer follow-on only
   - Do-not-do warning:
     - do not turn advisories into exploit or impact confirmation
 
 - `nrc-event-notifications`
   - Owner: `geospatial`
   - Purpose: bounded infrastructure event-notification context from public NRC notices
-  - First slice: one RSS or event-notification family only
+  - First slice: backend-first RSS slice already exists; next work should be a bounded consumer or explicit workflow-validation follow-on
   - Do-not-do warning:
     - do not infer radiological impact beyond source text
 
 - `washington-vaac-advisories`
   - Owner: `aerospace`
   - Purpose: bounded volcanic ash advisory context
-  - First slice: one advisory feed family only
+  - First slice: backend route plus bounded consumer/export package already exist; next work should be workflow validation only
   - Do-not-do warning:
     - do not claim ash dispersion precision beyond advisory text
 
 - `anchorage-vaac-advisories`
   - Owner: `aerospace`
   - Purpose: bounded volcanic ash advisory context
-  - First slice: one advisory feed family only
+  - First slice: backend route plus bounded consumer/export package already exist; next work should be workflow validation only
   - Do-not-do warning:
     - do not overstate route impact from advisory text alone
 
 - `tokyo-vaac-advisories`
   - Owner: `aerospace`
   - Purpose: bounded volcanic ash advisory context
-  - First slice: one advisory feed family only
+  - First slice: backend route plus bounded consumer/export package already exist; next work should be workflow validation only
   - Do-not-do warning:
     - do not flatten VAAC products into a fake global severity scale
 
 - `taiwan-cwa-aws-opendata`
   - Owner: `geospatial`
   - Purpose: bounded Taiwan weather or warning context through public AWS-backed files
-  - First slice: one public AWS-backed file family only
+  - First slice: backend-first AWS-backed weather slice already exists; next work should be a bounded consumer or explicit workflow-validation follow-on
   - Do-not-do warning:
     - do not drift into key-gated normal CWA APIs
 
@@ -384,6 +389,7 @@ Compact quick-assign packets are now available for the strongest Batch 6 handoff
 ## Data AI Routing
 
 Use [data-ai-onboarding.md](/C:/Users/mike/11Writer/app/docs/data-ai-onboarding.md) for lane boundaries and safety rules. Use [source-routing-priority-memo.md](/C:/Users/mike/11Writer/app/docs/source-routing-priority-memo.md) for the current Manager-facing ranked routing view.
+Use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) for the short sequencing view after the active starter bundle.
 
 Current Data AI implementation truth:
 
@@ -395,7 +401,8 @@ Current Data AI implementation truth:
   - `sans-isc-diary`
   - `cloudflare-status`
   - `gdacs-alerts`
-- use [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for the next bounded RSS/feed wave after that starter slice
+- the active starter bundle is now implemented backend-first with a bounded aggregate route, typed contracts, fixtures, tests, and prompt-injection-like fixture coverage
+- use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) plus [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md) for the next bounded RSS/feed wave after that starter slice
 
 Primary Data AI handoffs:
 
@@ -421,9 +428,9 @@ Primary Data AI handoffs:
     - do not assume high-rate or bulk-sync posture without keys
 
 - `nrc-event-notifications`
-  - Owner: `data` when assigned as public event-feed implementation work; `geospatial` remains the main contextual consumer
+  - Owner: `geospatial`
   - Purpose: bounded infrastructure event-notification context from public NRC notices
-  - First slice: one RSS or event-notification family only
+  - First slice: backend-first RSS slice already exists; next work should be a bounded consumer or explicit workflow-validation follow-on
   - Do-not-do warning:
     - do not infer radiological impact beyond source text
 
@@ -458,7 +465,7 @@ New compact packets added in the latest Batch 4 routing pass:
 - `bmkg-earthquakes`
   - Owner: `geospatial`
   - Purpose: Indonesian regional-authority earthquake feed with explicit public JSON endpoints
-  - First slice: latest and recent public quake JSON records only
+  - First slice: backend-first latest and recent public quake JSON records already exist; next work should be a bounded consumer or workflow-validation follow-on
   - Validation commands:
     - `curl.exe -L "https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json"`
     - `curl.exe -L "https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json"`
@@ -532,7 +539,7 @@ New compact packets added in the latest Batch 4 routing pass:
 - `ga-recent-earthquakes`
   - Owner: `geospatial`
   - Purpose: Australian regional-authority recent earthquake overlay via public KML
-  - First slice: recent earthquake feed only
+  - First slice: backend-first recent earthquake KML feed already exists; next work should be a bounded consumer or workflow-validation follow-on
   - Validation commands:
     - `curl.exe -L "http://www.ga.gov.au/earthquakes/all_recent.kml"`
   - Do-not-do warning:
@@ -1337,7 +1344,7 @@ These sources already have active briefing, ownership, or implementation momentu
 - Marine: `france-vigicrues-hydrometry` follow-through or first consumer prep after the current backend-only slice
 - Aerospace: rerun focused aerospace smoke on a healthy Windows host before promoting the current implemented source stack; do not reopen a fresh aerospace source just to replace that validation work
 - Features/Webcam: a bounded `finland-digitraffic` follow-on first, or `bart-gtfs-realtime` if Manager AI explicitly opens a fresh source lane
-- Data: keep the active five-feed RSS starter slice bounded, then route `ncsc-uk-all`, `cert-fr-alerts`, or `cloudflare-radar`
+- Data: keep the active five-feed RSS starter slice bounded, then use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) to route `ncsc-uk-all`, `cert-fr-alerts`, or `cloudflare-radar`
 - Gather: continue source brief expansion and ownership-map maintenance
 
 ## Use Rules

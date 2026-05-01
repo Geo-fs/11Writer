@@ -1,5 +1,158 @@
 # Connect AI Progress
 
+## 2026-04-30 22:27:59 -05:00
+
+- Task:
+  - Refine the ownership scanner for the newest source families, preserve real ambiguity, and run a current-state validation checkpoint
+- Assignment version read:
+  - `2026-04-30 22:22 America/Chicago`
+- What changed:
+  - Re-read the new Connect assignment and inspected the live dirty tree, scanner rules, coordination docs, and the latest Data, Geospatial, Aerospace, Marine, Features/Webcam, Gather, Atlas, and Connect progress entries before changing anything
+  - Ran the ownership scanner before changes and recorded the real mixed-tree posture:
+    - `shared-high-collision: 8`
+    - `unknown: 25`
+  - Refined scanner ownership only where file families were clearly lane-owned:
+    - Data AI:
+      - `nvd-cve` route/service/test/fixture family
+      - `cve_context` service/test family
+      - kept the older shared RSS foundation out of lane-exclusive ownership
+      - kept `data-ai-feed-rollout-ladder.md` in Data/Gather planning space rather than promoting it into implementation truth
+    - Aerospace:
+      - `noaa-ncei-space-weather-portal` adapter/route/service/fixture/test family
+    - Geospatial:
+      - `natural-earth-physical` service/fixture/test/doc family
+      - `noaa-global-volcano-locations` service/fixture/doc family
+      - `ga-recent-earthquakes` backend test/service family
+      - `base_earth_context` route plus `test_base_earth_reference_bundle.py`
+    - Gather:
+      - `source-routing-priority-memo.md` moved into the Gather planning bucket
+    - Atlas:
+      - added a dedicated `atlas-planning` bucket for `data-ai-rss-source-candidates.md` and `data-ai-rss-source-candidates-batch3.md` so those user-directed planning docs are visible as planning input, not implementation ownership
+  - Preserved real ambiguity on purpose for the two broad backend files that still should not be force-classified:
+    - `app/server/src/app.py`
+    - `app/server/src/services/status_service.py`
+  - Updated coordination docs so they no longer claim `unknown: 0` and now reflect the dedicated Atlas planning bucket plus the real residual ambiguity
+- Files touched:
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed before and after the scanner refinement
+  - `python scripts/alerts_ledger.py --json` passed
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py app/server/tests/test_nvd_cve.py app/server/tests/test_cve_context.py -q` passed
+  - `python -m pytest app/server/tests/test_bmkg_earthquakes.py app/server/tests/test_ga_recent_earthquakes.py app/server/tests/test_base_earth_reference_bundle.py -q` passed
+  - `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_ireland_opw_waterlevel.py app/server/tests/test_vigicrues_hydrometry.py -q` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --json` passed
+- Blockers or caveats:
+  - No new repo-wide blocker reproduced in this pass
+  - Ownership posture improved from:
+    - `shared-high-collision: 8`, `unknown: 25`
+    - to `shared-high-collision: 8`, `unknown: 2`
+  - The remaining `unknown: 2` is intentional and honest, not scanner debt:
+    - `app/server/src/app.py`
+    - `app/server/src/services/status_service.py`
+  - `app/docs/data-ai-feed-rollout-ladder.md` remains planning/routing material and should not be treated as implementation proof or source-promotion evidence
+  - Atlas Batch 3 RSS docs now classify under `atlas-planning`, but still remain user-directed planning input only
+- Next recommended task:
+  - If Manager AI wants another Connect pass, reconcile the remaining broad shared backend surfaces only if a concrete consolidation or validation blocker appears there; do not classify them away just to keep `unknown` at zero
+
+## 2026-04-30 22:06:04 -05:00
+
+- Task:
+  - Run the current-state consolidation checkpoint after the latest scanner and source-ops wave, fix only reproduced repo-wide blockers, and verify the live readiness surface
+- Assignment version read:
+  - `2026-04-30 21:52 America/Chicago`
+- What changed:
+  - Re-read the current Connect assignment, the latest Features/Webcam and Gather progress, the ownership scanner summary, and `app/docs/data-ai-feed-rollout-ladder.md` before making changes
+  - Confirmed that `app/docs/data-ai-feed-rollout-ladder.md` is a planning artifact only and still lacks Gather progress evidence for the manager-referenced `2026-04-30 21:43 America/Chicago` handoff, so it should not be treated as implementation proof or source-promotion truth
+  - Reproduced one real repo-wide blocker surface:
+    - backend marine context tests were split between `loaded` and `degraded` expectations
+    - the frontend build was failing on marine context health-type drift
+  - Fixed the backend health-classification drift in `marine_context_service.py` by degrading only when the returned result set actually contains partial-metadata records, instead of degrading based on hidden fixture records outside the scoped query window
+  - Revalidated the checkpoint surface after the fix:
+    - marine backend tests green
+    - client lint/build green
+    - focused `marine` and `webcam` smoke green
+- Files touched:
+  - `app/server/src/services/marine_context_service.py`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `python scripts/list_changed_files_by_owner.py --summary` passed before and after the fix
+  - `python scripts/alerts_ledger.py --json` passed
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_ireland_opw_waterlevel.py app/server/tests/test_vigicrues_hydrometry.py -q` passed after the fix
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python app/server/tests/run_playwright_smoke.py marine` passed
+  - `python app/server/tests/run_playwright_smoke.py webcam` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke webcam=passed --json` passed
+- Blockers or caveats:
+  - One repo-wide blocker reproduced and was fixed:
+    - marine fixture health classification had drifted into degrading scoped queries based on off-screen partial fixture rows
+  - Current ownership posture is mixed again:
+    - `unknown: 21`
+    - `shared-high-collision: 3`
+  - `app/docs/data-ai-feed-rollout-ladder.md` is still pending Gather handoff evidence and should remain planning-only in checkpoint reporting
+- Next recommended task:
+  - Refine the ownership scanner for the new Earth/base-reference and NVD/NCEI families so the mixed dirty tree is easier to consolidate without hiding genuinely broad shared files
+
+## 2026-04-30 21:51:29 -05:00
+
+- Task:
+  - Add a dedicated Data AI ownership bucket to the scanner and run a fresh repo checkpoint after the first Data AI implementation wave
+- Assignment version read:
+  - `2026-04-30 17:05 America/Chicago`
+- What changed:
+  - Re-read the updated Connect assignment plus the current Data AI progress, cyber-context docs, validation docs, and scanner before changing any coordination tooling
+  - Added a dedicated `data-ai` ownership bucket to the scanner for clear lane-owned implementation families only:
+    - CISA advisories route, service, test, fixture, and docs
+    - FIRST EPSS route, service, test, fixture, and docs
+    - Data AI five-feed aggregate route, registry, service, tests, and feed fixtures
+    - dedicated Data AI onboarding, next-task, and progress docs
+  - Intentionally left the older generic RSS foundation outside the Data AI bucket because it is shared/pre-existing rather than lane-exclusive
+  - Re-ran the scanner before and after the change:
+    - earlier current posture was a residual `unknown` set that still included Data AI implementation files
+    - after the dedicated bucket landed, the current dirty set classified cleanly with `unknown: 0`
+  - Updated coordination docs so they now reflect the dedicated Data AI bucket and the current clean ownership posture for the live modified set
+- Files touched:
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `python scripts/list_changed_files_by_owner.py --summary` passed before the Data AI bucket change
+  - `python scripts/alerts_ledger.py --json` passed
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py -q` passed
+  - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --json` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed after the Data AI bucket change
+- Blockers or caveats:
+  - No repo-wide blocker reproduced in this pass
+  - Atlas's RSS candidate list remains planning/routing input only, not implementation or validation proof
+  - The scanner is cleaner now, but generic shared RSS foundation files remain intentionally outside the Data AI bucket
+  - No domain semantics, source promotion, source status truth, or runtime exposure behavior changed
+- Next recommended task:
+  - Wait for the next Connect assignment unless Manager AI wants another checkpoint after the next Data AI source slice or wants a broader scanner pass over intentionally ambiguous roadmap/runtime docs
+
 ## 2026-04-30 17:01:58 -05:00
 
 - Task:

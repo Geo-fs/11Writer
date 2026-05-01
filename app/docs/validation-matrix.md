@@ -86,6 +86,31 @@ Notes:
 
 - No broad client or backend build is needed unless source code changed.
 
+## Data AI
+
+Purpose:
+
+- bounded public internet-information source slices, cyber-context routes, and the first five-feed aggregate route
+
+Working directory:
+
+- repo root: `C:\Users\mike\11Writer`
+
+Commands:
+
+```bash
+python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py -q
+python -m pytest app/server/tests/test_data_ai_multi_feed.py -q
+python -m pytest app/server/tests/test_rss_feed_service.py -q
+python -m compileall app/server/src
+```
+
+Notes:
+
+- Keep lane validation bounded to the assigned Data AI source slice.
+- Do not treat the generic RSS foundation as lane-exclusive ownership just because Data AI currently consumes it.
+- If the change only touches Data AI docs, prefer diff review plus the focused backend tests above.
+
 ## Geospatial backend
 
 Purpose:

@@ -283,9 +283,11 @@ async function runAircraftPhase(browser) {
         "Replay note:",
         "Aerospace Context Review",
         "Aerospace Export Readiness",
+        "Aerospace Source Readiness",
         "Aerospace Context Report",
         "Aerospace Review Queue",
         "Geomagnetism (USGS)",
+        "Space Weather Archive Context",
         "Volcanic Ash Advisory Context"
       ],
       "aircraft inspector"
@@ -334,6 +336,9 @@ async function runAircraftPhase(browser) {
     if (!snapshotMetadata?.geomagnetismContext?.observatoryId) {
       throw new Error("Aircraft snapshot metadata missing geomagnetism context.");
     }
+    if (!snapshotMetadata?.nceiSpaceWeatherArchiveContext?.collectionId) {
+      throw new Error("Aircraft snapshot metadata missing NCEI archive context.");
+    }
     if (!snapshotMetadata?.vaacContext?.sourceCount && snapshotMetadata?.vaacContext?.sourceCount !== 0) {
       throw new Error("Aircraft snapshot metadata missing VAAC context.");
     }
@@ -357,6 +362,9 @@ async function runAircraftPhase(browser) {
     if (!snapshotMetadata?.aerospaceExportReadiness?.category) {
       throw new Error("Aircraft snapshot metadata missing aerospace export readiness.");
     }
+    if (!snapshotMetadata?.aerospaceSourceReadiness?.familyCount && snapshotMetadata?.aerospaceSourceReadiness?.familyCount !== 0) {
+      throw new Error("Aircraft snapshot metadata missing aerospace source readiness.");
+    }
     if (!snapshotMetadata?.aerospaceContextReport?.sourceCount && snapshotMetadata?.aerospaceContextReport?.sourceCount !== 0) {
       throw new Error("Aircraft snapshot metadata missing aerospace context report.");
     }
@@ -369,6 +377,9 @@ async function runAircraftPhase(browser) {
     if (!Array.isArray(snapshotMetadata?.geomagnetismContext?.displayLines)) {
       throw new Error("Aircraft geomagnetism metadata missing display lines.");
     }
+    if (!Array.isArray(snapshotMetadata?.nceiSpaceWeatherArchiveContext?.displayLines)) {
+      throw new Error("Aircraft NCEI archive metadata missing display lines.");
+    }
     if (!Array.isArray(snapshotMetadata?.vaacContext?.sources)) {
       throw new Error("Aircraft VAAC metadata missing sources.");
     }
@@ -380,6 +391,9 @@ async function runAircraftPhase(browser) {
     }
     if (!Array.isArray(snapshotMetadata?.aerospaceReviewQueue?.topItems)) {
       throw new Error("Aircraft aerospace review queue metadata missing top items.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceSourceReadiness?.families)) {
+      throw new Error("Aircraft aerospace source readiness metadata missing families.");
     }
 
     const beforeHeight = await page.evaluate(
@@ -483,9 +497,11 @@ async function runSatellitePhase(browser) {
         "Replay note:",
         "Aerospace Context Review",
         "Aerospace Export Readiness",
+        "Aerospace Source Readiness",
         "Aerospace Context Report",
         "Aerospace Review Queue",
         "Geomagnetism (USGS)",
+        "Space Weather Archive Context",
         "Volcanic Ash Advisory Context"
       ],
       "satellite inspector"
@@ -540,6 +556,9 @@ async function runSatellitePhase(browser) {
     if (!snapshotMetadata?.geomagnetismContext?.observatoryId) {
       throw new Error("Satellite snapshot metadata missing geomagnetism context.");
     }
+    if (!snapshotMetadata?.nceiSpaceWeatherArchiveContext?.collectionId) {
+      throw new Error("Satellite snapshot metadata missing NCEI archive context.");
+    }
     if (!snapshotMetadata?.vaacContext?.sourceCount && snapshotMetadata?.vaacContext?.sourceCount !== 0) {
       throw new Error("Satellite snapshot metadata missing VAAC context.");
     }
@@ -555,6 +574,9 @@ async function runSatellitePhase(browser) {
     if (!snapshotMetadata?.aerospaceExportReadiness?.category) {
       throw new Error("Satellite snapshot metadata missing aerospace export readiness.");
     }
+    if (!snapshotMetadata?.aerospaceSourceReadiness?.familyCount && snapshotMetadata?.aerospaceSourceReadiness?.familyCount !== 0) {
+      throw new Error("Satellite snapshot metadata missing aerospace source readiness.");
+    }
     if (!snapshotMetadata?.aerospaceContextReport?.sourceCount && snapshotMetadata?.aerospaceContextReport?.sourceCount !== 0) {
       throw new Error("Satellite snapshot metadata missing aerospace context report.");
     }
@@ -567,6 +589,9 @@ async function runSatellitePhase(browser) {
     if (!Array.isArray(snapshotMetadata?.geomagnetismContext?.displayLines)) {
       throw new Error("Satellite geomagnetism metadata missing display lines.");
     }
+    if (!Array.isArray(snapshotMetadata?.nceiSpaceWeatherArchiveContext?.displayLines)) {
+      throw new Error("Satellite NCEI archive metadata missing display lines.");
+    }
     if (!Array.isArray(snapshotMetadata?.vaacContext?.sources)) {
       throw new Error("Satellite VAAC metadata missing sources.");
     }
@@ -578,6 +603,9 @@ async function runSatellitePhase(browser) {
     }
     if (!Array.isArray(snapshotMetadata?.aerospaceReviewQueue?.topItems)) {
       throw new Error("Satellite aerospace review queue metadata missing top items.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceSourceReadiness?.families)) {
+      throw new Error("Satellite aerospace source readiness metadata missing families.");
     }
 
     return {
@@ -942,7 +970,15 @@ async function runMarinePhase(browser) {
     const contextSourcesText = await page.locator('[data-testid="marine-context-sources"]').textContent();
     assertIncludes(
       contextSourcesText ?? "",
-      ["NOAA CO-OPS", "NOAA NDBC", "Scottish Water Overflows", "France Vigicrues Hydrometry", "Ireland OPW Water Level"],
+      [
+        "NOAA CO-OPS",
+        "NOAA NDBC",
+        "Scottish Water Overflows",
+        "France Vigicrues Hydrometry",
+        "Ireland OPW Water Level",
+        "degraded",
+        "unavailable"
+      ],
       "marine context source summary"
     );
     const contextTimelineText = await page.locator('[data-testid="marine-context-timeline"]').textContent();
@@ -954,7 +990,7 @@ async function runMarinePhase(browser) {
     const contextIssuesText = await page.locator('[data-testid="marine-context-issues"]').textContent();
     assertIncludes(
       contextIssuesText ?? "",
-      ["Marine Context Issues", "fixture/local mode"],
+      ["Marine Context Issues", "fixture/local mode", "degraded", "unavailable"],
       "marine context issues"
     );
     const environmentalText = await page.locator('[data-testid="marine-environmental-context"]').textContent();
@@ -982,13 +1018,13 @@ async function runMarinePhase(browser) {
     const scottishWaterText = await page.locator('[data-testid="marine-scottish-water-context"]').textContent();
     assertIncludes(
       scottishWaterText ?? "",
-      ["Scottish Water Overflows", "fixture/local", "active"],
+      ["Scottish Water Overflows", "fixture/local", "degraded", "active"],
       "marine Scottish Water overflow context"
     );
     const vigicruesText = await page.locator('[data-testid="marine-vigicrues-context"]').textContent();
     assertIncludes(
       vigicruesText ?? "",
-      ["France Vigicrues Hydrometry", "fixture/local"],
+      ["France Vigicrues Hydrometry", "fixture/local", "unavailable"],
       "marine Vigicrues hydrometry context"
     );
     const irelandOpwText = await page.locator('[data-testid="marine-ireland-opw-context"]').textContent();
@@ -1213,12 +1249,26 @@ async function runMarinePhase(browser) {
         throw new Error(`Marine context source summary metadata missing row label: ${expectedLabel}`);
       }
     }
+    const scottishWaterRow = contextSourceSummary.rows.find((row) => row.label === "Scottish Water Overflows");
+    if (!scottishWaterRow || scottishWaterRow.health !== "degraded") {
+      throw new Error(`Marine context source summary expected Scottish Water degraded state. Received ${JSON.stringify(scottishWaterRow)}`);
+    }
+    const vigicruesRow = contextSourceSummary.rows.find((row) => row.label === "France Vigicrues Hydrometry");
+    if (!vigicruesRow || vigicruesRow.health !== "unavailable") {
+      throw new Error(`Marine context source summary expected Vigicrues unavailable state. Received ${JSON.stringify(vigicruesRow)}`);
+    }
+    if (Number(contextSourceSummary.degradedSourceCount ?? 0) < 1) {
+      throw new Error("Marine context source summary expected at least one degraded source.");
+    }
     const vigicruesContext = metadata.marineAnomalySummary.vigicruesHydrometryContext ?? null;
     if (!vigicruesContext) {
       throw new Error("Marine snapshot metadata missing Vigicrues hydrometry context summary.");
     }
     if (vigicruesContext.sourceMode !== "fixture") {
       throw new Error(`Marine Vigicrues context expected fixture mode. Received ${vigicruesContext.sourceMode}`);
+    }
+    if (vigicruesContext.health !== "unavailable") {
+      throw new Error(`Marine Vigicrues context expected unavailable state. Received ${vigicruesContext.health}`);
     }
     const irelandOpwContext = metadata.marineAnomalySummary.irelandOpwWaterLevelContext ?? null;
     if (!irelandOpwContext) {
@@ -1239,6 +1289,9 @@ async function runMarinePhase(browser) {
     }
     if (!Array.isArray(hydrologyContext.caveats) || hydrologyContext.caveats.length < 1) {
       throw new Error("Marine hydrology context metadata missing caveats.");
+    }
+    if (!["loaded", "empty", "stale", "degraded", "disabled", "unavailable", "error", "unknown"].includes(hydrologyContext.vigicrues?.health ?? "")) {
+      throw new Error("Marine hydrology context metadata missing recognized Vigicrues health state.");
     }
     const contextFusionSummary = metadata.marineAnomalySummary.contextFusionSummary ?? null;
     if (!contextFusionSummary) {
@@ -1347,6 +1400,9 @@ async function runMarinePhase(browser) {
     if (Number(contextIssueQueue.issueCount ?? 0) < 1) {
       throw new Error("Marine context issue queue expected at least one issue in fixture mode.");
     }
+    if (Number(contextIssueQueue.warningCount ?? 0) < 1) {
+      throw new Error("Marine context issue queue expected at least one warning for degraded or unavailable source health.");
+    }
     if (Number(contextIssueQueue.infoCount ?? 0) < 1) {
       throw new Error("Marine context issue queue expected at least one informational fixture-mode issue.");
     }
@@ -1355,6 +1411,9 @@ async function runMarinePhase(browser) {
     }
     if (!contextIssueQueue.topIssues.some((issue) => issue.issueType === "fixture-mode")) {
       throw new Error("Marine context issue queue expected a fixture-mode issue in snapshot metadata.");
+    }
+    if (!contextIssueQueue.topIssues.some((issue) => issue.issueType === "degraded" || issue.issueType === "unavailable")) {
+      throw new Error("Marine context issue queue expected degraded or unavailable source-health coverage in snapshot metadata.");
     }
 
     return {

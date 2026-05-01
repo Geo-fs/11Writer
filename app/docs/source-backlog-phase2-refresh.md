@@ -22,6 +22,7 @@ Status note:
 - [source-workflow-validation-plan.md](/C:/Users/mike/11Writer/app/docs/source-workflow-validation-plan.md)
 - [source-prompt-index.md](/C:/Users/mike/11Writer/app/docs/source-prompt-index.md)
 - [source-routing-priority-memo.md](/C:/Users/mike/11Writer/app/docs/source-routing-priority-memo.md)
+- [source-next-routing-packets.md](/C:/Users/mike/11Writer/app/docs/source-next-routing-packets.md)
 - [source-quick-assign-packets-data-ai-rss.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-data-ai-rss.md)
 - [source-routing-batch7-base-earth-reference.md](/C:/Users/mike/11Writer/app/docs/source-routing-batch7-base-earth-reference.md)
 - [data_sources.noauth.registry.json](/C:/Users/mike/11Writer/app/docs/data_sources.noauth.registry.json)
@@ -244,7 +245,7 @@ New compact packets were added in the latest Batch 4 routing pass for:
 
 | Source id | Owner agent | Suggested timing | Reason |
 | --- | --- | --- | --- |
-| `bmkg-earthquakes` | `geospatial` | `now` | Regional-authority public JSON feeds are explicit, machine-readable, and a strong fit for the current environmental event architecture. |
+| `bmkg-earthquakes` | `geospatial` | `n/a` | Repo-local backend-first regional-authority slice now exists, so the next step is bounded consumer or validation follow-on rather than fresh assignment. |
 | `gb-carbon-intensity` | `geospatial` | `soon` | Official no-auth JSON with simple regional context semantics and a fast path to bounded implementation. |
 | `unhcr-refugee-data-finder` | `geospatial` | `soon` | High-value displacement baseline context for regional inspectors if the first slice stays country/region aggregate only. |
 | `worldbank-indicators` | `geospatial` | `soon` | Stable global baseline context with straightforward normalization and low collision risk. |
@@ -252,7 +253,7 @@ New compact packets were added in the latest Batch 4 routing pass for:
 | `london-air-quality-network` | `geospatial` | `soon` | Strong urban air-quality station candidate if kept to validated observations only. |
 | `france-vigicrues-hydrometry` | `marine` | `now` | Marine AI progress now shows real backend-only implementation, so the next best step is to finish the active lane rather than reassign a different marine source. |
 | `elexon-insights-grid` | `geospatial` | `later` | Public and useful, but should begin with one dataset family only to avoid catalog sprawl. |
-| `ga-recent-earthquakes` | `geospatial` | `later` | Good regional supplement, but KML parsing is slightly less clean than the top JSON-first candidates. |
+| `ga-recent-earthquakes` | `geospatial` | `n/a` | Repo-local backend-first regional-authority KML slice now exists, so the next step is bounded consumer or validation follow-on rather than fresh assignment. |
 
 ### Hold or verification additions
 
@@ -272,8 +273,8 @@ New compact packets were added in the latest Batch 4 routing pass for:
 
 ### Batch 4 ranking note
 
-- Batch 4 introduced several strong geospatial/context candidates, especially `bmkg-earthquakes`, `gb-carbon-intensity`, `unhcr-refugee-data-finder`, and `worldbank-indicators`.
-- These do not automatically replace the current top 8 queue above, but they are now valid next-wave candidates once the current geospatial assignment lane has capacity.
+- Batch 4 introduced several strong geospatial/context candidates, especially `gb-carbon-intensity`, `unhcr-refugee-data-finder`, and `worldbank-indicators`.
+- `bmkg-earthquakes` and `ga-recent-earthquakes` now have repo-local backend-first implementation evidence, so treat them as follow-on validation or consumer targets rather than fresh backlog candidates.
 
 ## Batch 5 Intake Notes
 
@@ -310,7 +311,7 @@ New compact packets were added in the latest Batch 5 routing pass for:
 | `mbta-gtfs-realtime` | `needs-verification` | `hold` | No-key experimentation is mentioned, but the no-signup production path still needs tighter confirmation. |
 | `canada-open-data-registry` | `deferred` | `hold` | Discovery/catalog work only, not a direct source integration candidate. |
 | `noaa-ncei-access-data` | `deferred` | `hold` | Public family is too broad to assign safely without a separate narrowing pass. |
-| `noaa-ncei-space-weather-portal` | `deferred` | `hold` | Better treated as a later archive/context follow-on than a fresh source lane. |
+| `noaa-ncei-space-weather-portal` | `implemented` | `n/a` | Backend-first archive/context route plus bounded consumer/export path now exist, so this is no longer fresh backlog work. |
 | `fdsn-public-seismic-metadata` | `deferred` | `hold` | Standards/discovery value is real, but a generic multi-center connector would sprawl quickly. |
 | `gadm-boundaries` | `rejected` | `hold` | Current licensing is restricted to academic and other non-commercial use. |
 | `mta-gtfs-realtime` | `rejected` | `hold` | Official MTA realtime feeds require an API key. |
@@ -325,7 +326,7 @@ Compact routing packets are now available in [source-quick-assign-packets-batch6
 
 ### Manager routing note
 
-Top 5 cleanest Batch 6 assignment-ready handoffs after this governance pass:
+Earlier Batch 6 ranking produced these clean handoffs:
 
 1. `geosphere-austria-warnings`
 2. `washington-vaac-advisories`
@@ -333,20 +334,26 @@ Top 5 cleanest Batch 6 assignment-ready handoffs after this governance pass:
 4. `bart-gtfs-realtime`
 5. `nasa-power-meteorology-solar`
 
+Current repo-local status truth:
+
+- `geosphere-austria-warnings`, `nasa-power-meteorology-solar`, `washington-vaac-advisories`, `anchorage-vaac-advisories`, `tokyo-vaac-advisories`, `nrc-event-notifications`, and `taiwan-cwa-aws-opendata` now have implemented backend-first or consumer-first slices in repo code.
+- Treat those as follow-on validation or bounded-consumer targets, not as fresh backlog assignments.
+- Use [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md) for the next bounded Data AI feed-family wave rather than expanding this backlog table with broad feed polling.
+
 ### Strong new assignment-ready additions
 
 | Source id | Owner agent | Suggested timing | Reason |
 | --- | --- | --- | --- |
 | `geosphere-austria-warnings` | `geospatial` | `soon` | Warning-context fit is strong and the first slice can stay bounded to one current warning feed family. |
 | `nasa-power-meteorology-solar` | `geospatial` | `soon` | Official point-query context source with a narrow route shape and clean modeled-context semantics. |
-| `first-epss` | `data` | `later` | Useful bounded exploit-prioritization context, but outside the core spatial lanes. |
-| `nist-nvd-cve` | `data` | `later` | Clean bounded CVE-detail context if kept to no-key lower-rate usage. |
-| `cisa-cyber-advisories` | `data` | `later` | Good advisory context, but still less central than the current geospatial and marine routing wave. |
-| `nrc-event-notifications` | `geospatial` | `soon` | Public infrastructure event notices fit a narrow evidence-aware context route. |
-| `washington-vaac-advisories` | `aerospace` | `soon` | Clean ash-advisory context source with strong aerospace relevance and bounded semantics. |
-| `anchorage-vaac-advisories` | `aerospace` | `soon` | Same bounded ash-advisory fit as Washington VAAC with strong aviation-context value. |
-| `tokyo-vaac-advisories` | `aerospace` | `soon` | Good bounded ash-advisory context if provenance remains explicit. |
-| `taiwan-cwa-aws-opendata` | `geospatial` | `soon` | Public-bucket-only weather or warning slice is a plausible narrow fit if key-gated APIs stay excluded. |
+| `first-epss` | `data` | `n/a` | Repo-local backend-first scored-context slice now exists, so the next step is bounded consumer or validation follow-on. |
+| `nist-nvd-cve` | `data` | `n/a` | Repo-local backend-first NVD detail slice plus conservative CVE-context composition now exist, so the next step is bounded consumer or validation follow-on. |
+| `cisa-cyber-advisories` | `data` | `n/a` | Repo-local backend-first advisory slice now exists, so the next step is bounded consumer or validation follow-on rather than fresh source work. |
+| `nrc-event-notifications` | `geospatial` | `n/a` | Repo-local backend-first slice now exists; treat as a follow-on validation or bounded-consumer target instead of fresh backlog work. |
+| `washington-vaac-advisories` | `aerospace` | `n/a` | Repo-local advisory route plus bounded consumer/export package now exists; workflow validation is the next step. |
+| `anchorage-vaac-advisories` | `aerospace` | `n/a` | Repo-local advisory route plus bounded consumer/export package now exists; workflow validation is the next step. |
+| `tokyo-vaac-advisories` | `aerospace` | `n/a` | Repo-local advisory route plus bounded consumer/export package now exists; workflow validation is the next step. |
+| `taiwan-cwa-aws-opendata` | `geospatial` | `n/a` | Repo-local backend-first weather slice now exists; treat as a follow-on validation or bounded-consumer target instead of fresh backlog work. |
 | `bart-gtfs-realtime` | `features-webcam` | `soon` | Clean bounded operational-context candidate if kept to one feed family only. |
 
 ### Hold or verification additions
