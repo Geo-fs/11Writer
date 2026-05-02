@@ -38,7 +38,14 @@ Related planning docs:
 - [source-consolidated-noauth-registry.md](/C:/Users/mike/11Writer/app/docs/source-consolidated-noauth-registry.md)
 - [source-discovery-platform-plan.md](/C:/Users/mike/11Writer/app/docs/source-discovery-platform-plan.md)
 - [source-discovery-agent-framework.md](/C:/Users/mike/11Writer/app/docs/source-discovery-agent-framework.md)
+- [wave-llm-interpretation-framework.md](/C:/Users/mike/11Writer/app/docs/wave-llm-interpretation-framework.md)
 - [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md)
+- [osint-framework-intake-routing-memo.md](/C:/Users/mike/11Writer/app/docs/osint-framework-intake-routing-memo.md)
+- [source-candidate-to-brief-routing-matrix.md](/C:/Users/mike/11Writer/app/docs/source-candidate-to-brief-routing-matrix.md)
+- [phase2-next-biggest-wins-packet.md](/C:/Users/mike/11Writer/app/docs/phase2-next-biggest-wins-packet.md)
+- [browser-use-agent-guidelines.md](/C:/Users/mike/11Writer/app/docs/browser-use-agent-guidelines.md)
+- [browser-use-security-verification.md](/C:/Users/mike/11Writer/app/docs/browser-use-security-verification.md)
+- [webcam-global-camera-candidate-batch-2026-05.md](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
 - [unified-user-workflows.md](/C:/Users/mike/11Writer/app/docs/unified-user-workflows.md)
 - [cross-source-hypothesis-graph.md](/C:/Users/mike/11Writer/app/docs/cross-source-hypothesis-graph.md)
 - [safe-hypothesis-governance-packet.md](/C:/Users/mike/11Writer/app/docs/safe-hypothesis-governance-packet.md)
@@ -97,6 +104,29 @@ Implemented Data AI feed-family waves:
   - `politifact`
   - `factcheck-org`
   - `euvsdisinfo`
+- official/public advisories wave:
+  - `state-travel-advisories`
+  - `eu-commission-press`
+  - `un-press-releases`
+  - `unaids-news`
+- scientific/environmental context wave:
+  - `our-world-in-data`
+  - `carbon-brief`
+  - `eumetsat-news`
+  - `smithsonian-volcano-news`
+  - `eos-news`
+- cyber-vendor/community follow-on wave:
+  - `google-security-blog`
+  - `bleepingcomputer`
+  - `krebs-on-security`
+  - `securityweek`
+  - `dfrlab`
+- internet-governance/standards context wave:
+  - `ripe-labs`
+  - `internet-society`
+  - `lacnic-news`
+  - `w3c-news`
+  - `letsencrypt`
 
 Next grouped Batch 3 routing surface:
 
@@ -134,7 +164,7 @@ Platform rule:
 - static, live, article, social/image, official, community, and dataset sources require different scoring rules.
 - full article text should be evaluated where legally and technically allowed; do not judge only from headlines.
 - agents implementing discovery jobs must follow [source-discovery-agent-framework.md](/C:/Users/mike/11Writer/app/docs/source-discovery-agent-framework.md).
-- current repo evidence also includes shared source-memory backend routes for overview, candidate writes, and claim-outcome updates, but those remain candidate/review/runtime evidence only
+- current repo evidence also includes shared source-discovery runtime routes for overview, candidate writes, claim-outcome updates, seed-url jobs, health checks, bounded expansion jobs, content snapshots, reputation reversal, and manual scheduler ticks, but those remain candidate/review/runtime evidence only
 
 Owner routing:
 
@@ -162,6 +192,48 @@ Safe Manager prompt reminder:
 - require provenance, access result, machine-readability result, source class, reputation basis, wave-fit basis, and owner recommendation
 - forbid automatic promotion to implemented or validated status
 - stop and report if signup, CAPTCHA, browser-only flows, scraping requirements, or unstable machine endpoints are encountered
+
+## OSINT Framework Intake
+
+Use these docs before routing any Wonder audit result or OSINT Framework listing into a source lane:
+
+- [osint-framework-intake-routing-memo.md](/C:/Users/mike/11Writer/app/docs/osint-framework-intake-routing-memo.md)
+- [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md)
+- [source-discovery-platform-plan.md](/C:/Users/mike/11Writer/app/docs/source-discovery-platform-plan.md)
+
+Owner routing:
+
+- `gather`
+  - candidate buckets, hold/reject truth, and routing packets
+- `data` or domain owner
+  - bounded endpoint review only after one machine-readable endpoint is pinned
+
+Do-not-do warning:
+
+- do not treat Wonder audit reachability, OSINT Framework presence, or directory popularity as source approval or assignment-ready proof
+
+## Candidate-To-Brief Routing
+
+Use this before turning any Wonder, Atlas, source-discovery, or webcam candidate into a Gather brief or quick-assign packet:
+
+- [source-candidate-to-brief-routing-matrix.md](/C:/Users/mike/11Writer/app/docs/source-candidate-to-brief-routing-matrix.md)
+
+Key packet gate:
+
+- no quick-assign packet without:
+  - official docs URL
+  - machine endpoint
+  - no-auth/no-signup status
+  - source owner
+  - evidence basis
+  - source mode expectation
+  - caveats
+  - export metadata expectation
+  - do-not-do list
+
+Do-not-do warning:
+
+- do not route candidate-only webcam records, Wonder audit leads, or Atlas/source-discovery runtime artifacts as if they were already briefed sources
 
 ## Safe Hypothesis Governance
 
@@ -272,6 +344,7 @@ Use the full brief pack for scope, caveats, and classification detail:
   - Owner: `geospatial`
   - Purpose: global shoreline and land-water-mask reference from GSHHG
   - First slice: one low/intermediate resolution shoreline layer or land-water helper
+  - Status note: backend-first static/reference route, fixtures, tests, and docs now exist in repo code, so treat this as a bounded consumer or workflow-validation follow-on rather than a fresh connector request
   - Do-not-do warning:
     - do not use GSHHG for legal shoreline, navigation, or high-precision coastal claims
 
@@ -287,6 +360,7 @@ Use the full brief pack for scope, caveats, and classification detail:
   - Owner: `geospatial`
   - Purpose: global tectonic plate-boundary reference from the Bird PB2002 model
   - First slice: generalized plate-boundary reference layer with plate IDs and boundary types where available
+  - Status note: backend-first static/reference route, fixtures, tests, and docs now exist in repo code, so treat this as a bounded consumer or workflow-validation follow-on rather than a fresh connector request
   - Do-not-do warning:
     - do not infer live hazard, earthquake risk, or impact from static boundaries
 
@@ -449,6 +523,10 @@ New compact packets added in the latest Batch 5 routing pass:
 
 ### Do Not Assign Yet
 
+Legacy note:
+
+- If a bullet below explicitly says repo-present or endpoint-verified, treat that newer note as superseding the older hold label on this section.
+
 - `belgium-rmi-warnings`
   - `needs-verification` because public warning pages were verified, but no official machine-readable warning feed was pinned
 - `mbta-gtfs-realtime`
@@ -566,7 +644,7 @@ Compact quick-assign packets are now available for the strongest Batch 6 handoff
 - `poland-imgw-public-data`
   - `needs-verification` because the bounded public file-family contract still needs tighter confirmation
 - `netherlands-rws-waterinfo`
-  - `needs-verification` because the clean machine path still needs separation from viewer/app routing
+  - use [source-endpoint-verification-netherlands-rws-waterinfo.md](/C:/Users/mike/11Writer/app/docs/source-endpoint-verification-netherlands-rws-waterinfo.md) for the bounded POST-based WaterWebservices slice; it now exists backend-first, so route follow-on work as a narrow consumer/helper or workflow note rather than a fresh source assignment
 - `iaea-ines-news-events`
   - `needs-verification` because public reporting exists, but a stable machine-readable endpoint still needs pinning
 - `ecmwf-open-forecast`
@@ -760,7 +838,7 @@ New compact packets added in the latest Batch 4 routing pass:
 - `ingv-seismic-fdsn`
   - `needs-verification` because the public event/query shape still needs tighter first-slice endpoint pinning
 - `orfeus-eida-federator`
-  - `needs-verification` because federated public access exists but the first bounded event metadata path still needs pinning
+  - backend-first bounded station-metadata slice already exists; use consumer/workflow follow-on work only
 - `germany-smard-power`
   - `needs-verification` because the exact first-party machine endpoint for the first slice still needs confirmation
 - `france-georisques`
@@ -1544,11 +1622,19 @@ These sources already have active briefing, ownership, or implementation momentu
 
 ## Recommended Next Assignments
 
-- Geospatial: `geonet-geohazards` or `hko-open-weather`, with `dmi-forecast-aws` as the next clean weather-context follow-on
+- May 2026 next-wave packets: use [source-quick-assign-packets-may-2026.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-may-2026.md) for the current bounded cross-lane packet set:
+  - Data: `propublica`, `global-voices`
+  - Geospatial: `canada-cap-alerts`, `canada-geomet-ogc`, with `meteoswiss-open-data` and `bc-wildfire-datamart` treated as implemented backend-first follow-ons rather than fresh source intake
+  - Features/Webcam: `nsw-live-traffic-cameras`, `quebec-mtmd-traffic-cameras` as `candidate-sandbox-importable` only
+  - Marine: `netherlands-rws-waterinfo` now exists as a bounded backend-first water-level slice; the next marine pass should be a narrow consumer/helper or workflow note, still secondary to the active `france-vigicrues-hydrometry` lane
+  - Aerospace hold: `esa-neocc-close-approaches`
+- Geospatial: `canada-cap-alerts` or `canada-geomet-ogc`, with `meteoswiss-open-data` and `bc-wildfire-datamart` as bounded consumer/workflow follow-ons after their newly implemented backend-first slices
 - Marine: `france-vigicrues-hydrometry` follow-through or first consumer prep after the current backend-only slice
 - Aerospace: rerun focused aerospace smoke on a healthy Windows host before promoting the current implemented source stack; do not reopen a fresh aerospace source just to replace that validation work
-- Features/Webcam: a bounded `finland-digitraffic` follow-on first, or `bart-gtfs-realtime` if Manager AI explicitly opens a fresh source lane
-- Data: keep the implemented starter, official cyber, infrastructure/status, OSINT/investigations, rights/civic/digital-policy, and fact-checking/disinformation waves bounded, then use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) to route one grouped remaining Batch 3 family, starting with `official/public advisories`
+- Features/Webcam: a bounded `finland-digitraffic` follow-on first, or `nsw-live-traffic-cameras` / `quebec-mtmd-traffic-cameras` if Manager AI explicitly opens a fresh camera-source lane
+- Data: keep the implemented starter, official cyber, infrastructure/status, OSINT/investigations, rights/civic/digital-policy, fact-checking/disinformation, official/public advisories, scientific/environmental context, cyber-vendor/community, internet-governance/standards, and public-institution/world-context waves bounded, then use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) or [source-quick-assign-packets-may-2026.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-may-2026.md) for one bounded next family or one bounded next packet
+- Data implementation note: `cyber-institutional-watch-context` is already backend-first on the shared recent-items route, `dataAiSourceIntelligence` is now an implemented client-light metadata-only inspector consumer, and `/api/feeds/data-ai/source-families/review` plus `/api/feeds/data-ai/source-families/review-queue` remain review/helper surfaces only
+- Peer-planning note: Wonder Browser Use, macOS plugin, and connector planning docs are routing/planning input only and do not create source approval or validation proof
 - Gather: continue source brief expansion and ownership-map maintenance
 
 ## Use Rules

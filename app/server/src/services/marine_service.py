@@ -11,6 +11,7 @@ from src.marine.gap_detection import MarineGapDetectionService
 from src.marine.repository import MarineRepository, MarineSourceUpdate
 from src.services.marine_context_service import (
     MarineIrelandOpwWaterLevelService,
+    MarineNetherlandsRwsWaterinfoService,
     MarineNdbcService,
     MarineNoaaCoopsService,
     MarineScottishWaterOverflowService,
@@ -21,6 +22,7 @@ from src.types.api import (
     FilterSummary,
     MarineAnomalyScore,
     MarineIrelandOpwWaterLevelContextResponse,
+    MarineNetherlandsRwsWaterinfoContextResponse,
     MarineNdbcContextResponse,
     MarineNoaaCoopsContextResponse,
     MarineScottishWaterOverflowResponse,
@@ -52,6 +54,7 @@ class MarineService:
         self._scottish_water = MarineScottishWaterOverflowService(settings)
         self._vigicrues_hydrometry = MarineVigicruesHydrometryService(settings)
         self._ireland_opw_waterlevel = MarineIrelandOpwWaterLevelService(settings)
+        self._netherlands_rws_waterinfo = MarineNetherlandsRwsWaterinfoService(settings)
 
     async def ingest_once(self) -> None:
         now = datetime.now(tz=timezone.utc).isoformat()
@@ -701,6 +704,21 @@ class MarineService:
         limit: int,
     ) -> MarineIrelandOpwWaterLevelContextResponse:
         return await self._ireland_opw_waterlevel.context(
+            center_lat=center_lat,
+            center_lon=center_lon,
+            radius_km=radius_km,
+            limit=limit,
+        )
+
+    async def netherlands_rws_waterinfo_context(
+        self,
+        *,
+        center_lat: float,
+        center_lon: float,
+        radius_km: float,
+        limit: int,
+    ) -> MarineNetherlandsRwsWaterinfoContextResponse:
+        return await self._netherlands_rws_waterinfo.context(
             center_lat=center_lat,
             center_lon=center_lon,
             radius_km=radius_km,

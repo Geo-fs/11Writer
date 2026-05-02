@@ -8,6 +8,8 @@ Route:
 - `GET /api/context/environmental/context-export-package`
 - `GET /api/context/environmental/source-health-issue-queue`
 - `GET /api/context/environmental/situation-snapshot-package`
+- `GET /api/context/environmental/weather-observation-export-bundle`
+- `GET /api/context/environmental/weather-observation-review-queue`
 
 Purpose:
 - provide fusion-ready backend review context across implemented environmental source families
@@ -30,6 +32,19 @@ Current family coverage:
 - `base-earth-reference`
 - `risk-reference`
 - `water-quality-context`
+
+Current `seismic` members include:
+- `usgs-earthquake-hazards-program`
+- `emsc-seismicportal-realtime`
+- `orfeus-eida-federator`
+- `bmkg-earthquakes`
+- `ga-recent-earthquakes`
+- `geonet-new-zealand`
+
+Current `base-earth-reference` members:
+- `natural-earth-physical`
+- `gshhg-shorelines`
+- `pb2002-plate-boundaries`
 
 Behavior:
 - calls a bounded set of existing fixture-backed or live-capable backend services with small default queries
@@ -201,6 +216,44 @@ Widened second-pass coverage:
 - `weather-alert-advisory` now includes HKO Open Weather, Canada CAP Alerts, MET Norway MetAlerts, IPMA warnings, Met Eireann warnings, and GeoSphere Austria warnings
 - `weather-flood-hydrology` now also includes Met Eireann forecast alongside DMI forecast, NASA POWER, Taiwan CWA weather, and UK EA flood monitoring
 - `infrastructure-event-context` now includes NRC event notifications as source-reported infrastructure-event context
+
+Current `weather-flood-hydrology` members:
+- `uk-ea-flood-monitoring`
+- `bc-wildfire-datamart`
+- `meteoswiss-open-data`
+- `taiwan-cwa-aws-opendata`
+- `dmi-forecast-aws`
+- `met-eireann-forecast`
+- `nasa-power-meteorology-solar`
+
+Weather-observation follow-on surfaces:
+- `GET /api/context/environmental/weather-observation-export-bundle`
+- `GET /api/context/environmental/weather-observation-review-queue`
+- bounded current-source coverage:
+  - `meteoswiss-open-data`
+  - `bc-wildfire-datamart`
+  - `taiwan-cwa-aws-opendata`
+  - `dmi-forecast-aws`
+  - `met-eireann-forecast`
+  - `nasa-power-meteorology-solar`
+- intended role:
+  - compact backend export/review context for implemented weather observation and point-context sources
+  - explicit source-mode, source-health, evidence-basis, coordinate-gap, scope-limit, and export-readiness visibility
+- review issue coverage may include:
+  - `fixture-only`
+  - `source-health-empty`
+  - `source-health-stale`
+  - `source-health-error`
+  - `source-health-disabled`
+  - `source-health-unknown`
+  - `missing-coordinates`
+  - `limited-asset-scope`
+  - `advisory-vs-observation-caveat`
+  - `export-readiness-gap`
+  - `missing-source`
+- guardrails:
+  - review/export context only
+  - no hazard, impact, damage, risk, responsibility, or action claims
 
 Intentional exclusions:
 - this helper still does not cover every implemented backend slice in the repo

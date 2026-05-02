@@ -65,6 +65,7 @@ Files touched:
 Validation:
 - `python -m compileall app/server/src`
 - `python -m pytest app/server/tests/test_wave_monitor.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
 - `git diff --check -- app/server/src/app.py app/server/src/routes/wave_monitor.py app/server/src/services/wave_monitor_service.py app/server/src/types/wave_monitor.py app/server/tests/test_wave_monitor.py app/docs/7po8-integration-plan.md app/docs/alerts.md app/docs/agent-progress/atlas-ai.md`
 - stale artifact scan under `7Po8` for `__pycache__`, `*.pyc`, `*.db`, `*.sqlite3`, and `*.tsbuildinfo`
 
@@ -823,3 +824,330 @@ Blockers or caveats:
 
 Next recommended task:
 - implement source-health checks and a bounded feed/catalog expansion job that can safely discover child feeds from already-approved seed sources
+
+## 2026-05-02 09:18 America/Chicago
+
+Task:
+- implement the first five Source Discovery backend follow-ups: source health, bounded expansion, full-text storage, reputation reversal, and scheduler integration
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added source-health check storage and `POST /api/source-discovery/health/check`
+- added bounded feed/catalog expansion storage behavior and `POST /api/source-discovery/jobs/expand`
+- added full-text/content snapshot storage and `POST /api/source-discovery/content/snapshots`
+- added reputation-event reversal fields, response contracts, and `POST /api/source-discovery/reputation/reverse-event`
+- added scheduler tick storage and `POST /api/source-discovery/scheduler/tick`
+- added recent reputation events to source-discovery memory overview so reversal tooling has an API-visible audit path
+- added SQLite column backfill for existing `source_reputation_events` tables so local databases created before this slice can support reversal metadata
+- updated Source Discovery framework and platform-plan docs with the new backend primitives
+- notified Manager AI through `app/docs/alerts.md`
+
+Files touched:
+- `app/docs/source-discovery-agent-framework.md`
+- `app/docs/source-discovery-platform-plan.md`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/source_discovery/db.py`
+- `app/server/src/source_discovery/models.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/test_source_discovery_memory.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+- `git diff --check -- app/server/src/routes/source_discovery.py app/server/src/services/source_discovery_service.py app/server/src/source_discovery/models.py app/server/src/types/source_discovery.py app/server/tests/test_source_discovery_memory.py app/docs/source-discovery-agent-framework.md app/docs/source-discovery-platform-plan.md app/docs/alerts.md app/docs/agent-progress/atlas-ai.md`
+
+Blockers or caveats:
+- focused backend tests pass, but the existing Pydantic schema alias warnings still appear during source-discovery route tests
+- scheduler integration is currently an API tick primitive, not a long-running OS/background process
+- bounded expansion still creates review candidates only; it does not promote, poll, or trust child sources
+- full-text extraction is a conservative first-pass parser, not a mature article readability engine
+
+Next recommended task:
+- add canonical URL/domain dedupe, backoff scheduling rules, and source-class/domain-specific scoring helpers on top of the new primitives
+
+## 2026-05-02 09:53 America/Chicago
+
+Task:
+- add a babysat per-wave LLM interpretation framework with BYOK provider support
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added Wave LLM runtime settings for BYOK/provider configuration without exposing raw keys
+- added provider capability route for `fixture`, `openai`, `anthropic`, `xai`, `google`, `openrouter`, `ollama`, `openclaw`, and `custom`
+- added persistent Wave LLM task and review tables
+- added `POST /api/tools/waves/llm/tasks` to create bounded per-wave interpretation tasks
+- added `POST /api/tools/waves/llm/reviews` to submit model output through deterministic validation
+- added validation that accepts candidate claims for review only, rejects malformed/short claims, caps confidence at `0.85`, flags risk conditions, and requires human review
+- added `app/docs/wave-llm-interpretation-framework.md` and linked it from the source prompt index and 7Po8 integration plan
+- notified Manager AI through `app/docs/alerts.md`
+
+Files touched:
+- `app/docs/wave-llm-interpretation-framework.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/7po8-integration-plan.md`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/server/src/app.py`
+- `app/server/src/config/settings.py`
+- `app/server/src/routes/wave_llm.py`
+- `app/server/src/services/wave_llm_service.py`
+- `app/server/src/types/wave_monitor.py`
+- `app/server/src/wave_monitor/models.py`
+- `app/server/tests/test_wave_monitor.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+
+Blockers or caveats:
+- provider adapters do not call live APIs yet; this slice creates the safe contracts, storage, and review gate
+- LLM output is deliberately not wired into source reputation, connector activation, or trusted facts
+- existing Pydantic schema alias warnings still appear during route tests
+
+Next recommended task:
+- add the first provider adapter behind this contract, likely Ollama fixture/live-local first, then OpenAI/OpenRouter BYOK once budget and retry controls are in place
+
+## 2026-05-02 10:01 America/Chicago
+
+Task:
+- implement the next five Wave LLM framework backend items
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added explicit Wave LLM task execution response/request contracts
+- added `POST /api/tools/waves/llm/tasks/{task_id}/execute`
+- added deterministic `fixture` execution adapter for no-network validation
+- added gated `ollama` live-local execution path with explicit `allowNetwork`, request budget, timeout, retry, and no-silent-fallback behavior
+- kept OpenAI, Anthropic, xAI, Google, OpenRouter, OpenClaw, and custom providers capability-detected only until their adapters are separately implemented and tested
+- added action allowlisting and prompt-injection/forbidden-action risk flags so weak/local model output stays babysat
+- updated the Wave LLM framework doc and notified Manager AI through `app/docs/alerts.md`
+
+Files touched:
+- `app/docs/wave-llm-interpretation-framework.md`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/server/src/config/settings.py`
+- `app/server/src/routes/wave_llm.py`
+- `app/server/src/services/wave_llm_service.py`
+- `app/server/src/types/wave_monitor.py`
+- `app/server/tests/test_wave_monitor.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_wave_monitor.py -q`
+
+Blockers or caveats:
+- cloud provider execution adapters remain intentionally blocked/not implemented
+- Ollama execution requires explicit network permission and a positive request budget
+- LLM output remains review-only and cannot promote sources, change reputation, activate connectors, or create trusted facts
+- existing Pydantic schema alias warnings still appear during route tests
+
+Next recommended task:
+- add mocked OpenAI/OpenRouter adapter tests and a shared provider adapter interface before allowing any cloud BYOK live calls
+
+## 2026-05-02 10:23 America/Chicago
+
+Task:
+- implement the top-five next backend items for Wave LLM execution and Source Discovery learning
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added a shared Wave LLM adapter execution seam so provider execution now runs through one request-budgeted, retry-aware, review-gated contract
+- added deterministic mock execution paths for `openai` and `openrouter` plus the gated local `ollama` path without enabling live cloud calls
+- added `POST /api/source-discovery/jobs/record-source-extract` so existing Wave Monitor records and bounded Data AI item batches can seed shared source memory
+- added canonical URL/domain dedupe, alias preservation, and source-memory fields for `canonical_url`, `domain_scope`, `next_check_at`, and health-check failure count
+- added source-health backoff scheduling and source-class-aware scoring/timeliness handling so static sources are not treated like stale live feeds
+- updated the shared Wave LLM and Source Discovery framework docs and notified Manager AI through `app/docs/alerts.md`
+
+Files touched:
+- `app/docs/wave-llm-interpretation-framework.md`
+- `app/docs/source-discovery-agent-framework.md`
+- `app/docs/source-discovery-platform-plan.md`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/services/wave_llm_adapters.py`
+- `app/server/src/services/wave_llm_service.py`
+- `app/server/src/source_discovery/db.py`
+- `app/server/src/source_discovery/models.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/test_source_discovery_memory.py`
+- `app/server/tests/test_wave_monitor.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+- `git diff --check -- app/server/src/services/wave_llm_adapters.py app/server/src/services/wave_llm_service.py app/server/src/services/source_discovery_service.py app/server/src/source_discovery/db.py app/server/src/source_discovery/models.py app/server/src/routes/source_discovery.py app/server/src/types/source_discovery.py app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/docs/wave-llm-interpretation-framework.md app/docs/source-discovery-agent-framework.md app/docs/source-discovery-platform-plan.md`
+
+Blockers or caveats:
+- live cloud-provider execution remains disabled; `openai` and `openrouter` are mock-only execution paths in this slice
+- Source Discovery still lacks a production article-body extractor, operator review UI, and background service wiring beyond the bounded API tick
+- existing Pydantic schema alias warnings still appear during route tests
+
+Next recommended task:
+- add bounded feed/article-body extraction adapters and runtime scheduler-service wiring before expanding autonomous discovery breadth
+
+## 2026-05-02 11:02 America/Chicago
+
+Task:
+- implement the next five backend items for Source Discovery runtime, review, and scheduler integration
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added `POST /api/source-discovery/jobs/feed-link-scan` so one allowed public feed batch can create candidate memories plus summary snapshots
+- improved content snapshots with lightweight HTML article title/body/meta extraction so later review is not headline-only by default
+- added `GET /api/source-discovery/review/queue` and `POST /api/source-discovery/review/actions` with owner-lane assignment and review-action audit rows
+- added scheduler-driven review-only Wave LLM `source_summary` task creation from eligible stored snapshots
+- added a process-local runtime scheduler coordinator, startup wiring, and `GET /api/source-discovery/runtime/status` for Source Discovery and Wave Monitor loops
+- extended source-discovery scheduler storage and responses with record-extract and Wave LLM execution counts
+- updated the Source Discovery, Wave LLM, and 7Po8 integration docs and notified Manager AI through `app/docs/alerts.md`
+
+Files touched:
+- `app/docs/7po8-integration-plan.md`
+- `app/docs/source-discovery-agent-framework.md`
+- `app/docs/source-discovery-platform-plan.md`
+- `app/docs/wave-llm-interpretation-framework.md`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/server/src/app.py`
+- `app/server/src/config/settings.py`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/runtime_scheduler_service.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/services/wave_monitor_service.py`
+- `app/server/src/source_discovery/db.py`
+- `app/server/src/source_discovery/models.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/test_source_discovery_memory.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+- `git diff --check -- app/server/src/app.py app/server/src/config/settings.py app/server/src/routes/source_discovery.py app/server/src/services/runtime_scheduler_service.py app/server/src/services/source_discovery_service.py app/server/src/services/wave_monitor_service.py app/server/src/source_discovery/db.py app/server/src/source_discovery/models.py app/server/src/types/source_discovery.py app/server/tests/test_source_discovery_memory.py app/docs/source-discovery-agent-framework.md app/docs/source-discovery-platform-plan.md app/docs/wave-llm-interpretation-framework.md app/docs/7po8-integration-plan.md app/docs/agent-progress/atlas-ai.md app/docs/alerts.md`
+
+Blockers or caveats:
+- runtime scheduler loops are process-local and opt-in, not OS-managed services
+- HTML article extraction is still a conservative first-pass parser, not a production readability engine
+- scheduler-created Wave LLM output remains strictly review-only and cannot promote sources or facts
+- existing Pydantic schema alias warnings still appear during route tests
+
+Next recommended task:
+- add a bounded catalog-scan job plus a stronger article extraction path, or build the operator-facing UI for the review queue and runtime status
+
+## 2026-05-02 12:19 America/Chicago
+
+Task:
+- implement the ten-step Phase 2 backend plan for Source Discovery runtime, bounded ingestion, reviewed claim application, and Wave LLM execution
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added source memory list/detail/export surfaces:
+  - `GET /api/source-discovery/memory/list`
+  - `GET /api/source-discovery/memory/{source_id}`
+  - `GET /api/source-discovery/memory/{source_id}/export`
+- added bounded source-discovery jobs:
+  - `POST /api/source-discovery/jobs/catalog-scan`
+  - `POST /api/source-discovery/jobs/article-fetch`
+  - `POST /api/source-discovery/jobs/social-metadata`
+- strengthened article extraction so HTML snapshots store structured body/title/author/published/canonical metadata with fallback behavior and extraction confidence
+- added reviewed-claim application through `POST /api/source-discovery/reviews/apply-claims`; accepted Wave LLM claims now affect source reputation only after explicit source review plus approved application
+- added persistent runtime worker/run storage plus `POST /api/source-discovery/runtime/workers/{worker_name}/control` for pause, resume, stop, and run-now
+- added conservative lease-safe scheduler behavior so duplicate backend instances skip rather than double-run workers
+- extended scheduler-created Wave LLM work so eligible full-text snapshots can create review-only `article_claim_extraction` tasks, not just `source_summary`
+- upgraded the OpenAI adapter from capability-only/mock-contract posture to a live BYOK path with explicit network permission, budget, retry, timeout, audit, and no silent fallback
+- updated shared docs and notified Manager AI through `app/docs/alerts.md`
+
+Files touched:
+- `app/docs/7po8-integration-plan.md`
+- `app/docs/source-discovery-agent-framework.md`
+- `app/docs/source-discovery-platform-plan.md`
+- `app/docs/wave-llm-interpretation-framework.md`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/runtime_scheduler_service.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/services/wave_llm_adapters.py`
+- `app/server/src/source_discovery/models.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/test_source_discovery_memory.py`
+- `app/server/tests/test_wave_monitor.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+- `python -m pytest app/server/tests/test_wave_monitor.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+
+Blockers or caveats:
+- runtime scheduler loops are still process-local preview loops even though worker state and lease checks are now persisted
+- article extraction is stronger than the first-pass parser but still not a production readability engine
+- public social/image support is metadata-only in this slice
+- OpenRouter and the other cloud/provider families remain mock-only or capability-only
+- existing Pydantic schema alias warnings still appear during route tests
+
+Next recommended task:
+- replace the bounded HTML parser with a stronger article-body extraction path, then add operator-facing UI for source packet review, runtime worker control, and reviewed-claim application
+
+## 2026-05-02 12:49 America/Chicago
+
+Task:
+- close the remaining Phase 2 backend caveats around runtime service deployment, public social/image evidence capture, article readability extraction, live provider adapters, and noisy route-test warnings
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added a dedicated runtime worker entrypoint at `app/server/src/runtime_worker.py` so Source Discovery and Wave Monitor can run outside the API process as long-lived worker processes
+- extended runtime status with deployment guidance plus `GET /api/source-discovery/runtime/services` that emits user-level Windows Task Scheduler, macOS launchd, and Linux systemd-user service artifacts for both workers
+- replaced the bounded HTML extraction path with a shared semantic extractor in `app/server/src/services/content_extraction.py`
+- upgraded article extraction to prefer JSON-LD article bodies when present, otherwise use a readability-style block scorer before falling back to full-page text
+- upgraded social/image jobs from metadata-only capture to bounded public page evidence capture: canonical URL, media URLs, captions, alt text, evidence text, and media hints while still refusing private or blob-heavy routes
+- implemented live BYOK execution paths for `openrouter`, `anthropic`, `xai`, `google`, and `openclaw` in addition to the existing `openai`, `ollama`, and deterministic mock paths
+- added route and provider tests for the new runtime-service, extraction, and adapter surfaces
+- suppressed the noisy FastAPI/Pydantic alias warning category for normal pytest route runs; standard route suites are now clean even though forcing `-W default` can still surface the upstream library warning path
+
+Files touched:
+- `app/server/pyproject.toml`
+- `app/server/src/app.py`
+- `app/server/src/runtime_worker.py`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/content_extraction.py`
+- `app/server/src/services/runtime_scheduler_service.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/services/wave_llm_adapters.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/conftest.py`
+- `app/server/tests/test_source_discovery_memory.py`
+- `app/server/tests/test_wave_monitor.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+- `python -m pytest app/server/tests/test_wave_monitor.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+- `git diff --check -- app/server/src/app.py app/server/src/runtime_worker.py app/server/src/routes/source_discovery.py app/server/src/services/content_extraction.py app/server/src/services/runtime_scheduler_service.py app/server/src/services/source_discovery_service.py app/server/src/services/wave_llm_adapters.py app/server/src/types/source_discovery.py app/server/tests/conftest.py app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/pyproject.toml`
+
+Blockers or caveats:
+- explicit pytest warning overrides such as `-W default` can still surface the upstream FastAPI/Pydantic alias warning path even though normal route-test runs are clean
+- runtime service artifacts are generated and validated as deployment templates in this slice; actual OS-level installation still depends on the target machine and user environment
+
+Next recommended task:
+- wire the generated runtime worker/service artifacts into the desktop/backend packaging path, then add operator-facing UI for runtime worker control and source evidence review

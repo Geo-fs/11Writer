@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "dataset_name": "Global Self-consistent Hierarchical High-resolution Geography",
+    "resolution": "intermediate",
+    "source_file": "gshhg-intermediate-shorelines",
+    "dataset_version": "2.3.7",
+    "license_name": "LGPL",
+    "generated_at": "2026-05-02T00:00:00Z"
+  },
+  "features": [
+    {
+      "record_id": "gshhg-001",
+      "feature_class": "shoreline",
+      "geometry_type": "Polygon",
+      "resolution": "intermediate",
+      "hierarchy_level": 1,
+      "bbox_min_lon": -12.0,
+      "bbox_min_lat": 49.5,
+      "bbox_max_lon": 2.0,
+      "bbox_max_lat": 59.0
+    },
+    {
+      "record_id": "gshhg-002",
+      "feature_class": "island",
+      "geometry_type": "Polygon",
+      "resolution": "intermediate",
+      "hierarchy_level": 2,
+      "bbox_min_lon": 120.0,
+      "bbox_min_lat": -11.0,
+      "bbox_max_lon": 150.0,
+      "bbox_max_lat": -1.0
+    },
+    {
+      "record_id": "gshhg-003",
+      "feature_class": "lake",
+      "geometry_type": "Polygon",
+      "resolution": "intermediate",
+      "hierarchy_level": 3,
+      "bbox_min_lon": 29.0,
+      "bbox_min_lat": -3.0,
+      "bbox_max_lon": 32.5,
+      "bbox_max_lat": 1.5
+    }
+  ]
+}

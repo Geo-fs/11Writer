@@ -187,7 +187,15 @@ def _missing_evidence(detail: CameraSourceOpsDetailResponse) -> list[str]:
     ):
         if "fixture or sandbox connector" not in missing:
             missing.append("fixture or sandbox connector")
-    if detail.lifecycle_bucket in {"candidate-needs-review", "candidate-endpoint-verified"}:
+    media_posture = detail.candidate_endpoint_report.media_evidence_posture
+    if detail.lifecycle_bucket in {
+        "candidate-needs-review",
+        "candidate-endpoint-verified",
+        "candidate-sandbox-importable",
+    } and media_posture not in {
+        "direct-image-documented",
+        "viewer-only-documented",
+    }:
         missing.append("direct-image evidence")
     return missing
 

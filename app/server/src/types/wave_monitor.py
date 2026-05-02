@@ -40,6 +40,133 @@ WaveMonitorAction = Literal[
     "export-packet",
     "move-on",
 ]
+WaveLlmProvider = Literal[
+    "fixture",
+    "openai",
+    "anthropic",
+    "xai",
+    "google",
+    "openrouter",
+    "ollama",
+    "openclaw",
+    "custom",
+]
+
+
+class WaveLlmProviderStatus(CamelModel):
+    provider: WaveLlmProvider
+    configured: bool
+    key_source: str
+    local: bool = False
+    caveats: list[str] = Field(default_factory=list)
+
+
+class WaveLlmCapabilityResponse(CamelModel):
+    enabled: bool
+    default_provider: str
+    default_model: str
+    providers: list[WaveLlmProviderStatus]
+    guardrails: list[str] = Field(default_factory=list)
+
+
+class WaveLlmInterpretationTaskRequest(CamelModel):
+    monitor_id: str
+    task_type: Literal["article_claim_extraction", "source_summary", "relationship_hypothesis"] = "article_claim_extraction"
+    provider: WaveLlmProvider = "fixture"
+    model: str | None = None
+    input_text: str
+    source_ids: list[str] = Field(default_factory=list)
+    record_ids: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class WaveLlmTaskSummary(CamelModel):
+    task_id: str
+    monitor_id: str
+    task_type: str
+    provider: str
+    model: str
+    status: str
+    input_summary: str
+    source_ids: list[str] = Field(default_factory=list)
+    record_ids: list[str] = Field(default_factory=list)
+    created_at: str
+    completed_at: str | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class WaveLlmValidatedClaim(CamelModel):
+    claim_text: str
+    claim_type: str
+    evidence_basis: str
+    confidence: float
+    status: Literal["accepted_for_review", "rejected"]
+    rejection_reason: str | None = None
+
+
+class WaveLlmReviewRequest(CamelModel):
+    task_id: str
+    raw_output: str
+    provider: WaveLlmProvider = "fixture"
+    model: str | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class WaveLlmTaskExecuteRequest(CamelModel):
+    task_id: str
+    allow_network: bool = False
+    request_budget: int = 0
+    max_retries: int | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class WaveLlmReviewSummary(CamelModel):
+    review_id: str
+    task_id: str
+    monitor_id: str
+    provider: str
+    model: str
+    validation_state: str
+    claims: list[WaveLlmValidatedClaim] = Field(default_factory=list)
+    proposed_actions: list[str] = Field(default_factory=list)
+    risk_flags: list[str] = Field(default_factory=list)
+    accepted_claim_count: int
+    rejected_claim_count: int
+    requires_human_review: bool
+    created_at: str
+    caveats: list[str] = Field(default_factory=list)
+
+
+class WaveLlmInterpretationTaskResponse(CamelModel):
+    task: WaveLlmTaskSummary
+    guardrails: list[str] = Field(default_factory=list)
+
+
+class WaveLlmReviewResponse(CamelModel):
+    task: WaveLlmTaskSummary
+    review: WaveLlmReviewSummary
+    guardrails: list[str] = Field(default_factory=list)
+
+
+class WaveLlmExecutionSummary(CamelModel):
+    task_id: str
+    provider: str
+    model: str
+    status: str
+    adapter_status: str
+    request_budget: int
+    used_requests: int
+    retry_count: int
+    raw_output: str
+    error_summary: str | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class WaveLlmExecutionResponse(CamelModel):
+    task: WaveLlmTaskSummary
+    execution: WaveLlmExecutionSummary
+    review: WaveLlmReviewSummary | None = None
+    guardrails: list[str] = Field(default_factory=list)
 
 
 class WaveMonitorRuntimeIntegration(CamelModel):

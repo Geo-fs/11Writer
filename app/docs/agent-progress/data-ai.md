@@ -1,5 +1,543 @@
 # Data AI Progress
 
+## 2026-05-02 12:40 America/Chicago
+
+Assignment version read:
+- `2026-05-02 12:27 America/Chicago`
+
+Task:
+- add a bounded Data AI topic/context lens and export package over existing recent-item and family-review metadata
+
+What changed:
+- added client contracts for Data AI recent items/source-health metadata in `app/client/src/types/api.ts`
+- added a recent-items query helper in `app/client/src/lib/queries.ts` for `GET /api/feeds/data-ai/recent`
+- extended `app/client/src/features/inspector/dataAiSourceIntelligence.ts` with a pure metadata-only topic/context lens
+- added a compact topic/context lens block inside the existing inspector Data AI Source Intelligence card in `app/client/src/features/inspector/InspectorPanel.tsx`
+- extended `app/client/scripts/dataAiSourceIntelligenceRegression.mjs` so the focused regression now covers both the source-intelligence posture summary and the topic/context lens
+
+Topic/context lens behavior:
+- topic hints are bounded and explicit: `cyber`, `infrastructure`, `public-institution`, `investigation-civic`, `governance-standards`, `advisory`, and `science-environment`
+- grouping uses only existing metadata: family ids, source ids, source categories, tags, evidence bases, source health, source modes, caveat classes, and dedupe posture
+- recent items are counted into topics by existing family/source metadata and bounded metadata hints only; there is no article-body, title, or summary inference
+- the inspector lens emits compact export-safe topic lines with family/source counts, recent-item counts, review-issue counts, evidence bases, caveat classes, and source-health posture
+
+Prompt-injection, no-leakage, and no-scoring guardrails:
+- the topic lens does not render article bodies, raw feed dumps, hostile titles, free-form summaries, linked-page content, or linked-page URLs
+- topic export lines are filtered to remain metadata-only and URL-free
+- prompt-injection-like recent-item text stays inert and cannot change topic grouping rules, source health, evidence basis, validation posture, or repo behavior
+- no credibility, truth, severity, threat, incident, exploitation, compromise, attribution, legal, remediation, policy, or action scores were added
+- the workflow-validation state remains explicit: this is workflow-supporting evidence only, not workflow-validated evidence
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/prompt-injection-defense.md`
+
+Files touched:
+- `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`
+- `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+- `app/client/src/features/inspector/InspectorPanel.tsx`
+- `app/client/src/lib/queries.ts`
+- `app/client/src/types/api.ts`
+- `app/client/src/features/marine/marineHydrologyContext.ts`
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/prompt-injection-defense.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `cmd /c npm.cmd run test:data-ai-source-intelligence` -> pass
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- this remains workflow-supporting evidence only; no smoke or manual workflow validation was added
+- no new feed sources, linked-page fetching, article-body extraction, browser automation, live-network tests, staging, commits, or pushes were added
+- to clear the required client build, I also fixed one small TypeScript mismatch in `app/client/src/features/marine/marineHydrologyContext.ts` that was outside the Data AI helper path but was blocking `npm run build`
+- updated `app/docs/agent-progress/data-ai.md`; awaiting Manager AI reassignment
+
+## 2026-05-02 11:56 America/Chicago
+
+Assignment version read:
+- `2026-05-02 11:49 America/Chicago`
+
+Task:
+- add a client-light Data AI Source Intelligence consumer on top of the existing metadata-only backend readiness/export, family review, and review queue surfaces
+
+What changed:
+- added typed client contracts for Data AI readiness/export, family review, and review queue responses in `app/client/src/types/api.ts`
+- added query helpers in `app/client/src/lib/queries.ts` for `GET /api/feeds/data-ai/source-families/readiness-export`, `GET /api/feeds/data-ai/source-families/review`, and `GET /api/feeds/data-ai/source-families/review-queue`
+- added a pure summary builder in `app/client/src/features/inspector/dataAiSourceIntelligence.ts` that composes the existing backend surfaces into one metadata-only operational summary
+- added a small always-visible Data AI Source Intelligence card to the inspector in `app/client/src/features/inspector/InspectorPanel.tsx`
+- added a focused regression script, `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`, plus the `npm` script `test:data-ai-source-intelligence`
+
+Client workflow behavior:
+- the inspector card is client-light and reads only the existing backend review surfaces; no new backend feed family or connector path was created
+- it shows review queue counts, top issue kinds, source mode, family/source health posture, evidence-basis summary, caveat-class summary, prompt-injection coverage posture, export-readiness gap count, and compact export-safe lines
+- it renders even with no selected map target so it can support review workflow state independently of entity inspection
+
+Prompt-injection, no-leakage, and no-scoring guardrails:
+- the client summary stays metadata-only and does not render article bodies, linked pages, raw feed dumps, or linked-page URLs
+- compact export lines are filtered to drop URL-bearing lines before rendering
+- the summary preserves backend guardrails and does not create credibility, truth, severity, threat, incident, exploitation, compromise, attribution, legal, remediation, policy, or action scores
+- the workflow-validation state is explicit: this consumer is workflow-supporting evidence only and is not workflow-validated because no smoke or manual workflow proof was recorded
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/prompt-injection-defense.md`
+
+Files touched:
+- `app/client/package.json`
+- `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`
+- `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+- `app/client/src/features/inspector/InspectorPanel.tsx`
+- `app/client/src/lib/queries.ts`
+- `app/client/src/types/api.ts`
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/prompt-injection-defense.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `cmd /c npm.cmd run test:data-ai-source-intelligence` -> pass
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m pytest app/server/tests/test_nvd_cve.py app/server/tests/test_cve_context.py -q` -> pass
+- `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- this is a workflow-supporting client consumer only; no smoke or manual workflow validation was added
+- no source status docs were changed
+- no new feed sources, browser automation, live-network tests, linked-page fetching, staging, commits, or pushes were added
+- updated `app/docs/agent-progress/data-ai.md`; awaiting Manager AI reassignment
+
+## 2026-05-02 10:55 America/Chicago
+
+Assignment version read:
+- `2026-05-02 10:47 America/Chicago`
+
+Task:
+- add a backend-only Data AI cross-family review queue and export bundle for family/source review coverage, source-health issues, caveat classes, dedupe posture, and prompt-injection test posture
+
+What changed:
+- added a new metadata-only backend route, `GET /api/feeds/data-ai/source-families/review-queue`, without creating another ingestion framework
+- added a new queue service, `app/server/src/services/data_ai_source_family_review_queue_service.py`, that composes the existing family overview and family/source summary data rather than reopening feed ingestion
+- extended the typed API contract with queue metadata and queue issue models so the queue preserves family/source ids, source mode, source health, evidence bases, caveat classes, counts, timestamps, review lines, export-safe lines, and active filters
+- preserved the current aggregate/review/readiness surfaces and built the queue on top of them instead of adding a second registry path
+
+Review queue and export bundle behavior:
+- `GET /api/feeds/data-ai/source-families/review-queue` supports bounded `family=`, `source=`, `category=`, and `issue_kind=` filters
+- queue categories are `family` and `source`
+- current queue issue kinds are:
+  - `fixture-local-source`
+  - `empty-family`
+  - `empty-source`
+  - `degraded-source`
+  - `high-caveat-density`
+  - `duplicate-heavy-feed`
+  - `prompt-injection-coverage-present`
+  - `prompt-injection-coverage-missing`
+  - `export-readiness-gap`
+  - `contextual-only-caveat-reminder`
+  - `advisory-only-caveat-reminder`
+- family-level items can flag fixture-local posture, empty-family state, duplicate-heavy families, prompt-injection fixture posture, export-readiness posture, and contextual-only or advisory-only reminders
+- source-level items can flag fixture-local posture, empty sources, degraded/error/disabled/stale/unknown source states, high caveat density, and duplicate-heavy feeds
+- the export bundle remains metadata-only: top-level export lines and per-issue export lines summarize ids, health, mode, evidence, caveat classes, counts, and filters without copying free-form feed text or linked-page URLs
+
+Prompt-injection, no-leakage, and no-scoring guardrails:
+- queue lines, export lines, and review lines remain metadata-only and do not echo hostile free-form feed text, linked-page URLs, or article-body content
+- tests prove imperative and quoted source text stays inert in the queue just as it does in aggregate/review/readiness routes
+- no scoring layer was added: no credibility score, truth score, severity score, threat score, incident proof, exploitation proof, compromise proof, attribution proof, legal conclusion, remediation priority, policy recommendation, or required-action guidance
+- source-health, caveat, evidence-basis, prompt-injection posture, and dedupe-posture fields remain explicit and preserved in the queue output
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/prompt-injection-defense.md`
+
+Files touched:
+- `app/server/src/routes/data_ai_feeds.py`
+- `app/server/src/services/data_ai_source_family_review_service.py`
+- `app/server/src/services/data_ai_source_family_review_queue_service.py`
+- `app/server/src/types/api.py`
+- `app/server/tests/test_data_ai_multi_feed.py`
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/prompt-injection-defense.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py -q` -> pass
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m pytest app/server/tests/test_nvd_cve.py app/server/tests/test_cve_context.py -q` -> pass
+- `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- the queue is review metadata only and does not reopen free-form feed text, linked pages, or article bodies
+- no new feed sources, linked-page scraping, private URLs, tokenized feeds, credentials, live-network tests, broad polling, runtime exposure changes, staging, commits, or pushes were added
+- updated `app/docs/agent-progress/data-ai.md`; awaiting Manager AI reassignment
+
+## 2026-05-02 10:45 America/Chicago
+
+Assignment version read:
+- `2026-05-02 10:34 America/Chicago`
+
+Task:
+- implement the bounded `investigative-civic-context` feed-family expansion using the existing aggregate, family overview, readiness/export snapshot, and family review surfaces
+
+What changed:
+- expanded the shared `GET /api/feeds/data-ai/recent` aggregate registry instead of creating another feed system
+- added these exact documented no-auth sources and fixture-backed feed URLs:
+  - `propublica` -> `https://www.propublica.org/feeds/propublica/main`
+  - `global-voices` -> `https://globalvoices.org/feed/`
+- added the new bounded family definition, `investigative-civic-context`, to the shared family overview, shared readiness/export snapshot, and shared family review surface without changing runtime exposure or adding a new connector path
+- preserved source ids, labels, family/category, feed URLs, source mode, source health, evidence basis, caveats, raw/deduped counts, dedupe posture, tags, review lines, and export-safe lines
+
+Aggregate, overview, readiness/export, and review behavior:
+- `GET /api/feeds/data-ai/recent` now includes the two new investigative/civic sources and supports bounded `source=propublica,global-voices`
+- the `propublica` fixture intentionally carries a duplicate-story/update pattern, so family and aggregate counts now preserve `3` raw items collapsing to `2` deduped items for that bounded source slice
+- `GET /api/feeds/data-ai/source-families/overview` now includes `investigative-civic-context` and preserves bounded `family=` and `source=` filter intersection
+- `GET /api/feeds/data-ai/source-families/readiness-export` now includes the new family in all-family snapshots and filtered export/readiness subsets
+- `GET /api/feeds/data-ai/source-families/review` now includes the new family in coverage review, caveat-class review, prompt-injection posture, dedupe posture, and export-readiness review
+- no scoring layer was added: no credibility score, truth score, severity score, wrongdoing score, threat score, event proof, attribution proof, legal conclusion, or required-action guidance
+
+Prompt-injection and caveat handling:
+- added deterministic fixtures with duplicate-story/update behavior, quoted text, advocacy/normative wording, HTML-bearing text, and prompt-injection-like text
+- tests prove that hostile text stays inert source data only, HTML markup such as `<strong>` and `<blockquote>` is stripped from normalized summaries, and review/export lines remain metadata-only without linked-page URLs or article-body extraction
+- caveat boundaries stay explicit:
+  - ProPublica remains investigative and civic-accountability reporting context, not official event confirmation, wrongdoing proof, intent proof, legal conclusion, or required-action guidance
+  - Global Voices remains civic, translation, and advocacy-adjacent reporting context, not official event truth, impact proof, legal conclusion, or required-action guidance
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+
+Files touched:
+- `app/server/src/services/data_ai_feed_registry.py`
+- `app/server/data/data_ai_multi_feeds/propublica.xml`
+- `app/server/data/data_ai_multi_feeds/global_voices.xml`
+- `app/server/tests/test_data_ai_multi_feed.py`
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py -q` -> pass
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m pytest app/server/tests/test_nvd_cve.py app/server/tests/test_cve_context.py -q` -> pass
+- `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- the implementation stays inside the existing aggregate route, family overview, readiness/export snapshot, and family review surface only
+- no linked-page scraping, article-body extraction, private URLs, tokenized feeds, credentials, live-network tests, broad polling, runtime exposure changes, staging, commits, or pushes were added
+- updated `app/docs/agent-progress/data-ai.md`; awaiting Manager AI reassignment
+
+## 2026-05-02 10:24 America/Chicago
+
+Assignment version read:
+- `2026-05-02 10:12 America/Chicago`
+
+Task:
+- implement the bounded `cyber-institutional-watch-context` feed-family expansion plus a compact backend review surface for Data AI feed-family coverage
+
+What changed:
+- expanded the shared `GET /api/feeds/data-ai/recent` aggregate registry instead of creating another feed system
+- added these exact documented no-auth sources and fixture-backed feed URLs:
+  - `cisa-news` -> `https://www.cisa.gov/news.xml`
+  - `jvn-en-new` -> `https://jvn.jp/en/rss/jvn.rdf`
+  - `debian-security` -> `https://www.debian.org/security/dsa`
+  - `microsoft-security-blog` -> `https://www.microsoft.com/en-us/security/blog/feed/`
+  - `cisco-talos-blog` -> `https://blog.talosintelligence.com/rss/`
+  - `mozilla-security-blog` -> `https://blog.mozilla.org/security/feed/`
+  - `github-security-blog` -> `https://github.blog/security/feed/`
+- added the new bounded family definition, `cyber-institutional-watch-context`, to the shared family overview and shared readiness/export snapshot without changing runtime exposure or adding a new connector path
+- added a compact backend review surface at `GET /api/feeds/data-ai/source-families/review` via `app/server/src/services/data_ai_source_family_review_service.py`
+- preserved source ids, labels, family/category, feed URLs, source mode, source health, evidence basis, caveats, raw/deduped counts, dedupe posture, tags, and export-safe lines
+
+Aggregate, overview, readiness/export, and review behavior:
+- `GET /api/feeds/data-ai/recent` now includes the seven new cyber institutional watch sources and supports bounded `source=cisa-news,jvn-en-new,debian-security,microsoft-security-blog,cisco-talos-blog,mozilla-security-blog,github-security-blog`
+- `GET /api/feeds/data-ai/source-families/overview` now includes `cyber-institutional-watch-context` and preserves bounded `family=` and `source=` filter intersection
+- `GET /api/feeds/data-ai/source-families/readiness-export` now includes the new family in all-family snapshots and filtered export/readiness subsets
+- `GET /api/feeds/data-ai/source-families/review` now summarizes implemented family coverage with source count, health posture, caveat classes, evidence bases, prompt-injection test posture, dedupe posture, export readiness, and compact review lines
+- the new review surface reuses the existing overview/readiness data and does not create another ingestion framework
+- no scoring layer was added: no credibility score, truth score, severity score, incident proof, exploitation proof, compromise proof, attribution proof, remediation priority, legal conclusion, policy recommendation, or required-action guidance
+
+Held or rejected candidates considered for this wave:
+- `cert-eu-news` held because the repo-local candidate docs record failed validation for the candidate feed URL
+- `enisa-news-rss` rejected/held because the repo-local candidate docs state ENISA discontinued RSS after its site relaunch
+- `jpcert-en-rss` held because the repo-local candidate docs say the English candidate failed and needs a separate endpoint-pinning pass
+- `arin-blog` held because the repo-local candidate docs record failed validation for the candidate feed URL
+- `ietf-blog` held because the repo-local candidate docs record failed validation for the candidate feed URL
+- `icann-announcements` held because the repo-local candidate docs record failed validation for the candidate feed URL
+
+Prompt-injection and caveat handling:
+- added deterministic fixtures with advisory wording, operational language, official-sounding claims, CVE/security wording, and prompt-injection-like text
+- tests prove that hostile text stays inert source data only, script/code markup is stripped from normalized summaries, and readiness/review/export lines remain metadata-only without linked-page URLs or free-form item text
+- caveat boundaries stay explicit:
+  - CISA news remains official institutional/cybersecurity announcement context, not exploit proof, compromise proof, incident confirmation, or required-action guidance
+  - JVN vulnerability notes remain official advisory context, not exploit proof, compromise proof, or universal remediation priority
+  - Debian security advisories remain distribution advisory context, not exploit proof, incident confirmation, or universal urgency guidance
+  - Microsoft Security Blog remains vendor security/incident-response context, not neutral global incident proof, exploitation proof, or required-action guidance
+  - Cisco Talos remains vendor threat-research context, not independent incident confirmation, attribution proof, or required-action guidance
+  - Mozilla Security Blog remains vendor security engineering context, not universal exploitation proof, compromise proof, or required-action guidance
+  - GitHub Security Blog remains platform security context, not independent incident confirmation, exploitation proof, or required-action guidance
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+
+Files touched:
+- `app/server/src/services/data_ai_feed_registry.py`
+- `app/server/src/services/data_ai_source_family_review_service.py`
+- `app/server/src/routes/data_ai_feeds.py`
+- `app/server/src/types/api.py`
+- `app/server/data/data_ai_multi_feeds/cisa_news.xml`
+- `app/server/data/data_ai_multi_feeds/jvn_en_new.xml`
+- `app/server/data/data_ai_multi_feeds/debian_security.xml`
+- `app/server/data/data_ai_multi_feeds/microsoft_security_blog.xml`
+- `app/server/data/data_ai_multi_feeds/cisco_talos_blog.xml`
+- `app/server/data/data_ai_multi_feeds/mozilla_security_blog.xml`
+- `app/server/data/data_ai_multi_feeds/github_security_blog.xml`
+- `app/server/tests/test_data_ai_multi_feed.py`
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m pytest app/server/tests/test_nvd_cve.py app/server/tests/test_cve_context.py -q` -> pass
+- `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py -q` -> pass
+- focused review-surface tests are included in `python -m pytest app/server/tests/test_data_ai_multi_feed.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- the implementation stays inside the existing aggregate route, family overview, readiness/export snapshot, and the new metadata-only review surface only
+- no broad polling, linked-page fetching, article scraping, private URLs, tokenized feeds, credentials, live-network tests, runtime exposure changes, staging, commits, or pushes were added
+- updated `app/docs/agent-progress/data-ai.md`; awaiting Manager AI reassignment
+
+## 2026-05-02 10:08 America/Chicago
+
+Task:
+- Implement the bounded `public-institution-world-context` feed family using the existing Data AI aggregate registry, family overview, and readiness/export snapshot.
+
+Assignment version read:
+- `2026-05-02 09:56 America/Chicago`
+
+What changed:
+- Expanded the shared `GET /api/feeds/data-ai/recent` aggregate registry instead of creating another feed system.
+- Added these exact documented no-auth sources and fixture-backed feed URLs:
+  - `who-news` -> `https://www.who.int/rss-feeds/news-english.xml`
+  - `undrr-news` -> `https://www.undrr.org/rss.xml`
+  - `nasa-breaking-news` -> `https://www.nasa.gov/news-release/feed/`
+  - `noaa-news` -> `https://www.noaa.gov/rss.xml`
+  - `esa-news` -> `https://www.esa.int/rssfeed/TopNews`
+  - `fda-news` -> `https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml`
+- Added the new bounded family definition, `public-institution-world-context`, to the shared family overview and shared readiness/export snapshot without changing runtime exposure or adding a new connector path.
+- Preserved source ids, labels, family/category, feed URLs, source mode, source health, evidence basis, caveats, raw/deduped counts, dedupe posture, tags, and export-safe lines.
+
+Aggregate, overview, and readiness/export behavior:
+- `GET /api/feeds/data-ai/recent` now includes the six new public institutional/world-context sources and supports bounded `source=who-news,undrr-news,nasa-breaking-news,noaa-news,esa-news,fda-news`.
+- `GET /api/feeds/data-ai/source-families/overview` now includes `public-institution-world-context` and preserves bounded `family=` and `source=` filter intersection.
+- `GET /api/feeds/data-ai/source-families/readiness-export` now includes the new family in all-family snapshots and filtered export/readiness subsets.
+- No scoring layer was added: no credibility score, truth score, severity score, threat score, incident proof, attribution proof, conflict assessment, legal conclusion, policy recommendation, or required-action guidance.
+
+Prompt-injection and caveat handling:
+- Added deterministic fixtures with official-sounding claims, public-event language, recommendation-like wording, and prompt-injection-like text.
+- Tests prove that hostile text stays inert source data only, script/code markup is stripped from normalized summaries, and export lines remain metadata-only without linked-page URLs or free-form item text.
+- Caveat boundaries stay explicit:
+  - WHO news remains official public-health and institutional context, not outbreak proof, field confirmation, diagnosis, or required-action guidance
+  - UNDRR news remains disaster-risk reduction and resilience context, not disaster impact proof, casualty confirmation, or required-action guidance
+  - NASA news releases remain official mission/science/public institutional context, not live hazard confirmation, public-safety proof, or required-action guidance
+  - NOAA news remains official weather/climate/ocean/institutional context, not local hazard confirmation, forecast guarantee, or required-action guidance
+  - ESA news remains official space/Earth-observation/institutional context, not live event confirmation, operational directive, or required-action guidance
+  - FDA press releases remain official regulatory/public-health announcement context, not personal medical advice, product harm proof, or required-action guidance
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+
+Files touched:
+- `app/server/src/services/data_ai_feed_registry.py`
+- `app/server/data/data_ai_multi_feeds/who_news.xml`
+- `app/server/data/data_ai_multi_feeds/undrr_news.xml`
+- `app/server/data/data_ai_multi_feeds/nasa_breaking_news.xml`
+- `app/server/data/data_ai_multi_feeds/noaa_news.xml`
+- `app/server/data/data_ai_multi_feeds/esa_news.xml`
+- `app/server/data/data_ai_multi_feeds/fda_news.xml`
+- `app/server/tests/test_data_ai_multi_feed.py`
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m pytest app/server/tests/test_nvd_cve.py app/server/tests/test_cve_context.py -q` -> pass
+- `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- The implementation stays inside the existing aggregate route, family overview, and readiness/export snapshot only.
+- No broad polling, article scraping, linked-page fetching, private URLs, tokenized feeds, credentials, live-network tests, runtime exposure changes, staging, commits, or pushes were added.
+- Updated `app/docs/agent-progress/data-ai.md`; awaiting Manager AI reassignment.
+
+## 2026-05-02 09:55 America/Chicago
+
+Task:
+- Implement the bounded `internet-governance-standards-context` feed family using the existing Data AI aggregate registry, family overview, and readiness/export snapshot.
+
+Assignment version read:
+- `2026-05-02 09:46 America/Chicago`
+
+What changed:
+- Expanded the shared `GET /api/feeds/data-ai/recent` aggregate registry instead of creating another feed system.
+- Added these exact documented no-auth sources and fixture-backed feed URLs:
+  - `ripe-labs` -> `https://labs.ripe.net/feed.xml`
+  - `internet-society` -> `https://www.internetsociety.org/feed/`
+  - `lacnic-news` -> `https://blog.lacnic.net/en/feed/`
+  - `w3c-news` -> `https://www.w3.org/news/feed/`
+  - `letsencrypt` -> `https://letsencrypt.org/feed.xml`
+- Added the new bounded family definition, `internet-governance-standards-context`, to the shared family overview and shared readiness/export snapshot without changing runtime exposure or adding a new connector path.
+- Preserved source ids, labels, family/category, feed URLs, source mode, source health, evidence basis, caveats, raw/deduped counts, dedupe posture, tags, and export-safe lines.
+
+Aggregate, overview, and readiness/export behavior:
+- `GET /api/feeds/data-ai/recent` now includes the five new governance/standards/context sources and supports bounded `source=ripe-labs,internet-society,lacnic-news,w3c-news,letsencrypt`.
+- `GET /api/feeds/data-ai/source-families/overview` now includes `internet-governance-standards-context` and preserves bounded `family=` and `source=` filter intersection.
+- `GET /api/feeds/data-ai/source-families/readiness-export` now includes the new family in all-family snapshots and filtered export/readiness subsets.
+- No scoring layer was added: no internet health score, outage proof, policy truth score, standards compliance conclusion, credibility score, severity score, attribution proof, legal conclusion, or required-action guidance.
+
+Prompt-injection and caveat handling:
+- Added deterministic fixtures with policy-like, standards-like, governance-recommendation, and operational-looking text plus prompt-injection-like wording.
+- Tests prove that hostile text stays inert source data only, script/code markup is stripped from normalized summaries, and export lines remain metadata-only.
+- Caveat boundaries stay explicit:
+  - RIPE Labs remains internet measurement, policy, and operations research context, not whole-internet truth, outage proof, or required-action guidance
+  - Internet Society remains internet-governance and resilience context, not policy truth, standards compliance proof, or required-action guidance
+  - LACNIC News remains regional internet-registry policy and operations context, not outage proof, standards compliance proof, or required-action guidance
+  - W3C News remains web-standards and governance context, not universal standards compliance proof, policy truth, or required-action guidance
+  - Let's Encrypt remains certificate and internet-operations context, not universal internet-health proof, standards compliance proof, or required-action guidance
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+
+Files touched:
+- `app/server/src/services/data_ai_feed_registry.py`
+- `app/server/data/data_ai_multi_feeds/ripe_labs.xml`
+- `app/server/data/data_ai_multi_feeds/internet_society.xml`
+- `app/server/data/data_ai_multi_feeds/lacnic_news.xml`
+- `app/server/data/data_ai_multi_feeds/w3c_news.xml`
+- `app/server/data/data_ai_multi_feeds/letsencrypt.xml`
+- `app/server/tests/test_data_ai_multi_feed.py`
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m pytest app/server/tests/test_nvd_cve.py app/server/tests/test_cve_context.py -q` -> pass
+- `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- The implementation stays inside the existing aggregate route, family overview, and readiness/export snapshot only.
+- No broad polling, article scraping, linked-page fetching, private URLs, tokenized feeds, credentials, live-network tests, runtime exposure changes, staging, commits, or pushes were added.
+- Updated `app/docs/agent-progress/data-ai.md`; awaiting Manager AI reassignment.
+
+## 2026-05-02 09:42 America/Chicago
+
+Task:
+- Add a compact backend Data AI feed-family readiness/export snapshot across all implemented feed families for future analyst/report consumers.
+
+Assignment version read:
+- `2026-05-02 09:12 America/Chicago`
+
+What changed:
+- Added a new backend route, `GET /api/feeds/data-ai/source-families/readiness-export`, on top of the existing Data AI aggregate registry and family-summary machinery.
+- Kept the implementation bounded to the already implemented Data AI feed families; no new family expansion was added.
+- Preserved compact readiness/export snapshot metadata for all selected families and sources:
+  - family ids and source ids
+  - family count and source count
+  - source mode and source health
+  - evidence bases
+  - raw item count and deduped item count
+  - dedupe posture
+  - guardrail line
+  - caveats
+  - top-level export-safe lines plus family/source export lines
+
+Readiness/export snapshot behavior:
+- The new route summarizes all implemented Data AI families by default and supports the same bounded `family=` and `source=` filtering pattern already used by the family overview route.
+- `family=` and `source=` intersect cleanly, so future analyst/report consumers can request a compact snapshot for a subset such as official/public plus cyber vendor/community sources only.
+- The snapshot reuses the existing family/source summary objects instead of creating a second feed framework or any scoring model.
+- No scoring or truth-adjudication layer was added: no credibility score, truth score, severity score, threat score, attribution proof, incident proof, legal conclusion, or required-action guidance.
+
+Prompt-injection and export guardrails:
+- Readiness/export lines summarize only source-safe metadata and never include free-form item text, article URLs, or linked-page content.
+- Tests prove that hostile feed text stays inert, does not appear in readiness/export lines, and does not alter source mode, source health, evidence basis, validation state, or repo behavior.
+- The same guardrail line remains explicit: source-availability and context accounting only, not credibility scoring, event proof, attribution proof, impact proof, legal conclusion, or required action.
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+
+Files touched:
+- `app/server/src/routes/data_ai_feeds.py`
+- `app/server/src/services/data_ai_multi_feed_service.py`
+- `app/server/src/types/api.py`
+- `app/server/tests/test_data_ai_multi_feed.py`
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m pytest app/server/tests/test_nvd_cve.py app/server/tests/test_cve_context.py -q` -> pass
+- `python -m pytest app/server/tests/test_cisa_cyber_advisories.py app/server/tests/test_first_epss.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- The snapshot stays backend-only and export-oriented; it does not follow linked pages, scrape articles, or widen runtime exposure.
+- No new feed-family expansion, broad polling, private URLs, tokenized feeds, credentials, live-network tests, staging, commits, or pushes were added.
+- Updated `app/docs/agent-progress/data-ai.md`; awaiting Manager AI reassignment.
+
 ## 2026-05-01 15:55 America/Chicago
 
 Task:

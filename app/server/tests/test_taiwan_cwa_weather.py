@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.app import create_application
 from src.config.settings import Settings, get_settings
+from src.routes.weather_context import router as weather_context_router
 
 
 def _settings() -> Settings:
@@ -27,7 +28,8 @@ def _empty_settings() -> Settings:
 
 
 def _client(settings_factory=_settings) -> TestClient:
-    app = create_application()
+    app = FastAPI()
+    app.include_router(weather_context_router)
     app.dependency_overrides[get_settings] = settings_factory
     return TestClient(app)
 

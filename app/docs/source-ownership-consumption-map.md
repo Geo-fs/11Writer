@@ -24,6 +24,10 @@ Scope:
 - [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md)
 - [source-routing-batch7-base-earth-reference.md](/C:/Users/mike/11Writer/app/docs/source-routing-batch7-base-earth-reference.md)
 - [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md)
+- [osint-framework-intake-routing-memo.md](/C:/Users/mike/11Writer/app/docs/osint-framework-intake-routing-memo.md)
+- [source-candidate-to-brief-routing-matrix.md](/C:/Users/mike/11Writer/app/docs/source-candidate-to-brief-routing-matrix.md)
+- [source-quick-assign-packets-may-2026.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-may-2026.md)
+- [phase2-next-biggest-wins-packet.md](/C:/Users/mike/11Writer/app/docs/phase2-next-biggest-wins-packet.md)
 
 ## Source Discovery / Shared Memory Addendum
 
@@ -42,6 +46,9 @@ Boundary rules:
 - source memory does not create implemented or validated source rows
 - source reputation is not claim truth
 - Atlas remains important user-directed implementation input, not Manager-controlled ownership proof
+- Wonder OSINT Framework audit artifacts are research input only and do not assign implementation ownership by themselves
+- Wonder Browser Use, macOS plugin, and connector planning docs are peer planning input only and do not assign source ownership or validation status by themselves
+- candidate-only webcam discovery records are research and source-ops input only and do not assign implementation ownership by themselves
 
 ## Data AI Ownership Addendum
 
@@ -67,8 +74,17 @@ Repo-local status note:
 
 - `nist-nvd-cve` is now implemented backend-first with a bounded CVE-detail route plus conservative CVE-context composition.
 - Keep ownership with `data`, but treat the next handoff as consumer/validation follow-on work rather than raw connector creation.
-- the Data AI starter bundle, official cyber advisory wave, infrastructure/status wave, OSINT/investigations wave, rights/civic/digital-policy wave, and fact-checking/disinformation wave are now all implemented backend-first on the shared recent-items route.
+- the Data AI starter bundle, official cyber advisory wave, infrastructure/status wave, OSINT/investigations wave, rights/civic/digital-policy wave, fact-checking/disinformation wave, and cyber-institutional-watch-context wave are now all implemented backend-first on the shared recent-items route.
+- the Data AI official/public advisories wave, scientific/environmental context wave, cyber-vendor/community follow-on wave, and internet-governance/standards context wave are also implemented backend-first on the shared recent-items route.
+- the Data AI public-institution/world-context wave is also implemented backend-first on the shared recent-items route.
+- the shared `/api/feeds/data-ai/source-families/review` helper is review metadata only and must not be treated as source truth or workflow-validation proof.
+- the shared `/api/feeds/data-ai/source-families/review-queue` helper is review metadata only and must not be treated as source truth, source scoring, or workflow-validation proof.
 - use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) for the next grouped expansion instead of reopening those implemented waves as fresh source-creation work.
+
+May 2026 camera-candidate note:
+
+- the `nsw-live-traffic-cameras` and `quebec-mtmd-traffic-cameras` packets in [source-quick-assign-packets-may-2026.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-may-2026.md) remain `candidate-sandbox-importable` routing surfaces.
+- they do not create implementation ownership, validation proof, or activation proof by themselves.
 
 ## Batch 6 Ownership Addendum
 
@@ -81,7 +97,7 @@ For compact Manager-facing handoffs on the strongest Batch 6 candidates, use [so
 | `geosphere-austria-warnings` | `geospatial` | `connect`, `marine` | current warning feed only | Shared warning-context route is appropriate if implemented; keep severity semantics source-owned and advisory-only | `medium` |
 | `geosphere-austria-datahub` | `geospatial` | `connect` | one pinned dataset family only | Keep local until one exact dataset endpoint is pinned and the contract stabilizes | `low` |
 | `poland-imgw-public-data` | `geospatial` | `marine`, `connect` | one bounded weather or hydrology file family only | Keep local first; repository-style sprawl is the main risk | `medium` |
-| `netherlands-rws-waterinfo` | `marine` | `geospatial`, `connect` | one bounded station or water-level slice only | Marine should own raw hydrology fetching if approved; geospatial should consume normalized context only | `medium` |
+| `netherlands-rws-waterinfo` | `marine` | `geospatial`, `connect` | one bounded station-metadata plus latest water-level slice only | Marine should own raw WaterWebservices hydrology fetching for the narrow approved slice and the next marine-local consumer/helper follow-on; geospatial should consume normalized context only | `medium` |
 | `nasa-power-meteorology-solar` | `geospatial` | `connect`, `marine` | one point-based meteorology or solar context query only | Shared context route is fine if modeled-context caveats survive unchanged | `low` |
 | `first-epss` | `data` | `gather`, `connect` | one CVE-score lookup only | Keep Data-owned and bounded; do not let consumers fork their own cyber-risk scoring fetchers | `low` |
 | `nist-nvd-cve` | `data` | `gather`, `connect` | one bounded CVE detail or recent-CVE slice only | Shared Data-owned context route is fine if no-key lower-rate assumptions are preserved | `low` |

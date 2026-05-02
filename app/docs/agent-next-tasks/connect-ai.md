@@ -2,50 +2,28 @@
 
 You are Connect AI, working on repo-wide integration, validation, blocker triage, ownership scanning, and release/readiness coordination for 11Writer.
 
-Assignment version: 2026-05-01 15:44 America/Chicago
+Assignment version: 2026-05-02 12:27 America/Chicago
 
 Recent Manager/Workflow Updates:
-- Atlas has escalated 7Po8-style source discovery, source reputation learning, and source memory implementation as user-directed peer work.
-- Source discovery may create candidates and review evidence only; it must not create trusted, validated, scheduled, or production sources without 11Writer source-governance gates.
-- Wave Monitor now includes persistent SQLite storage and manual run-now/scheduler tick APIs; validation is green, but runtime boundaries are real and must stay explicit.
-- Wonder AI is now onboarded as a user-directed peer like Atlas; do not treat Wonder as a controlled lane.
-
-Current state:
-- You completed the Wave Monitor/Analyst Workbench runtime-boundary validation sweep at `2026-05-01 15:03 America/Chicago`.
-- Open Atlas source-discovery alerts are being routed into this assignment and Gather/Data follow-ons.
-- The dirty tree remains large and high-collision; validation was green at your last checkpoint.
+- You completed the Source Discovery runtime/review/scheduler boundary sweep with green validation and no reproduced repo-wide blocker.
+- Atlas opened a new peer alert for a Source Discovery ten-step backend slice: catalog scan, article fetch, social/image metadata, source packet export, runtime worker control, lease-safe scheduler state, live-gated OpenAI execution, scheduler-created article-claim tasks, and reviewed-claim application.
+- Atlas is a peer/user-directed agent. Treat its work as important integration input, not source validation proof or autonomous runtime approval.
+- Record `Assignment version read: 2026-05-02 12:27 America/Chicago` in your progress doc before starting.
 
 Mission:
-- Run a source-discovery/source-memory integration boundary sweep across Atlas-created Wave Monitor/discovery surfaces, ownership scanner output, validation truth, and release-readiness docs.
-
-Inspect first:
-- `git status --short --branch`
-- `scripts/list_changed_files_by_owner.py`
-- `app/docs/alerts.md`
-- `app/docs/active-agent-worktree.md`
-- `app/docs/release-readiness.md`
-- `app/docs/wave-monitor-governance-intake.md`
-- `app/docs/7po8-integration-plan.md`
-- `app/docs/source-prompt-index.md`
-- `app/server/src/wave_monitor/`
-- `app/server/src/routes/wave_monitor.py`
-- `app/server/src/services/wave_monitor_service.py`
-- `app/server/tests/test_wave_monitor.py`
-- latest Atlas, Gather, Data, and Manager progress entries
+- Validate the new Source Discovery ten-step backend slice at current repo state and run a repo-wide pre-consolidation sweep focused on runtime, claim, worker, scheduler, and shared-contract boundaries.
 
 Tasks:
-1. Run a current-state validation sweep focused on Wave Monitor, source discovery/source memory surfaces, Analyst Workbench, Data AI feed families, and the core representative domain suites.
-2. Identify whether Atlas-added source discovery/reputation/memory files are fixture-only, persistence scaffold, live connector scaffold, scheduler scaffold, or runtime activation.
-3. Fix only reproduced repo-wide blockers, import/build/type errors, scanner misclassifications, or validation-doc truth gaps.
-4. Keep source-discovery and source-memory families broad/shared unless ownership is obvious; do not hide ambiguity by force-classifying.
-5. Update coordination docs with current validation truth, dirty-tree counts, high-collision files, source-discovery runtime-boundary posture, and recommended owner routing.
-6. If source discovery can schedule, promote, trust-score, or live-run sources automatically, document the exact boundary and route it to Manager/User; do not normalize it silently.
-7. Append your final output to `app/docs/agent-progress/connect-ai.md`.
+1. Reproduce current validation before changing anything.
+2. Verify catalog scan, article fetch, social/image metadata, source packet export, runtime worker control, lease-safe scheduler state, live-gated OpenAI execution, scheduler-created article-claim tasks, and reviewed-claim application are explicitly gated, review-oriented, auditable, and non-autonomous.
+3. Confirm no path auto-promotes, auto-validates, auto-activates, auto-schedules unapproved sources, applies claims without review, changes source truth without audit, or treats LLM output as trusted state.
+4. Fix only reproduced repo-wide blockers, import/type failures, unsafe runtime-boundary bugs, broken validation snapshots, or obvious docs/scanner drift.
+5. Update `active-agent-worktree.md`, `release-readiness.md`, and `validation-matrix.md` with scanner counts, warning posture, validation truth, runtime-boundary truth, and residual consolidation risk.
+6. Append your final output to `app/docs/agent-progress/connect-ai.md`.
 
 Constraints:
-- No autonomous source promotion, scheduled ingestion, trust laundering, or hidden live polling.
-- Do not mount standalone 7Po8 runtime.
-- Do not change domain semantics unless fixing reproduced integration breakage.
+- Do not implement new domain features, source connectors, live polling expansion, source promotions, UI polish, or autonomous scheduler behavior.
+- Do not hide real shared risk with cosmetic ownership scanner rules.
 - Do not stage, commit, or push.
 
 Validation:
@@ -53,17 +31,17 @@ Validation:
 - `python scripts/list_changed_files_by_owner.py --summary`
 - `python scripts/alerts_ledger.py --json`
 - `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
 - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
 - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q`
-- `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
-- `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q`
-- `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
+- `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py app/server/tests/test_webcam_module.py -q`
+- `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q`
 - From `app/client`: `cmd /c npm.cmd run lint`
 - From `app/client`: `cmd /c npm.cmd run build`
-- `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` if compile/lint/build pass
+- If compile/lint/build pass: `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
 
 Final report requirements:
-- Start with `Assignment version read: 2026-05-01 15:44 America/Chicago`.
-- Report validation results and ownership scanner counts.
-- State whether any blocker was fixed.
-- State source-discovery/source-memory runtime boundary and ownership recommendation.
+- Start with `Assignment version read: 2026-05-02 12:27 America/Chicago`.
+- Report validation results, scanner counts, warning posture, and runtime-boundary truth.
+- State exactly what blockers were fixed, routed, or not reproduced.
+- State no staging/commit/push.

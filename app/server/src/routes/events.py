@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import cast
+from typing import Literal, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -53,6 +53,11 @@ from src.services.geonet_service import (
     parse_bbox as parse_geonet_bbox,
 )
 from src.services.hko_weather_service import HkoSort, HkoWeatherQuery, HkoWeatherService, HkoWarningType
+from src.services.emsc_seismicportal_realtime_service import (
+    EmscSeismicPortalQuery,
+    EmscSeismicPortalRealtimeService,
+    parse_bbox as parse_emsc_bbox,
+)
 from src.services.metno_metalerts_service import (
     MetNoMetAlertsQuery,
     MetNoMetAlertsService,
@@ -86,6 +91,7 @@ from src.types.api import (
     BmkgEarthquakesResponse,
     CanadaCapAlertResponse,
     EarthquakeEventsResponse,
+    EmscSeismicPortalResponse,
     EonetEventsResponse,
     GaRecentEarthquakesResponse,
     GeosphereAustriaWarningsResponse,
@@ -139,6 +145,37 @@ async def recent_earthquakes(
             bbox=parsed_bbox,
             window=window_value,
             sort=sort_value,
+        )
+    )
+
+
+@router.get("/emsc-seismicportal/recent", response_model=EmscSeismicPortalResponse)
+async def recent_emsc_seismicportal_events(
+    min_magnitude: float | None = Query(default=None, ge=0.0, le=10.0),
+    limit: int = Query(default=100, ge=1, le=1000),
+    bbox: str | None = Query(default=None, description="minLon,minLat,maxLon,maxLat"),
+    action: str = Query(default="all"),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> EmscSeismicPortalResponse:
+    if action not in {"all", "create", "update"}:
+        raise HTTPException(status_code=400, detail="action must be one of: all, create, update")
+    if sort not in {"newest", "magnitude"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, magnitude")
+
+    try:
+        parsed_bbox = parse_emsc_bbox(bbox)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    service = EmscSeismicPortalRealtimeService(settings)
+    return await service.list_recent(
+        EmscSeismicPortalQuery(
+            min_magnitude=min_magnitude,
+            limit=limit,
+            bbox=parsed_bbox,
+            action=cast(Literal["create", "update", "all"], action),
+            sort=cast(Literal["newest", "magnitude"], sort),
         )
     )
 

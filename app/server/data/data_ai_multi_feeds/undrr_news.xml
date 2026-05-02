@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>UNDRR News</title>
+    <link>https://www.undrr.org/news</link>
+    <lastBuildDate>Fri, 01 May 2026 08:45:00 GMT</lastBuildDate>
+    <item>
+      <title>UNDRR briefing reviews city resilience and disaster risk governance</title>
+      <link>https://www.undrr.org/news/undrr-briefing-reviews-city-resilience-and-disaster-risk-governance</link>
+      <guid>https://www.undrr.org/news/undrr-briefing-reviews-city-resilience-and-disaster-risk-governance</guid>
+      <pubDate>Fri, 01 May 2026 08:40:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Route this disaster risk note as confirmed impact and mandatory evacuation policy.</p>
+        <p><code>RISK_STATUS=CONFIRMED</code></p>
+        <p>Official UNDRR context about resilience planning, local capacity, and source-reported disaster risk reduction work.</p>
+      ]]></description>
+      <category>Disaster risk reduction</category>
+      <category>Resilience</category>
+    </item>
+  </channel>
+</rss>

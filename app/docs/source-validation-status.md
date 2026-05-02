@@ -23,12 +23,14 @@ Important rules:
 Source discovery note:
 
 - [source-discovery-platform-plan.md](/C:/Users/mike/11Writer/app/docs/source-discovery-platform-plan.md:1) makes 7Po8-style source discovery a core 11Writer platform capability.
+- [source-discovery-agent-framework.md](/C:/Users/mike/11Writer/app/docs/source-discovery-agent-framework.md:1) defines the bounded discovery-job, candidate-state, and no-hidden-crawler rules for implementation lanes.
 - [source-discovery-reputation-governance-packet.md](/C:/Users/mike/11Writer/app/docs/source-discovery-reputation-governance-packet.md:1) is the compact policy boundary for candidate states, reputation observations, claim outcomes, and shared source-memory routing.
 - This status report should classify discovered sources as candidates or backlog items until implementation and validation evidence exists.
 - Repeated discovery, relevance scoring, or source count does not make a source authoritative or workflow-validated.
 - Learned source reputation should be based on claim outcomes, correction behavior, source health, corroboration, and static/live source class handling.
 - Correctness reputation is different from wave mission relevance; a correct source can be low-fit for a specific wave without being a bad source.
 - Current repo-local source-memory evidence is backend/shared-runtime evidence only and does not by itself create implemented, workflow-validated, or fully validated source rows.
+- Wonder's OSINT Framework audit artifacts are candidate-routing input only and do not by themselves prove source safety, machine-readability, legality, or assignment readiness.
 
 ## Validation Levels
 
@@ -47,23 +49,31 @@ Source discovery note:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `usgs-volcano-hazards` | `/api/events/volcanoes/recent` | `app/server/tests/test_volcano_events.py` | `app/docs/source-acceleration-phase2-briefs.md` | `app/server/data/usgs_volcano_status_fixture.json` | `useVolcanoStatusQuery` | `implemented-not-fully-validated` | Workflow validation not explicitly recorded |
 | `natural-earth-physical` | `/api/context/reference/natural-earth/physical/land` | `app/server/tests/test_base_earth_reference_bundle.py` | `app/docs/environmental-events-natural-earth-physical.md` | `app/server/data/natural_earth_physical_land_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first static/reference slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `gshhg-shorelines` | `/api/context/reference/gshhg/shorelines` | `app/server/tests/test_base_earth_reference_bundle.py` | `app/docs/environmental-events-gshhg-shorelines.md` | `app/server/data/gshhg_shorelines_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first static/reference shoreline slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `noaa-global-volcano-locations` | `/api/context/reference/noaa-global-volcanoes` | `app/server/tests/test_base_earth_reference_bundle.py` | `app/docs/environmental-events-noaa-global-volcano-locations.md` | `app/server/data/noaa_global_volcano_locations_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first static/reference slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `pb2002-plate-boundaries` | `/api/context/reference/pb2002/plate-boundaries` | `app/server/tests/test_base_earth_reference_bundle.py` | `app/docs/environmental-events-pb2002-plate-boundaries.md` | `app/server/data/pb2002_plate_boundaries_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first static/reference tectonic-context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `geosphere-austria-warnings` | `/api/events/geosphere-austria/warnings` | `app/server/tests/test_geosphere_austria_warnings.py` | `app/docs/environmental-events-geosphere-austria-warnings.md` | `app/server/data/geosphere_austria_warnings_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first advisory slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `nasa-power-meteorology-solar` | `/api/context/weather/nasa-power` | `app/server/tests/test_nasa_power_meteorology_solar.py` | `app/docs/environmental-events-nasa-power-meteorology-solar.md` | `app/server/data/nasa_power_meteorology_solar_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first modeled-context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `cisa-cyber-advisories` | `/api/context/cyber/cisa-advisories/recent` | `app/server/tests/test_cisa_cyber_advisories.py` | `app/docs/cyber-context-sources.md` | `app/server/data/cisa_cybersecurity_advisories_fixture.xml` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first advisory/context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `first-epss` | `/api/context/cyber/first-epss` | `app/server/tests/test_first_epss.py` | `app/docs/cyber-context-sources.md` | `app/server/data/first_epss_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first scored/context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `nist-nvd-cve` | `/api/context/cyber/nvd-cve` | `app/server/tests/test_nvd_cve.py` | `app/docs/cyber-context-sources.md` | `app/server/data/nvd_cve_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first NVD metadata/context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `taiwan-cwa-aws-opendata` | `/api/context/weather/taiwan-cwa` | `app/server/tests/test_taiwan_cwa_weather.py` | `app/docs/environmental-events-taiwan-cwa-weather.md` | `app/server/data/taiwan_cwa_current_weather_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first observed/context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `meteoswiss-open-data` | `/api/context/weather/meteoswiss` | `app/server/tests/test_meteoswiss_open_data.py` | `app/docs/environmental-events-meteoswiss-open-data.md` | `app/server/data/meteoswiss_open_data_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first SwissMetNet observed station-context slice is explicit and contract-tested, but it intentionally stays on station metadata plus one `t_now` asset family only and has no workflow validation or stable frontend consumer record yet |
+| `bc-wildfire-datamart` | `/api/context/fire-weather/bcws` | `app/server/tests/test_bc_wildfire_datamart.py` | `app/docs/environmental-events-bc-wildfire-datamart.md` | `app/server/data/bc_wildfire_datamart_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first fire-weather context slice is explicit and contract-tested, but it stays bounded to station reference rows and danger summaries only and has no workflow validation or stable frontend consumer record yet |
 | `nrc-event-notifications` | `/api/events/nrc/recent` | `app/server/tests/test_nrc_event_notifications.py` | `app/docs/environmental-events-nrc-event-notifications.md` | `app/server/data/nrc_event_notifications_fixture.xml` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first source-reported/context slice is explicit and contract-tested, with prompt-injection-safe free-text fixture coverage, but no workflow validation or stable frontend consumer record is explicit yet |
 | `bmkg-earthquakes` | `/api/events/bmkg-earthquakes/recent` | `app/server/tests/test_bmkg_earthquakes.py` | `app/docs/environmental-events-bmkg-earthquakes.md` | `app/server/data/bmkg_earthquakes_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first regional-authority earthquake slice is explicit and contract-tested, with source-health and prompt-injection-safe free-text coverage, but no workflow validation or stable frontend consumer record is explicit yet |
 | `ga-recent-earthquakes` | `/api/events/ga-earthquakes/recent` | `app/server/tests/test_ga_recent_earthquakes.py` | `app/docs/environmental-events-ga-recent-earthquakes.md` | `app/server/data/ga_recent_earthquakes_fixture.kml` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first regional-authority KML earthquake slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `emsc-seismicportal-realtime` | `/api/events/emsc-seismicportal/recent` | `app/server/tests/test_emsc_seismicportal_realtime.py` | `app/docs/environmental-events-emsc-seismicportal-realtime.md` | `app/server/data/emsc_seismicportal_realtime_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first buffered event-context slice is explicit and contract-tested, but no executed live-websocket path or workflow validation is recorded yet |
+| `orfeus-eida-federator` | `/api/context/seismic/orfeus-eida` | `app/server/tests/test_orfeus_eida_context.py` | `app/docs/environmental-events-orfeus-eida.md` | `app/server/data/orfeus_eida_station_fixture.txt` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first bounded seismic station-metadata slice is explicit and contract-tested, but it intentionally stays on public federated station metadata only and has no workflow validation or stable frontend consumer record yet |
 | `noaa-coops-tides-currents` | `/api/marine/context/noaa-coops` | `app/server/tests/test_marine_contracts.py` | `app/docs/source-acceleration-phase2-briefs.md` | fixture-backed context in `app/server/tests/smoke_fixture_app.py` | `useMarineNoaaCoopsContextQuery` | `workflow-validated` | Workflow validation is explicit in [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md:1), and contract hardening now explicitly covers `health=empty`, explicit fixture `sourceMode` on empty responses, `health=disabled` for disabled behavior, source-level caveats, and request validation errors; still not fully validated or live validated |
 | `usgs-geomagnetism` | `/api/context/geomagnetism/usgs` | `app/server/tests/test_usgs_geomagnetism.py` | `app/docs/environmental-events-usgs-geomagnetism.md` | `app/server/data/usgs_geomagnetism_fixture.json` | `useUsgsGeomagnetismContextQuery` | `implemented-not-fully-validated` | Backend-first slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `ourairports-reference` | `/api/aerospace/reference/ourairports` | `app/server/tests/test_ourairports_reference_contracts.py` | `app/docs/aerospace-ourairports-reference.md` | `app/server/data/ourairports_reference_fixture/airports.csv`, `app/server/data/ourairports_reference_fixture/runways.csv` | `useOurAirportsReferenceQuery` | `implemented-not-fully-validated` | Backend-first bounded airport/runway reference slice is explicit and contract-tested, and a selected-target/export consumer exists, but browser smoke is still blocked locally and no workflow validation is recorded yet |
 | `noaa-aviation-weather-center-data-api` | `/api/aviation-weather/airport-context` | `app/server/tests/test_aviation_weather_contracts.py` | `app/docs/source-acceleration-phase2-briefs.md` | mocked contract payloads, no dedicated `app/server/data` fixture identified in this audit | `useAviationWeatherContextQuery` | `implemented-not-fully-validated` | No explicit workflow validation record |
 | `faa-nas-airport-status` | `/api/aerospace/airports/{airport_code}/faa-nas-status` | `app/server/tests/test_faa_nas_status_contracts.py` | `app/docs/source-acceleration-phase2-briefs.md` | `app/server/data/faa_nas_airport_status_fixture.xml` | `useFaaNasAirportStatusQuery` | `implemented-not-fully-validated` | No explicit workflow validation record |
 | `noaa-ndbc-realtime` | `/api/marine/context/ndbc` | `app/server/tests/test_marine_contracts.py` | `app/docs/source-acceleration-phase2-briefs.md` | fixture-backed context in `app/server/tests/smoke_fixture_app.py` | `useMarineNdbcContextQuery` | `workflow-validated` | Workflow validation is explicit in [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md:1), and contract hardening now explicitly covers `health=empty`, explicit fixture `sourceMode` on empty responses, `health=disabled` for disabled behavior, source-level caveats, and request validation errors; still not fully validated or live validated |
 | `scottish-water-overflows` | `/api/marine/context/scottish-water-overflows` | `app/server/tests/test_marine_contracts.py` | `app/docs/source-acceleration-phase2-global-briefs.md` | fixture-backed context in `app/server/tests/smoke_fixture_app.py` | `useMarineScottishWaterOverflowsQuery` | `workflow-validated` | Workflow validation is explicit in [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md:1), and contract hardening now explicitly covers `health=empty`, explicit fixture `sourceMode` on empty responses, `health=disabled` for disabled behavior, source-level caveats, and request validation errors; still contextual only and not fully validated or live validated |
 | `finland-digitraffic` | `/api/features/finland-road-weather/stations` and `/api/features/finland-road-weather/stations/{station_id}` | `app/server/tests/test_finland_digitraffic.py` | `app/docs/source-acceleration-phase2-international-briefs.md` | `app/server/data/digitraffic_weather_stations_fixture.json`, `app/server/data/digitraffic_weather_station_data_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend route, detail route, endpoint health, and freshness interpretation are explicit, but no stable frontend consumer or workflow validation record is explicit yet |
+| `netherlands-rws-waterinfo` | `/api/marine/context/netherlands-rws-waterinfo` | `app/server/tests/test_netherlands_rws_waterinfo.py`, `app/server/tests/test_marine_contracts.py` | `app/docs/source-endpoint-verification-netherlands-rws-waterinfo.md` | fixture-backed marine context payloads in marine backend data flow | no client hook yet identified | `implemented-not-fully-validated` | Backend-first WaterWebservices slice is explicit and contract-tested, with pinned metadata plus latest-water-level POST endpoints, but no stable frontend consumer or workflow validation record is explicit yet |
 | `france-vigicrues-hydrometry` | `/api/marine/context/vigicrues-hydrometry` | `app/server/tests/test_vigicrues_hydrometry.py` | `app/docs/source-acceleration-phase2-batch4-briefs.md` | fixture-backed hydrometry payloads in `app/server/tests` and marine backend data flow | no client hook yet identified | `in-progress` | Backend-only slice is real and contract-tested, with pinned public Hub'Eau endpoint family and passing backend validation, but no client or workflow evidence is recorded yet |
 | `noaa-tsunami-alerts` | `/api/events/tsunami/recent` | `app/server/tests/test_tsunami_events.py` | `app/docs/source-prompt-index.md` | `app/server/data/noaa_tsunami_alerts_fixture.json` | `useTsunamiAlertsQuery` | `implemented-not-fully-validated` | Workflow validation not explicitly recorded |
 | `uk-ea-flood-monitoring` | `/api/events/uk-floods/recent` | `app/server/tests/test_uk_ea_flood_events.py` | `app/docs/source-acceleration-phase2-international-briefs.md` | `app/server/data/uk_ea_flood_monitoring_fixture.json` | `useUkEaFloodMonitoringQuery` | `implemented-not-fully-validated` | Implementation evidence is clear; remaining gap is workflow validation |
@@ -255,6 +265,202 @@ Source discovery note:
 - Next validation action:
   - validate one bounded consumer or export path for the aggregate route and preserve contextual-only semantics before treating this wave as anything stronger than implemented
 
+### `data-ai-rss-cyber-vendor-community-follow-on-wave`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/recent`
+- Current board status:
+  - backend-first implemented bundle on the shared Data AI lane, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/tests/test_rss_feed_service.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - feed definitions and fixtures for `google-security-blog`, `bleepingcomputer`, `krebs-on-security`, `securityweek`, and `dfrlab`
+  - bounded family definition `cyber-vendor-community-follow-on` on the shared family-overview route
+  - prompt-injection-like fixture coverage for quoted, vendor, community, and free-form post text
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this wave is contract-tested and parser-hardened, but no explicit workflow validation or stable frontend consumer record is recorded
+  - vendor, community, and investigative-style text remains contextual only and must not become exploit proof, compromise proof, attribution proof, or action guidance
+  - free-form feed text remains untrusted data and must stay inert
+- Next validation action:
+  - validate one bounded consumer or export path for the aggregate route and preserve contextual-only semantics before treating this wave as anything stronger than implemented
+
+### `data-ai-rss-internet-governance-standards-context-wave`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/recent`
+- Current board status:
+  - backend-first implemented bundle on the shared Data AI lane, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/tests/test_rss_feed_service.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - feed definitions and fixtures for `ripe-labs`, `internet-society`, `lacnic-news`, `w3c-news`, and `letsencrypt`
+  - bounded family definition `internet-governance-standards-context` on the shared family-overview and readiness/export routes
+  - prompt-injection-like fixture coverage for policy-like, standards-like, and operational-looking text
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this wave is contract-tested and parser-hardened, but no explicit workflow validation or stable frontend consumer record is recorded
+  - governance, standards, registry, and certificate/operations reporting remain contextual only and must not become whole-internet truth, standards compliance proof, or required-action guidance
+  - free-form feed text remains untrusted data and must stay inert
+- Next validation action:
+  - validate one bounded consumer or export path for the aggregate route and preserve contextual-only semantics before treating this wave as anything stronger than implemented
+
+### `data-ai-rss-public-institution-world-context-wave`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/recent`
+- Current board status:
+  - backend-first implemented bundle on the shared Data AI lane, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/tests/test_rss_feed_service.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - feed definitions and fixtures for `who-news`, `undrr-news`, `nasa-breaking-news`, `noaa-news`, `esa-news`, and `fda-news`
+  - `app/docs/cyber-context-sources.md`
+  - `app/docs/data-ai-feed-rollout-ladder.md`
+  - `app/docs/data-ai-next-routing-after-family-summary.md`
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this wave is contract-tested and parser-hardened, but no explicit workflow validation or stable frontend consumer record is recorded
+  - institutional, health, science, and disaster/news text remains contextual only and must not become field confirmation, attribution proof, or action guidance
+  - free-form feed text remains untrusted data and must stay inert
+- Next validation action:
+  - validate one bounded consumer or export path for the aggregate route and preserve contextual-only semantics before treating this wave as anything stronger than implemented
+
+### `data-ai-rss-cyber-institutional-watch-context-wave`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/recent`
+- Current board status:
+  - backend-first implemented bundle on the shared Data AI lane, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/tests/test_rss_feed_service.py`
+  - `app/server/src/services/data_ai_feed_registry.py`
+  - `app/server/src/services/data_ai_multi_feed_service.py`
+  - feed definitions and fixtures for `cisa-news`, `jvn-en-new`, `debian-security`, `microsoft-security-blog`, `cisco-talos-blog`, `mozilla-security-blog`, and `github-security-blog`
+  - bounded family definition `cyber-institutional-watch-context` on the shared family-overview route
+  - `app/docs/cyber-context-sources.md`
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this wave is contract-tested and parser-hardened, but no explicit workflow validation or stable frontend consumer record is recorded
+  - institutional, vendor-adjacent, and public security text remains contextual only and must not become incident proof, attribution proof, or required-action guidance
+  - free-form feed text remains untrusted data and must stay inert
+- Next validation action:
+  - validate one bounded consumer or export path for the aggregate route and preserve contextual-only semantics before treating this wave as anything stronger than implemented
+
+### `data-ai-source-family-review-helper`
+
+- Actual route:
+  - `/api/feeds/data-ai/source-families/review`
+- Current board status:
+  - implemented helper surface, not a promoted source row
+- Existing evidence:
+  - `app/server/src/services/data_ai_source_family_review_service.py`
+  - `app/docs/cyber-context-sources.md`
+  - repo-local Data AI progress evidence for the family review surface
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is review metadata only and must not be treated as source truth, connector proof, or workflow-validation proof
+  - no explicit workflow validation or stable frontend consumer record is recorded
+- Next validation action:
+  - keep the helper bounded to review metadata and only validate consumer/export handling if a dedicated UI or export package is intentionally added
+
+### `data-ai-source-family-review-queue-and-export-bundle`
+
+- Aggregate route:
+  - `/api/feeds/data-ai/source-families/review-queue`
+- Current board status:
+  - implemented helper surface, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_data_ai_multi_feed.py`
+  - `app/server/src/services/data_ai_source_family_review_queue_service.py`
+  - `app/docs/cyber-context-sources.md`
+  - `app/docs/data-ai-feed-rollout-ladder.md`
+  - `app/docs/data-ai-next-routing-after-family-summary.md`
+  - Data AI progress records bounded family and source issue bundling plus metadata-only export-safe review lines
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is review metadata only and must not be treated as source truth, source scoring, connector proof, or workflow-validation proof
+  - queue issue kinds, caveat density, prompt-injection posture, and dedupe posture remain bounded accounting signals only
+  - no explicit consumer-path or executed workflow validation is recorded yet
+- Next validation action:
+  - validate one bounded downstream consumer or export-path note while preserving metadata-only posture before treating the helper as anything stronger than implemented
+
+### `data-ai-source-intelligence`
+
+- Aggregate consumer path:
+  - `dataAiSourceIntelligence` in the inspector over:
+    - `/api/feeds/data-ai/source-families/readiness-export`
+    - `/api/feeds/data-ai/source-families/review`
+    - `/api/feeds/data-ai/source-families/review-queue`
+- Current board status:
+  - implemented helper surface, not a promoted source row
+- Existing evidence:
+  - `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`
+  - `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+  - `app/client/src/lib/queries.ts`
+  - `app/client/src/types/api.ts`
+  - `app/client/src/features/inspector/InspectorPanel.tsx`
+  - `app/docs/cyber-context-sources.md`
+  - `app/docs/data-ai-feed-rollout-ladder.md`
+  - `app/docs/data-ai-next-routing-after-family-summary.md`
+  - `app/docs/prompt-injection-defense.md`
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is a client-light metadata-only consumer and must not be treated as feed truth, source scoring, severity scoring, incident proof, or workflow-validation proof
+  - compact export lines are filtered to drop URL-bearing lines before rendering
+  - no smoke or manual workflow-validation record is recorded yet
+- Next validation action:
+  - record one bounded inspector/export workflow note for the metadata-only consumer before treating it as anything stronger than implemented
+
+### `emsc-seismicportal-realtime`
+
+- Actual route:
+  - `/api/events/emsc-seismicportal/recent`
+- Current board status:
+  - `implemented`
+- Backend route present?
+  - yes
+- Typed contracts present?
+  - yes
+- Fixture present?
+  - yes
+  - `app/server/data/emsc_seismicportal_realtime_fixture.json`
+- Backend tests present?
+  - yes
+  - `app/server/tests/test_emsc_seismicportal_realtime.py`
+- Client hook/types present?
+  - no dedicated client hook identified in this audit
+- Minimal UI present?
+  - no stable frontend consumer record identified in this audit
+- Export metadata present?
+  - no explicit export-workflow evidence recorded in this audit
+- Docs present?
+  - yes
+  - `app/docs/environmental-events-emsc-seismicportal-realtime.md`
+- Known validation commands reported:
+  - `python -m pytest app/server/tests/test_emsc_seismicportal_realtime.py -q`
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - backend-first buffered recent-events slice is explicit and contract-tested, but there is no recorded consumer-path, export-path, or workflow-validation evidence yet
+  - the slice intentionally avoids treating live-websocket availability as test-time proof
+- Next validation action:
+  - validate one bounded consumer or export path and record explicit workflow evidence before promoting beyond implemented
+
 ### `data-ai-source-family-overview-helper`
 
 - Aggregate route:
@@ -357,6 +563,23 @@ Source discovery note:
   - no explicit downstream workflow-validation note is recorded yet
 - Next validation action:
   - validate one server-side report or snapshot consumer path before treating the helper as anything stronger than implemented
+
+### `environmental-situation-snapshot-package-helper`
+
+- Aggregate route:
+  - `/api/context/environmental/situation-snapshot-package`
+- Current board status:
+  - implemented helper package, not a promoted source row
+- Existing evidence:
+  - Geospatial AI progress records a backend-first compact snapshot package over source-family overview, context export package, and source-health issue queue
+  - route profiles include `default`, `chokepoint-context`, and `source-health-review`
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this helper is a compact report/export input only and must not be treated as source validation proof or a scoring engine
+  - it does not certify source reliability and does not imply severity, impact, causation, or action recommendation
+- Next validation action:
+  - keep the helper at implemented helper-package status until a later explicit consumer-path workflow note is recorded
 
 ### `marine-context-issue-export-bundle`
 
@@ -505,6 +728,23 @@ Source discovery note:
 - Next validation action:
   - record one bounded aggregate handoff-summary export workflow note before treating the package as anything stronger than implemented
 
+### `features-source-ops-unified-export-surface`
+
+- Aggregate route:
+  - `/api/cameras/source-ops-export-surface`
+- Current board status:
+  - implemented helper package, not a promoted source row
+- Existing evidence:
+  - Features/Webcam AI progress records a unified aggregate-only export surface over review-queue bundles, evidence-packet bundles, export-readiness summaries, and handoff bundles
+  - aggregate-only caveats exclude per-source detail, raw payloads, URLs, creds, tokens, and local paths
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this helper is workflow-supporting package evidence only and must not be treated as external-source validation proof
+  - it does not activate, promote, schedule, scrape, or live-check sources
+- Next validation action:
+  - record one explicit end-to-end export workflow note before treating the helper as anything stronger than implemented
+
 ### `aerospace-context-gap-queue`
 
 - Aggregate helper path:
@@ -564,6 +804,49 @@ Source discovery note:
 - Next validation action:
   - rerun aerospace smoke on a host where Playwright can launch and record successful export-coherence assertions before treating the helper as anything stronger than implemented
 
+### `aerospace-workflow-readiness-package`
+
+- Aggregate helper path:
+  - `aerospaceWorkflowReadinessPackage`
+- Current board status:
+  - implemented helper package, not a promoted source row
+- Existing evidence:
+  - `app/docs/aerospace-workflow-validation.md`
+  - `app/docs/aerospace-workflow-evidence-ledger.md`
+  - `app/docs/aircraft-satellite-smoke.md`
+  - `app/client/scripts/playwright_smoke.mjs`
+  - Aerospace AI progress records prepared-vs-executed smoke accounting, validation rows, missing-evidence rows, and export metadata wiring
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this package is workflow and evidence accounting only and must not be treated as source validation proof by itself
+  - prepared smoke remains distinct from executed smoke
+  - executed browser smoke remains unrecorded on this host because Playwright launch is blocked by `windows-browser-launch-permission`
+- Next validation action:
+  - rerun aerospace smoke on a host where Playwright can launch and record successful workflow-readiness-package assertions before treating the helper as anything stronger than implemented
+
+### `aerospace-context-review-queue-and-export-bundle`
+
+- Aggregate helper paths:
+  - `aerospaceContextReviewQueue`
+  - `aerospaceContextReviewExportBundle`
+- Current board status:
+  - implemented helper package, not a promoted source row
+- Existing evidence:
+  - `app/docs/aerospace-workflow-validation.md`
+  - `app/docs/aerospace-workflow-evidence-ledger.md`
+  - `app/docs/aircraft-satellite-smoke.md`
+  - `app/client/scripts/playwright_smoke.mjs`
+  - Aerospace AI progress records prioritized review gaps, export-safe queue lines, caveat reminders, and export metadata wiring
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this queue and export bundle are workflow-supporting review/export accounting only and must not be treated as source validation proof by themselves
+  - they do not imply severity, target behavior, airport/runway availability, failure proof, route impact, causation, operational consequence, or action recommendation
+  - executed browser smoke remains unrecorded on this host because Playwright launch is blocked by `windows-browser-launch-permission`
+- Next validation action:
+  - rerun aerospace smoke on a host where Playwright can launch and record successful review-queue/export-bundle assertions before treating the helper as anything stronger than implemented
+
 ### `wave-monitor-tool-surface`
 
 - Aggregate routes:
@@ -590,32 +873,108 @@ Source discovery note:
 - Next validation action:
   - keep the tool at implemented fixture-backed status until persistence/runtime ownership is intentionally assigned and explicit workflow validation is recorded
 
-### `source-discovery-memory-tool-surface`
+### `marine-timeline-chokepoint-coherence-regression`
+
+- Aggregate path:
+  - `marineAnomalySummary.timelineSnapshots` plus chokepoint review package metadata
+- Current board status:
+  - implemented helper regression coverage, not a promoted source row
+- Existing evidence:
+  - Marine AI progress records timeline snapshot preservation of chokepoint review-lens metadata plus coherence between timeline snapshots and chokepoint review package outputs
+  - validation evidence includes marine tests, compile, helper tests, lint, build, and marine smoke
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this helper is metadata/regression hardening only and must not be treated as source validation proof
+  - it does not imply severity, wrongdoing, evasion, intent, causation, or action recommendation
+- Next validation action:
+  - preserve the regression at implemented helper-package status until a later broader workflow report intentionally relies on it
+
+### `aerospace-context-snapshot-report-helper`
+
+- Aggregate path:
+  - `aerospaceContextSnapshotReport`
+- Current board status:
+  - implemented helper package, not a promoted source row
+- Existing evidence:
+  - Aerospace AI progress records a compact report/export metadata helper over readiness, gap queue, current/archive context, export coherence, and issue-export bundle inputs
+  - backend contract tests, compile, lint, and build are explicitly recorded as passing for the active aerospace lane
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this helper is compact report/export metadata only and must not be treated as source validation proof
+  - executed browser smoke remains unrecorded on this host because Playwright launch is blocked by `windows-browser-launch-permission`
+- Next validation action:
+  - rerun aerospace smoke on a host where Playwright can launch and record successful helper assertions before treating the helper as anything stronger than implemented
+
+### `source-discovery-runtime-surface`
 
 - Aggregate routes:
   - `/api/source-discovery/memory/overview`
   - `/api/source-discovery/memory/candidates`
   - `/api/source-discovery/memory/claim-outcomes`
+  - `/api/source-discovery/jobs/seed-url`
+  - `/api/source-discovery/jobs/record-source-extract`
+  - `/api/source-discovery/health/check`
+  - `/api/source-discovery/jobs/expand`
+  - `/api/source-discovery/jobs/feed-link-scan`
+  - `/api/source-discovery/content/snapshots`
+  - `/api/source-discovery/reputation/reverse-event`
+  - `/api/source-discovery/scheduler/tick`
+  - `/api/source-discovery/review/queue`
+  - `/api/source-discovery/review/actions`
+  - `/api/source-discovery/runtime/status`
 - Current board status:
   - implemented shared candidate/reputation tool surface, not a promoted source row
 - Existing evidence:
   - `app/server/tests/test_source_discovery_memory.py`
   - `app/server/src/routes/source_discovery.py`
   - `app/server/src/services/source_discovery_service.py`
+  - `app/server/src/services/runtime_scheduler_service.py`
   - `app/server/src/source_discovery/db.py`
   - `app/server/src/source_discovery/models.py`
   - `app/server/src/types/source_discovery.py`
   - `app/docs/source-discovery-platform-plan.md`
+  - `app/docs/source-discovery-agent-framework.md`
   - `app/docs/source-discovery-reputation-governance-packet.md`
-  - Atlas AI progress records shared source-memory storage, claim-outcome updates, wave-fit separation, and Wave Monitor source-candidate seeding
+  - `app/docs/osint-framework-intake-routing-memo.md`
+  - Atlas AI progress records shared source-memory storage, claim-outcome updates, wave-fit separation, Wave Monitor source-candidate seeding, bounded seed/health/expand/snapshot/reversal/tick primitives, review queue/actions, runtime-status posture, and a newer Source Discovery Ten-Step backend slice as peer/runtime input
+  - Connect AI progress records persistent store wiring and explicit runtime-boundary validation
+  - Wonder planning docs for Browser Use, macOS plugin workflows, connector capability mapping, and connector adoption remain peer planning input only and do not change source-validation posture
 - Full validation status:
   - `implemented-not-fully-validated`
 - Blockers / caveats:
   - this is a candidate/reputation/review surface and must not be mistaken for source implementation proof or external-source validation proof
   - source reputation observations are not claim truth, source truth, attribution proof, causation proof, intent proof, wrongdoing proof, or action guidance
-  - no autonomous discovery runner, hidden live polling, full-text fetcher, or frontend review workflow is recorded in current repo evidence
+  - bounded jobs, snapshots, review actions, runtime status, and manual scheduler tick now exist, but no autonomous discovery runner, hidden live polling, or automatic source approval is recorded in current repo evidence
+  - `runtime_scheduler_service.py` is currently compatibility and status plumbing, not proof of hidden background scheduling
 - Next validation action:
   - keep the surface at implemented shared-tool status until Connect records the runtime/storage boundary truth and any later review workflow is explicitly validated without bypassing the normal source lifecycle
+
+### `features-webcam-sandbox-candidate-review-burden-summary`
+
+- Aggregate routes:
+  - `/api/cameras/source-ops-report-index`
+  - `/api/cameras/source-ops-export-summary`
+- Current board status:
+  - implemented helper surface, not a promoted source row
+- Existing evidence:
+  - `app/server/tests/test_camera_source_ops_report_index.py`
+  - `app/server/tests/test_camera_source_ops_export_summary.py`
+  - `app/server/src/services/camera_source_ops_sandbox_candidate_summary.py`
+  - `app/server/src/services/camera_source_ops_report_index.py`
+  - `app/server/src/services/camera_source_ops_export_summary.py`
+  - `app/docs/webcams.md`
+  - `app/docs/webcam-source-lifecycle-policy.md`
+  - `app/docs/webcam-global-camera-candidate-batch-2026-05.md`
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - this is backend-only source-ops evidence over `candidate-sandbox-importable` sources and must not be treated as activation, scheduling, validation, or live-ingest proof
+  - hostile or prompt-like fixture text remains inert and excluded from compact summary/export outputs
+  - no explicit end-to-end workflow-validation record is recorded yet
+- Next validation action:
+  - keep the summary bounded to candidate review burden and source-health expectation, or add one equally bounded endpoint-verified non-sandbox summary without changing lifecycle meaning
 
 ## Per-Source Status
 
@@ -1118,6 +1477,29 @@ Source discovery note:
 - Next validation action:
   - add one bounded consumer or export path and record workflow validation before any promotion beyond implemented
 
+### `netherlands-rws-waterinfo`
+
+- Current board status: `implemented`
+- Backend route present?: yes
+- Typed contracts present?: yes
+- Fixture present?: yes
+- Backend tests present?: yes
+- Client hook/types present?: no explicit stable consumer recorded
+- Minimal UI present?: no explicit stable consumer recorded
+- Export metadata present?: backend response fields and marine summary preservation are present for later export checks
+- Docs present?: yes
+- Known validation commands reported:
+  - `python -m pytest app/server/tests/test_netherlands_rws_waterinfo.py -q`
+  - `python -m pytest app/server/tests/test_marine_contracts.py -q`
+  - `python -m compileall app/server/src`
+- Full validation status: `implemented-not-fully-validated`
+- Blockers / caveats:
+  - backend-first WaterWebservices slice is explicit and contract-tested, but no stable consumer-path or workflow-validation record is explicit yet
+  - the source is intentionally bounded to official metadata plus latest water-level POST endpoints only
+  - prompt-like station text remains inert metadata only and must not affect lifecycle or export posture
+- Next validation action:
+  - validate one bounded marine-local consumer, helper, or export path while preserving metadata-only and observed-context caveats before promoting beyond implemented
+
 ### `scottish-water-overflows`
 
 - Current board status: `workflow-validated`
@@ -1343,24 +1725,46 @@ If repo-wide lint or build failures unrelated to a source are later reported, th
   - backend-first implementation evidence is clear for `eff-updates`, `access-now`, `privacy-international`, and `freedom-house`, but no stable frontend consumer or workflow-validation note is recorded yet
 - `data-ai-rss-fact-checking-disinformation-wave`
   - backend-first implementation evidence is clear for `full-fact`, `snopes`, `politifact`, `factcheck-org`, and `euvsdisinfo`, but no stable frontend consumer or workflow-validation note is recorded yet
+- `data-ai-rss-cyber-vendor-community-follow-on-wave`
+  - backend-first implementation evidence is clear for `google-security-blog`, `bleepingcomputer`, `krebs-on-security`, `securityweek`, and `dfrlab`, but no stable frontend consumer or workflow-validation note is recorded yet
+- `data-ai-rss-internet-governance-standards-context-wave`
+  - backend-first implementation evidence is clear for `ripe-labs`, `internet-society`, `lacnic-news`, `w3c-news`, and `letsencrypt`, but no stable frontend consumer or workflow-validation note is recorded yet
+- `data-ai-rss-public-institution-world-context-wave`
+  - backend-first implementation evidence is clear for `who-news`, `undrr-news`, `nasa-breaking-news`, `noaa-news`, `esa-news`, and `fda-news`, but no stable frontend consumer or workflow-validation note is recorded yet
 - `usgs-geomagnetism`
   - backend-first implementation evidence is clear, but no stable frontend consumer or workflow-validation note is recorded yet
 - `taiwan-cwa-aws-opendata`
   - backend-first implementation evidence is clear, but no stable frontend consumer or workflow-validation note is recorded yet
 - `nrc-event-notifications`
   - backend-first implementation evidence is clear, but no stable frontend consumer or workflow-validation note is recorded yet
+- `environmental-situation-snapshot-package-helper`
+  - backend-first helper evidence is clear, but no explicit consumer-path or workflow-validation note is recorded yet
+- `marine-timeline-chokepoint-coherence-regression`
+  - helper/regression evidence is clear, but it remains workflow-supporting package evidence rather than source validation proof
+- `aerospace-context-snapshot-report-helper`
+  - helper/export evidence is clear, but executed browser smoke remains unrecorded on this host
+- `features-source-ops-unified-export-surface`
+  - aggregate export helper evidence is clear, but no explicit end-to-end workflow note is recorded yet
+- `source-discovery-runtime-surface`
+  - shared runtime evidence is clear, but it remains candidate/review/runtime evidence rather than source implementation or workflow-validation proof
 - `france-vigicrues-hydrometry`
   - backend-only implementation evidence is clear, but there is no client or workflow evidence yet, so the source remains `in-progress`
 - `natural-earth-physical`
   - backend-first static/reference implementation evidence is clear, but no stable consumer or workflow-validation note is recorded yet
+- `gshhg-shorelines`
+  - backend-first static/reference shoreline implementation evidence is clear, but no stable consumer or workflow-validation note is recorded yet
 - `noaa-global-volcano-locations`
   - backend-first static/reference implementation evidence is clear, but no stable consumer or workflow-validation note is recorded yet
+- `pb2002-plate-boundaries`
+  - backend-first static/reference tectonic-context implementation evidence is clear, but no stable consumer or workflow-validation note is recorded yet
 - `nist-nvd-cve`
   - backend-first NVD implementation evidence is clear, but no stable consumer or workflow-validation note is recorded yet
 - `bmkg-earthquakes`
   - backend-first regional-authority earthquake implementation evidence is clear, but no stable consumer or workflow-validation note is recorded yet
 - `ga-recent-earthquakes`
   - backend-first KML regional-authority earthquake implementation evidence is clear, but no stable consumer or workflow-validation note is recorded yet
+- `emsc-seismicportal-realtime`
+  - backend-first buffered event-context implementation evidence is clear, but no stable consumer, export-path, or workflow-validation note is recorded yet
 - `finland-digitraffic`
   - implementation evidence is clear at the backend route/detail/freshness level, but there is no explicit workflow validation or stable frontend consumer record yet
 - `noaa-coops-tides-currents`
@@ -1391,10 +1795,12 @@ If repo-wide lint or build failures unrelated to a source are later reported, th
 - `python -m pytest app/server/tests/test_usgs_geomagnetism.py -q`
 - `python -m pytest app/server/tests/test_bmkg_earthquakes.py -q`
 - `python -m pytest app/server/tests/test_ga_recent_earthquakes.py -q`
+- `python -m pytest app/server/tests/test_emsc_seismicportal_realtime.py -q`
 - `python -m pytest app/server/tests/test_nvd_cve.py -q`
 - `python -m pytest app/server/tests/test_cve_context.py -q`
 - `python -m pytest app/server/tests/test_taiwan_cwa_weather.py -q`
 - `python -m pytest app/server/tests/test_nrc_event_notifications.py -q`
+- `python -m pytest app/server/tests/test_environmental_weather_observation_review.py -q`
 - `python -m pytest app/server/tests/test_tsunami_events.py -q`
 - `python -m pytest app/server/tests/test_uk_ea_flood_events.py -q`
 - `python -m pytest app/server/tests/test_aviation_weather_contracts.py -q`

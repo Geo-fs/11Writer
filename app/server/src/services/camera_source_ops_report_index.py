@@ -3,7 +3,14 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from src.config.settings import Settings
-from src.services.camera_registry import build_camera_source_inventory, is_camera_source_sandbox_importable
+from src.services.camera_registry import (
+    build_camera_source_inventory,
+    get_camera_source_sandbox_mode,
+    is_camera_source_sandbox_importable,
+)
+from src.services.camera_source_ops_sandbox_candidate_summary import (
+    build_camera_source_ops_sandbox_candidate_summary,
+)
 from src.types.api import (
     CameraSourceInventoryEntry,
     CameraSourceOpsArtifactAvailability,
@@ -17,6 +24,7 @@ def build_camera_source_ops_report_index(settings: Settings) -> CameraSourceOpsI
     sources = build_camera_source_inventory(settings)
     entries = [_build_entry(source, settings) for source in sources]
     entries.sort(key=lambda item: item.source_id)
+    sandbox_candidate_summary = build_camera_source_ops_sandbox_candidate_summary(settings)
     summary = CameraSourceOpsIndexSummary(
         total_sources=len(entries),
         validated_sources=sum(1 for entry in entries if entry.lifecycle_bucket == "validated-active"),
@@ -39,6 +47,7 @@ def build_camera_source_ops_report_index(settings: Settings) -> CameraSourceOpsI
         fetched_at=_now_iso(),
         count=len(entries),
         summary=summary,
+        sandbox_candidate_summary=sandbox_candidate_summary,
         export_lines=_build_export_lines(entries, summary),
         caveat=(
             "This source-operations index is read-only lifecycle evidence. "
@@ -205,10 +214,7 @@ def _sandbox_available(source: CameraSourceInventoryEntry, settings: Settings) -
 def _sandbox_mode(source: CameraSourceInventoryEntry, settings: Settings) -> str | None:
     if source.sandbox_import_mode:
         return source.sandbox_import_mode
-    if source.key == "finland-digitraffic-road-cameras" and _sandbox_available(source, settings):
-        mode = settings.finland_digitraffic_weathercam_mode.lower()
-        return mode if mode in {"fixture", "live"} else "fixture"
-    return None
+    return get_camera_source_sandbox_mode(source.key, settings) if _sandbox_available(source, settings) else None
 
 
 def _build_export_lines(

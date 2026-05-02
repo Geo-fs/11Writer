@@ -9,7 +9,20 @@ from src.services.data_ai_multi_feed_service import (
     DataAiMultiFeedQuery,
     DataAiMultiFeedService,
 )
-from src.types.api import DataAiFeedFamilyOverviewResponse, DataAiMultiFeedResponse
+from src.services.data_ai_source_family_review_queue_service import (
+    DATA_AI_FEED_FAMILY_REVIEW_QUEUE_CATEGORIES,
+    DATA_AI_FEED_FAMILY_REVIEW_QUEUE_ISSUE_KINDS,
+    DataAiFeedFamilyReviewQueueQuery,
+    DataAiSourceFamilyReviewQueueService,
+)
+from src.services.data_ai_source_family_review_service import DataAiSourceFamilyReviewService
+from src.types.api import (
+    DataAiFeedFamilyOverviewResponse,
+    DataAiFeedFamilyReviewQueueResponse,
+    DataAiFeedFamilyReviewResponse,
+    DataAiFeedFamilyReadinessSnapshotResponse,
+    DataAiMultiFeedResponse,
+)
 
 router = APIRouter(prefix="/api/feeds/data-ai", tags=["feeds", "data-ai"])
 
@@ -45,6 +58,87 @@ async def data_ai_feed_family_overview(
     service = DataAiMultiFeedService(settings)
     return await service.get_source_family_overview(
         DataAiFeedFamilyOverviewQuery(family_ids=family_ids, source_ids=source_ids)
+    )
+
+
+@router.get("/source-families/readiness-export", response_model=DataAiFeedFamilyReadinessSnapshotResponse)
+async def data_ai_feed_family_readiness_export(
+    family: str | None = Query(default=None, description="Comma-separated subset of configured Data AI family ids."),
+    source: str | None = Query(default=None, description="Comma-separated subset of configured source ids."),
+    settings: Settings = Depends(get_settings),
+) -> DataAiFeedFamilyReadinessSnapshotResponse:
+    family_ids = _parse_filter(
+        family,
+        configured_ids=DATA_AI_FEED_FAMILY_IDS,
+        invalid_detail_prefix="Unknown family id",
+    )
+    source_ids = _parse_filter(
+        source,
+        configured_ids=DATA_AI_MULTI_FEED_SOURCE_IDS,
+        invalid_detail_prefix="Unknown source id",
+    )
+    service = DataAiMultiFeedService(settings)
+    return await service.get_family_readiness_export(
+        DataAiFeedFamilyOverviewQuery(family_ids=family_ids, source_ids=source_ids)
+    )
+
+
+@router.get("/source-families/review", response_model=DataAiFeedFamilyReviewResponse)
+async def data_ai_feed_family_review(
+    family: str | None = Query(default=None, description="Comma-separated subset of configured Data AI family ids."),
+    source: str | None = Query(default=None, description="Comma-separated subset of configured source ids."),
+    settings: Settings = Depends(get_settings),
+) -> DataAiFeedFamilyReviewResponse:
+    family_ids = _parse_filter(
+        family,
+        configured_ids=DATA_AI_FEED_FAMILY_IDS,
+        invalid_detail_prefix="Unknown family id",
+    )
+    source_ids = _parse_filter(
+        source,
+        configured_ids=DATA_AI_MULTI_FEED_SOURCE_IDS,
+        invalid_detail_prefix="Unknown source id",
+    )
+    service = DataAiSourceFamilyReviewService(settings)
+    return await service.get_family_review(DataAiFeedFamilyOverviewQuery(family_ids=family_ids, source_ids=source_ids))
+
+
+@router.get("/source-families/review-queue", response_model=DataAiFeedFamilyReviewQueueResponse)
+async def data_ai_feed_family_review_queue(
+    family: str | None = Query(default=None, description="Comma-separated subset of configured Data AI family ids."),
+    source: str | None = Query(default=None, description="Comma-separated subset of configured source ids."),
+    category: str | None = Query(default=None, description="Comma-separated subset of review queue categories."),
+    issue_kind: str | None = Query(default=None, description="Comma-separated subset of review queue issue kinds."),
+    settings: Settings = Depends(get_settings),
+) -> DataAiFeedFamilyReviewQueueResponse:
+    family_ids = _parse_filter(
+        family,
+        configured_ids=DATA_AI_FEED_FAMILY_IDS,
+        invalid_detail_prefix="Unknown family id",
+    )
+    source_ids = _parse_filter(
+        source,
+        configured_ids=DATA_AI_MULTI_FEED_SOURCE_IDS,
+        invalid_detail_prefix="Unknown source id",
+    )
+    categories = _parse_filter(
+        category,
+        configured_ids=DATA_AI_FEED_FAMILY_REVIEW_QUEUE_CATEGORIES,
+        invalid_detail_prefix="Unknown review queue category",
+    )
+    issue_kinds = _parse_filter(
+        issue_kind,
+        configured_ids=DATA_AI_FEED_FAMILY_REVIEW_QUEUE_ISSUE_KINDS,
+        invalid_detail_prefix="Unknown review queue issue kind",
+    )
+    service = DataAiSourceFamilyReviewQueueService(settings)
+    return await service.get_review_queue(
+        DataAiFeedFamilyReviewQueueQuery(
+            family_ids=family_ids,
+            source_ids=source_ids,
+            categories=categories,
+            issue_kinds=issue_kinds,
+        )
     )
 
 

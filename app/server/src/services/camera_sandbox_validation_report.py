@@ -9,6 +9,7 @@ from src.config.settings import Settings
 from src.services.camera_registry import (
     build_camera_source_inventory,
     build_camera_source_registry,
+    get_camera_source_sandbox_mode,
     is_camera_source_sandbox_importable,
 )
 from src.webcam.refresh import build_review_items
@@ -138,9 +139,7 @@ def render_camera_sandbox_validation_report(report: CameraSandboxValidationRepor
 
 
 def _source_mode(settings: Settings, source_id: str) -> str:
-    if source_id == "finland-digitraffic-road-cameras":
-        return settings.finland_digitraffic_weathercam_mode.lower()
-    return "unknown"
+    return get_camera_source_sandbox_mode(source_id, settings) or "unknown"
 
 
 def _import_readiness(onboarding_state: str, configured: str | None) -> str:
@@ -244,6 +243,26 @@ def _recommended_next_step(source_id: str, fetch_result: CameraSourceFetchResult
         return (
             "Review station-to-preset mapping, review-queue burden, and source-health assumptions "
             "before any lifecycle advancement decision."
+        )
+    if source_id == "nsw-live-traffic-cameras" and fetch_result.cameras:
+        return (
+            "Review direct-image mapping, direction-derived orientation caveats, and source-health assumptions "
+            "before any manual lifecycle advancement decision."
+        )
+    if source_id == "quebec-mtmd-traffic-cameras" and fetch_result.cameras:
+        return (
+            "Review viewer-only or metadata-only media posture, coordinate mapping, and source-health assumptions "
+            "before any manual lifecycle advancement decision."
+        )
+    if source_id == "maryland-chart-traffic-cameras" and fetch_result.cameras:
+        return (
+            "Review viewer-only feed-url posture, coordinate mapping, and source-health assumptions "
+            "before any manual lifecycle advancement decision."
+        )
+    if source_id == "fingal-traffic-cameras" and fetch_result.cameras:
+        return (
+            "Review metadata-only media posture, identifier mapping, and source-health assumptions "
+            "before any manual lifecycle advancement decision."
         )
     return (
         "Review fixture mapping and source-health assumptions before any lifecycle change. "

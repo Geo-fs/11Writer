@@ -1,0 +1,4 @@
+id,ident,type,name,latitude_deg,longitude_deg,elevation_ft,continent,iso_country,iso_region,municipality,scheduled_service,gps_code,iata_code,local_code,home_link,wikipedia_link,keywords
+1,KTEST,small_airport,Test Regional Airport,30.1234,-97.5432,500,NA,US,US-TX,Testville,yes,KTEST,TST,TEST,,,training|regional
+2,KVOID,small_airport,Void Field,,,250,NA,US,US-OK,Nowhere,no,KVOID,,VOID,,,private
+3,CYVR,large_airport,Vancouver International Airport,49.1947,-123.1792,14,NA,CA,CA-BC,Richmond,yes,CYVR,YVR,CYVR,,,international|pacific

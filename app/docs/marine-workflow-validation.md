@@ -20,6 +20,7 @@ Related contract doc:
   - `python -m pytest app/server/tests/test_marine_contracts.py -q`
   - `python -m pytest app/server/tests/test_vigicrues_hydrometry.py -q`
   - `python -m pytest app/server/tests/test_ireland_opw_waterlevel.py -q`
+  - `python -m pytest app/server/tests/test_netherlands_rws_waterinfo.py -q`
 - backend imports/typing pass:
   - `python -m compileall app/server/src`
 - frontend build passes:
@@ -37,6 +38,7 @@ Related contract doc:
   - Scottish Water Overflows
   - France Vigicrues Hydrometry
   - Ireland OPW Water Level
+  - Netherlands RWS Waterinfo
 - required source fields remain present:
   - source id / label
   - source mode
@@ -52,6 +54,7 @@ Related contract doc:
   - Scottish Water overflow status stays `source-reported` / contextual
   - Vigicrues latest hydrometry observations stay `observed`
   - Ireland OPW latest water-level readings stay `observed`
+  - Netherlands RWS Waterinfo latest water-level observations stay `observed`
 - disabled-mode behavior remains explicit for non-fixture mode in this phase:
   - health `disabled`
   - live mode not fabricated
@@ -63,8 +66,9 @@ Related contract doc:
     - Scottish Water Overflows
     - France Vigicrues Hydrometry
     - Ireland OPW Water Level
+    - Netherlands RWS Waterinfo
   - CO-OPS and NDBC still do not emit `degraded` because the current slice has no honest partial-ingest/source-quality degradation signal
-  - CO-OPS, NDBC, Scottish Water, Vigicrues, and Ireland OPW all have dedicated regression coverage for these boundaries
+  - CO-OPS, NDBC, Scottish Water, Vigicrues, Ireland OPW, and Netherlands RWS Waterinfo all have dedicated regression coverage for these boundaries
 - route validation should reject invalid coordinates/radius values with request validation errors
 
 ### Context Fusion / Review Contract Dependencies
@@ -128,14 +132,34 @@ These marine-local helpers do not define new backend routes. Their workflow vali
   - from `app/client`:
     - `cmd /c npm.cmd run test:marine-context-helpers`
 - this coverage guards:
+  - anchor/radius/fallback transition coherence across:
+    - selected-vessel anchored context
+    - viewport/manual fallback context
+    - chokepoint bounded-area context
+    - radius-change context for the same selected entity/source set
+  - source-toggle and preset-switch transition coherence across:
+    - broad/all-sources review context
+    - limited/degraded review context with disabled-source rows
+  - focused evidence interpretation mode-switch coherence across:
+    - `compact`
+    - `detailed`
+    - `evidence-only`
+    - `caveats-first`
+  - visible interpretation-card kind / label / basis export coherence for every mode
   - degraded/unavailable-dominant fusion wording
   - review-report `partial context` / `review caveat` wording
   - chokepoint-review export wording for bounded corridor label, crossing-count support, source-health gaps, and focused review signals
   - context-timeline/chokepoint coherence for current and previous review-lens snapshots
+  - context-timeline preset/source-toggle transition coherence for current and previous review-lens snapshots
+  - context-timeline anchor/radius/fallback coherence for current and previous review-lens snapshots
+  - alignment between environmental anchor/effective-anchor metadata, fallback reason, radius, bounded-area label, source-summary rows, issue visibility, issue-export review actions, fusion family detail, review-report caveats, and focused interpretation environmental caveats
+  - alignment between enabled/disabled source rows, issue-queue visibility, issue-export review actions, fusion limited-source counts, environmental preset metadata, and focused interpretation source-mode caveats
+  - alignment between focused interpretation mode metadata, chokepoint review package, context timeline, issue export bundle, and top-level marine caveats
   - `does not prove` guardrails for impact, anomaly cause, vessel behavior, vessel intent, and wrongdoing
   - chokepoint-specific no-inference guardrails for AIS/signal gaps, reroutes, queue/backlog wording, evasion, escort, toll activity, blockade, targeting, threat, and causation
   - source-family distinctions in the issue export bundle
   - full `marineAnomalySummary` export-package coherence across:
+    - `focusedEvidenceInterpretation`
     - `contextFusionSummary`
     - `contextReviewReport`
     - `contextSourceSummary`
@@ -165,15 +189,31 @@ These marine-local helpers do not define new backend routes. Their workflow vali
 - combined marine environmental context renders
 - marine context source registry renders all context sources
 - marine context issue queue renders source-health issues without implying vessel behavior
-- marine hydrology context review summary renders Vigicrues and Ireland OPW together without creating a merged severity signal
+- marine hydrology context review summary renders Vigicrues, Ireland OPW, and Netherlands RWS Waterinfo together without creating a merged severity signal
 - marine context fusion summary renders ocean/met, hydrology, and infrastructure families without collapsing them into one severity model
 - marine context review report renders degraded/unavailable-dominant phrasing as a review caveat rather than impact or anomaly language
 - marine context review report renders review-needed items, caveat lines, and does-not-prove lines from the existing fusion/issue path
 - marine context issue export bundle preserves source family, health state, source mode, evidence basis, allowed review action, and does-not-prove lines across marine context sources
 - marine chokepoint review package preserves bounded corridor label, time window, crossing-count support, source-health limitations, focused replay/context signals, and explicit no-evasion/no-threat/no-causation wording
 - marine context timeline preserves chokepoint review-lens coherence for corridor label, focused target, focused evidence kinds, context-gap count, and source-health caveat wording across current and previous snapshots
+- marine context timeline also preserves preset/source-toggle transition coherence across current and previous snapshots, including enabled sources and active preset label
+- marine context timeline also preserves anchor/radius/fallback transition coherence across current and previous snapshots, including:
+  - selected-vessel vs fallback-viewport effective anchor
+  - chokepoint bounded-area label
+  - current/previous radius values
 - environmental presets update controls
 - environmental source toggles update the visible context path
+- deterministic helper regression now verifies that preset/toggle transitions keep:
+  - disabled rows in `contextSourceSummary`
+  - disabled-source visibility in `contextIssueQueue`
+  - disabled-source review actions in `contextIssueExportBundle`
+  - limited-source counts in `contextFusionSummary`
+  - active preset/source-toggle state in `environmentalContext`, `contextTimeline`, and `focusedEvidenceInterpretation`
+- deterministic helper regression now also verifies that anchor/radius/fallback transitions keep:
+  - active anchor/effective-anchor metadata in `environmentalContext`
+  - fallback-center reason in export metadata and environmental caveats
+  - bounded-area label coherence between `chokepointReviewPackage` and `contextTimeline`
+  - radius changes in current/previous timeline snapshots without changing anomaly scores, source ids, source health, or evidence bases
 - context timeline records context-lens changes
 - context timeline clear action works
 
@@ -195,6 +235,7 @@ Marine export metadata should include:
 - `marineAnomalySummary.contextIssueExportBundle`
 - `marineAnomalySummary.contextTimeline`
 - `marineAnomalySummary.chokepointReviewPackage`
+- `marineAnomalySummary.focusedEvidenceInterpretation`
 
 ### Caveat / Semantics Checks
 
@@ -248,6 +289,15 @@ Marine export metadata should include:
 - marine-local frontend card exists
 - export metadata-covered
 - marine smoke-covered
+
+### Netherlands RWS Waterinfo
+
+- implemented
+- backend contract-covered
+- marine-local frontend card exists
+- export metadata-covered
+- deterministic helper-regression-covered
+- marine smoke not applicable yet in this slice
 
 ### Marine Hydrology Context Review Summary
 
@@ -309,6 +359,7 @@ Marine export metadata should include:
 - Repo-wide frontend build/smoke remains a separate confirmation layer; after Connect AI clears shared blockers, marine smoke should continue confirming cards, export metadata, presets, issue queue, and timeline against the same backend contract guarantees.
 - The marine-only smoke path now explicitly confirms the Vigicrues hydrometry card, the Vigicrues row in the marine context source summary, and the `marineAnomalySummary.vigicruesHydrometryContext` export metadata block.
 - The marine-only smoke path now explicitly confirms the Ireland OPW water-level card, the Ireland OPW row in the marine context source summary, and the `marineAnomalySummary.irelandOpwWaterLevelContext` export metadata block.
+- Netherlands RWS Waterinfo now has a marine-local card and export metadata block, but marine smoke has not yet been extended for it in this slice.
 - The marine-only smoke path now explicitly confirms the composed marine hydrology context card and the `marineAnomalySummary.hydrologyContext` export metadata block.
 - The marine-only smoke path now explicitly confirms the composed marine context fusion card and the `marineAnomalySummary.contextFusionSummary` export metadata block.
 - The marine-only smoke path now explicitly confirms the composed marine context review report card and the `marineAnomalySummary.contextReviewReport` export metadata block.

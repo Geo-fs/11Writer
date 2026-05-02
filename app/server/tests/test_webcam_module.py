@@ -6,7 +6,9 @@ from datetime import datetime, timezone
 
 from alembic import command
 from alembic.config import Config
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
+import pytest
 from sqlalchemy import text
 
 from src.adapters.cameras import (
@@ -23,8 +25,9 @@ from src.adapters.cameras import (
     _classify_position,
     _normalize_structured_511_item,
 )
-from src.app import create_application
 from src.config.settings import Settings, get_settings
+from src.routes.cameras import router as cameras_router
+from src.routes.status import router as status_router
 from src.services.camera_registry import build_camera_source_inventory, build_camera_source_registry
 from src.services.camera_service import CameraService
 from src.services.source_registry import reset_source_registry
@@ -40,6 +43,17 @@ def _run_migrations(database_url: str) -> None:
     config.set_main_option("script_location", str(Path(__file__).resolve().parents[1] / "alembic"))
     config.set_main_option("sqlalchemy.url", database_url)
     command.upgrade(config, "head")
+
+
+def _data_fixture_path(filename: str) -> str:
+    return str(Path(__file__).resolve().parents[1] / "data" / filename)
+
+
+def _camera_test_application() -> FastAPI:
+    app = FastAPI()
+    app.include_router(cameras_router)
+    app.include_router(status_router)
+    return app
 
 
 def _sample_compliance(*, review_required: bool = False) -> CameraComplianceMetadata:
@@ -241,6 +255,12 @@ def test_source_inventory_templates_include_new_sources_and_page_candidates() ->
     keys = {entry.key for entry in inventory}
     assert "usgs-ashcam" in keys
     assert "finland-digitraffic-road-cameras" in keys
+    assert "nsw-live-traffic-cameras" in keys
+    assert "quebec-mtmd-traffic-cameras" in keys
+    assert "maryland-chart-traffic-cameras" in keys
+    assert "fingal-traffic-cameras" in keys
+    assert "baton-rouge-traffic-cameras" in keys
+    assert "euskadi-traffic-cameras" in keys
     assert "faa-weather-cameras-page" in keys
     assert "minnesota-511-public-arcgis" in keys
     assert "511ny-cameras" in keys
@@ -278,6 +298,34 @@ def test_source_inventory_templates_include_new_sources_and_page_candidates() ->
     assert faa_entry.endpoint_verification_status == "needs-review"
     assert faa_entry.candidate_endpoint_url == "https://weathercams.faa.gov/"
     assert faa_entry.machine_readable_endpoint_url is None
+    nsw_entry = next(item for item in inventory if item.key == "nsw-live-traffic-cameras")
+    assert nsw_entry.onboarding_state == "candidate"
+    assert nsw_entry.access_method == "json-api"
+    assert nsw_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert nsw_entry.candidate_endpoint_url == "https://api.transport.nsw.gov.au/v1/live/cameras"
+    assert nsw_entry.machine_readable_endpoint_url == "https://api.transport.nsw.gov.au/v1/live/cameras"
+    assert nsw_entry.provides_direct_image is True
+    assert nsw_entry.provides_viewer_only is False
+    quebec_entry = next(item for item in inventory if item.key == "quebec-mtmd-traffic-cameras")
+    assert quebec_entry.onboarding_state == "candidate"
+    assert quebec_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert quebec_entry.provides_direct_image is False
+    assert quebec_entry.provides_viewer_only is True
+    maryland_entry = next(item for item in inventory if item.key == "maryland-chart-traffic-cameras")
+    assert maryland_entry.onboarding_state == "candidate"
+    assert maryland_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert maryland_entry.provides_direct_image is False
+    assert maryland_entry.provides_viewer_only is True
+    fingal_entry = next(item for item in inventory if item.key == "fingal-traffic-cameras")
+    assert fingal_entry.onboarding_state == "candidate"
+    assert fingal_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert fingal_entry.provides_direct_image is False
+    assert fingal_entry.provides_viewer_only is False
+    euskadi_entry = next(item for item in inventory if item.key == "euskadi-traffic-cameras")
+    assert euskadi_entry.onboarding_state == "candidate"
+    assert euskadi_entry.endpoint_verification_status == "candidate-url-only"
+    assert euskadi_entry.candidate_endpoint_url == "https://opendata.euskadi.eus/catalogo/-/camaras-de-trafico-de-euskadi/"
+    assert euskadi_entry.machine_readable_endpoint_url is None
     minnesota_entry = next(item for item in inventory if item.key == "minnesota-511-public-arcgis")
     assert minnesota_entry.onboarding_state == "candidate"
     assert minnesota_entry.source_type == "public-camera-page"
@@ -294,6 +342,10 @@ def test_source_inventory_templates_include_new_sources_and_page_candidates() ->
 def test_candidate_registry_entries_are_not_marked_active_ingest_sources() -> None:
     registry = build_camera_source_registry(Settings())
     finland_entry = next(item for item in registry if item.key == "finland-digitraffic-road-cameras")
+    nsw_entry = next(item for item in registry if item.key == "nsw-live-traffic-cameras")
+    quebec_entry = next(item for item in registry if item.key == "quebec-mtmd-traffic-cameras")
+    maryland_entry = next(item for item in registry if item.key == "maryland-chart-traffic-cameras")
+    fingal_entry = next(item for item in registry if item.key == "fingal-traffic-cameras")
     faa_entry = next(item for item in registry if item.key == "faa-weather-cameras-page")
     minnesota_entry = next(item for item in registry if item.key == "minnesota-511-public-arcgis")
 
@@ -302,6 +354,18 @@ def test_candidate_registry_entries_are_not_marked_active_ingest_sources() -> No
     assert finland_entry.inventory_source_type == "official-dot-api"
     assert finland_entry.endpoint_verification_status == "machine-readable-confirmed"
     assert "fixtures" in (finland_entry.detail or "")
+    assert nsw_entry.enabled is False
+    assert nsw_entry.status == "needs-review"
+    assert nsw_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert quebec_entry.enabled is False
+    assert quebec_entry.status == "needs-review"
+    assert quebec_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert maryland_entry.enabled is False
+    assert maryland_entry.status == "needs-review"
+    assert maryland_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert fingal_entry.enabled is False
+    assert fingal_entry.status == "needs-review"
+    assert fingal_entry.endpoint_verification_status == "machine-readable-confirmed"
     assert faa_entry.enabled is False
     assert faa_entry.status == "needs-review"
     assert faa_entry.blocked_reason is not None
@@ -318,11 +382,19 @@ def test_lifecycle_policy_invariants_hold_for_current_sources() -> None:
 
     ashcam_inventory = inventory_map["usgs-ashcam"]
     finland_inventory = inventory_map["finland-digitraffic-road-cameras"]
+    nsw_inventory = inventory_map["nsw-live-traffic-cameras"]
+    quebec_inventory = inventory_map["quebec-mtmd-traffic-cameras"]
+    maryland_inventory = inventory_map["maryland-chart-traffic-cameras"]
+    fingal_inventory = inventory_map["fingal-traffic-cameras"]
     minnesota_inventory = inventory_map["minnesota-511-public-arcgis"]
     wsdot_inventory = inventory_map["wsdot-cameras"]
 
     ashcam_registry = registry_map["usgs-ashcam"]
     finland_registry = registry_map["finland-digitraffic-road-cameras"]
+    nsw_registry = registry_map["nsw-live-traffic-cameras"]
+    quebec_registry = registry_map["quebec-mtmd-traffic-cameras"]
+    maryland_registry = registry_map["maryland-chart-traffic-cameras"]
+    fingal_registry = registry_map["fingal-traffic-cameras"]
     minnesota_registry = registry_map["minnesota-511-public-arcgis"]
     wsdot_registry = registry_map["wsdot-cameras"]
 
@@ -339,6 +411,33 @@ def test_lifecycle_policy_invariants_hold_for_current_sources() -> None:
     assert finland_inventory.provides_direct_image is True
     assert finland_registry.enabled is False
     assert finland_registry.status == "needs-review"
+
+    assert nsw_inventory.onboarding_state == "candidate"
+    assert nsw_inventory.endpoint_verification_status == "machine-readable-confirmed"
+    assert nsw_inventory.provides_direct_image is True
+    assert nsw_registry.enabled is False
+    assert nsw_registry.status == "needs-review"
+
+    assert quebec_inventory.onboarding_state == "candidate"
+    assert quebec_inventory.endpoint_verification_status == "machine-readable-confirmed"
+    assert quebec_inventory.provides_direct_image is False
+    assert quebec_inventory.provides_viewer_only is True
+    assert quebec_registry.enabled is False
+    assert quebec_registry.status == "needs-review"
+
+    assert maryland_inventory.onboarding_state == "candidate"
+    assert maryland_inventory.endpoint_verification_status == "machine-readable-confirmed"
+    assert maryland_inventory.provides_direct_image is False
+    assert maryland_inventory.provides_viewer_only is True
+    assert maryland_registry.enabled is False
+    assert maryland_registry.status == "needs-review"
+
+    assert fingal_inventory.onboarding_state == "candidate"
+    assert fingal_inventory.endpoint_verification_status == "machine-readable-confirmed"
+    assert fingal_inventory.provides_direct_image is False
+    assert fingal_inventory.provides_viewer_only is False
+    assert fingal_registry.enabled is False
+    assert fingal_registry.status == "needs-review"
 
     assert wsdot_inventory.onboarding_state == "approved"
     assert wsdot_inventory.authentication == "access-code"
@@ -579,7 +678,7 @@ def test_camera_api_persists_and_returns_sources(tmp_path: Path, monkeypatch) ->
         )
     monkeypatch.setattr("src.webcam.refresh.WebcamRefreshService._probe_frame", fake_probe)
 
-    client = TestClient(create_application())
+    client = TestClient(_camera_test_application())
     camera_response = client.get("/api/cameras")
     source_response = client.get("/api/cameras/sources")
     inventory_response = client.get("/api/cameras/source-inventory")
@@ -624,6 +723,50 @@ def test_camera_api_persists_and_returns_sources(tmp_path: Path, monkeypatch) ->
     assert inventory_finland["sandboxUsableCount"] == 0
     assert inventory_finland["sandboxReviewQueueCount"] == 0
     assert "Sandbox fixture import proves mapping only" in inventory_finland["sandboxValidationCaveat"]
+    inventory_nsw = next(item for item in inventory_response.json()["sources"] if item["key"] == "nsw-live-traffic-cameras")
+    assert inventory_nsw["onboardingState"] == "candidate"
+    assert inventory_nsw["importReadiness"] == "inventory-only"
+    assert inventory_nsw["endpointVerificationStatus"] == "machine-readable-confirmed"
+    assert inventory_nsw["sandboxImportAvailable"] is True
+    assert inventory_nsw["sandboxImportMode"] == "fixture"
+    assert inventory_nsw["sandboxConnectorId"] == "NswLiveTrafficCameraConnector"
+    assert inventory_nsw["sandboxDiscoveredCount"] == 0
+    assert inventory_nsw["sandboxUsableCount"] == 0
+    assert "candidate mapping and lifecycle evidence only" in inventory_nsw["sandboxValidationCaveat"]
+    inventory_quebec = next(
+        item for item in inventory_response.json()["sources"] if item["key"] == "quebec-mtmd-traffic-cameras"
+    )
+    assert inventory_quebec["onboardingState"] == "candidate"
+    assert inventory_quebec["importReadiness"] == "inventory-only"
+    assert inventory_quebec["endpointVerificationStatus"] == "machine-readable-confirmed"
+    assert inventory_quebec["sandboxImportAvailable"] is True
+    assert inventory_quebec["sandboxImportMode"] == "fixture"
+    assert inventory_quebec["sandboxConnectorId"] == "QuebecMtmdTrafficCameraConnector"
+    assert inventory_quebec["sandboxDiscoveredCount"] == 0
+    assert inventory_quebec["sandboxUsableCount"] == 0
+    assert "candidate mapping and lifecycle evidence only" in inventory_quebec["sandboxValidationCaveat"]
+    inventory_maryland = next(
+        item for item in inventory_response.json()["sources"] if item["key"] == "maryland-chart-traffic-cameras"
+    )
+    assert inventory_maryland["onboardingState"] == "candidate"
+    assert inventory_maryland["importReadiness"] == "inventory-only"
+    assert inventory_maryland["endpointVerificationStatus"] == "machine-readable-confirmed"
+    assert inventory_maryland["sandboxImportAvailable"] is True
+    assert inventory_maryland["sandboxImportMode"] == "fixture"
+    assert inventory_maryland["sandboxConnectorId"] == "MarylandChartTrafficCameraConnector"
+    assert inventory_maryland["sandboxDiscoveredCount"] == 0
+    assert inventory_maryland["sandboxUsableCount"] == 0
+    assert "candidate mapping and lifecycle evidence only" in inventory_maryland["sandboxValidationCaveat"]
+    inventory_fingal = next(item for item in inventory_response.json()["sources"] if item["key"] == "fingal-traffic-cameras")
+    assert inventory_fingal["onboardingState"] == "candidate"
+    assert inventory_fingal["importReadiness"] == "inventory-only"
+    assert inventory_fingal["endpointVerificationStatus"] == "machine-readable-confirmed"
+    assert inventory_fingal["sandboxImportAvailable"] is True
+    assert inventory_fingal["sandboxImportMode"] == "fixture"
+    assert inventory_fingal["sandboxConnectorId"] == "FingalTrafficCameraConnector"
+    assert inventory_fingal["sandboxDiscoveredCount"] == 0
+    assert inventory_fingal["sandboxUsableCount"] == 0
+    assert "candidate mapping and lifecycle evidence only" in inventory_fingal["sandboxValidationCaveat"]
     inventory_faa = next(item for item in inventory_response.json()["sources"] if item["key"] == "faa-weather-cameras-page")
     assert inventory_faa["onboardingState"] == "candidate"
     assert inventory_faa["endpointVerificationStatus"] == "needs-review"
@@ -934,3 +1077,185 @@ def test_finland_digitraffic_fixture_import_remains_inventory_only(tmp_path: Pat
     assert source_entry.sandbox_discovered_count == 2
     assert source_entry.sandbox_usable_count == 1
     assert source_entry.sandbox_review_queue_count >= 2
+
+
+@pytest.mark.parametrize(
+    (
+        "source_id",
+        "mode_key",
+        "fixture_key",
+        "fixture_name",
+        "expected_discovered",
+        "expected_usable",
+        "expected_direct_image",
+        "expected_viewer_only",
+        "expected_connector_id",
+        "expected_phrase",
+        "expected_review_categories",
+    ),
+    [
+        (
+            "nsw-live-traffic-cameras",
+            "NSW_LIVE_TRAFFIC_CAMERAS_MODE",
+            "NSW_LIVE_TRAFFIC_CAMERAS_FIXTURE_PATH",
+            "nsw_live_traffic_cameras_fixture.json",
+            2,
+            1,
+            1,
+            0,
+            "NswLiveTrafficCameraConnector",
+            "Ignore previous instructions",
+            {"orientation-verification", "frame-unavailable"},
+        ),
+        (
+            "quebec-mtmd-traffic-cameras",
+            "QUEBEC_MTMD_TRAFFIC_CAMERAS_MODE",
+            "QUEBEC_MTMD_TRAFFIC_CAMERAS_FIXTURE_PATH",
+            "quebec_mtmd_traffic_cameras_fixture.json",
+                2,
+                1,
+                0,
+                1,
+                "QuebecMtmdTrafficCameraConnector",
+            "Ignore previous instructions",
+            {"orientation-verification", "viewer-fallback", "frame-unavailable"},
+        ),
+        (
+            "maryland-chart-traffic-cameras",
+            "MARYLAND_CHART_TRAFFIC_CAMERAS_MODE",
+            "MARYLAND_CHART_TRAFFIC_CAMERAS_FIXTURE_PATH",
+            "maryland_chart_traffic_cameras_fixture.json",
+            2,
+            1,
+            0,
+            1,
+            "MarylandChartTrafficCameraConnector",
+            "Ignore previous instructions",
+            {"orientation-verification", "viewer-fallback", "frame-unavailable"},
+        ),
+        (
+            "fingal-traffic-cameras",
+            "FINGAL_TRAFFIC_CAMERAS_MODE",
+            "FINGAL_TRAFFIC_CAMERAS_FIXTURE_PATH",
+            "fingal_traffic_cameras_fixture.json",
+            2,
+            0,
+            0,
+            0,
+            "FingalTrafficCameraConnector",
+            "Ignore previous instructions",
+            {"orientation-verification", "frame-unavailable"},
+        ),
+    ],
+)
+def test_candidate_sandbox_fixture_imports_remain_inventory_only_and_inert(
+    tmp_path: Path,
+    source_id: str,
+    mode_key: str,
+    fixture_key: str,
+    fixture_name: str,
+    expected_discovered: int,
+    expected_usable: int,
+    expected_direct_image: int,
+    expected_viewer_only: int,
+    expected_connector_id: str,
+    expected_phrase: str,
+    expected_review_categories: set[str],
+) -> None:
+    database_url = f"sqlite:///{tmp_path / f'{source_id}.db'}"
+    _run_migrations(database_url)
+
+    settings = Settings(
+        REFERENCE_DATABASE_URL=database_url,
+        WEBCAM_DATABASE_URL=database_url,
+        **{
+            mode_key: "fixture",
+            fixture_key: _data_fixture_path(fixture_name),
+        },
+    )
+    service = WebcamRefreshService(settings)
+
+    result = asyncio.run(service.run_live_validation(source_keys=[source_id]))
+
+    with session_scope(database_url) as session:
+        repository = WebcamRepository(session)
+        source = next(item for item in repository.list_sources() if item.key == source_id)
+        inventory = next(item for item in repository.list_source_inventory() if item.key == source_id)
+        cameras = sorted(
+            [camera for camera in repository.list_cameras() if camera.source == source_id],
+            key=lambda camera: camera.camera_id or "",
+        )
+        review_items = [item for item in repository.list_review_queue(limit=50) if item.source_key == source_id]
+
+    assert result.refreshed_sources == 1
+    assert source.enabled is False
+    assert source.status == "needs-review"
+    assert source.last_run_mode == "validation"
+    assert source.last_frame_probe_count == 0
+    assert inventory.onboarding_state == "candidate"
+    assert inventory.import_readiness == "inventory-only"
+    assert inventory.discovered_camera_count == expected_discovered
+    assert inventory.usable_camera_count == expected_usable
+    assert inventory.direct_image_camera_count == expected_direct_image
+    assert inventory.viewer_only_camera_count == expected_viewer_only
+    assert inventory.missing_coordinate_camera_count == 0
+    assert inventory.uncertain_orientation_camera_count == expected_discovered
+    assert inventory.review_queue_count >= 2
+    assert len(cameras) == expected_discovered
+    assert all(camera.position.kind == "exact" for camera in cameras)
+    assert all(camera.orientation.kind in {"unknown", "approximate"} for camera in cameras)
+    if source_id == "nsw-live-traffic-cameras":
+        assert cameras[0].frame.image_url == "https://example.test/nsw-live-traffic/nsw-fixture-001.jpg"
+        assert cameras[0].frame.viewer_url == "https://example.test/nsw-live-traffic/nsw-fixture-001"
+        assert cameras[1].frame.image_url is None
+        assert cameras[1].frame.viewer_url is None
+    elif source_id == "quebec-mtmd-traffic-cameras":
+        assert cameras[0].frame.viewer_url == "https://example.test/quebec-mtmd/qc-fixture-001/viewer"
+        assert cameras[0].frame.image_url is None
+        assert cameras[1].frame.image_url is None
+    elif source_id == "maryland-chart-traffic-cameras":
+        assert cameras[0].frame.viewer_url == "https://example.test/maryland-chart/md-fixture-001/viewer"
+        assert cameras[0].frame.image_url is None
+        assert cameras[1].frame.image_url is None
+        assert cameras[1].frame.viewer_url is None
+    else:
+        assert all(camera.frame.image_url is None for camera in cameras)
+        assert all(camera.frame.viewer_url is None for camera in cameras)
+    review_categories = {issue.category for item in review_items for issue in item.issues}
+    assert expected_review_categories.issubset(review_categories)
+
+    camera_service = CameraService(settings)
+
+    async def no_due_work():
+        return None
+
+    camera_service._refresh_service.run_due_work = no_due_work
+    camera_service._refresh_service.bootstrap_inventory = no_due_work
+    inventory_response = asyncio.run(camera_service.list_source_inventory())
+    inventory_entry = next(item for item in inventory_response.sources if item.key == source_id)
+    source_response = asyncio.run(camera_service.list_sources())
+    source_entry = next(item for item in source_response.sources if item.key == source_id)
+
+    assert inventory_entry.onboarding_state == "candidate"
+    assert inventory_entry.import_readiness == "inventory-only"
+    assert inventory_entry.sandbox_import_available is True
+    assert inventory_entry.sandbox_import_mode == "fixture"
+    assert inventory_entry.sandbox_connector_id == expected_connector_id
+    assert inventory_entry.last_sandbox_import_at is not None
+    assert inventory_entry.last_sandbox_import_outcome == "needs-review"
+    assert inventory_entry.sandbox_discovered_count == expected_discovered
+    assert inventory_entry.sandbox_usable_count == expected_usable
+    assert inventory_entry.sandbox_review_queue_count >= 2
+    assert inventory_entry.sandbox_validation_caveat is not None
+    assert source_entry.onboarding_state == "candidate"
+    assert source_entry.import_readiness == "inventory-only"
+    assert source_entry.sandbox_import_available is True
+    assert source_entry.sandbox_import_mode == "fixture"
+    assert source_entry.sandbox_connector_id == expected_connector_id
+    assert source_entry.last_sandbox_import_at is not None
+    assert source_entry.last_sandbox_import_outcome == "needs-review"
+    assert source_entry.sandbox_discovered_count == expected_discovered
+    assert source_entry.sandbox_usable_count == expected_usable
+    assert source_entry.sandbox_review_queue_count >= 2
+    assert expected_phrase not in str(inventory_entry.model_dump())
+    assert expected_phrase not in str(source_entry.model_dump())

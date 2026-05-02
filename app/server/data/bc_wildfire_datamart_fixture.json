@@ -1,0 +1,51 @@
+{
+  "generated_at": "2026-05-02T15:00:00Z",
+  "stations": [
+    {
+      "external_id": "C50001",
+      "station_code": "C50001",
+      "station_name": "Prince George North <script>alert(1)</script>",
+      "station_acronym": "PGN",
+      "latitude": 53.95,
+      "longitude": -122.75,
+      "elevation_m": 625,
+      "fire_centre": "Prince George"
+    },
+    {
+      "external_id": "C60002",
+      "station_code": "C60002",
+      "station_name": "Kamloops Valley",
+      "station_acronym": "KVL",
+      "latitude": 50.67,
+      "longitude": -120.34,
+      "elevation_m": 410,
+      "fire_centre": "Kamloops"
+    },
+    {
+      "external_id": "C70003",
+      "station_code": "C70003",
+      "station_name": "Fort St John Ridge",
+      "station_acronym": "FSJ",
+      "latitude": 56.25,
+      "longitude": -120.84,
+      "elevation_m": 700,
+      "fire_centre": "Prince George"
+    }
+  ],
+  "danger_summaries": [
+    {
+      "external_id": "PG-2026-05-02-high",
+      "fire_centre": "Prince George",
+      "summary_date": "2026-05-02",
+      "danger_class": "High",
+      "station_count": 18
+    },
+    {
+      "external_id": "KL-2026-05-02-moderate",
+      "fire_centre": "Kamloops",
+      "summary_date": "2026-05-02",
+      "danger_class": "Moderate",
+      "station_count": 12
+    }
+  ]
+}

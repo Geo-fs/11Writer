@@ -19,6 +19,7 @@ import type { MarineContextIssueExportBundle, MarineContextIssueExportRow } from
 import type { MarineContextReviewReportSummary } from "./marineContextReviewReport";
 import type { MarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
 import type { MarineHydrologyContextSummary } from "./marineHydrologyContext";
+import type { MarineNetherlandsRwsWaterinfoContextSummary } from "./marineNetherlandsRwsWaterinfoContext";
 import {
   buildMarineChokepointReviewPackage,
   type MarineChokepointReviewContext
@@ -92,6 +93,9 @@ export interface MarineAnomalySnapshotMetadata {
       sourceModes: Array<"fixture" | "live" | "unknown">;
       cardCount: number;
       visibleCardCount: number;
+      visibleCardKinds: MarineEvidenceInterpretationCard["kind"][];
+      visibleCardLabels: string[];
+      visibleCardBases: MarineEvidenceInterpretationCard["basis"][];
       environmentalCaveats: string[];
       topCaveats: string[];
     };
@@ -219,6 +223,32 @@ export interface MarineAnomalySnapshotMetadata {
       topObservationSummary: string | null;
       caveats: string[];
     } | null;
+    netherlandsRwsWaterinfoContext: {
+      sourceId: string;
+      sourceMode: "fixture" | "live" | "unknown";
+      health:
+        | "loaded"
+        | "empty"
+        | "stale"
+        | "degraded"
+        | "unavailable"
+        | "error"
+        | "disabled"
+        | "unknown";
+      nearbyStationCount: number;
+      topStation:
+        | {
+            stationId: string;
+            stationName: string;
+            distanceKm: number;
+            waterBody?: string | null;
+            parameterCode: string;
+            parameterLabel: string;
+          }
+        | null;
+      topObservationSummary: string | null;
+      caveats: string[];
+    } | null;
     hydrologyContext: {
       sourceCount: number;
       loadedSourceCount: number;
@@ -259,6 +289,22 @@ export interface MarineAnomalySnapshotMetadata {
         nearbyStationCount: number;
         topStationName?: string | null;
         topReadingAt?: string | null;
+        hasPartialMetadata: boolean;
+      } | null;
+      waterinfo: {
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        nearbyStationCount: number;
+        topStationName?: string | null;
+        topObservationObservedAt?: string | null;
         hasPartialMetadata: boolean;
       } | null;
       caveats: string[];
@@ -456,6 +502,7 @@ export function buildMarineEvidenceSummary(input: {
   scottishWaterContextSummary: MarineScottishWaterContextSummary | null;
   vigicruesContextSummary: MarineVigicruesContextSummary | null;
   irelandOpwContextSummary: MarineIrelandOpwContextSummary | null;
+  netherlandsRwsWaterinfoContextSummary?: MarineNetherlandsRwsWaterinfoContextSummary | null;
   hydrologyContextSummary: MarineHydrologyContextSummary | null;
   contextFusionSummary: MarineContextFusionSummary | null;
   contextReviewReportSummary: MarineContextReviewReportSummary | null;
@@ -551,6 +598,9 @@ export function buildMarineEvidenceSummary(input: {
   if (input.irelandOpwContextSummary) {
     displayLines.push(input.irelandOpwContextSummary.exportLines[0]);
   }
+  if (input.netherlandsRwsWaterinfoContextSummary) {
+    displayLines.push(input.netherlandsRwsWaterinfoContextSummary.exportLines[0]);
+  }
   if (input.hydrologyContextSummary) {
     displayLines.push(input.hydrologyContextSummary.exportLines[0]);
   }
@@ -642,6 +692,9 @@ export function buildMarineEvidenceSummary(input: {
           sourceModes: input.environmentalContextSummary?.environmentalCaveatSummary.sourceModes ?? [],
           cardCount: input.focusedEvidenceInterpretation.cards.length,
           visibleCardCount: input.visibleInterpretationCards.length,
+          visibleCardKinds: input.visibleInterpretationCards.map((card) => card.kind),
+          visibleCardLabels: input.visibleInterpretationCards.map((card) => card.label),
+          visibleCardBases: input.visibleInterpretationCards.map((card) => card.basis),
           environmentalCaveats:
             input.environmentalContextSummary?.environmentalCaveatSummary.caveats.slice(0, 3) ?? [],
           topCaveats: input.focusedEvidenceInterpretation.caveats.slice(0, 3)
@@ -651,6 +704,7 @@ export function buildMarineEvidenceSummary(input: {
         scottishWaterOverflowContext: input.scottishWaterContextSummary?.metadata ?? null,
         vigicruesHydrometryContext: input.vigicruesContextSummary?.metadata ?? null,
         irelandOpwWaterLevelContext: input.irelandOpwContextSummary?.metadata ?? null,
+        netherlandsRwsWaterinfoContext: input.netherlandsRwsWaterinfoContextSummary?.metadata ?? null,
         hydrologyContext: input.hydrologyContextSummary?.metadata ?? null,
         contextFusionSummary: input.contextFusionSummary?.metadata ?? null,
         contextReviewReport: input.contextReviewReportSummary?.metadata ?? null,

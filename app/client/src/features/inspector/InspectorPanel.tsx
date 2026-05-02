@@ -24,7 +24,17 @@ import { buildAerospaceExportReadinessSummary } from "./aerospaceExportReadiness
 import { buildAerospaceReviewQueueSummary } from "./aerospaceReviewQueue";
 import { buildAerospaceContextReportSummary } from "./aerospaceContextReport";
 import { buildAerospaceContextGapQueueSummary } from "./aerospaceContextGapQueue";
+import { buildAerospaceContextReviewQueueSummary } from "./aerospaceContextReviewQueue";
+import { buildAerospaceContextReviewExportBundleSummary } from "./aerospaceContextReviewExportBundle";
 import { buildAerospaceCurrentArchiveContextSummary } from "./aerospaceCurrentArchiveContext";
+import { buildAerospaceWorkflowEvidenceLedger } from "./aerospaceWorkflowEvidenceLedger";
+import { buildAerospaceWorkflowReadinessPackageSummary } from "./aerospaceWorkflowReadinessPackage";
+import { buildAerospaceExportCoherenceSummary } from "./aerospaceExportCoherence";
+import { buildAerospaceIssueExportBundleSummary } from "./aerospaceIssueExportBundle";
+import {
+  buildDataAiSourceIntelligenceSummary,
+  buildDataAiTopicLensSummary
+} from "./dataAiSourceIntelligence";
 import {
   AEROSPACE_SOURCE_READINESS_BUNDLES,
   buildAerospaceSourceReadinessBundleSummary,
@@ -40,6 +50,7 @@ import { buildAerospaceVaacContextSummary } from "./aerospaceVaacContext";
 import { buildAerospaceSpaceContextSummary } from "./aerospaceSpaceContext";
 import { buildAerospaceSpaceWeatherArchiveContextSummary } from "./aerospaceSpaceWeatherArchiveContext";
 import { buildAerospaceSpaceWeatherContextSummary } from "./aerospaceSpaceWeatherContext";
+import { buildAerospaceReferenceContextSummary } from "./aerospaceReferenceContext";
 import {
   buildAerospaceOpenSkyContextSummary
 } from "./aerospaceOpenSkyContext";
@@ -56,10 +67,15 @@ import {
   useAviationWeatherContextQuery,
   useCameraSourceInventoryQuery,
   useCneosEventsQuery,
+  useDataAiFeedFamilyReadinessExportQuery,
+  useDataAiRecentFeedQuery,
+  useDataAiFeedFamilyReviewQuery,
+  useDataAiFeedFamilyReviewQueueQuery,
   useFaaNasAirportStatusQuery,
   useNearestAirportReferenceQuery,
   useNearestRunwayThresholdReferenceQuery,
   useOpenSkyStatesQuery,
+  useOurAirportsReferenceQuery,
   useNceiSpaceWeatherArchiveQuery,
   useSourceStatusQuery,
   useAnchorageVaacAdvisoriesQuery,
@@ -135,6 +151,10 @@ export function InspectorPanel() {
   const clearAerospaceFocusHistory = useAppStore((state) => state.clearAerospaceFocusHistory);
   const sourceStatusQuery = useSourceStatusQuery();
   const cameraSourceInventoryQuery = useCameraSourceInventoryQuery();
+  const dataAiReadinessQuery = useDataAiFeedFamilyReadinessExportQuery();
+  const dataAiRecentQuery = useDataAiRecentFeedQuery();
+  const dataAiReviewQuery = useDataAiFeedFamilyReviewQuery();
+  const dataAiReviewQueueQuery = useDataAiFeedFamilyReviewQueueQuery();
   const [cameraFrameNonce, setCameraFrameNonce] = useState<number>(Date.now());
 
   const related = useMemo(() => {
@@ -194,6 +214,12 @@ export function InspectorPanel() {
     (aircraftReferenceQuery.data?.primary?.summary.objectType === "airport"
       ? aircraftReferenceQuery.data.primary.summary.canonicalName
       : aircraftReferenceQuery.data?.context?.nearestAirport?.canonicalName ?? null);
+  const nearestAirportRegionCode = buildReferenceRegionCode(
+    nearestAirportQuery.data?.results[0]?.summary ??
+      (aircraftReferenceQuery.data?.primary?.summary.objectType === "airport"
+        ? aircraftReferenceQuery.data.primary.summary
+        : aircraftReferenceQuery.data?.context?.nearestAirport ?? null)
+  );
   const aviationWeatherQuery = useAviationWeatherContextQuery({
     airportCode: selectedAircraft ? nearestAirportCode ?? null : null,
     airportName: selectedAircraft ? nearestAirportName ?? null : null,
@@ -214,6 +240,14 @@ export function InspectorPanel() {
     icao24: selectedAircraft?.canonicalIds.icao24 ?? null,
     callsign: selectedAircraft?.callsign ?? null,
     limit: 5
+  });
+  const ourAirportsReferenceQuery = useOurAirportsReferenceQuery({
+    enabled: selectedAircraft != null,
+    airportCode: selectedAircraft ? nearestAirportCode ?? null : null,
+    airportName: selectedAircraft ? nearestAirportName ?? null : null,
+    regionCode: selectedAircraft ? nearestAirportRegionCode : null,
+    includeRunways: true,
+    limit: 3
   });
   const swpcContextQuery = useSwpcSpaceWeatherContextQuery({
     enabled: entity?.type === "aircraft" || entity?.type === "satellite",
@@ -248,6 +282,9 @@ export function InspectorPanel() {
     : null;
   const openSkySourceHealth = selectedAircraft
     ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "opensky-anonymous-states") ?? null
+    : null;
+  const ourAirportsReferenceSourceHealth = selectedAircraft
+    ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "ourairports-reference") ?? null
     : null;
   const cneosSourceHealth =
     entity?.type === "aircraft" || entity?.type === "satellite"
@@ -290,6 +327,14 @@ export function InspectorPanel() {
     response: openSkyStatesQuery.data,
     sourceHealth: openSkySourceHealth,
     selectedAircraft
+  });
+  const ourAirportsReferenceSummary = buildAerospaceReferenceContextSummary({
+    response: ourAirportsReferenceQuery.data,
+    sourceHealth: ourAirportsReferenceSourceHealth,
+    selectedAircraft,
+    primaryReference: aircraftReferenceQuery.data?.primary ?? null,
+    nearestAirport: nearestAirportQuery.data?.results[0] ?? null,
+    nearestRunway: nearestRunwayQuery.data?.results[0] ?? null
   });
   const swpcSpaceWeatherSummary = buildAerospaceSpaceWeatherContextSummary({
     context: swpcContextQuery.data,
@@ -370,6 +415,7 @@ export function InspectorPanel() {
     weatherSummary: aviationWeatherSummary,
     airportStatusSummary,
     geomagnetismSummary,
+    referenceSummary: ourAirportsReferenceSummary,
     spaceContextSummary: cneosSpaceContextSummary,
     spaceWeatherSummary: swpcSpaceWeatherSummary,
     spaceWeatherArchiveSummary: nceiSpaceWeatherArchiveSummary,
@@ -387,6 +433,7 @@ export function InspectorPanel() {
     geomagnetismSourceHealth,
     openSkySummary: openSkyContextSummary,
     openSkySourceHealth,
+    referenceSummary: ourAirportsReferenceSummary,
     spaceContextSummary: cneosSpaceContextSummary,
     spaceWeatherSummary: swpcSpaceWeatherSummary,
     spaceWeatherArchiveSummary: nceiSpaceWeatherArchiveSummary,
@@ -422,12 +469,64 @@ export function InspectorPanel() {
     summary: aerospaceSourceReadinessSummary,
     bundleId: selectedAerospaceSourceReadinessBundle
   });
+  const aerospaceWorkflowEvidenceLedgerSummary = buildAerospaceWorkflowEvidenceLedger();
+  const inspectorExportProfileDefinition =
+    AEROSPACE_EXPORT_PROFILES.find((profile) => profile.id === selectedAerospaceExportProfile) ?? null;
+  const inspectorExportProfileSummary = inspectorExportProfileDefinition
+    ? {
+        profileId: inspectorExportProfileDefinition.id,
+        profileLabel: inspectorExportProfileDefinition.label,
+        includedSections: inspectorExportProfileDefinition.preferredFooterSections,
+        caveat: inspectorExportProfileDefinition.caveat,
+        footerLines: [],
+        metadata: {
+          profileId: inspectorExportProfileDefinition.id,
+          profileLabel: inspectorExportProfileDefinition.label,
+          includedSections: inspectorExportProfileDefinition.preferredFooterSections,
+          includedMetadataKeys: inspectorExportProfileDefinition.includedMetadataKeys,
+          caveat: inspectorExportProfileDefinition.caveat,
+        },
+      }
+    : null;
+  const aerospaceWorkflowReadinessPackageSummary = buildAerospaceWorkflowReadinessPackageSummary({
+    workflowEvidenceLedger: aerospaceWorkflowEvidenceLedgerSummary,
+    ourAirportsReferenceSummary,
+    availabilitySummary: operationalContextAvailabilitySummary,
+    sourceReadinessSummary: aerospaceSourceReadinessSummary,
+    exportProfileSummary: inspectorExportProfileSummary,
+  });
   const aerospaceContextGapQueueSummary = buildAerospaceContextGapQueueSummary({
     selectedTargetLabel: selectedEvidenceSummary?.label ?? null,
     exportProfileId: selectedAerospaceExportProfile,
     availabilitySummary: operationalContextAvailabilitySummary,
     sourceReadinessSummary: aerospaceSourceReadinessSummary
   });
+  const aerospaceExportCoherenceSummary = buildAerospaceExportCoherenceSummary({
+    sourceReadinessBundleSummary: aerospaceSourceReadinessBundleSummary,
+    contextGapQueueSummary: aerospaceContextGapQueueSummary,
+    currentArchiveContextSummary: aerospaceCurrentArchiveContextSummary,
+    exportProfileSummary: inspectorExportProfileSummary,
+  });
+  const aerospaceIssueExportBundleSummary = buildAerospaceIssueExportBundleSummary({
+    sourceReadinessBundleSummary: aerospaceSourceReadinessBundleSummary,
+    contextGapQueueSummary: aerospaceContextGapQueueSummary,
+    currentArchiveContextSummary: aerospaceCurrentArchiveContextSummary,
+    exportCoherenceSummary: aerospaceExportCoherenceSummary,
+  });
+  const aerospaceContextReviewQueueSummary = buildAerospaceContextReviewQueueSummary({
+    availabilitySummary: operationalContextAvailabilitySummary,
+    sourceReadinessBundleSummary: aerospaceSourceReadinessBundleSummary,
+    contextGapQueueSummary: aerospaceContextGapQueueSummary,
+    exportCoherenceSummary: aerospaceExportCoherenceSummary,
+    issueExportBundleSummary: aerospaceIssueExportBundleSummary,
+    workflowReadinessPackageSummary: aerospaceWorkflowReadinessPackageSummary,
+    ourAirportsReferenceSummary,
+    exportProfileSummary: inspectorExportProfileSummary,
+  });
+  const aerospaceContextReviewExportBundleSummary =
+    buildAerospaceContextReviewExportBundleSummary({
+      reviewQueueSummary: aerospaceContextReviewQueueSummary,
+    });
   const aerospaceContextReportSummary = buildAerospaceContextReportSummary({
     selectedTargetSummary: selectedEvidenceSummary,
     availabilitySummary: operationalContextAvailabilitySummary,
@@ -504,6 +603,36 @@ export function InspectorPanel() {
       .slice(0, 6);
   }, [aerospaceFocus.enabled, aerospaceFocusComputation.relatedEntityIds, aircraftEntities, entity, related, satelliteEntities]);
   const imageryContext = buildActiveImageryContextFromHud(hud);
+  const dataAiSourceIntelligenceSummary = useMemo(
+    () =>
+      buildDataAiSourceIntelligenceSummary({
+        readiness: dataAiReadinessQuery.data,
+        review: dataAiReviewQuery.data,
+        reviewQueue: dataAiReviewQueueQuery.data
+      }),
+    [dataAiReadinessQuery.data, dataAiReviewQuery.data, dataAiReviewQueueQuery.data]
+  );
+  const dataAiTopicLensSummary = useMemo(
+    () =>
+      buildDataAiTopicLensSummary({
+        recent: dataAiRecentQuery.data,
+        readiness: dataAiReadinessQuery.data,
+        review: dataAiReviewQuery.data,
+        reviewQueue: dataAiReviewQueueQuery.data
+      }),
+    [
+      dataAiRecentQuery.data,
+      dataAiReadinessQuery.data,
+      dataAiReviewQuery.data,
+      dataAiReviewQueueQuery.data
+    ]
+  );
+  const dataAiSourceIntelligenceLoading =
+    dataAiReadinessQuery.isLoading || dataAiReviewQuery.isLoading || dataAiReviewQueueQuery.isLoading;
+  const dataAiSourceIntelligenceError =
+    dataAiReadinessQuery.isError || dataAiReviewQuery.isError || dataAiReviewQueueQuery.isError;
+  const dataAiTopicLensLoading = dataAiRecentQuery.isLoading;
+  const dataAiTopicLensError = dataAiRecentQuery.isError;
   const cameraSourceInventory =
     entity?.type === "camera"
       ? (cameraSourceInventoryQuery.data?.sources ?? []).find((source) => source.key === entity.source)
@@ -543,6 +672,106 @@ export function InspectorPanel() {
     <aside className="panel panel--right">
       <div className="panel__section">
         <p className="panel__eyebrow">Evidence Inspector</p>
+        <div className="panel__section" data-testid="data-ai-source-intelligence">
+          <p className="panel__eyebrow">Data AI Source Intelligence</p>
+          {dataAiSourceIntelligenceSummary ? (
+            <div className="data-card data-card--compact" data-testid="data-ai-source-intelligence-summary">
+              <strong>{dataAiSourceIntelligenceSummary.workflowValidationLine}</strong>
+              <span>{dataAiSourceIntelligenceSummary.displayLines[0]}</span>
+              <span>{dataAiSourceIntelligenceSummary.displayLines[1]}</span>
+              <div className="stack">
+                <StatusBadge tone="info">{dataAiSourceIntelligenceSummary.sourceMode}</StatusBadge>
+                <StatusBadge tone="info">
+                  Prompt injection {dataAiSourceIntelligenceSummary.promptInjectionTestPosture}
+                </StatusBadge>
+                <StatusBadge
+                  tone={
+                    dataAiSourceIntelligenceSummary.exportReadinessGapCount > 0 ? "warning" : "available"
+                  }
+                >
+                  Export gaps {dataAiSourceIntelligenceSummary.exportReadinessGapCount}
+                </StatusBadge>
+              </div>
+              {dataAiSourceIntelligenceSummary.topIssueKinds.length > 0 ? (
+                <div className="stack">
+                  {dataAiSourceIntelligenceSummary.topIssueKinds.map((issue) => (
+                    <div
+                      key={issue.issueKind}
+                      className="data-card data-card--compact"
+                      data-testid={`data-ai-source-intelligence-issue-${issue.issueKind}`}
+                    >
+                      <strong>{issue.label}</strong>
+                      <span>{issue.count} queued items</span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+              {dataAiSourceIntelligenceSummary.displayLines.slice(2).map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+              {dataAiSourceIntelligenceSummary.exportLines.map((line) => (
+                <span key={line}>Export-safe: {line}</span>
+              ))}
+              {dataAiTopicLensSummary ? (
+                <div className="panel__section" data-testid="data-ai-topic-lens">
+                  <p className="panel__eyebrow">Data AI Topic Lens</p>
+                  <strong>{dataAiTopicLensSummary.workflowValidationLine}</strong>
+                  {dataAiTopicLensSummary.displayLines.map((line) => (
+                    <span key={line}>{line}</span>
+                  ))}
+                  <div className="stack">
+                    {dataAiTopicLensSummary.topics.slice(0, 4).map((topic) => (
+                      <div
+                        key={topic.topicId}
+                        className="data-card data-card--compact"
+                        data-testid={`data-ai-topic-lens-${topic.topicId}`}
+                      >
+                        <strong>{topic.label}</strong>
+                        <span>
+                          {topic.itemCount} recent items | {topic.sourceCount} sources | {topic.issueCount} review
+                          issues
+                        </span>
+                        <span>Evidence: {topic.evidenceBases.join(", ") || "none"}</span>
+                        <span>{topic.exportLines[0]}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {dataAiTopicLensSummary.exportLines.slice(0, 4).map((line) => (
+                    <span key={line}>Topic export-safe: {line}</span>
+                  ))}
+                </div>
+              ) : dataAiTopicLensLoading ? (
+                <div className="empty-state compact" data-testid="data-ai-topic-lens-loading">
+                  <p>Loading Data AI topic/context lens.</p>
+                  <span>Recent-item metadata is being grouped into bounded topic hints.</span>
+                </div>
+              ) : dataAiTopicLensError ? (
+                <div className="empty-state compact" data-testid="data-ai-topic-lens-error">
+                  <p>Data AI topic/context lens is unavailable.</p>
+                  <span>Only the existing source-intelligence posture is shown.</span>
+                </div>
+              ) : null}
+              <CaveatBlock heading="Data AI Caveats" tone="evidence" compact>
+                {dataAiSourceIntelligenceSummary.caveats.slice(0, 3).join(" | ")}
+              </CaveatBlock>
+            </div>
+          ) : dataAiSourceIntelligenceLoading ? (
+            <div className="empty-state compact" data-testid="data-ai-source-intelligence-loading">
+              <p>Loading Data AI source-intelligence metadata.</p>
+              <span>Review queue, readiness/export, and family review are being summarized.</span>
+            </div>
+          ) : dataAiSourceIntelligenceError ? (
+            <div className="empty-state compact" data-testid="data-ai-source-intelligence-error">
+              <p>Data AI source-intelligence metadata is unavailable.</p>
+              <span>Inspector output stays metadata-only when these backend review surfaces fail.</span>
+            </div>
+          ) : (
+            <div className="empty-state compact" data-testid="data-ai-source-intelligence-empty">
+              <p>No Data AI source-intelligence metadata is available.</p>
+              <span>The client only summarizes the existing backend review surfaces.</span>
+            </div>
+          )}
+        </div>
         {!entity ? (
           <div className="empty-state">
             <p>No target selected.</p>
@@ -1307,6 +1536,75 @@ export function InspectorPanel() {
                   </div>
                 ) : null}
 
+                {aerospaceWorkflowReadinessPackageSummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aerospace Workflow Readiness</p>
+                    <div className="data-card data-card--compact">
+                      <strong>{aerospaceWorkflowReadinessPackageSummary.packageLabel}</strong>
+                      <div className="stack stack--actions">
+                        <StatusBadge tone="info">
+                          Prepared smoke: {aerospaceWorkflowReadinessPackageSummary.preparedSmokeStatus ?? "unknown"}
+                        </StatusBadge>
+                        <StatusBadge
+                          tone={
+                            aerospaceWorkflowReadinessPackageSummary.executedSmokeStatus === "executed"
+                              ? "available"
+                              : aerospaceWorkflowReadinessPackageSummary.executedSmokeStatus === "blocked"
+                                ? "warning"
+                                : "neutral"
+                          }
+                        >
+                          Executed smoke: {aerospaceWorkflowReadinessPackageSummary.executedSmokeStatus ?? "unknown"}
+                        </StatusBadge>
+                      </div>
+                      {aerospaceWorkflowReadinessPackageSummary.displayLines.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                      {aerospaceWorkflowReadinessPackageSummary.validationRows.slice(0, 3).map((row) => (
+                        <div key={row.category} className="data-card data-card--compact">
+                          <strong>{row.label}</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge
+                              tone={
+                                row.status === "executed"
+                                  ? "available"
+                                  : row.status === "blocked"
+                                    ? "warning"
+                                    : row.status === "prepared"
+                                      ? "advisory"
+                                      : "neutral"
+                              }
+                            >
+                              {row.status}
+                            </StatusBadge>
+                            <StatusBadge tone="info">{row.itemCount} items</StatusBadge>
+                          </div>
+                          <span>{row.items.slice(0, 3).join(", ")}</span>
+                          {row.caveat ? <span>{row.caveat}</span> : null}
+                        </div>
+                      ))}
+                      {aerospaceWorkflowReadinessPackageSummary.missingEvidenceRows.slice(0, 2).map((row) => (
+                        <div key={`${row.kind}-${row.sourceId}-${row.status}`} className="data-card data-card--compact">
+                          <strong>{row.label}</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge tone={row.kind === "validation" ? "warning" : "advisory"}>
+                              {row.status}
+                            </StatusBadge>
+                            <DataBasisBadge basis="contextual" prefix={row.kind === "validation" ? "Validation" : "Gap"} />
+                          </div>
+                          <span>{row.reason}</span>
+                          {row.caveat ? <span>{row.caveat}</span> : null}
+                        </div>
+                      ))}
+                    </div>
+                    {aerospaceWorkflowReadinessPackageSummary.caveats.slice(0, 2).map((caveat) => (
+                      <CaveatBlock key={caveat} heading="Workflow-readiness caveat" tone="evidence" compact>
+                        {caveat}
+                      </CaveatBlock>
+                    ))}
+                  </div>
+                ) : null}
+
                 {aerospaceContextGapQueueSummary ? (
                   <div className="panel__section">
                     <p className="panel__eyebrow">Aerospace Context Gap Queue</p>
@@ -1334,6 +1632,53 @@ export function InspectorPanel() {
                     </div>
                     {aerospaceContextGapQueueSummary.caveats.slice(0, 2).map((caveat) => (
                       <CaveatBlock key={caveat} heading="Gap-queue caveat" tone="evidence" compact>
+                        {caveat}
+                      </CaveatBlock>
+                    ))}
+                  </div>
+                ) : null}
+
+                {aerospaceContextReviewQueueSummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aerospace Context Review Queue</p>
+                    <div className="data-card data-card--compact">
+                      <strong>
+                        {aerospaceContextReviewQueueSummary.reviewFirstCount} review-first | {aerospaceContextReviewQueueSummary.reviewCount} review | {aerospaceContextReviewQueueSummary.noteCount} note
+                      </strong>
+                      {aerospaceContextReviewQueueSummary.displayLines.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                      {aerospaceContextReviewQueueSummary.topItems.slice(0, 4).map((item) => (
+                        <div key={item.itemId} className="data-card data-card--compact">
+                          <strong>{item.label}</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge tone={queueBandTone(item.priority)}>
+                              {item.priority}
+                            </StatusBadge>
+                            <StatusBadge tone={issueCategoryTone("availability-gap")}>
+                              {item.kind}
+                            </StatusBadge>
+                            <DataBasisBadge
+                              basis={normalizeDataBasis(item.evidenceBases[0] ?? "contextual")}
+                              prefix="Basis"
+                            />
+                          </div>
+                          <span>{item.reviewLine}</span>
+                          <span>Sources: {item.sourceIds.join(", ") || "unavailable"}</span>
+                          {item.caveat ? <span>{item.caveat}</span> : null}
+                        </div>
+                      ))}
+                    </div>
+                    {aerospaceContextReviewExportBundleSummary ? (
+                      <div className="data-card data-card--compact">
+                        <strong>{aerospaceContextReviewExportBundleSummary.bundleLabel}</strong>
+                        {aerospaceContextReviewExportBundleSummary.reviewLines.slice(0, 3).map((line) => (
+                          <span key={line}>{line}</span>
+                        ))}
+                      </div>
+                    ) : null}
+                    {aerospaceContextReviewQueueSummary.caveats.slice(0, 2).map((caveat) => (
+                      <CaveatBlock key={caveat} heading="Review-queue caveat" tone="evidence" compact>
                         {caveat}
                       </CaveatBlock>
                     ))}
@@ -1598,6 +1943,65 @@ export function InspectorPanel() {
                     nearestRunway={nearestRunwayQuery.data?.results[0]}
                     contextCaveat={selectedSectionHealthDisplay?.aviationContextCaveat ?? null}
                   />
+                ) : null}
+
+                {selectedAircraft ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">OurAirports Reference Context</p>
+                    {ourAirportsReferenceQuery.isLoading ? (
+                      <div className="data-card data-card--compact">
+                        <span>Loading bounded airport/runway baseline reference context.</span>
+                      </div>
+                    ) : ourAirportsReferenceQuery.isError && !ourAirportsReferenceSummary ? (
+                      <div className="data-card data-card--compact">
+                        <strong>Baseline reference comparison unavailable</strong>
+                        <span>
+                          {ourAirportsReferenceQuery.error instanceof Error
+                            ? ourAirportsReferenceQuery.error.message
+                            : "OurAirports reference request failed."}
+                        </span>
+                        <span>Reference data remains optional baseline context only.</span>
+                      </div>
+                    ) : ourAirportsReferenceSummary ? (
+                      <>
+                        <div className="data-card data-card--compact">
+                          <strong>Bounded baseline airport/runway reference</strong>
+                          <div className="stack stack--actions">
+                            <StatusBadge
+                              tone={healthTone(
+                                ourAirportsReferenceSourceHealth?.state === "healthy"
+                                  ? "normal"
+                                  : ourAirportsReferenceSourceHealth?.state === "stale"
+                                    ? "stale"
+                                    : ourAirportsReferenceSourceHealth?.state === "degraded" ||
+                                        ourAirportsReferenceSourceHealth?.state === "rate-limited"
+                                      ? "degraded"
+                                      : ourAirportsReferenceSourceHealth?.state === "never-fetched"
+                                        ? "unknown"
+                                        : "partial"
+                              )}
+                            >
+                              Source: {ourAirportsReferenceSummary.sourceState}
+                            </StatusBadge>
+                            <DataBasisBadge basis="contextual" prefix="Basis" />
+                          </div>
+                          {ourAirportsReferenceSummary.displayLines.map((line) => (
+                            <span key={line}>{line}</span>
+                          ))}
+                        </div>
+                        {ourAirportsReferenceSummary.caveats.slice(0, 3).map((caveat) => (
+                          <CaveatBlock key={caveat} heading="Reference caveat" tone="evidence" compact>
+                            {caveat}
+                          </CaveatBlock>
+                        ))}
+                      </>
+                    ) : (
+                      <div className="data-card data-card--compact">
+                        <strong>Baseline reference comparison unavailable</strong>
+                        <span>No bounded OurAirports comparison context is currently loaded.</span>
+                      </div>
+                    )}
+                  </div>
                 ) : null}
 
                 {selectedAircraft ? (
@@ -2999,6 +3403,26 @@ function availabilityTone(value: "available" | "unavailable" | "disabled" | "emp
   }
 }
 
+function buildReferenceRegionCode(
+  summary:
+    | {
+        countryCode?: string | null;
+        admin1Code?: string | null;
+      }
+    | null
+    | undefined
+) {
+  const admin1 = summary?.admin1Code?.trim().toUpperCase() ?? null;
+  if (!admin1) {
+    return null;
+  }
+  if (admin1.includes("-")) {
+    return admin1;
+  }
+  const country = summary?.countryCode?.trim().toUpperCase() ?? null;
+  return country ? `${country}-${admin1}` : admin1;
+}
+
 function issueSeverityTone(value: "attention" | "info") {
   switch (value) {
     case "attention":
@@ -3059,6 +3483,16 @@ function queueCategoryTone(
     default:
       return "neutral" as const;
   }
+}
+
+function normalizeDataBasis(value: string) {
+  if (value === "advisory" || value === "source-reported" || value === "reference") {
+    return "contextual" as const;
+  }
+  if (value === "observed" || value === "derived" || value === "contextual" || value === "unavailable") {
+    return value;
+  }
+  return "contextual" as const;
 }
 
 function issueCategoryTone(

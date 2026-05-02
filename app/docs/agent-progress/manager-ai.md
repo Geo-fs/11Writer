@@ -1,5 +1,593 @@
 # Manager AI Progress
 
+## 2026-05-02 12:27 America/Chicago
+
+Task:
+- perform Manager AI check-in, close peer alerts by routing them, and reassign all completed controlled agents
+
+What changed:
+- confirmed all controlled agents completed their current assignments:
+  - Connect AI completed Source Discovery runtime/review/scheduler boundary validation
+  - Gather AI completed Phase 2 next-biggest-wins governance packet and status reconciliation
+  - Data AI completed client-light Data AI Source Intelligence consumer
+  - Features/Webcam AI completed sandbox candidate review-burden/source-health summary
+  - Geospatial AI completed backend-first `meteoswiss-open-data`
+  - Marine AI completed backend-first `netherlands-rws-waterinfo`
+  - Aerospace AI completed aerospace context review queue/export bundle
+- closed Manager-owned alerts:
+  - Wonder macOS plugin guidance routed as peer planning input only
+  - Atlas Source Discovery ten-step backend slice routed into Connect/Gather follow-up
+- rewrote all seven controlled next-task docs with assignment version `2026-05-02 12:27 America/Chicago`
+
+New assignments:
+- Connect AI: validate Atlas Source Discovery ten-step backend slice and shared runtime/claim/scheduler boundaries
+- Gather AI: reconcile latest full wave and update next-wins routing/status docs
+- Data AI: Data AI topic/context lens and export package
+- Features/Webcam AI: endpoint-verified non-sandbox candidate review summary
+- Geospatial AI: environmental weather/observation review queue and export bundle
+- Marine AI: Waterinfo marine-local consumer/helper/export block
+- Aerospace AI: selected-target aerospace report package
+
+Files touched:
+- `app/docs/alerts.md`
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- alert routing -> pass
+- next-task doc rewrite -> pass
+
+Blockers or caveats:
+- Atlas and Wonder remain peer/user-directed input only
+- Connect must validate Atlas's new ten-step Source Discovery runtime slice before Manager treats it as integration truth
+- Aerospace smoke remains locally blocked by Windows Playwright Chromium `spawn EPERM`
+
+## 2026-05-02 11:49 America/Chicago
+
+Task:
+- correct idle-agent routing after user clarified only Aerospace, Gather, and Connect were actually working
+
+What changed:
+- treated Data AI, Features/Webcam AI, Geospatial AI, and Marine AI as idle despite older next-task docs
+- rewrote four controlled next-task docs with fresh assignment version `2026-05-02 11:49 America/Chicago`
+- assigned larger concrete Phase 2 work:
+  - Data AI: client-light Data AI Source Intelligence consumer over existing review/readiness/export surfaces
+  - Features/Webcam AI: sandbox candidate review-burden, source-health expectation, and next-review priority summary
+  - Geospatial AI: backend-first `meteoswiss-open-data` station-observation context slice
+  - Marine AI: backend-first `netherlands-rws-waterinfo` WaterWebservices metadata plus latest water-level slice
+- corrected the stale Marine task wording now that Gather has verified `netherlands-rws-waterinfo` narrowly assignment-ready
+
+Files touched:
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Still working:
+- Aerospace AI remains on assignment `2026-05-02 11:07 America/Chicago`
+- Gather AI remains on assignment `2026-05-02 11:07 America/Chicago`
+- Connect AI remains on assignment `2026-05-02 11:07 America/Chicago`
+
+Validation:
+- next-task doc rewrite -> pass
+
+Blockers or caveats:
+- none; user should prompt the four idle agents to read their updated next-task docs and start
+
+## 2026-05-02 11:07 America/Chicago
+
+Task:
+- perform Manager AI check-in, route new Atlas runtime alert, and reassign completed Aerospace lane
+
+What changed:
+- reviewed alerts, progress docs, next-task docs, and current worktree status
+- confirmed one new Manager-owned Atlas alert:
+  - `Source Discovery Runtime Review Slice`
+  - feed-link scan, article-body extraction, review queue/actions, review-only scheduler LLM bridging, and opt-in runtime scheduler status/loops
+- marked the Atlas alert completed by routing the shared runtime/review/scheduler implications into Connect AI and Gather AI assignments
+- confirmed Aerospace AI completed assignment `2026-05-02 10:47 America/Chicago` by adding an aerospace workflow readiness/evidence export package with prepared-vs-executed smoke truth, source/evidence/caveats/export metadata, and no-inference guardrails
+- rewrote three controlled next-task docs at assignment version `2026-05-02 11:07 America/Chicago`
+- assigned larger follow-on work:
+  - Connect AI: Source Discovery runtime/review/scheduler boundary validation plus pre-consolidation integration sweep
+  - Gather AI: top-three next-wins governance packet with Atlas runtime alert represented as peer/runtime input
+  - Aerospace AI: aerospace context review queue and export bundle over existing aerospace sources
+
+Files touched:
+- `app/docs/alerts.md`
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Not reassigned:
+- Data AI remains on assignment `2026-05-02 10:57 America/Chicago`
+- Features/Webcam AI, Geospatial AI, and Marine AI remain on assignment `2026-05-02 10:52 America/Chicago`
+- Atlas AI and Wonder AI are peer/user-directed agents and were not assigned controlled work
+
+Validation:
+- progress-doc review -> pass
+- alert routing -> pass
+- next-task doc rewrite -> pass
+
+Blockers or caveats:
+- Connect must validate the Atlas Source Discovery runtime boundary before Manager treats that runtime slice as safe integration truth
+- Aerospace smoke remains blocked by local Windows Playwright Chromium `spawn EPERM`; this remains environment-boundary evidence, not app failure
+
+## 2026-05-02 10:57 America/Chicago
+
+Task:
+- perform Manager AI check-in and reassign completed controlled lanes with larger Phase 2 tasks
+
+What changed:
+- reviewed controlled-agent progress docs, next-task docs, alerts ledger, and current worktree state
+- confirmed alerts ledger is clean: `0` open alerts, `26` completed alerts, within the 500-line target
+- confirmed Connect AI completed assignment `2026-05-02 10:47 America/Chicago` by clearing a real shared import blocker for `runtime_scheduler_service.py`, refining ownership scanner mappings, updating readiness/worktree docs, and passing the assigned backend/frontend validation matrix
+- confirmed Data AI completed assignment `2026-05-02 10:47 America/Chicago` by adding a metadata-only Data AI source-family review queue/export bundle with prompt-injection, no-leakage, caveat, source-health, and no-scoring guardrails
+- confirmed Gather AI completed assignment `2026-05-02 10:34 America/Chicago` by reconciling latest status docs and verifying `netherlands-rws-waterinfo` as assignment-ready only for one narrow POST-based WaterWebservices metadata plus latest-reading slice
+- rewrote three controlled next-task docs at assignment version `2026-05-02 10:57 America/Chicago`
+- assigned larger follow-on work:
+  - Connect AI: pre-consolidation integration risk-reduction sweep
+  - Data AI: client-light Data AI Source Intelligence consumer over existing review/readiness/export surfaces
+  - Gather AI: top-three next-wins governance packet and latest source/status reconciliation
+
+Files touched:
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Not reassigned:
+- Marine AI already has assignment `2026-05-02 10:52 America/Chicago` and has not reported reading/completing it, so it was not overwritten
+- Geospatial AI and Features/Webcam AI remain on assignment `2026-05-02 10:52 America/Chicago`
+- Aerospace AI remains on assignment `2026-05-02 10:47 America/Chicago`
+- Atlas AI and Wonder AI are peer/user-directed agents and were not assigned controlled work
+
+Validation:
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+- `python scripts/alerts_ledger.py --json` -> pass; 0 open alerts
+
+Blockers or caveats:
+- dirty tree remains large and mixed; Connect owns the next integration-risk pass
+- `netherlands-rws-waterinfo` is now assignment-ready, but Marine should finish/read its current `10:52` task before receiving that fresh source build
+
+## 2026-05-02 10:52 America/Chicago
+
+Task:
+- perform Manager AI check-in, close Wonder browser-guidance alert, and reassign completed controlled lanes
+
+What changed:
+- confirmed three controlled lanes completed their current assignments:
+  - Features/Webcam AI completed Maryland and Fingal fixture-first sandbox-importability support
+  - Geospatial AI completed the `bc-wildfire-datamart` fire-weather context slice
+  - Marine AI completed anchor/radius/fallback transition coherence regression
+- reviewed Wonder AI browser guidance docs:
+  - `app/docs/browser-use-agent-guidelines.md`
+  - `app/docs/browser-use-security-verification.md`
+- closed the Wonder browser-guidance alert after broadcasting the policy into relevant next-task prompts
+- left Connect AI in flight on `2026-05-02 10:47 America/Chicago`
+- left Data AI in flight on `2026-05-02 10:47 America/Chicago`
+- left Aerospace AI in flight on `2026-05-02 10:47 America/Chicago`
+- left Gather AI in flight on `2026-05-02 10:34 America/Chicago`
+- rewrote three controlled next-task docs at assignment version `2026-05-02 10:52 America/Chicago`
+- assigned larger follow-on work:
+  - Features/Webcam AI: sandbox candidate review-burden and source-health expectation summary
+  - Geospatial AI: `meteoswiss-open-data` station-observation context slice
+  - Marine AI: manual/custom preset drift and center-unavailable edge-case regression
+
+Files touched:
+- `app/docs/alerts.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- browser guidance review -> pass
+- next-task doc rewrite -> pass
+- `python scripts/alerts_ledger.py --json` before routing -> pass; 1 open low-priority Manager-owned alert
+
+Blockers or caveats:
+- no open alerts after closing the Wonder browser-guidance alert
+- Gather has not yet completed the `netherlands-rws-waterinfo` endpoint-verification assignment, so Marine remains blocked from implementing that source
+- Connect, Data, and Aerospace are still working their `2026-05-02 10:47 America/Chicago` assignments
+
+Next recommended task:
+- tell Features/Webcam, Geospatial, and Marine to read their next-task docs and start assignment version `2026-05-02 10:52 America/Chicago`; Connect, Data, Aerospace, and Gather should continue their current active assignments
+
+## 2026-05-02 10:47 America/Chicago
+
+Task:
+- perform Manager AI check-in and reassign completed controlled lanes
+
+What changed:
+- confirmed three controlled lanes completed their current assignments:
+  - Connect AI completed Wave LLM / Source Discovery Top-5 validation and closed the Atlas alert
+  - Data AI completed `investigative-civic-context` with ProPublica and Global Voices
+  - Aerospace AI completed deterministic OurAirports smoke fixture support and prepared smoke assertions
+- left Features/Webcam AI in flight on `2026-05-02 10:34 America/Chicago`
+- left Gather AI in flight on `2026-05-02 10:34 America/Chicago`
+- left Geospatial AI in flight on `2026-05-02 10:34 America/Chicago`
+- left Marine AI in flight on `2026-05-02 10:41 America/Chicago`
+- left Atlas AI and Wonder AI as user-directed peer agents
+- rewrote three controlled next-task docs at assignment version `2026-05-02 10:47 America/Chicago`
+- assigned larger follow-on work:
+  - Connect AI: shared-contract reconciliation and warning-reduction sweep
+  - Data AI: backend-only Data AI cross-family review queue and export bundle
+  - Aerospace AI: aerospace workflow readiness/evidence export package
+
+Files touched:
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+- `python scripts/alerts_ledger.py --json` -> pass; 0 open alerts, 25 completed, no malformed lines
+
+Blockers or caveats:
+- no open alerts
+- Features/Webcam, Gather, Geospatial, and Marine did not yet show matching completion entries for their active assignments
+- Aerospace executed smoke remains locally blocked by Windows Playwright `spawn EPERM` if it fails before app assertions
+
+Next recommended task:
+- tell Connect, Data, and Aerospace to read their next-task docs and start assignment version `2026-05-02 10:47 America/Chicago`; Features/Webcam, Gather, Geospatial, and Marine should continue their existing active assignments
+
+## 2026-05-02 10:41 America/Chicago
+
+Task:
+- correct Marine AI next-task version after user reported Marine was not updated
+
+What changed:
+- inspected Marine AI next-task and progress docs
+- confirmed Marine next-task doc was still on `2026-05-02 10:01 America/Chicago`
+- confirmed Marine progress did not show a matching completion entry for that `10:01` assignment
+- rewrote Marine AI next-task doc anyway to align the lane with the current coordination rhythm and prevent stale-task confusion
+- assigned Marine AI a larger corrected task at `2026-05-02 10:41 America/Chicago`:
+  - anchor/radius/fallback transition coherence regression
+  - selected-vessel, viewport/manual fallback, chokepoint, and radius-change scenarios
+  - export/report metadata alignment
+  - no-intent/no-impact/no-action guardrails
+  - no new marine source implementation until Gather verifies `netherlands-rws-waterinfo`
+
+Files touched:
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- Marine progress/next-task review -> pass
+- next-task doc rewrite -> pass
+- `python scripts/alerts_ledger.py --json` -> pass; 1 low-priority alert remains in progress under Connect AI
+
+Blockers or caveats:
+- Marine did not have a completion entry for the superseded `2026-05-02 10:01 America/Chicago` assignment
+- this is a coordination correction, not evidence that Marine completed the previous assignment
+- Connect still owns the Atlas Wave LLM / Source Discovery Top-5 alert
+
+Next recommended task:
+- tell Marine AI to read its next-task doc and start assignment version `2026-05-02 10:41 America/Chicago`
+
+## 2026-05-02 10:34 America/Chicago
+
+Task:
+- perform Manager AI check-in, route open alert, and reassign completed controlled lanes
+
+What changed:
+- confirmed six controlled lanes completed their current assignments:
+  - Connect AI completed the shared-contract/ownership/validation sweep and fixed Source Discovery canonical URL handling plus aerospace frontend reference-helper drift
+  - Data AI completed `cyber-institutional-watch-context` plus the Data AI source-family review surface
+  - Features/Webcam AI completed fixture-first sandbox-importability support for NSW and Quebec camera candidates
+  - Gather AI completed the May 2026 cross-lane quick-assign packet set and latest source/status reconciliation
+  - Geospatial AI completed `orfeus-eida-federator` station metadata context and seismic family integration
+  - Aerospace AI completed the OurAirports selected-target/reference consumer and export context
+- routed the open Atlas `Wave LLM And Source Discovery Top-5 Slice` alert to Connect AI and marked it `in_progress`
+- left Marine AI in flight on `2026-05-02 10:01 America/Chicago`
+- left Atlas AI and Wonder AI as user-directed peer agents
+- rewrote six controlled next-task docs at assignment version `2026-05-02 10:34 America/Chicago`
+- assigned larger follow-on work:
+  - Connect AI: validate Atlas Wave LLM / Source Discovery Top-5 runtime boundaries and run focused shared-contract sweep
+  - Data AI: implement `investigative-civic-context` using ProPublica and Global Voices
+  - Features/Webcam AI: fixture-first sandbox-importability for Maryland and Fingal camera candidates
+  - Gather AI: reconcile latest wave plus create `netherlands-rws-waterinfo` endpoint-verification memo
+  - Geospatial AI: implement bounded `bc-wildfire-datamart` context slice if endpoint evidence is sufficient
+  - Aerospace AI: add deterministic OurAirports smoke fixture support and prepared smoke assertions
+
+Files touched:
+- `app/docs/alerts.md`
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+- `python scripts/alerts_ledger.py --json` before routing -> pass; 1 open low-priority Manager-owned alert
+
+Blockers or caveats:
+- Atlas alert is now routed to Connect AI instead of Manager AI
+- Marine still does not show completion for assignment `2026-05-02 10:01 America/Chicago`
+- Aerospace Playwright smoke may still hit the known Windows `spawn EPERM` launcher boundary
+- Atlas and Wonder remain peer/user-directed and were not assigned Manager-controlled work
+
+Next recommended task:
+- tell Connect, Data, Features/Webcam, Gather, Geospatial, and Aerospace to read their next-task docs and start assignment version `2026-05-02 10:34 America/Chicago`; Marine should keep working assignment version `2026-05-02 10:01 America/Chicago`
+
+## 2026-05-02 10:12 America/Chicago
+
+Task:
+- perform Manager AI check-in and reassign completed controlled lanes
+
+What changed:
+- confirmed two controlled lanes completed their current assignments:
+  - Data AI completed the `public-institution-world-context` feed family with WHO, UNDRR, NASA, NOAA, ESA, and FDA feeds
+  - Features/Webcam AI completed the candidate-only endpoint-report/graduation/evidence/readiness batch for NSW, Quebec, Maryland, and Fingal
+- left Connect AI in flight on `2026-05-02 10:08 America/Chicago`
+- left Gather AI in flight on `2026-05-02 10:08 America/Chicago`
+- left Geospatial AI in flight on `2026-05-02 10:08 America/Chicago`
+- left Marine AI in flight on `2026-05-02 10:01 America/Chicago`
+- left Aerospace AI in flight on `2026-05-02 10:01 America/Chicago`
+- left Atlas AI and Wonder AI as user-directed peer agents
+- rewrote two controlled next-task docs at assignment version `2026-05-02 10:12 America/Chicago`
+- assigned larger follow-on work:
+  - Data AI: `cyber-institutional-watch-context` feed-family expansion plus compact backend feed-family review surface
+  - Features/Webcam AI: fixture-first sandbox-importability planning/build wave for NSW and Quebec camera candidates
+
+Files touched:
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+- `python scripts/alerts_ledger.py --json` -> pass; 0 open alerts, 24 completed, no malformed lines
+
+Blockers or caveats:
+- no open alerts
+- Connect, Gather, and Geospatial are newly assigned and still in flight
+- Marine and Aerospace do not yet show completion for their active `2026-05-02 10:01 America/Chicago` assignments
+- Atlas and Wonder remain peer/user-directed and were not assigned Manager-controlled work
+
+Next recommended task:
+- tell Data and Features/Webcam to read their next-task docs and start assignment version `2026-05-02 10:12 America/Chicago`; Connect, Gather, Geospatial, Marine, and Aerospace should keep working their existing assignments
+
+## 2026-05-02 10:08 America/Chicago
+
+Task:
+- perform Manager AI check-in and reassign completed controlled lanes
+
+What changed:
+- confirmed three controlled lanes were ready for reassignment:
+  - Geospatial AI completed the backend-first `emsc-seismicportal-realtime` seismic context slice and family-overview integration
+  - Gather AI completed the candidate-to-brief routing matrix and latest source/status reconciliation
+  - Connect AI completed the Wave LLM runtime-boundary/readiness sweep in substance and closed both Atlas Wave LLM alerts
+- noted a Connect timing caveat:
+  - Connect's progress entry says it read assignment version `2026-05-02 09:56 America/Chicago`, but it covered the Wave LLM interpretation/execution scope and closed both alerts that are now in the `2026-05-02 10:01 America/Chicago` task
+  - Manager treated that as semantically complete rather than leaving Connect idle over a mid-flight task-doc timestamp mismatch
+- left Data AI in flight on `2026-05-02 09:56 America/Chicago`
+- left Features/Webcam AI in flight on `2026-05-02 09:56 America/Chicago`
+- left Marine AI in flight on `2026-05-02 10:01 America/Chicago`
+- left Aerospace AI in flight on `2026-05-02 10:01 America/Chicago`
+- left Atlas AI and Wonder AI as user-directed peer agents
+- rewrote three controlled next-task docs at assignment version `2026-05-02 10:08 America/Chicago`
+- assigned larger follow-on work:
+  - Connect AI: current-state shared-contract, ownership, and validation hardening sweep across the newest Phase 2 surfaces
+  - Geospatial AI: `seismic-network-reference-context` expansion to complement EMSC with a second bounded seismic metadata/context source
+  - Gather AI: May 2026 quick-assign packet package converting strongest candidate buckets into 8-12 owner-routed Phase 2 source packets
+
+Files touched:
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+- `python scripts/alerts_ledger.py --json` -> pass; 0 open alerts, 24 completed, no malformed lines
+
+Blockers or caveats:
+- no open alerts
+- Connect's latest completion had an assignment-version mismatch caused by mid-flight Manager reassignment, but the actual Wave LLM scope and alert closure were completed
+- Data, Features/Webcam, Marine, and Aerospace were not overwritten because their current assignments do not yet have matching completion entries
+
+Next recommended task:
+- tell Connect, Geospatial, and Gather to read their next-task docs and start assignment version `2026-05-02 10:08 America/Chicago`; Data, Features/Webcam, Marine, and Aerospace should keep working their existing assignments
+
+## 2026-05-02 10:01 America/Chicago
+
+Task:
+- perform Manager AI check-in and reassign completed controlled lanes
+
+What changed:
+- confirmed two controlled lanes completed their current assignments:
+  - Marine AI completed source-toggle and preset-switch transition coherence regression
+  - Aerospace AI completed the backend-first `ourairports-reference` slice
+- updated Connect AI from `2026-05-02 09:56 America/Chicago` to `2026-05-02 10:01 America/Chicago` after Atlas opened a second Wave LLM execution-adapter alert
+- left Data AI in flight on `2026-05-02 09:56 America/Chicago`
+- left Gather AI in flight on `2026-05-02 09:56 America/Chicago`
+- left Geospatial AI in flight on `2026-05-02 09:56 America/Chicago`
+- left Features/Webcam AI in flight on `2026-05-02 09:56 America/Chicago`
+- left Atlas AI and Wonder AI as user-directed peer agents
+- rewrote two controlled next-task docs at assignment version `2026-05-02 10:01 America/Chicago`
+- assigned larger follow-on work:
+  - Connect AI: Wave LLM interpretation plus execution-adapter runtime-boundary/readiness validation
+  - Marine AI: anchor/radius/fallback transition regression and export coherence
+  - Aerospace AI: bounded OurAirports reference consumer for selected-target/export context
+- routed the Atlas `Wave LLM Execution Adapter Slice` alert to Connect AI and marked it `in_progress`
+
+Files touched:
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- two low-priority alerts remain in progress under Connect AI for Wave LLM validation
+- Data, Gather, Geospatial, and Features/Webcam were not overwritten because their current `09:56` assignments do not yet have matching completion entries
+- Atlas and Wonder remain peer/user-directed and were not assigned Manager-controlled work
+
+Next recommended task:
+- tell Connect, Marine, and Aerospace to read their next-task docs and start assignment version `2026-05-02 10:01 America/Chicago`; Data, Gather, Geospatial, and Features/Webcam continue assignment version `2026-05-02 09:56 America/Chicago`
+
+## 2026-05-02 09:56 America/Chicago
+
+Task:
+- perform Manager AI check-in and reassign completed controlled lanes
+
+What changed:
+- confirmed five controlled lanes completed their current assignments:
+  - Connect AI completed the Source Discovery five-part backend validation/runtime-boundary sweep
+  - Data AI completed the `internet-governance-standards-context` feed-family expansion
+  - Gather AI completed OSINT Framework intake/routing and source-discovery status reconciliation
+  - Geospatial AI completed the GSHHG/PB2002 base-earth reference bundle
+  - Features/Webcam AI completed the global candidate-only camera source batch
+- left Marine AI in flight on `2026-05-02 09:46 America/Chicago`
+- left Aerospace AI in flight on `2026-05-02 09:46 America/Chicago`
+- left Atlas AI and Wonder AI as user-directed peer agents
+- rewrote five controlled next-task docs at assignment version `2026-05-02 09:56 America/Chicago`
+- assigned larger follow-on work:
+  - Connect AI: Wave LLM interpretation framework runtime-boundary/readiness validation
+  - Data AI: `public-institution-world-context` feed-family expansion
+  - Gather AI: candidate-to-brief routing matrix plus latest source/status reconciliation
+  - Geospatial AI: backend-first global seismic/reference context bundle
+  - Features/Webcam AI: candidate endpoint report/graduation-plan/evidence/readiness batch for strongest new camera candidates
+- routed the Atlas `Wave LLM Interpretation Framework` alert to Connect AI and marked it `in_progress`
+
+Files touched:
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- one low-priority alert remains in progress under Connect AI for Wave LLM validation
+- Marine and Aerospace were not overwritten because their current `09:46` assignments do not yet have matching completion entries
+- Atlas and Wonder remain peer/user-directed and were not assigned Manager-controlled work
+
+Next recommended task:
+- tell Connect, Data, Gather, Geospatial, and Features/Webcam to read their next-task docs and start assignment version `2026-05-02 09:56 America/Chicago`; Marine and Aerospace continue assignment version `2026-05-02 09:46 America/Chicago`
+
+## 2026-05-02 09:46 America/Chicago
+
+Task:
+- perform Manager AI check-in and reassign completed controlled lanes
+
+What changed:
+- confirmed four controlled lanes completed their current assignments:
+  - Connect AI completed source-discovery backend and OSINT audit readiness sweep
+  - Data AI completed Data AI feed-family readiness/export snapshot
+  - Marine AI completed focused evidence interpretation mode-switch coherence regression
+  - Aerospace AI completed aerospace workflow evidence ledger
+- left Gather AI in flight on `2026-05-02 09:12 America/Chicago`
+- left Geospatial AI in flight on `2026-05-02 09:12 America/Chicago`
+- left Features/Webcam AI in flight on `2026-05-01 15:57 America/Chicago`
+- rewrote four controlled next-task docs at assignment version `2026-05-02 09:46 America/Chicago`
+- assigned larger follow-on work:
+  - Connect AI: newest Atlas Source Discovery five-part backend validation/runtime-boundary sweep
+  - Data AI: internet-governance/standards/network-operations feed-family implementation
+  - Marine AI: source-toggle and preset-switch transition coherence regression
+  - Aerospace AI: backend-first OurAirports reference slice
+- routed the open Atlas Source Discovery five-part backend alert into Connect AI and marked it completed
+
+Files touched:
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+- alerts routed in `app/docs/alerts.md`
+
+Blockers or caveats:
+- Gather, Geospatial, and Features/Webcam remain in flight and were not reassigned
+- Atlas and Wonder remain user-directed peer agents
+- aerospace smoke remains known launcher-blocked locally if Playwright fails before app assertions
+
+Next recommended task:
+- tell Connect, Data, Marine, and Aerospace to read their next-task docs and start assignment version `2026-05-02 09:46 America/Chicago`; Gather and Geospatial continue `2026-05-02 09:12 America/Chicago`; Features continues `2026-05-01 15:57 America/Chicago`
+
+## 2026-05-02 09:12 America/Chicago
+
+Task:
+- perform full Manager AI check-in and reassign completed controlled lanes
+
+What changed:
+- confirmed six controlled lanes completed their current assignments:
+  - Connect AI completed source-discovery/source-memory boundary sweep and validation
+  - Gather AI completed source-discovery/reputation governance packet
+  - Data AI completed cyber vendor/community follow-on feed-family implementation
+  - Geospatial AI completed environmental situation snapshot/report package
+  - Marine AI completed timeline/history plus chokepoint-review coherence regression
+  - Aerospace AI completed aerospace context snapshot/report metadata helper
+- left Features/Webcam AI in flight on assignment `2026-05-01 15:57 America/Chicago` for global no-auth camera/source discovery
+- noted Wonder AI's user-directed OSINT Framework audit as important research input, not source approval
+- rewrote six controlled next-task docs at assignment version `2026-05-02 09:12 America/Chicago`
+- assigned larger follow-on work:
+  - Connect AI: source-discovery backend additions, OSINT audit artifact posture, validation, ownership, and release-readiness sweep
+  - Gather AI: OSINT Framework intake/routing memo plus source-discovery status reconciliation
+  - Data AI: Data AI family readiness/export snapshot across implemented feed families
+  - Geospatial AI: backend-first GSHHG shorelines and PB2002 plate-boundaries reference bundle
+  - Marine AI: focused evidence interpretation mode-switch coherence regression
+  - Aerospace AI: aerospace workflow evidence ledger distinguishing prepared vs executed validation
+- marked two Atlas source-discovery alerts completed after routing them into Connect/Gather assignments
+
+Files touched:
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+- alerts routed in `app/docs/alerts.md`
+
+Blockers or caveats:
+- Features/Webcam AI remains in flight and was not reassigned
+- Atlas and Wonder remain user-directed peer agents
+- aerospace smoke remains known launcher-blocked locally if Playwright fails before app assertions
+
+Next recommended task:
+- tell Connect, Gather, Data, Geospatial, Marine, and Aerospace to read their next-task docs and start assignment version `2026-05-02 09:12 America/Chicago`; Features continues `2026-05-01 15:57 America/Chicago`
+
 ## 2026-05-01 15:57 America/Chicago
 
 Task:

@@ -575,6 +575,84 @@ export interface OpenSkyStatesResponse {
   caveats: string[];
 }
 
+export interface OurAirportsReferenceSourceHealth {
+  sourceName: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "normal" | "degraded" | "unavailable" | "unknown";
+  detail: string;
+  airportsSourceUrl: string;
+  runwaysSourceUrl: string;
+  lastUpdatedAt?: string | null;
+  state?: SourceStatus["state"] | null;
+  caveats: string[];
+}
+
+export interface OurAirportsAirportReferenceRecord {
+  referenceId: string;
+  externalId: string;
+  airportCode?: string | null;
+  iataCode?: string | null;
+  localCode?: string | null;
+  name: string;
+  airportType?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  countryCode?: string | null;
+  regionCode?: string | null;
+  municipality?: string | null;
+  elevationFt?: number | null;
+  runwayCount: number;
+  longestRunwayFt?: number | null;
+  sourceUrl: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "normal" | "degraded" | "unavailable" | "unknown";
+  caveats: string[];
+  evidenceBasis: "reference" | "contextual";
+}
+
+export interface OurAirportsRunwayReferenceRecord {
+  referenceId: string;
+  externalId: string;
+  airportRefId: string;
+  airportCode?: string | null;
+  leIdent?: string | null;
+  heIdent?: string | null;
+  lengthFt?: number | null;
+  widthFt?: number | null;
+  surface?: string | null;
+  surfaceCategory?: string | null;
+  centerLatitude?: number | null;
+  centerLongitude?: number | null;
+  sourceUrl: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "normal" | "degraded" | "unavailable" | "unknown";
+  caveats: string[];
+  evidenceBasis: "reference" | "contextual";
+}
+
+export interface OurAirportsReferenceExportMetadata {
+  sourceId: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "normal" | "degraded" | "unavailable" | "unknown";
+  airportCount: number;
+  runwayCount: number;
+  includeRunways: boolean;
+  filters: Record<string, string>;
+  caveat: string;
+}
+
+export interface OurAirportsReferenceResponse {
+  fetchedAt: string;
+  source: string;
+  airportCount: number;
+  runwayCount: number;
+  airports: OurAirportsAirportReferenceRecord[];
+  runways: OurAirportsRunwayReferenceRecord[];
+  sourceHealth: OurAirportsReferenceSourceHealth;
+  exportMetadata: OurAirportsReferenceExportMetadata;
+  caveats: string[];
+}
+
 export interface UsgsGeomagnetismSample {
   observedAt: string;
   values: Record<string, number | null>;
@@ -1453,6 +1531,56 @@ export interface MarineIrelandOpwWaterLevelContextResponse {
   caveats: string[];
 }
 
+export interface MarineNetherlandsRwsWaterinfoSourceHealth {
+  sourceId: string;
+  sourceLabel: string;
+  enabled: boolean;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "loaded" | "empty" | "stale" | "degraded" | "unavailable" | "error" | "disabled" | "unknown";
+  loadedCount: number;
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  detail: string;
+  errorSummary?: string | null;
+  caveat?: string | null;
+}
+
+export interface MarineNetherlandsRwsWaterinfoObservation {
+  observedAt: string;
+  parameterCode: string;
+  parameterLabel: string;
+  waterLevelValue: number;
+  unitCode?: string | null;
+  unitLabel?: string | null;
+  sourceDetail: string;
+  sourceUrl?: string | null;
+  observedBasis: "observed";
+}
+
+export interface MarineNetherlandsRwsWaterinfoStation {
+  stationId: string;
+  stationName: string;
+  latitude: number;
+  longitude: number;
+  distanceKm: number;
+  waterBody?: string | null;
+  statusLine: string;
+  stationSourceUrl?: string | null;
+  latestObservation?: MarineNetherlandsRwsWaterinfoObservation | null;
+  caveats: string[];
+}
+
+export interface MarineNetherlandsRwsWaterinfoContextResponse {
+  fetchedAt: string;
+  centerLat: number;
+  centerLon: number;
+  radiusKm: number;
+  count: number;
+  sourceHealth: MarineNetherlandsRwsWaterinfoSourceHealth;
+  stations: MarineNetherlandsRwsWaterinfoStation[];
+  caveats: string[];
+}
+
 export interface EarthquakeEvent {
   eventId: string;
   source: string;
@@ -2014,4 +2142,283 @@ export interface MetNoMetAlertsResponse {
   metadata: MetNoMetAlertsMetadata;
   count: number;
   alerts: MetNoMetAlertEvent[];
+}
+
+export type DataAiFeedSourceMode = "fixture" | "live" | "mixed" | "unknown";
+
+export type DataAiFeedFamilyHealth =
+  | "loaded"
+  | "mixed"
+  | "empty"
+  | "degraded"
+  | "unknown";
+
+export type DataAiFeedFamilySourceHealth =
+  | "loaded"
+  | "empty"
+  | "stale"
+  | "error"
+  | "disabled"
+  | "unknown";
+
+export type DataAiFeedFamilyReviewQueueSourceHealth =
+  | "loaded"
+  | "mixed"
+  | "empty"
+  | "degraded"
+  | "stale"
+  | "error"
+  | "disabled"
+  | "unknown";
+
+export interface DataAiFeedSourceHealth {
+  sourceId: string;
+  sourceName: string;
+  sourceCategory: string;
+  feedUrl: string;
+  finalUrl?: string | null;
+  enabled: boolean;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  loadedCount: number;
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  detail: string;
+  errorSummary?: string | null;
+  evidenceBasis: "advisory" | "contextual" | "source-reported";
+  caveat: string;
+}
+
+export interface DataAiFeedItem {
+  recordId: string;
+  sourceId: string;
+  sourceName: string;
+  sourceCategory: string;
+  feedUrl: string;
+  finalUrl?: string | null;
+  guid?: string | null;
+  link?: string | null;
+  title: string;
+  summary?: string | null;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+  fetchedAt: string;
+  evidenceBasis: "advisory" | "contextual" | "source-reported";
+  sourceMode: "fixture" | "live" | "unknown";
+  sourceHealth: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  caveats: string[];
+  tags: string[];
+}
+
+export interface DataAiMultiFeedMetadata {
+  source: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  fetchedAt: string;
+  count: number;
+  rawCount: number;
+  dedupedCount: number;
+  configuredSourceIds: string[];
+  selectedSourceIds: string[];
+  caveat: string;
+}
+
+export interface DataAiMultiFeedResponse {
+  metadata: DataAiMultiFeedMetadata;
+  count: number;
+  sourceHealth: DataAiFeedSourceHealth[];
+  items: DataAiFeedItem[];
+  caveats: string[];
+}
+
+export interface DataAiFeedFamilySourceMember {
+  familyId: string;
+  familyLabel: string;
+  sourceId: string;
+  sourceName: string;
+  sourceCategory: string;
+  feedUrl: string;
+  finalUrl?: string | null;
+  sourceMode: DataAiFeedSourceMode;
+  sourceHealth: DataAiFeedFamilySourceHealth;
+  evidenceBasis: "advisory" | "contextual" | "source-reported";
+  rawCount: number;
+  itemCount: number;
+  dedupePosture: string;
+  tags: string[];
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  caveat: string;
+  summaryLine: string;
+  exportLines: string[];
+}
+
+export interface DataAiFeedFamilySummary {
+  familyId: string;
+  familyLabel: string;
+  familyHealth: DataAiFeedFamilyHealth;
+  familyMode: DataAiFeedSourceMode;
+  sourceIds: string[];
+  sourceLabels: string[];
+  sourceCategories: string[];
+  feedUrls: string[];
+  evidenceBases: string[];
+  sourceCount: number;
+  loadedSourceCount: number;
+  fixtureSourceCount: number;
+  rawCount: number;
+  itemCount: number;
+  dedupePosture: string;
+  tags: string[];
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  caveats: string[];
+  exportLines: string[];
+  sources: DataAiFeedFamilySourceMember[];
+}
+
+export interface DataAiFeedFamilyReadinessSnapshotMetadata {
+  source: string;
+  sourceName: string;
+  sourceMode: DataAiFeedSourceMode;
+  fetchedAt: string;
+  familyCount: number;
+  sourceCount: number;
+  rawCount: number;
+  itemCount: number;
+  selectedFamilyIds: string[];
+  selectedSourceIds: string[];
+  dedupePosture: string;
+  guardrailLine: string;
+  caveat: string;
+}
+
+export interface DataAiFeedFamilyReadinessSnapshotResponse {
+  metadata: DataAiFeedFamilyReadinessSnapshotMetadata;
+  familyCount: number;
+  sourceCount: number;
+  rawCount: number;
+  itemCount: number;
+  families: DataAiFeedFamilySummary[];
+  guardrailLine: string;
+  exportLines: string[];
+  caveats: string[];
+}
+
+export interface DataAiFeedFamilyReviewCard {
+  familyId: string;
+  familyLabel: string;
+  familyHealth: DataAiFeedFamilyHealth;
+  familyMode: DataAiFeedSourceMode;
+  sourceCount: number;
+  loadedSourceCount: number;
+  rawCount: number;
+  itemCount: number;
+  sourceIds: string[];
+  sourceCategories: string[];
+  evidenceBases: string[];
+  caveatClasses: string[];
+  promptInjectionTestPosture: string;
+  dedupePosture: string;
+  exportReadiness: string;
+  reviewLines: string[];
+}
+
+export interface DataAiFeedFamilyReviewMetadata {
+  source: string;
+  sourceName: string;
+  sourceMode: DataAiFeedSourceMode;
+  fetchedAt: string;
+  familyCount: number;
+  sourceCount: number;
+  rawCount: number;
+  itemCount: number;
+  selectedFamilyIds: string[];
+  selectedSourceIds: string[];
+  dedupePosture: string;
+  promptInjectionTestPosture: string;
+  guardrailLine: string;
+  caveat: string;
+}
+
+export interface DataAiFeedFamilyReviewResponse {
+  metadata: DataAiFeedFamilyReviewMetadata;
+  familyCount: number;
+  sourceCount: number;
+  rawCount: number;
+  itemCount: number;
+  promptInjectionTestPosture: string;
+  families: DataAiFeedFamilyReviewCard[];
+  reviewLines: string[];
+  guardrailLine: string;
+  caveats: string[];
+}
+
+export type DataAiFeedFamilyReviewQueueCategory = "family" | "source";
+
+export type DataAiFeedFamilyReviewQueueIssueKind =
+  | "fixture-local-source"
+  | "empty-family"
+  | "empty-source"
+  | "degraded-source"
+  | "high-caveat-density"
+  | "duplicate-heavy-feed"
+  | "prompt-injection-coverage-present"
+  | "prompt-injection-coverage-missing"
+  | "export-readiness-gap"
+  | "contextual-only-caveat-reminder"
+  | "advisory-only-caveat-reminder";
+
+export interface DataAiFeedFamilyReviewQueueIssue {
+  queueId: string;
+  category: DataAiFeedFamilyReviewQueueCategory;
+  issueKind: DataAiFeedFamilyReviewQueueIssueKind;
+  familyId: string;
+  familyLabel: string;
+  sourceId?: string | null;
+  sourceName?: string | null;
+  sourceCategory?: string | null;
+  sourceMode: DataAiFeedSourceMode;
+  sourceHealth: DataAiFeedFamilyReviewQueueSourceHealth;
+  evidenceBases: string[];
+  caveatClasses: string[];
+  rawCount: number;
+  itemCount: number;
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  detail: string;
+  reviewLines: string[];
+  exportLines: string[];
+}
+
+export interface DataAiFeedFamilyReviewQueueMetadata {
+  source: string;
+  sourceName: string;
+  sourceMode: DataAiFeedSourceMode;
+  fetchedAt: string;
+  familyCount: number;
+  sourceCount: number;
+  issueCount: number;
+  selectedFamilyIds: string[];
+  selectedSourceIds: string[];
+  selectedCategories: string[];
+  selectedIssueKinds: string[];
+  dedupePosture: string;
+  promptInjectionTestPosture: string;
+  guardrailLine: string;
+  caveat: string;
+}
+
+export interface DataAiFeedFamilyReviewQueueResponse {
+  metadata: DataAiFeedFamilyReviewQueueMetadata;
+  familyCount: number;
+  sourceCount: number;
+  issueCount: number;
+  promptInjectionTestPosture: string;
+  categoryCounts: Record<string, number>;
+  issueKindCounts: Record<string, number>;
+  issues: DataAiFeedFamilyReviewQueueIssue[];
+  reviewLines: string[];
+  exportLines: string[];
+  guardrailLine: string;
+  caveats: string[];
 }

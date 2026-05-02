@@ -1,4 +1,5 @@
 import type { MarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
+import type { MarineNetherlandsRwsWaterinfoContextSummary } from "./marineNetherlandsRwsWaterinfoContext";
 import type { MarineNdbcContextSummary } from "./marineNdbcContext";
 import type { MarineNoaaContextSummary } from "./marineNoaaContext";
 import type { MarineScottishWaterContextSummary } from "./marineScottishWaterContext";
@@ -54,6 +55,7 @@ export interface MarineContextSourceRegistrySummary {
 
 export function buildMarineContextSourceRegistrySummary(input: {
   irelandOpw: MarineIrelandOpwContextSummary | null;
+  netherlandsRwsWaterinfo?: MarineNetherlandsRwsWaterinfoContextSummary | null;
   noaaCoops: MarineNoaaContextSummary | null;
   ndbc: MarineNdbcContextSummary | null;
   scottishWater: MarineScottishWaterContextSummary | null;
@@ -71,7 +73,10 @@ export function buildMarineContextSourceRegistrySummary(input: {
     ,
     input.irelandOpw
       ? fromIrelandOpw(input.irelandOpw)
-      : unavailableRow("ireland-opw-waterlevel", "Ireland OPW Water Level", "hydrology")
+      : unavailableRow("ireland-opw-waterlevel", "Ireland OPW Water Level", "hydrology"),
+    input.netherlandsRwsWaterinfo
+      ? fromWaterinfo(input.netherlandsRwsWaterinfo)
+      : unavailableRow("netherlands-rws-waterinfo", "Netherlands RWS Waterinfo", "hydrology")
   ];
 
   const sourceCount = rows.length;
@@ -190,6 +195,22 @@ function fromIrelandOpw(summary: MarineIrelandOpwContextSummary): MarineContextS
   return {
     sourceId: summary.metadata.sourceId,
     label: "Ireland OPW Water Level",
+    category: "hydrology",
+    sourceMode: summary.metadata.sourceMode,
+    health: summary.metadata.health,
+    availability: availabilityFromHealth(summary.metadata.health),
+    nearbyCount: summary.metadata.nearbyStationCount,
+    activeCount: null,
+    topSummary: summary.metadata.topObservationSummary,
+    caveats: summary.metadata.caveats,
+    evidenceBasis: "observed"
+  };
+}
+
+function fromWaterinfo(summary: MarineNetherlandsRwsWaterinfoContextSummary): MarineContextSourceSummaryRow {
+  return {
+    sourceId: summary.metadata.sourceId,
+    label: "Netherlands RWS Waterinfo",
     category: "hydrology",
     sourceMode: summary.metadata.sourceMode,
     health: summary.metadata.health,

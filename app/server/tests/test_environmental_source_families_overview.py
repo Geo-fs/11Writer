@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.app import create_application
 from src.config.settings import Settings, get_settings
+from src.routes.environmental_context import router as environmental_context_router
 
 
 def _fixture(name: str) -> str:
@@ -16,6 +17,10 @@ def _settings() -> Settings:
     return Settings(
         EARTHQUAKE_SOURCE_MODE="fixture",
         EARTHQUAKE_FIXTURE_PATH=_fixture("usgs_earthquakes_fixture.geojson"),
+        EMSC_SEISMICPORTAL_SOURCE_MODE="fixture",
+        EMSC_SEISMICPORTAL_FIXTURE_PATH=_fixture("emsc_seismicportal_realtime_fixture.json"),
+        ORFEUS_EIDA_SOURCE_MODE="fixture",
+        ORFEUS_EIDA_FIXTURE_PATH=_fixture("orfeus_eida_station_fixture.txt"),
         EONET_SOURCE_MODE="fixture",
         EONET_FIXTURE_PATH=_fixture("nasa_eonet_events_fixture.json"),
         VOLCANO_SOURCE_MODE="fixture",
@@ -42,6 +47,10 @@ def _settings() -> Settings:
         GEOSPHERE_AUSTRIA_WARNINGS_FIXTURE_PATH=_fixture("geosphere_austria_warnings_fixture.json"),
         NATURAL_EARTH_PHYSICAL_SOURCE_MODE="fixture",
         NATURAL_EARTH_PHYSICAL_FIXTURE_PATH=_fixture("natural_earth_physical_land_fixture.json"),
+        GSHHG_SHORELINES_SOURCE_MODE="fixture",
+        GSHHG_SHORELINES_FIXTURE_PATH=_fixture("gshhg_shorelines_fixture.json"),
+        PB2002_PLATE_BOUNDARIES_SOURCE_MODE="fixture",
+        PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=_fixture("pb2002_plate_boundaries_fixture.json"),
         NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
         NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=_fixture("noaa_global_volcano_locations_fixture.json"),
         TAIWAN_CWA_SOURCE_MODE="fixture",
@@ -50,6 +59,10 @@ def _settings() -> Settings:
         NRC_EVENT_NOTIFICATIONS_FIXTURE_PATH=_fixture("nrc_event_notifications_fixture.xml"),
         BMKG_EARTHQUAKES_SOURCE_MODE="fixture",
         BMKG_EARTHQUAKES_FIXTURE_PATH=_fixture("bmkg_earthquakes_fixture.json"),
+        BC_WILDFIRE_DATAMART_SOURCE_MODE="fixture",
+        BC_WILDFIRE_DATAMART_FIXTURE_PATH=_fixture("bc_wildfire_datamart_fixture.json"),
+        METEOSWISS_OPEN_DATA_SOURCE_MODE="fixture",
+        METEOSWISS_OPEN_DATA_FIXTURE_PATH=_fixture("meteoswiss_open_data_fixture.json"),
         GA_RECENT_EARTHQUAKES_SOURCE_MODE="fixture",
         GA_RECENT_EARTHQUAKES_FIXTURE_PATH=_fixture("ga_recent_earthquakes_fixture.kml"),
         DMI_FORECAST_SOURCE_MODE="fixture",
@@ -68,7 +81,8 @@ def _settings() -> Settings:
 
 
 def _client(settings_factory=_settings) -> TestClient:
-    app = create_application()
+    app = FastAPI()
+    app.include_router(environmental_context_router)
     app.dependency_overrides[get_settings] = settings_factory
     return TestClient(app)
 
@@ -83,7 +97,7 @@ def test_environmental_source_families_overview_shape_and_family_grouping() -> N
     assert payload["metadata"]["source"] == "environmental-source-family-overview"
     assert payload["metadata"]["sourceMode"] == "fixture"
     assert payload["familyCount"] >= 10
-    assert payload["sourceCount"] >= 26
+    assert payload["sourceCount"] >= 32
     family_ids = [family["familyId"] for family in payload["families"]]
     assert "seismic" in family_ids
     assert "environmental-event-context" in family_ids
@@ -93,6 +107,8 @@ def test_environmental_source_families_overview_shape_and_family_grouping() -> N
     assert "infrastructure-event-context" in family_ids
     seismic = next(family for family in payload["families"] if family["familyId"] == "seismic")
     assert "usgs-earthquake-hazards-program" in seismic["sourceIds"]
+    assert "emsc-seismicportal-realtime" in seismic["sourceIds"]
+    assert "orfeus-eida-federator" in seismic["sourceIds"]
     assert "bmkg-earthquakes" in seismic["sourceIds"]
     assert "ga-recent-earthquakes" in seismic["sourceIds"]
     assert "geonet-new-zealand" in seismic["sourceIds"]
@@ -105,6 +121,10 @@ def test_environmental_source_families_overview_shape_and_family_grouping() -> N
     assert "met-eireann-warnings" in weather_alerts["sourceIds"]
     assert "geosphere-austria-warnings" in weather_alerts["sourceIds"]
     assert "advisory" in " ".join(weather_alerts["evidenceBases"]).lower()
+    base_earth = next(family for family in payload["families"] if family["familyId"] == "base-earth-reference")
+    assert "natural-earth-physical" in base_earth["sourceIds"]
+    assert "gshhg-shorelines" in base_earth["sourceIds"]
+    assert "pb2002-plate-boundaries" in base_earth["sourceIds"]
 
 
 def test_environmental_source_families_overview_preserves_caveats_and_prompt_injection_inertness() -> None:
@@ -142,6 +162,8 @@ def test_environmental_source_families_overview_review_lines_and_runtime_states_
     assert all("damage score" not in line.lower() for line in weather_alerts["exportLines"])
     assert all("health risk" not in line.lower() for line in weather_alerts["exportLines"])
     water_family = families["weather-flood-hydrology"]
+    assert "bc-wildfire-datamart" in water_family["sourceIds"]
+    assert "meteoswiss-open-data" in water_family["sourceIds"]
     assert "met-eireann-forecast" in water_family["sourceIds"]
     assert water_family["familyHealth"] in {"loaded", "mixed", "empty", "degraded", "unknown"}
     assert all("hazard score" not in line.lower() for line in water_family["exportLines"])

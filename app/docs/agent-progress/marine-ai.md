@@ -1,3 +1,279 @@
+## 2026-05-02 13:02 America/Chicago
+
+Assignment version:
+- 2026-05-02 12:27 America/Chicago
+
+Task:
+- add one narrow marine-local consumer/helper/export block for `netherlands-rws-waterinfo` without widening beyond metadata plus latest observations
+
+What changed:
+- in progress
+
+Files touched:
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/marine-ai.md)
+
+Validation:
+- in progress
+
+Blockers or caveats:
+- in progress
+
+Next recommended task:
+- in progress
+## 2026-05-02 12:38 America/Chicago
+
+Assignment version:
+- 2026-05-02 11:49 America/Chicago
+
+Task:
+- implement the bounded backend-first, fixture-first `netherlands-rws-waterinfo` marine context slice for official WaterWebservices metadata plus latest water-level observations
+
+What changed:
+- added a backend-first marine context route for Netherlands RWS Waterinfo:
+  - `GET /api/marine/context/netherlands-rws-waterinfo`
+- pinned the bounded official endpoint family in settings/contracts/docs:
+  - `POST https://waterwebservices.apps.rijkswaterstaat.nl/ddapi20-waterwebservices/api/METADATASERVICES_DBO/OphalenCatalogus`
+  - `POST https://waterwebservices.apps.rijkswaterstaat.nl/ddapi20-waterwebservices/api/ONLINEWAARNEMINGENSERVICES_DBO/OphalenLaatsteWaarnemingen`
+- added marine-only backend settings for:
+  - source mode
+  - fixture path
+  - metadata catalog URL
+  - latest observations URL
+  - timeout
+- added typed backend contracts for:
+  - source health
+  - station metadata
+  - latest water-level observation
+  - context response
+- added deterministic fixture behavior for:
+  - one normal Hoek van Holland station
+  - one IJmuiden station with prompt-like source text preserved as inert metadata
+  - one Dordrecht partial-metadata station with missing `waterBody` and `unitLabel`
+  - empty/no-match behavior
+  - disabled non-fixture behavior
+  - honest stale/degraded/unavailable source-health behavior
+- added focused backend tests covering:
+  - loaded contract behavior
+  - empty result stays `health=empty`
+  - partial metadata preservation
+  - inert prompt-like source text preservation
+  - disabled non-fixture behavior
+  - fixture-mode no-fabrication boundary
+  - stale/degraded/unavailable source-health behavior
+  - invalid radius / invalid coordinates validation
+- updated marine docs and directly relevant source/status docs so Waterinfo now reads as:
+  - backend-contract-covered
+  - backend-only in the current slice
+  - still bounded to metadata plus latest water-level POST endpoints only
+
+Files touched:
+- [settings.py](/C:/Users/mike/11Writer/app/server/src/config/settings.py)
+- [api.py](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+- [marine_context_service.py](/C:/Users/mike/11Writer/app/server/src/services/marine_context_service.py)
+- [marine_service.py](/C:/Users/mike/11Writer/app/server/src/services/marine_service.py)
+- [marine.py](/C:/Users/mike/11Writer/app/server/src/routes/marine.py)
+- [test_netherlands_rws_waterinfo.py](/C:/Users/mike/11Writer/app/server/tests/test_netherlands_rws_waterinfo.py)
+- [test_marine_contracts.py](/C:/Users/mike/11Writer/app/server/tests/test_marine_contracts.py)
+- [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+- [marine-context-fixture-reference.md](/C:/Users/mike/11Writer/app/docs/marine-context-fixture-reference.md)
+- [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+- [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+- [source-assignment-board.md](/C:/Users/mike/11Writer/app/docs/source-assignment-board.md)
+- [source-endpoint-verification-netherlands-rws-waterinfo.md](/C:/Users/mike/11Writer/app/docs/source-endpoint-verification-netherlands-rws-waterinfo.md)
+- [source-quick-assign-packets-may-2026.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-may-2026.md)
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/marine-ai.md)
+
+Validation:
+- `python -m pytest app/server/tests/test_netherlands_rws_waterinfo.py -q` -> pass
+- `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- this slice is backend-first and fixture-first only; there is no marine-local client consumer, export metadata key, or smoke assertion yet
+- no live-network tests were added
+- no broad Waterinfo portal/viewer ingestion was added
+- source-provided text is preserved as inert metadata only
+- no flood-impact, navigation-safety, operational-failure, anomaly-cause, vessel-behavior, vessel-intent, wrongdoing, pollution-impact, or health-risk inference was added
+
+Next recommended task:
+- if Manager AI wants the next bounded Waterinfo step, add one narrow marine-local consumer card/helper/export block for `netherlands-rws-waterinfo` and then promote it with explicit marine smoke/workflow-validation evidence without widening beyond the official metadata plus latest-observation POST slice
+
+## 2026-05-02 16:41 America/Chicago
+
+Assignment version:
+- 2026-05-02 10:41 America/Chicago
+
+Task:
+- extend deterministic regression, metadata, and docs for marine anchor/radius/fallback transition coherence so selected-vessel, viewport/manual fallback, chokepoint bounded-area, and radius-change review lenses cannot drift across export and helper layers
+
+What changed:
+- updated [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs)
+  - added deterministic scope-transition coverage for:
+    - selected-vessel anchored context
+    - viewport/manual fallback context
+    - chokepoint bounded-area context
+    - radius-change context for the same selected entity/source set
+  - added a compact scenario builder that runs the real Marine helper/export path across:
+    - `environmentalContext`
+    - `contextSourceSummary`
+    - `contextIssueQueue`
+    - `contextIssueExportBundle`
+    - `contextFusionSummary`
+    - `contextReviewReport`
+    - `contextTimeline`
+    - `focusedEvidenceInterpretation`
+    - `chokepointReviewPackage`
+    - top-level `marineAnomalySummary` caveats
+  - added assertions that:
+    - selected-vessel anchor metadata stays aligned across environmental context and timeline
+    - viewport fallback preserves `effectiveAnchor=fallback-viewport`, fallback reason, and environmental caveats
+    - chokepoint scope preserves `boundedAreaLabel` coherence between chokepoint review metadata and timeline snapshots
+    - radius changes update current/previous scope metadata while preserving anomaly scores, source ids, source health, and evidence bases
+- updated [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+  - documented deterministic anchor/radius/fallback transition coverage and export alignment expectations
+- updated [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+  - documented scope-transition coherence requirements for:
+    - anchor
+    - effective anchor
+    - fallback reason
+    - radius
+    - bounded-area label
+    - downstream export consumers
+
+Files touched:
+- [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs)
+- [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+- [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/marine-ai.md)
+
+Validation:
+- `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run test:marine-context-helpers` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python app/server/tests/run_playwright_smoke.py marine` -> pass
+
+Blockers or caveats:
+- this slice hardened regression/docs only; it did not change anomaly scoring or source semantics
+- anchor/radius/fallback transitions remain review/context only and do not prove severity, impact, anomaly cause, vessel behavior, vessel intent, wrongdoing, evasion, escort, toll activity, blockade, targeting, threat, or action need
+- no new marine source was implemented; `netherlands-rws-waterinfo` remains out of scope pending Gather/Manager assignment readiness
+
+Next recommended task:
+- if Manager AI wants the next marine hardening slice, extend deterministic regression and export coherence into manual/custom preset drift and center-unavailable edge cases so export consumers can distinguish explicit analyst choice from automatic fallback without reading UI-only state
+
+## 2026-05-02 16:08 America/Chicago
+
+Assignment version:
+- 2026-05-02 09:46 America/Chicago
+
+Task:
+- extend deterministic regression and export coherence into source-toggle and preset-switch transitions so marine context, source registry, issue queue, fusion/report metadata, and review lenses cannot drift
+
+What changed:
+- updated [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs)
+  - added a deterministic broad/all-sources review context
+  - added a deterministic limited/degraded review context with an explicitly disabled CO-OPS row under a preset/source-toggle transition
+  - added transition regression coverage that verifies current/previous snapshot coherence across:
+    - `environmentalContext`
+    - `contextSourceSummary`
+    - `contextIssueQueue`
+    - `contextIssueExportBundle`
+    - `contextFusionSummary`
+    - `contextTimeline`
+    - `focusedEvidenceInterpretation`
+  - added assertions for:
+    - active preset id/label
+    - enabled source list
+    - disabled row visibility
+    - disabled-source issue visibility
+    - disabled-source review action wording
+    - limited-source counts
+    - no-intent/no-wrongdoing/no-severity/no-impact guardrails across the full export package
+- updated [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+  - documented source-toggle/preset-switch transition coherence expectations and deterministic helper-regression coverage
+- updated [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+  - documented that preset/source-toggle transitions must remain aligned across environmental context, source summary, issue queue, issue export bundle, fusion, timeline, and focused interpretation metadata
+
+Files touched:
+- [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs)
+- [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+- [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/marine-ai.md)
+
+Validation:
+- `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run test:marine-context-helpers` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python app/server/tests/run_playwright_smoke.py marine` -> pass
+
+Blockers or caveats:
+- this slice is regression/docs hardening only; it does not change anomaly scoring or source semantics
+- preset/source-toggle transitions remain review/context only and do not prove severity, impact, anomaly cause, vessel behavior, vessel intent, wrongdoing, evasion, escort, toll activity, blockade, targeting, threat, or action need
+
+Next recommended task:
+- if Manager AI wants the next marine hardening slice, extend deterministic regression and export coherence into anchor/radius fallback transitions so selected-vessel, viewport, chokepoint, and fallback-center behavior cannot drift across environmental context, source registry, and review/export metadata
+
+## 2026-05-02 15:24 America/Chicago
+
+Assignment version:
+- 2026-05-02 09:12 America/Chicago
+
+Task:
+- extend deterministic regression and export metadata so focused evidence interpretation mode switches stay coherent with marine review/export caveats
+
+What changed:
+- updated [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts)
+  - extended `marineAnomalySummary.focusedEvidenceInterpretation` metadata with:
+    - `visibleCardKinds`
+    - `visibleCardLabels`
+    - `visibleCardBases`
+  - this makes export metadata preserve the actual visible interpretation-card selection for each marine mode, not just counts
+- updated [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs)
+  - added deterministic mode-switch regression coverage for:
+    - `compact`
+    - `detailed`
+    - `evidence-only`
+    - `caveats-first`
+  - asserts that each mode preserves the expected visible interpretation-card selection from the real helper path
+  - asserts export metadata stays aligned with visible card kinds, labels, and bases in every mode
+  - asserts every mode preserves coherence with:
+    - focused replay evidence
+    - chokepoint review package
+    - context timeline
+    - context issue export bundle
+    - top-level `marineAnomalySummary.caveats`
+  - preserves no-severity/no-impact/no-vessel-intent/no-wrongdoing/no-evasion/no-escort/no-threat/no-action guardrails in each mode
+- updated [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+  - documented focused interpretation mode-switch coherence coverage in helper regression and export metadata expectations
+- updated [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+  - documented the new `focusedEvidenceInterpretation` visible-card metadata fields and mode-switch coherence behavior
+
+Files touched:
+- [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts)
+- [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs)
+- [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+- [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/marine-ai.md)
+
+Validation:
+- `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run test:marine-context-helpers` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python app/server/tests/run_playwright_smoke.py marine` -> pass
+
+Blockers or caveats:
+- this slice hardens helper/export coherence only; it does not change anomaly scoring or marine source semantics
+- focused evidence mode-switch behavior remains review/context only and does not prove severity, impact, anomaly cause, vessel behavior, vessel intent, wrongdoing, evasion, escort, toll activity, blockade, targeting, threat, or action need
+
+Next recommended task:
+- if Manager AI wants the next marine hardening slice, extend deterministic regression and export coherence into source-toggle and preset-switch transitions so combined environmental context, source registry, issue queue, and fusion/report metadata cannot drift when the review lens changes
+
 ## 2026-05-01 15:56 America/Chicago
 
 Assignment version:
@@ -1150,6 +1426,10 @@ Blockers or caveats:
 
 Next recommended task:
 - extend marine source-health validation for stale or unavailable source behavior without broadening semantics or touching shared frontend files
+
+
+
+
 
 
 

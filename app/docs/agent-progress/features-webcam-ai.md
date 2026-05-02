@@ -1,5 +1,259 @@
 # Features/Webcam AI Progress
 
+## 2026-05-02 11:59:29 -05:00
+
+- Task: Add a backend-only sandbox-candidate review-burden, source-health expectation, and next-review summary across webcam sandbox-importable candidates without activation or validation drift.
+- Assignment version read: `2026-05-02 11:49 America/Chicago`
+- What changed:
+  - added a backend-only sandbox-candidate summary helper that groups current `candidate-sandbox-importable` webcam sources by:
+    - review burden
+    - media evidence posture
+    - missing evidence count
+    - source-health expectation
+    - next-review priority
+  - surfaced compact per-source sandbox-candidate rows with:
+    - lifecycle state
+    - media posture
+    - source-health expectation
+    - missing evidence
+    - sandbox discovered / usable / review counts
+    - export-safe review lines
+  - wired the new sandbox-candidate summary into:
+    - source-ops index responses
+    - source-ops export-summary responses
+  - preserved weaker/held posture outside the sandbox-candidate set:
+    - `baton-rouge-traffic-cameras`
+    - `euskadi-traffic-cameras`
+  - added inert hostile-text coverage so prompt-like fixture text remains excluded from sandbox summary and export outputs
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_sandbox_candidate_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_sandbox_candidate_summary.py)
+  - [`app/server/src/services/camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_report_index.py)
+  - [`app/server/src/services/camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_summary.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q` passed
+  - `python -m compileall app/server/src` passed
+  - `python scripts/alerts_ledger.py --json` passed
+- Blockers or caveats:
+  - the new summary is backend-only and read-only
+  - sandbox-importable remains distinct from validated, active, or scheduled ingest
+  - `fingal-traffic-cameras` stays held within the sandbox candidate set because its media posture is still `metadata-only-documented`
+  - hostile fixture text remains inert data only and is excluded from compact summary/export outputs
+  - no scraping, browser automation, live checks, activation, scheduling, or validation promotion occurred
+- Next recommended task:
+  - either add a similar backend-only summary for endpoint-verified non-sandbox candidates, or take Baton Rouge through a conservative fixture-first review if Manager AI wants to expand the sandbox-importable set
+
+## 2026-05-02 10:49:48 -05:00
+
+- Task: Add fixture-first sandbox-importability support for Maryland and Fingal camera candidates and surface that progress through backend webcam source-ops without activating or validating either source.
+- Assignment version read: `2026-05-02 10:34 America/Chicago`
+- What changed:
+  - added fixture-first sandbox connector support for:
+    - `maryland-chart-traffic-cameras`
+    - `fingal-traffic-cameras`
+  - added deterministic synthetic fixtures for both sources and kept the connectors fixture-only so no live-default drift or scheduled-ingest semantics were introduced
+  - extended the sandbox-support mapping helpers so Maryland and Fingal now surface as `candidate-sandbox-importable` across inventory/status/detail/index/export readiness while remaining candidate-only and not validated
+  - added focused backend coverage for:
+    - Maryland conservative viewer-only fixture mapping and unavailable-frame review behavior
+    - Fingal metadata-only fixture mapping and unavailable-frame review behavior
+    - sandbox validation report counts and next-step posture for both sources
+    - source-ops detail/report/readiness/export behavior after the lifecycle shift
+    - inert hostile fixture note text with no lifecycle, activation, or export leakage
+  - tightened export-readiness logic so a sandboxed metadata-only source like Fingal still records missing media evidence instead of appearing artificially complete
+  - updated webcam docs and lifecycle policy so Maryland and Fingal are documented as fixture-first sandbox candidates rather than endpoint-only candidates
+  - narrowed `test_webcam_module.py` to a cameras/status-only FastAPI harness so webcam validation no longer depends on unrelated app-wide imports
+- Files touched:
+  - [`app/server/src/config/settings.py`](/C:/Users/mike/11Writer/app/server/src/config/settings.py)
+  - [`app/server/src/adapters/cameras.py`](/C:/Users/mike/11Writer/app/server/src/adapters/cameras.py)
+  - [`app/server/src/services/camera_registry.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py)
+  - [`app/server/src/services/camera_sandbox_validation_report.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_sandbox_validation_report.py)
+  - [`app/server/src/services/camera_source_ops_export_readiness.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_readiness.py)
+  - [`app/server/data/maryland_chart_traffic_cameras_fixture.json`](/C:/Users/mike/11Writer/app/server/data/maryland_chart_traffic_cameras_fixture.json)
+  - [`app/server/data/fingal_traffic_cameras_fixture.json`](/C:/Users/mike/11Writer/app/server/data/fingal_traffic_cameras_fixture.json)
+  - [`app/server/tests/test_webcam_module.py`](/C:/Users/mike/11Writer/app/server/tests/test_webcam_module.py)
+  - [`app/server/tests/test_camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_endpoint_report.py)
+  - [`app/server/tests/test_camera_candidate_graduation_plan.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_graduation_plan.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_detail.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/server/tests/test_camera_sandbox_validation_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_sandbox_validation_report.py)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q` passed
+  - `python -m compileall app/server/src` passed
+  - `python scripts/alerts_ledger.py --json` passed
+- Blockers or caveats:
+  - Maryland and Fingal are still candidate-only, inactive, unscheduled, and not validated
+  - sandbox importability is fixture-only for both new sources in this pass
+  - Baton Rouge and Euskadi were not promoted and keep their weaker or held posture
+  - hostile prompt-like fixture note text remains inert data only and is excluded from compact export/report surfaces
+  - no live endpoint checks in tests, no scraping, no browser automation, no source activation, and no validation promotion occurred
+- Next recommended task:
+  - if Manager AI wants the next webcam move, either take Baton Rouge through a similarly conservative fixture-first review pass or strengthen backend-only source-health and review-burden summaries for the now larger sandbox-importable candidate set
+
+## 2026-05-02 10:32:36 -05:00
+
+- Task: Add fixture-first sandbox-importability support for NSW and Quebec camera candidates and surface that progress through backend webcam source-ops without activating or validating either source.
+- Assignment version read: `2026-05-02 10:12 America/Chicago`
+- What changed:
+  - added fixture-first sandbox connector support for:
+    - `nsw-live-traffic-cameras`
+    - `quebec-mtmd-traffic-cameras`
+  - added deterministic synthetic fixtures for both sources and kept the connectors fixture-only so no live-default drift was introduced
+  - generalized sandbox metadata helpers so source inventory, source status, source-ops detail, report index, and sandbox validation report no longer special-case Finland only
+  - kept both sources inactive, unscheduled, candidate-only, and not validated while shifting their honest lifecycle posture to `candidate-sandbox-importable`
+  - added focused backend coverage for:
+    - NSW direct-image fixture mapping and unavailable-frame review behavior
+    - Quebec conservative viewer-only fixture mapping and unavailable-frame review behavior
+    - sandbox validation report counts and next-step posture for both sources
+    - source-ops detail/report/readiness/export behavior after the lifecycle shift
+    - inert hostile fixture note text with no lifecycle, activation, or export leakage
+  - updated webcam docs and lifecycle policy so NSW and Quebec are documented as fixture-first sandbox candidates rather than endpoint-only candidates
+- Files touched:
+  - [`app/server/src/config/settings.py`](/C:/Users/mike/11Writer/app/server/src/config/settings.py)
+  - [`app/server/src/adapters/cameras.py`](/C:/Users/mike/11Writer/app/server/src/adapters/cameras.py)
+  - [`app/server/src/services/camera_registry.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py)
+  - [`app/server/src/services/camera_service.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_service.py)
+  - [`app/server/src/services/camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_candidate_endpoint_report.py)
+  - [`app/server/src/services/camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_report_index.py)
+  - [`app/server/src/services/camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_detail.py)
+  - [`app/server/src/services/camera_sandbox_validation_report.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_sandbox_validation_report.py)
+  - [`app/server/data/nsw_live_traffic_cameras_fixture.json`](/C:/Users/mike/11Writer/app/server/data/nsw_live_traffic_cameras_fixture.json)
+  - [`app/server/data/quebec_mtmd_traffic_cameras_fixture.json`](/C:/Users/mike/11Writer/app/server/data/quebec_mtmd_traffic_cameras_fixture.json)
+  - [`app/server/tests/test_webcam_module.py`](/C:/Users/mike/11Writer/app/server/tests/test_webcam_module.py)
+  - [`app/server/tests/test_camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_endpoint_report.py)
+  - [`app/server/tests/test_camera_candidate_graduation_plan.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_graduation_plan.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_detail.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/server/tests/test_camera_sandbox_validation_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_sandbox_validation_report.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q` passed
+  - `python -m compileall app/server/src` passed
+  - `python scripts/alerts_ledger.py --json` passed
+- Blockers or caveats:
+  - NSW and Quebec are still candidate-only, inactive, unscheduled, and not validated
+  - sandbox importability is fixture-only for both new sources in this pass
+  - Maryland, Fingal, Baton Rouge, and Euskadi were not promoted and keep their weaker or held posture
+  - hostile prompt-like fixture note text remains inert data only and is excluded from compact export/report surfaces
+  - no live endpoint checks in tests, no scraping, no browser automation, no source activation, and no validation promotion occurred
+- Next recommended task:
+  - if Manager AI wants the next webcam move, take Maryland or Fingal through the same bounded fixture-first sandbox-importability pass, or add backend-only source-health expectations for the new NSW and Quebec sandbox connectors without enabling live ingest
+
+## 2026-05-02 10:08:21 -05:00
+
+- Task: Take the strongest new global camera candidates through the existing endpoint-report, graduation-plan, evidence-packet, and export-readiness source-ops batch without activating or validating any source.
+- Assignment version read: `2026-05-02 09:56 America/Chicago`
+- What changed:
+  - selected the strongest newly added machine-readable candidates for deeper candidate-only follow-up:
+    - `nsw-live-traffic-cameras`
+    - `quebec-mtmd-traffic-cameras`
+    - `maryland-chart-traffic-cameras`
+    - `fingal-traffic-cameras`
+  - kept `baton-rouge-traffic-cameras` weaker for now because the current evidence is still mostly location-centric, and kept `euskadi-traffic-cameras` review-gated because the final public machine-readable endpoint is still unpinned
+  - extended `CameraCandidateEndpointReportItem` and the composed detail path with candidate-specific source mode, lifecycle state, media evidence posture, evidence basis, source-health expectation, caveats, and export-safe lines
+  - extended graduation-plan output with explicit missing-evidence lists, sandbox-readiness posture, lifecycle caveats, and export-safe lines while preserving no-activation/no-scheduling posture
+  - tightened export-readiness and evidence-packet logic so selected candidates now reflect honest media posture:
+    - NSW records documented direct-image evidence
+    - Quebec and Maryland record conservative viewer-only evidence
+    - Fingal stays metadata-only
+    - Euskadi stays candidate-needs-review and weaker than the selected machine-readable set
+  - added hostile prompt-like note coverage in candidate endpoint-report tests and kept it inert across report, plan, evidence-packet, and export/readiness behavior
+  - updated webcam docs and lifecycle policy so the selected-candidate batch, held/weakened candidates, and missing-evidence rules are explicit
+- Files touched:
+  - [`app/server/src/services/camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_candidate_endpoint_report.py)
+  - [`app/server/src/services/camera_candidate_graduation_plan.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_candidate_graduation_plan.py)
+  - [`app/server/src/services/camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_detail.py)
+  - [`app/server/src/services/camera_source_ops_evidence_packets.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_evidence_packets.py)
+  - [`app/server/src/services/camera_source_ops_export_readiness.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_readiness.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_endpoint_report.py)
+  - [`app/server/tests/test_camera_candidate_graduation_plan.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_graduation_plan.py)
+  - [`app/server/tests/test_camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_detail.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_webcam_module.py -q` passed
+  - `python -m compileall app/server/src` passed
+  - `python scripts/alerts_ledger.py --json` passed
+- Blockers or caveats:
+  - all sources in this batch remain candidate-only and inactive
+  - no sandbox connector was added for the new candidates
+  - no live endpoint checks, source activation, validation promotion, scheduled refresh, scraping, browser automation, CAPTCHA/login bypass, token/session use, or credentialed API use occurred
+  - prompt-like source notes remain inert untrusted data only and do not affect lifecycle state, next actions, or export/readiness semantics
+- Next recommended task:
+  - if Manager AI wants the next bigger webcam batch, take one of the selected strong candidates such as `nsw-live-traffic-cameras` or `quebec-mtmd-traffic-cameras` into a fixture-first sandbox connector planning pass without enabling live ingest or broadening into frontend work
+
+## 2026-05-02 09:52:09 -05:00
+
+- Task: Add a global candidate-only webcam source batch from official/public no-auth machine-readable camera families and wire the new candidates into backend source-ops tests/docs without activating any source.
+- Assignment version read: `2026-05-01 15:57 America/Chicago`
+- What changed:
+  - researched a bounded global batch of official/public no-auth camera families across Australia, Canada, Ireland, Spain, and the United States, plus held/blocked follow-ons where machine endpoints were not pinned cleanly or where keys/registration were required
+  - added six candidate-only webcam source definitions to the registry:
+    - `nsw-live-traffic-cameras`
+    - `quebec-mtmd-traffic-cameras`
+    - `maryland-chart-traffic-cameras`
+    - `fingal-traffic-cameras`
+    - `baton-rouge-traffic-cameras`
+    - `euskadi-traffic-cameras`
+  - kept all six new records inactive and review-gated with explicit endpoint verification posture, candidate URLs, lifecycle caveats, and no activation/validation/scheduling semantics
+  - recorded the full research batch, held/blocked sources, and inert source-text warning in a new candidate discovery doc
+  - extended backend webcam/source-ops tests so inventory, candidate report selection, and lifecycle index coverage now assert the new candidate-only records and their lifecycle buckets
+  - linked the new discovery doc from the core webcam docs and source-planning docs so later routing can reuse the candidate-only evidence without treating it as implementation proof
+- Files touched:
+  - [`app/server/src/services/camera_registry.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py)
+  - [`app/server/tests/test_webcam_module.py`](/C:/Users/mike/11Writer/app/server/tests/test_webcam_module.py)
+  - [`app/server/tests/test_camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_endpoint_report.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/source-prompt-index.md`](/C:/Users/mike/11Writer/app/docs/source-prompt-index.md)
+  - [`app/docs/source-assignment-board.md`](/C:/Users/mike/11Writer/app/docs/source-assignment-board.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_webcam_module.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m compileall app/server/src` passed
+  - `python scripts/alerts_ledger.py --json` passed
+- Blockers or caveats:
+  - all newly added sources remain candidate-only and inactive
+  - no live endpoint probing, browser automation, scraping, CAPTCHA/login bypass, API-key use, scheduling, activation, or validation promotion occurred
+  - `euskadi-traffic-cameras` remains `candidate-url-only` because the direct final machine endpoint was not pinned in this pass
+  - `qldtraffic-web-cameras` and `nzta-traffic-cameras` were held because the final stable no-auth machine endpoint was not pinned cleanly enough for registry onboarding
+  - `npra-datex-webcams`, `udot-traffic-cameras`, and `az511-cameras` remain blocked by registration or API-key posture under current rules
+- Next recommended task:
+  - if Manager AI wants a follow-on from this batch, take one newly added machine-readable candidate such as `nsw-live-traffic-cameras` or `quebec-mtmd-traffic-cameras` through the existing candidate endpoint report and graduation-plan path, still without enabling activation or live-import scheduling
+
 ## 2026-05-01 15:51:05 -05:00
 
 - Task: Add a backend-only unified source-ops export surface that composes review-queue export bundles, evidence-packet export bundles, and handoff export bundles under one aggregate-only selector contract.

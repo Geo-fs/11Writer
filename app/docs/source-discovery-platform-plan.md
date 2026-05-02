@@ -475,9 +475,27 @@ Implemented backend primitives:
   - reputation audit events
 - API routes:
   - `GET /api/source-discovery/memory/overview`
+  - `GET /api/source-discovery/memory/list`
+  - `GET /api/source-discovery/memory/{source_id}`
+  - `GET /api/source-discovery/memory/{source_id}/export`
   - `POST /api/source-discovery/memory/candidates`
   - `POST /api/source-discovery/memory/claim-outcomes`
   - `POST /api/source-discovery/jobs/seed-url`
+  - `POST /api/source-discovery/jobs/record-source-extract`
+  - `POST /api/source-discovery/health/check`
+  - `POST /api/source-discovery/jobs/expand`
+  - `POST /api/source-discovery/jobs/catalog-scan`
+  - `POST /api/source-discovery/jobs/feed-link-scan`
+  - `POST /api/source-discovery/content/snapshots`
+  - `POST /api/source-discovery/jobs/article-fetch`
+  - `POST /api/source-discovery/jobs/social-metadata`
+  - `POST /api/source-discovery/reputation/reverse-event`
+  - `POST /api/source-discovery/scheduler/tick`
+  - `GET /api/source-discovery/review/queue`
+  - `POST /api/source-discovery/review/actions`
+  - `POST /api/source-discovery/reviews/apply-claims`
+  - `GET /api/source-discovery/runtime/status`
+  - `POST /api/source-discovery/runtime/workers/{worker_name}/control`
 - deterministic claim-outcome scoring for:
   - `confirmed`
   - `contradicted`
@@ -488,6 +506,26 @@ Implemented backend primitives:
 - separation between global/domain correctness reputation and wave-specific fit
 - initial Wave Monitor source-candidate seeding into shared source memory
 - bounded seed-url job audit records with rejection before candidate creation for non-http URLs
+- bounded record-source-extract jobs that mine source URLs from existing Wave Monitor records and bounded Data AI item batches
+- source-health check records that update health/access/machine-readable status without changing correctness reputation
+- canonical URL/domain dedupe with alias preservation for merged source identities
+- next-check scheduling and health-check backoff with tracked failure counts
+- source-class-aware initial scoring and outcome handling so static sources are not treated like stale live feeds
+- bounded expansion jobs that turn supplied or one-fetch seed content into child candidates without broad crawling
+- bounded catalog-scan jobs that turn one allowed public catalog or API response into candidate memories without recursive crawling
+- bounded feed-link-scan jobs that turn one allowed public feed batch into child source candidates and feed-summary snapshots
+- content snapshots that store full text or extracted body text for later claim assessment
+- stronger structured HTML article extraction plus fallback parsing so stored snapshots can prefer article body, canonical URL, and metadata over headline-only text
+- bounded article-fetch jobs for reviewed approved/sandboxed article-class sources
+- public social/image metadata jobs that preserve metadata-only evidence without touching media blobs or private endpoints
+- source packet list/detail/export surfaces for handoff and future UI
+- reversible reputation audit events
+- review queue and review-action audit APIs for lane assignment plus reviewed, sandboxed, approved, rejected, and archived transitions
+- reviewed Wave LLM claims can update reputation only through explicit approved application after the source has already been reviewed
+- scheduler-to-Wave-LLM bridge for bounded review-only `source_summary` and `article_claim_extraction` tasks created from eligible snapshots
+- backend scheduler tick primitive for bounded source-discovery maintenance
+- persistent runtime worker state and run history plus a lease-safe scheduler coordinator/status surface for opt-in source-discovery and Wave Monitor background loops
+- startup backfill for older local SQLite files that predate the new source-memory columns
 
 What this proves:
 
@@ -495,17 +533,27 @@ What this proves:
 - a source can become low-fit for one wave without reducing global correctness reputation
 - confirmed and contradicted claims update reputation in auditable increments
 - existing Wave Monitor candidates can populate the shared memory layer without mounting standalone 7Po8
+- existing records can now seed shared source memory without re-fetching the whole web
+- duplicate source identities can converge on one canonical memory row while keeping alias provenance
 - agents have a safe first job pattern for candidate discovery without hidden crawling or automatic polling
+- one allowed feed batch can seed child source candidates and summary snapshots without broad crawling
+- one allowed catalog/API page can seed candidate memories without broad crawling
+- one reviewed article source can be fetched into full text without auto-fetching children or promoting claims
+- one public social/image page can contribute metadata-only context without opening the door to login scraping
+- stored source snapshots can be routed into review-only Wave LLM interpretation without bypassing provider budgets or human review
+- accepted LLM claims remain inert until an explicit reviewed-claim application step writes audited claim outcomes
+- review/routing state can now be expressed through backend APIs before any frontend queue exists
+- backend-only or sidecar runtime can expose scheduler health, accept pause/resume/run-now controls, and conservatively skip duplicate worker execution across processes
+- health scheduling, full-text, expansion, reversal, review, and scheduler workflows now have backend contracts and fixture-safe tests
 
 What it does not do yet:
 
-- no autonomous discovery job runner
-- no full-text fetcher
-- no social/image evidence fetcher
-- no source candidate dedupe beyond source id and URL-shape classification
-- no mature source-class scoring model
+- no mature autonomous discovery planner
+- no production-grade article extraction parser
 - no frontend review queue
-- no background scheduler integration for discovery jobs
+- no OS-managed service deployment yet; current runtime loops remain process-local even though lease-safe persistence exists
+- no broad social/image evidence ingestion beyond metadata-only public-page capture
+- no graphical operator-facing candidate approval and routing surface
 
 Validation:
 

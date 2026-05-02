@@ -24,9 +24,16 @@ def test_source_ops_detail_composes_finland_candidate_artifacts() -> None:
     assert detail.endpoint_evaluation.available is True
     assert detail.endpoint_evaluation.endpoint_verification_status == "machine-readable-confirmed"
     assert detail.candidate_endpoint_report.available is True
+    assert detail.candidate_endpoint_report.source_mode == "official-dot-api:json-api"
+    assert detail.candidate_endpoint_report.lifecycle_state == "candidate-sandbox-importable"
+    assert detail.candidate_endpoint_report.media_evidence_posture == "direct-image-documented"
+    assert detail.candidate_endpoint_report.export_lines
     assert detail.candidate_endpoint_report.next_action == "machine endpoint candidate found"
     assert detail.graduation_plan.available is True
     assert detail.graduation_plan.recommended_next_state == "approved-unvalidated-candidate"
+    assert detail.graduation_plan.sandbox_readiness_posture == "sandbox-importable"
+    assert detail.graduation_plan.missing_evidence
+    assert detail.graduation_plan.lifecycle_caveats
     assert detail.sandbox_validation_report.available is True
     assert detail.review_prerequisites.current_lifecycle_state == "candidate-sandbox-importable"
     assert detail.review_prerequisites.validated is False
@@ -53,6 +60,44 @@ def test_source_ops_detail_composes_finland_candidate_artifacts() -> None:
     )
     assert graduation_timestamp.timestamp_status == "missing"
     assert "read-only lifecycle evidence" in detail.caveats[0].lower()
+
+
+def test_source_ops_detail_composes_new_sandbox_candidate_metadata() -> None:
+    detail = build_camera_source_ops_detail(Settings(), "nsw-live-traffic-cameras")
+
+    assert detail is not None
+    assert detail.lifecycle_bucket == "candidate-sandbox-importable"
+    assert detail.candidate_endpoint_report.available is True
+    assert detail.candidate_endpoint_report.source_mode == "official-dot-api:json-api"
+    assert detail.candidate_endpoint_report.lifecycle_state == "candidate-sandbox-importable"
+    assert detail.candidate_endpoint_report.media_evidence_posture == "direct-image-documented"
+    assert "official" in (detail.candidate_endpoint_report.evidence_basis or "").lower()
+    assert detail.graduation_plan.available is True
+    assert detail.graduation_plan.recommended_next_state == "approved-unvalidated-candidate"
+    assert detail.graduation_plan.sandbox_readiness_posture == "sandbox-importable"
+    assert detail.sandbox_validation_report.available is True
+
+    quebec = build_camera_source_ops_detail(Settings(), "quebec-mtmd-traffic-cameras")
+    assert quebec is not None
+    assert quebec.lifecycle_bucket == "candidate-sandbox-importable"
+    assert quebec.candidate_endpoint_report.lifecycle_state == "candidate-sandbox-importable"
+    assert quebec.candidate_endpoint_report.media_evidence_posture == "viewer-only-documented"
+    assert quebec.graduation_plan.sandbox_readiness_posture == "sandbox-importable"
+    assert quebec.sandbox_validation_report.available is True
+
+    maryland = build_camera_source_ops_detail(Settings(), "maryland-chart-traffic-cameras")
+    assert maryland is not None
+    assert maryland.lifecycle_bucket == "candidate-sandbox-importable"
+    assert maryland.candidate_endpoint_report.media_evidence_posture == "viewer-only-documented"
+    assert maryland.graduation_plan.sandbox_readiness_posture == "sandbox-importable"
+    assert maryland.sandbox_validation_report.available is True
+
+    fingal = build_camera_source_ops_detail(Settings(), "fingal-traffic-cameras")
+    assert fingal is not None
+    assert fingal.lifecycle_bucket == "candidate-sandbox-importable"
+    assert fingal.candidate_endpoint_report.media_evidence_posture == "metadata-only-documented"
+    assert fingal.graduation_plan.sandbox_readiness_posture == "sandbox-importable"
+    assert fingal.sandbox_validation_report.available is True
 
 
 def test_source_ops_detail_preserves_blocked_and_validated_boundaries() -> None:

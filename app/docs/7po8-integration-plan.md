@@ -147,23 +147,34 @@ Shared-system integration now started:
 - Analyst timeline callers can disable Wave Monitor context with `include_wave_monitor=false`
 - Source Discovery memory is exposed through:
   - `GET /api/source-discovery/memory/overview`
+  - `GET /api/source-discovery/memory/list`
+  - `GET /api/source-discovery/memory/{source_id}`
+  - `GET /api/source-discovery/memory/{source_id}/export`
   - `POST /api/source-discovery/memory/candidates`
   - `POST /api/source-discovery/memory/claim-outcomes`
+  - `POST /api/source-discovery/jobs/catalog-scan`
+  - `POST /api/source-discovery/jobs/article-fetch`
+  - `POST /api/source-discovery/jobs/social-metadata`
+  - `POST /api/source-discovery/reviews/apply-claims`
+  - `POST /api/source-discovery/runtime/workers/{worker_name}/control`
 
 What it does not do yet:
 
 - no create/update/delete APIs for user-authored monitors or connectors yet
-- no automatic background scheduler loop yet
 - no frontend Situation Workspace panel
 - no migration of existing 7Po8 Alembic data into 11Writer storage
 - no source-discovery/source-check policy persistence beyond the initial source-candidate shape
-- no autonomous source-discovery runner, full-text fetcher, or mature source-class scoring model yet
+- no autonomous source-discovery planner, production-grade article parser, or mature source-class scoring model yet
+- no OS-managed background service yet; current runtime loops are process-local and opt-in
 
 Phase 2 backend notes:
 
 - Storage tables are 11Writer-native: monitors, connectors, records, signals, runs, and source candidates.
 - Seed data exists only to keep backend and Analyst Workbench contracts useful before user-created monitor APIs land.
 - The manual scheduler tick scans enabled connectors on active monitors, runs only due connectors, advances `next_run_at`, and records run history.
+- A process-local runtime scheduler coordinator can now start opt-in Wave Monitor and Source Discovery loops at backend startup and report status through `GET /api/source-discovery/runtime/status`.
+- Source Discovery now supports bounded catalog scan, article fetch, social/image metadata capture, source packet export, reviewed-claim application, and runtime worker control without mounting a separate 7Po8 runtime.
+- Runtime worker state and recent run history are persisted in Source Discovery storage, and duplicate-worker execution is conservatively skipped with lease checks.
 - Live connectors must remain public/no-auth/no-CAPTCHA and must preserve provenance, caveats, evidence basis, and source-health state.
 - Frontend work remains intentionally deferred for this phase.
 
@@ -660,6 +671,11 @@ Validation:
 - graceful stop tests
 - no hidden infinite loop
 
+Current status:
+
+- partial implementation exists through a process-local runtime scheduler coordinator plus `GET /api/source-discovery/runtime/status`
+- startup loops remain opt-in and are suitable for backend-only or sidecar preview, not yet OS/service-manager deployment
+
 ### Slice 4B: Platform Source Discovery
 
 Goal:
@@ -737,6 +753,7 @@ Agents working on 7Po8 integration should:
 - make Wave Monitor compatible with desktop, companion web, and backend-only runtime modes
 - keep source health, evidence basis, caveats, provenance, and export metadata mandatory
 - avoid broad crawling, scraping, or source expansion without explicit source rules
+- use [wave-llm-interpretation-framework.md](/C:/Users/mike/11Writer/app/docs/wave-llm-interpretation-framework.md) for per-wave LLM interpretation; model output is review input only and must not directly change source trust, facts, connector state, or user-facing claims
 
 ## Open Questions
 
@@ -761,4 +778,5 @@ Recommended defaults:
 - [runtime-interface-requirements.md](/C:/Users/mike/11Writer/app/docs/runtime-interface-requirements.md)
 - [cross-platform-agent-guidelines.md](/C:/Users/mike/11Writer/app/docs/cross-platform-agent-guidelines.md)
 - [source-workflow-validation-plan.md](/C:/Users/mike/11Writer/app/docs/source-workflow-validation-plan.md)
+- [wave-llm-interpretation-framework.md](/C:/Users/mike/11Writer/app/docs/wave-llm-interpretation-framework.md)
 - [7Po8 README](/C:/Users/mike/11Writer/7Po8/README.md)

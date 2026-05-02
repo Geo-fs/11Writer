@@ -4,6 +4,54 @@ This matrix is scoped to aerospace / aircraft-satellite source slices only.
 It documents the current backend contract surface, required caveats, and current validation status.
 It does not change source semantics.
 
+## OurAirports Reference
+
+- Route:
+  `/api/aerospace/reference/ourairports`
+- Source category:
+  public airport/runway reference context
+- Evidence basis:
+  reference / contextual
+- Source health fields:
+  `sourceHealth.sourceName`
+  `sourceHealth.sourceMode`
+  `sourceHealth.health`
+  `sourceHealth.detail`
+  `sourceHealth.airportsSourceUrl`
+  `sourceHealth.runwaysSourceUrl`
+  `sourceHealth.lastUpdatedAt`
+  `sourceHealth.state`
+  `sourceHealth.caveats`
+- Source mode fields:
+  `sourceHealth.sourceMode`
+  per-record `sourceMode`
+  `exportMetadata.sourceMode`
+- Empty behavior:
+  empty `airports` and `runways` lists are valid and explicit, not a route failure
+- Primary observations/events:
+  airport reference rows and related runway reference rows
+- Export metadata key:
+  backend response `exportMetadata`;
+  aerospace snapshot/export metadata key `ourairportsReferenceContext`
+- UI card currently exists:
+  yes;
+  compact aerospace-local `OurAirports Reference Context` section
+- Smoke coverage status:
+  no prepared assertion added in this pass;
+  current aerospace smoke fixture path does not yet include a dedicated OurAirports reference endpoint
+- Caveats:
+  public baseline reference metadata only,
+  not live airport status,
+  not runway availability,
+  not survey-grade precision,
+  must remain separate from selected-target source truth
+- Do-not-infer rules:
+  do not infer airport operational status,
+  do not infer runway closure or suitability,
+  do not infer flight intent,
+  do not treat a reference match as aircraft validation,
+  do not overwrite live selected-target evidence with reference enrichment
+
 ## NOAA AWC
 
 - Route:

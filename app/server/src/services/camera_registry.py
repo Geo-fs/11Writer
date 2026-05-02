@@ -546,6 +546,377 @@ _SOURCE_DEFINITIONS: tuple[CameraSourceDefinition, ...] = (
         ),
     ),
     CameraSourceDefinition(
+        key="nsw-live-traffic-cameras",
+        display_name="NSW Live Traffic Cameras",
+        owner="Transport for NSW",
+        source_type="official-dot",
+        inventory_source_type="official-dot-api",
+        source_family="nsw-open-traffic-cameras",
+        access_method="json-api",
+        onboarding_state="candidate",
+        coverage="New South Wales public live traffic camera dataset",
+        coverage_states=(),
+        coverage_regions=("New South Wales", "Australia"),
+        priority=78,
+        authentication="none",
+        default_refresh_interval_seconds=1800,
+        refresh_policy=RefreshPolicy(1800, 1800, 1800, False, 1800, 1800, 7200),
+        provides_exact_coordinates=True,
+        provides_direction_text=True,
+        provides_numeric_heading=False,
+        provides_direct_image=True,
+        provides_viewer_only=False,
+        supports_embed=False,
+        supports_storage=False,
+        rate_limit_notes=(
+            "Public official traffic camera API; keep polling conservative until connector and cadence review exist.",
+        ),
+        quality_notes=("Official Transport for NSW camera API with image URLs and coordinates.",),
+        stability_notes=("Official machine-readable camera API documented in the Live Traffic NSW developer guide.",),
+        compliance_risk="low",
+        extraction_feasibility="high",
+        endpoint_verification_status="machine-readable-confirmed",
+        candidate_endpoint_url="https://api.transport.nsw.gov.au/v1/live/cameras",
+        machine_readable_endpoint_url="https://api.transport.nsw.gov.au/v1/live/cameras",
+        last_endpoint_check_at="2026-05-02",
+        last_endpoint_http_status=None,
+        last_endpoint_content_type=None,
+        last_endpoint_result="Official developer documentation identifies a public GeoJSON camera endpoint with image URLs, coordinates, and view descriptions. Runtime connector verification is still pending.",
+        last_endpoint_notes=(
+            "Documentation-first candidate evidence only; this task does not activate, validate, or schedule ingestion.",
+            "Treat image URL capability as a candidate capability baseline until fixture-backed mapping review is complete.",
+        ),
+        verification_caveat="Documented machine-readable access is not production-readiness evidence and does not bypass lifecycle review.",
+        blocked_reason="Candidate only. Fixture design, connector mapping, compliance review, and source-health validation are still required before any activation decision.",
+        notes=(
+            "Official NSW live traffic camera candidate from Transport for NSW open data.",
+            "The developer guide documents a public GeoJSON endpoint for camera records.",
+        ),
+        compliance=CameraComplianceMetadata(
+            attribution_text="Transport for NSW Live Traffic Cameras",
+            attribution_url="https://data.nsw.gov.au/data/dataset/2-live-traffic-cameras",
+            terms_url="https://developer.transport.nsw.gov.au/terms-and-conditions",
+            license_summary="Official NSW open data camera dataset. Preserve attribution and keep storage/embedding assumptions conservative until reviewed.",
+            requires_authentication=False,
+            supports_embedding=False,
+            supports_frame_storage=False,
+            review_required=True,
+            notes=[
+                "Candidate-only lifecycle posture remains in force until fixture-backed review is complete.",
+                "Do not treat the documented endpoint as validated ingest or storage permission.",
+            ],
+        ),
+    ),
+    CameraSourceDefinition(
+        key="quebec-mtmd-traffic-cameras",
+        display_name="Quebec MTMD Traffic Cameras",
+        owner="Ministere des Transports et de la Mobilite durable",
+        source_type="official-dot",
+        inventory_source_type="official-dot-api",
+        source_family="quebec-open-traffic-cameras",
+        access_method="json-api",
+        onboarding_state="candidate",
+        coverage="Quebec provincial traffic camera dataset",
+        coverage_states=(),
+        coverage_regions=("Quebec", "Canada"),
+        priority=78,
+        authentication="none",
+        default_refresh_interval_seconds=1800,
+        refresh_policy=RefreshPolicy(1800, 1800, 1800, False, 1800, 1800, 7200),
+        provides_exact_coordinates=True,
+        provides_direction_text=False,
+        provides_numeric_heading=False,
+        provides_direct_image=False,
+        provides_viewer_only=True,
+        supports_embed=False,
+        supports_storage=False,
+        rate_limit_notes=(
+            "Public provincial WFS/GeoJSON dataset; keep polling conservative until connector and cadence review exist.",
+        ),
+        quality_notes=("Official provincial traffic camera dataset with exact coordinates and per-camera URL fields.",),
+        stability_notes=("Official Donnees Quebec resource advertises GeoJSON, WFS, WMS, and daily updates.",),
+        compliance_risk="low",
+        extraction_feasibility="high",
+        endpoint_verification_status="machine-readable-confirmed",
+        candidate_endpoint_url="https://ws.mapserver.transports.gouv.qc.ca/swtq?service=wfs&version=2.0.0&request=getfeature&typename=ms:infos_cameras&outfile=Camera&srsname=EPSG:4326&outputformat=geojson",
+        machine_readable_endpoint_url="https://ws.mapserver.transports.gouv.qc.ca/swtq?service=wfs&version=2.0.0&request=getfeature&typename=ms:infos_cameras&outfile=Camera&srsname=EPSG:4326&outputformat=geojson",
+        last_endpoint_check_at="2026-05-02",
+        last_endpoint_http_status=None,
+        last_endpoint_content_type=None,
+        last_endpoint_result="Official dataset metadata identifies a public GeoJSON WFS camera endpoint and states that each camera carries a URL for viewing the image/video stream. Runtime connector verification is still pending.",
+        last_endpoint_notes=(
+            "Documentation-first candidate evidence only; this task does not activate, validate, or schedule ingestion.",
+            "Per-camera URL fields are treated conservatively as viewer-capability evidence until fixtures confirm direct-image posture.",
+        ),
+        verification_caveat="Machine-readable dataset availability does not establish direct-image rights, validated mapping, or production ingest readiness.",
+        blocked_reason="Candidate only. Fixture design, connector mapping, compliance review, and source-health validation are still required before any activation decision.",
+        notes=(
+            "Official Quebec traffic camera candidate from Donnees Quebec and MTMD.",
+            "GeoJSON resource metadata documents an exact WFS download route for the camera layer.",
+        ),
+        compliance=CameraComplianceMetadata(
+            attribution_text="Ministere des Transports et de la Mobilite durable du Quebec - Camera de circulation",
+            attribution_url="https://www.donneesquebec.ca/recherche/dataset/camera-de-circulation",
+            terms_url="https://www.donneesquebec.ca/a-propos/licence/",
+            license_summary="Official Quebec open data traffic camera dataset under CC BY 4.0. Preserve attribution and keep frame/storage assumptions conservative until reviewed.",
+            requires_authentication=False,
+            supports_embedding=False,
+            supports_frame_storage=False,
+            review_required=True,
+            notes=[
+                "Candidate-only lifecycle posture remains in force until fixture-backed review is complete.",
+                "Do not assume direct-image ingest from a documented camera URL field without connector validation.",
+            ],
+        ),
+    ),
+    CameraSourceDefinition(
+        key="maryland-chart-traffic-cameras",
+        display_name="Maryland CHART Traffic Cameras",
+        owner="State of Maryland / CHART",
+        source_type="official-dot",
+        inventory_source_type="official-dot-api",
+        source_family="maryland-chart-open-data",
+        access_method="json-api",
+        onboarding_state="candidate",
+        coverage="Maryland statewide CHART traffic camera dataset",
+        coverage_states=("MD",),
+        coverage_regions=("Maryland", "United States"),
+        priority=78,
+        authentication="none",
+        default_refresh_interval_seconds=1800,
+        refresh_policy=RefreshPolicy(1800, 1800, 1800, False, 1800, 1800, 7200),
+        provides_exact_coordinates=True,
+        provides_direction_text=False,
+        provides_numeric_heading=False,
+        provides_direct_image=False,
+        provides_viewer_only=True,
+        supports_embed=False,
+        supports_storage=False,
+        rate_limit_notes=(
+            "Public Socrata dataset; keep polling conservative until connector and cadence review exist.",
+        ),
+        quality_notes=("Official statewide camera location dataset that includes URLs to live camera feeds.",),
+        stability_notes=("Official Maryland open data dataset with JSON, CSV, and XML distributions.",),
+        compliance_risk="low",
+        extraction_feasibility="high",
+        endpoint_verification_status="machine-readable-confirmed",
+        candidate_endpoint_url="https://opendata.maryland.gov/api/views/hua3-qc8n/rows.json?accessType=DOWNLOAD",
+        machine_readable_endpoint_url="https://opendata.maryland.gov/api/views/hua3-qc8n/rows.json?accessType=DOWNLOAD",
+        last_endpoint_check_at="2026-05-02",
+        last_endpoint_http_status=None,
+        last_endpoint_content_type=None,
+        last_endpoint_result="Official Maryland open data metadata identifies a public JSON camera dataset and states that the records include URLs to live camera feeds. Runtime connector verification is still pending.",
+        last_endpoint_notes=(
+            "Documentation-first candidate evidence only; this task does not activate, validate, or schedule ingestion.",
+            "Feed URLs are treated conservatively as viewer-capability evidence until fixture review confirms direct-image posture.",
+        ),
+        verification_caveat="Machine-readable dataset availability does not establish direct-image rights, validated mapping, or production ingest readiness.",
+        blocked_reason="Candidate only. Fixture design, connector mapping, compliance review, and source-health validation are still required before any activation decision.",
+        notes=(
+            "Official Maryland CHART traffic camera candidate from the Maryland open data catalog.",
+            "The dataset description states that it includes locations and URLs to live camera feeds.",
+        ),
+        compliance=CameraComplianceMetadata(
+            attribution_text="State of Maryland CHART Traffic Cameras",
+            attribution_url="https://catalog.data.gov/dataset/traffic-cameras-c212e",
+            terms_url="https://opendata.maryland.gov/",
+            license_summary="Official Maryland open data camera dataset. Preserve attribution and keep storage/embedding assumptions conservative until reviewed.",
+            requires_authentication=False,
+            supports_embedding=False,
+            supports_frame_storage=False,
+            review_required=True,
+            notes=[
+                "Candidate-only lifecycle posture remains in force until fixture-backed review is complete.",
+                "Do not infer validated direct-image ingest from catalog metadata alone.",
+            ],
+        ),
+    ),
+    CameraSourceDefinition(
+        key="fingal-traffic-cameras",
+        display_name="Fingal Traffic Cameras",
+        owner="Fingal County Council",
+        source_type="official-dot",
+        inventory_source_type="official-dot-api",
+        source_family="fingal-open-data-cameras",
+        access_method="json-api",
+        onboarding_state="candidate",
+        coverage="Fingal County Council traffic camera dataset",
+        coverage_states=(),
+        coverage_regions=("Fingal", "Ireland"),
+        priority=78,
+        authentication="none",
+        default_refresh_interval_seconds=1800,
+        refresh_policy=RefreshPolicy(1800, 1800, 1800, False, 1800, 1800, 7200),
+        provides_exact_coordinates=True,
+        provides_direction_text=False,
+        provides_numeric_heading=False,
+        provides_direct_image=False,
+        provides_viewer_only=False,
+        supports_embed=False,
+        supports_storage=False,
+        rate_limit_notes=(
+            "Public local-authority GeoJSON dataset; keep polling conservative until connector and cadence review exist.",
+        ),
+        quality_notes=("Official local-authority traffic camera location dataset with ArcGIS and GeoJSON downloads.",),
+        stability_notes=("Official data.gov.ie / Fingal Open Data resource with direct GeoJSON and ArcGIS service links.",),
+        compliance_risk="low",
+        extraction_feasibility="medium",
+        endpoint_verification_status="machine-readable-confirmed",
+        candidate_endpoint_url="https://data.fingal.ie/api/download/v1/items/9aa1ed2ce9e3416fa6208a1bc7015097/geojson?layers=0",
+        machine_readable_endpoint_url="https://data.fingal.ie/api/download/v1/items/9aa1ed2ce9e3416fa6208a1bc7015097/geojson?layers=0",
+        last_endpoint_check_at="2026-05-02",
+        last_endpoint_http_status=None,
+        last_endpoint_content_type=None,
+        last_endpoint_result="Official data.gov.ie metadata identifies a public GeoJSON traffic camera resource and ArcGIS service. Runtime connector verification is still pending.",
+        last_endpoint_notes=(
+            "Documentation-first candidate evidence only; this task does not activate, validate, or schedule ingestion.",
+            "The current public metadata describes camera locations; direct-image capability remains unverified and must not be overclaimed.",
+        ),
+        verification_caveat="Machine-readable location metadata does not establish direct-image capability, validated mapping, or production ingest readiness.",
+        blocked_reason="Candidate only. Fixture design, connector mapping, compliance review, and source-health validation are still required before any activation decision.",
+        notes=(
+            "Official Fingal County Council traffic camera candidate from Ireland's open data catalog.",
+            "Treat the current evidence as location-centric until per-camera media fields are confirmed in fixtures.",
+        ),
+        compliance=CameraComplianceMetadata(
+            attribution_text="Fingal County Council Traffic Cameras",
+            attribution_url="https://data.gov.ie/dataset/traffic-cameras-fcc3",
+            terms_url="https://data.gov.ie/pages/opendatalicence",
+            license_summary="Official Irish open data traffic camera dataset under CC BY 4.0. Preserve attribution and keep media/storage assumptions conservative until reviewed.",
+            requires_authentication=False,
+            supports_embedding=False,
+            supports_frame_storage=False,
+            review_required=True,
+            notes=[
+                "Candidate-only lifecycle posture remains in force until fixture-backed review is complete.",
+                "Do not assume media ingest rights from location dataset availability alone.",
+            ],
+        ),
+    ),
+    CameraSourceDefinition(
+        key="baton-rouge-traffic-cameras",
+        display_name="Baton Rouge Traffic Cameras",
+        owner="City of Baton Rouge / Parish of East Baton Rouge",
+        source_type="official-dot",
+        inventory_source_type="official-dot-api",
+        source_family="baton-rouge-open-data-cameras",
+        access_method="json-api",
+        onboarding_state="candidate",
+        coverage="Greater Baton Rouge traffic camera dataset",
+        coverage_states=("LA",),
+        coverage_regions=("Louisiana", "United States"),
+        priority=78,
+        authentication="none",
+        default_refresh_interval_seconds=1800,
+        refresh_policy=RefreshPolicy(1800, 1800, 1800, False, 1800, 1800, 7200),
+        provides_exact_coordinates=True,
+        provides_direction_text=False,
+        provides_numeric_heading=False,
+        provides_direct_image=False,
+        provides_viewer_only=False,
+        supports_embed=False,
+        supports_storage=False,
+        rate_limit_notes=(
+            "Public municipal JSON dataset; keep polling conservative until connector and cadence review exist.",
+        ),
+        quality_notes=("Official municipal traffic camera location dataset with JSON, XML, and CSV distributions.",),
+        stability_notes=("Official Open Data BR dataset with explicit rows.json download URL.",),
+        compliance_risk="low",
+        extraction_feasibility="medium",
+        endpoint_verification_status="machine-readable-confirmed",
+        candidate_endpoint_url="https://data.brla.gov/api/views/6z6u-ts44/rows.json?accessType=DOWNLOAD",
+        machine_readable_endpoint_url="https://data.brla.gov/api/views/6z6u-ts44/rows.json?accessType=DOWNLOAD",
+        last_endpoint_check_at="2026-05-02",
+        last_endpoint_http_status=None,
+        last_endpoint_content_type=None,
+        last_endpoint_result="Official Open Data BR metadata identifies a public JSON traffic camera dataset for the Greater Baton Rouge area. Runtime connector verification is still pending.",
+        last_endpoint_notes=(
+            "Documentation-first candidate evidence only; this task does not activate, validate, or schedule ingestion.",
+            "Current public description confirms a traffic camera dataset, but direct-image and viewer-field posture remain unverified until fixture review.",
+        ),
+        verification_caveat="Machine-readable location dataset availability does not establish direct-image capability, validated mapping, or production ingest readiness.",
+        blocked_reason="Candidate only. Fixture design, connector mapping, compliance review, and source-health validation are still required before any activation decision.",
+        notes=(
+            "Official Baton Rouge open data traffic camera candidate.",
+            "Treat the current evidence as location-centric until per-camera media fields are confirmed in fixtures.",
+        ),
+        compliance=CameraComplianceMetadata(
+            attribution_text="Open Data BR Traffic Camera",
+            attribution_url="https://catalog.data.gov/dataset/traffic-camera",
+            terms_url="https://data.brla.gov/terms-of-service",
+            license_summary="Official municipal open data camera dataset. Preserve attribution and keep media/storage assumptions conservative until reviewed.",
+            requires_authentication=False,
+            supports_embedding=False,
+            supports_frame_storage=False,
+            review_required=True,
+            notes=[
+                "Candidate-only lifecycle posture remains in force until fixture-backed review is complete.",
+                "Do not assume media ingest rights from dataset availability alone.",
+            ],
+        ),
+    ),
+    CameraSourceDefinition(
+        key="euskadi-traffic-cameras",
+        display_name="Euskadi Traffic Cameras",
+        owner="Gobierno Vasco",
+        source_type="official-dot",
+        inventory_source_type="official-dot-api",
+        source_family="euskadi-open-traffic-cameras",
+        access_method="json-api",
+        onboarding_state="candidate",
+        coverage="Basque Country public traffic camera dataset",
+        coverage_states=(),
+        coverage_regions=("Basque Country", "Spain"),
+        priority=78,
+        authentication="none",
+        default_refresh_interval_seconds=1800,
+        refresh_policy=RefreshPolicy(1800, 1800, 1800, False, 1800, 1800, 7200),
+        provides_exact_coordinates=True,
+        provides_direction_text=False,
+        provides_numeric_heading=False,
+        provides_direct_image=True,
+        provides_viewer_only=False,
+        supports_embed=False,
+        supports_storage=False,
+        rate_limit_notes=(
+            "Official open data camera dataset with JSON/GEOJSON and REST resources advertised; keep polling conservative until direct endpoint pinning and connector review exist.",
+        ),
+        quality_notes=("Official Basque Government traffic camera dataset that advertises camera image URLs.",),
+        stability_notes=("Official open data catalog advertises JSON, GeoJSON, XML, and REST resources with real-time updates.",),
+        compliance_risk="low",
+        extraction_feasibility="medium",
+        endpoint_verification_status="candidate-url-only",
+        candidate_endpoint_url="https://opendata.euskadi.eus/catalogo/-/camaras-de-trafico-de-euskadi/",
+        machine_readable_endpoint_url=None,
+        last_endpoint_check_at="2026-05-02",
+        last_endpoint_http_status=None,
+        last_endpoint_content_type=None,
+        last_endpoint_result="Official catalog metadata advertises JSON, GeoJSON, XML, and REST camera resources and says the dataset includes image URLs, but this docs-first pass did not pin the final no-auth data endpoint yet.",
+        last_endpoint_notes=(
+            "Documentation-first candidate evidence only; this task does not activate, validate, or schedule ingestion.",
+            "Endpoint remains review-gated until the direct public data resource URL is pinned into registry metadata.",
+        ),
+        verification_caveat="Catalog-level resource advertising is not enough to claim a pinned machine endpoint or validated ingest path.",
+        notes=(
+            "Official Euskadi traffic camera candidate from the Basque Government open data catalog.",
+            "Treat as candidate-url-only until the final JSON/GEOJSON resource URL is pinned.",
+        ),
+        compliance=CameraComplianceMetadata(
+            attribution_text="Gobierno Vasco - Camaras de trafico de Euskadi",
+            attribution_url="https://opendata.euskadi.eus/catalogo/-/camaras-de-trafico-de-euskadi/",
+            terms_url="https://opendata.euskadi.eus/informacion-legal/",
+            license_summary="Official Basque open data traffic camera dataset. Preserve attribution and keep media/storage assumptions conservative until direct endpoint review is complete.",
+            requires_authentication=False,
+            supports_embedding=False,
+            supports_frame_storage=False,
+            review_required=True,
+            notes=[
+                "Candidate-only lifecycle posture remains in force until the direct endpoint is pinned and fixture-backed review is complete.",
+                "Do not treat catalog-level resource listings as validated ingest readiness.",
+            ],
+        ),
+    ),
+    CameraSourceDefinition(
         key="faa-weather-cameras-page",
         display_name="FAA Weather Cameras Page",
         owner="Federal Aviation Administration",
@@ -1031,6 +1402,56 @@ def is_camera_source_enabled(key: str, settings: Settings) -> bool:
 
 
 def is_camera_source_sandbox_importable(key: str, settings: Settings) -> bool:
+    return get_camera_source_sandbox_mode(key, settings) in {"fixture", "live"}
+
+
+def get_camera_source_sandbox_mode(key: str, settings: Settings) -> str | None:
     if key == "finland-digitraffic-road-cameras":
-        return settings.finland_digitraffic_weathercam_mode.lower() in {"fixture", "live"}
-    return False
+        mode = settings.finland_digitraffic_weathercam_mode.lower()
+        return mode if mode in {"fixture", "live"} else None
+    if key == "nsw-live-traffic-cameras":
+        mode = settings.nsw_live_traffic_cameras_mode.lower()
+        return "fixture" if mode == "fixture" else None
+    if key == "quebec-mtmd-traffic-cameras":
+        mode = settings.quebec_mtmd_traffic_cameras_mode.lower()
+        return "fixture" if mode == "fixture" else None
+    if key == "maryland-chart-traffic-cameras":
+        mode = settings.maryland_chart_traffic_cameras_mode.lower()
+        return "fixture" if mode == "fixture" else None
+    if key == "fingal-traffic-cameras":
+        mode = settings.fingal_traffic_cameras_mode.lower()
+        return "fixture" if mode == "fixture" else None
+    return None
+
+
+def get_camera_source_sandbox_connector_id(key: str) -> str | None:
+    if key == "finland-digitraffic-road-cameras":
+        return "FinlandDigitrafficWeatherCamConnector"
+    if key == "nsw-live-traffic-cameras":
+        return "NswLiveTrafficCameraConnector"
+    if key == "quebec-mtmd-traffic-cameras":
+        return "QuebecMtmdTrafficCameraConnector"
+    if key == "maryland-chart-traffic-cameras":
+        return "MarylandChartTrafficCameraConnector"
+    if key == "fingal-traffic-cameras":
+        return "FingalTrafficCameraConnector"
+    return None
+
+
+def get_camera_source_sandbox_validation_caveat(key: str) -> str | None:
+    if key == "finland-digitraffic-road-cameras":
+        return (
+            "Sandbox fixture import proves mapping only. It does not mark the source validated "
+            "or enable scheduled ingestion."
+        )
+    if key in {
+        "nsw-live-traffic-cameras",
+        "quebec-mtmd-traffic-cameras",
+        "maryland-chart-traffic-cameras",
+        "fingal-traffic-cameras",
+    }:
+        return (
+            "Sandbox fixture import proves candidate mapping and lifecycle evidence only. "
+            "It does not validate, activate, or schedule ingestion."
+        )
+    return None

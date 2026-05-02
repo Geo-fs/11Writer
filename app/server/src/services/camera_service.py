@@ -3,7 +3,12 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from src.config.settings import Settings
-from src.services.camera_registry import is_camera_source_sandbox_importable
+from src.services.camera_registry import (
+    get_camera_source_sandbox_connector_id,
+    get_camera_source_sandbox_mode,
+    get_camera_source_sandbox_validation_caveat,
+    is_camera_source_sandbox_importable,
+)
 from src.types.api import (
     CameraQuery,
     CameraResponse,
@@ -262,12 +267,12 @@ def _with_sandbox_metadata(
     sandbox_available = is_camera_source_sandbox_importable(item.key, settings)
     if not sandbox_available:
         return item
-    mode = settings.finland_digitraffic_weathercam_mode.lower()
+    mode = get_camera_source_sandbox_mode(item.key, settings)
     return item.model_copy(
         update={
             "sandbox_import_available": True,
-            "sandbox_import_mode": mode if mode in {"fixture", "live"} else None,
-            "sandbox_connector_id": "FinlandDigitrafficWeatherCamConnector",
+            "sandbox_import_mode": mode,
+            "sandbox_connector_id": get_camera_source_sandbox_connector_id(item.key),
             "last_sandbox_import_at": (
                 source.last_validation_at
                 or source.last_completed_at
@@ -281,9 +286,7 @@ def _with_sandbox_metadata(
             "sandbox_discovered_count": item.discovered_camera_count,
             "sandbox_usable_count": item.usable_camera_count,
             "sandbox_review_queue_count": item.review_queue_count,
-            "sandbox_validation_caveat": (
-                "Sandbox fixture import proves mapping only. It does not mark the source validated or enable scheduled ingestion."
-            ),
+            "sandbox_validation_caveat": get_camera_source_sandbox_validation_caveat(item.key),
         }
     )
 

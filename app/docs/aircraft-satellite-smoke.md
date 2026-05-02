@@ -21,6 +21,10 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
 
 ## Current validation outcome
 
+Read [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md) with this section.
+This smoke checklist records prepared assertion coverage and local runner behavior.
+The ledger is where aerospace distinguishes prepared smoke from executed workflow evidence.
+
 - TypeScript compilation: passed.
 - Production Vite build: passed.
 - Playwright smoke runner:
@@ -32,18 +36,24 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   and `aerospaceContextIssues`
   and `aerospaceExportReadiness`
   and `aerospaceSourceReadiness`
+  and `aerospaceContextReviewQueue`
+  and `aerospaceContextReviewExportBundle`
   and `aerospaceContextReport`
   and `aerospaceReviewQueue`
   and `aerospaceCurrentArchiveContext`
   and `nceiSpaceWeatherArchiveContext`
+  and `ourairportsReferenceContext`
   and `vaacContext`
   and `aerospaceExportCoherence`
   and `aerospaceIssueExportBundle`
   and `aerospaceContextSnapshotReport`
+  and `aerospaceWorkflowReadinessPackage`
   in the aerospace export path.
   Local execution note for 2026-04-30:
   the aerospace smoke harness on this Windows host did not reach browser assertions because Playwright Chromium launch failed up front with `spawn EPERM`;
   treat that specific result as a machine-environment blocker, not as an aerospace assertion failure.
+  Until that launcher boundary is cleared on a host where Chromium can actually launch,
+  keep these assertions in the `prepared` bucket rather than the `executed workflow evidence` bucket.
 - Deterministic smoke fixture API: serving both `/api/*` responses and the built client bundle from `app/server/tests/smoke_fixture_app.py`.
 - Playwright validated end to end:
   aircraft selected-target restore,
@@ -114,6 +124,15 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   and surfaces a compact `Airport Status (FAA NAS)` inspector section.
   FAA NAS status is treated as contextual/advisory airport information only and is not flight-specific.
   The provider is tracked separately in source status as `faa-nas-status`.
+- OurAirports reference comparison consumer:
+  selected aircraft can now also consume bounded read-only airport/runway baseline reference context through
+  `/api/aerospace/reference/ourairports`.
+  This aerospace consumer is comparison-only and export-aware.
+  It surfaces a compact `OurAirports Reference Context` inspector section using already-derived selected-airport and runway-threshold context,
+  preserves snapshot metadata under `ourairportsReferenceContext`,
+  is now backed by a deterministic aerospace smoke-fixture endpoint and prepared metadata/text smoke assertions,
+  and keeps explicit caveats that baseline reference matches do not validate aircraft identity, route, airport status, runway availability, or operational state.
+  This consumer does not replace the shared selected-target evidence or the existing aviation-context panel.
 - NASA/JPL CNEOS first slice:
   selected aircraft and satellites can now consume read-only close-approach and fireball context through
   `/api/aerospace/space/cneos-events`.
@@ -176,6 +195,40 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   The package preserves package profile, source ids, source modes, source health states, evidence bases, review lines, export lines, missing metadata keys, missing footer sections, caveats, and guardrail wording.
   This helper is report/export accounting only.
   It does not imply source certification, severity, operational consequence, failure proof, route impact, target exposure, threat, causation, or action recommendation.
+- Aerospace workflow-readiness package helper:
+  snapshot/export metadata now also preserves an `aerospaceWorkflowReadinessPackage` package that composes
+  the workflow-evidence ledger,
+  OurAirports reference context,
+  aerospace context-availability rows,
+  aerospace source-readiness posture,
+  and the selected aerospace export profile
+  into one compact evidence-accounting surface.
+  The package preserves source ids, source modes, source health states, evidence bases, prepared-vs-executed validation rows, missing-evidence rows, guardrail wording, export lines, and caveats.
+  This helper is workflow-accounting only.
+  It does not imply source certification, airport/runway availability truth, severity, operational consequence, failure proof, target behavior evidence, threat, causation, or action recommendation.
+- Aerospace context-review queue helper:
+  snapshot/export metadata now also preserves an `aerospaceContextReviewQueue` summary that composes
+  context-availability rows,
+  source-readiness bundle posture,
+  context-gap queue items,
+  workflow-readiness missing-evidence rows,
+  export-coherence findings,
+  issue-export-bundle caveat reminders,
+  OurAirports reference-only caveats,
+  and active export-profile context
+  into one prioritized review queue.
+  The queue preserves source ids, source modes, source health states, evidence bases, review lines, export-safe lines, caveats, and a guardrail that it is review/accounting only.
+  It does not imply severity, route impact, target behavior, failure proof, causation, or action recommendation.
+- Aerospace context-review export-bundle helper:
+  snapshot/export metadata now also preserves an `aerospaceContextReviewExportBundle` package that converts the review queue into compact export-safe lines while preserving
+  source ids,
+  source modes,
+  source health states,
+  evidence bases,
+  active export-profile context,
+  caveats,
+  and explicit export-bundle guardrail wording.
+  This helper remains export-accounting only and does not change source semantics or create severity/impact/action meaning.
 - OpenSky anonymous states first slice:
   selected aircraft can now consume optional read-only anonymous OpenSky state-vector context through
   `/api/aerospace/aircraft/opensky/states`.
@@ -235,6 +288,7 @@ This checklist is scoped to the aircraft/satellite OSINT workspace only. It expl
   It shows one row per aerospace context source:
   AWC aviation weather,
   FAA NAS airport status,
+  OurAirports airport/runway reference,
   CNEOS space events,
   SWPC space weather,
   volcanic ash advisories,

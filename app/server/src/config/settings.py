@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     app_env: str = Field(default="development", alias="APP_ENV")
+    app_runtime_mode: str = Field(default="desktop-sidecar", alias="APP_RUNTIME_MODE")
     app_cors_origins: str = Field(default="http://localhost:5173", alias="APP_CORS_ORIGINS")
     google_maps_api_key: str | None = Field(default=None, alias="GOOGLE_MAPS_API_KEY")
     cache_ttl_seconds: int = Field(default=60, alias="CACHE_TTL_SECONDS")
@@ -68,6 +69,38 @@ class Settings(BaseSettings):
         default="https://tie.digitraffic.fi/api/weathercam/v1",
         alias="FINLAND_DIGITRAFFIC_WEATHERCAM_BASE_URL",
     )
+    nsw_live_traffic_cameras_mode: str = Field(
+        default="fixture",
+        alias="NSW_LIVE_TRAFFIC_CAMERAS_MODE",
+    )
+    nsw_live_traffic_cameras_fixture_path: str = Field(
+        default="./app/server/data/nsw_live_traffic_cameras_fixture.json",
+        alias="NSW_LIVE_TRAFFIC_CAMERAS_FIXTURE_PATH",
+    )
+    quebec_mtmd_traffic_cameras_mode: str = Field(
+        default="fixture",
+        alias="QUEBEC_MTMD_TRAFFIC_CAMERAS_MODE",
+    )
+    quebec_mtmd_traffic_cameras_fixture_path: str = Field(
+        default="./app/server/data/quebec_mtmd_traffic_cameras_fixture.json",
+        alias="QUEBEC_MTMD_TRAFFIC_CAMERAS_FIXTURE_PATH",
+    )
+    maryland_chart_traffic_cameras_mode: str = Field(
+        default="fixture",
+        alias="MARYLAND_CHART_TRAFFIC_CAMERAS_MODE",
+    )
+    maryland_chart_traffic_cameras_fixture_path: str = Field(
+        default="./app/server/data/maryland_chart_traffic_cameras_fixture.json",
+        alias="MARYLAND_CHART_TRAFFIC_CAMERAS_FIXTURE_PATH",
+    )
+    fingal_traffic_cameras_mode: str = Field(
+        default="fixture",
+        alias="FINGAL_TRAFFIC_CAMERAS_MODE",
+    )
+    fingal_traffic_cameras_fixture_path: str = Field(
+        default="./app/server/data/fingal_traffic_cameras_fixture.json",
+        alias="FINGAL_TRAFFIC_CAMERAS_FIXTURE_PATH",
+    )
     finland_digitraffic_source_mode: str = Field(
         default="fixture",
         alias="FINLAND_DIGITRAFFIC_SOURCE_MODE",
@@ -95,6 +128,26 @@ class Settings(BaseSettings):
     windy_webcams_api_key: str | None = Field(default=None, alias="WINDY_WEBCAMS_API_KEY")
     windy_webcams_base_url: str = Field(default="https://api.windy.com/api/webcams/v2", alias="WINDY_WEBCAMS_BASE_URL")
     reference_database_url: str = Field(default="sqlite:///./data/reference.db", alias="REFERENCE_DATABASE_URL")
+    ourairports_reference_source_mode: str = Field(
+        default="fixture",
+        alias="OURAIRPORTS_REFERENCE_SOURCE_MODE",
+    )
+    ourairports_reference_fixture_path: str = Field(
+        default="./data/ourairports_reference_fixture",
+        alias="OURAIRPORTS_REFERENCE_FIXTURE_PATH",
+    )
+    ourairports_reference_airports_url: str = Field(
+        default="https://davidmegginson.github.io/ourairports-data/airports.csv",
+        alias="OURAIRPORTS_REFERENCE_AIRPORTS_URL",
+    )
+    ourairports_reference_runways_url: str = Field(
+        default="https://davidmegginson.github.io/ourairports-data/runways.csv",
+        alias="OURAIRPORTS_REFERENCE_RUNWAYS_URL",
+    )
+    ourairports_reference_http_timeout_seconds: int = Field(
+        default=20,
+        alias="OURAIRPORTS_REFERENCE_HTTP_TIMEOUT_SECONDS",
+    )
     marine_database_url_override: str | None = Field(default=None, alias="MARINE_DATABASE_URL")
     marine_snapshot_interval_minutes: int = Field(default=5, alias="MARINE_SNAPSHOT_INTERVAL_MINUTES")
     marine_source_mode: str = Field(default="fixture", alias="MARINE_SOURCE_MODE")
@@ -144,6 +197,32 @@ class Settings(BaseSettings):
     ireland_opw_waterlevel_http_timeout_seconds: int = Field(
         default=20,
         alias="IRELAND_OPW_WATERLEVEL_HTTP_TIMEOUT_SECONDS",
+    )
+    netherlands_rws_waterinfo_mode: str = Field(
+        default="fixture",
+        alias="NETHERLANDS_RWS_WATERINFO_MODE",
+    )
+    netherlands_rws_waterinfo_fixture_path: str = Field(
+        default="./data/netherlands_rws_waterinfo_fixture.json",
+        alias="NETHERLANDS_RWS_WATERINFO_FIXTURE_PATH",
+    )
+    netherlands_rws_waterinfo_catalog_url: str = Field(
+        default=(
+            "https://waterwebservices.apps.rijkswaterstaat.nl/ddapi20-waterwebservices/api/"
+            "METADATASERVICES_DBO/OphalenCatalogus"
+        ),
+        alias="NETHERLANDS_RWS_WATERINFO_CATALOG_URL",
+    )
+    netherlands_rws_waterinfo_latest_observations_url: str = Field(
+        default=(
+            "https://waterwebservices.apps.rijkswaterstaat.nl/ddapi20-waterwebservices/api/"
+            "ONLINEWAARNEMINGENSERVICES_DBO/OphalenLaatsteWaarnemingen"
+        ),
+        alias="NETHERLANDS_RWS_WATERINFO_LATEST_OBSERVATIONS_URL",
+    )
+    netherlands_rws_waterinfo_http_timeout_seconds: int = Field(
+        default=20,
+        alias="NETHERLANDS_RWS_WATERINFO_HTTP_TIMEOUT_SECONDS",
     )
     scottish_water_overflows_mode: str = Field(
         default="fixture",
@@ -378,6 +457,98 @@ class Settings(BaseSettings):
         alias="HKO_TROPICAL_CYCLONE_URL",
     )
     hko_http_timeout_seconds: int = Field(default=20, alias="HKO_HTTP_TIMEOUT_SECONDS")
+    emsc_seismicportal_source_mode: str = Field(
+        default="fixture",
+        alias="EMSC_SEISMICPORTAL_SOURCE_MODE",
+    )
+    emsc_seismicportal_fixture_path: str = Field(
+        default="./data/emsc_seismicportal_realtime_fixture.json",
+        alias="EMSC_SEISMICPORTAL_FIXTURE_PATH",
+    )
+    emsc_seismicportal_stream_url: str = Field(
+        default="wss://www.seismicportal.eu/standing_order/websocket",
+        alias="EMSC_SEISMICPORTAL_STREAM_URL",
+    )
+    emsc_seismicportal_documentation_url: str = Field(
+        default="https://www.seismicportal.eu/realtime.html",
+        alias="EMSC_SEISMICPORTAL_DOCUMENTATION_URL",
+    )
+    emsc_seismicportal_fdsn_url: str = Field(
+        default="https://www.seismicportal.eu/fdsnws/event/1/",
+        alias="EMSC_SEISMICPORTAL_FDSN_URL",
+    )
+    emsc_seismicportal_http_timeout_seconds: int = Field(
+        default=20,
+        alias="EMSC_SEISMICPORTAL_HTTP_TIMEOUT_SECONDS",
+    )
+    orfeus_eida_source_mode: str = Field(
+        default="fixture",
+        alias="ORFEUS_EIDA_SOURCE_MODE",
+    )
+    orfeus_eida_fixture_path: str = Field(
+        default="./data/orfeus_eida_station_fixture.txt",
+        alias="ORFEUS_EIDA_FIXTURE_PATH",
+    )
+    orfeus_eida_documentation_url: str = Field(
+        default="https://www.orfeus-eu.org/data/eida/nodes/FEDERATOR/",
+        alias="ORFEUS_EIDA_DOCUMENTATION_URL",
+    )
+    orfeus_eida_station_url: str = Field(
+        default="https://federator.orfeus-eu.org/fdsnws/station/1/",
+        alias="ORFEUS_EIDA_STATION_URL",
+    )
+    orfeus_eida_http_timeout_seconds: int = Field(
+        default=20,
+        alias="ORFEUS_EIDA_HTTP_TIMEOUT_SECONDS",
+    )
+    bc_wildfire_datamart_source_mode: str = Field(
+        default="fixture",
+        alias="BC_WILDFIRE_DATAMART_SOURCE_MODE",
+    )
+    bc_wildfire_datamart_fixture_path: str = Field(
+        default="./data/bc_wildfire_datamart_fixture.json",
+        alias="BC_WILDFIRE_DATAMART_FIXTURE_PATH",
+    )
+    bc_wildfire_datamart_stations_url: str = Field(
+        default="https://bcwsapi.nrs.gov.bc.ca/wfwx-datamart-api/v1/stations",
+        alias="BC_WILDFIRE_DATAMART_STATIONS_URL",
+    )
+    bc_wildfire_datamart_danger_summaries_url: str = Field(
+        default="https://bcwsapi.nrs.gov.bc.ca/wfwx-datamart-api/v1/danger-summaries",
+        alias="BC_WILDFIRE_DATAMART_DANGER_SUMMARIES_URL",
+    )
+    bc_wildfire_datamart_documentation_url: str = Field(
+        default="https://www2.gov.bc.ca/assets/gov/public-safety-and-emergency-services/wildfire-status/prepare/bcws_datamart_and_api_v2_1.pdf",
+        alias="BC_WILDFIRE_DATAMART_DOCUMENTATION_URL",
+    )
+    bc_wildfire_datamart_http_timeout_seconds: int = Field(
+        default=20,
+        alias="BC_WILDFIRE_DATAMART_HTTP_TIMEOUT_SECONDS",
+    )
+    meteoswiss_open_data_source_mode: str = Field(
+        default="fixture",
+        alias="METEOSWISS_OPEN_DATA_SOURCE_MODE",
+    )
+    meteoswiss_open_data_fixture_path: str = Field(
+        default="./data/meteoswiss_open_data_fixture.json",
+        alias="METEOSWISS_OPEN_DATA_FIXTURE_PATH",
+    )
+    meteoswiss_open_data_documentation_url: str = Field(
+        default="https://opendatadocs.meteoswiss.ch/a-data-groundbased/a1-automatic-weather-stations",
+        alias="METEOSWISS_OPEN_DATA_DOCUMENTATION_URL",
+    )
+    meteoswiss_open_data_collection_url: str = Field(
+        default="https://data.geo.admin.ch/api/stac/v1/collections/ch.meteoschweiz.ogd-smn",
+        alias="METEOSWISS_OPEN_DATA_COLLECTION_URL",
+    )
+    meteoswiss_open_data_items_url: str = Field(
+        default="https://data.geo.admin.ch/api/stac/v1/collections/ch.meteoschweiz.ogd-smn/items",
+        alias="METEOSWISS_OPEN_DATA_ITEMS_URL",
+    )
+    meteoswiss_open_data_http_timeout_seconds: int = Field(
+        default=20,
+        alias="METEOSWISS_OPEN_DATA_HTTP_TIMEOUT_SECONDS",
+    )
     natural_earth_physical_source_mode: str = Field(
         default="fixture",
         alias="NATURAL_EARTH_PHYSICAL_SOURCE_MODE",
@@ -393,6 +564,38 @@ class Settings(BaseSettings):
     natural_earth_physical_http_timeout_seconds: int = Field(
         default=20,
         alias="NATURAL_EARTH_PHYSICAL_HTTP_TIMEOUT_SECONDS",
+    )
+    gshhg_shorelines_source_mode: str = Field(
+        default="fixture",
+        alias="GSHHG_SHORELINES_SOURCE_MODE",
+    )
+    gshhg_shorelines_fixture_path: str = Field(
+        default="./data/gshhg_shorelines_fixture.json",
+        alias="GSHHG_SHORELINES_FIXTURE_PATH",
+    )
+    gshhg_shorelines_source_url: str = Field(
+        default="https://www.ngdc.noaa.gov/mgg/shorelines/shorelines.html",
+        alias="GSHHG_SHORELINES_SOURCE_URL",
+    )
+    gshhg_shorelines_http_timeout_seconds: int = Field(
+        default=20,
+        alias="GSHHG_SHORELINES_HTTP_TIMEOUT_SECONDS",
+    )
+    pb2002_plate_boundaries_source_mode: str = Field(
+        default="fixture",
+        alias="PB2002_PLATE_BOUNDARIES_SOURCE_MODE",
+    )
+    pb2002_plate_boundaries_fixture_path: str = Field(
+        default="./data/pb2002_plate_boundaries_fixture.json",
+        alias="PB2002_PLATE_BOUNDARIES_FIXTURE_PATH",
+    )
+    pb2002_plate_boundaries_source_url: str = Field(
+        default="https://peterbird.name/publications/2003_pb2002/2003_pb2002.htm",
+        alias="PB2002_PLATE_BOUNDARIES_SOURCE_URL",
+    )
+    pb2002_plate_boundaries_http_timeout_seconds: int = Field(
+        default=20,
+        alias="PB2002_PLATE_BOUNDARIES_HTTP_TIMEOUT_SECONDS",
     )
     noaa_global_volcano_source_mode: str = Field(
         default="fixture",
@@ -729,6 +932,31 @@ class Settings(BaseSettings):
         default="sqlite:///./data/source_discovery.db",
         alias="SOURCE_DISCOVERY_DATABASE_URL",
     )
+    source_discovery_scheduler_enabled: bool = Field(default=False, alias="SOURCE_DISCOVERY_SCHEDULER_ENABLED")
+    source_discovery_scheduler_run_on_startup: bool = Field(default=False, alias="SOURCE_DISCOVERY_SCHEDULER_RUN_ON_STARTUP")
+    source_discovery_scheduler_poll_seconds: int = Field(default=300, alias="SOURCE_DISCOVERY_SCHEDULER_POLL_SECONDS")
+    source_discovery_scheduler_health_check_limit: int = Field(default=2, alias="SOURCE_DISCOVERY_SCHEDULER_HEALTH_CHECK_LIMIT")
+    source_discovery_scheduler_record_extract_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_RECORD_EXTRACT_LIMIT")
+    source_discovery_scheduler_llm_task_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_LLM_TASK_LIMIT")
+    source_discovery_scheduler_request_budget: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_REQUEST_BUDGET")
+    source_discovery_scheduler_allow_network: bool = Field(default=False, alias="SOURCE_DISCOVERY_SCHEDULER_ALLOW_NETWORK")
+    wave_monitor_scheduler_enabled: bool = Field(default=False, alias="WAVE_MONITOR_SCHEDULER_ENABLED")
+    wave_monitor_scheduler_run_on_startup: bool = Field(default=False, alias="WAVE_MONITOR_SCHEDULER_RUN_ON_STARTUP")
+    wave_monitor_scheduler_poll_seconds: int = Field(default=300, alias="WAVE_MONITOR_SCHEDULER_POLL_SECONDS")
+    wave_llm_enabled: bool = Field(default=False, alias="WAVE_LLM_ENABLED")
+    wave_llm_default_provider: str = Field(default="fixture", alias="WAVE_LLM_DEFAULT_PROVIDER")
+    wave_llm_default_model: str = Field(default="local-fixture", alias="WAVE_LLM_DEFAULT_MODEL")
+    openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
+    anthropic_api_key: str | None = Field(default=None, alias="ANTHROPIC_API_KEY")
+    xai_api_key: str | None = Field(default=None, alias="XAI_API_KEY")
+    google_ai_api_key: str | None = Field(default=None, alias="GOOGLE_AI_API_KEY")
+    openrouter_api_key: str | None = Field(default=None, alias="OPENROUTER_API_KEY")
+    ollama_base_url: str | None = Field(default="http://localhost:11434", alias="OLLAMA_BASE_URL")
+    openclaw_base_url: str | None = Field(default=None, alias="OPENCLAW_BASE_URL")
+    wave_llm_max_input_chars: int = Field(default=12000, alias="WAVE_LLM_MAX_INPUT_CHARS")
+    wave_llm_max_output_chars: int = Field(default=8000, alias="WAVE_LLM_MAX_OUTPUT_CHARS")
+    wave_llm_http_timeout_seconds: int = Field(default=30, alias="WAVE_LLM_HTTP_TIMEOUT_SECONDS")
+    wave_llm_max_retries: int = Field(default=1, alias="WAVE_LLM_MAX_RETRIES")
     webcam_database_url: str | None = Field(default=None, alias="WEBCAM_DATABASE_URL")
     webcam_worker_enabled: bool = Field(default=False, alias="WEBCAM_WORKER_ENABLED")
     webcam_worker_poll_seconds: int = Field(default=15, alias="WEBCAM_WORKER_POLL_SECONDS")

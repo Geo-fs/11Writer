@@ -168,3 +168,41 @@ class WaveSourceCandidateORM(WaveMonitorBase):
     caveats_json: Mapped[str] = mapped_column(Text, default="[]")
 
     monitor: Mapped[WaveMonitorORM] = relationship(back_populates="source_candidates")
+
+
+class WaveLlmTaskORM(WaveMonitorBase):
+    __tablename__ = "wave_llm_tasks"
+
+    task_id: Mapped[str] = mapped_column(String(180), primary_key=True)
+    monitor_id: Mapped[str] = mapped_column(String(128), index=True)
+    task_type: Mapped[str] = mapped_column(String(64), index=True)
+    provider: Mapped[str] = mapped_column(String(64), index=True)
+    model: Mapped[str] = mapped_column(String(160), default="")
+    status: Mapped[str] = mapped_column(String(64), default="pending_review", index=True)
+    input_summary: Mapped[str] = mapped_column(Text, default="")
+    source_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    record_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    prompt_contract_json: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[str] = mapped_column(String(64), index=True)
+    completed_at: Mapped[str | None] = mapped_column(String(64), index=True)
+    caveats_json: Mapped[str] = mapped_column(Text, default="[]")
+
+
+class WaveLlmReviewORM(WaveMonitorBase):
+    __tablename__ = "wave_llm_reviews"
+
+    review_id: Mapped[str] = mapped_column(String(180), primary_key=True)
+    task_id: Mapped[str] = mapped_column(String(180), index=True)
+    monitor_id: Mapped[str] = mapped_column(String(128), index=True)
+    provider: Mapped[str] = mapped_column(String(64), index=True)
+    model: Mapped[str] = mapped_column(String(160), default="")
+    raw_output: Mapped[str] = mapped_column(Text, default="")
+    parsed_claims_json: Mapped[str] = mapped_column(Text, default="[]")
+    proposed_actions_json: Mapped[str] = mapped_column(Text, default="[]")
+    validation_state: Mapped[str] = mapped_column(String(64), index=True)
+    risk_flags_json: Mapped[str] = mapped_column(Text, default="[]")
+    accepted_claim_count: Mapped[int] = mapped_column(Integer, default=0)
+    rejected_claim_count: Mapped[int] = mapped_column(Integer, default=0)
+    requires_human_review: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    created_at: Mapped[str] = mapped_column(String(64), index=True)
+    caveats_json: Mapped[str] = mapped_column(Text, default="[]")

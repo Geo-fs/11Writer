@@ -84,6 +84,7 @@ def build_camera_source_ops_export_summary(
         unknown_source_ids=unknown_source_ids,
         lifecycle_caveats=lifecycle_caveats,
         index_lines=list(index.export_lines),
+        sandbox_candidate_summary=index.sandbox_candidate_summary,
         detail_lines=detail_lines,
         artifact_timestamps=[build_export_summary_timestamp(generated_at)],
         artifact_status_rollup=artifact_status_rollup,

@@ -768,6 +768,293 @@ def _normalize_finland_digitraffic_feature(
     return results
 
 
+def _normalize_nsw_live_traffic_camera(
+    item: Any,
+    *,
+    fetched_at: str,
+    source_name: str,
+    owner: str,
+    compliance: CameraComplianceMetadata,
+) -> CameraEntity | None:
+    if not isinstance(item, dict):
+        return None
+    latitude, longitude, position = _classify_position([item], "NSW Live Traffic camera coordinates")
+    if latitude is None or longitude is None:
+        return None
+    direction = _first_str(item, "direction", "Direction")
+    orientation = _classify_orientation(
+        direction_text=direction,
+        degrees=_first_float(item, "heading", "Heading"),
+        source="NSW Live Traffic direction metadata",
+    )
+    image_url = _first_str(item, "imageUrl", "image_url")
+    viewer_url = _first_str(item, "viewerUrl", "viewer_url", "externalUrl")
+    frame = _classify_frame(
+        image_url=image_url,
+        viewer_url=viewer_url,
+        stream_url=None,
+        width=_first_int(item, "width", "imageWidth"),
+        height=_first_int(item, "height", "imageHeight"),
+    )
+    camera_id = _first_str(item, "id", "cameraId") or _hash_label(_first_str(item, "title", "name") or "nsw")
+    label = _first_str(item, "title", "name", "label") or "NSW traffic camera"
+    roadway = _first_str(item, "roadway", "route")
+    view_description = _first_str(item, "viewDescription", "description")
+    return _build_camera_entity(
+        source=source_name,
+        entity_id=f"camera:{source_name}:{camera_id}",
+        label=label,
+        latitude=latitude,
+        longitude=longitude,
+        fetched_at=fetched_at,
+        external_url=viewer_url or image_url,
+        camera_id=camera_id,
+        source_camera_id=camera_id,
+        owner=owner,
+        state="NSW",
+        county=None,
+        region="New South Wales",
+        roadway=roadway,
+        direction=direction,
+        location_description=view_description or roadway or label,
+        feed_type="snapshot" if image_url else "page",
+        position=position,
+        orientation=orientation,
+        frame=frame,
+        compliance=compliance,
+        metadata={
+            "provider": "nsw-live-traffic",
+            "fixtureMode": True,
+            "viewDescription": view_description,
+            "sourceHealthNote": _first_str(item, "sourceHealthNote"),
+            "evidenceBasis": _first_str(item, "evidenceBasis"),
+            "untrustedText": _first_str(item, "note"),
+        },
+        reference_hint_text=label,
+        facility_code_hint=camera_id,
+    )
+
+
+def _normalize_quebec_mtmd_camera(
+    feature: Any,
+    *,
+    fetched_at: str,
+    source_name: str,
+    owner: str,
+    compliance: CameraComplianceMetadata,
+) -> CameraEntity | None:
+    if not isinstance(feature, dict):
+        return None
+    properties = feature.get("properties")
+    if not isinstance(properties, dict):
+        properties = {}
+    latitude, longitude, position = _classify_geojson_position(
+        feature.get("geometry"),
+        "Quebec MTMD traffic camera GeoJSON coordinates",
+    )
+    if latitude is None or longitude is None:
+        return None
+    orientation = _classify_orientation(
+        direction_text=None,
+        degrees=None,
+        source="Quebec MTMD camera metadata does not provide verified orientation",
+    )
+    image_url = _first_str(properties, "imageUrl", "image_url")
+    viewer_url = _first_str(properties, "cameraUrl", "viewerUrl", "streamUrl", "url")
+    frame = _classify_frame(
+        image_url=image_url,
+        viewer_url=viewer_url,
+        stream_url=None,
+        width=None,
+        height=None,
+    )
+    camera_id = _first_str(properties, "cameraId", "id", "code") or _hash_label(
+        _first_str(properties, "title", "name") or "quebec"
+    )
+    label = _first_str(properties, "title", "name") or "Quebec traffic camera"
+    municipality = _first_str(properties, "municipality", "city")
+    roadway = _first_str(properties, "roadway", "route", "highway")
+    location_description = _first_str(properties, "locationDescription", "viewDescription")
+    if location_description is None:
+        location_description = " / ".join(part for part in (municipality, roadway) if part) or label
+    return _build_camera_entity(
+        source=source_name,
+        entity_id=f"camera:{source_name}:{camera_id}",
+        label=label,
+        latitude=latitude,
+        longitude=longitude,
+        fetched_at=fetched_at,
+        external_url=viewer_url,
+        camera_id=camera_id,
+        source_camera_id=camera_id,
+        owner=owner,
+        state="QC",
+        county=None,
+        region="Quebec",
+        roadway=roadway,
+        direction=None,
+        location_description=location_description,
+        feed_type="snapshot" if image_url else "page",
+        position=position,
+        orientation=orientation,
+        frame=frame,
+        compliance=compliance,
+        metadata={
+            "provider": "quebec-mtmd",
+            "fixtureMode": True,
+            "municipality": municipality,
+            "sourceHealthNote": _first_str(properties, "sourceHealthNote"),
+            "evidenceBasis": _first_str(properties, "evidenceBasis"),
+            "untrustedText": _first_str(properties, "note"),
+        },
+        reference_hint_text=label,
+        facility_code_hint=camera_id,
+    )
+
+
+def _normalize_maryland_chart_camera(
+    item: Any,
+    *,
+    fetched_at: str,
+    source_name: str,
+    owner: str,
+    compliance: CameraComplianceMetadata,
+) -> CameraEntity | None:
+    if not isinstance(item, dict):
+        return None
+    latitude, longitude, position = _classify_position([item], "Maryland CHART traffic camera coordinates")
+    if latitude is None or longitude is None:
+        return None
+    orientation = _classify_orientation(
+        direction_text=None,
+        degrees=None,
+        source="Maryland CHART camera dataset does not provide verified orientation",
+    )
+    image_url = _first_str(item, "imageUrl", "image_url")
+    viewer_url = _first_str(item, "viewerUrl", "viewer_url", "feedUrl", "url")
+    frame = _classify_frame(
+        image_url=image_url,
+        viewer_url=viewer_url,
+        stream_url=None,
+        width=None,
+        height=None,
+    )
+    camera_id = _first_str(item, "id", "cameraId") or _hash_label(_first_str(item, "title", "name") or "maryland")
+    label = _first_str(item, "title", "name", "label") or "Maryland CHART traffic camera"
+    roadway = _first_str(item, "roadway", "route", "highway")
+    county = _first_str(item, "county")
+    location_description = _first_str(item, "locationDescription", "description")
+    if location_description is None:
+        location_description = " / ".join(part for part in (roadway, county) if part) or label
+    return _build_camera_entity(
+        source=source_name,
+        entity_id=f"camera:{source_name}:{camera_id}",
+        label=label,
+        latitude=latitude,
+        longitude=longitude,
+        fetched_at=fetched_at,
+        external_url=viewer_url,
+        camera_id=camera_id,
+        source_camera_id=camera_id,
+        owner=owner,
+        state="MD",
+        county=county,
+        region="Maryland",
+        roadway=roadway,
+        direction=None,
+        location_description=location_description,
+        feed_type="snapshot" if image_url else "page",
+        position=position,
+        orientation=orientation,
+        frame=frame,
+        compliance=compliance,
+        metadata={
+            "provider": "maryland-chart",
+            "fixtureMode": True,
+            "sourceHealthNote": _first_str(item, "sourceHealthNote"),
+            "evidenceBasis": _first_str(item, "evidenceBasis"),
+            "untrustedText": _first_str(item, "note"),
+        },
+        reference_hint_text=label,
+        facility_code_hint=camera_id,
+    )
+
+
+def _normalize_fingal_traffic_camera(
+    feature: Any,
+    *,
+    fetched_at: str,
+    source_name: str,
+    owner: str,
+    compliance: CameraComplianceMetadata,
+) -> CameraEntity | None:
+    if not isinstance(feature, dict):
+        return None
+    properties = feature.get("properties")
+    if not isinstance(properties, dict):
+        properties = {}
+    latitude, longitude, position = _classify_geojson_position(
+        feature.get("geometry"),
+        "Fingal traffic camera GeoJSON coordinates",
+    )
+    if latitude is None or longitude is None:
+        return None
+    orientation = _classify_orientation(
+        direction_text=None,
+        degrees=None,
+        source="Fingal traffic camera metadata does not provide verified orientation",
+    )
+    frame = _classify_frame(
+        image_url=None,
+        viewer_url=None,
+        stream_url=None,
+        width=None,
+        height=None,
+    )
+    camera_id = _first_str(properties, "cameraId", "id", "code") or _hash_label(
+        _first_str(properties, "title", "name") or "fingal"
+    )
+    label = _first_str(properties, "title", "name") or "Fingal traffic camera"
+    roadway = _first_str(properties, "roadway", "route")
+    locality = _first_str(properties, "locality", "area")
+    location_description = _first_str(properties, "locationDescription", "description")
+    if location_description is None:
+        location_description = " / ".join(part for part in (locality, roadway) if part) or label
+    return _build_camera_entity(
+        source=source_name,
+        entity_id=f"camera:{source_name}:{camera_id}",
+        label=label,
+        latitude=latitude,
+        longitude=longitude,
+        fetched_at=fetched_at,
+        external_url=None,
+        camera_id=camera_id,
+        source_camera_id=camera_id,
+        owner=owner,
+        state=None,
+        county=None,
+        region="Fingal",
+        roadway=roadway,
+        direction=None,
+        location_description=location_description,
+        feed_type="page",
+        position=position,
+        orientation=orientation,
+        frame=frame,
+        compliance=compliance,
+        metadata={
+            "provider": "fingal-open-data",
+            "fixtureMode": True,
+            "locality": locality,
+            "sourceHealthNote": _first_str(properties, "sourceHealthNote"),
+            "evidenceBasis": _first_str(properties, "evidenceBasis"),
+            "untrustedText": _first_str(properties, "note"),
+        },
+        reference_hint_text=label,
+        facility_code_hint=camera_id,
+    )
+
+
 class Structured511CameraConnector(CameraConnector):
     def __init__(
         self,
@@ -872,6 +1159,176 @@ class UsgsAshcamConnector(CameraConnector):
         )
 
 
+class NswLiveTrafficCameraConnector(CameraConnector):
+    source_name = "nsw-live-traffic-cameras"
+
+    async def fetch(self) -> CameraSourceFetchResult:
+        mode = self._settings.nsw_live_traffic_cameras_mode.lower()
+        if mode != "fixture":
+            raise RuntimeError("NSW_LIVE_TRAFFIC_CAMERAS_MODE must be 'fixture' for this sandbox-only connector.")
+
+        payload = _load_json_fixture(self._settings.nsw_live_traffic_cameras_fixture_path)
+        items = payload.get("cameras") if isinstance(payload, dict) else []
+        if not isinstance(items, list):
+            items = []
+
+        fetched_at = _now_iso()
+        cameras: list[CameraEntity] = []
+        warnings: list[str] = []
+        failures = 0
+        for item in items:
+            normalized = _normalize_nsw_live_traffic_camera(
+                item,
+                fetched_at=fetched_at,
+                source_name=self.source_name,
+                owner="Transport for NSW",
+                compliance=self.compliance,
+            )
+            if normalized is None:
+                failures += 1
+                continue
+            if normalized.review.status != "verified":
+                warnings.append(f"{normalized.label}: {normalized.review.reason or 'metadata requires review'}")
+            cameras.append(normalized)
+
+        return self._result_from_normalization(
+            cameras=cameras,
+            warnings=_dedupe(warnings),
+            total_records=len(items),
+            partial_failure_count=failures,
+            detail="NSW Live Traffic camera metadata refreshed from fixture.",
+            last_http_status=200,
+        )
+
+
+class QuebecMtmdTrafficCameraConnector(CameraConnector):
+    source_name = "quebec-mtmd-traffic-cameras"
+
+    async def fetch(self) -> CameraSourceFetchResult:
+        mode = self._settings.quebec_mtmd_traffic_cameras_mode.lower()
+        if mode != "fixture":
+            raise RuntimeError("QUEBEC_MTMD_TRAFFIC_CAMERAS_MODE must be 'fixture' for this sandbox-only connector.")
+
+        payload = _load_json_fixture(self._settings.quebec_mtmd_traffic_cameras_fixture_path)
+        features = payload.get("features") if isinstance(payload, dict) else []
+        if not isinstance(features, list):
+            features = []
+
+        fetched_at = _now_iso()
+        cameras: list[CameraEntity] = []
+        warnings: list[str] = []
+        failures = 0
+        for feature in features:
+            normalized = _normalize_quebec_mtmd_camera(
+                feature,
+                fetched_at=fetched_at,
+                source_name=self.source_name,
+                owner="Ministere des Transports et de la Mobilite durable",
+                compliance=self.compliance,
+            )
+            if normalized is None:
+                failures += 1
+                continue
+            if normalized.review.status != "verified":
+                warnings.append(f"{normalized.label}: {normalized.review.reason or 'metadata requires review'}")
+            cameras.append(normalized)
+
+        return self._result_from_normalization(
+            cameras=cameras,
+            warnings=_dedupe(warnings),
+            total_records=len(features),
+            partial_failure_count=failures,
+            detail="Quebec MTMD traffic camera metadata refreshed from fixture.",
+            last_http_status=200,
+        )
+
+
+class MarylandChartTrafficCameraConnector(CameraConnector):
+    source_name = "maryland-chart-traffic-cameras"
+
+    async def fetch(self) -> CameraSourceFetchResult:
+        mode = self._settings.maryland_chart_traffic_cameras_mode.lower()
+        if mode != "fixture":
+            raise RuntimeError(
+                "MARYLAND_CHART_TRAFFIC_CAMERAS_MODE must be 'fixture' for this sandbox-only connector."
+            )
+
+        payload = _load_json_fixture(self._settings.maryland_chart_traffic_cameras_fixture_path)
+        items = payload.get("cameras") if isinstance(payload, dict) else []
+        if not isinstance(items, list):
+            items = []
+
+        fetched_at = _now_iso()
+        cameras: list[CameraEntity] = []
+        warnings: list[str] = []
+        failures = 0
+        for item in items:
+            normalized = _normalize_maryland_chart_camera(
+                item,
+                fetched_at=fetched_at,
+                source_name=self.source_name,
+                owner="State of Maryland / CHART",
+                compliance=self.compliance,
+            )
+            if normalized is None:
+                failures += 1
+                continue
+            if normalized.review.status != "verified":
+                warnings.append(f"{normalized.label}: {normalized.review.reason or 'metadata requires review'}")
+            cameras.append(normalized)
+
+        return self._result_from_normalization(
+            cameras=cameras,
+            warnings=_dedupe(warnings),
+            total_records=len(items),
+            partial_failure_count=failures,
+            detail="Maryland CHART traffic camera metadata refreshed from fixture.",
+            last_http_status=200,
+        )
+
+
+class FingalTrafficCameraConnector(CameraConnector):
+    source_name = "fingal-traffic-cameras"
+
+    async def fetch(self) -> CameraSourceFetchResult:
+        mode = self._settings.fingal_traffic_cameras_mode.lower()
+        if mode != "fixture":
+            raise RuntimeError("FINGAL_TRAFFIC_CAMERAS_MODE must be 'fixture' for this sandbox-only connector.")
+
+        payload = _load_json_fixture(self._settings.fingal_traffic_cameras_fixture_path)
+        features = payload.get("features") if isinstance(payload, dict) else []
+        if not isinstance(features, list):
+            features = []
+
+        fetched_at = _now_iso()
+        cameras: list[CameraEntity] = []
+        warnings: list[str] = []
+        failures = 0
+        for feature in features:
+            normalized = _normalize_fingal_traffic_camera(
+                feature,
+                fetched_at=fetched_at,
+                source_name=self.source_name,
+                owner="Fingal County Council",
+                compliance=self.compliance,
+            )
+            if normalized is None:
+                failures += 1
+                continue
+            if normalized.review.status != "verified":
+                warnings.append(f"{normalized.label}: {normalized.review.reason or 'metadata requires review'}")
+            cameras.append(normalized)
+
+        return self._result_from_normalization(
+            cameras=cameras,
+            warnings=_dedupe(warnings),
+            total_records=len(features),
+            partial_failure_count=failures,
+            detail="Fingal traffic camera metadata refreshed from fixture.",
+            last_http_status=200,
+        )
+
+
 class FinlandDigitrafficWeatherCamConnector(CameraConnector):
     source_name = "finland-digitraffic-road-cameras"
 
@@ -934,10 +1391,7 @@ class FinlandDigitrafficWeatherCamConnector(CameraConnector):
         )
 
     def _load_fixture_payload(self) -> Any:
-        fixture_path = Path(self._settings.finland_digitraffic_weathercam_fixture_path)
-        if not fixture_path.is_absolute():
-            fixture_path = Path.cwd() / fixture_path
-        return json.loads(fixture_path.read_text(encoding="utf-8"))
+        return _load_json_fixture(self._settings.finland_digitraffic_weathercam_fixture_path)
 
 
 class WindyWebcamConnector(CameraConnector):
@@ -1077,6 +1531,10 @@ def build_camera_connectors(settings: Settings) -> list[CameraConnector]:
             api_key=settings.alaska_511_api_key,
         ),
         UsgsAshcamConnector(settings),
+        NswLiveTrafficCameraConnector(settings),
+        QuebecMtmdTrafficCameraConnector(settings),
+        MarylandChartTrafficCameraConnector(settings),
+        FingalTrafficCameraConnector(settings),
         FinlandDigitrafficWeatherCamConnector(settings),
         WindyWebcamConnector(settings),
     ]
@@ -1462,6 +1920,13 @@ def _direction_to_orientation(direction: str | None) -> OrientationGuess:
 def _safe_json(response: httpx.Response) -> Any:
     response.raise_for_status()
     return response.json()
+
+
+def _load_json_fixture(path_value: str) -> Any:
+    fixture_path = Path(path_value)
+    if not fixture_path.is_absolute():
+        fixture_path = Path.cwd() / fixture_path
+    return json.loads(fixture_path.read_text(encoding="utf-8"))
 
 
 def _redirect_link(raw_links: Any) -> str | None:

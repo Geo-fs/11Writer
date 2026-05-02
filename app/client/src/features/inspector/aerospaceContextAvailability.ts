@@ -2,6 +2,7 @@ import type { SourceStatus } from "../../types/api";
 import type { AerospaceAirportStatusSummary } from "./aerospaceAirportStatusContext";
 import type { AerospaceGeomagnetismContextSummary } from "./aerospaceGeomagnetismContext";
 import type { AerospaceOpenSkyContextSummary } from "./aerospaceOpenSkyContext";
+import type { AerospaceReferenceContextSummary } from "./aerospaceReferenceContext";
 import type { AerospaceSourceHealthSummary } from "./aerospaceSourceHealth";
 import type { AerospaceSpaceContextSummary } from "./aerospaceSpaceContext";
 import type { AerospaceSpaceWeatherArchiveContextSummary } from "./aerospaceSpaceWeatherArchiveContext";
@@ -64,6 +65,7 @@ export function buildAerospaceContextAvailabilitySummary(input: {
   geomagnetismSourceHealth?: SourceStatus | null;
   openSkySummary?: AerospaceOpenSkyContextSummary | null;
   openSkySourceHealth?: SourceStatus | null;
+  referenceSummary?: AerospaceReferenceContextSummary | null;
   spaceContextSummary?: AerospaceSpaceContextSummary | null;
   spaceWeatherSummary?: AerospaceSpaceWeatherContextSummary | null;
   spaceWeatherArchiveSummary?: AerospaceSpaceWeatherArchiveContextSummary | null;
@@ -87,6 +89,7 @@ export function buildAerospaceContextAvailabilitySummary(input: {
     buildAirportStatusRow(input),
     buildGeomagnetismRow(input),
     buildOpenSkyRow(input),
+    buildOurAirportsReferenceRow(input),
     buildSpaceEventsRow(input),
     buildSpaceWeatherRow(input),
     buildSpaceWeatherArchiveRow(input),
@@ -564,6 +567,68 @@ function buildDataHealthRow(input: {
     reason: `${summary.evidenceBasis} | ${summary.freshness}`,
     caveat: summary.caveats[0] ?? null,
     evidenceBasis: summary.evidenceBasis,
+  };
+}
+
+function buildOurAirportsReferenceRow(input: {
+  selectedTargetType: "aircraft" | "satellite" | null;
+  referenceSummary?: AerospaceReferenceContextSummary | null;
+}): AerospaceContextAvailabilityRow {
+  if (input.selectedTargetType == null) {
+    return unavailableRow(
+      "ourairports-reference",
+      "OurAirports Reference",
+      "ourairports-reference",
+      "no selected target"
+    );
+  }
+  if (input.selectedTargetType !== "aircraft") {
+    return unavailableRow(
+      "ourairports-reference",
+      "OurAirports Reference",
+      "ourairports-reference",
+      "aircraft context only"
+    );
+  }
+  if (!input.referenceSummary) {
+    return {
+      sourceId: "ourairports-reference",
+      label: "OurAirports Reference",
+      contextType: "ourairports-reference",
+      availability: "unavailable",
+      sourceMode: "unknown",
+      health: "unknown",
+      reason: "reference context unavailable",
+      caveat:
+        "OurAirports remains bounded baseline reference context only and does not replace selected-target evidence.",
+      evidenceBasis: "contextual"
+    };
+  }
+
+  const summary = input.referenceSummary;
+  const availability =
+    summary.airportMatchStatus === "not-applicable"
+      ? "disabled"
+      : summary.airportMatchStatus === "unavailable"
+        ? "unavailable"
+        : summary.sourceState === "degraded" || summary.sourceState === "stale" || summary.sourceHealth === "degraded"
+          ? "degraded"
+          : summary.airportCount === 0
+            ? "empty"
+            : summary.airportMatchStatus === "exact-airport-code" || summary.airportMatchStatus === "airport-name-match"
+              ? "available"
+              : "degraded";
+
+  return {
+    sourceId: "ourairports-reference",
+    label: "OurAirports Reference",
+    contextType: "ourairports-reference",
+    availability,
+    sourceMode: summary.sourceMode,
+    health: `${summary.sourceHealth}/${summary.sourceState}`,
+    reason: summary.comparisonLine,
+    caveat: summary.caveats[0] ?? null,
+    evidenceBasis: "contextual"
   };
 }
 

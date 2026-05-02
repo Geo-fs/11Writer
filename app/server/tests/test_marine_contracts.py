@@ -50,6 +50,8 @@ def _client(tmp_path: Path, *, env: dict[str, str] | None = None) -> TestClient:
         os.environ["MARINE_NDBC_MODE"] = "fixture"
         os.environ["VIGICRUES_HYDROMETRY_MODE"] = "fixture"
         os.environ["SCOTTISH_WATER_OVERFLOWS_MODE"] = "fixture"
+        os.environ["IRELAND_OPW_WATERLEVEL_MODE"] = "fixture"
+        os.environ["NETHERLANDS_RWS_WATERINFO_MODE"] = "fixture"
         if env:
             for key, value in env.items():
                 os.environ[key] = value

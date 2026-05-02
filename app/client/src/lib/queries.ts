@@ -13,17 +13,23 @@ import type {
   FaaNasAirportStatusResponse,
   NceiSpaceWeatherPortalResponse,
   OpenSkyStatesResponse,
+  OurAirportsReferenceResponse,
   GeoNetHazardsResponse,
   HkoWeatherResponse,
   MetNoMetAlertsResponse,
   CameraSourceRegistryResponse,
+  DataAiMultiFeedResponse,
   EarthquakeEventsResponse,
+  DataAiFeedFamilyReadinessSnapshotResponse,
+  DataAiFeedFamilyReviewQueueResponse,
+  DataAiFeedFamilyReviewResponse,
   TsunamiAlertResponse,
   UkEaFloodResponse,
   VolcanoStatusResponse,
   ReviewQueueResponse,
   MarineChokepointAnalyticalSummaryResponse,
   MarineIrelandOpwWaterLevelContextResponse,
+  MarineNetherlandsRwsWaterinfoContextResponse,
   MarineNdbcContextResponse,
   MarineNoaaCoopsContextResponse,
   MarineScottishWaterOverflowResponse,
@@ -191,6 +197,58 @@ export function useNearestRunwayThresholdReferenceQuery(
     },
     enabled: aircraft != null,
     staleTime: 120_000
+  });
+}
+
+export function useOurAirportsReferenceQuery(input: {
+  enabled: boolean;
+  airportCode?: string | null;
+  airportName?: string | null;
+  regionCode?: string | null;
+  includeRunways?: boolean;
+  limit?: number;
+}) {
+  const airportCode = input.airportCode?.trim() || null;
+  const airportName = input.airportName?.trim() || null;
+  const regionCode = input.regionCode?.trim() || null;
+  const includeRunways = input.includeRunways ?? true;
+  const limit = input.limit ?? 3;
+
+  return useQuery({
+    queryKey: [
+      "ourairports-reference-context",
+      airportCode,
+      airportName,
+      regionCode,
+      includeRunways,
+      limit
+    ],
+    queryFn: () => {
+      if (!airportCode && !airportName) {
+        throw new Error("OurAirports reference context requires an airport code or airport name.");
+      }
+
+      const params = new URLSearchParams({
+        include_runways: includeRunways ? "true" : "false",
+        limit: String(limit)
+      });
+
+      if (airportCode) {
+        params.set("airport_code", airportCode);
+      } else if (airportName) {
+        params.set("q", airportName);
+      }
+
+      if (regionCode) {
+        params.set("region_code", regionCode);
+      }
+
+      return fetchJson<OurAirportsReferenceResponse>(
+        `/api/aerospace/reference/ourairports?${params.toString()}`
+      );
+    },
+    enabled: input.enabled && (airportCode != null || airportName != null),
+    staleTime: 300_000
   });
 }
 
@@ -708,6 +766,41 @@ export function useMarineIrelandOpwWaterLevelContextQuery(input: {
   });
 }
 
+export function useMarineNetherlandsRwsWaterinfoContextQuery(input: {
+  center: { lat: number; lon: number } | null;
+  radiusKm?: number;
+  enabled?: boolean;
+}) {
+  const radiusKm = input.radiusKm ?? 250;
+  const enabled = input.enabled ?? true;
+  return useQuery({
+    queryKey: [
+      "marine-netherlands-rws-waterinfo",
+      input.center?.lat ?? null,
+      input.center?.lon ?? null,
+      radiusKm,
+      enabled
+    ],
+    queryFn: () => {
+      if (!input.center) {
+        throw new Error("Marine Netherlands RWS Waterinfo context requires center coordinates.");
+      }
+      const params = new URLSearchParams({
+        lat: String(input.center.lat),
+        lon: String(input.center.lon),
+        radius_km: String(radiusKm),
+        limit: "5"
+      });
+      return fetchJson<MarineNetherlandsRwsWaterinfoContextResponse>(
+        `/api/marine/context/netherlands-rws-waterinfo?${params.toString()}`
+      );
+    },
+    enabled: enabled && input.center != null,
+    staleTime: 60_000,
+    refetchInterval: 120_000
+  });
+}
+
 export function useEarthquakeEventsQuery(filters: EnvironmentalEventFilterState, enabled: boolean) {
   return useQuery({
     queryKey: ["earthquakes-recent", filters.window, filters.sort, filters.minMagnitude, filters.limit],
@@ -990,4 +1083,154 @@ export function useMetEireannForecastQuery(input?: {
     staleTime: 45_000,
     refetchInterval: 60_000
   });
+}
+
+interface DataAiSourceIntelligenceQueryInput {
+  familyIds?: string[] | null;
+  sourceIds?: string[] | null;
+  enabled?: boolean;
+}
+
+interface DataAiSourceIntelligenceReviewQueueQueryInput extends DataAiSourceIntelligenceQueryInput {
+  categories?: string[] | null;
+  issueKinds?: string[] | null;
+}
+
+export function useDataAiFeedFamilyReadinessExportQuery(
+  input?: DataAiSourceIntelligenceQueryInput
+) {
+  const enabled = input?.enabled ?? true;
+  const familyIds = normalizeFilterValues(input?.familyIds);
+  const sourceIds = normalizeFilterValues(input?.sourceIds);
+  const queryString = buildDataAiSourceIntelligenceQueryString({
+    familyIds,
+    sourceIds
+  });
+
+  return useQuery({
+    queryKey: ["data-ai-feed-family-readiness-export", familyIds, sourceIds],
+    queryFn: () =>
+      fetchJson<DataAiFeedFamilyReadinessSnapshotResponse>(
+        `/api/feeds/data-ai/source-families/readiness-export${queryString}`
+      ),
+    enabled,
+    staleTime: 60_000,
+    refetchInterval: 120_000
+  });
+}
+
+export function useDataAiRecentFeedQuery(input?: {
+  limit?: number;
+  dedupe?: boolean;
+  sourceIds?: string[] | null;
+  enabled?: boolean;
+}) {
+  const enabled = input?.enabled ?? true;
+  const limit = input?.limit ?? 80;
+  const dedupe = input?.dedupe ?? true;
+  const sourceIds = normalizeFilterValues(input?.sourceIds);
+  const params = new URLSearchParams({
+    limit: String(limit),
+    dedupe: dedupe ? "true" : "false"
+  });
+  appendCommaSeparatedParam(params, "source", sourceIds);
+
+  return useQuery({
+    queryKey: ["data-ai-recent-feed", limit, dedupe, sourceIds],
+    queryFn: () =>
+      fetchJson<DataAiMultiFeedResponse>(`/api/feeds/data-ai/recent?${params.toString()}`),
+    enabled,
+    staleTime: 60_000,
+    refetchInterval: 120_000
+  });
+}
+
+export function useDataAiFeedFamilyReviewQuery(input?: DataAiSourceIntelligenceQueryInput) {
+  const enabled = input?.enabled ?? true;
+  const familyIds = normalizeFilterValues(input?.familyIds);
+  const sourceIds = normalizeFilterValues(input?.sourceIds);
+  const queryString = buildDataAiSourceIntelligenceQueryString({
+    familyIds,
+    sourceIds
+  });
+
+  return useQuery({
+    queryKey: ["data-ai-feed-family-review", familyIds, sourceIds],
+    queryFn: () =>
+      fetchJson<DataAiFeedFamilyReviewResponse>(
+        `/api/feeds/data-ai/source-families/review${queryString}`
+      ),
+    enabled,
+    staleTime: 60_000,
+    refetchInterval: 120_000
+  });
+}
+
+export function useDataAiFeedFamilyReviewQueueQuery(
+  input?: DataAiSourceIntelligenceReviewQueueQueryInput
+) {
+  const enabled = input?.enabled ?? true;
+  const familyIds = normalizeFilterValues(input?.familyIds);
+  const sourceIds = normalizeFilterValues(input?.sourceIds);
+  const categories = normalizeFilterValues(input?.categories);
+  const issueKinds = normalizeFilterValues(input?.issueKinds);
+  const queryString = buildDataAiSourceIntelligenceQueryString({
+    familyIds,
+    sourceIds,
+    categories,
+    issueKinds
+  });
+
+  return useQuery({
+    queryKey: [
+      "data-ai-feed-family-review-queue",
+      familyIds,
+      sourceIds,
+      categories,
+      issueKinds
+    ],
+    queryFn: () =>
+      fetchJson<DataAiFeedFamilyReviewQueueResponse>(
+        `/api/feeds/data-ai/source-families/review-queue${queryString}`
+      ),
+    enabled,
+    staleTime: 60_000,
+    refetchInterval: 120_000
+  });
+}
+
+function buildDataAiSourceIntelligenceQueryString(input: {
+  familyIds?: string[] | null;
+  sourceIds?: string[] | null;
+  categories?: string[] | null;
+  issueKinds?: string[] | null;
+}) {
+  const params = new URLSearchParams();
+  appendCommaSeparatedParam(params, "family", input.familyIds);
+  appendCommaSeparatedParam(params, "source", input.sourceIds);
+  appendCommaSeparatedParam(params, "category", input.categories);
+  appendCommaSeparatedParam(params, "issue_kind", input.issueKinds);
+  const query = params.toString();
+  return query ? `?${query}` : "";
+}
+
+function appendCommaSeparatedParam(
+  params: URLSearchParams,
+  key: string,
+  values?: string[] | null
+) {
+  if (!values || values.length === 0) {
+    return;
+  }
+  params.set(key, values.join(","));
+}
+
+function normalizeFilterValues(values?: string[] | null) {
+  if (!values) {
+    return null;
+  }
+  const normalized = Array.from(
+    new Set(values.map((value) => value.trim()).filter((value) => value.length > 0))
+  );
+  return normalized.length > 0 ? normalized : null;
 }

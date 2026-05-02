@@ -315,6 +315,15 @@ def _direct_image_proof_posture(
     detail: CameraSourceOpsDetailResponse,
     missing_evidence: list[str],
 ) -> str:
+    media_posture = detail.candidate_endpoint_report.media_evidence_posture
+    if media_posture == "direct-image-documented":
+        return "documented-direct-image-evidence"
+    if media_posture == "viewer-only-documented":
+        return "viewer-only-evidence-recorded"
+    if media_posture == "metadata-only-documented":
+        return "metadata-only-media-posture"
+    if media_posture == "catalog-image-claim-unverified":
+        return "catalog-image-claim-unverified"
     if "direct-image evidence" in missing_evidence:
         return "missing-direct-image-evidence"
     if detail.lifecycle_bucket == "validated-active":

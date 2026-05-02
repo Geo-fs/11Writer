@@ -1,8 +1,10 @@
 import asyncio
+import warnings
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic.warnings import UnsupportedFieldAttributeWarning
 
 from src.config.settings import get_settings
 from src.routes.aircraft import router as aircraft_router
@@ -19,6 +21,7 @@ from src.routes.data_ai_feeds import router as data_ai_feeds_router
 from src.routes.environmental_context import router as environmental_context_router
 from src.routes.events import router as events_router
 from src.routes.faa_nas_status import router as faa_nas_status_router
+from src.routes.fire_weather_context import router as fire_weather_context_router
 from src.routes.feeds import router as feeds_router
 from src.routes.features import router as features_router
 from src.routes.geomagnetism import router as geomagnetism_router
@@ -27,19 +30,31 @@ from src.routes.marine import router as marine_router
 from src.routes.ncei_space_weather_portal import router as ncei_space_weather_portal_router
 from src.routes.nvd_cve import router as nvd_cve_router
 from src.routes.opensky_states import router as opensky_states_router
+from src.routes.ourairports_reference import router as ourairports_reference_router
 from src.routes.first_epss import router as first_epss_router
 from src.routes.reference import router as reference_router
 from src.routes.risk_context import router as risk_context_router
 from src.routes.satellite import router as satellite_router
+from src.routes.seismic_context import router as seismic_context_router
 from src.routes.status import router as status_router
 from src.routes.source_discovery import router as source_discovery_router
 from src.routes.swpc import router as swpc_router
 from src.routes.tokyo_vaac import router as tokyo_vaac_router
 from src.routes.washington_vaac import router as washington_vaac_router
+from src.routes.wave_llm import router as wave_llm_router
 from src.routes.wave_monitor import router as wave_monitor_router
 from src.routes.water_quality_context import router as water_quality_context_router
 from src.routes.weather_context import router as weather_context_router
 from src.webcam.refresh import WebcamRefreshService, WebcamWorker
+from src.services.runtime_scheduler_service import (
+    RuntimeSchedulerCoordinator,
+    configure_runtime_scheduler_state,
+    should_start_source_discovery_scheduler,
+    should_start_wave_monitor_scheduler,
+)
+
+
+warnings.filterwarnings("ignore", category=UnsupportedFieldAttributeWarning)
 
 
 @asynccontextmanager
@@ -47,6 +62,11 @@ async def _lifespan(_: FastAPI):
     settings = get_settings()
     stop_event: asyncio.Event | None = None
     worker_task: asyncio.Task[None] | None = None
+    source_discovery_stop_event: asyncio.Event | None = None
+    source_discovery_task: asyncio.Task[None] | None = None
+    wave_monitor_stop_event: asyncio.Event | None = None
+    wave_monitor_task: asyncio.Task[None] | None = None
+    coordinator = RuntimeSchedulerCoordinator(settings)
     if settings.webcam_worker_enabled and settings.webcam_worker_run_on_startup:
         stop_event = asyncio.Event()
         worker = WebcamWorker(
@@ -54,17 +74,36 @@ async def _lifespan(_: FastAPI):
             poll_seconds=settings.webcam_worker_poll_seconds,
         )
         worker_task = asyncio.create_task(worker.run_loop(stop_event=stop_event))
+    if should_start_source_discovery_scheduler(settings):
+        source_discovery_stop_event = asyncio.Event()
+        source_discovery_task = asyncio.create_task(
+            coordinator.source_discovery_loop(stop_event=source_discovery_stop_event)
+        )
+    if should_start_wave_monitor_scheduler(settings):
+        wave_monitor_stop_event = asyncio.Event()
+        wave_monitor_task = asyncio.create_task(
+            coordinator.wave_monitor_loop(stop_event=wave_monitor_stop_event)
+        )
     try:
         yield
     finally:
         if stop_event is not None:
             stop_event.set()
+        if source_discovery_stop_event is not None:
+            source_discovery_stop_event.set()
+        if wave_monitor_stop_event is not None:
+            wave_monitor_stop_event.set()
         if worker_task is not None:
             await worker_task
+        if source_discovery_task is not None:
+            await source_discovery_task
+        if wave_monitor_task is not None:
+            await wave_monitor_task
 
 
 def create_application() -> FastAPI:
     settings = get_settings()
+    configure_runtime_scheduler_state(settings)
     application = FastAPI(
         title="WorldView Spatial Intelligence Simulator API",
         version="0.1.0",
@@ -87,6 +126,7 @@ def create_application() -> FastAPI:
     application.include_router(data_ai_feeds_router)
     application.include_router(environmental_context_router)
     application.include_router(events_router)
+    application.include_router(fire_weather_context_router)
     application.include_router(feeds_router)
     application.include_router(features_router)
     application.include_router(first_epss_router)
@@ -95,9 +135,11 @@ def create_application() -> FastAPI:
     application.include_router(source_discovery_router)
     application.include_router(reference_router)
     application.include_router(risk_context_router)
+    application.include_router(seismic_context_router)
     application.include_router(analyst_router)
     application.include_router(aircraft_router)
     application.include_router(opensky_states_router)
+    application.include_router(ourairports_reference_router)
     application.include_router(aviation_weather_router)
     application.include_router(faa_nas_status_router)
     application.include_router(cneos_router)
@@ -113,5 +155,6 @@ def create_application() -> FastAPI:
     application.include_router(nvd_cve_router)
     application.include_router(cameras_router)
     application.include_router(wave_monitor_router)
+    application.include_router(wave_llm_router)
 
     return application

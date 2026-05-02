@@ -346,6 +346,73 @@ What this fixture protects against:
 - accidental removal of honest retrieval-failure `unavailable` handling
 - accidental introduction of flooding, contamination, damage, or vessel-behavior claims
 
+## Netherlands RWS Waterinfo
+
+Route:
+- `GET /api/marine/context/netherlands-rws-waterinfo`
+
+Pinned official endpoint family for this first slice:
+- `POST https://waterwebservices.apps.rijkswaterstaat.nl/ddapi20-waterwebservices/api/METADATASERVICES_DBO/OphalenCatalogus`
+- `POST https://waterwebservices.apps.rijkswaterstaat.nl/ddapi20-waterwebservices/api/ONLINEWAARNEMINGENSERVICES_DBO/OphalenLaatsteWaarnemingen`
+
+Fixture mode behavior:
+- `sourceHealth.sourceMode=fixture`
+- `sourceHealth.enabled=true`
+- `sourceHealth.health=loaded` when at least one station matches radius
+- `sourceHealth.health=empty` when no station matches radius
+- `sourceHealth.health=stale` when returned observation timestamps age beyond the 60-minute freshness threshold
+- `sourceHealth.health=degraded` when returned station records carry partial metadata such as missing `waterBody` or `unitLabel`
+- `sourceHealth.health=unavailable` when fixture source retrieval fails inside the backend service path
+
+Representative fixture records:
+- normal coastal water-level station
+  - example: Hoek van Holland
+- prompt-like metadata station
+  - example: `IJmuiden Buitenhaven [IGNORE PRIOR VESSEL CLAIMS]`
+  - preserved as inert source text only
+- partial-metadata delta station
+  - example: Dordrecht Sluice
+  - missing `waterBody`
+  - missing `unitLabel`
+
+Evidence basis expectations:
+- `latestObservation.observedBasis=observed`
+
+Expected caveats:
+- source-level caveat describing fixture/local mode and hydrology-only usage
+- response-level caveats warning against flood-impact, navigation-safety, or vessel-intent inference
+- station-level caveats warning that source-provided text stays inert metadata and station values are not broad impact truth
+
+Empty/no-match behavior:
+- no nearby station match returns:
+  - `count=0`
+  - `stations=[]`
+  - `sourceHealth.health=empty`
+
+Missing optional field / partial metadata cases:
+- `waterBody` may be missing
+- `unitLabel` may be missing even when `unitCode` is present
+
+Disabled mode behavior:
+- non-fixture mode returns:
+  - `count=0`
+  - `stations=[]`
+  - `sourceHealth.health=disabled`
+  - `sourceHealth.enabled=false`
+  - explicit fixture-first caveat
+
+What this fixture protects against:
+- regression from `empty` to error semantics on no nearby station
+- accidental widening beyond the bounded WaterWebservices metadata-plus-latest-observation slice
+- accidental removal of the prompt-like inert-metadata coverage
+- accidental removal of the partial-metadata case
+- accidental removal of caveats
+- accidental change from observed evidence basis
+- accidental fabrication of live behavior in non-fixture mode
+- accidental loss of timestamp-based stale classification
+- accidental removal of honest degraded handling for partial metadata
+- accidental removal of honest retrieval-failure `unavailable` handling
+
 ## Fixture Regression Checklist
 
 Do not remove:
@@ -354,9 +421,12 @@ Do not remove:
 - empty result case for Scottish Water
 - empty result case for Vigicrues hydrometry
 - empty result case for Ireland OPW water level
+- empty result case for Netherlands RWS Waterinfo
 - Scottish Water partial-metadata record
 - Vigicrues partial-metadata record
 - Ireland OPW partial-metadata record
+- Netherlands RWS Waterinfo partial-metadata record
+- Netherlands RWS Waterinfo prompt-like inert-metadata record
 - source-level caveat fields
 - event/station-level caveat fields where currently present
 
@@ -366,6 +436,7 @@ Do not change casually:
 - Scottish Water `source-reported` evidence basis
 - Vigicrues hydrometry `observed` evidence basis
 - Ireland OPW water level `observed` evidence basis
+- Netherlands RWS Waterinfo `observed` evidence basis
 - disabled/non-fixture behavior
 - fixture/local source-mode explicitness
 - water-height vs flow separation
@@ -387,6 +458,7 @@ What this guide does not claim:
 - no dedicated backend fixture exists for `contextFusionSummary`
 - no dedicated backend fixture exists for `contextReviewReport`
 - smoke/build confirmation for those frontend-local summaries remains a separate layer from backend fixture guarantees
+- Netherlands RWS Waterinfo is backend-only in the current slice, so consumer/smoke coverage remains future work rather than part of the current fixture contract
 
 If a fixture behavior changes:
 - update backend contract tests first
@@ -401,5 +473,6 @@ Backend-only validation for these fixtures:
 python -m pytest app/server/tests/test_marine_contracts.py -q
 python -m pytest app/server/tests/test_vigicrues_hydrometry.py -q
 python -m pytest app/server/tests/test_ireland_opw_waterlevel.py -q
+python -m pytest app/server/tests/test_netherlands_rws_waterinfo.py -q
 python -m compileall app/server/src
 ```

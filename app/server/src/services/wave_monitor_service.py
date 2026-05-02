@@ -83,7 +83,11 @@ class WaveMonitorService:
                 settings=self._settings,
                 monitors=serialized,
                 storage_mode="persistent-sqlite",
-                scheduler_mode="manual",
+                scheduler_mode=(
+                    "backend-only-ready"
+                    if self._settings.wave_monitor_scheduler_enabled or self._settings.app_runtime_mode == "backend-only"
+                    else "manual"
+                ),
             )
 
     async def run_monitor_now(self, monitor_id: str) -> WaveMonitorRunResponse:
@@ -319,7 +323,7 @@ def _overview_response(
             "source": "wave-monitor-overview",
             "sourceMode": "mixed" if any(monitor.source_mode == "live" for monitor in monitors) else "fixture",
             "importedProject": "7Po8",
-            "runtimeMode": settings.app_env,
+            "runtimeMode": settings.app_runtime_mode,
             "toolStatus": "persistent-backend-preview",
         },
         runtime=WaveMonitorRuntimeIntegration(

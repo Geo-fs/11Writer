@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "model_name": "PB2002",
+    "model_vintage": "2003",
+    "source_file": "pb2002-boundaries",
+    "citation": "Bird, P. (2003) An updated digital model of plate boundaries.",
+    "generated_at": "2026-05-02T00:00:00Z"
+  },
+  "boundaries": [
+    {
+      "record_id": "pb2002-001",
+      "boundary_name": "Mid-Atlantic Ridge segment",
+      "boundary_type": "divergent",
+      "primary_plate_id": "NA",
+      "secondary_plate_id": "EU",
+      "geometry_type": "LineString",
+      "segment_count": 12,
+      "bbox_min_lon": -35.0,
+      "bbox_min_lat": 45.0,
+      "bbox_max_lon": -10.0,
+      "bbox_max_lat": 65.0,
+      "citation": "Bird, P. (2003) An updated digital model of plate boundaries."
+    },
+    {
+      "record_id": "pb2002-002",
+      "boundary_name": "Andes trench segment",
+      "boundary_type": "convergent",
+      "primary_plate_id": "SA",
+      "secondary_plate_id": "NZ",
+      "geometry_type": "LineString",
+      "segment_count": 18,
+      "bbox_min_lon": -82.0,
+      "bbox_min_lat": -42.0,
+      "bbox_max_lon": -70.0,
+      "bbox_max_lat": 8.0,
+      "citation": "Bird, P. (2003) An updated digital model of plate boundaries."
+    },
+    {
+      "record_id": "pb2002-003",
+      "boundary_name": "Papua New Guinea transform segment",
+      "boundary_type": "transform",
+      "primary_plate_id": "PA",
+      "secondary_plate_id": "AU",
+      "geometry_type": "LineString",
+      "segment_count": 7,
+      "bbox_min_lon": 130.0,
+      "bbox_min_lat": -10.0,
+      "bbox_max_lon": 155.0,
+      "bbox_max_lat": -1.0,
+      "citation": "Bird, P. (2003) An updated digital model of plate boundaries."
+    }
+  ]
+}

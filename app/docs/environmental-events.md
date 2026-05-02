@@ -6,6 +6,9 @@ There is now also a backend fusion helper for source-family review:
 - [environmental-source-family-overview.md](C:/Users/mike/11Writer/app/docs/environmental-source-family-overview.md)
 - this backend helper summarizes source families, source health, evidence basis, caveats, and export-safe review lines across existing environmental/geospatial slices
 - current backend family coverage includes seismic, volcano/reference, tsunami, weather alert/advisory, weather and hydrology context, infrastructure-event context, geomagnetic context, risk/reference, and water-quality context
+- weather and hydrology backend family coverage now also includes bounded BC Wildfire Service Datamart fire-weather station and danger-summary context
+- weather and hydrology backend family coverage also includes bounded MeteoSwiss SwissMetNet station metadata plus one observed `t_now` asset family
+- backend weather/observation review/export follow-on surfaces now provide compact source review and export lines across MeteoSwiss, BCWS, Taiwan CWA, DMI, Met Eireann forecast, and NASA POWER without turning them into hazard or action truth
 - it is not a final UI and does not replace source-specific meaning
 
 ## Current Sources
@@ -19,6 +22,10 @@ There is now also a backend fusion helper for source-family review:
 - Hong Kong Observatory Open Weather
 - MET Norway MetAlerts
 - Canada CAP Alerts
+- BC Wildfire Datamart
+- MeteoSwiss Open Data
+- GSHHG Shorelines
+- PB2002 Plate Boundaries
 
 ## Overview Behavior
 

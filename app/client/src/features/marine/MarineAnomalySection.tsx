@@ -3,6 +3,7 @@ import clsx from "clsx";
 import {
   useMarineChokepointSummaryQuery,
   useMarineIrelandOpwWaterLevelContextQuery,
+  useMarineNetherlandsRwsWaterinfoContextQuery,
   useMarineNdbcContextQuery,
   useMarineNoaaCoopsContextQuery,
   useMarineScottishWaterOverflowsQuery,
@@ -43,6 +44,7 @@ import {
 import { buildMarineNdbcContextSummary } from "./marineNdbcContext";
 import { buildMarineNoaaContextSummary } from "./marineNoaaContext";
 import { buildMarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
+import { buildMarineNetherlandsRwsWaterinfoContextSummary } from "./marineNetherlandsRwsWaterinfoContext";
 import { buildMarineScottishWaterContextSummary } from "./marineScottishWaterContext";
 import { buildMarineVigicruesContextSummary } from "./marineVigicruesContext";
 import { buildFocusedMarineReplayEvidence } from "./marineReplayEvidence";
@@ -249,6 +251,11 @@ export function MarineAnomalySection() {
     radiusKm: contextRadiusKm,
     enabled: effectiveContextState.centerAvailable
   });
+  const netherlandsRwsWaterinfoContextQuery = useMarineNetherlandsRwsWaterinfoContextQuery({
+    center: effectiveContextState.center,
+    radiusKm: contextRadiusKm,
+    enabled: effectiveContextState.centerAvailable
+  });
 
   const sortedSlices = useMemo(() => {
     const slices = [...(chokepointSummaryQuery.data?.slices ?? [])];
@@ -349,24 +356,37 @@ export function MarineAnomalySection() {
     () => buildMarineIrelandOpwContextSummary(irelandOpwContextQuery.data ?? null),
     [irelandOpwContextQuery.data]
   );
+  const netherlandsRwsWaterinfoContextSummary = useMemo(
+    () => buildMarineNetherlandsRwsWaterinfoContextSummary(netherlandsRwsWaterinfoContextQuery.data ?? null),
+    [netherlandsRwsWaterinfoContextQuery.data]
+  );
   const hydrologyContextSummary = useMemo(
     () =>
       buildMarineHydrologyContextSummary({
         vigicrues: vigicruesContextSummary,
-        irelandOpw: irelandOpwContextSummary
+        irelandOpw: irelandOpwContextSummary,
+        waterinfo: netherlandsRwsWaterinfoContextSummary
       }),
-    [vigicruesContextSummary, irelandOpwContextSummary]
+    [vigicruesContextSummary, irelandOpwContextSummary, netherlandsRwsWaterinfoContextSummary]
   );
   const contextSourceRegistrySummary = useMemo(
     () =>
       buildMarineContextSourceRegistrySummary({
         irelandOpw: irelandOpwContextSummary,
+        netherlandsRwsWaterinfo: netherlandsRwsWaterinfoContextSummary,
         noaaCoops: noaaContextSummary,
         ndbc: ndbcContextSummary,
         scottishWater: scottishWaterContextSummary,
         vigicrues: vigicruesContextSummary
       }),
-    [irelandOpwContextSummary, noaaContextSummary, ndbcContextSummary, scottishWaterContextSummary, vigicruesContextSummary]
+    [
+      irelandOpwContextSummary,
+      netherlandsRwsWaterinfoContextSummary,
+      noaaContextSummary,
+      ndbcContextSummary,
+      scottishWaterContextSummary,
+      vigicruesContextSummary
+    ]
   );
   const environmentalContextSummary = useMemo(
     () =>
@@ -533,6 +553,7 @@ export function MarineAnomalySection() {
         scottishWaterContextSummary,
         vigicruesContextSummary,
         irelandOpwContextSummary,
+        netherlandsRwsWaterinfoContextSummary,
         hydrologyContextSummary,
         contextFusionSummary,
         contextReviewReportSummary,
@@ -564,6 +585,7 @@ export function MarineAnomalySection() {
       scottishWaterContextSummary,
       vigicruesContextSummary,
       irelandOpwContextSummary,
+      netherlandsRwsWaterinfoContextSummary,
       hydrologyContextSummary,
       contextFusionSummary,
       contextReviewReportSummary,
@@ -1111,6 +1133,42 @@ export function MarineAnomalySection() {
       ) : irelandOpwContextQuery.isError ? (
         <div className="empty-state compact" data-testid="marine-ireland-opw-context-error">
           <p>Ireland OPW water-level context unavailable.</p>
+          <span>Marine hydrology context is limited until the source loads.</span>
+        </div>
+      ) : null}
+      {netherlandsRwsWaterinfoContextQuery.data ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-netherlands-rws-waterinfo-context">
+          <strong>Netherlands RWS Waterinfo</strong>
+          <span>
+            {netherlandsRwsWaterinfoContextSummary?.sourceLine ??
+              "Netherlands RWS Waterinfo context loaded."}
+          </span>
+          {netherlandsRwsWaterinfoContextSummary?.stationLines.map((station) => (
+            <div key={station.stationId} className="stack stack--tight">
+              <span>{station.label}</span>
+              <span className="marine-anomaly-muted">{station.observationLine}</span>
+              <span className="marine-anomaly-muted">{station.detailLine}</span>
+              {station.caveat ? <span className="marine-anomaly-muted">Caveat: {station.caveat}</span> : null}
+            </div>
+          ))}
+          {netherlandsRwsWaterinfoContextQuery.data.count === 0 ? (
+            <span className="marine-anomaly-muted">
+              No nearby Netherlands RWS Waterinfo station context in this window.
+            </span>
+          ) : null}
+          {netherlandsRwsWaterinfoContextQuery.data.sourceHealth.caveat ? (
+            <span className="marine-anomaly-muted">
+              {netherlandsRwsWaterinfoContextQuery.data.sourceHealth.caveat}
+            </span>
+          ) : null}
+        </div>
+      ) : netherlandsRwsWaterinfoContextQuery.isLoading ? (
+        <div className="empty-state compact" data-testid="marine-netherlands-rws-waterinfo-context-loading">
+          <p>Loading Netherlands RWS Waterinfo context.</p>
+        </div>
+      ) : netherlandsRwsWaterinfoContextQuery.isError ? (
+        <div className="empty-state compact" data-testid="marine-netherlands-rws-waterinfo-context-error">
+          <p>Netherlands RWS Waterinfo context unavailable.</p>
           <span>Marine hydrology context is limited until the source loads.</span>
         </div>
       ) : null}

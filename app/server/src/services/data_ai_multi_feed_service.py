@@ -22,6 +22,8 @@ from src.services.rss_feed_service import ParsedFeedDocument, RssFeedRecord, par
 from src.types.api import (
     DataAiFeedFamilyOverviewMetadata,
     DataAiFeedFamilyOverviewResponse,
+    DataAiFeedFamilyReadinessSnapshotMetadata,
+    DataAiFeedFamilyReadinessSnapshotResponse,
     DataAiFeedFamilySourceMember,
     DataAiFeedFamilySummary,
     DataAiFeedItem,
@@ -37,6 +39,9 @@ DATA_AI_MULTI_FEED_CAVEAT = (
 )
 DATA_AI_FEED_FAMILY_OVERVIEW_CAVEAT = (
     "This Data AI family overview is a backend summary over existing Data AI feed definitions. It preserves source health, evidence basis, source mode, caveats, dedupe posture, and export-safe metadata without creating a global credibility, severity, truth, attribution, or action score."
+)
+DATA_AI_FEED_FAMILY_READINESS_EXPORT_CAVEAT = (
+    "This Data AI readiness/export snapshot summarizes implemented feed families for analyst and report consumers. It preserves source health, evidence basis, source mode, caveats, dedupe posture, and export-safe metadata without creating a credibility, severity, truth, attribution, or action score."
 )
 DATA_AI_FEED_FAMILY_GUARDRAIL_LINE = (
     "This summary is source-availability and context accounting only, not credibility scoring, event proof, attribution proof, impact proof, legal conclusion, or required action."
@@ -146,6 +151,55 @@ class DataAiMultiFeedService:
                 DATA_AI_FEED_FAMILY_OVERVIEW_CAVEAT,
                 DATA_AI_FEED_FAMILY_GUARDRAIL_LINE,
                 "Family export lines intentionally avoid free-form feed text and summarize only source-safe metadata such as counts, health, mode, evidence basis, tags, and configured feed URLs.",
+            ],
+        )
+
+    async def get_family_readiness_export(
+        self,
+        query: DataAiFeedFamilyOverviewQuery,
+    ) -> DataAiFeedFamilyReadinessSnapshotResponse:
+        requested_source_ids = self._resolve_overview_source_ids(query.source_ids, query.family_ids)
+        snapshot = await self._load_snapshot(requested_source_ids=requested_source_ids, dedupe=True)
+        selected_family_ids = _selected_family_ids(query.family_ids, snapshot.sources)
+        families = _build_family_summaries(snapshot.sources, selected_family_ids)
+        raw_count = sum(family.raw_count for family in families)
+        item_count = sum(family.item_count for family in families)
+        source_mode = _combined_source_mode([source.source_health.source_mode for source in snapshot.sources])
+
+        return DataAiFeedFamilyReadinessSnapshotResponse(
+            metadata=DataAiFeedFamilyReadinessSnapshotMetadata(
+                source="data-ai-feed-family-readiness-export",
+                source_name="Data AI Feed Family Readiness Export Snapshot",
+                source_mode=source_mode,
+                fetched_at=snapshot.fetched_at,
+                family_count=len(families),
+                source_count=len(snapshot.sources),
+                raw_count=raw_count,
+                item_count=item_count,
+                selected_family_ids=selected_family_ids,
+                selected_source_ids=[source.definition.source_id for source in snapshot.sources],
+                dedupe_posture=DATA_AI_FEED_DEDUPE_POSTURE,
+                guardrail_line=DATA_AI_FEED_FAMILY_GUARDRAIL_LINE,
+                caveat=DATA_AI_FEED_FAMILY_READINESS_EXPORT_CAVEAT,
+            ),
+            family_count=len(families),
+            source_count=len(snapshot.sources),
+            raw_count=raw_count,
+            item_count=item_count,
+            families=families,
+            guardrail_line=DATA_AI_FEED_FAMILY_GUARDRAIL_LINE,
+            export_lines=_build_readiness_export_lines(
+                families=families,
+                family_count=len(families),
+                source_count=len(snapshot.sources),
+                raw_count=raw_count,
+                item_count=item_count,
+                source_mode=source_mode,
+            ),
+            caveats=[
+                DATA_AI_FEED_FAMILY_READINESS_EXPORT_CAVEAT,
+                DATA_AI_FEED_FAMILY_GUARDRAIL_LINE,
+                "Readiness/export lines intentionally summarize only source-safe family metadata and never include free-form item text, article URLs, or linked-page content.",
             ],
         )
 
@@ -477,6 +531,26 @@ def _family_health(
     if any(health in {"stale", "disabled", "unknown", "empty"} for health in health_values):
         return "mixed"
     return "unknown"
+
+
+def _build_readiness_export_lines(
+    *,
+    families: list[DataAiFeedFamilySummary],
+    family_count: int,
+    source_count: int,
+    raw_count: int,
+    item_count: int,
+    source_mode: Literal["fixture", "live", "mixed", "unknown"],
+) -> list[str]:
+    return [
+        (
+            f"Data AI readiness snapshot: {family_count} families; {source_count} sources; "
+            f"{item_count} items after dedupe ({raw_count} raw); mode {source_mode}"
+        ),
+        f"Dedupe posture: {DATA_AI_FEED_DEDUPE_POSTURE}",
+        DATA_AI_FEED_FAMILY_GUARDRAIL_LINE,
+        *[family.export_lines[0] for family in families],
+    ]
 
 
 def _combined_source_mode(

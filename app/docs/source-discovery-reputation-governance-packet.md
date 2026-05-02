@@ -24,10 +24,17 @@ Current repo-local evidence supports a shared backend source-memory slice with:
 - `GET /api/source-discovery/memory/overview`
 - `POST /api/source-discovery/memory/candidates`
 - `POST /api/source-discovery/memory/claim-outcomes`
+- `POST /api/source-discovery/jobs/seed-url`
+- `POST /api/source-discovery/health/check`
+- `POST /api/source-discovery/jobs/expand`
+- `POST /api/source-discovery/content/snapshots`
+- `POST /api/source-discovery/reputation/reverse-event`
+- `POST /api/source-discovery/scheduler/tick`
 - shared persistence models for source memories, per-wave fit, claim outcomes, and reputation audit events
 - deterministic reputation updates for `confirmed`, `contradicted`, `corrected`, `outdated`, `unresolved`, and `not-applicable`
 - explicit separation between correctness reputation and wave-specific fit
 - Wave Monitor source-candidate seeding into shared source memory
+- bounded seed, health-check, expand, snapshot, reversal, and manual scheduler-tick primitives
 - focused backend tests in `app/server/tests/test_source_discovery_memory.py`
 
 This is important implementation evidence, but it is still:
@@ -36,7 +43,7 @@ This is important implementation evidence, but it is still:
 - candidate/review evidence
 - not source implementation proof
 - not workflow validation proof
-- not proof of autonomous discovery, live polling, or safe runtime scheduling
+- not proof of autonomous discovery, hidden live polling, or automatic source approval
 
 ## Allowed States
 
@@ -169,7 +176,7 @@ Required interpretation rules:
 - no claim-outcome history treated as attribution, causation, wrongdoing, or intent proof
 - no scraping of interactive web apps
 - no bypass of login, signup, request forms, CAPTCHAs, tokens, or browser-only access controls
-- no “popular source” shortcut that ignores provenance or policy status
+- no "popular source" shortcut that ignores provenance or policy status
 - no downgrade of correctness reputation merely because a source is low-fit for one wave
 
 ## Ownership Routing

@@ -6,12 +6,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from src.config.settings import Settings, get_settings
 from src.services.dmi_forecast_service import DmiForecastQuery, DmiForecastService
 from src.services.met_eireann_forecast_service import MetEireannForecastQuery, MetEireannForecastService
+from src.services.meteoswiss_open_data_service import MeteoSwissOpenDataQuery, MeteoSwissOpenDataService
 from src.services.nasa_power_meteorology_solar_service import (
     NasaPowerMeteorologySolarQuery,
     NasaPowerMeteorologySolarService,
 )
 from src.services.taiwan_cwa_weather_service import TaiwanCwaSort, TaiwanCwaWeatherQuery, TaiwanCwaWeatherService
-from src.types.api import DmiForecastResponse, MetEireannForecastResponse, NasaPowerMeteorologySolarResponse, TaiwanCwaWeatherResponse
+from src.types.api import DmiForecastResponse, MeteoSwissOpenDataResponse, MetEireannForecastResponse, NasaPowerMeteorologySolarResponse, TaiwanCwaWeatherResponse
 
 router = APIRouter(prefix="/api/context/weather", tags=["geospatial-context"])
 
@@ -99,5 +100,22 @@ async def taiwan_cwa_current_weather_context(
             station_id=station_id,
             limit=limit,
             sort=cast(TaiwanCwaSort, sort),
+        )
+    )
+
+
+@router.get("/meteoswiss", response_model=MeteoSwissOpenDataResponse)
+async def meteoswiss_open_data_context(
+    station_abbr: str | None = Query(default=None),
+    canton: str | None = Query(default=None),
+    limit: int = Query(default=25, ge=1, le=100),
+    settings: Settings = Depends(get_settings),
+) -> MeteoSwissOpenDataResponse:
+    service = MeteoSwissOpenDataService(settings)
+    return await service.get_context(
+        MeteoSwissOpenDataQuery(
+            station_abbr=station_abbr,
+            canton=canton,
+            limit=limit,
         )
     )

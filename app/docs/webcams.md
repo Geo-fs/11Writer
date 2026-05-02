@@ -149,6 +149,42 @@ Interpretation rules:
 - blocked or do-not-scrape sources may still be strategically valuable if a compliant machine-readable path is later documented
 - a source remains unvalidated until connector mapping, health behavior, compliance, and observed import quality are reviewed
 
+### Sandbox candidate summary
+
+The backend source-ops index and export-summary responses now include a compact sandbox-candidate summary for sources currently in `candidate-sandbox-importable`.
+
+It groups sandbox candidates by:
+
+- `reviewBurden`
+  - `low`, `medium`, or `high`
+- `mediaEvidencePosture`
+  - `direct-image-documented`
+  - `viewer-only-documented`
+  - `metadata-only-documented`
+- `missingEvidenceCount`
+- `sourceHealthExpectation`
+- `nextReviewPriority`
+  - `review-next`
+  - `follow-up`
+  - `hold`
+
+It also exposes compact per-source rows with:
+
+- source id and source name
+- lifecycle state
+- media posture
+- source-health expectation
+- missing evidence and missing evidence count
+- sandbox discovered / usable / review counts
+- export-safe review lines
+
+Interpretation rules:
+
+- this summary is review planning only
+- it does not activate, validate, schedule, or promote any source
+- hostile fixture or candidate text remains inert data only and is excluded from compact export lines
+- `hold` means a sandbox candidate still lacks enough media evidence for stronger follow-up, not that it should be scraped or bypassed
+
 ## Normalized Schema
 
 The canonical camera object is `CameraEntity`.
@@ -266,8 +302,48 @@ The repo now carries explicit candidate inventory records for:
 - `newengland-511-cameras-page`
 - `511pa-cameras-page`
 - `511nj-cameras-page`
+- `nsw-live-traffic-cameras`
+- `quebec-mtmd-traffic-cameras`
+- `maryland-chart-traffic-cameras`
+- `fingal-traffic-cameras`
+- `baton-rouge-traffic-cameras`
+- `euskadi-traffic-cameras`
 
 These remain inventory-only candidates until compliance, stability, field mapping, and source-health review are explicitly approved. `finland-digitraffic-road-cameras` is the exception in type only: it is an official machine-readable API candidate, but it is still not active for ingest.
+
+The May 2026 global candidate discovery batch is documented in [`webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md). That batch records the researched no-auth camera families, which candidates were added as candidate-only registry entries, which were held or blocked, and why candidate/source text remains inert operational evidence only.
+
+The strongest new machine-readable candidates currently taken through deeper source-ops follow-up are:
+
+- `nsw-live-traffic-cameras`
+  - endpoint status: `machine-readable-confirmed`
+  - media posture: `direct-image-documented`
+  - lifecycle: `candidate-sandbox-importable`
+  - sandbox connector: `NswLiveTrafficCameraConnector` in `fixture` mode only
+  - still missing: source-health review, explicit lifecycle decision, and real import evidence beyond sandbox mapping
+- `quebec-mtmd-traffic-cameras`
+  - endpoint status: `machine-readable-confirmed`
+  - media posture: `viewer-only-documented`
+  - lifecycle: `candidate-sandbox-importable`
+  - sandbox connector: `QuebecMtmdTrafficCameraConnector` in `fixture` mode only
+  - still missing: conservative viewer-only confirmation, source-health review, and real import evidence beyond sandbox mapping
+- `maryland-chart-traffic-cameras`
+  - endpoint status: `machine-readable-confirmed`
+  - media posture: `viewer-only-documented`
+  - lifecycle: `candidate-sandbox-importable`
+  - sandbox connector: `MarylandChartTrafficCameraConnector` in `fixture` mode only
+  - still missing: source-health review, explicit lifecycle decision, and real import evidence beyond sandbox mapping
+- `fingal-traffic-cameras`
+  - endpoint status: `machine-readable-confirmed`
+  - media posture: `metadata-only-documented`
+  - lifecycle: `candidate-sandbox-importable`
+  - sandbox connector: `FingalTrafficCameraConnector` in `fixture` mode only
+  - still missing: metadata-only posture review, source-health review, and real import evidence beyond sandbox mapping
+
+Within the same batch:
+
+- `baton-rouge-traffic-cameras` remains candidate-only but was not chosen for deeper follow-up yet because current evidence is still mostly location-centric
+- `euskadi-traffic-cameras` remains `candidate-needs-review` because the final public machine-readable endpoint is still unpinned
 
 `minnesota-511-public-arcgis` is currently an inventory-only Gather-registry candidate. It is not active for import, and the repo explicitly treats it as blocked on public endpoint verification. The current rule is: do not scrape the interactive 511MN web app, and do not enable ingest until a stable public no-auth machine endpoint is verified.
 
@@ -308,6 +384,24 @@ Sandbox connector visibility for candidate sources:
 - `sandboxReviewQueueCount`
 - `sandboxValidationCaveat`
 
+Current fixture-first sandbox candidates:
+
+- `finland-digitraffic-road-cameras`
+  - direct-image capable fixture-first sandbox connector
+  - validation-style sandbox import stays candidate-only
+- `nsw-live-traffic-cameras`
+  - direct-image documented, fixture-first sandbox connector
+  - exact coordinates and direction-derived orientation are exercised through deterministic fixtures only
+- `quebec-mtmd-traffic-cameras`
+  - conservative viewer-only/media-posture sandbox connector
+  - exact coordinates and per-camera URL fields are exercised through deterministic fixtures only
+- `maryland-chart-traffic-cameras`
+  - conservative viewer-only/media-posture sandbox connector
+  - exact coordinates and documented feed-url posture are exercised through deterministic fixtures only
+- `fingal-traffic-cameras`
+  - metadata-only sandbox connector
+  - exact coordinates and identifier mapping are exercised through deterministic fixtures only
+
 Interpretation rules:
 
 - sandbox import is not validation
@@ -315,6 +409,7 @@ Interpretation rules:
 - sandbox import does not enable scheduled refresh
 - sandbox counts are evidence about mapping and review burden only
 - validated and approved-unvalidated production fields remain the source of truth for actual active ingest readiness
+- hostile prompt-like fixture note text remains inert data only and is excluded from compact source-ops export/report surfaces
 
 Backend-only sandbox validation report:
 
@@ -959,6 +1054,11 @@ Important rule:
 - endpoint evidence alone is never enough to recommend `validated`
 - `machine-readable-confirmed` can at most justify `approved-unvalidated-candidate`
 - the Finland fixture-first connector does not change this rule; successful fixture imports still leave the source non-validated
+- graduation output now also records:
+  - `missingEvidence`
+  - `sandboxReadinessPosture`
+  - explicit lifecycle caveats
+  - compact export-safe lines
 
 Required manual work before any activation still includes:
 

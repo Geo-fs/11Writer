@@ -1481,6 +1481,213 @@ def _opensky_states_context(
     }
 
 
+def _ourairports_reference_context(
+    q: str | None = None,
+    airport_code: str | None = None,
+    region_code: str | None = None,
+    include_runways: bool = True,
+    limit: int = 3,
+) -> dict[str, Any]:
+    normalized_code = airport_code.strip().upper() if airport_code else None
+    normalized_query = q.strip().upper() if q else None
+    normalized_region = region_code.strip().upper() if region_code else None
+    airports = [
+        {
+            "referenceId": "ourairports:airport:KAUS",
+            "externalId": "ourairports-airport-KAUS",
+            "airportCode": "KAUS",
+            "iataCode": "AUS",
+            "localCode": "AUS",
+            "name": "Austin-Bergstrom International Airport",
+            "airportType": "large_airport",
+            "latitude": 30.1945,
+            "longitude": -97.6699,
+            "countryCode": "US",
+            "regionCode": "US-TX",
+            "municipality": "Austin",
+            "elevationFt": 542.0,
+            "runwayCount": 2,
+            "longestRunwayFt": 12250.0,
+            "sourceUrl": "https://ourairports.com/airports/KAUS/",
+            "sourceMode": "fixture",
+            "health": "normal",
+            "caveats": [
+                "OurAirports reference rows are baseline facility metadata only and are not live airport-status or runway-availability evidence."
+            ],
+            "evidenceBasis": "reference",
+        },
+        {
+            "referenceId": "ourairports:airport:KTEST",
+            "externalId": "ourairports-airport-KTEST",
+            "airportCode": "KTEST",
+            "iataCode": None,
+            "localCode": "TST",
+            "name": "Test Regional Airport",
+            "airportType": "small_airport",
+            "latitude": 30.21,
+            "longitude": -97.64,
+            "countryCode": "US",
+            "regionCode": "US-TX",
+            "municipality": "Austin",
+            "elevationFt": 530.0,
+            "runwayCount": 1,
+            "longestRunwayFt": 5600.0,
+            "sourceUrl": "https://ourairports.com/airports/KTEST/",
+            "sourceMode": "fixture",
+            "health": "normal",
+            "caveats": [
+                "Fixture test airport is baseline reference metadata only."
+            ],
+            "evidenceBasis": "reference",
+        },
+        {
+            "referenceId": "ourairports:airport:KVOID",
+            "externalId": "ourairports-airport-KVOID",
+            "airportCode": "KVOID",
+            "iataCode": None,
+            "localCode": None,
+            "name": "Void Field",
+            "airportType": "closed",
+            "latitude": None,
+            "longitude": None,
+            "countryCode": "US",
+            "regionCode": "US-TX",
+            "municipality": None,
+            "elevationFt": None,
+            "runwayCount": 0,
+            "longestRunwayFt": None,
+            "sourceUrl": "https://ourairports.com/airports/KVOID/",
+            "sourceMode": "fixture",
+            "health": "degraded",
+            "caveats": [
+                "Fixture partial record lacks usable coordinates and must not be treated as map-precise facility geometry."
+            ],
+            "evidenceBasis": "reference",
+        },
+    ]
+    runways = [
+        {
+            "referenceId": "ourairports:runway:KAUS:17R-35L",
+            "externalId": "ourairports-runway-KAUS-17R-35L",
+            "airportRefId": "ourairports:airport:KAUS",
+            "airportCode": "KAUS",
+            "leIdent": "17R",
+            "heIdent": "35L",
+            "lengthFt": 12250.0,
+            "widthFt": 150.0,
+            "surface": "ASP",
+            "surfaceCategory": "paved",
+            "centerLatitude": 30.1961,
+            "centerLongitude": -97.6662,
+            "sourceUrl": "https://ourairports.com/airports/KAUS/runways.html",
+            "sourceMode": "fixture",
+            "health": "normal",
+            "caveats": [
+                "Runway rows are baseline geometry only and do not prove runway availability or airport access."
+            ],
+            "evidenceBasis": "reference",
+        },
+        {
+            "referenceId": "ourairports:runway:KTEST:18-36",
+            "externalId": "ourairports-runway-KTEST-18-36",
+            "airportRefId": "ourairports:airport:KTEST",
+            "airportCode": "KTEST",
+            "leIdent": "18",
+            "heIdent": "36",
+            "lengthFt": 5600.0,
+            "widthFt": 100.0,
+            "surface": "ASP",
+            "surfaceCategory": "paved",
+            "centerLatitude": 30.211,
+            "centerLongitude": -97.639,
+            "sourceUrl": "https://ourairports.com/airports/KTEST/runways.html",
+            "sourceMode": "fixture",
+            "health": "normal",
+            "caveats": [
+                "Fixture runway row is baseline geometry only."
+            ],
+            "evidenceBasis": "reference",
+        },
+    ]
+
+    filtered_airports = airports
+    if normalized_code:
+        filtered_airports = [
+            airport
+            for airport in filtered_airports
+            if normalized_code
+            in {
+                (airport["airportCode"] or "").upper(),
+                (airport["iataCode"] or "").upper(),
+                (airport["localCode"] or "").upper(),
+            }
+        ]
+    elif normalized_query:
+        filtered_airports = [
+            airport
+            for airport in filtered_airports
+            if normalized_query in airport["name"].upper()
+        ]
+    if normalized_region:
+        filtered_airports = [
+            airport
+            for airport in filtered_airports
+            if (airport["regionCode"] or "").upper() == normalized_region
+        ]
+    filtered_airports = filtered_airports[:limit]
+    airport_ref_ids = {airport["referenceId"] for airport in filtered_airports}
+    filtered_runways = (
+        [runway for runway in runways if runway["airportRefId"] in airport_ref_ids][:limit]
+        if include_runways
+        else []
+    )
+
+    caveats = [
+        "OurAirports reference data is public baseline facility metadata, not live airport status or runway availability.",
+        "Baseline reference matches do not validate aircraft identity, route, intent, or operational state.",
+        "OurAirports reference context must not overwrite live selected-target evidence or shared aviation context.",
+    ]
+
+    return {
+        "fetchedAt": _iso(NOW),
+        "source": "ourairports-reference",
+        "airportCount": len(filtered_airports),
+        "runwayCount": len(filtered_runways),
+        "airports": filtered_airports,
+        "runways": filtered_runways,
+        "sourceHealth": {
+            "sourceName": "ourairports-reference",
+            "sourceMode": "fixture",
+            "health": "normal",
+            "detail": "OurAirports fixture baseline airport/runway reference loaded successfully for aerospace comparison-only context.",
+            "airportsSourceUrl": "fixture:ourairports_reference_fixture/airports.csv",
+            "runwaysSourceUrl": "fixture:ourairports_reference_fixture/runways.csv",
+            "lastUpdatedAt": _iso(NOW - timedelta(days=1)),
+            "state": "healthy",
+            "caveats": caveats,
+        },
+        "exportMetadata": {
+            "sourceId": "ourairports-reference",
+            "sourceMode": "fixture",
+            "health": "normal",
+            "airportCount": len(filtered_airports),
+            "runwayCount": len(filtered_runways),
+            "includeRunways": include_runways,
+            "filters": {
+                key: value
+                for key, value in {
+                    "airportCode": normalized_code,
+                    "q": normalized_query,
+                    "regionCode": normalized_region,
+                }.items()
+                if value
+            },
+            "caveat": "OurAirports export metadata is baseline/reference-only and must not be treated as live airport operational truth.",
+        },
+        "caveats": caveats,
+    }
+
+
 def _cneos_space_context(
     event_type: str = "all",
     limit: int = 3,
@@ -2227,6 +2434,27 @@ async def source_status() -> dict[str, Any]:
                 "blockedReason": None,
                 "reviewRequired": False,
                 "lastAttemptAt": _iso(NOW - timedelta(seconds=55)),
+                "lastFailureAt": None,
+                "successCount": 2,
+                "failureCount": 0,
+                "warningCount": 0,
+            },
+            {
+                "name": "ourairports-reference",
+                "state": "healthy",
+                "enabled": True,
+                "healthy": True,
+                "freshnessSeconds": 86400,
+                "staleAfterSeconds": 604800,
+                "lastSuccessAt": _iso(NOW - timedelta(hours=6)),
+                "degradedReason": None,
+                "rateLimited": False,
+                "hiddenReason": None,
+                "detail": "OurAirports fixture provides baseline airport and runway reference context for aerospace comparison-only review.",
+                "credentialsConfigured": True,
+                "blockedReason": None,
+                "reviewRequired": False,
+                "lastAttemptAt": _iso(NOW - timedelta(hours=6)),
                 "lastFailureAt": None,
                 "successCount": 2,
                 "failureCount": 0,
@@ -3362,6 +3590,23 @@ async def faa_nas_airport_status(
     airport_name: str | None = Query(default=None),
 ) -> dict[str, Any]:
     return _faa_nas_airport_status(airport_code, airport_name)
+
+
+@app.get("/api/aerospace/reference/ourairports")
+async def ourairports_reference(
+    q: str | None = Query(default=None),
+    airport_code: str | None = Query(default=None),
+    region_code: str | None = Query(default=None),
+    include_runways: bool = Query(default=True),
+    limit: int = Query(default=10),
+) -> dict[str, Any]:
+    return _ourairports_reference_context(
+        q=q,
+        airport_code=airport_code,
+        region_code=region_code,
+        include_runways=include_runways,
+        limit=limit,
+    )
 
 
 @app.get("/api/aerospace/aircraft/opensky/states")

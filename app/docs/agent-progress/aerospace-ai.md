@@ -1,5 +1,244 @@
 # Aerospace AI Progress
 
+## 2026-05-02 12:00 America/Chicago
+
+- Assignment version:
+  2026-05-02 11:07 America/Chicago
+- Task:
+  Add a client/backend-light aerospace context review queue and export bundle that prioritizes review gaps across existing aerospace context sources without changing source semantics or crossing no-inference guardrails.
+- What changed:
+  Added the pure helper [aerospaceContextReviewQueue.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceContextReviewQueue.ts).
+  It composes existing context availability, source-readiness bundle posture, context-gap queue items, workflow-readiness missing-evidence rows, export-coherence findings, issue-export-bundle caveat reminders, OurAirports reference-only caveats, and active export-profile context into one prioritized aerospace review queue.
+  The queue preserves source ids, source modes, source health states, evidence bases, review-safe lines, export-safe lines, caveats, and an explicit no-severity/no-consequence guardrail.
+  Added the pure helper [aerospaceContextReviewExportBundle.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceContextReviewExportBundle.ts).
+  It converts the queue into compact export-safe lines while preserving active context-profile linkage, source ids, source modes, source health states, evidence bases, caveats, and explicit export-bundle guardrail wording.
+  Wired both helpers into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) so snapshot/export metadata now preserves `aerospaceContextReviewQueue` and `aerospaceContextReviewExportBundle`, and existing aerospace export profiles can prioritize their footer lines.
+  Added a compact `Aerospace Context Review Queue` inspector section in [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx) with the new queue plus a small export-bundle preview.
+  Updated [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts), [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts), and prepared smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so the new metadata keys, footer sections, and guardrail wording are tracked consistently.
+  Updated [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md), [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md), and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) to document the new queue/export bundle and keep prepared-vs-executed smoke truth explicit.
+- Files touched:
+  [aerospaceContextReviewQueue.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceContextReviewQueue.ts)
+  [aerospaceContextReviewExportBundle.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceContextReviewExportBundle.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  From `app/client`, `cmd /c npm.cmd run lint` passed.
+  From `app/client`, `cmd /c npm.cmd run build` passed.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before browser assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  Prepared smoke assertions for `aerospaceContextReviewQueue` and `aerospaceContextReviewExportBundle` are now in place, but executed aerospace smoke evidence is still blocked locally by the existing Windows Playwright Chromium launcher boundary.
+  The new queue and export bundle remain review/export accounting only. They do not imply severity, target behavior, airport/runway availability, failure proof, route impact, causation, operational consequence, or action recommendation.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Playwright Chromium can launch so the prepared `aerospaceContextReviewQueue` and `aerospaceContextReviewExportBundle` assertions can move from prepared coverage to executed workflow evidence if they pass.
+
+## 2026-05-02 10:58 America/Chicago
+
+- Assignment version:
+  2026-05-02 10:47 America/Chicago
+- Task:
+  Add a compact aerospace workflow readiness and evidence export package that composes OurAirports context, workflow-evidence ledger state, availability/source-readiness posture, export-profile linkage, and prepared-vs-executed smoke status.
+- What changed:
+  Added the pure helper [aerospaceWorkflowReadinessPackage.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowReadinessPackage.ts).
+  The helper composes the existing workflow-evidence ledger, OurAirports reference context, aerospace context availability, aerospace source-readiness posture, and export-profile metadata into one compact evidence-accounting package.
+  It preserves source ids, source modes, source health states, evidence bases, prepared/executed smoke status, validation rows, missing-evidence rows, guardrail wording, export lines, and caveats without changing source semantics.
+  Wired the new package into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) under snapshot/export metadata key `aerospaceWorkflowReadinessPackage` and added footer-priority support in [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts).
+  Added a compact `Aerospace Workflow Readiness` inspector section in [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx) that shows prepared-vs-executed smoke status, top validation rows, and missing-evidence rows while keeping the Windows Playwright launcher caveat explicit.
+  Extended prepared aerospace smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so the aircraft workflow now requires the new inspector label and `aerospaceWorkflowReadinessPackage` metadata with validation rows, missing-evidence rows, prepared smoke status, and the evidence-accounting guardrail.
+  Updated [aerospace-ourairports-reference.md](/C:/Users/mike/11Writer/app/docs/aerospace-ourairports-reference.md), [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md), [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md), and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) so the package is documented with the same prepared-vs-executed distinction as the rest of the aerospace workflow evidence model.
+- Files touched:
+  [aerospaceWorkflowReadinessPackage.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowReadinessPackage.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-ourairports-reference.md](/C:/Users/mike/11Writer/app/docs/aerospace-ourairports-reference.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  From `app/client`, `cmd /c npm.cmd run lint` passed.
+  From `app/client`, `cmd /c npm.cmd run build` passed.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  Prepared aerospace smoke assertions for the new package are present, but executed workflow-smoke evidence remains blocked locally by the existing Windows Playwright Chromium launcher boundary.
+  The new package is workflow/accounting only. It does not certify source truth, does not collapse prepared smoke into executed smoke evidence, and does not imply airport/runway availability, flight intent, target behavior, operational consequence, failure proof, threat, causation, or action recommendation.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Playwright Chromium can launch so the prepared `aerospaceWorkflowReadinessPackage` assertions can move from prepared coverage to executed workflow evidence if they pass.
+
+## 2026-05-02 10:48 America/Chicago
+
+- Assignment version:
+  2026-05-02 10:34 America/Chicago
+- Task:
+  Add deterministic OurAirports reference support to the aerospace smoke fixture lane and prepare aerospace smoke assertions for the OurAirports reference context.
+- What changed:
+  Added a deterministic aerospace smoke-fixture response path for `GET /api/aerospace/reference/ourairports` in [smoke_fixture_app.py](/C:/Users/mike/11Writer/app/server/tests/smoke_fixture_app.py).
+  The new fixture preserves bounded airport/runway reference rows, source mode, source health, export metadata, and explicit reference-only caveats without introducing airport-status or runway-availability semantics.
+  Added `ourairports-reference` to the deterministic smoke `/api/status/sources` fixture so aerospace availability and source-health accounting can resolve the same source in smoke mode.
+  Extended prepared aerospace smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so the aircraft workflow now requires:
+  the `OurAirports Reference Context` inspector section,
+  `ourairportsReferenceContext` snapshot metadata,
+  fixture source mode,
+  recognized airport-match status,
+  and explicit `doesNotProve` reference-only guardrails.
+  Updated [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md) and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) to remove the older “not yet prepared” wording and to record the actual state:
+  deterministic smoke fixture support and prepared assertions now exist, while executed smoke evidence remains blocked locally by Playwright Chromium launch permission failure on this Windows host.
+- Files touched:
+  [smoke_fixture_app.py](/C:/Users/mike/11Writer/app/server/tests/smoke_fixture_app.py)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  From `app/client`, `cmd /c npm.cmd run lint` passed.
+  From `app/client`, `cmd /c npm.cmd run build` passed.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with Playwright Chromium launch `spawn EPERM`; the runner diagnosis was `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  Executed aerospace smoke evidence for the OurAirports slice is still blocked locally by the known Windows Playwright Chromium launch permission boundary, so this pass only promotes the slice to deterministic fixture support plus prepared assertion coverage.
+  The OurAirports slice remains baseline/reference-only and comparison-only. It does not replace selected-target evidence and does not imply aircraft identity validation, airport status, runway availability, route impact, flight intent, operational consequence, threat, causation, or action guidance.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Playwright Chromium can actually launch, then promote the prepared OurAirports aerospace smoke coverage to executed workflow evidence if the new assertions pass.
+
+## 2026-05-02 10:23 America/Chicago
+
+- Assignment version:
+  2026-05-02 10:01 America/Chicago
+- Task:
+  Add a bounded aerospace consumer for `ourairports-reference` that supports selected-target airport/reference comparison and export context while keeping reference data separate from live selected-target evidence.
+- What changed:
+  Added typed client contracts for the OurAirports aerospace route in [api.ts](/C:/Users/mike/11Writer/app/client/src/types/api.ts) and a narrow client query hook `useOurAirportsReferenceQuery(...)` in [queries.ts](/C:/Users/mike/11Writer/app/client/src/lib/queries.ts).
+  Added a new pure helper [aerospaceReferenceContext.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceReferenceContext.ts) that builds a bounded selected-aircraft reference comparison summary from already-loaded airport/runway context and the new OurAirports response.
+  That helper preserves source mode, source health/state, bounded airport/runway counts, selected airport/runway basis, airport match status, runway match status, compact display/export lines, explicit caveats, and explicit `does not prove` lines.
+  Wired the helper into existing aerospace context surfaces:
+  [aerospaceOperationalContext.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceOperationalContext.ts),
+  [aerospaceContextAvailability.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceContextAvailability.ts),
+  and [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts).
+  Added one compact inspector section, `OurAirports Reference Context`, in [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx) and preserved machine-readable snapshot/export metadata under `ourairportsReferenceContext` in [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx).
+  Updated aerospace docs in [aerospace-ourairports-reference.md](/C:/Users/mike/11Writer/app/docs/aerospace-ourairports-reference.md), [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md), [aerospace-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/aerospace-source-contract-matrix.md), and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md).
+  I intentionally deferred prepared Playwright assertions for this slice because the current aerospace smoke fixture lane does not yet expose a dedicated OurAirports reference endpoint; the docs now record that deferral explicitly instead of overstating coverage.
+- Files touched:
+  [api.ts](/C:/Users/mike/11Writer/app/client/src/types/api.ts)
+  [queries.ts](/C:/Users/mike/11Writer/app/client/src/lib/queries.ts)
+  [aerospaceReferenceContext.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceReferenceContext.ts)
+  [aerospaceContextAvailability.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceContextAvailability.ts)
+  [aerospaceOperationalContext.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceOperationalContext.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [aerospace-ourairports-reference.md](/C:/Users/mike/11Writer/app/docs/aerospace-ourairports-reference.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aerospace-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/aerospace-source-contract-matrix.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  From `app/client`, `cmd /c npm.cmd run lint` passed.
+  From `app/client`, `cmd /c npm.cmd run build` passed.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  This pass required narrow edits to shared aerospace-hosting frontend files [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx) and [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) because that is where aerospace inspector sections and snapshot/export metadata already live.
+  The new consumer is reference-only and comparison-only. It does not replace selected-target evidence, does not validate aircraft identity, and does not imply airport status, runway availability, flight intent, route impact, operational consequence, threat, causation, or action guidance.
+  Executed aerospace smoke evidence for this new slice remains blocked locally by the known Windows Playwright launcher boundary. Prepared OurAirports smoke assertions were intentionally deferred rather than overstated.
+- Next recommended task:
+  Add a deterministic OurAirports reference endpoint to the aerospace smoke fixture lane, then add prepared metadata/text assertions for `ourairportsReferenceContext` and the `OurAirports Reference Context` inspector section before trying to promote that slice to executed workflow-smoke evidence.
+
+## 2026-05-02 09:58 America/Chicago
+
+- Assignment version:
+  2026-05-02 09:46 America/Chicago
+- Task:
+  Implement a backend-first `ourairports-reference` slice for bounded public airport/runway reference context, fixture-first and caveat/export aware.
+- What changed:
+  Added a new backend-only aerospace route [ourairports_reference.py](/C:/Users/mike/11Writer/app/server/src/routes/ourairports_reference.py) at `GET /api/aerospace/reference/ourairports`.
+  Added typed contracts in [api.py](/C:/Users/mike/11Writer/app/server/src/types/api.py) for source health, airport records, runway records, backend export metadata, and the full response shape.
+  Added fixture-first source loading in [ourairports_reference.py](/C:/Users/mike/11Writer/app/server/src/adapters/ourairports_reference.py), reusing the existing OurAirports parser but keeping this slice separate from the shared reference database and shared reference route surface.
+  Added bounded response shaping and filtering in [ourairports_reference_service.py](/C:/Users/mike/11Writer/app/server/src/services/ourairports_reference_service.py) for `q`, `airport_code`, `country_code`, `region_code`, `airport_type`, `include_runways`, and `limit`.
+  Added deterministic CSV fixtures under [ourairports_reference_fixture](/C:/Users/mike/11Writer/app/server/data/ourairports_reference_fixture) and focused contract coverage in [test_ourairports_reference_contracts.py](/C:/Users/mike/11Writer/app/server/tests/test_ourairports_reference_contracts.py) for fixture serialization, filtering, source mode/health, explicit empty behavior, missing-coordinate handling, caveat preservation, and backend export metadata.
+  Registered the new route in [app.py](/C:/Users/mike/11Writer/app/server/src/app.py) and added runtime source-status exposure in [status_service.py](/C:/Users/mike/11Writer/app/server/src/services/status_service.py) as `ourairports-reference`.
+  Added aerospace docs in [aerospace-ourairports-reference.md](/C:/Users/mike/11Writer/app/docs/aerospace-ourairports-reference.md) and updated [aerospace-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/aerospace-source-contract-matrix.md), [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md), and [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md).
+- Files touched:
+  [settings.py](/C:/Users/mike/11Writer/app/server/src/config/settings.py)
+  [api.py](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  [ourairports_reference.py](/C:/Users/mike/11Writer/app/server/src/adapters/ourairports_reference.py)
+  [ourairports_reference_service.py](/C:/Users/mike/11Writer/app/server/src/services/ourairports_reference_service.py)
+  [ourairports_reference.py](/C:/Users/mike/11Writer/app/server/src/routes/ourairports_reference.py)
+  [status_service.py](/C:/Users/mike/11Writer/app/server/src/services/status_service.py)
+  [app.py](/C:/Users/mike/11Writer/app/server/src/app.py)
+  [airports.csv](/C:/Users/mike/11Writer/app/server/data/ourairports_reference_fixture/airports.csv)
+  [runways.csv](/C:/Users/mike/11Writer/app/server/data/ourairports_reference_fixture/runways.csv)
+  [test_ourairports_reference_contracts.py](/C:/Users/mike/11Writer/app/server/tests/test_ourairports_reference_contracts.py)
+  [aerospace-ourairports-reference.md](/C:/Users/mike/11Writer/app/docs/aerospace-ourairports-reference.md)
+  [aerospace-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/aerospace-source-contract-matrix.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+- Blockers or caveats:
+  This slice is backend-first only. No frontend consumer, smoke path, or client export consumer was added in this assignment.
+  Reference data remains baseline/contextual only. It does not imply live airport status, runway availability, facility access, flight intent, route impact, operational consequence, or action guidance.
+  I observed unrelated pre-existing edits in shared server files during diff review and did not revert or take ownership of them.
+- Next recommended task:
+  Add one bounded aerospace consumer of `ourairports-reference` for selected-target reference comparison or export context, while keeping reference data read-only and separate from live selected-target evidence.
+
+## 2026-05-02 09:42 America/Chicago
+
+- Assignment version:
+  2026-05-02 09:12 America/Chicago
+- Task:
+  Add an aerospace workflow evidence ledger/helper that distinguishes backend contract evidence, client lint/build evidence, prepared smoke assertions, and executed smoke evidence.
+- What changed:
+  Added a new pure helper [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts) that defines a compact aerospace workflow-evidence ledger with explicit row categories for implemented helper surfaces, snapshot/export metadata keys, backend contract suites, client validation, prepared smoke assertions, and executed smoke status.
+  The helper preserves a compact ledger line, row statuses, coverage item lists, caveats, and a strict guardrail line that this is workflow-accounting only and not a severity, operational-consequence, failure-proof, threat, causation, or action-recommendation surface.
+  Added a dedicated docs-backed ledger in [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md) so future agents can see the current aerospace validation truth in one place without confusing prepared smoke assertions with executed smoke evidence.
+  Updated [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md) to point directly to the new ledger and to state explicitly that prepared smoke coverage must not be promoted while the local Playwright launcher remains blocked.
+  Updated [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) so the smoke checklist now defers the prepared-vs-executed distinction to the new ledger and repeats that the local `spawn EPERM` boundary is a machine-environment blocker rather than an aerospace assertion result.
+  I did not add frontend unit tests because there is no existing lightweight frontend helper-test harness in this assignment path, and the helper is docs/report-accounting only. The practical validation here is typechecked helper code plus explicit docs and the existing smoke-runner status.
+- Files touched:
+  [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts)
+  [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  `cmd /c npm.cmd run lint` initially failed inside the sandbox with TSConfig path-mirroring parser errors against `C:\Users\CodexSandboxOnline\.codex\.sandbox\cwd\...`; rerunning the same command outside the sandbox passed, so there is no current aerospace lint regression in the real workspace.
+  `cmd /c npm.cmd run build` passed from `app/client`.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before browser assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  Executed aerospace smoke evidence remains locally blocked by the Windows Playwright launcher boundary, so the ledger must keep smoke in the `prepared` or `blocked` buckets on this host.
+  The helper and docs are workflow-accounting only. They do not imply flight intent, route impact, operational consequence, GPS/radio/satellite failure proof, severity, threat, causation, target exposure, or action recommendation.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Playwright Chromium can launch, then update the ledger rows from `prepared`/`blocked` to `executed` only for the assertions that actually run and pass.
+
 ## 2026-05-01 15:51 America/Chicago
 
 - Assignment version:

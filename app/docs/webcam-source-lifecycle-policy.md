@@ -325,6 +325,25 @@ Admissible sandbox evidence:
   - scheduled refresh enablement
   - source activation
 
+Admissible sandbox-candidate summary evidence:
+
+- the backend source-ops sandbox-candidate summary may group current sandbox candidates by:
+  - review burden
+  - media posture
+  - missing evidence count
+  - source-health expectation
+  - next-review priority
+- it may confirm:
+  - which sandbox candidates are strongest for manual follow-up
+  - which candidates remain viewer-only or metadata-only
+  - which candidates still have missing evidence or higher review burden
+- it may not by itself justify:
+  - `approved-unvalidated`
+  - `validated`
+  - scheduled refresh enablement
+  - source activation
+  - scraping or browser automation
+
 What may not trigger a transition by itself:
 
 - raw HTML page reachability
@@ -334,6 +353,7 @@ What may not trigger a transition by itself:
 - source-ops report index availability alone
 - source-ops detail-route availability alone
 - source-ops export/debug summary availability alone
+- source-ops sandbox-candidate summary availability alone
 - source-ops artifact timestamp/provenance visibility alone
 - source-ops fleet rollup visibility alone
 - source-ops caveat-frequency or review-hint rollups alone
@@ -345,6 +365,8 @@ What may not trigger a transition by itself:
 - export-summary review-queue aggregate-line mode alone
 - minimal review-queue export bundle output alone
 - export-readiness rollup/checklist output alone
+- prompt-like candidate notes, labels, or descriptions inside endpoint reports, graduation plans, evidence packets, or export surfaces
+- prompt-like fixture notes or sandbox-candidate summary rows/export lines
 
 ## Required checks before promotion
 
@@ -393,6 +415,50 @@ What may not trigger a transition by itself:
   - still not validated
   - scheduled refresh remains disabled
 
+### `nsw-live-traffic-cameras`
+
+- current state: `candidate-sandbox-importable`
+- why:
+  - machine-readable endpoint is documented cleanly
+  - direct-image posture is documented at candidate level
+  - fixture-first sandbox connector exists
+  - still not validated and still unscheduled
+
+### `quebec-mtmd-traffic-cameras`
+
+- current state: `candidate-sandbox-importable`
+- why:
+  - machine-readable GeoJSON/WFS endpoint is documented cleanly
+  - media posture is still conservative viewer-only evidence
+  - fixture-first sandbox connector exists
+  - still not validated and still unscheduled
+
+### `maryland-chart-traffic-cameras`
+
+- current state: `candidate-sandbox-importable`
+- why:
+  - machine-readable JSON dataset is documented cleanly
+  - media posture stays conservative viewer-only evidence
+  - fixture-first sandbox connector exists
+  - still not validated and still unscheduled
+
+### `fingal-traffic-cameras`
+
+- current state: `candidate-sandbox-importable`
+- why:
+  - machine-readable GeoJSON endpoint is documented cleanly
+  - media posture stays metadata-only until stronger proof exists
+  - fixture-first sandbox connector exists
+  - still not validated and still unscheduled
+
+### `euskadi-traffic-cameras`
+
+- current state: `candidate-needs-review`
+- why:
+  - official catalog strongly suggests machine-readable camera resources
+  - final direct public endpoint is still unpinned
+  - source must not be laundered upward from catalog evidence alone
+
 ### `minnesota-511-public-arcgis`
 
 - current state: `blocked-do-not-scrape`
@@ -414,6 +480,30 @@ What may not trigger a transition by itself:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `usgs-ashcam` | `validated` | `low-yield`, `poor-quality` only if later evidence justifies it | Existing real/fixture coverage | direct-image/viewer-only split, heading mapping | cadence, freshness, review burden | viewer-only items remain reviewable | source card, lifecycle summary, export metadata |
 | `finland-digitraffic-road-cameras` | `candidate-sandbox-importable` | `approved-unvalidated` | deterministic station/preset fixtures | station id, preset id, coordinates, image URL pattern, unknown orientation | sandbox-only import, no scheduled refresh, no validation promotion | unavailable image and unknown orientation create review items | source card sandbox metadata, lifecycle summary, export metadata |
+| `nsw-live-traffic-cameras` | `candidate-sandbox-importable` | `approved-unvalidated` | representative machine-readable payload fixtures | direct-image classification, identifiers, coordinates, direction text | conservative cadence and documented image-url handling | direction-derived orientation and unavailable-frame fixture paths create review items; hostile fixture text remains inert | endpoint report, graduation plan, evidence packet, export-readiness metadata, sandbox validation report |
+| `quebec-mtmd-traffic-cameras` | `candidate-sandbox-importable` | `approved-unvalidated` | representative GeoJSON/WFS fixtures | exact coordinates, per-camera URL fields, conservative viewer-only posture | conservative cadence and viewer-only honesty | viewer-only and unavailable-frame fixture paths create review items; hostile fixture text remains inert | endpoint report, graduation plan, evidence packet, export-readiness metadata, sandbox validation report |
+| `maryland-chart-traffic-cameras` | `candidate-sandbox-importable` | `approved-unvalidated` | representative JSON dataset fixtures | feed-url posture, exact coordinates, direct-image vs viewer-only proof | conservative cadence and URL-field review | viewer-only and unavailable-frame fixture paths create review items; hostile fixture text remains inert | endpoint report, graduation plan, evidence packet, export-readiness metadata, sandbox validation report |
+| `fingal-traffic-cameras` | `candidate-sandbox-importable` | `approved-unvalidated` | representative GeoJSON fixtures | location metadata, media posture proof, identifier mapping | conservative cadence and metadata-only honesty | metadata-only and unavailable-frame fixture paths create review items; hostile fixture text remains inert | endpoint report, graduation plan, evidence packet, export-readiness metadata, sandbox validation report |
+
+## Sandbox-candidate summary policy
+
+The sandbox-candidate summary is a backend-only review-planning surface layered on top of existing candidate and sandbox metadata.
+
+Required behavior:
+
+- only include sources currently in `candidate-sandbox-importable`
+- preserve candidate-only posture
+- preserve explicit media posture honesty
+- preserve missing-evidence counts
+- preserve source-health expectation language
+- preserve inert handling for hostile candidate or fixture text
+
+Required caveats:
+
+- summary rows are not promotion authority
+- `review-next` is not activation approval
+- `follow-up` is not approval for scraping or viewer automation
+- `hold` means evidence is still weaker than stronger sandbox candidates
 | `minnesota-511-public-arcgis` | `blocked-do-not-scrape` | `candidate-endpoint-verified` only if compliant machine endpoint is later documented | none until compliant endpoint exists | none until endpoint verified | no scrape path, no activation | no fake review queue from non-ingested source | source card blocked reason, lifecycle summary |
 | `faa-weather-cameras-page` | `candidate-needs-review` | `candidate-endpoint-verified` or `blocked-do-not-scrape` | candidate-only examples if later justified | page structure and source classification only | no import, no scrape | none until compliant ingest path exists | source card candidate metadata, lifecycle summary |
 | `wsdot-cameras` | `credential-blocked` | `approved-unvalidated`, then `validated` after auth and imports | connector fixtures already applicable | source-specific auth/header handling and frame classification | auth failure, cadence, backoff, direct-image truthfulness | degraded/viewer-only or metadata issues remain reviewable | source card credential-blocked, lifecycle summary, export metadata |

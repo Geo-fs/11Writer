@@ -1,5 +1,361 @@
 # Geospatial AI Progress
 
+## 2026-05-02 12:39:12 -05:00
+
+- Assignment version:
+  - `2026-05-02 12:27 America/Chicago`
+- Task:
+  - Added a backend-first environmental weather/observation export bundle and review queue across implemented observation/context sources without expanding the source catalog.
+- What changed:
+  - Added two new backend routes:
+    - `GET /api/context/environmental/weather-observation-export-bundle`
+    - `GET /api/context/environmental/weather-observation-review-queue`
+  - Added typed contracts for:
+    - `EnvironmentalWeatherObservationSourceSummary`
+    - `EnvironmentalWeatherObservationExportMetadata`
+    - `EnvironmentalWeatherObservationExportBundle`
+    - `EnvironmentalWeatherObservationReviewItem`
+    - `EnvironmentalWeatherObservationReviewQueueMetadata`
+    - `EnvironmentalWeatherObservationReviewQueuePackage`
+  - Extended the environmental source-family overview service with bounded weather/observation composition over:
+    - `meteoswiss-open-data`
+    - `bc-wildfire-datamart`
+    - `taiwan-cwa-aws-opendata`
+    - `dmi-forecast-aws`
+    - `met-eireann-forecast`
+    - `nasa-power-meteorology-solar`
+  - The export bundle now preserves compact source lines for:
+    - source mode
+    - source health
+    - evidence basis
+    - fetched/source-generated timestamps
+    - coordinate counts and coordinate gaps
+    - limited-scope posture
+    - export-readiness posture
+    - caveats
+  - The review queue now surfaces bounded issue types for:
+    - `fixture-only`
+    - `source-health-empty`
+    - `source-health-stale`
+    - `source-health-error`
+    - `source-health-disabled`
+    - `source-health-unknown`
+    - `missing-coordinates`
+    - `limited-asset-scope`
+    - `advisory-vs-observation-caveat`
+    - `export-readiness-gap`
+    - `missing-source`
+  - Added focused router-level tests for source grouping, filters, missing-source handling, inert prompt-like text, coordinate-gap reporting, and no overclaim behavior.
+  - Updated family-overview and environmental docs to document the new weather/observation review/export surfaces.
+  - No staging, commit, or push was performed.
+- Files touched:
+  - `app/server/src/types/api.py`
+  - `app/server/src/routes/environmental_context.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/tests/test_environmental_weather_observation_review.py`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/environmental-events.md`
+  - `app/docs/source-validation-status.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_environmental_weather_observation_review.py -q`
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m pytest app/server/tests/test_meteoswiss_open_data.py app/server/tests/test_taiwan_cwa_weather.py app/server/tests/test_dmi_forecast.py app/server/tests/test_met_eireann_forecast.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - This follow-on adds review/export context only and does not add any new source ingestion.
+  - Weather/observation bundle coverage is intentionally bounded to implemented sources that currently expose enough metadata for honest review items.
+  - Forecast, modeled, contextual, and observed semantics remain distinct and are not flattened into hazard, impact, damage, risk, responsibility, or action guidance.
+- Next recommended task:
+  - Add the next bounded backend review/export follow-on only where existing geospatial sources expose enough provenance and source-health metadata to support honest issue typing without flattening source-native semantics.
+
+## 2026-05-02 11:59:16 -05:00
+
+- Assignment version:
+  - `2026-05-02 11:49 America/Chicago`
+- Task:
+  - Implemented the backend-first `meteoswiss-open-data` station-observation context slice using the bounded SwissMetNet STAC collection plus one `t_now` observation asset family.
+- What changed:
+  - Verified the endpoint posture against the pinned official docs and collection:
+    - MeteoSwiss automatic weather stations docs
+    - `https://data.geo.admin.ch/api/stac/v1/collections/ch.meteoschweiz.ogd-smn`
+    - per-station `t_now` observation assets from the collection items family
+  - Added a backend route:
+    - `GET /api/context/weather/meteoswiss`
+  - Added typed contracts for:
+    - `MeteoSwissStationObservation`
+    - `MeteoSwissOpenDataSourceHealth`
+    - `MeteoSwissOpenDataMetadata`
+    - `MeteoSwissOpenDataResponse`
+  - Added a fixture-first MeteoSwiss service that preserves:
+    - collection id and collection URL
+    - items URL
+    - station metadata asset URL
+    - selected asset family `t_now`
+    - station IDs, coordinates, canton, WIGOS id, timestamps, observed fields, source mode, source health, caveats, and export-safe metadata
+  - Added a deterministic fixture bundle with:
+    - STAC collection metadata
+    - station metadata CSV
+    - bounded per-station `t_now` observation assets
+    - hostile free-text fixture coverage kept inert
+  - Added focused MeteoSwiss tests for:
+    - fixture parsing and provenance
+    - filtering and limit behavior
+    - empty/no-match behavior
+    - prompt-injection inertness
+    - no fake coordinates
+    - source mode and source health
+  - Updated the environmental source-family overview so `meteoswiss-open-data` participates in `weather-flood-hydrology`.
+  - Updated environmental docs and source-validation-status docs for this slice.
+  - No staging, commit, or push was performed.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/routes/weather_context.py`
+  - `app/server/src/services/meteoswiss_open_data_service.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/data/meteoswiss_open_data_fixture.json`
+  - `app/server/tests/test_meteoswiss_open_data.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/docs/environmental-events-meteoswiss-open-data.md`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/environmental-events.md`
+  - `app/docs/source-validation-status.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_meteoswiss_open_data.py -q`
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m pytest app/server/tests/test_taiwan_cwa_weather.py app/server/tests/test_dmi_forecast.py app/server/tests/test_met_eireann_forecast.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - This slice is intentionally bounded to station metadata plus one `t_now` observation asset family only.
+  - It does not attempt the full MeteoSwiss catalog.
+  - It does not infer hazard, impact, forecast certainty, local damage, risk, cause, responsibility, or action recommendations from station data.
+  - Free-form station text remains inert source data only.
+- Next recommended task:
+  - Continue with the next bounded no-auth geospatial weather or reference slice from the current assignment board, preserving source-native evidence semantics and avoiding catalog-wide expansion.
+
+## 2026-05-02 10:49:30 -05:00
+
+- Assignment version:
+  - `2026-05-02 10:34 America/Chicago`
+- Task:
+  - Implemented the backend-first `bc-wildfire-datamart` fire-weather context slice, added it to the environmental source-family overview, and documented the bounded BCWS semantics.
+- What changed:
+  - Added a new backend context route:
+    - `GET /api/context/fire-weather/bcws`
+  - Added typed contracts for:
+    - `BcWildfireDatamartStation`
+    - `BcWildfireDatamartDangerSummary`
+    - `BcWildfireDatamartSourceHealth`
+    - `BcWildfireDatamartMetadata`
+    - `BcWildfireDatamartResponse`
+  - Added a fixture-first BCWS Datamart service with bounded support for:
+    - weather-station reference rows
+    - fire-centre danger-summary rows
+    - `station_code`, `fire_centre`, `resource`, and `limit` filters
+    - explicit source mode, source health, and export-safe caveats
+  - Added a deterministic BCWS fixture with sanitized free-text coverage.
+  - Added focused BCWS route tests for:
+    - provenance
+    - filtering
+    - resource selection
+    - empty/no-match behavior
+    - inert free-text handling
+    - invalid params
+  - Updated the environmental source-family overview so `bc-wildfire-datamart` participates in `weather-flood-hydrology`.
+  - Updated family-overview tests, environmental docs, and source-validation-status docs.
+  - Hardened the BCWS, family-overview, UK EA water-quality, and Taiwan CWA tests to use router-only FastAPI apps because the full shared app import path currently hits an unrelated `source_discovery` import failure outside geospatial ownership.
+  - No staging, commit, or push was performed.
+- Files touched:
+  - `app/server/src/app.py`
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/routes/fire_weather_context.py`
+  - `app/server/src/services/bc_wildfire_datamart_service.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/data/bc_wildfire_datamart_fixture.json`
+  - `app/server/tests/test_bc_wildfire_datamart.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/server/tests/test_uk_ea_water_quality.py`
+  - `app/server/tests/test_taiwan_cwa_weather.py`
+  - `app/docs/environmental-events-bc-wildfire-datamart.md`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/environmental-events.md`
+  - `app/docs/source-validation-status.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_bc_wildfire_datamart.py -q`
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m pytest app/server/tests/test_uk_ea_water_quality.py app/server/tests/test_taiwan_cwa_weather.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - BCWS remains bounded to fire-weather station reference rows and danger summaries only.
+  - The slice does not assert wildfire incident truth, perimeter truth, evacuation status, spread prediction, or damage/impact evidence.
+  - Free-form station and fire-centre text remains inert source data only.
+  - Full-app route tests that import `src.app` are currently blocked by an unrelated missing `src.services.runtime_scheduler_service` import inside the shared `source_discovery` route path, so the validation here uses router-only FastAPI apps to stay scoped to geospatial ownership.
+- Next recommended task:
+  - Add the next backend-first public geospatial context slice from the assignment board and keep expanding the environmental source-family overview only when source-native evidence semantics can still be preserved.
+
+## 2026-05-02 10:18:12 -05:00
+
+- Assignment version:
+  - `2026-05-02 10:08 America/Chicago`
+- Task:
+  - Added a backend-first `seismic-network-reference-context` expansion using `orfeus-eida-federator` station metadata and wired it into the existing seismic family overview alongside EMSC and the other seismic sources.
+- What changed:
+  - Selected source:
+    - `orfeus-eida-federator`
+  - Added a new backend context route:
+    - `GET /api/context/seismic/orfeus-eida`
+  - Added typed contracts for:
+    - `OrfeusEidaStationRecord`
+    - `OrfeusEidaSourceHealth`
+    - `OrfeusEidaMetadata`
+    - `OrfeusEidaResponse`
+  - Added a fixture-first backend service for bounded ORFEUS federated station metadata using the public `fdsnws-station` text family only.
+  - Added deterministic fixture coverage for:
+    - source-provided network and station codes
+    - source-provided coordinates and elevation
+    - source-provided start/end times
+    - sanitized inert free-text site names
+  - Added focused tests for parsing, provenance, filters, empty/no-match behavior, invalid params, and no script-like output leakage.
+  - Updated the environmental source-family overview service so `orfeus-eida-federator` participates in the existing `seismic` family.
+  - Updated source-family overview and validation-status docs and added a source-specific ORFEUS doc.
+  - No staging, commit, or push was performed.
+- Files touched:
+  - `app/server/src/app.py`
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/routes/seismic_context.py`
+  - `app/server/src/services/orfeus_eida_service.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/data/orfeus_eida_station_fixture.txt`
+  - `app/server/tests/test_orfeus_eida_context.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/docs/environmental-events-orfeus-eida.md`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/source-validation-status.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_orfeus_eida_context.py -q`
+  - `python -m pytest app/server/tests/test_emsc_seismicportal_realtime.py app/server/tests/test_earthquake_events.py -q`
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - This first slice is fixture-first and bounded to public station metadata only.
+  - It does not implement waveform download, restricted datasets, generic FDSN platform behavior, or event harvesting from ORFEUS.
+  - ORFEUS federator best-effort and partial-fulfilment caveats remain explicit.
+  - No damage, casualty, shaking-impact, infrastructure-impact, risk, cause, threat, or action-recommendation claims were added.
+- Next recommended task:
+  - The next bounded geospatial step should be another clearly verified public seismic or hazard context source only if it can preserve source-native semantics as cleanly as the current EMSC plus ORFEUS split.
+
+## 2026-05-02 10:06:52 -05:00
+
+- Assignment version:
+  - `2026-05-02 09:56 America/Chicago`
+- Task:
+  - Added a backend-first `global-seismic-reference-context` slice using `emsc-seismicportal-realtime` and wired it into the existing seismic family overview.
+- What changed:
+  - Selected source:
+    - `emsc-seismicportal-realtime`
+  - Added a new backend route:
+    - `GET /api/events/emsc-seismicportal/recent`
+  - Added typed contracts for:
+    - `EmscSeismicPortalEvent`
+    - `EmscSeismicPortalSourceHealth`
+    - `EmscSeismicPortalMetadata`
+    - `EmscSeismicPortalResponse`
+  - Added a fixture-first backend service for bounded near-realtime event context from the EMSC Seismic Portal websocket message shape.
+  - Added deterministic fixture coverage for:
+    - create and update actions
+    - provider/auth labels
+    - source-provided coordinates, magnitude, depth, and timestamps
+    - sanitized inert free-text region text
+  - Added focused tests for parsing, provenance, filters, empty/no-match behavior, invalid params, and no script-like output leakage.
+  - Updated the environmental source-family overview service so `emsc-seismicportal-realtime` participates in the existing `seismic` family.
+  - Updated source-family overview docs and added a source-specific EMSC doc.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/routes/events.py`
+  - `app/server/src/services/emsc_seismicportal_realtime_service.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/data/emsc_seismicportal_realtime_fixture.json`
+  - `app/server/tests/test_emsc_seismicportal_realtime.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/docs/environmental-events-emsc-seismicportal-realtime.md`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_emsc_seismicportal_realtime.py -q`
+  - `python -m pytest app/server/tests/test_earthquake_events.py -q`
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - This first slice is fixture-first and live websocket ingestion is intentionally not enabled yet.
+  - The route is bounded to event-context only and does not attempt network/station registry harvesting, waveform access, or a generic seismic multi-provider platform.
+  - EMSC action labels (`create`, `update`) remain source-record lifecycle context only and are not urgency, impact, or damage signals.
+  - No damage, casualty, shaking-impact, infrastructure-impact, threat, or action-recommendation claims were added.
+- Next recommended task:
+  - The next bounded geospatial step should be another verified public observed/context source slice, or a narrow second seismic metadata source only after Manager AI assigns one with clear official endpoint posture.
+
+## 2026-05-02 09:50:37 -05:00
+
+- Assignment version:
+  - `2026-05-02 09:12 America/Chicago`
+- Task:
+  - Added a backend-first static/reference bundle for `gshhg-shorelines` and `pb2002-plate-boundaries`, plus base-earth family-overview participation.
+- What changed:
+  - Added new backend reference routes:
+    - `GET /api/context/reference/gshhg/shorelines`
+    - `GET /api/context/reference/pb2002/plate-boundaries`
+  - Added typed contracts for:
+    - `GshhgShorelineFeature`
+    - `GshhgShorelinesSourceHealth`
+    - `GshhgShorelinesMetadata`
+    - `GshhgShorelinesResponse`
+    - `Pb2002PlateBoundaryRecord`
+    - `Pb2002PlateBoundariesSourceHealth`
+    - `Pb2002PlateBoundariesMetadata`
+    - `Pb2002PlateBoundariesResponse`
+  - Added fixture-first services for GSHHG and PB2002 with bounded `bbox` filtering, compact reference summaries, source mode, source health, caveats, and export-safe metadata.
+  - Added deterministic fixtures for both slices and extended the base-earth reference test bundle to cover parsing, provenance, filter behavior, empty fixture behavior, and invalid bbox handling.
+  - Updated the environmental source-family overview service so `base-earth-reference` now includes:
+    - `natural-earth-physical`
+    - `gshhg-shorelines`
+    - `pb2002-plate-boundaries`
+  - Updated reference-family regression tests and source docs.
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/routes/base_earth_context.py`
+  - `app/server/src/services/gshhg_shorelines_service.py`
+  - `app/server/src/services/pb2002_plate_boundaries_service.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/data/gshhg_shorelines_fixture.json`
+  - `app/server/data/pb2002_plate_boundaries_fixture.json`
+  - `app/server/tests/test_base_earth_reference_bundle.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/docs/environmental-events.md`
+  - `app/docs/environmental-events-gshhg-shorelines.md`
+  - `app/docs/environmental-events-pb2002-plate-boundaries.md`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_base_earth_reference_bundle.py -q`
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m compileall app/server/src`
+- Blockers or caveats:
+  - Both new slices remain fixture-first and static/reference only.
+  - GSHHG remains generalized shoreline context only and must not be treated as legal shoreline or navigation truth.
+  - PB2002 remains model-era tectonic reference only and must not be treated as real-time tectonic activity or earthquake-risk proof.
+  - No full-resolution geometry, polygon rendering, live-fetch ingestion, or frontend/UI work was added in this assignment.
+- Next recommended task:
+  - The next bounded geospatial step should be another backend-first static/reference or observed-context source slice that can join the existing source-family overview without widening frontend ownership.
+
 ## 2026-05-01 15:51:00 -05:00
 
 - Assignment version:

@@ -1,0 +1,74 @@
+{
+  "generated_at": "2026-05-02T13:15:00Z",
+  "messages": [
+    {
+      "action": "create",
+      "data": {
+        "type": "Feature",
+        "properties": {
+          "unid": "20260502_001",
+          "time": "2026-05-02T13:11:04Z",
+          "lastupdate": "2026-05-02T13:12:10Z",
+          "mag": 5.4,
+          "magtype": "Mw",
+          "depth": 18.0,
+          "flynn_region": "South of Fiji Islands",
+          "auth": "EMSC"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -178.412,
+            -24.615,
+            18.0
+          ]
+        }
+      }
+    },
+    {
+      "action": "update",
+      "data": {
+        "type": "Feature",
+        "properties": {
+          "unid": "20260502_002",
+          "time": "2026-05-02T12:44:00Z",
+          "lastupdate": "2026-05-02T12:50:18Z",
+          "mag": 4.7,
+          "magtype": "mb",
+          "depth": 11.0,
+          "flynn_region": "Central Mid-Atlantic Ridge <script>alert(1)</script>",
+          "auth": "GFZ"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -31.502,
+            1.205,
+            11.0
+          ]
+        }
+      }
+    },
+    {
+      "action": "create",
+      "data": {
+        "type": "Feature",
+        "properties": {
+          "unid": "20260502_003",
+          "time": "2026-05-02T11:20:30Z",
+          "mag": 3.9,
+          "magtype": "ML",
+          "flynn_region": "Northern Italy",
+          "auth": "INGV"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            10.742,
+            44.615
+          ]
+        }
+      }
+    }
+  ]
+}

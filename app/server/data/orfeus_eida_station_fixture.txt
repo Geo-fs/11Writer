@@ -1,0 +1,4 @@
+#Network|Station|Latitude|Longitude|Elevation|SiteName|StartTime|EndTime
+NL|HGN|52.1550|4.4900|12.0|Hengelo North|2010-01-01T00:00:00|2599-12-31T23:59:59
+IV|ACER|40.8270|14.4280|605.0|Mount Vesuvius <script>alert(1)</script>|2005-06-01T00:00:00|2599-12-31T23:59:59
+_ALPARRAY|A123A|46.8000|13.5000|1750.0|Alpine Temporary Array|2018-01-01T00:00:00|2020-12-31T23:59:59

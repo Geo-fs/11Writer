@@ -454,28 +454,67 @@ Interpretation rules:
 - station readings must not be presented as flood-impact, inundation, contamination, or damage confirmation
 - fixture/local mode must remain explicit in contracts and future downstream consumption
 
+### Netherlands RWS Waterinfo Context
+
+Marine now also includes a first fixture-backed Netherlands Rijkswaterstaat Waterinfo slice for nearby Dutch water-level context:
+- backend route: `GET /api/marine/context/netherlands-rws-waterinfo`
+- client hook: `useMarineNetherlandsRwsWaterinfoContextQuery(...)`
+- frontend helper: `app/client/src/features/marine/marineNetherlandsRwsWaterinfoContext.ts`
+- pinned official WaterWebservices endpoint family:
+  - `POST https://waterwebservices.apps.rijkswaterstaat.nl/ddapi20-waterwebservices/api/METADATASERVICES_DBO/OphalenCatalogus`
+  - `POST https://waterwebservices.apps.rijkswaterstaat.nl/ddapi20-waterwebservices/api/ONLINEWAARNEMINGENSERVICES_DBO/OphalenLaatsteWaarnemingen`
+
+Current scope:
+- bounded station metadata
+- latest water-level observation per fixture station
+- explicit parameter code/label, value, unit code/label, and observed timestamp
+- compact source health and mode (`fixture`, later `live`)
+- query center / radius lookup
+- export-ready provenance fields through station and latest-observation source URLs
+
+Current limits:
+- compact marine-local consumer only in this slice
+- no broad Waterinfo portal ingestion
+- no historical, forecast, or multi-family ingestion
+- no flood-impact, navigation-safety, operational-failure, or vessel-behavior inference
+- prompt-like source text remains inert metadata only
+
+Source health semantics:
+- `loaded`: nearby station context returned
+- `empty`: source responded but no nearby station matched the query radius
+- `stale`: returned observation timestamps exceeded the freshness threshold
+- `degraded`: returned station records include partial metadata such as missing `waterBody` or `unitLabel`
+- `unavailable`: source retrieval failed inside the backend service path
+- `disabled`: non-fixture mode requested before live implementation exists
+
+Interpretation rules:
+- Waterinfo water-level observations are contextual hydrology data, not anomaly evidence
+- station values must not be presented as flood-impact, navigation-safety, or operational-failure confirmation
+- fixture/local mode must remain explicit in contracts and any future downstream consumer
+- the first slice must stay bounded to the official WaterWebservices metadata-plus-latest-reading POST flow only
+
 ### Marine Hydrology Context Review Summary
 
-Marine also composes the two river-condition context sources into a bounded hydrology review summary:
+Marine also composes the three river-condition context sources into a bounded hydrology review summary:
 - helper: `app/client/src/features/marine/marineHydrologyContext.ts`
 - current consumer: `app/client/src/features/marine/MarineAnomalySection.tsx`
 
 Current scope:
-- compose already-loaded France Vigicrues and Ireland OPW summaries into review-ready lines
-- keep water height, flow, and OPW water-level observations distinct
+- compose already-loaded France Vigicrues, Ireland OPW, and Netherlands RWS Waterinfo summaries into review-ready lines
+- keep water height, flow, OPW water-level, and Waterinfo water-level observations distinct
 - surface source health, source mode, empty/no-match context, partial metadata, and missing observed-time caveats
 - expose compact export/snapshot metadata
 
 Interpretation rules:
 - hydrology review summary is workflow context only
-- it must not merge Vigicrues and OPW into a fake severity score
+- it must not merge Vigicrues, OPW, and Waterinfo into a fake severity score
 - it must not be presented as flood-impact, inundation, damage, contamination, health-impact, anomaly-cause, vessel-behavior, or vessel-intent evidence
 - hydrology context remains separate from combined CO-OPS/NDBC environmental context
 
 ### Backend Contract Coverage
 
 Marine backend contract coverage currently locks down the following context-source guarantees:
-- NOAA CO-OPS, NOAA NDBC, Scottish Water, Vigicrues, and Ireland OPW routes are contract-tested
+- NOAA CO-OPS, NOAA NDBC, Scottish Water, Vigicrues, Ireland OPW, and Netherlands RWS Waterinfo routes are contract-tested
 - fixture mode must remain explicit through source-health/source-mode fields
 - empty nearby results must return `health=empty`, not backend error semantics
 - loaded nearby results may now return `health=stale` when returned source observation/update timestamps exceed source-specific freshness thresholds
@@ -484,7 +523,8 @@ Marine backend contract coverage currently locks down the following context-sour
 - Scottish Water overflow status basis must remain `source-reported`
 - Vigicrues latest hydrometry observation basis must remain `observed`
 - Ireland OPW latest water-level reading basis must remain `observed`
-- source-level caveats must remain present for all five sources
+- Netherlands RWS Waterinfo latest water-level observation basis must remain `observed`
+- source-level caveats must remain present for all six sources
 
 Current marine source-health thresholds:
 - NOAA CO-OPS: stale after 30 minutes based on returned water-level/current observation timestamps
@@ -492,9 +532,10 @@ Current marine source-health thresholds:
 - Scottish Water Overflows: stale after 2 hours based on returned monitor `last_updated_at`
 - France Vigicrues Hydrometry: stale after 60 minutes based on returned observation timestamps
 - Ireland OPW Water Level: stale after 60 minutes based on returned reading timestamps
+- Netherlands RWS Waterinfo: stale after 60 minutes based on returned latest-observation timestamps
 
 Current emitted health-state boundaries:
-- all five current marine context sources can emit:
+- all six current marine context sources can emit:
   - `loaded`
   - `empty`
   - `stale`
@@ -504,6 +545,7 @@ Current emitted health-state boundaries:
   - Scottish Water Overflows
   - France Vigicrues Hydrometry
   - Ireland OPW Water Level
+  - Netherlands RWS Waterinfo
 - `degraded` is intentionally not emitted for:
   - NOAA CO-OPS
   - NOAA NDBC
@@ -521,6 +563,7 @@ Forbidden inference claims remain unchanged:
 - no pollution-impact or health-risk claim from Scottish Water status alone
 - no flood-impact, inundation, or damage claim from Vigicrues station values alone
 - no flood-impact, inundation, contamination, or damage claim from Ireland OPW station values alone
+- no flood-impact, navigation-safety, operational-failure, or vessel-behavior claim from Netherlands RWS Waterinfo station values alone
 
 ### Marine Context Source Registry Summary
 
@@ -872,6 +915,17 @@ Manual/custom behavior:
 - if the current control combination matches another preset exactly, marine reflects that preset
 - if a manual change no longer matches any preset, marine marks the state as `Custom context settings`
 - custom/manual mode changes review scope only; it does not change source semantics or anomaly scoring
+- deterministic marine helper regression now also verifies preset/source-toggle transition coherence between:
+  - broad/all-sources review presets
+  - limited/degraded source mixes with disabled-source rows
+- that regression requires the active preset/source-toggle state to remain aligned across:
+  - `environmentalContext`
+  - `contextSourceSummary`
+  - `contextIssueQueue`
+  - `contextIssueExportBundle`
+  - `contextFusionSummary`
+  - `contextTimeline`
+  - `focusedEvidenceInterpretation`
 
 Fallback behavior:
 - default behavior preserves current marine context pattern:
@@ -882,6 +936,20 @@ Fallback behavior:
 - if `selected-vessel` anchor is chosen but no selected vessel center is available, marine falls back to viewport center when possible
 - if no usable center exists, environmental context is marked unavailable rather than fabricating coordinates
 - disabled sources are treated as disabled by current marine controls, not as source failures
+- deterministic marine helper regression now verifies that anchor/radius/fallback transitions preserve coherent export metadata for:
+  - selected-vessel anchored context
+  - viewport/manual fallback context
+  - chokepoint bounded-area context
+  - radius-change context for the same selected entity/source set
+- those checks require alignment across:
+  - `environmentalContext.anchor`
+  - `environmentalContext.effectiveAnchor`
+  - `environmentalContext.fallbackReason`
+  - `environmentalContext.radiusKm`
+  - `contextTimeline` current/previous snapshots
+  - `chokepointReviewPackage.boundedAreaLabel`
+  - `focusedEvidenceInterpretation.environmentalCaveats`
+  - `contextSourceSummary`, `contextIssueQueue`, `contextIssueExportBundle`, and `contextFusionSummary`
 
 Environmental context caveat behavior:
 - marine derives compact caveats from combined CO-OPS/NDBC availability, health, and source mode
@@ -913,6 +981,7 @@ This validates marine anomaly rendering and controls using deterministic fixture
 - NOAA NDBC context card
 - France Vigicrues Hydrometry context card
 - Ireland OPW Water Level context card
+- Netherlands RWS Waterinfo context card
 - source-specific preset behavior
 - Scottish Water overflow context card
 - marine context source registry summary
@@ -925,6 +994,7 @@ This validates marine anomaly rendering and controls using deterministic fixture
 - active focused target display
 - snapshot metadata contains `marineAnomalySummary.vigicruesHydrometryContext` after export
 - snapshot metadata contains `marineAnomalySummary.irelandOpwWaterLevelContext` after export
+- snapshot metadata contains `marineAnomalySummary.netherlandsRwsWaterinfoContext` after export
 - snapshot metadata contains `marineAnomalySummary.hydrologyContext` after export
 - snapshot metadata contains `marineAnomalySummary.contextFusionSummary` after export
 - snapshot metadata contains `marineAnomalySummary.contextReviewReport` after export
@@ -951,6 +1021,7 @@ Included export evidence fields:
 - NOAA NDBC context summary (source mode/health, nearby station count, top station + top observation summary)
 - Vigicrues hydrometry context summary (source mode/health, nearby station count, parameter filter, top station + top observation summary)
 - Ireland OPW water-level context summary (source mode/health, nearby station count, top station + top reading summary)
+- Netherlands RWS Waterinfo context summary (source mode/health, nearby station count, top station + top latest-observation summary)
 - composed marine hydrology context summary (loaded/empty counts, nearby station count, per-source review lines, caveats)
 - composed marine context fusion summary (family availability, export-readiness line, top caveats)
 - composed marine context review report (families included, review-needed items, export caveats, does-not-prove lines)
@@ -980,6 +1051,9 @@ Snapshot/export integration behavior:
   - `trustLevel`
   - `cardCount`
   - `visibleCardCount`
+  - `visibleCardKinds`
+  - `visibleCardLabels`
+  - `visibleCardBases`
   - `topCaveats`
 - `marineAnomalySummary.noaaCoopsContext` adds compact NOAA marine-context metadata:
   - `sourceId`
@@ -1094,11 +1168,23 @@ Snapshot/export integration behavior:
   - `topObservations`
   - `environmentalCaveatSummary`
   - `caveats`
+- downstream report consumers should use these fields to distinguish:
+  - selected-vessel anchored context
+  - viewport/manual fallback context
+  - chokepoint-scoped context
+  - radius-adjusted context
+- radius or fallback-center changes may change context scope metadata and nearby-count detail, but they must not change anomaly scoring or convert context into behavioral evidence
 - `marineAnomalySummary.focusedEvidenceInterpretation` also includes environmental-context caveat fields:
   - `environmentalContextAvailability`
   - `environmentalContextSourceHealthSummary`
   - `sourceModes`
   - `environmentalCaveats`
+- deterministic marine helper regression now checks that `compact`, `detailed`, `evidence-only`, and `caveats-first` interpretation modes preserve coherent visible-card selection and no-intent/no-wrongdoing caveats across:
+  - `focusedEvidenceInterpretation`
+  - `contextTimeline`
+  - `chokepointReviewPackage`
+  - `contextIssueExportBundle`
+  - top-level `marineAnomalySummary.caveats`
 
 Future marine-owned context sources such as tsunami products, hurricane marine advisories, or HF radar currents can join this combined helper later if they remain explicitly contextual and do not collapse into vessel-intent inference.
 

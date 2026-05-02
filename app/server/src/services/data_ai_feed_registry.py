@@ -84,6 +84,83 @@ DATA_AI_MULTI_FEED_DEFINITIONS: tuple[DataAiFeedSourceDefinition, ...] = (
         ),
     ),
     DataAiFeedSourceDefinition(
+        source_id="cisa-news",
+        source_name="CISA News",
+        source_category="cyber-official",
+        feed_url="https://www.cisa.gov/news.xml",
+        fixture_file_name="cisa_news.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "CISA news items are official institutional and cybersecurity announcement context only; they are not by themselves exploit proof, compromise proof, incident confirmation, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="jvn-en-new",
+        source_name="JVN Vulnerability Notes",
+        source_category="cyber-official",
+        feed_url="https://jvn.jp/en/rss/jvn.rdf",
+        fixture_file_name="jvn_en_new.xml",
+        evidence_basis="advisory",
+        caveat=(
+            "JVN vulnerability notes are official advisory context for the Japanese vulnerability-information ecosystem; they are not exploit proof, compromise proof, or universal remediation priority."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="debian-security",
+        source_name="Debian Security Advisories",
+        source_category="cyber-official",
+        feed_url="https://www.debian.org/security/dsa",
+        fixture_file_name="debian_security.xml",
+        evidence_basis="advisory",
+        caveat=(
+            "Debian security items are distribution advisory context only; they are not exploit proof, incident confirmation, or universal urgency guidance beyond the source wording."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="microsoft-security-blog",
+        source_name="Microsoft Security Blog",
+        source_category="cyber-vendor",
+        feed_url="https://www.microsoft.com/en-us/security/blog/feed/",
+        fixture_file_name="microsoft_security_blog.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "Microsoft Security Blog items are vendor security and incident-response context only; they are not neutral global incident proof, exploitation proof, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="cisco-talos-blog",
+        source_name="Cisco Talos Blog",
+        source_category="cyber-research",
+        feed_url="https://blog.talosintelligence.com/rss/",
+        fixture_file_name="cisco_talos_blog.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "Cisco Talos items are vendor threat-research context only; they are not independent incident confirmation, attribution proof, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="mozilla-security-blog",
+        source_name="Mozilla Security Blog",
+        source_category="cyber-vendor",
+        feed_url="https://blog.mozilla.org/security/feed/",
+        fixture_file_name="mozilla_security_blog.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "Mozilla Security Blog items are vendor security engineering context only; they are not universal exploitation proof, compromise proof, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="github-security-blog",
+        source_name="GitHub Security Blog",
+        source_category="cyber-vendor",
+        feed_url="https://github.blog/security/feed/",
+        fixture_file_name="github_security_blog.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "GitHub Security Blog items are platform security context only; they are not independent incident confirmation, exploitation proof, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
         source_id="sans-isc-diary",
         source_name="SANS Internet Storm Center Diary",
         source_category="cyber-community",
@@ -139,6 +216,61 @@ DATA_AI_MULTI_FEED_DEFINITIONS: tuple[DataAiFeedSourceDefinition, ...] = (
         ),
     ),
     DataAiFeedSourceDefinition(
+        source_id="ripe-labs",
+        source_name="RIPE Labs",
+        source_category="internet-governance",
+        feed_url="https://labs.ripe.net/feed.xml",
+        fixture_file_name="ripe_labs.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "RIPE Labs items are internet-measurement, policy, and operations research context only; they are not whole-internet truth, outage proof, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="internet-society",
+        source_name="Internet Society",
+        source_category="internet-governance",
+        feed_url="https://www.internetsociety.org/feed/",
+        fixture_file_name="internet_society.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "Internet Society items are internet-governance and resilience context only; they are not policy truth, standards compliance proof, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="lacnic-news",
+        source_name="LACNIC News",
+        source_category="internet-registry",
+        feed_url="https://blog.lacnic.net/en/feed/",
+        fixture_file_name="lacnic_news.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "LACNIC news items are regional internet-registry policy and operations context only; they are not outage proof, standards compliance proof, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="w3c-news",
+        source_name="W3C News",
+        source_category="internet-standards",
+        feed_url="https://www.w3.org/news/feed/",
+        fixture_file_name="w3c_news.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "W3C news items are web-standards and governance context only; they are not universal standards compliance proof, policy truth, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="letsencrypt",
+        source_name="Let's Encrypt",
+        source_category="internet-operations",
+        feed_url="https://letsencrypt.org/feed.xml",
+        fixture_file_name="letsencrypt.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "Let's Encrypt items are certificate and internet-operations context only; they are not universal internet-health proof, standards compliance proof, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
         source_id="bellingcat",
         source_name="Bellingcat",
         source_category="osint-investigations",
@@ -180,6 +312,28 @@ DATA_AI_MULTI_FEED_DEFINITIONS: tuple[DataAiFeedSourceDefinition, ...] = (
         evidence_basis="contextual",
         caveat=(
             "ICIJ items are investigative/public-interest context, not official incident confirmation, legal conclusion, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="propublica",
+        source_name="ProPublica",
+        source_category="investigations",
+        feed_url="https://www.propublica.org/feeds/propublica/main",
+        fixture_file_name="propublica.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "ProPublica items are investigative and civic-accountability reporting context, not official event confirmation, wrongdoing proof, intent proof, legal conclusion, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="global-voices",
+        source_name="Global Voices",
+        source_category="civic-media",
+        feed_url="https://globalvoices.org/feed/",
+        fixture_file_name="global_voices.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "Global Voices items are civic, translation, and advocacy-adjacent reporting context, not official event truth, impact proof, legal conclusion, or required-action guidance."
         ),
     ),
     DataAiFeedSourceDefinition(
@@ -334,6 +488,72 @@ DATA_AI_MULTI_FEED_DEFINITIONS: tuple[DataAiFeedSourceDefinition, ...] = (
         evidence_basis="contextual",
         caveat=(
             "UNAIDS news items are official public-health and program context, not medical diagnosis, field confirmation, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="who-news",
+        source_name="World Health Organization News",
+        source_category="world-health",
+        feed_url="https://www.who.int/rss-feeds/news-english.xml",
+        fixture_file_name="who_news.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "WHO news items are official public-health and institutional context only; they are not outbreak proof, field confirmation, medical diagnosis, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="undrr-news",
+        source_name="UNDRR News",
+        source_category="disaster-risk",
+        feed_url="https://www.undrr.org/rss.xml",
+        fixture_file_name="undrr_news.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "UNDRR news items are disaster-risk reduction and resilience context only; they are not disaster impact proof, casualty confirmation, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="nasa-breaking-news",
+        source_name="NASA News Releases",
+        source_category="space-agency",
+        feed_url="https://www.nasa.gov/news-release/feed/",
+        fixture_file_name="nasa_breaking_news.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "NASA news-release items are official mission, science, and public institutional context only; they are not live hazard confirmation, public-safety proof, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="noaa-news",
+        source_name="NOAA News",
+        source_category="weather-climate",
+        feed_url="https://www.noaa.gov/rss.xml",
+        fixture_file_name="noaa_news.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "NOAA news items are official weather, climate, ocean, and institutional context only; they are not local hazard confirmation, forecast guarantee, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="esa-news",
+        source_name="ESA Top News",
+        source_category="space-agency",
+        feed_url="https://www.esa.int/rssfeed/TopNews",
+        fixture_file_name="esa_news.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "ESA news items are official space, Earth-observation, and institutional context only; they are not live event confirmation, operational directive, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="fda-news",
+        source_name="FDA Press Releases",
+        source_category="public-health-regulator",
+        feed_url="https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml",
+        fixture_file_name="fda_news.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "FDA press-release items are official regulatory and public-health announcement context only; they are not personal medical advice, product harm proof, or required-action guidance."
         ),
     ),
     DataAiFeedSourceDefinition(
@@ -524,6 +744,23 @@ DATA_AI_FEED_FAMILY_DEFINITIONS: tuple[DataAiFeedFamilyDefinition, ...] = (
         ),
     ),
     DataAiFeedFamilyDefinition(
+        family_id="cyber-institutional-watch-context",
+        family_label="Cyber Institutional Watch Context",
+        source_ids=(
+            "cisa-news",
+            "jvn-en-new",
+            "debian-security",
+            "microsoft-security-blog",
+            "cisco-talos-blog",
+            "mozilla-security-blog",
+            "github-security-blog",
+        ),
+        tags=("cyber", "institutional", "watch", "contextual"),
+        caveat=(
+            "Cyber institutional watch rows summarize official cyber announcements, advisory ecosystems, distribution security notices, and vendor/platform security watch context only; they do not create exploitation proof, compromise proof, incident confirmation, attribution proof, remediation priority, or required-action guidance."
+        ),
+    ),
+    DataAiFeedFamilyDefinition(
         family_id="official-public-advisories",
         family_label="Official and Public Advisories",
         source_ids=(
@@ -535,6 +772,22 @@ DATA_AI_FEED_FAMILY_DEFINITIONS: tuple[DataAiFeedFamilyDefinition, ...] = (
         tags=("official", "public", "advisory", "press"),
         caveat=(
             "Official/public advisory rows summarize source-claimed guidance, announcements, and institutional context only; they do not create field confirmation, legal conclusions, impact proof, or required-action guidance."
+        ),
+    ),
+    DataAiFeedFamilyDefinition(
+        family_id="public-institution-world-context",
+        family_label="Public Institution and World Context",
+        source_ids=(
+            "who-news",
+            "undrr-news",
+            "nasa-breaking-news",
+            "noaa-news",
+            "esa-news",
+            "fda-news",
+        ),
+        tags=("public", "institutional", "world-context", "contextual"),
+        caveat=(
+            "Public institution/world-context rows summarize official institutional, health, disaster-risk, space, weather, and regulatory context only; they do not create field confirmation, impact proof, legal conclusions, personal medical advice, or required-action guidance."
         ),
     ),
     DataAiFeedFamilyDefinition(
@@ -606,6 +859,21 @@ DATA_AI_FEED_FAMILY_DEFINITIONS: tuple[DataAiFeedFamilyDefinition, ...] = (
         ),
     ),
     DataAiFeedFamilyDefinition(
+        family_id="internet-governance-standards-context",
+        family_label="Internet Governance and Standards Context",
+        source_ids=(
+            "ripe-labs",
+            "internet-society",
+            "lacnic-news",
+            "w3c-news",
+            "letsencrypt",
+        ),
+        tags=("internet", "governance", "standards", "operations", "contextual"),
+        caveat=(
+            "Internet governance/standards rows summarize policy, standards, registry, and network-operations context only; they do not create whole-internet truth, outage proof, standards compliance conclusions, or required-action guidance."
+        ),
+    ),
+    DataAiFeedFamilyDefinition(
         family_id="osint-investigations",
         family_label="OSINT and Investigations",
         source_ids=(
@@ -617,6 +885,18 @@ DATA_AI_FEED_FAMILY_DEFINITIONS: tuple[DataAiFeedFamilyDefinition, ...] = (
         tags=("osint", "investigations", "research", "contextual"),
         caveat=(
             "OSINT/investigations family rows summarize investigative and research context only; they do not create official incident truth, legal conclusions, or standalone attribution proof."
+        ),
+    ),
+    DataAiFeedFamilyDefinition(
+        family_id="investigative-civic-context",
+        family_label="Investigative and Civic Context",
+        source_ids=(
+            "propublica",
+            "global-voices",
+        ),
+        tags=("investigations", "civic", "public-interest", "contextual"),
+        caveat=(
+            "Investigative/civic rows summarize investigative, translation, public-interest, and civic-accountability context only; they do not create official event truth, wrongdoing proof, intent proof, legal conclusions, or required-action guidance."
         ),
     ),
     DataAiFeedFamilyDefinition(

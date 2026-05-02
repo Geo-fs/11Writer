@@ -8,6 +8,8 @@ from src.types.api import (
     EnvironmentalSituationSnapshotPackage,
     EnvironmentalSourceFamiliesExportResponse,
     EnvironmentalSourceFamiliesOverviewResponse,
+    EnvironmentalWeatherObservationExportBundle,
+    EnvironmentalWeatherObservationReviewQueuePackage,
 )
 
 router = APIRouter(prefix="/api/context/environmental", tags=["geospatial-context"])
@@ -63,3 +65,21 @@ async def environmental_situation_snapshot_package(
         )
     service = EnvironmentalSourceFamiliesOverviewService(settings)
     return await service.get_situation_snapshot_package(family_ids=family, profile=profile)  # type: ignore[arg-type]
+
+
+@router.get("/weather-observation-export-bundle", response_model=EnvironmentalWeatherObservationExportBundle)
+async def environmental_weather_observation_export_bundle(
+    source: list[str] | None = Query(default=None, description="Optional repeated source filter, e.g. ?source=meteoswiss-open-data&source=taiwan-cwa-aws-opendata"),
+    settings: Settings = Depends(get_settings),
+) -> EnvironmentalWeatherObservationExportBundle:
+    service = EnvironmentalSourceFamiliesOverviewService(settings)
+    return await service.get_weather_observation_export_bundle(source_ids=source)
+
+
+@router.get("/weather-observation-review-queue", response_model=EnvironmentalWeatherObservationReviewQueuePackage)
+async def environmental_weather_observation_review_queue(
+    source: list[str] | None = Query(default=None, description="Optional repeated source filter, e.g. ?source=meteoswiss-open-data&source=taiwan-cwa-aws-opendata"),
+    settings: Settings = Depends(get_settings),
+) -> EnvironmentalWeatherObservationReviewQueuePackage:
+    service = EnvironmentalSourceFamiliesOverviewService(settings)
+    return await service.get_weather_observation_review_queue(source_ids=source)

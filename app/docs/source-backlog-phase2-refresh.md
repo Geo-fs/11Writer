@@ -264,7 +264,7 @@ New compact packets were added in the latest Batch 4 routing pass for:
 | `un-population-api` | `needs-verification` | `hold` | The exact official machine-readable population endpoint still needs tighter pinning. |
 | `uk-ea-water-quality` | `needs-verification` | `hold` | Official family is plausible, but the first safe public measurement query still needs confirmation. |
 | `ingv-seismic-fdsn` | `needs-verification` | `hold` | Public FDSN access exists, but the best narrow public event path still needs pinning. |
-| `orfeus-eida-federator` | `needs-verification` | `hold` | Good European network context candidate, but the bounded first slice needs clearer endpoint definition. |
+| `orfeus-eida-federator` | `implemented` | `n/a` | Repo-local backend-first bounded station-metadata slice now exists, so the next step is bounded consumer or explicit workflow-validation follow-on rather than fresh assignment. |
 | `germany-smard-power` | `needs-verification` | `hold` | High context value, but the first-party machine endpoint for a narrow slice still needs confirmation. |
 | `france-georisques` | `needs-verification` | `hold` | Strong risk-reference value, but it should not be assigned until one exact public dataset query is pinned. |
 | `iom-dtm-public-displacement` | `needs-verification` | `hold` | Public-resource-only access remains plausible, but form-gated and public paths need stricter separation. |
@@ -364,7 +364,7 @@ Current repo-local status truth:
 | --- | --- | --- | --- |
 | `geosphere-austria-datahub` | `needs-verification` | `hold` | DataHub-wide approval is too broad until one exact machine-readable dataset endpoint is pinned. |
 | `poland-imgw-public-data` | `needs-verification` | `hold` | Public repository posture looks plausible, but one bounded file-family contract still needs confirmation. |
-| `netherlands-rws-waterinfo` | `needs-verification` | `hold` | Useful hydrology context candidate, but machine endpoints still need cleaner separation from viewer/app routing. |
+| `netherlands-rws-waterinfo` | `assignment-ready` | `soon` | Narrow WaterWebservices POST endpoints are now pinned for one metadata plus latest water-level slice, but the active marine hydrology lane should finish first. |
 | `iaea-ines-news-events` | `needs-verification` | `hold` | Public reporting exists, but a stable machine-readable path still needs pinning. |
 | `ecmwf-open-forecast` | `deferred` | `hold` | Open model data is real, but the first safe slice is too binary-heavy and product-heavy for this wave. |
 | `noaa-nomads-models` | `deferred` | `hold` | Product-family sprawl and GRIB-heavy handling are too broad for a clean immediate assignment. |

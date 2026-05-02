@@ -13,15 +13,24 @@ Status note:
 - [source-assignment-board.md](/C:/Users/mike/11Writer/app/docs/source-assignment-board.md) remains the source-status truth.
 - [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md) remains the validation-traceability truth.
 - Atlas candidate docs remain routing input only, not implementation or workflow-validation proof.
+- A compact backend readiness/export snapshot now exists for implemented Data AI families; use it as the export/readiness surface before reopening any new family expansion.
+- A compact backend family review surface now exists at `GET /api/feeds/data-ai/source-families/review`; use it for coverage review before reopening any new family expansion.
+- A compact backend family review queue now exists at `GET /api/feeds/data-ai/source-families/review-queue`; use it for filterable family/source issue review before reopening any new family expansion.
+- A client-light inspector consumer now exists on top of those metadata-only surfaces, but it remains workflow-supporting evidence only until explicit smoke or manual workflow validation is recorded.
+- The client also exposes a bounded topic/context lens over recent-item metadata plus family metadata; treat it as workflow-supporting grouping only, not as claim truth, severity, or action guidance.
 - The implemented Data AI waves already cover:
   - starter bundle
   - official cyber advisory wave
+  - cyber institutional watch context wave
   - official/public advisory wave
+  - public institution/world-context wave
   - scientific/environmental context wave
   - policy/think-tank commentary wave
   - cyber vendor/community follow-on wave
+  - internet governance/standards context wave
   - infrastructure/status wave
   - OSINT/investigations wave
+  - investigative/civic context wave
   - rights/civic/digital-policy wave
   - fact-checking/disinformation wave
 
@@ -35,6 +44,7 @@ Why:
 - scientific/environmental context is now implemented backend-first and should not be routed again as fresh source-creation work
 - policy/think-tank commentary is now implemented backend-first and should not be routed again as fresh source-creation work
 - cyber vendor/community follow-on is now implemented backend-first and should not be routed again as fresh source-creation work
+- investigative/civic context is now implemented backend-first and should not be routed again as fresh source-creation work
 - held/deferred groups should stay closed unless Manager explicitly reopens one narrow family
 
 ## Post-Summary Families

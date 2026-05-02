@@ -284,9 +284,12 @@ async function runAircraftPhase(browser) {
         "Aerospace Context Review",
         "Aerospace Export Readiness",
         "Aerospace Source Readiness",
+        "Aerospace Workflow Readiness",
         "Aerospace Context Gap Queue",
+        "Aerospace Context Review Queue",
         "Aerospace Context Report",
         "Aerospace Review Queue",
+        "OurAirports Reference Context",
         "Geomagnetism (USGS)",
         "Current vs Archive Space-Weather Context",
         "Space Weather Archive Context",
@@ -335,6 +338,31 @@ async function runAircraftPhase(browser) {
     if (!snapshotMetadata?.faaNasAirportStatus?.airportCode) {
       throw new Error("Aircraft snapshot metadata missing FAA NAS airport-status context.");
     }
+    if (!snapshotMetadata?.ourairportsReferenceContext?.selectedAirportCode) {
+      throw new Error("Aircraft snapshot metadata missing OurAirports reference context.");
+    }
+    if (snapshotMetadata.ourairportsReferenceContext?.sourceMode !== "fixture") {
+      throw new Error(
+        `Aircraft OurAirports metadata expected fixture mode. Received ${snapshotMetadata.ourairportsReferenceContext?.sourceMode}`
+      );
+    }
+    if (
+      !["exact-airport-code", "airport-name-match", "no-match", "not-applicable", "unavailable"].includes(
+        snapshotMetadata.ourairportsReferenceContext?.airportMatchStatus
+      )
+    ) {
+      throw new Error(
+        `Aircraft OurAirports airport match status was not recognized: ${snapshotMetadata.ourairportsReferenceContext?.airportMatchStatus}`
+      );
+    }
+    if (
+      !Array.isArray(snapshotMetadata?.ourairportsReferenceContext?.doesNotProve) ||
+      !snapshotMetadata.ourairportsReferenceContext.doesNotProve.some((line) =>
+        String(line).includes("do not validate aircraft identity")
+      )
+    ) {
+      throw new Error("Aircraft OurAirports metadata missing reference-only does-not-prove guardrails.");
+    }
     if (!snapshotMetadata?.geomagnetismContext?.observatoryId) {
       throw new Error("Aircraft snapshot metadata missing geomagnetism context.");
     }
@@ -373,8 +401,17 @@ async function runAircraftPhase(browser) {
     if (!snapshotMetadata?.aerospaceSourceReadinessBundle?.bundleId) {
       throw new Error("Aircraft snapshot metadata missing aerospace source readiness bundle.");
     }
+    if (!snapshotMetadata?.aerospaceWorkflowReadinessPackage?.packageId) {
+      throw new Error("Aircraft snapshot metadata missing aerospace workflow readiness package.");
+    }
     if (!snapshotMetadata?.aerospaceContextGapQueue?.itemCount && snapshotMetadata?.aerospaceContextGapQueue?.itemCount !== 0) {
       throw new Error("Aircraft snapshot metadata missing aerospace context gap queue.");
+    }
+    if (!snapshotMetadata?.aerospaceContextReviewQueue?.itemCount && snapshotMetadata?.aerospaceContextReviewQueue?.itemCount !== 0) {
+      throw new Error("Aircraft snapshot metadata missing aerospace context review queue.");
+    }
+    if (!snapshotMetadata?.aerospaceContextReviewExportBundle?.bundleId) {
+      throw new Error("Aircraft snapshot metadata missing aerospace context review export bundle.");
     }
     if (!snapshotMetadata?.aerospaceExportCoherence?.coherenceState) {
       throw new Error("Aircraft snapshot metadata missing aerospace export coherence.");
@@ -430,8 +467,20 @@ async function runAircraftPhase(browser) {
     if (!Array.isArray(snapshotMetadata?.aerospaceSourceReadinessBundle?.families)) {
       throw new Error("Aircraft aerospace source readiness bundle metadata missing families.");
     }
+    if (!Array.isArray(snapshotMetadata?.aerospaceWorkflowReadinessPackage?.validationRows)) {
+      throw new Error("Aircraft aerospace workflow readiness package metadata missing validationRows.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceWorkflowReadinessPackage?.missingEvidenceRows)) {
+      throw new Error("Aircraft aerospace workflow readiness package metadata missing missingEvidenceRows.");
+    }
     if (!Array.isArray(snapshotMetadata?.aerospaceContextGapQueue?.items)) {
       throw new Error("Aircraft aerospace context gap queue metadata missing items.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceContextReviewQueue?.items)) {
+      throw new Error("Aircraft aerospace context review queue metadata missing items.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceContextReviewExportBundle?.reviewLines)) {
+      throw new Error("Aircraft aerospace context review export bundle metadata missing reviewLines.");
     }
     if (!Array.isArray(snapshotMetadata?.aerospaceExportCoherence?.alignedMetadataKeys)) {
       throw new Error("Aircraft aerospace export coherence metadata missing alignedMetadataKeys.");
@@ -444,6 +493,14 @@ async function runAircraftPhase(browser) {
     }
     if (!snapshotMetadata.aerospaceIssueExportBundle.items.some((item) => item.category === "current-archive-separation")) {
       throw new Error("Aircraft aerospace issue export bundle metadata missing current/archive separation review coverage.");
+    }
+    if (snapshotMetadata?.aerospaceWorkflowReadinessPackage?.preparedSmokeStatus !== "prepared") {
+      throw new Error(
+        `Aircraft aerospace workflow readiness package expected prepared smoke status. Received ${snapshotMetadata?.aerospaceWorkflowReadinessPackage?.preparedSmokeStatus}`
+      );
+    }
+    if (!String(snapshotMetadata?.aerospaceWorkflowReadinessPackage?.guardrailLine ?? "").includes("evidence-accounting only")) {
+      throw new Error("Aircraft aerospace workflow readiness package metadata missing the evidence-accounting guardrail.");
     }
     if (!snapshotMetadata.aerospaceIssueExportBundle.items.every((item) => String(item.guardrailLines?.join(" ") ?? "").includes("do not imply severity"))) {
       throw new Error("Aircraft aerospace issue export bundle metadata missing review-only guardrails on one or more items.");
@@ -466,8 +523,20 @@ async function runAircraftPhase(browser) {
     if (!snapshotMetadata?.aerospaceExportProfile?.includedMetadataKeys?.includes("aerospaceContextSnapshotReport")) {
       throw new Error("Aircraft export profile metadata missing context snapshot/report metadata-key coverage.");
     }
+    if (!snapshotMetadata?.aerospaceExportProfile?.includedMetadataKeys?.includes("aerospaceContextReviewQueue")) {
+      throw new Error("Aircraft export profile metadata missing context review queue metadata-key coverage.");
+    }
+    if (!snapshotMetadata?.aerospaceExportProfile?.includedMetadataKeys?.includes("aerospaceContextReviewExportBundle")) {
+      throw new Error("Aircraft export profile metadata missing context review export bundle metadata-key coverage.");
+    }
     if (!String(snapshotMetadata?.aerospaceContextGapQueue?.guardrailLine ?? "").includes("do not imply severity")) {
       throw new Error("Aircraft aerospace context gap queue metadata missing the no-consequence guardrail.");
+    }
+    if (!String(snapshotMetadata?.aerospaceContextReviewQueue?.guardrailLine ?? "").includes("review/accounting summaries only")) {
+      throw new Error("Aircraft aerospace context review queue metadata missing the review-accounting guardrail.");
+    }
+    if (!String(snapshotMetadata?.aerospaceContextReviewExportBundle?.guardrailLine ?? "").includes("review-safe lines and caveats only")) {
+      throw new Error("Aircraft aerospace context review export bundle metadata missing the review-safe export guardrail.");
     }
     if (!String(snapshotMetadata?.aerospaceIssueExportBundle?.guardrailLine ?? "").includes("do not imply severity")) {
       throw new Error("Aircraft aerospace issue export bundle metadata missing the no-severity guardrail.");
@@ -585,6 +654,7 @@ async function runSatellitePhase(browser) {
         "Aerospace Export Readiness",
         "Aerospace Source Readiness",
         "Aerospace Context Gap Queue",
+        "Aerospace Context Review Queue",
         "Aerospace Context Report",
         "Aerospace Review Queue",
         "Geomagnetism (USGS)",
@@ -674,6 +744,12 @@ async function runSatellitePhase(browser) {
     if (!snapshotMetadata?.aerospaceContextGapQueue?.itemCount && snapshotMetadata?.aerospaceContextGapQueue?.itemCount !== 0) {
       throw new Error("Satellite snapshot metadata missing aerospace context gap queue.");
     }
+    if (!snapshotMetadata?.aerospaceContextReviewQueue?.itemCount && snapshotMetadata?.aerospaceContextReviewQueue?.itemCount !== 0) {
+      throw new Error("Satellite snapshot metadata missing aerospace context review queue.");
+    }
+    if (!snapshotMetadata?.aerospaceContextReviewExportBundle?.bundleId) {
+      throw new Error("Satellite snapshot metadata missing aerospace context review export bundle.");
+    }
     if (!snapshotMetadata?.aerospaceExportCoherence?.coherenceState) {
       throw new Error("Satellite snapshot metadata missing aerospace export coherence.");
     }
@@ -731,6 +807,12 @@ async function runSatellitePhase(browser) {
     if (!Array.isArray(snapshotMetadata?.aerospaceContextGapQueue?.items)) {
       throw new Error("Satellite aerospace context gap queue metadata missing items.");
     }
+    if (!Array.isArray(snapshotMetadata?.aerospaceContextReviewQueue?.items)) {
+      throw new Error("Satellite aerospace context review queue metadata missing items.");
+    }
+    if (!Array.isArray(snapshotMetadata?.aerospaceContextReviewExportBundle?.reviewLines)) {
+      throw new Error("Satellite aerospace context review export bundle metadata missing reviewLines.");
+    }
     if (!Array.isArray(snapshotMetadata?.aerospaceExportCoherence?.alignedMetadataKeys)) {
       throw new Error("Satellite aerospace export coherence metadata missing alignedMetadataKeys.");
     }
@@ -764,8 +846,20 @@ async function runSatellitePhase(browser) {
     if (!snapshotMetadata?.aerospaceExportProfile?.includedMetadataKeys?.includes("aerospaceContextSnapshotReport")) {
       throw new Error("Satellite export profile metadata missing context snapshot/report metadata-key coverage.");
     }
+    if (!snapshotMetadata?.aerospaceExportProfile?.includedMetadataKeys?.includes("aerospaceContextReviewQueue")) {
+      throw new Error("Satellite export profile metadata missing context review queue metadata-key coverage.");
+    }
+    if (!snapshotMetadata?.aerospaceExportProfile?.includedMetadataKeys?.includes("aerospaceContextReviewExportBundle")) {
+      throw new Error("Satellite export profile metadata missing context review export bundle metadata-key coverage.");
+    }
     if (!String(snapshotMetadata?.aerospaceContextGapQueue?.guardrailLine ?? "").includes("do not imply severity")) {
       throw new Error("Satellite aerospace context gap queue metadata missing the no-consequence guardrail.");
+    }
+    if (!String(snapshotMetadata?.aerospaceContextReviewQueue?.guardrailLine ?? "").includes("review/accounting summaries only")) {
+      throw new Error("Satellite aerospace context review queue metadata missing the review-accounting guardrail.");
+    }
+    if (!String(snapshotMetadata?.aerospaceContextReviewExportBundle?.guardrailLine ?? "").includes("review-safe lines and caveats only")) {
+      throw new Error("Satellite aerospace context review export bundle metadata missing the review-safe export guardrail.");
     }
     if (!String(snapshotMetadata?.aerospaceIssueExportBundle?.guardrailLine ?? "").includes("do not imply severity")) {
       throw new Error("Satellite aerospace issue export bundle metadata missing the no-severity guardrail.");

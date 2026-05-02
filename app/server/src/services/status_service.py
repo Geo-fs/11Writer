@@ -14,6 +14,7 @@ def build_source_status(settings: Settings) -> SourceStatusResponse:
     google_enabled = bool(settings.google_maps_api_key)
     aircraft_runtime = get_source_runtime_status("opensky-network")
     opensky_anonymous_runtime = get_source_runtime_status("opensky-anonymous-states")
+    ourairports_reference_runtime = get_source_runtime_status("ourairports-reference")
     satellite_runtime = get_source_runtime_status("celestrak-active")
     aviation_weather_runtime = get_source_runtime_status("noaa-awc")
     faa_nas_runtime = get_source_runtime_status("faa-nas-status")
@@ -71,6 +72,13 @@ def build_source_status(settings: Settings) -> SourceStatusResponse:
             default_freshness=60,
             default_stale_after=300,
             detail="Optional OpenSky anonymous state-vector context is available for selected-aircraft source review; coverage is rate-limited and not guaranteed complete.",
+        ),
+        _runtime_to_status(
+            name="ourairports-reference",
+            runtime=ourairports_reference_runtime,
+            default_freshness=86_400,
+            default_stale_after=604_800,
+            detail="OurAirports public airport/runway reference context is available as baseline reference metadata for aerospace matching and display; it is not live operational airport truth.",
         ),
         _runtime_to_status(
             name="satellites",

@@ -77,15 +77,29 @@ Data AI owns bounded backend-only public internet-information source slices that
   - `ncsc-uk-all`
   - `cert-fr-alerts`
   - `cert-fr-advisories`
+  - `cisa-news`
+  - `jvn-en-new`
+  - `debian-security`
+  - `microsoft-security-blog`
+  - `cisco-talos-blog`
+  - `mozilla-security-blog`
+  - `github-security-blog`
   - `sans-isc-diary`
   - `cloudflare-status`
   - `cloudflare-radar`
   - `netblocks`
   - `apnic-blog`
+  - `ripe-labs`
+  - `internet-society`
+  - `lacnic-news`
+  - `w3c-news`
+  - `letsencrypt`
   - `bellingcat`
   - `citizen-lab`
   - `occrp`
   - `icij`
+  - `propublica`
+  - `global-voices`
   - `eff-updates`
   - `access-now`
   - `privacy-international`
@@ -100,6 +114,12 @@ Data AI owns bounded backend-only public internet-information source slices that
   - `eu-commission-press`
   - `un-press-releases`
   - `unaids-news`
+  - `who-news`
+  - `undrr-news`
+  - `nasa-breaking-news`
+  - `noaa-news`
+  - `esa-news`
+  - `fda-news`
   - `our-world-in-data`
   - `carbon-brief`
   - `eumetsat-news`
@@ -121,15 +141,29 @@ Data AI owns bounded backend-only public internet-information source slices that
   - `ncsc-uk-all` -> `https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml`
   - `cert-fr-alerts` -> `https://www.cert.ssi.gouv.fr/alerte/feed/`
   - `cert-fr-advisories` -> `https://www.cert.ssi.gouv.fr/avis/feed/`
+  - `cisa-news` -> `https://www.cisa.gov/news.xml`
+  - `jvn-en-new` -> `https://jvn.jp/en/rss/jvn.rdf`
+  - `debian-security` -> `https://www.debian.org/security/dsa`
+  - `microsoft-security-blog` -> `https://www.microsoft.com/en-us/security/blog/feed/`
+  - `cisco-talos-blog` -> `https://blog.talosintelligence.com/rss/`
+  - `mozilla-security-blog` -> `https://blog.mozilla.org/security/feed/`
+  - `github-security-blog` -> `https://github.blog/security/feed/`
   - `sans-isc-diary` -> `https://isc.sans.edu/rssfeed.xml`
   - `cloudflare-status` -> `https://www.cloudflarestatus.com/history.rss`
   - `cloudflare-radar` -> `https://blog.cloudflare.com/tag/cloudflare-radar/rss/`
   - `netblocks` -> `https://netblocks.org/feed`
   - `apnic-blog` -> `https://blog.apnic.net/feed/`
+  - `ripe-labs` -> `https://labs.ripe.net/feed.xml`
+  - `internet-society` -> `https://www.internetsociety.org/feed/`
+  - `lacnic-news` -> `https://blog.lacnic.net/en/feed/`
+  - `w3c-news` -> `https://www.w3.org/news/feed/`
+  - `letsencrypt` -> `https://letsencrypt.org/feed.xml`
   - `bellingcat` -> `https://www.bellingcat.com/feed/`
   - `citizen-lab` -> `https://citizenlab.ca/feed/`
   - `occrp` -> `https://www.occrp.org/en/feed`
   - `icij` -> `https://www.icij.org/feed/`
+  - `propublica` -> `https://www.propublica.org/feeds/propublica/main`
+  - `global-voices` -> `https://globalvoices.org/feed/`
   - `eff-updates` -> `https://www.eff.org/rss/updates.xml`
   - `access-now` -> `https://www.accessnow.org/feed/`
   - `privacy-international` -> `https://privacyinternational.org/rss.xml`
@@ -144,6 +178,12 @@ Data AI owns bounded backend-only public internet-information source slices that
   - `eu-commission-press` -> `https://ec.europa.eu/commission/presscorner/api/rss`
   - `un-press-releases` -> `https://press.un.org/en/rss.xml`
   - `unaids-news` -> `https://www.unaids.org/en/rss.xml`
+  - `who-news` -> `https://www.who.int/rss-feeds/news-english.xml`
+  - `undrr-news` -> `https://www.undrr.org/rss.xml`
+  - `nasa-breaking-news` -> `https://www.nasa.gov/news-release/feed/`
+  - `noaa-news` -> `https://www.noaa.gov/rss.xml`
+  - `esa-news` -> `https://www.esa.int/rssfeed/TopNews`
+  - `fda-news` -> `https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml`
   - `our-world-in-data` -> `https://ourworldindata.org/atom.xml`
   - `carbon-brief` -> `https://www.carbonbrief.org/feed/`
   - `eumetsat-news` -> `https://www.eumetsat.int/rss.xml`
@@ -180,12 +220,16 @@ Data AI owns bounded backend-only public internet-information source slices that
   - the aggregate route reuses the single existing registry/service path
   - `source` accepts a comma-separated subset of configured source ids
   - official cyber-advisory family queries can stay bounded with `source=ncsc-uk-all,cert-fr-alerts,cert-fr-advisories`
+  - cyber institutional watch queries can stay bounded with `source=cisa-news,jvn-en-new,debian-security,microsoft-security-blog,cisco-talos-blog,mozilla-security-blog,github-security-blog`
   - official/public advisory family queries can stay bounded with `source=state-travel-advisories,eu-commission-press,un-press-releases,unaids-news`
+  - public institutional/world-context queries can stay bounded with `source=who-news,undrr-news,nasa-breaking-news,noaa-news,esa-news,fda-news`
   - scientific/environmental family queries can stay bounded with `source=our-world-in-data,carbon-brief,eumetsat-news,smithsonian-volcano-news,eos-news`
   - policy/think-tank family queries can stay bounded with `source=atlantic-council,ecfr,war-on-the-rocks,modern-war-institute,irregular-warfare`
   - cyber vendor/community follow-on queries can stay bounded with `source=google-security-blog,bleepingcomputer,krebs-on-security,securityweek,dfrlab`
   - infrastructure/status family queries can stay bounded with `source=cloudflare-radar,netblocks,apnic-blog`
+  - internet governance/standards queries can stay bounded with `source=ripe-labs,internet-society,lacnic-news,w3c-news,letsencrypt`
   - OSINT/investigation family queries can stay bounded with `source=bellingcat,citizen-lab,occrp,icij`
+  - investigative/civic family queries can stay bounded with `source=propublica,global-voices`
   - rights/civic family queries can stay bounded with `source=eff-updates,access-now,privacy-international,freedom-house`
   - fact-checking/disinformation family queries can stay bounded with `source=full-fact,snopes,politifact,factcheck-org,euvsdisinfo`
   - unknown source ids return `400`
@@ -208,13 +252,17 @@ Data AI owns bounded backend-only public internet-information source slices that
   - `Act`: support analyst/export routing only; no action recommendation is implied
 - Implemented family ids:
   - `official-advisories`
+  - `cyber-institutional-watch-context`
   - `official-public-advisories`
+  - `public-institution-world-context`
   - `scientific-environmental-context`
   - `policy-thinktank-commentary`
   - `cyber-vendor-community-follow-on`
   - `cyber-community-context`
   - `infrastructure-status`
+  - `internet-governance-standards-context`
   - `osint-investigations`
+  - `investigative-civic-context`
   - `rights-civic-digital-policy`
   - `fact-checking-disinformation`
   - `world-events-disaster-alerts`
@@ -260,10 +308,23 @@ Data AI owns bounded backend-only public internet-information source slices that
   - NCSC UK all-feed items remain mixed official guidance/news/advisory context, not exploit or incident proof
   - CERT-FR alerts remain official French alert context, not exploit proof, victim proof, or action ranking
   - CERT-FR advisories remain official French advisory context, not incident certainty or derived severity
+  - CISA news remains official institutional/cybersecurity announcement context, not exploit proof, compromise proof, incident confirmation, or required-action guidance
+  - JVN vulnerability notes remain official advisory context, not exploit proof, compromise proof, or universal remediation priority
+  - Debian security advisories remain distribution advisory context, not exploit proof, incident confirmation, or universal urgency guidance
+  - Microsoft Security Blog remains vendor security/incident-response context, not neutral global incident proof, exploitation proof, or required-action guidance
+  - Cisco Talos remains vendor threat-research context, not independent incident confirmation, attribution proof, or required-action guidance
+  - Mozilla Security Blog remains vendor security engineering context, not universal exploitation proof, compromise proof, or required-action guidance
+  - GitHub Security Blog remains platform security context, not independent incident confirmation, exploitation proof, or required-action guidance
   - U.S. State travel advisories remain official travel-guidance context, not universal safety truth, field confirmation, or required action
   - European Commission Press Corner remains official institutional policy/announcement context, not field confirmation or legal conclusion
   - UN press releases remain official institutional statement context, not independent field confirmation, legal conclusion, or attribution proof
   - UNAIDS news remains official public-health/program context, not diagnosis, field confirmation, or required-action guidance
+  - WHO news remains official public-health and institutional context, not outbreak proof, field confirmation, diagnosis, or required-action guidance
+  - UNDRR news remains disaster-risk reduction and resilience context, not disaster impact proof, casualty confirmation, or required-action guidance
+  - NASA news releases remain official mission/science/public institutional context, not live hazard confirmation, public-safety proof, or required-action guidance
+  - NOAA news remains official weather/climate/ocean/institutional context, not local hazard confirmation, forecast guarantee, or required-action guidance
+  - ESA news remains official space/Earth-observation/institutional context, not live event confirmation, operational directive, or required-action guidance
+  - FDA press releases remain official regulatory/public-health announcement context, not personal medical advice, product harm proof, or required-action guidance
   - Our World in Data remains research and explanatory context, not primary event truth, field confirmation, or required-action guidance
   - Carbon Brief remains climate/environmental reporting context, not primary hazard confirmation, scientific certainty proof, or required-action guidance
   - EUMETSAT news remains weather/climate/Earth-observation context, not live hazard confirmation or operational forecast truth
@@ -284,10 +345,17 @@ Data AI owns bounded backend-only public internet-information source slices that
   - Cloudflare Radar remains provider-specific internet-analysis context, not neutral whole-internet truth or outage proof
   - NetBlocks remains methodology-dependent measurement context, not operator-confirmed outage truth
   - APNIC blog remains routing, measurement, and policy context, not a live incident feed
+  - RIPE Labs remains internet measurement, policy, and operations research context, not whole-internet truth, outage proof, or required-action guidance
+  - Internet Society remains internet-governance and resilience context, not policy truth, standards compliance proof, or required-action guidance
+  - LACNIC News remains regional internet-registry policy and operations context, not outage proof, standards compliance proof, or required-action guidance
+  - W3C News remains web-standards and governance context, not universal standards compliance proof, policy truth, or required-action guidance
+  - Let's Encrypt remains certificate and internet-operations context, not universal internet-health proof, standards compliance proof, or required-action guidance
   - Bellingcat remains investigative/OSINT context, not official incident truth, attribution proof, or legal conclusion
   - Citizen Lab remains research and digital-rights context, not official incident confirmation or universal attribution proof
   - OCCRP remains investigative-reporting context, not official source truth or standalone proof of culpability
   - ICIJ remains investigative/public-interest context, not official incident confirmation or legal finding
+  - ProPublica remains investigative and civic-accountability reporting context, not official event confirmation, wrongdoing proof, intent proof, legal conclusion, or required-action guidance
+  - Global Voices remains civic, translation, and advocacy-adjacent reporting context, not official event truth, impact proof, legal conclusion, or required-action guidance
   - EFF updates remain civic and digital-rights context, not official incident truth or required-action policy
   - Access Now remains advocacy and digital-rights context, not official source truth or incident confirmation
   - Privacy International remains civic and privacy-rights context, not official incident truth or legal conclusion
@@ -298,6 +366,143 @@ Data AI owns bounded backend-only public internet-information source slices that
   - FactCheck.org remains fact-checking context, not enforcement guidance or universal truth adjudication
   - EUvsDisinfo remains disinformation-monitoring context, not attribution proof, legal conclusion, or required-action policy
   - GDACS remains disaster alert context, not impact/damage proof
+
+### Data AI family readiness/export snapshot
+
+- Route: `GET /api/feeds/data-ai/source-families/readiness-export`
+- Query params:
+  - `family`
+  - `source`
+- Purpose:
+  - provide one compact backend readiness/export snapshot across all implemented Data AI feed families for analyst/report consumers
+  - preserve existing family/source health, evidence basis, mode, caveats, counts, and export-safe lines without inventing a credibility, severity, or truth score
+- Coverage:
+  - spans all currently implemented Data AI feed families already exposed by the shared aggregate registry and family overview
+  - supports bounded `family=` filtering, bounded `source=` filtering, and clean intersection of both filters
+- Snapshot/export metadata preserved:
+  - selected family ids and selected source ids
+  - family count and source count
+  - raw item count and deduped item count
+  - dedupe posture
+  - source mode
+  - prompt-injection guardrail line
+  - family caveats
+  - compact top-level export lines plus family/source export-safe lines
+- Export-safe behavior:
+  - readiness/export lines summarize metadata only
+  - they do not include free-form item text, article URLs, or linked-page content
+  - suspicious or imperative source text remains inert and cannot change source health, source mode, evidence basis, validation state, or repo behavior
+- Guardrail boundary:
+  - the readiness/export snapshot is source-availability and context accounting only
+  - it is not credibility scoring, truth adjudication, incident proof, attribution proof, legal conclusion, threat scoring, severity scoring, or required-action guidance
+
+### Data AI family review surface
+
+- Route: `GET /api/feeds/data-ai/source-families/review`
+- Query params:
+  - `family`
+  - `source`
+- Purpose:
+  - provide one compact backend review surface for implemented Data AI family coverage without reopening raw feed text
+  - summarize family source counts, health posture, caveat classes, evidence bases, prompt-injection test posture, dedupe posture, and export readiness
+- Coverage:
+  - reuses the existing family overview and readiness/export data rather than creating another feed ingestion path
+  - supports bounded `family=` filtering, bounded `source=` filtering, and clean intersection of both filters
+- Review metadata preserved:
+  - selected family ids and selected source ids
+  - family count and source count
+  - raw item count and deduped item count
+  - dedupe posture
+  - prompt-injection test posture
+  - guardrail line
+  - compact review lines
+- Family review card fields preserved:
+  - family id and label
+  - family health and family mode
+  - source count and loaded source count
+  - raw item count and deduped item count
+  - source ids and source categories
+  - evidence bases
+  - caveat classes
+  - prompt-injection test posture
+  - dedupe posture
+  - export readiness
+  - compact review lines
+- Export-safe behavior:
+  - review lines summarize metadata only
+  - they do not include free-form feed text, article URLs, or linked-page content
+  - suspicious or imperative source text remains inert and cannot change source health, source mode, evidence basis, validation state, or repo behavior
+- Guardrail boundary:
+  - the review surface is source-availability and context accounting only
+  - it is not credibility scoring, truth adjudication, incident proof, exploitation proof, compromise proof, attribution proof, legal conclusion, remediation priority, or required-action guidance
+
+### Data AI family review queue
+
+- Route: `GET /api/feeds/data-ai/source-families/review-queue`
+- Query params:
+  - `family`
+  - `source`
+  - `category`
+  - `issue_kind`
+- Purpose:
+  - provide one compact backend review queue and export bundle for implemented Data AI family/source review needs without reopening raw feed text or adding another ingestion framework
+  - surface family/source review issues around fixture-local posture, empty/degraded health states, caveat density, duplicate-heavy feeds, prompt-injection fixture posture, export-readiness posture, and contextual-only or advisory-only reminders
+- Coverage:
+  - reuses the existing family overview plus family/source summary data rather than creating another feed ingestion path
+  - supports bounded `family=` filtering, bounded `source=` filtering, bounded `category=` filtering, and bounded `issue_kind=` filtering
+  - current queue categories are `family` and `source`
+  - current queue issue kinds are:
+    - `fixture-local-source`
+    - `empty-family`
+    - `empty-source`
+    - `degraded-source`
+    - `high-caveat-density`
+    - `duplicate-heavy-feed`
+    - `prompt-injection-coverage-present`
+    - `prompt-injection-coverage-missing`
+    - `export-readiness-gap`
+    - `contextual-only-caveat-reminder`
+    - `advisory-only-caveat-reminder`
+- Review/export metadata preserved:
+  - selected family ids and selected source ids
+  - selected queue categories and selected issue kinds
+  - family count, source count, and issue count
+  - dedupe posture
+  - prompt-injection test posture
+  - source/family ids, source mode, source health, evidence bases, caveat classes, counts, and timestamps per queue item
+  - top-level review lines and export-safe lines plus per-issue review/export lines
+- Queue behavior:
+  - family-level items can flag fixture-local families, empty families, duplicate-heavy families, prompt-injection coverage posture, and contextual-only or advisory-only reminder posture
+  - source-level items can flag fixture-local sources, empty sources, degraded/error/disabled/stale/unknown sources, high caveat density, and duplicate-heavy feeds
+  - the queue is review metadata only; it does not reopen article text, linked pages, or article bodies
+- Export-safe behavior:
+  - queue review/export lines summarize metadata only
+  - they do not include free-form feed text, linked-page URLs, article URLs, or article-body extraction
+  - prompt-like source text remains inert and cannot change source health, source mode, evidence basis, validation state, queue behavior, or repo behavior
+  - the current client inspector consumer renders only metadata-safe counts, posture summaries, caveat classes, and export-safe lines from these backend surfaces
+- Guardrail boundary:
+  - the review queue is source-availability and context accounting only
+  - it is not credibility scoring, truth adjudication, severity scoring, threat scoring, incident proof, exploitation proof, compromise proof, attribution proof, legal conclusion, remediation priority, policy recommendation, or required-action guidance
+
+### Data AI client workflow support
+
+- Current client consumer:
+  - the inspector now exposes a small Data AI Source Intelligence card built only from `GET /api/feeds/data-ai/source-families/readiness-export`, `GET /api/feeds/data-ai/source-families/review`, and `GET /api/feeds/data-ai/source-families/review-queue`
+  - the inspector now also exposes a bounded topic/context lens built from existing recent-item metadata plus family review/readiness metadata
+- Client scope:
+  - review queue counts and top issue kinds
+  - source mode and family/source health posture
+  - evidence-basis and caveat-class summaries
+  - prompt-injection coverage posture
+  - export-readiness gap count
+  - compact export-safe lines
+  - bounded topic hints such as cyber, infrastructure, public institution, investigation/civic, governance/standards, advisory, and science/environment
+- Client guardrails:
+  - this remains workflow-supporting evidence only unless explicit smoke or manual workflow validation is recorded
+  - the client consumer does not fetch article bodies, linked pages, raw feed dumps, or linked-page URLs
+  - topic/context groupings use family ids, source ids, source categories, tags, evidence bases, source health, source modes, caveat classes, and dedupe posture only
+  - topic/context groupings do not infer hidden themes from article bodies, titles, or summaries
+  - the client consumer does not create credibility, truth, severity, threat, attribution, legal, remediation, policy, or action scores
 
 ### NIST NVD CVE
 

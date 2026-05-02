@@ -41,6 +41,16 @@ The product target is cross-platform: full desktop app, companion web app, and b
 - For shared files, validate after hunk staging, not before.
 - Current verified machine state: `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, and `cmd /c npm.cmd run build` are green; focused `marine` and `webcam` smoke currently pass, while focused `aerospace` smoke currently fails before app assertions with `windows-playwright-launch-permission`, narrowed to `windows-browser-launch-permission`.
 - That pre-assertion aerospace smoke result does not imply stale `dist` output or a current client compile failure.
+- Current verified Source Discovery plus Wave LLM shared-runtime checkpoint is also green:
+  - `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+  - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+  - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q`
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py app/server/tests/test_webcam_module.py -q`
+  - `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q`
+  - current warning posture in that checkpoint:
+    - `test_source_discovery_memory.py`: `378` Pydantic warnings
+    - `test_wave_monitor.py app/server/tests/test_analyst_workbench.py`: `45` Pydantic warnings
+  - those warnings are noisy but non-blocking in the current tree.
 
 ## Connect / tooling
 
@@ -110,6 +120,57 @@ Notes:
 - Keep lane validation bounded to the assigned Data AI source slice.
 - Do not treat the generic RSS foundation as lane-exclusive ownership just because Data AI currently consumes it.
 - If the change only touches Data AI docs, prefer diff review plus the focused backend tests above.
+
+## Source Discovery / Wave LLM shared runtime boundary
+
+Purpose:
+
+- shared runtime, review, scheduler, candidate-memory, and LLM-boundary validation across Connect, Data AI, Wave Monitor, and Analyst surfaces
+
+Working directory:
+
+- repo root: `C:\Users\mike\11Writer`
+
+Commands:
+
+```bash
+python -m pytest app/server/tests/test_source_discovery_memory.py -q
+python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q
+python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q
+python -m pytest app/server/tests/test_camera_sandbox_validation_report.py app/server/tests/test_webcam_module.py -q
+python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q
+python -m compileall app/server/src
+```
+
+Notes:
+
+- Use this block when staged changes touch any of:
+  - `app/server/src/app.py`
+  - `app/server/src/routes/source_discovery.py`
+  - `app/server/src/routes/wave_llm.py`
+  - `app/server/src/services/runtime_scheduler_service.py`
+  - `app/server/src/services/source_discovery_service.py`
+  - `app/server/src/services/wave_llm_service.py`
+  - `app/server/src/services/wave_monitor_service.py`
+  - `app/server/src/types/source_discovery.py`
+  - `app/server/src/types/wave_monitor.py`
+  - `app/server/tests/test_source_discovery_memory.py`
+  - `app/server/tests/test_wave_monitor.py`
+  - `app/server/tests/test_analyst_workbench.py`
+- Current boundary truth for this block:
+  - catalog scan is bounded, candidate-only, and explicit through `POST /api/source-discovery/jobs/catalog-scan`
+  - article fetch is explicit through `POST /api/source-discovery/jobs/article-fetch` and is gated to reviewed source classes plus allowed lifecycle states
+  - social metadata collection is explicit through `POST /api/source-discovery/jobs/social-metadata`, stores metadata-only snapshots, and does not fetch private or media-heavy payloads
+  - source packet export is explicit through `GET /api/source-discovery/memory/{source_id}/export`
+  - reviewed-claim application is explicit through `POST /api/source-discovery/reviews/apply-claims`, requires reviewed input, and is audit-logged
+  - runtime worker control is explicit through `POST /api/source-discovery/runtime/workers/{worker_name}/control`
+  - manual `run_now` is lease-safe and may return skip states when another worker holds the current lease
+  - scheduler startup loops are opt-in and gated by both `*_SCHEDULER_ENABLED` and `*_SCHEDULER_RUN_ON_STARTUP`
+  - scheduler ticks are bounded maintenance only and do not auto-promote, auto-validate, auto-activate, apply claims without review, or silently trust model output
+  - scheduler-created Wave LLM tasks are review-only `article_claim_extraction` tasks from eligible snapshots
+  - feed-link scan, bounded expansion, content snapshots, and review actions remain explicit job or review APIs
+  - OpenAI execution remains gated by explicit network permission plus positive request budget
+  - Wave LLM output remains review metadata and cannot directly change source reputation, source health, connector activation, or trusted facts
 
 ## Geospatial backend
 

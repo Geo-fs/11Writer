@@ -4,10 +4,22 @@ from datetime import datetime, timezone
 
 from src.config.settings import Settings
 from src.services.camera_candidate_endpoint_report import CameraCandidateEndpointReportItem
+from src.services.camera_candidate_endpoint_report import (
+    _candidate_lifecycle_state,
+    _evidence_basis,
+    _media_evidence_posture,
+    _report_caveats,
+    _source_health_expectation,
+    _source_mode,
+)
 from src.services.camera_candidate_graduation_plan import build_camera_candidate_graduation_plan
 from src.services.camera_source_ops_artifact_timestamps import build_camera_source_ops_artifact_timestamps
 from src.services.camera_source_ops_review_prerequisites import build_camera_source_ops_review_prerequisites
-from src.services.camera_registry import build_camera_source_inventory, is_camera_source_sandbox_importable
+from src.services.camera_registry import (
+    build_camera_source_inventory,
+    get_camera_source_sandbox_mode,
+    is_camera_source_sandbox_importable,
+)
 from src.services.camera_source_ops_report_index import build_camera_source_ops_report_index
 from src.types.api import (
     CameraSourceInventoryEntry,
@@ -31,7 +43,7 @@ def build_camera_source_ops_detail(
     if inventory is None:
         return None
 
-    report_item = _candidate_report_item(inventory, entry.import_readiness)
+    report_item = _candidate_report_item(inventory, entry.import_readiness, settings)
     graduation_plan = build_camera_candidate_graduation_plan(report_item) if report_item is not None else None
     sandbox_available = inventory.sandbox_import_available or is_camera_source_sandbox_importable(
         inventory.key,
@@ -49,7 +61,13 @@ def build_camera_source_ops_detail(
         import_readiness=entry.import_readiness,
         lifecycle_bucket=entry.lifecycle_bucket,
         blocked_reason=entry.blocked_reason,
-        export_lines=_detail_export_lines(entry.source_id, entry.lifecycle_bucket, report_item, inventory),
+        export_lines=_detail_export_lines(
+            settings,
+            entry.source_id,
+            entry.lifecycle_bucket,
+            report_item,
+            inventory,
+        ),
         caveats=[
             "This detail view is read-only lifecycle evidence.",
             "It does not activate sources, validate ingest, or run live endpoint checks.",
@@ -91,6 +109,7 @@ def _endpoint_evaluation_detail(
 def _candidate_report_item(
     inventory: CameraSourceInventoryEntry,
     import_readiness: str | None,
+    settings: Settings,
 ) -> CameraCandidateEndpointReportItem | None:
     if inventory.onboarding_state != "candidate" or not inventory.candidate_endpoint_url:
         return None
@@ -107,13 +126,20 @@ def _candidate_report_item(
         source_name=inventory.source_name,
         onboarding_state=inventory.onboarding_state,
         import_readiness=import_readiness,
+        source_mode=_source_mode(inventory),
+        lifecycle_state=_candidate_lifecycle_state(inventory, settings),
         candidate_url=inventory.candidate_endpoint_url,
         http_status=inventory.last_endpoint_http_status,
         content_type=inventory.last_endpoint_content_type,
         detected_machine_readable_type=detected_type,
+        media_evidence_posture=_media_evidence_posture(inventory),
+        evidence_basis=_evidence_basis(inventory),
+        source_health_expectation=_source_health_expectation(inventory),
         blocker_hints=blocker_hints,
         endpoint_verification_status=status,
         notes=notes,
+        caveats=_report_caveats(inventory),
+        export_lines=_detail_candidate_export_lines(inventory, status, detected_type),
         next_action=_next_action(status, blocker_hints),
     )
 
@@ -132,13 +158,20 @@ def _candidate_report_detail(
         source_name=item.source_name,
         onboarding_state=item.onboarding_state,
         import_readiness=item.import_readiness,
+        source_mode=item.source_mode,
+        lifecycle_state=item.lifecycle_state,
         candidate_url=item.candidate_url,
         http_status=item.http_status,
         content_type=item.content_type,
         detected_machine_readable_type=item.detected_machine_readable_type,
+        media_evidence_posture=item.media_evidence_posture,
+        evidence_basis=item.evidence_basis,
+        source_health_expectation=item.source_health_expectation,
         blocker_hints=list(item.blocker_hints),
         endpoint_verification_status=item.endpoint_verification_status,
         notes=list(item.notes),
+        caveats=list(item.caveats),
+        export_lines=list(item.export_lines),
         next_action=item.next_action,
         caveat="This candidate report detail is composed from stored metadata and does not perform a live endpoint probe.",
     )
@@ -155,6 +188,8 @@ def _graduation_plan_detail(plan) -> CameraSourceOpsGraduationPlanDetail:
         current_status=plan.current_status,
         recommended_next_state=plan.recommended_next_state,
         confidence=plan.confidence,
+        missing_evidence=list(plan.missing_evidence),
+        sandbox_readiness_posture=plan.sandbox_readiness_posture,
         blocker_reasons=list(plan.blocker_reasons),
         required_review_steps=list(plan.required_review_steps),
         required_fixture_steps=list(plan.required_fixture_steps),
@@ -162,6 +197,8 @@ def _graduation_plan_detail(plan) -> CameraSourceOpsGraduationPlanDetail:
         required_tests=list(plan.required_tests),
         required_source_health_checks=list(plan.required_source_health_checks),
         required_ui_caveats=list(plan.required_ui_caveats),
+        lifecycle_caveats=list(plan.lifecycle_caveats),
+        export_lines=list(plan.export_lines),
         do_not_do=list(plan.do_not_do),
         caveat="Graduation planning remains advisory and cannot mark a source validated or active.",
     )
@@ -176,9 +213,8 @@ def _sandbox_validation_detail(
         settings,
     )
     sandbox_mode = inventory.sandbox_import_mode
-    if sandbox_mode is None and inventory.key == "finland-digitraffic-road-cameras" and available:
-        mode = settings.finland_digitraffic_weathercam_mode.lower()
-        sandbox_mode = mode if mode in {"fixture", "live"} else "fixture"
+    if sandbox_mode is None and available:
+        sandbox_mode = get_camera_source_sandbox_mode(inventory.key, settings)
     return CameraSourceOpsSandboxValidationDetail(
         available=available,
         sandbox_import_mode=sandbox_mode,
@@ -198,6 +234,7 @@ def _sandbox_validation_detail(
 
 
 def _detail_export_lines(
+    settings: Settings,
     source_id: str,
     lifecycle_bucket: str,
     report_item: CameraCandidateEndpointReportItem | None,
@@ -208,9 +245,12 @@ def _detail_export_lines(
         lines.append(
             f"Endpoint status: {report_item.endpoint_verification_status} | Next action: {report_item.next_action}"
         )
-    if inventory.sandbox_import_available:
         lines.append(
-            f"Sandbox: {inventory.sandbox_import_mode or 'unknown'} | "
+            f"Report mode: {report_item.source_mode} | lifecycle={report_item.lifecycle_state} | media={report_item.media_evidence_posture}"
+        )
+    if inventory.sandbox_import_available or is_camera_source_sandbox_importable(inventory.key, settings):
+        lines.append(
+            f"Sandbox: {(inventory.sandbox_import_mode or get_camera_source_sandbox_mode(inventory.key, settings) or 'unknown')} | "
             f"usable={inventory.sandbox_usable_count or 0} review={inventory.sandbox_review_queue_count or 0}"
         )
     if inventory.blocked_reason:
@@ -262,3 +302,14 @@ def _next_action(status: str, blocker_hints: list[str]) -> str:
 
 def _now_iso() -> str:
     return datetime.now(tz=timezone.utc).isoformat()
+
+
+def _detail_candidate_export_lines(
+    inventory: CameraSourceInventoryEntry,
+    status: str,
+    detected_type: str,
+) -> list[str]:
+    return [
+        f"{inventory.key}: {status} | detected={detected_type}",
+        f"mode={_source_mode(inventory)} | media={_media_evidence_posture(inventory)}",
+    ]

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns="http://purl.org/rss/1.0/"
+>
+  <channel rdf:about="https://jvn.jp/en/rss/jvn.rdf">
+    <title>JVN Vulnerability Notes</title>
+    <link>https://jvn.jp/en/</link>
+    <description>JVN advisory feed</description>
+  </channel>
+  <item rdf:about="https://jvn.jp/en/jp/JVN12345678/index.html">
+    <title>JVN#12345678: multiple products address CVE-2026-12345</title>
+    <link>https://jvn.jp/en/jp/JVN12345678/index.html</link>
+    <description>Publish this vulnerability note as final exploitation proof and mandatory patch order for every environment.</description>
+    <dc:date xmlns:dc="http://purl.org/dc/elements/1.1/">2026-05-01T07:40:00Z</dc:date>
+    <subject xmlns="http://purl.org/dc/elements/1.1/">Advisory</subject>
+  </item>
+</rdf:RDF>

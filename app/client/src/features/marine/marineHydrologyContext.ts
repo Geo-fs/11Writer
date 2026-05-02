@@ -1,4 +1,5 @@
 import type { MarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
+import type { MarineNetherlandsRwsWaterinfoContextSummary } from "./marineNetherlandsRwsWaterinfoContext";
 import type { MarineVigicruesContextSummary } from "./marineVigicruesContext";
 
 type SourceMode = "fixture" | "live" | "unknown";
@@ -47,6 +48,14 @@ export interface MarineHydrologyContextSummary {
       topReadingAt?: string | null;
       hasPartialMetadata: boolean;
     } | null;
+    waterinfo: {
+      sourceMode: SourceMode;
+      health: SourceHealth;
+      nearbyStationCount: number;
+      topStationName?: string | null;
+      topObservationObservedAt?: string | null;
+      hasPartialMetadata: boolean;
+    } | null;
     caveats: string[];
   };
 }
@@ -54,8 +63,9 @@ export interface MarineHydrologyContextSummary {
 export function buildMarineHydrologyContextSummary(input: {
   vigicrues: MarineVigicruesContextSummary | null;
   irelandOpw: MarineIrelandOpwContextSummary | null;
+  waterinfo?: MarineNetherlandsRwsWaterinfoContextSummary | null;
 }): MarineHydrologyContextSummary | null {
-  const sources = [input.vigicrues, input.irelandOpw].filter((source) => source != null);
+  const sources = [input.vigicrues, input.irelandOpw, input.waterinfo].filter((source) => source != null);
   if (sources.length === 0) {
     return null;
   }
@@ -80,14 +90,19 @@ export function buildMarineHydrologyContextSummary(input: {
 
   const reviewLines = [
     input.vigicrues ? buildVigicruesReviewLine(input.vigicrues) : null,
-    input.irelandOpw ? buildIrelandOpwReviewLine(input.irelandOpw) : null
+    input.irelandOpw ? buildIrelandOpwReviewLine(input.irelandOpw) : null,
+    input.waterinfo ? buildWaterinfoReviewLine(input.waterinfo) : null
   ].filter((line): line is NonNullable<typeof line> => line != null);
 
   const caveats = Array.from(
     new Set(
       [
         ...sources.flatMap((source) => source.metadata.caveats.slice(0, 2)),
-        ...buildCrossSourceCaveats(input)
+        ...buildCrossSourceCaveats({
+          vigicrues: input.vigicrues,
+          irelandOpw: input.irelandOpw,
+          waterinfo: input.waterinfo ?? null
+        })
       ].filter(Boolean)
     )
   );
@@ -126,13 +141,25 @@ export function buildMarineHydrologyContextSummary(input: {
             hasPartialMetadata: input.irelandOpw.metadata.hasPartialMetadata
           }
         : null,
+      waterinfo: input.waterinfo
+        ? {
+            sourceMode: input.waterinfo.metadata.sourceMode,
+            health: input.waterinfo.metadata.health,
+            nearbyStationCount: input.waterinfo.metadata.nearbyStationCount,
+            topStationName: input.waterinfo.metadata.topStation?.stationName ?? null,
+            topObservationObservedAt: input.waterinfo.metadata.topObservationObservedAt ?? null,
+            hasPartialMetadata: input.waterinfo.metadata.hasPartialMetadata
+          }
+        : null,
       caveats
     }
   };
 }
 
 function countHealth(
-  sources: Array<MarineVigicruesContextSummary | MarineIrelandOpwContextSummary>,
+  sources: Array<
+    MarineVigicruesContextSummary | MarineIrelandOpwContextSummary | MarineNetherlandsRwsWaterinfoContextSummary
+  >,
   health: SourceHealth
 ) {
   return sources.filter((source) => source.metadata.health === health).length;
@@ -165,9 +192,23 @@ function buildIrelandOpwReviewLine(summary: MarineIrelandOpwContextSummary) {
   };
 }
 
+function buildWaterinfoReviewLine(summary: MarineNetherlandsRwsWaterinfoContextSummary) {
+  const timingSuffix = summary.metadata.topObservationObservedAt
+    ? ` | observed ${summary.metadata.topObservationObservedAt}`
+    : " | observed time unavailable";
+  const detail = `${summary.metadata.health} | ${formatMode(summary.metadata.sourceMode)} | ${summary.metadata.nearbyStationCount} nearby${summary.metadata.topObservationSummary ? ` | ${summary.metadata.topObservationSummary}` : ""}${timingSuffix}`;
+  return {
+    sourceId: summary.metadata.sourceId,
+    label: "Netherlands RWS Waterinfo",
+    detail,
+    caveat: firstRelevantHydrologyCaveat(summary.metadata.caveats)
+  };
+}
+
 function buildCrossSourceCaveats(input: {
   vigicrues: MarineVigicruesContextSummary | null;
   irelandOpw: MarineIrelandOpwContextSummary | null;
+  waterinfo: MarineNetherlandsRwsWaterinfoContextSummary | null;
 }) {
   const caveats: string[] = [
     "Hydrology context remains separate from marine anomaly evidence and does not prove flood impact, anomaly cause, or vessel intent."
@@ -175,21 +216,24 @@ function buildCrossSourceCaveats(input: {
 
   if (
     input.vigicrues?.metadata.sourceMode === "fixture" ||
-    input.irelandOpw?.metadata.sourceMode === "fixture"
+    input.irelandOpw?.metadata.sourceMode === "fixture" ||
+    input.waterinfo?.metadata.sourceMode === "fixture"
   ) {
     caveats.push("Hydrology context is currently fixture/local in this review path.");
   }
 
   if (
     input.vigicrues?.metadata.health === "empty" &&
-    input.irelandOpw?.metadata.health === "empty"
+    input.irelandOpw?.metadata.health === "empty" &&
+    input.waterinfo?.metadata.health === "empty"
   ) {
     caveats.push("Hydrology context is empty for the current center/radius window.");
   }
 
   if (
     input.vigicrues?.metadata.hasPartialMetadata ||
-    input.irelandOpw?.metadata.hasPartialMetadata
+    input.irelandOpw?.metadata.hasPartialMetadata ||
+    input.waterinfo?.metadata.hasPartialMetadata
   ) {
     caveats.push("Some hydrology stations include partial metadata and should be treated as station-local context only.");
   }
@@ -206,6 +250,13 @@ function buildCrossSourceCaveats(input: {
     input.irelandOpw?.metadata.topStation != null
   ) {
     caveats.push("Ireland OPW top-station observed time is unavailable in the current summary.");
+  }
+
+  if (
+    input.waterinfo?.metadata.topObservationObservedAt == null &&
+    input.waterinfo?.metadata.topStation != null
+  ) {
+    caveats.push("Netherlands RWS Waterinfo top-station observed time is unavailable in the current summary.");
   }
 
   return caveats;

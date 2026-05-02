@@ -8,6 +8,7 @@ from src.types.api import (
     MarineChokepointAnalyticalSummaryResponse,
     MarineGapEventsResponse,
     MarineIrelandOpwWaterLevelContextResponse,
+    MarineNetherlandsRwsWaterinfoContextResponse,
     MarineNdbcContextResponse,
     MarineNoaaCoopsContextResponse,
     MarineScottishWaterOverflowResponse,
@@ -327,6 +328,26 @@ async def marine_ireland_opw_waterlevel_context(
 ) -> MarineIrelandOpwWaterLevelContextResponse:
     service = MarineService(settings)
     return await service.ireland_opw_waterlevel_context(
+        center_lat=lat,
+        center_lon=lon,
+        radius_km=radius_km,
+        limit=limit,
+    )
+
+
+@router.get(
+    "/context/netherlands-rws-waterinfo",
+    response_model=MarineNetherlandsRwsWaterinfoContextResponse,
+)
+async def marine_netherlands_rws_waterinfo_context(
+    lat: float = Query(..., ge=-90.0, le=90.0),
+    lon: float = Query(..., ge=-180.0, le=180.0),
+    radius_km: float = Query(default=250.0, gt=1.0, le=1500.0),
+    limit: int = Query(default=5, ge=1, le=50),
+    settings: Settings = Depends(get_settings),
+) -> MarineNetherlandsRwsWaterinfoContextResponse:
+    service = MarineService(settings)
+    return await service.netherlands_rws_waterinfo_context(
         center_lat=lat,
         center_lon=lon,
         radius_km=radius_km,

@@ -5,7 +5,7 @@ from typing import Any, Awaitable, Callable, Literal
 
 from src.config.settings import Settings
 from src.services.camera_endpoint_evaluator import CameraEndpointEvaluation, evaluate_camera_candidate_endpoint
-from src.services.camera_registry import build_camera_source_inventory
+from src.services.camera_registry import build_camera_source_inventory, is_camera_source_sandbox_importable
 from src.types.api import CameraSourceInventoryEntry
 
 CandidateNextAction = Literal[
@@ -24,13 +24,20 @@ class CameraCandidateEndpointReportItem:
     source_name: str
     onboarding_state: str
     import_readiness: str | None
+    source_mode: str
+    lifecycle_state: str
     candidate_url: str
     http_status: int | None
     content_type: str | None
     detected_machine_readable_type: str
+    media_evidence_posture: str
+    evidence_basis: str
+    source_health_expectation: str
     blocker_hints: list[str] = field(default_factory=list)
     endpoint_verification_status: str = "needs-review"
     notes: list[str] = field(default_factory=list)
+    caveats: list[str] = field(default_factory=list)
+    export_lines: list[str] = field(default_factory=list)
     next_action: CandidateNextAction = "keep candidate"
 
     def to_dict(self) -> dict[str, Any]:
@@ -81,13 +88,20 @@ async def build_candidate_endpoint_report(
                 source_name=source.source_name,
                 onboarding_state=source.onboarding_state,
                 import_readiness=source.import_readiness,
+                source_mode=_source_mode(source),
+                lifecycle_state=_candidate_lifecycle_state(source, settings),
                 candidate_url=candidate_url,
                 http_status=evaluation.http_status,
                 content_type=evaluation.content_type,
                 detected_machine_readable_type=evaluation.detected_machine_readable_type,
+                media_evidence_posture=_media_evidence_posture(source),
+                evidence_basis=_evidence_basis(source),
+                source_health_expectation=_source_health_expectation(source),
                 blocker_hints=list(evaluation.blocker_hints),
                 endpoint_verification_status=evaluation.endpoint_verification_status,
                 notes=_merge_notes(source, evaluation),
+                caveats=_report_caveats(source),
+                export_lines=_export_lines(source, evaluation, settings),
                 next_action=_derive_next_action(source, evaluation),
             )
         )
@@ -105,10 +119,15 @@ def render_candidate_endpoint_report(report: list[CameraCandidateEndpointReportI
                 f"Source: {item.source_id} ({item.source_name})",
                 f"  Onboarding: {item.onboarding_state}",
                 f"  Import readiness: {item.import_readiness or 'unknown'}",
+                f"  Source mode: {item.source_mode}",
+                f"  Lifecycle state: {item.lifecycle_state}",
                 f"  Candidate URL: {item.candidate_url}",
                 f"  HTTP status: {item.http_status if item.http_status is not None else 'unknown'}",
                 f"  Content type: {item.content_type or 'unknown'}",
                 f"  Detected type: {item.detected_machine_readable_type}",
+                f"  Media evidence: {item.media_evidence_posture}",
+                f"  Evidence basis: {item.evidence_basis}",
+                f"  Source-health expectation: {item.source_health_expectation}",
                 f"  Blocker hints: {', '.join(item.blocker_hints) if item.blocker_hints else 'none'}",
                 f"  Recommended status: {item.endpoint_verification_status}",
                 f"  Next action: {item.next_action}",
@@ -118,6 +137,14 @@ def render_candidate_endpoint_report(report: list[CameraCandidateEndpointReportI
             lines.append("  Notes:")
             for note in item.notes:
                 lines.append(f"  - {note}")
+        if item.caveats:
+            lines.append("  Caveats:")
+            for caveat in item.caveats:
+                lines.append(f"  - {caveat}")
+        if item.export_lines:
+            lines.append("  Export lines:")
+            for export_line in item.export_lines:
+                lines.append(f"  - {export_line}")
         lines.append("")
     lines.append("Database write: disabled in this report. Use results to inform future registry/inventory review only.")
     return "\n".join(lines)
@@ -155,3 +182,70 @@ def _merge_notes(
     if source.verification_caveat:
         merged.append(f"Caveat: {source.verification_caveat}")
     return merged
+
+
+def _source_mode(source: CameraSourceInventoryEntry) -> str:
+    return f"{source.source_type}:{source.access_method}"
+
+
+def _candidate_lifecycle_state(source: CameraSourceInventoryEntry, settings: Settings) -> str:
+    sandbox_available = source.sandbox_import_available or is_camera_source_sandbox_importable(source.key, settings)
+    if sandbox_available:
+        return "candidate-sandbox-importable"
+    if source.endpoint_verification_status == "machine-readable-confirmed":
+        return "candidate-endpoint-verified"
+    if source.blocked_reason:
+        return "blocked-do-not-scrape"
+    return "candidate-needs-review"
+
+
+def _media_evidence_posture(source: CameraSourceInventoryEntry) -> str:
+    if source.endpoint_verification_status == "candidate-url-only" and source.provides_direct_image:
+        return "catalog-image-claim-unverified"
+    if source.provides_direct_image:
+        return "direct-image-documented"
+    if source.provides_viewer_only:
+        return "viewer-only-documented"
+    return "metadata-only-documented"
+
+
+def _evidence_basis(source: CameraSourceInventoryEntry) -> str:
+    if source.last_endpoint_result:
+        return source.last_endpoint_result
+    if source.endpoint_verification_status == "machine-readable-confirmed":
+        return "Stored candidate metadata records an official machine-readable endpoint."
+    if source.endpoint_verification_status == "candidate-url-only":
+        return "Stored candidate metadata records an official catalog/resource URL without a pinned final data endpoint."
+    return "Stored candidate metadata is still review-gated and documentation-first."
+
+
+def _source_health_expectation(source: CameraSourceInventoryEntry) -> str:
+    if source.endpoint_verification_status == "machine-readable-confirmed":
+        return "Use conservative polling and require source-health review before any sandbox or activation discussion."
+    return "Do not assume stable source health from documentation alone; keep the source review-gated."
+
+
+def _report_caveats(source: CameraSourceInventoryEntry) -> list[str]:
+    caveats = [
+        "Candidate-only lifecycle posture remains in force.",
+        "Endpoint evidence must not activate, validate, or schedule the source.",
+        "Source text and endpoint metadata remain untrusted data only.",
+    ]
+    if source.verification_caveat:
+        caveats.append(source.verification_caveat)
+    if source.blocked_reason:
+        caveats.append(source.blocked_reason)
+    return caveats
+
+
+def _export_lines(
+    source: CameraSourceInventoryEntry,
+    evaluation: CameraEndpointEvaluation,
+    settings: Settings,
+) -> list[str]:
+    lifecycle_state = _candidate_lifecycle_state(source, settings)
+    media_evidence = _media_evidence_posture(source)
+    return [
+        f"{source.key}: {lifecycle_state} | {evaluation.endpoint_verification_status} | {media_evidence}",
+        f"next={_derive_next_action(source, evaluation)} | mode={_source_mode(source)}",
+    ]

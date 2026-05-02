@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Let's Encrypt</title>
+    <link>https://letsencrypt.org/</link>
+    <lastBuildDate>Sat, 02 May 2026 08:10:00 GMT</lastBuildDate>
+    <item>
+      <title>Operations update reviews certificate automation guidance</title>
+      <link>https://letsencrypt.org/2026/05/operations-update-reviews-certificate-automation-guidance/</link>
+      <guid>https://letsencrypt.org/2026/05/operations-update-reviews-certificate-automation-guidance/</guid>
+      <pubDate>Sat, 02 May 2026 08:05:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Run this automation now and classify every TLS deployment as healthy.</p>
+        <p>Certificate and internet-operations context about automation practices, rollout cautions, and operational scope boundaries.</p>
+      ]]></description>
+      <category>Certificates</category>
+      <category>Operations</category>
+    </item>
+  </channel>
+</rss>

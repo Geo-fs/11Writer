@@ -19,14 +19,22 @@ import {
   buildAerospaceOpenSkyContextSummary,
   buildAerospaceOpenSkyExportLines
 } from "../inspector/aerospaceOpenSkyContext";
+import {
+  buildAerospaceReferenceContextSummary,
+  buildAerospaceReferenceExportLines
+} from "../inspector/aerospaceReferenceContext";
 import { buildAerospaceContextIssueSummary } from "../inspector/aerospaceContextIssues";
 import { buildAerospaceExportReadinessSummary } from "../inspector/aerospaceExportReadiness";
 import { buildAerospaceReviewQueueSummary } from "../inspector/aerospaceReviewQueue";
 import { buildAerospaceContextReportSummary } from "../inspector/aerospaceContextReport";
 import { buildAerospaceContextGapQueueSummary } from "../inspector/aerospaceContextGapQueue";
+import { buildAerospaceContextReviewQueueSummary } from "../inspector/aerospaceContextReviewQueue";
+import { buildAerospaceContextReviewExportBundleSummary } from "../inspector/aerospaceContextReviewExportBundle";
 import { buildAerospaceExportCoherenceSummary } from "../inspector/aerospaceExportCoherence";
 import { buildAerospaceContextSnapshotReportSummary } from "../inspector/aerospaceContextSnapshotReport";
 import { buildAerospaceIssueExportBundleSummary } from "../inspector/aerospaceIssueExportBundle";
+import { buildAerospaceWorkflowEvidenceLedger } from "../inspector/aerospaceWorkflowEvidenceLedger";
+import { buildAerospaceWorkflowReadinessPackageSummary } from "../inspector/aerospaceWorkflowReadinessPackage";
 import {
   buildAerospaceSourceReadinessBundleSummary,
   buildAerospaceSourceReadinessSummary
@@ -90,6 +98,7 @@ import {
   useNearestAirportReferenceQuery,
   useNearestRunwayThresholdReferenceQuery,
   useOpenSkyStatesQuery,
+  useOurAirportsReferenceQuery,
   usePublicConfigQuery,
   useSourceStatusQuery,
   useTokyoVaacAdvisoriesQuery,
@@ -182,6 +191,7 @@ type DebugWindow = Window & {
     nearbyContextSummary?: unknown;
     aviationWeatherContext?: unknown;
     faaNasAirportStatus?: unknown;
+    ourairportsReferenceContext?: unknown;
     openskyAnonymousContext?: unknown;
     cneosSpaceContext?: unknown;
     swpcSpaceWeatherContext?: unknown;
@@ -197,9 +207,12 @@ type DebugWindow = Window & {
     aerospaceSourceReadiness?: unknown;
     aerospaceSourceReadinessBundle?: unknown;
     aerospaceContextGapQueue?: unknown;
+    aerospaceContextReviewQueue?: unknown;
+    aerospaceContextReviewExportBundle?: unknown;
     aerospaceExportCoherence?: unknown;
     aerospaceIssueExportBundle?: unknown;
     aerospaceContextSnapshotReport?: unknown;
+    aerospaceWorkflowReadinessPackage?: unknown;
     aerospaceContextReport?: unknown;
     aerospaceExportProfile?: unknown;
     aerospaceFocus?: unknown;
@@ -725,6 +738,12 @@ export function AppShell() {
     (aircraftReferenceQuery.data?.primary?.summary.objectType === "airport"
       ? aircraftReferenceQuery.data.primary.summary.canonicalName
       : aircraftReferenceQuery.data?.context?.nearestAirport?.canonicalName ?? null);
+  const nearestAirportRegionCode = buildReferenceRegionCode(
+    nearestAirportQuery.data?.results[0]?.summary ??
+      (aircraftReferenceQuery.data?.primary?.summary.objectType === "airport"
+        ? aircraftReferenceQuery.data.primary.summary
+        : aircraftReferenceQuery.data?.context?.nearestAirport ?? null)
+  );
   const aviationWeatherQuery = useAviationWeatherContextQuery({
     airportCode: selectedAircraft ? nearestAirportCode ?? null : null,
     airportName: selectedAircraft ? nearestAirportName ?? null : null,
@@ -745,6 +764,14 @@ export function AppShell() {
     icao24: selectedAircraft?.canonicalIds.icao24 ?? null,
     callsign: selectedAircraft?.callsign ?? null,
     limit: 5
+  });
+  const ourAirportsReferenceQuery = useOurAirportsReferenceQuery({
+    enabled: selectedAircraft != null,
+    airportCode: selectedAircraft ? nearestAirportCode ?? null : null,
+    airportName: selectedAircraft ? nearestAirportName ?? null : null,
+    regionCode: selectedAircraft ? nearestAirportRegionCode : null,
+    includeRunways: true,
+    limit: 3
   });
   const swpcContextQuery = useSwpcSpaceWeatherContextQuery({
     enabled: selectedAircraft != null || selectedSatellite != null,
@@ -787,6 +814,10 @@ export function AppShell() {
     selectedAircraft != null
       ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "opensky-anonymous-states") ?? null
       : null;
+  const ourAirportsReferenceSourceHealth =
+    selectedAircraft != null
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "ourairports-reference") ?? null
+      : null;
   const swpcSourceHealth =
     selectedAircraft != null || selectedSatellite != null
       ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "noaa-swpc") ?? null
@@ -824,6 +855,14 @@ export function AppShell() {
     response: openSkyStatesQuery.data,
     sourceHealth: openSkySourceHealth,
     selectedAircraft
+  });
+  const ourAirportsReferenceSummary = buildAerospaceReferenceContextSummary({
+    response: ourAirportsReferenceQuery.data,
+    sourceHealth: ourAirportsReferenceSourceHealth,
+    selectedAircraft,
+    primaryReference: aircraftReferenceQuery.data?.primary ?? null,
+    nearestAirport: nearestAirportQuery.data?.results[0] ?? null,
+    nearestRunway: nearestRunwayQuery.data?.results[0] ?? null
   });
   const swpcSpaceWeatherSummary = buildAerospaceSpaceWeatherContextSummary({
     context: swpcContextQuery.data,
@@ -888,6 +927,7 @@ export function AppShell() {
     weatherSummary: aviationWeatherSummary,
     airportStatusSummary: faaNasAirportStatusSummary,
     geomagnetismSummary,
+    referenceSummary: ourAirportsReferenceSummary,
     spaceContextSummary: cneosSpaceContextSummary,
     spaceWeatherSummary: swpcSpaceWeatherSummary,
     spaceWeatherArchiveSummary: nceiSpaceWeatherArchiveSummary,
@@ -904,6 +944,7 @@ export function AppShell() {
     geomagnetismSourceHealth,
     openSkySummary: openSkyContextSummary,
     openSkySourceHealth,
+    referenceSummary: ourAirportsReferenceSummary,
     spaceContextSummary: cneosSpaceContextSummary,
     spaceWeatherSummary: swpcSpaceWeatherSummary,
     spaceWeatherArchiveSummary: nceiSpaceWeatherArchiveSummary,
@@ -1254,6 +1295,7 @@ export function AppShell() {
     const summaryLines = selectedTargetSummary?.displayLines.slice(0, 6) ?? [];
     const dataHealthLine = buildAerospaceDataHealthExportLine(selectedDataHealthSummary);
     const nearbyContextLines = buildNearbyContextExportLines(nearbyContextSummary);
+    const ourAirportsReferenceLines = buildAerospaceReferenceExportLines(ourAirportsReferenceSummary);
     const aviationWeatherLines = buildAerospaceWeatherExportLines(aviationWeatherSummary);
     const faaNasAirportStatusLines = buildAerospaceAirportStatusExportLines(faaNasAirportStatusSummary);
     const openSkyContextLines = buildAerospaceOpenSkyExportLines(openSkyContextSummary);
@@ -1286,6 +1328,7 @@ export function AppShell() {
       selectedTargetLines: summaryLines,
       dataHealthLine,
       nearbyContextLines,
+      ourairportsReferenceLines: ourAirportsReferenceLines,
       aviationWeatherLines,
       faaNasAirportStatusLines,
       openSkyContextLines,
@@ -1330,11 +1373,34 @@ export function AppShell() {
       exportCoherenceSummary: aerospaceExportCoherenceSummary,
       issueExportBundleSummary: aerospaceIssueExportBundleSummary
     });
+    const aerospaceWorkflowEvidenceLedgerSummary = buildAerospaceWorkflowEvidenceLedger();
+    const aerospaceWorkflowReadinessPackageSummary = buildAerospaceWorkflowReadinessPackageSummary({
+      workflowEvidenceLedger: aerospaceWorkflowEvidenceLedgerSummary,
+      ourAirportsReferenceSummary,
+      availabilitySummary: aerospaceContextAvailabilitySummary,
+      sourceReadinessSummary: aerospaceSourceReadinessSummary,
+      exportProfileSummary: baseExportProfileSummary,
+    });
+    const aerospaceContextReviewQueueSummary = buildAerospaceContextReviewQueueSummary({
+      availabilitySummary: aerospaceContextAvailabilitySummary,
+      sourceReadinessBundleSummary: aerospaceSourceReadinessBundleSummary,
+      contextGapQueueSummary: aerospaceContextGapQueueSummary,
+      exportCoherenceSummary: aerospaceExportCoherenceSummary,
+      issueExportBundleSummary: aerospaceIssueExportBundleSummary,
+      workflowReadinessPackageSummary: aerospaceWorkflowReadinessPackageSummary,
+      ourAirportsReferenceSummary,
+      exportProfileSummary: baseExportProfileSummary,
+    });
+    const aerospaceContextReviewExportBundleSummary =
+      buildAerospaceContextReviewExportBundleSummary({
+        reviewQueueSummary: aerospaceContextReviewQueueSummary,
+      });
     const exportProfileSummary = buildAerospaceExportProfileSummary({
       profileId: selectedAerospaceExportProfile,
       selectedTargetLines: summaryLines,
       dataHealthLine,
       nearbyContextLines,
+      ourairportsReferenceLines: ourAirportsReferenceLines,
       aviationWeatherLines,
       faaNasAirportStatusLines,
       openSkyContextLines,
@@ -1352,9 +1418,13 @@ export function AppShell() {
       sourceReadinessLines,
       sourceReadinessBundleLines,
       contextGapQueueLines,
+      contextReviewQueueLines: aerospaceContextReviewQueueSummary?.exportLines ?? [],
+      contextReviewExportBundleLines:
+        aerospaceContextReviewExportBundleSummary?.exportLines ?? [],
       exportCoherenceLines: aerospaceExportCoherenceSummary?.exportLines ?? [],
       issueExportBundleLines: aerospaceIssueExportBundleSummary?.exportLines ?? [],
       snapshotReportPackageLines: aerospaceContextSnapshotReportSummary?.exportLines ?? [],
+      workflowReadinessPackageLines: aerospaceWorkflowReadinessPackageSummary?.exportLines ?? [],
       contextReportLines,
       focusLines,
       selectedDataHealthSummary,
@@ -1931,6 +2001,44 @@ export function AppShell() {
               caveats: faaNasAirportStatusSummary.caveats.slice(0, 4),
             }
           : null,
+        ourairportsReferenceContext: ourAirportsReferenceSummary
+          ? {
+              source: ourAirportsReferenceSummary.source,
+              sourceMode: ourAirportsReferenceSummary.sourceMode,
+              sourceHealth: ourAirportsReferenceSummary.sourceHealth,
+              sourceState: ourAirportsReferenceSummary.sourceState,
+              airportCount: ourAirportsReferenceSummary.airportCount,
+              runwayCount: ourAirportsReferenceSummary.runwayCount,
+              selectedAirportCode: ourAirportsReferenceSummary.selectedAirportCode,
+              selectedAirportName: ourAirportsReferenceSummary.selectedAirportName,
+              selectedRegionCode: ourAirportsReferenceSummary.selectedRegionCode,
+              selectedRunwayCode: ourAirportsReferenceSummary.selectedRunwayCode,
+              airportMatchStatus: ourAirportsReferenceSummary.airportMatchStatus,
+              runwayMatchStatus: ourAirportsReferenceSummary.runwayMatchStatus,
+              comparisonLine: ourAirportsReferenceSummary.comparisonLine,
+              matchedAirport: ourAirportsReferenceSummary.matchedAirport
+                ? {
+                    airportCode: ourAirportsReferenceSummary.matchedAirport.airportCode,
+                    name: ourAirportsReferenceSummary.matchedAirport.name,
+                    regionCode: ourAirportsReferenceSummary.matchedAirport.regionCode,
+                    runwayCount: ourAirportsReferenceSummary.matchedAirport.runwayCount,
+                    longestRunwayFt: ourAirportsReferenceSummary.matchedAirport.longestRunwayFt
+                  }
+                : null,
+              matchedRunway: ourAirportsReferenceSummary.matchedRunway
+                ? {
+                    airportCode: ourAirportsReferenceSummary.matchedRunway.airportCode,
+                    leIdent: ourAirportsReferenceSummary.matchedRunway.leIdent,
+                    heIdent: ourAirportsReferenceSummary.matchedRunway.heIdent,
+                    lengthFt: ourAirportsReferenceSummary.matchedRunway.lengthFt,
+                    surface: ourAirportsReferenceSummary.matchedRunway.surface
+                  }
+                : null,
+              displayLines: ourAirportsReferenceSummary.displayLines.slice(0, 6),
+              caveats: ourAirportsReferenceSummary.caveats.slice(0, 4),
+              doesNotProve: ourAirportsReferenceSummary.doesNotProve.slice(0, 2)
+            }
+          : null,
         openskyAnonymousContext: openSkyContextSummary
           ? {
               source: openSkyContextSummary.source,
@@ -2110,6 +2218,12 @@ export function AppShell() {
         aerospaceContextGapQueue: aerospaceContextGapQueueSummary
           ? aerospaceContextGapQueueSummary.metadata
           : null,
+        aerospaceContextReviewQueue: aerospaceContextReviewQueueSummary
+          ? aerospaceContextReviewQueueSummary.metadata
+          : null,
+        aerospaceContextReviewExportBundle: aerospaceContextReviewExportBundleSummary
+          ? aerospaceContextReviewExportBundleSummary.metadata
+          : null,
         aerospaceExportCoherence: aerospaceExportCoherenceSummary
           ? aerospaceExportCoherenceSummary.metadata
           : null,
@@ -2118,6 +2232,9 @@ export function AppShell() {
           : null,
         aerospaceContextSnapshotReport: aerospaceContextSnapshotReportSummary
           ? aerospaceContextSnapshotReportSummary.metadata
+          : null,
+        aerospaceWorkflowReadinessPackage: aerospaceWorkflowReadinessPackageSummary
+          ? aerospaceWorkflowReadinessPackageSummary.metadata
           : null,
         aerospaceContextReport: aerospaceContextReportSummary
           ? aerospaceContextReportSummary.metadata
@@ -2376,6 +2493,7 @@ export function AppShell() {
     currentFocusSnapshot,
     aviationWeatherSummary,
     openSkyContextSummary,
+    ourAirportsReferenceSummary,
     swpcSpaceWeatherSummary,
     nceiSpaceWeatherArchiveSummary,
     aerospaceCurrentArchiveContextSummary,
@@ -2579,6 +2697,26 @@ function describeFilters(filters: FilterState) {
     filters.recencySeconds != null ? `recency=${filters.recencySeconds}s` : null
   ].filter(Boolean);
   return values.length > 0 ? values.join(", ") : "none";
+}
+
+function buildReferenceRegionCode(
+  summary:
+    | {
+        countryCode?: string | null;
+        admin1Code?: string | null;
+      }
+    | null
+    | undefined
+) {
+  const admin1 = summary?.admin1Code?.trim().toUpperCase() ?? null;
+  if (!admin1) {
+    return null;
+  }
+  if (admin1.includes("-")) {
+    return admin1;
+  }
+  const country = summary?.countryCode?.trim().toUpperCase() ?? null;
+  return country ? `${country}-${admin1}` : admin1;
 }
 
 function mapExportProfileToSnapshotReportProfile(

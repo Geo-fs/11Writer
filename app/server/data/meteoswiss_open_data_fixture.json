@@ -1,0 +1,35 @@
+{
+  "collection": {
+    "id": "ch.meteoschweiz.ogd-smn",
+    "updated": "2026-05-02T13:33:58.048729Z",
+    "assets": {
+      "ogd-smn_meta_stations.csv": {
+        "href": "https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn/ogd-smn_meta_stations.csv"
+      }
+    }
+  },
+  "station_meta_csv": "station_abbr;station_name;station_canton;station_wigos_id;station_type_en;station_dataowner;station_data_since;station_height_masl;station_height_barometer_masl;station_coordinates_lv95_east;station_coordinates_lv95_north;station_coordinates_wgs84_lat;station_coordinates_wgs84_lon;station_exposition_en;station_url_en\nABO;Adelboden;BE;0-20000-0-06735;Automatic weather stations - Measurement values;MeteoSwiss, SLF;01.01.1901;1321.0;1326.0;2609372.0;1148939.0;46.491703;7.560703;south-eastern oriented slope;https://www.meteoswiss.admin.ch/services-and-publications/applications/measurement-values-and-measuring-networks.html#param=messnetz-automatisch&station=ABO\nLUG;Lugano <script>alert(1)</script>;TI;0-20000-0-06655;Automatic weather stations - Measurement values;MeteoSwiss;01.01.1981;273.0;;2719850.0;1093450.0;46.003677;8.960302;plain;https://www.meteoswiss.admin.ch/services-and-publications/applications/measurement-values-and-measuring-networks.html#param=messnetz-automatisch&station=LUG\nZER;Zermatt;VS;0-20000-0-06789;Automatic weather stations - Measurement values;MeteoSwiss;01.01.1990;1638.0;;0.0;0.0;;;mountain valley;https://www.meteoswiss.admin.ch/services-and-publications/applications/measurement-values-and-measuring-networks.html#param=messnetz-automatisch&station=ZER\n",
+  "observation_assets": [
+    {
+      "station_abbr": "ABO",
+      "asset_name": "ogd-smn_abo_t_now.csv",
+      "asset_href": "https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn/abo/ogd-smn_abo_t_now.csv",
+      "asset_updated_at": "2026-05-02T00:12:00Z",
+      "csv_text": "station_abbr;reference_timestamp;tre200s0;ure200s0;pp0qnhs0;fu3010z0;fu3010z1;rre150z0;sre000z0\nABO;02.05.2026 00:00;8.8;74.5;1026.1;3.6;8.6;0;0\nABO;02.05.2026 00:10;8.5;75.5;1026.0;2.2;4.7;0;0\n"
+    },
+    {
+      "station_abbr": "LUG",
+      "asset_name": "ogd-smn_lug_t_now.csv",
+      "asset_href": "https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn/lug/ogd-smn_lug_t_now.csv",
+      "asset_updated_at": "2026-05-02T00:12:00Z",
+      "csv_text": "station_abbr;reference_timestamp;tre200s0;ure200s0;pp0qnhs0;fu3010z0;fu3010z1;rre150z0;sre000z0\nLUG;02.05.2026 00:00;14.1;63.0;1018.4;1.1;3.4;0;0\nLUG;02.05.2026 00:10;13.9;64.2;1018.2;1.5;3.8;0;0\n"
+    },
+    {
+      "station_abbr": "ZER",
+      "asset_name": "ogd-smn_zer_t_now.csv",
+      "asset_href": "https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn/zer/ogd-smn_zer_t_now.csv",
+      "asset_updated_at": "2026-05-02T00:12:00Z",
+      "csv_text": "station_abbr;reference_timestamp;tre200s0;ure200s0;pp0qnhs0;fu3010z0;fu3010z1;rre150z0;sre000z0\nZER;02.05.2026 00:10;1.2;55.0;835.2;8.1;14.4;0.2;0\n"
+    }
+  ]
+}

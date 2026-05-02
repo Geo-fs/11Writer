@@ -9,11 +9,23 @@
 - Use `app/docs/commit-groups.current.md` when planning future task-by-task commit consolidation.
 - Use `python scripts/list_changed_files_by_owner.py` for a quick heuristic ownership scan before staging. It does not replace manual diff review.
 - Use `python scripts/list_changed_files_by_owner.py --summary` for a concise branch/worktree snapshot with ownership counts, shared-file warnings, and coordination doc links.
-- The scanner now also classifies many lane-owned source docs, backend services, tests, and fixtures for Geospatial, Marine, Aerospace, Features/Webcam, Data AI, Gather, Connect workflow paths, and a dedicated `atlas-planning` bucket for user-directed Atlas Batch 2/3 RSS planning docs.
-- Current ownership truth is no longer `unknown: 0`; the latest mixed Phase 2 dirty set is down to `unknown: 2`, both of which are intentionally broad backend surfaces:
+- The scanner now also classifies many lane-owned source docs, backend services, tests, and fixtures for Geospatial, Marine, Aerospace, Features/Webcam, Data AI, Gather, Connect workflow paths, and a dedicated `atlas-planning` bucket for user-directed Atlas planning docs.
+- Latest live ownership snapshot from the current ten-step Source Discovery runtime sweep:
+  - `modified=109`
+  - `untracked=83`
+  - `shared-high-collision: 8`
+  - `unknown: 41`
+- The current `unknown` bucket is still intentionally broad. It includes shared runtime and coordination surfaces such as:
   - `app/server/src/app.py`
+  - `app/server/src/routes/source_discovery.py`
+  - `app/server/src/routes/wave_llm.py`
+  - `app/server/src/services/source_discovery_service.py`
   - `app/server/src/services/status_service.py`
-- Treat those two files as real ambiguity, not scanner debt.
+  - `app/server/src/services/wave_llm_service.py`
+  - `app/server/src/types/source_discovery.py`
+  - `app/server/src/types/wave_monitor.py`
+  - `app/server/src/wave_monitor/models.py`
+- Treat those files as real ambiguity, not scanner debt.
 - Use `python scripts/release_dry_run.py` for a larger non-mutating readiness scan covering ownership groups, high-collision files, secret/junk checks, generated-file checks, and validation guidance.
 - Use `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke aerospace=known-local-caveat:windows-browser-launch-permission --smoke webcam=passed` for a compact manager-facing validation and smoke summary.
 - Use `python scripts/alerts_ledger.py` for a compact manager-facing alerts summary and ledger validation.
@@ -26,6 +38,212 @@
   - `python app/server/tests/run_playwright_smoke.py webcam` passed
   - `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with `windows-playwright-launch-permission`, narrowed to `windows-browser-launch-permission`
 - Treat that aerospace smoke result as a machine and browser-launch issue, not as evidence of stale `dist` output or a current frontend compile failure.
+- Latest Connect checkpoint for assignment `2026-05-02 12:27 America/Chicago`:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed and reported:
+    - `modified=109`
+    - `untracked=83`
+    - `shared-high-collision: 8`
+    - `unknown: 41`
+  - `python scripts/alerts_ledger.py --json` passed and reported `0` open alerts
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_source_discovery_memory.py -q` passed with `26` tests and `378` Pydantic warnings
+  - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q` passed with `21` tests and `45` Pydantic warnings
+  - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` passed with `29` tests
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py app/server/tests/test_webcam_module.py -q` passed with `26` tests
+  - `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed with `6` tests
+  - `cmd /c npm.cmd run lint` passed
+  - `cmd /c npm.cmd run build` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+  - no repo-wide blocker reproduced
+  - current Source Discovery ten-step runtime-boundary truth:
+    - catalog scan is bounded, candidate-only, and explicit through `POST /api/source-discovery/jobs/catalog-scan`
+    - article fetch is explicit through `POST /api/source-discovery/jobs/article-fetch` and is gated to reviewed source classes and allowed lifecycle states
+    - social metadata collection is explicit through `POST /api/source-discovery/jobs/social-metadata`, stores metadata-only snapshots, and does not fetch private/media-heavy content
+    - source packet export is explicit through `GET /api/source-discovery/memory/{source_id}/export`
+    - review actions remain explicit through `POST /api/source-discovery/review/actions`
+    - reviewed-claim application is explicit through `POST /api/source-discovery/reviews/apply-claims`, requires reviewed inputs, and is audit-logged
+    - runtime worker control is explicit through `POST /api/source-discovery/runtime/workers/{worker_name}/control`
+    - manual `run_now` honors lease safety and can return skip states when another worker holds the lease
+    - scheduler startup loops remain opt-in and process-local:
+      - Source Discovery starts only when `SOURCE_DISCOVERY_SCHEDULER_ENABLED=true` and `SOURCE_DISCOVERY_SCHEDULER_RUN_ON_STARTUP=true`
+      - Wave Monitor starts only when `WAVE_MONITOR_SCHEDULER_ENABLED=true` and `WAVE_MONITOR_SCHEDULER_RUN_ON_STARTUP=true`
+    - scheduler-created Wave LLM tasks are review-only `article_claim_extraction` tasks from eligible snapshots
+    - current OpenAI execution paths remain explicitly gated by `allow_network=true` plus positive request budget
+    - no reproduced path auto-promotes, auto-validates, auto-activates, auto-schedules unapproved sources, applies claims without review, changes source truth without audit, or treats LLM output as trusted state
+- Latest Connect checkpoint for assignment `2026-05-02 11:07 America/Chicago`:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed and reported:
+    - `modified=99`
+    - `untracked=69`
+    - `shared-high-collision: 8`
+    - `unknown: 29`
+  - `python scripts/alerts_ledger.py --json` passed and reported `0` open alerts
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_source_discovery_memory.py -q` passed with `20` tests and `255` Pydantic warnings
+  - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q` passed with `19` tests and `45` Pydantic warnings
+  - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` passed with `29` tests
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py app/server/tests/test_webcam_module.py -q` passed with `26` tests
+  - `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed with `6` tests
+  - `cmd /c npm.cmd run lint` passed
+  - `cmd /c npm.cmd run build` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+  - no repo-wide blocker reproduced
+  - current Source Discovery runtime-boundary truth:
+    - review actions such as `approve_candidate`, `sandbox_check`, `reject`, `archive`, and `assign_owner` exist only through explicit `POST /api/source-discovery/review/actions`
+    - claim outcomes and reputation reversal are explicit audited writes; scheduler and Wave LLM paths do not change source truth silently
+    - feed-link scan, bounded expansion, and content snapshots are explicit API jobs, not autonomous runtime loops
+    - scheduler ticks are bounded maintenance only:
+      - due-source health checks
+      - optional record-source extraction
+      - optional review-only Wave LLM `source_summary` tasks from eligible snapshots
+    - current scheduler tick does not auto-promote, auto-validate, auto-activate, or auto-schedule discovered candidates
+    - runtime startup loops are present but still opt-in and process-local:
+      - Source Discovery loop starts only when `SOURCE_DISCOVERY_SCHEDULER_ENABLED=true` and `SOURCE_DISCOVERY_SCHEDULER_RUN_ON_STARTUP=true`
+      - Wave Monitor loop starts only when `WAVE_MONITOR_SCHEDULER_ENABLED=true` and `WAVE_MONITOR_SCHEDULER_RUN_ON_STARTUP=true`
+    - runtime status does not imply cross-process coordination or autonomous service readiness
+  - current Wave LLM runtime-boundary truth:
+    - task creation, explicit execution, review submission, and scheduler-created review tasks are implemented
+    - `fixture` remains deterministic and review-only
+    - `ollama` remains budget and network gated
+    - cloud providers remain capability-only or mock-only in this slice
+    - model output remains review metadata and cannot directly promote sources, alter reputation, activate connectors, or create trusted facts
+  - current ownership posture:
+    - the `unknown` bucket still intentionally includes real shared runtime surfaces such as `app.py`, `source_discovery.py`, `source_discovery_service.py`, `wave_monitor_service.py`, `types/source_discovery.py`, `types/wave_monitor.py`, `wave_llm.py`, `wave_llm_service.py`, and `runtime_scheduler_service.py`
+    - treat those as real consolidation-review territory, not scanner debt
+- Latest Connect checkpoint for assignment `2026-05-02 10:34 America/Chicago`:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed
+  - `python scripts/alerts_ledger.py --json` passed
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_source_discovery_memory.py -q` passed with `15` tests and `198` Pydantic warnings
+  - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q` passed with `19` tests and `45` Pydantic warnings
+  - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` passed
+  - `python -m pytest app/server/tests/test_orfeus_eida_context.py app/server/tests/test_environmental_source_families_overview.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py app/server/tests/test_webcam_module.py -q` passed
+  - `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed
+  - `cmd /c npm.cmd run lint` passed
+  - `cmd /c npm.cmd run build` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+  - no repo-wide blocker reproduced
+  - current live dirty-tree posture at validation start:
+    - `modified=91`
+    - `untracked=53`
+    - `shared-high-collision: 6`
+    - `unknown: 40`
+  - current high-collision files:
+    - `app/client/src/features/app-shell/AppShell.tsx`
+    - `app/client/src/features/inspector/InspectorPanel.tsx`
+    - `app/client/src/lib/queries.ts`
+    - `app/client/src/types/api.ts`
+    - `app/server/src/config/settings.py`
+    - `app/server/src/types/api.py`
+  - current Source Discovery runtime-boundary truth:
+    - record extraction, canonical dedupe, bounded expansion, health checks, content snapshots, reputation reversal, and manual scheduler ticks are implemented
+    - source-class scoring affects review metadata, health/timeliness defaults, and candidate prioritization only
+    - current code does not auto-promote, auto-validate, auto-schedule, auto-activate, trust-rank, or adjudicate sources or claims
+    - discovered or extracted URLs remain candidates with manual-review caveats and no automatic polling
+    - prompt-injection-like feed text is stored as inert data and explicitly caveated rather than trusted behavior
+  - current Wave LLM runtime-boundary truth:
+    - fixture execution is deterministic and review-only
+    - `ollama` stays blocked unless `allow_network=true` and `request_budget > 0`
+    - cloud providers remain capability-only or mock-only in this slice
+    - model output remains review metadata and cannot change source reputation, source health, validation truth, connector activation, or trusted facts
+  - current alert truth:
+    - the Atlas `Wave LLM And Source Discovery Top-5 Slice` alert is now completed
+    - alerts ledger is back to `0` open alerts
+- Latest Connect checkpoint for assignment `2026-05-02 10:47 America/Chicago`:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed
+  - `python scripts/alerts_ledger.py --json` passed
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_source_discovery_memory.py -q` passed with `15` tests and `210` Pydantic warnings
+  - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q` passed with `19` tests and `45` Pydantic warnings
+  - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` passed with `24` tests
+  - `python -m pytest app/server/tests/test_orfeus_eida_context.py app/server/tests/test_environmental_source_families_overview.py -q` passed with `18` tests
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py app/server/tests/test_webcam_module.py -q` passed with `26` tests
+  - `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed with `6` tests
+  - `cmd /c npm.cmd run lint` passed
+  - `cmd /c npm.cmd run build` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+  - one real repo-wide blocker reproduced and was cleared:
+    - `app/server/src/routes/source_discovery.py` imported `src.services.runtime_scheduler_service`, but that service file did not exist in the current tree, breaking test collection across Source Discovery, Wave Monitor, Analyst, Data AI, RSS, and ORFEUS suites
+    - Connect added a minimal compatibility service at `app/server/src/services/runtime_scheduler_service.py` that reports conservative scheduler status without implying any hidden background execution
+  - latest live dirty-tree posture after the scanner refresh:
+    - `modified=98`
+    - `untracked=67`
+    - `shared-high-collision: 8`
+    - `unknown: 26`
+  - current high-collision files:
+    - `app/client/scripts/playwright_smoke.mjs`
+    - `app/client/src/features/app-shell/AppShell.tsx`
+    - `app/client/src/features/inspector/InspectorPanel.tsx`
+    - `app/client/src/lib/queries.ts`
+    - `app/client/src/types/api.ts`
+    - `app/server/src/config/settings.py`
+    - `app/server/src/types/api.py`
+    - `app/server/tests/smoke_fixture_app.py`
+  - scanner posture:
+    - Connect narrowed several obvious ownership gaps for Geospatial, Aerospace, Features/Webcam, and Connect docs/services
+    - Source Discovery, Wave LLM, shared app/runtime, and a handful of routing/planning surfaces remain intentionally broad under `unknown`
+  - current alert truth:
+    - alerts ledger now has `1` open low-priority Manager-owned alert
+    - no Connect-owned alert is open
+- Latest Connect checkpoint for assignment `2026-05-02 09:56 America/Chicago`:
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q` passed
+  - `python -m pytest app/server/tests/test_source_discovery_memory.py -q` passed
+  - `cmd /c npm.cmd run lint` passed
+  - `cmd /c npm.cmd run build` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+  - no repo-wide blocker reproduced
+  - current Wave LLM runtime-boundary truth:
+    - provider capability reporting, task creation, explicit execution, and review validation are implemented
+    - task execution remains review-gated and human-review-required
+    - model output does not become trusted fact, source reputation truth, connector activation, or action guidance
+    - only `fixture` executes deterministically by default
+    - `ollama` is the only live adapter path and is blocked unless execution is explicitly allowed with network and budget
+    - cloud providers remain capability-only until adapters exist
+    - prompt-injection findings and forbidden actions are stored as review metadata, not trusted state
+  - warning status:
+    - `test_wave_monitor.py app/server/tests/test_analyst_workbench.py` passed with `17` tests and `45` Pydantic warnings
+    - `test_source_discovery_memory.py` passed with `10` tests and `180` Pydantic warnings
+    - warnings are noisy but non-blocking in the current tree
+  - current live dirty-tree posture after the final ledger/snapshot refresh:
+    - `modified=78`
+    - `untracked=34`
+    - `shared-high-collision: 2`
+    - `unknown: 29`
+- Latest Connect checkpoint for assignment `2026-05-02 10:08 America/Chicago`:
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` passed
+  - `python -m pytest app/server/tests/test_emsc_seismicportal_realtime.py app/server/tests/test_environmental_source_families_overview.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_webcam_module.py -q` passed
+  - `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed
+  - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q` passed after a Connect fix
+  - `python -m pytest app/server/tests/test_source_discovery_memory.py -q` passed after the same Connect fix
+  - `cmd /c npm.cmd run lint` passed
+  - `cmd /c npm.cmd run build` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+  - reproduced shared blockers cleared:
+    - Source Discovery candidate upserts were missing the newly required shared canonical URL/domain helper path, which broke Wave Monitor and Analyst runtime tests
+    - shared aerospace reference helper drift in `AppShell.tsx` and `InspectorPanel.tsx` caused frontend build failures
+  - current live dirty-tree posture after the final sweep:
+    - `modified=86`
+    - `untracked=43`
+    - `shared-high-collision: 6`
+    - `unknown: 35`
+  - current high-collision files:
+    - `app/client/src/features/app-shell/AppShell.tsx`
+    - `app/client/src/features/inspector/InspectorPanel.tsx`
+    - `app/client/src/lib/queries.ts`
+    - `app/client/src/types/api.ts`
+    - `app/server/src/config/settings.py`
+    - `app/server/src/types/api.py`
+  - warning status:
+    - `test_wave_monitor.py app/server/tests/test_analyst_workbench.py` passed with `19` tests and `45` Pydantic warnings
+    - `test_source_discovery_memory.py` passed with `10` tests and `180` Pydantic warnings
+    - warnings remain noisy but non-blocking
 - Latest Connect checkpoint for assignment `2026-05-01 15:03 America/Chicago`:
   - `python -m compileall app/server/src` passed
   - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q` passed
@@ -92,6 +310,71 @@
     - the latest full Connect checkpoint reached a clean local tree on `main...origin/main` before subsequent concurrent lane edits resumed
     - that clean checkpoint had `shared-high-collision: 0` and `unknown: 0`
     - the focused validation checkpoint for Data AI, Geospatial reference/seismic, Aerospace NCEI, Features/Webcam source-ops, and Marine source-health was green
+  - latest Connect checkpoint for assignment `2026-05-02 09:12 America/Chicago`:
+    - no repo-wide blocker reproduced
+    - current assigned validation surface is green:
+      - `python -m compileall app/server/src`
+      - `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+      - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+      - focused Data AI, environmental source-family overview, Marine, and Features/Webcam suites
+      - `cmd /c npm.cmd run lint`
+      - `cmd /c npm.cmd run build`
+      - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+    - current live dirty-tree posture at checkpoint start:
+      - `modified=18`
+      - `untracked=0`
+      - `shared-high-collision: 0`
+      - `unknown: 8`
+    - current source-discovery runtime-boundary truth:
+      - persistent SQLite-backed source-memory store is implemented
+      - API-triggered candidate upserts and claim-outcome writes are implemented
+      - bounded `seed-url`, `health/check`, `jobs/expand`, `content/snapshots`, `reputation/reverse-event`, and manual `scheduler/tick` routes are implemented
+      - Wave Monitor seeds shared source memory from source-candidate rows
+      - no autonomous source promotion, no automatic trust approval, and no hidden background polling loop were reproduced
+    - current ownership recommendation:
+      - keep Source Discovery, Wave Monitor, and Analyst Workbench broad/shared for now
+      - do not hide those shared families with cosmetic scanner rules
+    - current Wonder OSINT audit artifact recommendation:
+      - `output/osint_framework_best_fit_audit.{md,csv,json}` are repo-local research and routing artifacts only
+      - they are not implementation proof, source approval, or workflow-validation evidence
+      - no secret or tokenized feed patterns were found in those audit files during the latest Connect sweep
+  - latest Connect checkpoint for assignment `2026-05-02 09:46 America/Chicago`:
+    - no repo-wide blocker reproduced
+    - current assigned validation surface is green:
+      - `python -m compileall app/server/src`
+      - `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+      - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+      - focused Data AI, Geospatial overview/reference, Marine, Features/Webcam, and Aerospace suites
+      - `cmd /c npm.cmd run lint`
+      - `cmd /c npm.cmd run build`
+      - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+    - current live dirty-tree posture after scanner refinement:
+      - `modified=64`
+      - `untracked=17`
+      - `shared-high-collision: 2`
+      - `unknown: 14`
+    - current ownership counts after the latest scanner pass:
+      - `connect-tooling: 19`
+      - `gather-ui-integration: 9`
+      - `data-ai: 11`
+      - `geospatial-environmental: 12`
+      - `aerospace: 4`
+      - `marine: 4`
+      - `features-webcam: 6`
+      - `shared-high-collision: 2`
+      - `unknown: 14`
+    - current source-discovery runtime-boundary truth:
+      - persistent SQLite-backed source-memory store is implemented
+      - candidate upserts, claim-outcome writes, seed-url jobs, health checks, bounded expansion jobs, content snapshots, reputation reversal, and manual scheduler ticks are implemented
+      - bounded expansion creates review candidates only and does not fetch child sources
+      - scheduler tick currently performs bounded health checks only; no autonomous promotion, trust approval, or hidden polling loop was reproduced
+    - current warning status:
+      - `test_source_discovery_memory.py` now covers the five-part backend slice and passed with `10` tests
+      - the suite still emits `180` Pydantic alias warnings in the latest Connect sweep
+      - those warnings are noisy but non-blocking
+    - current alert truth:
+      - the Atlas `Source Discovery Five-Part Backend Slice` alert is resolved and marked `completed`
+      - the alerts ledger is currently back to `0` open alerts
   - current live dirty-tree truth after the post-infrastructure/status Data AI reassignment:
     - `modified=18`
     - `untracked=7`

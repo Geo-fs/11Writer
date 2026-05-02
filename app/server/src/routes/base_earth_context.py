@@ -5,6 +5,11 @@ from typing import cast
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.config.settings import Settings, get_settings
+from src.services.gshhg_shorelines_service import (
+    GshhgShorelinesQuery,
+    GshhgShorelinesService,
+    parse_bbox as parse_gshhg_bbox,
+)
 from src.services.natural_earth_physical_service import (
     NaturalEarthPhysicalQuery,
     NaturalEarthPhysicalService,
@@ -15,7 +20,17 @@ from src.services.noaa_global_volcano_service import (
     NoaaGlobalVolcanoService,
     NoaaGlobalVolcanoSort,
 )
-from src.types.api import NaturalEarthPhysicalResponse, NoaaGlobalVolcanoResponse
+from src.services.pb2002_plate_boundaries_service import (
+    Pb2002PlateBoundariesQuery,
+    Pb2002PlateBoundariesService,
+    parse_bbox as parse_pb2002_bbox,
+)
+from src.types.api import (
+    GshhgShorelinesResponse,
+    NaturalEarthPhysicalResponse,
+    NoaaGlobalVolcanoResponse,
+    Pb2002PlateBoundariesResponse,
+)
 
 router = APIRouter(prefix="/api/context/reference", tags=["base-earth-context"])
 
@@ -34,6 +49,48 @@ async def natural_earth_physical_land_context(
     service = NaturalEarthPhysicalService(settings)
     return await service.get_context(
         NaturalEarthPhysicalQuery(
+            bbox=parsed_bbox,
+            limit=limit,
+        )
+    )
+
+
+@router.get("/gshhg/shorelines", response_model=GshhgShorelinesResponse)
+async def gshhg_shorelines_context(
+    bbox: str | None = Query(default=None, description="minLon,minLat,maxLon,maxLat"),
+    limit: int = Query(default=100, ge=1, le=500),
+    settings: Settings = Depends(get_settings),
+) -> GshhgShorelinesResponse:
+    try:
+        parsed_bbox = parse_gshhg_bbox(bbox)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    service = GshhgShorelinesService(settings)
+    return await service.get_context(
+        GshhgShorelinesQuery(
+            bbox=parsed_bbox,
+            limit=limit,
+        )
+    )
+
+
+@router.get("/pb2002/plate-boundaries", response_model=Pb2002PlateBoundariesResponse)
+async def pb2002_plate_boundaries_context(
+    boundary_type: str | None = Query(default=None),
+    bbox: str | None = Query(default=None, description="minLon,minLat,maxLon,maxLat"),
+    limit: int = Query(default=100, ge=1, le=500),
+    settings: Settings = Depends(get_settings),
+) -> Pb2002PlateBoundariesResponse:
+    try:
+        parsed_bbox = parse_pb2002_bbox(bbox)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    service = Pb2002PlateBoundariesService(settings)
+    return await service.get_context(
+        Pb2002PlateBoundariesQuery(
+            boundary_type=boundary_type,
             bbox=parsed_bbox,
             limit=limit,
         )

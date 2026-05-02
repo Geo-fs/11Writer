@@ -14,6 +14,10 @@ def _settings() -> Settings:
     return Settings(
         NATURAL_EARTH_PHYSICAL_SOURCE_MODE="fixture",
         NATURAL_EARTH_PHYSICAL_FIXTURE_PATH=str(base / "natural_earth_physical_land_fixture.json"),
+        GSHHG_SHORELINES_SOURCE_MODE="fixture",
+        GSHHG_SHORELINES_FIXTURE_PATH=str(base / "gshhg_shorelines_fixture.json"),
+        PB2002_PLATE_BOUNDARIES_SOURCE_MODE="fixture",
+        PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=str(base / "pb2002_plate_boundaries_fixture.json"),
         NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
         NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=str(base / "noaa_global_volcano_locations_fixture.json"),
     )
@@ -24,6 +28,10 @@ def _natural_earth_empty_settings() -> Settings:
     return Settings(
         NATURAL_EARTH_PHYSICAL_SOURCE_MODE="fixture",
         NATURAL_EARTH_PHYSICAL_FIXTURE_PATH=str(base / "natural_earth_physical_land_empty_fixture.json"),
+        GSHHG_SHORELINES_SOURCE_MODE="fixture",
+        GSHHG_SHORELINES_FIXTURE_PATH=str(base / "gshhg_shorelines_fixture.json"),
+        PB2002_PLATE_BOUNDARIES_SOURCE_MODE="fixture",
+        PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=str(base / "pb2002_plate_boundaries_fixture.json"),
         NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
         NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=str(base / "noaa_global_volcano_locations_fixture.json"),
     )
@@ -34,8 +42,40 @@ def _noaa_volcano_empty_settings() -> Settings:
     return Settings(
         NATURAL_EARTH_PHYSICAL_SOURCE_MODE="fixture",
         NATURAL_EARTH_PHYSICAL_FIXTURE_PATH=str(base / "natural_earth_physical_land_fixture.json"),
+        GSHHG_SHORELINES_SOURCE_MODE="fixture",
+        GSHHG_SHORELINES_FIXTURE_PATH=str(base / "gshhg_shorelines_fixture.json"),
+        PB2002_PLATE_BOUNDARIES_SOURCE_MODE="fixture",
+        PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=str(base / "pb2002_plate_boundaries_fixture.json"),
         NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
         NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=str(base / "noaa_global_volcano_locations_empty_fixture.json"),
+    )
+
+
+def _gshhg_empty_settings() -> Settings:
+    base = Path(__file__).resolve().parents[1] / "data"
+    return Settings(
+        NATURAL_EARTH_PHYSICAL_SOURCE_MODE="fixture",
+        NATURAL_EARTH_PHYSICAL_FIXTURE_PATH=str(base / "natural_earth_physical_land_fixture.json"),
+        GSHHG_SHORELINES_SOURCE_MODE="fixture",
+        GSHHG_SHORELINES_FIXTURE_PATH=str(base / "gshhg_shorelines_empty_fixture.json"),
+        PB2002_PLATE_BOUNDARIES_SOURCE_MODE="fixture",
+        PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=str(base / "pb2002_plate_boundaries_fixture.json"),
+        NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
+        NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=str(base / "noaa_global_volcano_locations_fixture.json"),
+    )
+
+
+def _pb2002_empty_settings() -> Settings:
+    base = Path(__file__).resolve().parents[1] / "data"
+    return Settings(
+        NATURAL_EARTH_PHYSICAL_SOURCE_MODE="fixture",
+        NATURAL_EARTH_PHYSICAL_FIXTURE_PATH=str(base / "natural_earth_physical_land_fixture.json"),
+        GSHHG_SHORELINES_SOURCE_MODE="fixture",
+        GSHHG_SHORELINES_FIXTURE_PATH=str(base / "gshhg_shorelines_fixture.json"),
+        PB2002_PLATE_BOUNDARIES_SOURCE_MODE="fixture",
+        PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=str(base / "pb2002_plate_boundaries_empty_fixture.json"),
+        NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
+        NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=str(base / "noaa_global_volcano_locations_fixture.json"),
     )
 
 
@@ -92,6 +132,104 @@ def test_natural_earth_invalid_bbox_returns_400() -> None:
     client = _client()
 
     response = client.get("/api/context/reference/natural-earth/physical/land", params={"bbox": "1,2,3"})
+    assert response.status_code == 400
+
+
+def test_gshhg_fixture_parsing_and_provenance() -> None:
+    client = _client()
+
+    payload = client.get("/api/context/reference/gshhg/shorelines").json()
+
+    assert payload["metadata"]["source"] == "gshhg-shorelines"
+    assert payload["metadata"]["sourceName"] == "GSHHG Shorelines"
+    assert payload["metadata"]["resolution"] == "intermediate"
+    assert payload["metadata"]["sourceFile"] == "gshhg-intermediate-shorelines"
+    assert payload["metadata"]["sourceUrl"] == "https://www.ngdc.noaa.gov/mgg/shorelines/shorelines.html"
+    assert payload["metadata"]["sourceMode"] == "fixture"
+    assert payload["metadata"]["licenseName"] == "LGPL"
+    assert payload["count"] == 3
+    assert payload["sourceHealth"]["health"] == "loaded"
+    assert payload["features"][0]["evidenceBasis"] == "reference"
+
+
+def test_gshhg_bbox_filter_and_limit() -> None:
+    client = _client()
+
+    payload = client.get(
+        "/api/context/reference/gshhg/shorelines",
+        params={"bbox": "115,-15,155,0", "limit": 1},
+    ).json()
+
+    assert payload["count"] == 1
+    assert payload["features"][0]["recordId"] == "gshhg-002"
+
+
+def test_gshhg_empty_fixture_reports_empty_health() -> None:
+    empty_fixture = Path(__file__).resolve().parents[1] / "data" / "gshhg_shorelines_empty_fixture.json"
+    empty_fixture.write_text('{"metadata":{"resolution":"intermediate","source_file":"gshhg-intermediate-shorelines"},"features":[]}', encoding="utf-8")
+    try:
+        client = _client(_gshhg_empty_settings)
+        payload = client.get("/api/context/reference/gshhg/shorelines").json()
+    finally:
+        empty_fixture.unlink(missing_ok=True)
+
+    assert payload["count"] == 0
+    assert payload["sourceHealth"]["health"] == "empty"
+
+
+def test_gshhg_invalid_bbox_returns_400() -> None:
+    client = _client()
+
+    response = client.get("/api/context/reference/gshhg/shorelines", params={"bbox": "1,2,3"})
+    assert response.status_code == 400
+
+
+def test_pb2002_fixture_parsing_and_provenance() -> None:
+    client = _client()
+
+    payload = client.get("/api/context/reference/pb2002/plate-boundaries").json()
+
+    assert payload["metadata"]["source"] == "pb2002-plate-boundaries"
+    assert payload["metadata"]["sourceName"] == "PB2002 Plate Boundaries"
+    assert payload["metadata"]["modelName"] == "PB2002"
+    assert payload["metadata"]["modelVintage"] == "2003"
+    assert payload["metadata"]["sourceFile"] == "pb2002-boundaries"
+    assert payload["metadata"]["sourceUrl"] == "https://peterbird.name/publications/2003_pb2002/2003_pb2002.htm"
+    assert payload["metadata"]["sourceMode"] == "fixture"
+    assert payload["count"] == 3
+    assert payload["sourceHealth"]["health"] == "loaded"
+    assert payload["boundaries"][0]["evidenceBasis"] == "reference"
+
+
+def test_pb2002_boundary_type_bbox_filter_and_limit() -> None:
+    client = _client()
+
+    payload = client.get(
+        "/api/context/reference/pb2002/plate-boundaries",
+        params={"boundary_type": "transform", "bbox": "110,-15,165,0", "limit": 1},
+    ).json()
+
+    assert payload["count"] == 1
+    assert payload["boundaries"][0]["recordId"] == "pb2002-003"
+
+
+def test_pb2002_empty_fixture_reports_empty_health() -> None:
+    empty_fixture = Path(__file__).resolve().parents[1] / "data" / "pb2002_plate_boundaries_empty_fixture.json"
+    empty_fixture.write_text('{"metadata":{"model_name":"PB2002","model_vintage":"2003","source_file":"pb2002-boundaries"},"boundaries":[]}', encoding="utf-8")
+    try:
+        client = _client(_pb2002_empty_settings)
+        payload = client.get("/api/context/reference/pb2002/plate-boundaries").json()
+    finally:
+        empty_fixture.unlink(missing_ok=True)
+
+    assert payload["count"] == 0
+    assert payload["sourceHealth"]["health"] == "empty"
+
+
+def test_pb2002_invalid_bbox_returns_400() -> None:
+    client = _client()
+
+    response = client.get("/api/context/reference/pb2002/plate-boundaries", params={"bbox": "1,2,3"})
     assert response.status_code == 400
 
 
