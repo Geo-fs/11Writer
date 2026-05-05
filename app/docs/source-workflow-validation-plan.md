@@ -36,6 +36,7 @@ Source discovery platform update:
 - Claim outcomes such as confirmed, contradicted, corrected, outdated, unresolved, and not-applicable should drive learned source reputation.
 - Validation promotion still requires the normal workflow-validation bundle below.
 - Current repo-local source-memory routes and persistence are shared candidate/review/runtime evidence only; they do not directly create implemented or workflow-validated source rows.
+- Source Discovery `structure-scan`, knowledge-node clustering/backfill, review-claim import/apply, Wave LLM provider/runtime controls, and media/OCR interpretation surfaces are candidate-routing, review, derived-evidence, or runtime-boundary helpers only; they do not create workflow-validation proof by themselves.
 
 Marine workflow update:
 
@@ -54,8 +55,8 @@ Marine workflow update:
   - honest backend `degraded` handling only where partial-metadata evidence exists
 - Treat those three as `workflow-validated` for status-tracking purposes.
 - They still remain below `fully validated` and should not be treated as live validated from this evidence alone.
-- `france-vigicrues-hydrometry` is not promoted into this workflow plan yet because current repo evidence is still backend-only and better classified as `in-progress`.
-- `netherlands-rws-waterinfo` now exists as a backend-first implemented marine source slice, but it remains below `workflow-validated` because no stable consumer-path or explicit workflow-validation record is recorded yet.
+- `france-vigicrues-hydrometry` now has implemented backend-first source evidence plus completed hydrology/corridor report-follow-through in Marine AI progress, but it still remains below `workflow-validated` because no explicit source-row workflow-validation record is recorded yet.
+- `netherlands-rws-waterinfo` now also has a completed bounded helper/export follow-on in Marine AI progress, but it still remains below `workflow-validated` because no explicit workflow-validation record is recorded yet.
 
 Aerospace workflow update:
 
@@ -162,6 +163,14 @@ Data workflow update:
 - Treat that review queue and export bundle as metadata only, not as source truth or workflow-validation proof.
 - Data AI progress now also records a client-light inspector helper path at:
   - `dataAiSourceIntelligence`
+- Data AI progress now also records a bounded topic/context lens and export-safe topic lines inside:
+  - `dataAiSourceIntelligence`
+- Data AI progress now also records a bounded report-brief package inside:
+  - `dataAiSourceIntelligence`
+- Data AI progress now also records a completed metadata-only infrastructure/status context package over:
+  - `cloudflare-radar`
+  - `netblocks`
+  - `apnic-blog`
 - Treat that consumer as metadata-only workflow support over readiness/review/review-queue surfaces, not as source truth or workflow-validation proof.
 - None of these Data lanes should be treated as `workflow-validated` yet because no explicit consumer-path, smoke, or export-workflow validation is recorded.
 - The active bounded Data AI feed lane should not be widened into broad polling; use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) plus [data-ai-rss-batch3-routing-packets.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-batch3-routing-packets.md) for the next grouped Batch 3 expansion only after the implemented waves stay stable, starting with official/public advisories rather than reopening implemented fact-checking, OSINT, or rights/civic families.
@@ -176,6 +185,10 @@ Cross-lane helper update:
   - `/api/feeds/data-ai/source-families/review-queue`
 - Data AI progress now also records a client-light inspector helper path at:
   - `dataAiSourceIntelligence`
+- Geospatial AI progress now also records a backend-first environmental weather/observation review queue route at:
+  - `/api/context/environmental/weather-observation-review-queue`
+- Geospatial AI progress now also records a backend-first environmental weather/observation export bundle route at:
+  - `/api/context/environmental/weather-observation-export-bundle`
 - Geospatial AI progress now also records a backend-first environmental family-overview helper route at:
   - `/api/context/environmental/source-families-overview`
 - Geospatial AI progress now also records a backend-first environmental family export helper route at:
@@ -184,11 +197,22 @@ Cross-lane helper update:
   - `/api/context/environmental/context-export-package`
 - Geospatial AI progress now also records a backend-first environmental situation snapshot package route at:
   - `/api/context/environmental/situation-snapshot-package`
+- Geospatial AI progress now also records a backend-first environmental fusion-snapshot input route at:
+  - `/api/context/environmental/fusion-snapshot-input`
 - Marine AI progress now also records a workflow-supporting export helper path at:
   - `marineAnomalySummary.contextIssueExportBundle`
 - Marine AI progress now also records a full review/export coherence regression over `marineAnomalySummary` helper outputs
 - Marine AI progress now also records focused replay-evidence and evidence-interpretation export coherence checks over `marineAnomalySummary`
 - Marine AI progress now also records timeline-snapshot preservation of chokepoint review-lens metadata plus coherence between timeline snapshots and chokepoint review package outputs
+- Marine AI progress now also records a completed hydrology/source-health workflow helper path at:
+  - `marineAnomalySummary.hydrologySourceHealthWorkflow`
+- Treat that hydrology/source-health package as implemented workflow-supporting metadata only; it now has build/lint/smoke/helper evidence, but it still remains below `workflow-validated`
+- Marine AI progress now also records a completed bounded report/export helper path at:
+  - `marineAnomalySummary.hydrologySourceHealthReport`
+- Treat that report package as implemented workflow-supporting metadata only; it now has regression and smoke-metadata evidence, but it still remains below `workflow-validated`
+- Marine AI progress now also records a completed fusion-snapshot input helper path at:
+  - `marineAnomalySummary.fusionSnapshotInput`
+- Treat that fusion input as implemented workflow-supporting metadata only; it now has regression and smoke-metadata evidence, but it still remains below `workflow-validated`
 - Aerospace AI progress now also records a workflow-supporting review helper path at:
   - `aerospaceContextGapQueue`
 - Aerospace AI progress now also records a workflow-supporting current-vs-archive separation helper path at:
@@ -199,9 +223,13 @@ Cross-lane helper update:
   - `aerospaceContextSnapshotReport`
 - Aerospace AI progress now also records a workflow-readiness and evidence-accounting helper path at:
   - `aerospaceWorkflowReadinessPackage`
+- Aerospace AI progress now also records a completed workflow-validation evidence snapshot helper path at:
+  - `aerospaceWorkflowValidationEvidenceSnapshot`
 - Aerospace AI progress now also records a workflow-supporting review/export helper path at:
   - `aerospaceContextReviewQueue`
   - `aerospaceContextReviewExportBundle`
+- Aerospace AI progress now also records a completed report-brief package helper path at:
+  - `aerospaceReportBriefPackage`
 - Features/Webcam AI progress now also records a workflow-supporting evidence-packet selector route at:
   - `/api/cameras/source-ops-evidence-packets`
 - Features/Webcam AI progress now also records a workflow-supporting aggregate export-bundle route at:
@@ -211,6 +239,7 @@ Cross-lane helper update:
 - Features/Webcam AI progress now also records a workflow-supporting aggregate export surface route at:
   - `/api/cameras/source-ops-export-surface`
 - Features/Webcam AI progress now also records `nsw-live-traffic-cameras` and `quebec-mtmd-traffic-cameras` as `candidate-sandbox-importable` only; that is source-ops evidence and not implementation or validation proof.
+- Features/Webcam AI progress now also records `baton-rouge-traffic-cameras` and `vancouver-web-cam-url-links` as `candidate-sandbox-importable`, `arlington-traffic-cameras` as `endpoint-verified` only, and `qldtraffic-web-cameras` as held after a `401` on `/v1/webcams`; that remains candidate/source-ops evidence rather than implementation or validation proof.
 - Features/Webcam AI progress now also records a backend-only sandbox-candidate review-burden and source-health-expectation summary over current candidate-sandbox-importable sources.
 - Atlas AI progress now also records a fixture-backed Wave Monitor tool surface at:
   - `/api/tools/waves/overview`
@@ -232,25 +261,32 @@ Cross-lane helper update:
   - `/api/source-discovery/review/actions`
   - `/api/source-discovery/runtime/status`
 - Atlas AI progress now also records a newer Source Discovery Ten-Step backend slice as peer/runtime input only.
+- Atlas alerting and current next-task routing now also record a newer runtime operator-console slice as peer/runtime input only pending Connect validation.
+- Atlas alerting now also records a media-geolocation peer slice; keep it at derived-evidence or candidate-location input only unless a later controlled validation pass explicitly promotes a narrower surface.
+- Wonder alerting now also records bounded Statuspage and Mastodon discovery; keep both at candidate/review discovery input only unless a later controlled validation pass explicitly promotes a narrower surface.
 - Wonder planning docs now also record Browser Use guidance plus macOS/plugin/connector planning, but those remain peer planning input only and must not change source-validation posture by themselves.
 - These helper paths are implemented and useful for review/export workflows, but they should not be treated as external-source workflow validation proof by themselves.
 - Current evidence split:
   - scientific/environmental context is implemented and contract-tested on the existing shared Data AI route, but still has no explicit consumer-path or workflow-validation record
   - official/public advisories is implemented and contract-tested on the existing shared Data AI route, but still has no explicit consumer-path or workflow-validation record
   - source-family review queue is implemented and contract-tested as review metadata only, but still has no explicit consumer-path or workflow-validation record
-  - Data AI Source Intelligence is implemented as a client-light metadata-only inspector consumer, but still has no explicit smoke or manual workflow-validation record
+  - Data AI Source Intelligence is implemented as a client-light metadata-only inspector consumer, and its topic/context lens plus export-safe topic lines remain metadata-only workflow support without explicit smoke or manual workflow-validation record
+  - the infrastructure/status context package over `cloudflare-radar`, `netblocks`, and `apnic-blog` is now completed workflow-supporting metadata, not the active fresh Data lane
+  - the latest completed Data lanes now include the bounded fusion/claim-integrity snapshot and bounded report-brief package over the existing metadata-only Data AI surfaces
+  - the next useful Data move is one bounded topic-scoped report packet plus reporting-input coherence and validation/export closure; do not reopen implemented infrastructure/status, completed `world-news-awareness`, `propublica`, or `global-voices` as fresh source-build lanes
   - cyber-vendor/community follow-on is implemented and contract-tested on the existing shared Data AI route, but still has no explicit consumer-path or workflow-validation record
   - internet-governance/standards context is implemented and contract-tested on the existing shared Data AI route, but still has no explicit consumer-path or workflow-validation record
   - public-institution/world-context is implemented and contract-tested on the existing shared Data AI route, but still has no explicit consumer-path or workflow-validation record
   - Data family overview helper is contract-tested and metadata-oriented only
-  - environmental family overview helper, environmental family export helper, environmental context export package, and environmental situation snapshot package are contract-tested and metadata-oriented only
-  - marine issue export bundle plus full export coherence, focused-evidence coherence, and timeline/chokepoint coherence regressions now have helper regression plus marine smoke/build evidence, but remain helper-package evidence rather than source promotion
+  - environmental family overview helper, environmental family export helper, environmental context export package, environmental situation snapshot package, environmental weather/observation review queue, and environmental weather/observation export bundle are contract-tested and metadata-oriented only
+  - marine issue export bundle plus full export coherence, focused-evidence coherence, timeline/chokepoint coherence regressions, the hydrology/source-health workflow helper, the hydrology/source-health report helper, and `marineFusionSnapshotInput` now have helper regression plus marine smoke/build evidence, but remain helper-package evidence rather than source promotion
   - aerospace context gap queue, current-vs-archive helper, export-coherence helper, context snapshot report helper, and workflow-readiness package have smoke assertions prepared or export-aware evidence, but executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`
-  - aerospace context review queue and export bundle have prepared smoke assertions and export-aware evidence, but executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`
+  - aerospace context review queue, export bundle, workflow-validation evidence snapshot, and report-brief package have prepared smoke assertions or export-aware accounting evidence, but executed browser smoke is still missing on this host because Playwright launch is blocked by `windows-browser-launch-permission`; preserve the stale assignment-marker caveat on the snapshot helper and the Marine-owned lint-failure note from the last aerospace run
   - Features/Webcam evidence-packet selector, aggregate export bundle, aggregate handoff summary, and aggregate export surface have backend test and documentation evidence, but no explicit end-to-end workflow note yet
-  - Features/Webcam sandbox-candidate review-burden/source-health summary has backend test and documentation evidence, but no explicit end-to-end workflow note yet
+  - Features/Webcam sandbox-candidate review-burden/source-health summary has backend test and documentation evidence, and the current candidate-expansion wave appears completed with Baton Rouge/Vancouver/Caltrans candidate-sandbox-importable, Arlington endpoint-verified or feasibility-only, NZTA feasibility-only, and Queensland held; the newer active Features/Webcam lane is now NZTA and Arlington feasibility plus bounded candidate growth, but no explicit end-to-end workflow note is recorded yet
   - Wave Monitor is implemented as a fixture-backed tool surface with focused backend tests and analyst/readiness integration, but it is still not a validated live runtime, scheduler, or source-truth surface
   - source discovery runtime is implemented as a shared backend candidate/reputation surface with focused backend tests plus bounded seed, health, expand, snapshot, reversal, and manual scheduler-tick primitives, but it is still not source implementation proof, source-truth proof, autonomous discovery proof, or workflow-validation proof
+  - the Atlas runtime operator-console slice remains peer/runtime input only until Connect records explicit current-state validation; do not route it as workflow-validation proof, source proof, or ownership proof
 
 Wave Monitor tool update:
 
@@ -265,6 +301,8 @@ Source discovery memory update:
 - [source-discovery-platform-plan.md](/C:/Users/mike/11Writer/app/docs/source-discovery-platform-plan.md:1), [source-discovery-agent-framework.md](/C:/Users/mike/11Writer/app/docs/source-discovery-agent-framework.md:1), and Atlas AI progress now record a shared source-discovery runtime with overview, candidate-write, claim-outcome update, seed-url, record-source-extract, health-check, bounded expand, feed-link-scan, snapshot, reversal, review queue/actions, runtime status, and manual scheduler-tick routes.
 - Current repo evidence supports persistence models, SQLite-backed session wiring, deterministic claim-outcome reputation updates, Wave Monitor candidate seeding, metadata-only health checks, bounded expansion jobs, content snapshots, review queue/actions, runtime status, and reputation reversal.
 - Connect AI progress now also records `runtime_scheduler_service.py` as conservative compatibility and status plumbing rather than proof of hidden background scheduling.
+- Connect AI progress now also records provider/runtime boundary truth where config presence is exposed by key-source name only, `fixture` remains deterministic and review-only, and `openai`, `OpenRouter`, `Anthropic`, `xAI`, `Google`, `OpenClaw`, and `ollama` remain gated by provider configuration, explicit network permission, and positive request budget.
+- Mock-model paths remain deterministic and no provider path is allowed to promote sources, validate claims, activate connectors, or create direct action guidance.
 - Treat source discovery memory as an implemented shared candidate/reputation surface and governance input, not a source row and not a validated discovery runtime.
 - Autonomous discovery runners, hidden live polling, automatic source approval, and frontend review workflows remain outside current implemented proof.
 - Atlas evidence should inform governance and validation notes, but Atlas remains user-directed and does not by itself assign stable ownership or validation status.
@@ -1380,12 +1418,13 @@ Required:
   - pinned official POST endpoints for catalog metadata and latest water-level observations
   - fixtures and backend source-health handling for empty, disabled, stale, degraded, and unavailable behavior
   - marine docs now record the bounded WaterWebservices slice and its no-widening caveats
+  - Marine AI progress now also records a completed bounded helper/export follow-on through `marineSourceHealthExportCoherence.ts` and `marineAnomalySummary.sourceHealthExportCoherence`
 - Missing workflow evidence:
-  - explicit marine-local consumer or helper validation note
+  - explicit recorded workflow validation over the completed helper/export path or an equivalent marine-local consumer path
   - explicit export metadata validation note
   - explicit UI or operational workflow evidence
 - Required UI/smoke checks:
-  - one bounded marine consumer path shows station metadata and latest water-level observations without inventing impact semantics
+  - one bounded marine consumer or helper path shows station metadata and latest water-level observations without inventing impact semantics
   - partial metadata remains intelligible and inert
   - empty or unavailable branches remain distinct from normal observed results
 - Required export metadata checks:
@@ -1402,7 +1441,7 @@ Required:
   - `python -m pytest app/server/tests/test_marine_contracts.py -q`
 - Pass criteria for `workflow-validated`:
   - contract tests pass
-  - one bounded marine consumer or helper path is exercised successfully
+  - one bounded marine consumer or the completed helper/export path is exercised successfully
   - export metadata is checked and recorded once
 - Pass criteria for `fully validated`:
   - `workflow-validated` criteria pass

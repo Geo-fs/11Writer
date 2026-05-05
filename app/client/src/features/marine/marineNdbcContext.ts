@@ -24,6 +24,7 @@ export interface MarineNdbcContextSummary {
       | "unknown";
     nearbyStationCount: number;
     contextKind: "viewport" | "chokepoint";
+    topObservedAt?: string | null;
     topStation:
       | {
           stationId: string;
@@ -70,13 +71,14 @@ export function buildMarineNdbcContextSummary(
     sourceLine,
     stationLines,
     exportLines,
-    metadata: {
-      sourceId: response.sourceHealth.sourceId,
-      sourceMode: response.sourceHealth.sourceMode,
-      health: response.sourceHealth.health,
-      nearbyStationCount: response.count,
-      contextKind: response.contextKind,
-      topStation: topStation
+      metadata: {
+        sourceId: response.sourceHealth.sourceId,
+        sourceMode: response.sourceHealth.sourceMode,
+        health: response.sourceHealth.health,
+        nearbyStationCount: response.count,
+        contextKind: response.contextKind,
+        topObservedAt: topStation?.latestObservation?.observedAt ?? null,
+        topStation: topStation
         ? {
             stationId: topStation.stationId,
             stationName: topStation.stationName,

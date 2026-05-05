@@ -15,6 +15,7 @@ import {
   buildAerospaceGeomagnetismExportLines
 } from "../inspector/aerospaceGeomagnetismContext";
 import { buildAerospaceVaacContextSummary } from "../inspector/aerospaceVaacContext";
+import { buildAerospaceVaacAdvisoryReportPackageSummary } from "../inspector/aerospaceVaacAdvisoryReportPackage";
 import {
   buildAerospaceOpenSkyContextSummary,
   buildAerospaceOpenSkyExportLines
@@ -35,6 +36,12 @@ import { buildAerospaceContextSnapshotReportSummary } from "../inspector/aerospa
 import { buildAerospaceIssueExportBundleSummary } from "../inspector/aerospaceIssueExportBundle";
 import { buildAerospaceWorkflowEvidenceLedger } from "../inspector/aerospaceWorkflowEvidenceLedger";
 import { buildAerospaceWorkflowReadinessPackageSummary } from "../inspector/aerospaceWorkflowReadinessPackage";
+import { buildAerospaceWorkflowValidationEvidenceSnapshotSummary } from "../inspector/aerospaceWorkflowValidationEvidenceSnapshot";
+import { buildAerospaceEvidenceTimelinePackageSummary } from "../inspector/aerospaceEvidenceTimelinePackage";
+import { buildAerospacePackageCoherenceSummary } from "../inspector/aerospacePackageCoherence";
+import { buildAerospaceFusionSnapshotInputSummary } from "../inspector/aerospaceFusionSnapshotInput";
+import { buildAerospaceReportBriefPackageSummary } from "../inspector/aerospaceReportBriefPackage";
+import { buildAerospaceSpaceWeatherContinuityPackageSummary } from "../inspector/aerospaceSpaceWeatherContinuityPackage";
 import {
   buildAerospaceSourceReadinessBundleSummary,
   buildAerospaceSourceReadinessSummary
@@ -213,6 +220,13 @@ type DebugWindow = Window & {
     aerospaceIssueExportBundle?: unknown;
     aerospaceContextSnapshotReport?: unknown;
     aerospaceWorkflowReadinessPackage?: unknown;
+    aerospaceWorkflowValidationEvidenceSnapshot?: unknown;
+    aerospaceEvidenceTimelinePackage?: unknown;
+    aerospaceFusionSnapshotInput?: unknown;
+    aerospaceReportBriefPackage?: unknown;
+    aerospaceSpaceWeatherContinuityPackage?: unknown;
+    aerospaceVaacAdvisoryReportPackage?: unknown;
+    aerospacePackageCoherence?: unknown;
     aerospaceContextReport?: unknown;
     aerospaceExportProfile?: unknown;
     aerospaceFocus?: unknown;
@@ -1395,6 +1409,67 @@ export function AppShell() {
       buildAerospaceContextReviewExportBundleSummary({
         reviewQueueSummary: aerospaceContextReviewQueueSummary,
       });
+    const aerospaceWorkflowValidationEvidenceSnapshotSummary =
+      buildAerospaceWorkflowValidationEvidenceSnapshotSummary({
+        contextSnapshotReportSummary: aerospaceContextSnapshotReportSummary,
+        contextReviewQueueSummary: aerospaceContextReviewQueueSummary,
+        contextReviewExportBundleSummary: aerospaceContextReviewExportBundleSummary,
+        workflowReadinessPackageSummary: aerospaceWorkflowReadinessPackageSummary,
+        ourAirportsReferenceSummary,
+      });
+    const aerospaceEvidenceTimelinePackageSummary =
+      buildAerospaceEvidenceTimelinePackageSummary({
+        selectedDataHealthSummary,
+        weatherSummary: aviationWeatherSummary,
+        airportStatusSummary: faaNasAirportStatusSummary,
+        referenceSummary: ourAirportsReferenceSummary,
+        openSkySummary: openSkyContextSummary,
+        geomagnetismSummary,
+        cneosSummary: cneosSpaceContextSummary,
+        swpcSummary: swpcSpaceWeatherSummary,
+        nceiArchiveSummary: nceiSpaceWeatherArchiveSummary,
+        vaacSummary: vaacContextSummary,
+        availabilitySummary: aerospaceContextAvailabilitySummary,
+        workflowValidationSnapshotSummary: aerospaceWorkflowValidationEvidenceSnapshotSummary,
+        workflowReadinessPackageSummary: aerospaceWorkflowReadinessPackageSummary,
+      });
+    const aerospacePackageCoherenceSummary = buildAerospacePackageCoherenceSummary({
+      contextReviewQueueSummary: aerospaceContextReviewQueueSummary,
+      contextReviewExportBundleSummary: aerospaceContextReviewExportBundleSummary,
+      issueExportBundleSummary: aerospaceIssueExportBundleSummary,
+      contextSnapshotReportSummary: aerospaceContextSnapshotReportSummary,
+      workflowReadinessPackageSummary: aerospaceWorkflowReadinessPackageSummary,
+      workflowValidationEvidenceSnapshotSummary: aerospaceWorkflowValidationEvidenceSnapshotSummary,
+      evidenceTimelinePackageSummary: aerospaceEvidenceTimelinePackageSummary,
+      exportProfileSummary: baseExportProfileSummary,
+    });
+    const aerospaceFusionSnapshotInputSummary = buildAerospaceFusionSnapshotInputSummary({
+      selectedTargetSummary,
+      contextSnapshotReportSummary: aerospaceContextSnapshotReportSummary,
+      contextReviewQueueSummary: aerospaceContextReviewQueueSummary,
+      contextReviewExportBundleSummary: aerospaceContextReviewExportBundleSummary,
+      issueExportBundleSummary: aerospaceIssueExportBundleSummary,
+      workflowReadinessPackageSummary: aerospaceWorkflowReadinessPackageSummary,
+      workflowValidationEvidenceSnapshotSummary: aerospaceWorkflowValidationEvidenceSnapshotSummary,
+      evidenceTimelinePackageSummary: aerospaceEvidenceTimelinePackageSummary,
+      packageCoherenceSummary: aerospacePackageCoherenceSummary,
+      exportProfileSummary: baseExportProfileSummary,
+      exportReadinessSummary: aerospaceExportReadinessSummary,
+    });
+    const aerospaceReportBriefPackageSummary = buildAerospaceReportBriefPackageSummary({
+      fusionSnapshotInputSummary: aerospaceFusionSnapshotInputSummary,
+    });
+    const aerospaceSpaceWeatherContinuityPackageSummary =
+      buildAerospaceSpaceWeatherContinuityPackageSummary({
+        currentArchiveContextSummary: aerospaceCurrentArchiveContextSummary,
+        geomagnetismSummary,
+        reportBriefPackageSummary: aerospaceReportBriefPackageSummary,
+      });
+    const aerospaceVaacAdvisoryReportPackageSummary =
+      buildAerospaceVaacAdvisoryReportPackageSummary({
+        vaacContextSummary,
+        reportBriefPackageSummary: aerospaceReportBriefPackageSummary,
+      });
     const exportProfileSummary = buildAerospaceExportProfileSummary({
       profileId: selectedAerospaceExportProfile,
       selectedTargetLines: summaryLines,
@@ -1421,6 +1496,16 @@ export function AppShell() {
       contextReviewQueueLines: aerospaceContextReviewQueueSummary?.exportLines ?? [],
       contextReviewExportBundleLines:
         aerospaceContextReviewExportBundleSummary?.exportLines ?? [],
+      workflowValidationEvidenceLines:
+        aerospaceWorkflowValidationEvidenceSnapshotSummary?.exportLines ?? [],
+      evidenceTimelineLines: aerospaceEvidenceTimelinePackageSummary?.exportLines ?? [],
+      fusionSnapshotInputLines: aerospaceFusionSnapshotInputSummary?.exportLines ?? [],
+      reportBriefPackageLines: aerospaceReportBriefPackageSummary?.exportLines ?? [],
+      spaceWeatherContinuityPackageLines:
+        aerospaceSpaceWeatherContinuityPackageSummary?.exportLines ?? [],
+      vaacAdvisoryReportPackageLines:
+        aerospaceVaacAdvisoryReportPackageSummary?.exportLines ?? [],
+      packageCoherenceLines: aerospacePackageCoherenceSummary?.exportLines ?? [],
       exportCoherenceLines: aerospaceExportCoherenceSummary?.exportLines ?? [],
       issueExportBundleLines: aerospaceIssueExportBundleSummary?.exportLines ?? [],
       snapshotReportPackageLines: aerospaceContextSnapshotReportSummary?.exportLines ?? [],
@@ -2235,6 +2320,27 @@ export function AppShell() {
           : null,
         aerospaceWorkflowReadinessPackage: aerospaceWorkflowReadinessPackageSummary
           ? aerospaceWorkflowReadinessPackageSummary.metadata
+          : null,
+        aerospaceWorkflowValidationEvidenceSnapshot: aerospaceWorkflowValidationEvidenceSnapshotSummary
+          ? aerospaceWorkflowValidationEvidenceSnapshotSummary.metadata
+          : null,
+        aerospaceEvidenceTimelinePackage: aerospaceEvidenceTimelinePackageSummary
+          ? aerospaceEvidenceTimelinePackageSummary.metadata
+          : null,
+        aerospaceFusionSnapshotInput: aerospaceFusionSnapshotInputSummary
+          ? aerospaceFusionSnapshotInputSummary.metadata
+          : null,
+        aerospaceReportBriefPackage: aerospaceReportBriefPackageSummary
+          ? aerospaceReportBriefPackageSummary.metadata
+          : null,
+        aerospaceSpaceWeatherContinuityPackage: aerospaceSpaceWeatherContinuityPackageSummary
+          ? aerospaceSpaceWeatherContinuityPackageSummary.metadata
+          : null,
+        aerospaceVaacAdvisoryReportPackage: aerospaceVaacAdvisoryReportPackageSummary
+          ? aerospaceVaacAdvisoryReportPackageSummary.metadata
+          : null,
+        aerospacePackageCoherence: aerospacePackageCoherenceSummary
+          ? aerospacePackageCoherenceSummary.metadata
           : null,
         aerospaceContextReport: aerospaceContextReportSummary
           ? aerospaceContextReportSummary.metadata

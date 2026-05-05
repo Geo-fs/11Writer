@@ -19,7 +19,14 @@ import type { MarineContextIssueExportBundle, MarineContextIssueExportRow } from
 import type { MarineContextReviewReportSummary } from "./marineContextReviewReport";
 import type { MarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
 import type { MarineHydrologyContextSummary } from "./marineHydrologyContext";
+import { buildMarineFusionSnapshotInput } from "./marineFusionSnapshotInput";
+import { buildMarineHydrologySourceHealthReportSummary } from "./marineHydrologySourceHealthReport";
+import { buildMarineHydrologySourceHealthWorkflowSummary } from "./marineHydrologySourceHealthWorkflow";
+import { buildMarineReportBriefPackage } from "./marineReportBriefPackage";
 import type { MarineNetherlandsRwsWaterinfoContextSummary } from "./marineNetherlandsRwsWaterinfoContext";
+import { buildMarineCorridorReviewPackage } from "./marineCorridorReviewPackage";
+import { buildMarineCorridorSituationPackage } from "./marineCorridorSituationPackage";
+import { buildMarineSourceHealthExportCoherenceSummary } from "./marineSourceHealthExportCoherence";
 import {
   buildMarineChokepointReviewPackage,
   type MarineChokepointReviewContext
@@ -309,6 +316,466 @@ export interface MarineAnomalySnapshotMetadata {
       } | null;
       caveats: string[];
     } | null;
+    sourceHealthExportCoherence: {
+      sourceCount: number;
+      loadedSourceCount: number;
+      limitedSourceCount: number;
+      fixtureSourceCount: number;
+      latestTimestampKnownCount: number;
+      totalNearbyStationCount: number;
+      totalExportedObservationCount: number;
+      rows: Array<{
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "hydrology";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis: "observed";
+        nearbyStationCount: number;
+        exportedObservationCount: number;
+        latestTimestampPosture: string;
+        caveat: string;
+      }>;
+      caveats: string[];
+    } | null;
+    hydrologySourceHealthWorkflow: {
+      sourceCount: number;
+      hydrologySourceCount: number;
+      oceanMetSourceCount: number;
+      loadedSourceCount: number;
+      limitedSourceCount: number;
+      latestTimestampKnownCount: number;
+      rows: Array<{
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "hydrology";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis: "observed";
+        nearbyStationCount: number;
+        exportedObservationCount: number;
+        latestTimestampPosture: string;
+        caveat: string;
+      }>;
+      familyLines: Array<{
+        family: "hydrology" | "ocean-met";
+        label: string;
+        sourceCount: number;
+        loadedSourceCount: number;
+        limitedSourceCount: number;
+        latestTimestampKnownCount: number;
+        detail: string;
+        caveat: string;
+      }>;
+      caveats: string[];
+    } | null;
+    hydrologySourceHealthReport: {
+      title: string;
+      summaryLine: string;
+      posture: "broad" | "limited" | "empty-stale" | "missing-source";
+      sourceCount: number;
+      hydrologySourceCount: number;
+      oceanMetSourceCount: number;
+      loadedSourceCount: number;
+      limitedSourceCount: number;
+      latestTimestampKnownCount: number;
+      familyLines: Array<{
+        family: "hydrology" | "ocean-met";
+        label: string;
+        sourceCount: number;
+        loadedSourceCount: number;
+        limitedSourceCount: number;
+        latestTimestampKnownCount: number;
+        detail: string;
+        caveat: string;
+      }>;
+      rows: Array<{
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "hydrology";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis: "observed";
+        nearbyStationCount: number;
+        exportedObservationCount: number;
+        latestTimestampPosture: string;
+        caveat: string;
+        family: "hydrology" | "ocean-met" | "other";
+        reviewLine: string;
+      }>;
+      vigicruesRow: {
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "hydrology";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis: "observed";
+        nearbyStationCount: number;
+        exportedObservationCount: number;
+        latestTimestampPosture: string;
+        caveat: string;
+        family: "hydrology" | "ocean-met" | "other";
+        reviewLine: string;
+      } | null;
+      vigicruesStatusLine: string | null;
+      topSourceLines: string[];
+      doesNotProveLines: string[];
+      caveats: string[];
+    } | null;
+    corridorReviewPackage: {
+      title: string;
+      selectedCorridorLabel: string;
+      selectedProfileLabel: string | null;
+      posture: "normal" | "degraded" | "empty-no-match" | "missing-source";
+      sourceIds: string[];
+      sourceModes: Array<"fixture" | "live" | "unknown">;
+      sourceHealth: {
+        loaded: number;
+        empty: number;
+        stale: number;
+        degraded: number;
+        unavailable: number;
+        error: number;
+        disabled: number;
+        unknown: number;
+      };
+      evidenceBases: Array<
+        "observed" | "inferred" | "scored" | "summary" | "contextual" | "advisory"
+      >;
+      sourceRows: Array<{
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis: "observed" | "contextual" | "advisory";
+        nearbyCount: number;
+        activeCount: number | null;
+        caveat: string;
+      }>;
+      vigicruesRow: {
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis: "observed" | "contextual" | "advisory";
+        nearbyCount: number;
+        activeCount: number | null;
+        caveat: string;
+      } | null;
+      vigicruesStatusLine: string | null;
+      vigicruesCaveat: string | null;
+      replayReviewCounts: {
+        sliceCount: number;
+        totalObservedGapEvents: number;
+        totalSuspiciousGapEvents: number;
+        focusedEvidenceRowCount: number;
+        contextGapCount: number;
+      };
+      environmentalContextPosture: {
+        sourceCount: number;
+        healthySourceCount: number;
+        nearbyStationCount: number;
+        healthSummary: string;
+      } | null;
+      hydrologyContextPosture: {
+        sourceCount: number;
+        loadedSourceCount: number;
+        degradedSourceCount: number;
+        nearbyStationCount: number;
+        healthSummary: string;
+      } | null;
+      hydrologySourceHealthPosture: {
+        posture: "broad" | "limited" | "empty-stale" | "missing-source";
+        sourceCount: number;
+        hydrologySourceCount: number;
+        oceanMetSourceCount: number;
+        loadedSourceCount: number;
+        limitedSourceCount: number;
+      } | null;
+      explainLines: string[];
+      actLines: string[];
+      doesNotProveLines: string[];
+      caveats: string[];
+    } | null;
+    fusionSnapshotInput: {
+      title: string;
+      summaryLine: string;
+      replayPostureLine: string;
+      sourcePostureLine: string;
+      reviewPostureLine: string;
+      hydrologyStatusLine: string | null;
+      vigicruesStatusLine: string | null;
+      attentionItemCount: number;
+      reviewNeededItemCount: number;
+      issueCount: number;
+      warningCount: number;
+      contextGapCount: number;
+      focusedEvidenceRowCount: number;
+      observedGapCount: number;
+      suspiciousGapCount: number;
+      replayTrustLevel: "higher" | "moderate" | "limited";
+      topAttentionLabel: string | null;
+      topAttentionType: "selected-vessel" | "viewport" | "chokepoint-slice" | null;
+      focusedTargetLabel: string | null;
+      sourceCount: number;
+      loadedSourceCount: number;
+      limitedSourceCount: number;
+      emptySourceCount: number;
+      disabledSourceCount: number;
+      sourceRows: Array<{
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis:
+          | "observed"
+          | "inferred"
+          | "scored"
+          | "summary"
+          | "contextual"
+          | "advisory";
+        nearbyCount: number;
+        activeCount: number | null;
+        latestTimestampPosture: string | null;
+        caveat: string;
+      }>;
+      hydrologyPosture: {
+        posture: "broad" | "limited" | "empty-stale" | "missing-source";
+        sourceCount: number;
+        hydrologySourceCount: number;
+        oceanMetSourceCount: number;
+        loadedSourceCount: number;
+        limitedSourceCount: number;
+        summaryLine: string;
+        vigicruesStatusLine: string | null;
+      } | null;
+      corridorPosture: {
+        selectedCorridorLabel: string;
+        selectedProfileLabel: string | null;
+        posture: "normal" | "degraded" | "empty-no-match" | "missing-source";
+        replayReviewCounts: {
+          sliceCount: number;
+          totalObservedGapEvents: number;
+          totalSuspiciousGapEvents: number;
+          focusedEvidenceRowCount: number;
+          contextGapCount: number;
+        };
+        sourceHealthLine: string;
+        vigicruesStatusLine: string | null;
+      } | null;
+      chokepointPosture: {
+        reviewOnly: true;
+        corridorLabel: string;
+        boundedAreaLabel: string | null;
+        focusedEvidenceKinds: string[];
+        focusedTargetLabel: string | null;
+        contextGapCount: number;
+        sourceHealthLine: string;
+        focusedEvidenceLine: string;
+        contextGapLine: string;
+        dominantLimitationLine: string | null;
+      } | null;
+      doesNotProveLines: string[];
+      caveats: string[];
+    } | null;
+    reportBriefPackage: {
+      title: string;
+      summaryLine: string;
+      observe: {
+        heading: "observe";
+        lines: string[];
+      };
+      orient: {
+        heading: "orient";
+        lines: string[];
+      };
+      prioritize: {
+        heading: "prioritize";
+        lines: string[];
+      };
+      explain: {
+        heading: "explain";
+        lines: string[];
+      };
+      attentionItemCount: number;
+      reviewNeededItemCount: number;
+      warningCount: number;
+      contextGapCount: number;
+      sourceCount: number;
+      loadedSourceCount: number;
+      limitedSourceCount: number;
+      vigicruesWorkflowEvidenceLine: string | null;
+      waterinfoWorkflowEvidenceLine: string | null;
+      sourceRows: Array<{
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis:
+          | "observed"
+          | "inferred"
+          | "scored"
+          | "summary"
+          | "contextual"
+          | "advisory";
+        nearbyCount: number;
+        activeCount: number | null;
+        latestTimestampPosture: string | null;
+        caveat: string;
+      }>;
+      doesNotProveLines: string[];
+      caveats: string[];
+    } | null;
+    corridorSituationPackage: {
+      title: string;
+      summaryLine: string;
+      selectedCorridorLine: string;
+      replaySituationLine: string;
+      sourceSituationLine: string;
+      hydrologySituationLine: string | null;
+      corridorLabel: string | null;
+      boundedAreaLabel: string | null;
+      chokepointReviewOnly: boolean;
+      posture: "normal" | "degraded" | "empty-no-match" | "missing-source";
+      sourceCount: number;
+      loadedSourceCount: number;
+      limitedSourceCount: number;
+      attentionItemCount: number;
+      reviewNeededItemCount: number;
+      warningCount: number;
+      contextGapCount: number;
+      focusedEvidenceRowCount: number;
+      observedGapCount: number;
+      suspiciousGapCount: number;
+      vigicruesWorkflowEvidenceLine: string | null;
+      waterinfoWorkflowEvidenceLine: string | null;
+      hydrologyRows: Array<{
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis:
+          | "observed"
+          | "inferred"
+          | "scored"
+          | "summary"
+          | "contextual"
+          | "advisory";
+        nearbyCount: number;
+        activeCount: number | null;
+        latestTimestampPosture: string | null;
+        caveat: string;
+      }>;
+      sourceRows: Array<{
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis:
+          | "observed"
+          | "inferred"
+          | "scored"
+          | "summary"
+          | "contextual"
+          | "advisory";
+        nearbyCount: number;
+        activeCount: number | null;
+        latestTimestampPosture: string | null;
+        caveat: string;
+      }>;
+      observe: string[];
+      orient: string[];
+      prioritize: string[];
+      explain: string[];
+      doesNotProveLines: string[];
+      caveats: string[];
+    } | null;
     contextFusionSummary: {
       familyCount: number;
       availableFamilyCount: number;
@@ -513,6 +980,19 @@ export function buildMarineEvidenceSummary(input: {
   environmentalContextSummary: MarineEnvironmentalContextSummary | null;
   chokepointReviewContext?: MarineChokepointReviewContext | null;
 }): MarineEvidenceSummaryOutput {
+  const sourceHealthExportCoherenceSummary = buildMarineSourceHealthExportCoherenceSummary({
+    noaaCoops: input.noaaContextSummary,
+    ndbc: input.ndbcContextSummary,
+    vigicrues: input.vigicruesContextSummary,
+    irelandOpw: input.irelandOpwContextSummary,
+    netherlandsRwsWaterinfo: input.netherlandsRwsWaterinfoContextSummary ?? null
+  });
+  const hydrologySourceHealthWorkflowSummary = buildMarineHydrologySourceHealthWorkflowSummary(
+    sourceHealthExportCoherenceSummary
+  );
+  const hydrologySourceHealthReportSummary = buildMarineHydrologySourceHealthReportSummary(
+    hydrologySourceHealthWorkflowSummary
+  );
   const selectedVessel = input.selectedVesselSummary
     ? toMiniSummary(input.selectedVesselSummary.anomaly)
     : null;
@@ -563,6 +1043,53 @@ export function buildMarineEvidenceSummary(input: {
     hydrologyContextSummary: input.hydrologyContextSummary,
     environmentalContextSummary: input.environmentalContextSummary
   });
+  const corridorReviewPackage = buildMarineCorridorReviewPackage({
+    chokepointReviewPackage,
+    chokepointSummary: input.chokepointSummary,
+    activeNavigationTarget: input.activeNavigationTarget,
+    focusedEvidenceRows: input.focusedEvidenceRows,
+    chokepointReviewContext: input.chokepointReviewContext ?? null,
+    contextSourceRegistrySummary: input.contextSourceRegistrySummary,
+    environmentalContextSummary: input.environmentalContextSummary,
+    hydrologyContextSummary: input.hydrologyContextSummary,
+    hydrologySourceHealthReportSummary
+  });
+  const fusionSnapshotInput = buildMarineFusionSnapshotInput({
+    attentionQueue: {
+      itemCount: queue.length,
+      topItem: topQueue
+        ? {
+            type: topQueue.type,
+            label: topQueue.label
+          }
+        : null
+    },
+    focusedReplayEvidence: {
+      rowCount: input.focusedEvidenceRows.length,
+      caveats: input.focusedEvidenceRows
+        .map((row) => row.caveat)
+        .filter((value): value is string => Boolean(value))
+        .slice(0, 3)
+    },
+    focusedEvidenceInterpretation: {
+      trustLevel: input.focusedEvidenceInterpretation.trustLevel,
+      topCaveats: input.focusedEvidenceInterpretation.caveats.slice(0, 3)
+    },
+    sourceHealthExportCoherenceSummary,
+    hydrologySourceHealthReportSummary,
+    corridorReviewPackage,
+    chokepointReviewPackage,
+    contextFusionSummary: input.contextFusionSummary,
+    contextReviewReportSummary: input.contextReviewReportSummary,
+    contextIssueQueueSummary: input.contextIssueQueueSummary,
+    contextIssueExportBundle: input.contextIssueExportBundle
+  });
+  const reportBriefPackage = buildMarineReportBriefPackage(fusionSnapshotInput);
+  const corridorSituationPackage = buildMarineCorridorSituationPackage({
+    fusionSnapshotInput,
+    reportBriefPackage,
+    chokepointReviewPackage
+  });
 
   const displayLines: string[] = [];
   if (selectedVessel) {
@@ -604,6 +1131,15 @@ export function buildMarineEvidenceSummary(input: {
   if (input.hydrologyContextSummary) {
     displayLines.push(input.hydrologyContextSummary.exportLines[0]);
   }
+  if (sourceHealthExportCoherenceSummary) {
+    displayLines.push(sourceHealthExportCoherenceSummary.exportLines[0]);
+  }
+  if (hydrologySourceHealthWorkflowSummary) {
+    displayLines.push(hydrologySourceHealthWorkflowSummary.exportLines[0]);
+  }
+  if (hydrologySourceHealthReportSummary) {
+    displayLines.push(hydrologySourceHealthReportSummary.exportLines[0]);
+  }
   if (input.contextFusionSummary) {
     displayLines.push(input.contextFusionSummary.exportLines[0]);
   }
@@ -631,6 +1167,18 @@ export function buildMarineEvidenceSummary(input: {
   }
   if (chokepointReviewPackage) {
     displayLines.push(chokepointReviewPackage.exportLines[0]);
+  }
+  if (corridorReviewPackage) {
+    displayLines.push(corridorReviewPackage.exportLines[0]);
+  }
+  if (fusionSnapshotInput) {
+    displayLines.push(fusionSnapshotInput.exportLines[0]);
+  }
+  if (reportBriefPackage) {
+    displayLines.push(reportBriefPackage.exportLines[0]);
+  }
+  if (corridorSituationPackage) {
+    displayLines.push(corridorSituationPackage.exportLines[0]);
   }
   if (input.activeNavigationTarget) {
     const t = input.activeNavigationTarget;
@@ -706,6 +1254,9 @@ export function buildMarineEvidenceSummary(input: {
         irelandOpwWaterLevelContext: input.irelandOpwContextSummary?.metadata ?? null,
         netherlandsRwsWaterinfoContext: input.netherlandsRwsWaterinfoContextSummary?.metadata ?? null,
         hydrologyContext: input.hydrologyContextSummary?.metadata ?? null,
+        sourceHealthExportCoherence: sourceHealthExportCoherenceSummary?.metadata ?? null,
+        hydrologySourceHealthWorkflow: hydrologySourceHealthWorkflowSummary?.metadata ?? null,
+        hydrologySourceHealthReport: hydrologySourceHealthReportSummary?.metadata ?? null,
         contextFusionSummary: input.contextFusionSummary?.metadata ?? null,
         contextReviewReport: input.contextReviewReportSummary?.metadata ?? null,
         contextSourceSummary: input.contextSourceRegistrySummary?.metadata ?? null,
@@ -714,6 +1265,10 @@ export function buildMarineEvidenceSummary(input: {
         contextIssueExportBundle: input.contextIssueExportBundle?.metadata ?? null,
         environmentalContext: input.environmentalContextSummary?.metadata ?? null,
         chokepointReviewPackage: chokepointReviewPackage?.metadata ?? null,
+        corridorReviewPackage: corridorReviewPackage?.metadata ?? null,
+        fusionSnapshotInput: fusionSnapshotInput?.metadata ?? null,
+        reportBriefPackage: reportBriefPackage?.metadata ?? null,
+        corridorSituationPackage: corridorSituationPackage?.metadata ?? null,
         caveats: [
           "Anomaly ranking is attention prioritization, not proof of intent or wrongdoing.",
           "AIS gaps/signals are observed/inferred/scored indicators, not proof of intentional disabling."

@@ -1,12 +1,17 @@
 # Wave LLM Interpretation Framework
 
-Waves can use LLMs for the parts deterministic code cannot do well, such as understanding article body text, extracting candidate claims, translating prose into structured review packets, and suggesting corroboration checks.
+Waves use LLMs for the parts deterministic code cannot do well, such as understanding article body text, extracting candidate claims, translating prose into structured review packets, and suggesting corroboration checks.
 
 Core rule:
 
 - LLMs propose interpretation; deterministic code babysits, validates, stores caveats, and decides what can move forward.
 
-The current backend slice supports BYOK/provider capability reporting, a shared provider-adapter execution seam, LLM interpretation task records, explicit task execution, validated review submission, live-gated OpenAI execution, and a bounded Source Discovery scheduler bridge that can create review-only `source_summary` or `article_claim_extraction` tasks from eligible snapshots.
+The current backend slice supports managed BYOK/provider configuration, per-wave provider overrides, a shared provider-adapter execution seam, explicit task creation, explicit task execution, audited execution history, validated review submission, and a bounded Source Discovery scheduler bridge that can create review-only `source_summary` or `article_claim_extraction` tasks from eligible snapshots.
+
+Runtime-boundary rule:
+
+- provider configuration, BYOK state, execution history, request budgets, and runtime controls are runtime-boundary and review-only surfaces
+- they are not source-approval proof, claim-truth proof, or workflow-validation proof for any external source
 
 ## Supported Provider Families
 
@@ -22,7 +27,7 @@ The framework recognizes these provider families:
 - `openclaw`
 - `custom`
 
-User-owned configuration keys:
+User-owned configuration inputs:
 
 - `WAVE_LLM_ENABLED`
 - `WAVE_LLM_DEFAULT_PROVIDER`
@@ -37,38 +42,67 @@ User-owned configuration keys:
 - `WAVE_LLM_MAX_INPUT_CHARS`
 - `WAVE_LLM_MAX_OUTPUT_CHARS`
 
-Capability responses must only expose configured/not-configured state and config source names. They must never return raw API keys.
+Runtime-managed provider settings now include:
+
+- global defaults:
+  - provider
+  - model
+  - allow-network default
+  - request-budget default
+  - retry default
+  - timeout default
+- per-provider settings:
+  - saved API key when applicable
+  - base URL when applicable
+  - provider-level default model
+  - provider-level network/budget/retry/timeout defaults
+- per-wave settings:
+  - provider override
+  - model override
+  - allow-network override
+  - request-budget override
+  - retry override
+  - timeout override
+
+API responses must only expose configured/not-configured state, config source names, and masked secret fingerprints. They must never return raw API keys.
 
 ## Current Routes
 
 - `GET /api/tools/waves/llm/capabilities`
+- `GET /api/tools/waves/llm/config`
+- `POST /api/tools/waves/llm/config/defaults`
+- `POST /api/tools/waves/llm/config/providers/{provider}`
+- `POST /api/tools/waves/llm/config/monitors/{monitor_id}`
 - `POST /api/tools/waves/llm/tasks`
 - `POST /api/tools/waves/llm/tasks/{task_id}/execute`
 - `POST /api/tools/waves/llm/reviews`
+- `GET /api/tools/waves/llm/reviews`
+- `GET /api/tools/waves/llm/executions`
 
 Current storage:
 
 - `wave_llm_tasks`
 - `wave_llm_reviews`
+- `wave_llm_executions`
+- `wave_llm_monitor_preferences`
+- local user-data provider config JSON
 
 Current executable adapters:
 
 - `fixture`: deterministic local JSON output, no network
 - `ollama`: live local adapter path, blocked unless `allowNetwork=true` and `requestBudget > 0`
-- `openai`: live BYOK adapter path, blocked unless `allowNetwork=true`, `requestBudget > 0`, and `OPENAI_API_KEY` is configured
-- `openrouter`: deterministic mock adapter path for BYOK contract testing only; live network calls remain disabled
+- `openai`: live BYOK adapter path, blocked unless `allowNetwork=true`, `requestBudget > 0`, and a configured key exists
+- `openrouter`: live BYOK adapter path, blocked unless `allowNetwork=true`, `requestBudget > 0`, and a configured key exists
+- `anthropic`: live BYOK adapter path, blocked unless `allowNetwork=true`, `requestBudget > 0`, and a configured key exists
+- `xai`: live BYOK adapter path, blocked unless `allowNetwork=true`, `requestBudget > 0`, and a configured key exists
+- `google`: live BYOK adapter path, blocked unless `allowNetwork=true`, `requestBudget > 0`, and a configured key exists
+- `openclaw`: live base-URL adapter path, blocked unless `allowNetwork=true`, `requestBudget > 0`, and a configured base URL exists
 
-Current capability-only adapters:
+Current capability-only adapter:
 
-- `anthropic`
-- `xai`
-- `google`
-- `openclaw`
 - `custom`
 
-Capability-only means keys/configuration can be detected, but execution is blocked until a provider adapter is implemented, tested, and budget-gated.
-
-Mock-only means the provider name can execute through the shared adapter contract, but only against deterministic local responses. It does not contact the provider network and does not prove live-provider readiness.
+Mock execution remains supported for provider-safe contract testing. Models prefixed with `mock-` or `test-mock-` execute deterministically with no provider network call.
 
 ## Babysitting Rules
 
@@ -115,6 +149,7 @@ Every LLM execution must preserve:
 - request budget
 - used requests
 - retry count
+- timeout seconds
 - raw output when present
 - error summary when blocked or failed
 - caveats
@@ -166,7 +201,7 @@ Forbidden action language such as connector activation, source promotion, or rep
 
 ## Provider Adapter Rules
 
-Future provider adapters must:
+Provider adapters must:
 
 - implement the shared adapter contract so every provider goes through the same request budget, timeout, retry, audit, and review path
 - run only when `WAVE_LLM_ENABLED=true` or when explicitly fixture/manual
@@ -188,10 +223,11 @@ Provider adapters should return raw model output into the review path. The revie
 Task execution is explicit:
 
 1. Create an interpretation task.
-2. Execute that task with a specific adapter, budget, and network permission.
-3. Store execution output.
-4. Submit output through the review validator.
-5. Treat accepted claims as review candidates only.
+2. Resolve provider/model/defaults from runtime config, per-wave preference, and explicit request overrides.
+3. Execute that task with a specific adapter, budget, timeout, and network permission.
+4. Store execution output.
+5. Submit output through the review validator.
+6. Treat accepted claims as review candidates only.
 
 Automated execution is allowed only through bounded scheduler controls that still create explicit tasks, preserve audit rows, respect request budgets, and keep outputs review-only.
 
@@ -200,7 +236,7 @@ No connector loop or arbitrary runtime shortcut should bypass the explicit task,
 Current bounded automation:
 
 - Source Discovery scheduler ticks may create `source_summary` or `article_claim_extraction` tasks from eligible stored snapshots
-- scheduler-created tasks must use the same adapter contract, request-budget rules, provider gating, and review validator as manual tasks
+- scheduler-created tasks must use the same adapter contract, request-budget rules, provider gating, per-wave provider preferences, and review validator as manual tasks
 - provider execution remains bounded by runtime settings such as `llmTaskLimit`, `requestBudget`, and `allowNetwork`
 
 ## Local Model Posture
@@ -221,6 +257,7 @@ Required posture:
 Agents adding LLM work should:
 
 - add provider adapters through the shared execution adapter seam behind `WaveLlmService`
+- keep new provider-management fields wired through the shared runtime config service instead of reading raw settings directly
 - keep model output inert until validated
 - write tests for malformed JSON, unsupported claim types, overconfident claims, and accusatory language
 - keep live-provider tests monkeypatched or fixture-backed unless the user explicitly requests a real provider call

@@ -35,6 +35,18 @@ def _settings() -> Settings:
         FINGAL_TRAFFIC_CAMERAS_FIXTURE_PATH=str(
             Path(__file__).resolve().parents[1] / "data" / "fingal_traffic_cameras_fixture.json"
         ),
+        BATON_ROUGE_TRAFFIC_CAMERAS_MODE="fixture",
+        BATON_ROUGE_TRAFFIC_CAMERAS_FIXTURE_PATH=str(
+            Path(__file__).resolve().parents[1] / "data" / "baton_rouge_traffic_cameras_fixture.json"
+        ),
+        VANCOUVER_WEB_CAM_URL_LINKS_MODE="fixture",
+        VANCOUVER_WEB_CAM_URL_LINKS_FIXTURE_PATH=str(
+            Path(__file__).resolve().parents[1] / "data" / "vancouver_web_cam_url_links_fixture.json"
+        ),
+        CALTRANS_CCTV_CAMERAS_MODE="fixture",
+        CALTRANS_CCTV_CAMERAS_FIXTURE_PATH=str(
+            Path(__file__).resolve().parents[1] / "data" / "caltrans_cctv_cameras_fixture.json"
+        ),
     )
 
 
@@ -187,6 +199,85 @@ def test_fingal_sandbox_report_keeps_metadata_only_posture_conservative() -> Non
     assert report.review_queue_count >= 2
     assert any("orientation" in reason.lower() or "frame" in reason.lower() for reason in report.top_review_reasons)
     assert "metadata-only" in report.recommended_next_step.lower()
+    assert "activate" not in report.recommended_next_step.lower()
+    assert "Ignore previous instructions" not in json.dumps(report.to_dict())
+
+
+def test_baton_rouge_sandbox_report_keeps_viewer_only_posture_conservative() -> None:
+    report = asyncio.run(
+        build_camera_sandbox_validation_report(
+            _settings(),
+            source_id="baton-rouge-traffic-cameras",
+        )
+    )
+
+    assert report.source_id == "baton-rouge-traffic-cameras"
+    assert report.source_mode == "fixture"
+    assert report.validated is False
+    assert report.discovered_count == 2
+    assert report.usable_count == 0
+    assert report.direct_image_count == 0
+    assert report.viewer_only_count == 1
+    assert report.missing_coordinate_count == 0
+    assert report.uncertain_orientation_count == 2
+    assert report.unavailable_frame_count >= 1
+    assert report.review_queue_count >= 2
+    assert any("viewer" in reason.lower() or "frame" in reason.lower() for reason in report.top_review_reasons)
+    assert "viewer-only" in report.recommended_next_step.lower() or "media posture" in report.recommended_next_step.lower()
+    assert "activate" not in report.recommended_next_step.lower()
+    assert "Ignore previous instructions" not in json.dumps(report.to_dict())
+
+
+def test_vancouver_sandbox_report_keeps_viewer_only_posture_conservative() -> None:
+    report = asyncio.run(
+        build_camera_sandbox_validation_report(
+            _settings(),
+            source_id="vancouver-web-cam-url-links",
+        )
+    )
+
+    assert report.source_id == "vancouver-web-cam-url-links"
+    assert report.source_mode == "fixture"
+    assert report.validated is False
+    assert report.discovered_count == 2
+    assert report.usable_count == 0
+    assert report.direct_image_count == 0
+    assert report.viewer_only_count == 1
+    assert report.missing_coordinate_count == 0
+    assert report.uncertain_orientation_count == 2
+    assert report.unavailable_frame_count >= 1
+    assert report.review_queue_count >= 2
+    assert any("viewer" in reason.lower() or "frame" in reason.lower() for reason in report.top_review_reasons)
+    assert "viewer-only" in report.recommended_next_step.lower() or "media posture" in report.recommended_next_step.lower()
+    assert "activate" not in report.recommended_next_step.lower()
+    assert "Ignore previous instructions" not in json.dumps(report.to_dict())
+
+
+def test_caltrans_sandbox_report_keeps_direct_image_posture_conservative() -> None:
+    report = asyncio.run(
+        build_camera_sandbox_validation_report(
+            _settings(),
+            source_id="caltrans-cctv-cameras",
+        )
+    )
+
+    assert report.source_id == "caltrans-cctv-cameras"
+    assert report.source_mode == "fixture"
+    assert report.onboarding_state == "candidate"
+    assert report.import_readiness == "inventory-only"
+    assert report.validated is False
+    assert report.discovered_count == 2
+    assert report.usable_count == 1
+    assert report.direct_image_count == 1
+    assert report.viewer_only_count == 0
+    assert report.missing_coordinate_count == 0
+    assert report.uncertain_orientation_count == 2
+    assert report.unavailable_frame_count >= 1
+    assert report.review_queue_count >= 2
+    assert any("orientation" in reason.lower() for reason in report.top_review_reasons)
+    assert any("frame" in reason.lower() or "unavailable" in reason.lower() for reason in report.top_review_reasons)
+    assert "direct-image" in report.recommended_next_step.lower() or "mapping" in report.recommended_next_step.lower()
+    assert "validated" not in report.recommended_next_step.lower()
     assert "activate" not in report.recommended_next_step.lower()
     assert "Ignore previous instructions" not in json.dumps(report.to_dict())
 

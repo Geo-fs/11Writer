@@ -185,6 +185,40 @@ Interpretation rules:
 - hostile fixture or candidate text remains inert data only and is excluded from compact export lines
 - `hold` means a sandbox candidate still lacks enough media evidence for stronger follow-up, not that it should be scraped or bypassed
 
+### Promotion-readiness comparison
+
+The backend source-ops index and export-summary responses now also include a compact promotion-readiness comparison summary across inventory-backed candidate sources.
+
+It groups current candidates into:
+
+- `sandbox-stronger-follow-up`
+- `sandbox-follow-up`
+- `sandbox-held`
+- `endpoint-verified-follow-up`
+- `endpoint-verified-held`
+- `endpoint-research-needed`
+- `blocked-hold`
+
+Each row stays export-safe and limited to:
+
+- lifecycle state
+- media evidence posture
+- media access posture
+- payload-shape posture
+- sandbox-feasibility posture
+- source-health expectation
+- missing evidence and missing-evidence count
+- next safe review step
+- comparison basis
+
+Interpretation rules:
+
+- this comparison is read-only planning evidence only
+- `sandbox-stronger-follow-up` is still weaker than `approved-unvalidated`
+- `endpoint-verified-held` means a machine endpoint is documented, but public media evidence is still weaker than the current sandbox cohort
+- blocked and needs-review candidates stay materially different from endpoint-verified or sandbox-importable candidates
+- no comparison bucket activates, validates, schedules, or promotes a source
+
 ## Normalized Schema
 
 The canonical camera object is `CameraEntity`.
@@ -307,6 +341,10 @@ The repo now carries explicit candidate inventory records for:
 - `maryland-chart-traffic-cameras`
 - `fingal-traffic-cameras`
 - `baton-rouge-traffic-cameras`
+- `vancouver-web-cam-url-links`
+- `nzta-traffic-cameras`
+- `arlington-traffic-cameras`
+- `caltrans-cctv-cameras`
 - `euskadi-traffic-cameras`
 
 These remain inventory-only candidates until compliance, stability, field mapping, and source-health review are explicitly approved. `finland-digitraffic-road-cameras` is the exception in type only: it is an official machine-readable API candidate, but it is still not active for ingest.
@@ -339,11 +377,66 @@ The strongest new machine-readable candidates currently taken through deeper sou
   - lifecycle: `candidate-sandbox-importable`
   - sandbox connector: `FingalTrafficCameraConnector` in `fixture` mode only
   - still missing: metadata-only posture review, source-health review, and real import evidence beyond sandbox mapping
+- `baton-rouge-traffic-cameras`
+  - endpoint status: `machine-readable-confirmed`
+  - media posture: `viewer-only-documented`
+  - lifecycle: `candidate-sandbox-importable`
+  - sandbox connector: `BatonRougeTrafficCameraConnector` in `fixture` mode only
+  - still missing: source-health review, explicit lifecycle decision, and real import evidence beyond sandbox mapping
+- `vancouver-web-cam-url-links`
+  - endpoint status: `machine-readable-confirmed`
+  - media posture: `viewer-only-documented`
+  - lifecycle: `candidate-sandbox-importable`
+  - sandbox connector: `VancouverWebCamUrlLinksConnector` in `fixture` mode only
+  - still missing: source-health review, explicit lifecycle decision, and real import evidence beyond sandbox mapping
+- `caltrans-cctv-cameras`
+  - endpoint status: `machine-readable-confirmed`
+  - media posture: `direct-image-documented`
+  - payload-shape posture: `fixture-reviewed-sandbox-shape`
+  - sandbox-feasibility posture: `fixture-backed-direct-image-review`
+  - lifecycle: `candidate-sandbox-importable`
+  - sandbox connector: `CaltransCctvCameraConnector` in `fixture` mode only
+  - still missing: source-health review, explicit lifecycle decision, and real import evidence beyond sandbox mapping
+- `nzta-traffic-cameras`
+  - endpoint status: `machine-readable-confirmed`
+  - media posture: `metadata-only-documented`
+  - payload-shape posture: `api-family-documented-shape-unpinned`
+  - sandbox-feasibility posture: `endpoint-family-unpinned`
+  - lifecycle: `candidate-endpoint-verified`
+  - no sandbox connector yet
+  - still missing: bounded camera payload review, stable media-field proof, source-health review, and explicit lifecycle decision before any later sandbox or `approved-unvalidated` discussion
 
 Within the same batch:
 
-- `baton-rouge-traffic-cameras` remains candidate-only but was not chosen for deeper follow-up yet because current evidence is still mostly location-centric
+- `arlington-traffic-cameras` remains `candidate-endpoint-verified` because the public county JSON inventory is still metadata-only and only supports a `machine-shape-location-only` posture, not a stable public media path
+  - sandbox-feasibility posture: `media-proof-missing`
 - `euskadi-traffic-cameras` remains `candidate-needs-review` because the final public machine-readable endpoint is still unpinned
+
+Additional hardening review in the same lane kept these sources out of the registry or out of stronger lifecycle buckets:
+
+- `qldtraffic-web-cameras`
+  - still held because the official unauthenticated posture remains `401`
+- `npra-datex-webcams`
+  - remains credential-blocked because registration is required
+- `udot-traffic-cameras`
+  - remains credential-blocked because a developer key is required
+- `az511-cameras`
+  - remains credential-blocked because a developer key is required
+- `seattle-traffic-cameras`
+  - left out of the backend inventory because the current public evidence is still viewer-page centric rather than a pinned machine-readable inventory
+
+The bounded Caltrans sandbox-feasibility pass also re-reviewed `euskadi-traffic-cameras`, `qldtraffic-web-cameras`, `seattle-traffic-cameras`, `nzta-traffic-cameras`, and `arlington-traffic-cameras`. No new candidate records were added from that extra backlog review because none met the same clean endpoint-pinning plus media-posture bar already met by the current sandbox-importable set.
+
+The follow-up NZTA and Arlington sandbox-feasibility comparison now records explicit backend-only hold postures across candidate reports, source-ops detail, candidate-network coverage, promotion-readiness summaries, and export surfaces:
+
+- `caltrans-cctv-cameras`
+  - comparator posture: `fixture-backed-direct-image-review`
+- `nzta-traffic-cameras`
+  - hold posture: `endpoint-family-unpinned`
+- `arlington-traffic-cameras`
+  - hold posture: `media-proof-missing`
+
+This comparison is export-safe lifecycle evidence only. It does not create sandbox connectors for NZTA or Arlington, does not activate sources, and does not justify validation or scheduled ingest.
 
 `minnesota-511-public-arcgis` is currently an inventory-only Gather-registry candidate. It is not active for import, and the repo explicitly treats it as blocked on public endpoint verification. The current rule is: do not scrape the interactive 511MN web app, and do not enable ingest until a stable public no-auth machine endpoint is verified.
 
@@ -401,6 +494,12 @@ Current fixture-first sandbox candidates:
 - `fingal-traffic-cameras`
   - metadata-only sandbox connector
   - exact coordinates and identifier mapping are exercised through deterministic fixtures only
+- `baton-rouge-traffic-cameras`
+  - conservative viewer-only/media-posture sandbox connector
+  - exact coordinates and Socrata row-field mapping are exercised through deterministic fixtures only
+- `vancouver-web-cam-url-links`
+  - conservative viewer-only/media-posture sandbox connector
+  - exact coordinates and records-api field mapping are exercised through deterministic fixtures only
 
 Interpretation rules:
 
@@ -483,6 +582,7 @@ Purpose:
 - describe which lifecycle tooling artifacts already exist for each webcam source
 - keep candidate, sandbox, approved-unvalidated, validated, blocked, and credential-blocked states explicit
 - provide compact export/report lines for operational summaries
+- preserve export-safe review-priority rows for candidate-only follow-up without activation drift
 
 The index can mark availability for:
 
@@ -490,6 +590,26 @@ The index can mark availability for:
 - candidate endpoint report
 - graduation plan
 - sandbox validation report
+
+The index and export summary also expose a candidate network coverage package for registry-tracked candidate sources. It groups rows by:
+
+- primary region
+- lifecycle state
+- media evidence posture
+- direct-image/viewer-link posture
+- missing evidence count
+- source-health expectation
+- next safe review step
+- review priority
+
+Interpretation rules:
+
+- the package covers inventory-tracked candidate sources only
+- held/doc-only candidates such as `qldtraffic-web-cameras` remain documented in research docs until they are safely added to inventory
+- `review-next` means a stronger manual follow-up candidate, not activation approval
+- `follow-up` means bounded registry, sandbox, or source-health work is still required
+- `hold` means the source is still weaker than stronger candidate/sandbox peers under current media evidence
+- `blocked` means document compliant alternatives only and do not scrape or automate viewer apps
 
 The per-source detail view composes stored lifecycle evidence for one source id and can summarize:
 
@@ -502,6 +622,7 @@ The per-source detail view composes stored lifecycle evidence for one source id 
 The export/debug summary route composes:
 
 - source-ops index export lines
+- candidate network coverage summary rows and aggregate lines across registry-tracked candidate sources
 - optional selected per-source detail export lines
 - stored artifact timestamp/provenance summaries
 - fleet-level artifact timestamp-status rollups

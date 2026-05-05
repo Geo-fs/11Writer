@@ -8,6 +8,12 @@ from src.services.camera_registry import (
     get_camera_source_sandbox_mode,
     is_camera_source_sandbox_importable,
 )
+from src.services.camera_source_ops_candidate_network_summary import (
+    build_camera_source_ops_candidate_network_summary,
+)
+from src.services.camera_source_ops_promotion_readiness_summary import (
+    build_camera_source_ops_promotion_readiness_summary,
+)
 from src.services.camera_source_ops_sandbox_candidate_summary import (
     build_camera_source_ops_sandbox_candidate_summary,
 )
@@ -25,6 +31,8 @@ def build_camera_source_ops_report_index(settings: Settings) -> CameraSourceOpsI
     entries = [_build_entry(source, settings) for source in sources]
     entries.sort(key=lambda item: item.source_id)
     sandbox_candidate_summary = build_camera_source_ops_sandbox_candidate_summary(settings)
+    candidate_network_summary = build_camera_source_ops_candidate_network_summary(settings)
+    promotion_readiness_summary = build_camera_source_ops_promotion_readiness_summary(settings)
     summary = CameraSourceOpsIndexSummary(
         total_sources=len(entries),
         validated_sources=sum(1 for entry in entries if entry.lifecycle_bucket == "validated-active"),
@@ -48,7 +56,14 @@ def build_camera_source_ops_report_index(settings: Settings) -> CameraSourceOpsI
         count=len(entries),
         summary=summary,
         sandbox_candidate_summary=sandbox_candidate_summary,
-        export_lines=_build_export_lines(entries, summary),
+        candidate_network_summary=candidate_network_summary,
+        promotion_readiness_summary=promotion_readiness_summary,
+        export_lines=_build_export_lines(
+            entries,
+            summary,
+            candidate_network_summary.export_lines,
+            promotion_readiness_summary.export_lines,
+        ),
         caveat=(
             "This source-operations index is read-only lifecycle evidence. "
             "It describes which lifecycle artifacts exist, not whether a source is active or validated."
@@ -220,6 +235,8 @@ def _sandbox_mode(source: CameraSourceInventoryEntry, settings: Settings) -> str
 def _build_export_lines(
     entries: list[CameraSourceOpsIndexEntry],
     summary: CameraSourceOpsIndexSummary,
+    candidate_network_lines: list[str],
+    promotion_readiness_lines: list[str],
 ) -> list[str]:
     sandbox_sources = [entry.source_id for entry in entries if _artifact_available(entry, "sandbox-validation-report")]
     blocked_sources = [entry.source_id for entry in entries if entry.lifecycle_bucket == "blocked-do-not-scrape"]
@@ -241,6 +258,8 @@ def _build_export_lines(
         lines.append(f"Sandbox-reportable candidates: {', '.join(sandbox_sources[:3])}")
     if blocked_sources:
         lines.append(f"Blocked/do-not-scrape: {', '.join(blocked_sources[:3])}")
+    lines.extend(candidate_network_lines[:3])
+    lines.extend(promotion_readiness_lines[:2])
     return lines
 
 

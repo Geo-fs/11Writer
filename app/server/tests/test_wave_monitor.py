@@ -10,8 +10,10 @@ from src.config.settings import Settings, get_settings
 
 
 def _settings(database_path: Path, source_memory_path: Path) -> Settings:
+    app_user_data_dir = str(database_path.parent / "appdata")
     return Settings(
         APP_ENV="test",
+        APP_USER_DATA_DIR=app_user_data_dir,
         WAVE_MONITOR_DATABASE_URL=f"sqlite:///{database_path.as_posix()}",
         SOURCE_DISCOVERY_DATABASE_URL=f"sqlite:///{source_memory_path.as_posix()}",
         WAVE_LLM_ENABLED=True,
@@ -171,6 +173,120 @@ def test_wave_llm_capabilities_expose_byok_without_leaking_keys(tmp_path: Path) 
     assert any("never directly becomes fact" in guardrail for guardrail in payload["guardrails"])
 
 
+def test_wave_llm_config_masks_saved_secret_and_returns_provider_defaults(tmp_path: Path) -> None:
+    client = _client(tmp_path / "wave_monitor.db")
+
+    response = client.post(
+        "/api/tools/waves/llm/config/providers/openai",
+        json={
+            "apiKey": "sk-local-secret-123456789",
+            "defaultModel": "mock-gpt-4o-mini",
+            "allowNetworkDefault": False,
+            "requestBudgetDefault": 0,
+            "maxRetriesDefault": 1,
+            "timeoutSecondsDefault": 41,
+        },
+    )
+    payload = response.json()
+
+    assert response.status_code == 200
+    provider = next(item for item in payload["providers"] if item["provider"] == "openai")
+    assert provider["configured"] is True
+    assert provider["keySource"] == "runtime-file"
+    assert provider["maskedSecret"].startswith("sk-***")
+    assert provider["defaultModel"] == "mock-gpt-4o-mini"
+    assert "sk-local-secret-123456789" not in str(payload)
+
+
+def test_wave_llm_task_and_execution_inherit_managed_defaults(tmp_path: Path) -> None:
+    client = _client(tmp_path / "wave_monitor.db")
+    client.get("/api/tools/waves/overview")
+    client.post(
+        "/api/tools/waves/llm/config/defaults",
+        json={
+            "defaultProvider": "openai",
+            "defaultModel": "mock-gpt-4o-mini",
+            "allowNetworkDefault": False,
+            "requestBudgetDefault": 0,
+            "maxRetriesDefault": 1,
+            "timeoutSecondsDefault": 33,
+        },
+    )
+
+    task_response = client.post(
+        "/api/tools/waves/llm/tasks",
+        json={
+            "monitorId": "wave:scam-ecosystem-watch",
+            "taskType": "article_claim_extraction",
+            "inputText": "Article body says a public advisory described a new fraud pattern.",
+        },
+    )
+    task_payload = task_response.json()
+    task_id = task_payload["task"]["taskId"]
+
+    execution_response = client.post(
+        f"/api/tools/waves/llm/tasks/{task_id}/execute",
+        json={"taskId": task_id},
+    )
+    execution_payload = execution_response.json()
+    executions_payload = client.get("/api/tools/waves/llm/executions").json()
+
+    assert task_response.status_code == 200
+    assert task_payload["task"]["provider"] == "openai"
+    assert task_payload["task"]["model"] == "mock-gpt-4o-mini"
+    assert execution_response.status_code == 200
+    assert execution_payload["execution"]["adapterStatus"] == "mock_openai"
+    assert execution_payload["execution"]["usedRequests"] == 0
+    assert executions_payload["items"][0]["provider"] == "openai"
+    assert executions_payload["items"][0]["timeoutSeconds"] == 33
+
+
+def test_wave_llm_monitor_preference_overrides_global_defaults(tmp_path: Path) -> None:
+    client = _client(tmp_path / "wave_monitor.db")
+    client.get("/api/tools/waves/overview")
+    client.post(
+        "/api/tools/waves/llm/config/defaults",
+        json={
+            "defaultProvider": "fixture",
+            "defaultModel": "local-fixture",
+            "allowNetworkDefault": False,
+            "requestBudgetDefault": 0,
+            "maxRetriesDefault": 1,
+            "timeoutSecondsDefault": 30,
+        },
+    )
+    response = client.post(
+        "/api/tools/waves/llm/config/monitors/wave:scam-ecosystem-watch",
+        json={
+            "provider": "openrouter",
+            "model": "mock-openrouter-wave",
+            "allowNetwork": False,
+            "requestBudget": 0,
+            "maxRetries": 0,
+            "timeoutSeconds": 25,
+        },
+    )
+    task_response = client.post(
+        "/api/tools/waves/llm/tasks",
+        json={
+            "monitorId": "wave:scam-ecosystem-watch",
+            "taskType": "article_claim_extraction",
+            "inputText": "Article body says a public advisory described a new fraud pattern.",
+        },
+    )
+    task_payload = task_response.json()
+
+    assert response.status_code == 200
+    assert any(
+        preference["monitorId"] == "wave:scam-ecosystem-watch"
+        and preference["provider"] == "openrouter"
+        for preference in response.json()["monitorPreferences"]
+    )
+    assert task_response.status_code == 200
+    assert task_payload["task"]["provider"] == "openrouter"
+    assert task_payload["task"]["model"] == "mock-openrouter-wave"
+
+
 def test_wave_llm_review_babysits_local_model_output(tmp_path: Path) -> None:
     client = _client(tmp_path / "wave_monitor.db")
     client.get("/api/tools/waves/overview")
@@ -243,6 +359,37 @@ def test_wave_llm_fixture_execution_creates_review_without_network(tmp_path: Pat
     assert payload["execution"]["usedRequests"] == 0
     assert payload["review"]["requiresHumanReview"] is True
     assert payload["review"]["acceptedClaimCount"] == 1
+
+
+def test_wave_llm_review_queue_lists_pending_review_packets(tmp_path: Path) -> None:
+    client = _client(tmp_path / "wave_monitor.db")
+    client.get("/api/tools/waves/overview")
+
+    task_payload = client.post(
+        "/api/tools/waves/llm/tasks",
+        json={
+          "monitorId": "wave:scam-ecosystem-watch",
+          "taskType": "article_claim_extraction",
+          "provider": "fixture",
+          "model": "fixture-claim-extractor",
+          "inputText": "Article body says a public advisory described a new fraud pattern.",
+          "sourceIds": ["source:regional-news-feed"],
+        },
+    ).json()
+    task_id = task_payload["task"]["taskId"]
+    client.post(
+        f"/api/tools/waves/llm/tasks/{task_id}/execute",
+        json={"taskId": task_id, "allowNetwork": False, "requestBudget": 0},
+    )
+
+    response = client.get("/api/tools/waves/llm/reviews")
+    payload = response.json()
+
+    assert response.status_code == 200
+    assert payload["metadata"]["count"] >= 1
+    assert payload["items"][0]["task"]["taskId"] == task_id
+    assert payload["items"][0]["primarySourceId"] == "source:regional-news-feed"
+    assert payload["items"][0]["review"]["requiresHumanReview"] is True
 
 
 def test_wave_llm_ollama_execution_is_blocked_without_explicit_budget_and_network(tmp_path: Path) -> None:

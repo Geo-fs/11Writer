@@ -23,9 +23,17 @@ import type {
   DataAiFeedFamilyReadinessSnapshotResponse,
   DataAiFeedFamilyReviewQueueResponse,
   DataAiFeedFamilyReviewResponse,
+  SourceDiscoveryMemoryDetailResponse,
+  SourceDiscoveryReviewQueueResponse,
+  SourceDiscoveryRuntimeServiceBundleResponse,
+  SourceDiscoveryRuntimeStatusResponse,
   TsunamiAlertResponse,
   UkEaFloodResponse,
   VolcanoStatusResponse,
+  WaveLlmConfigResponse,
+  WaveLlmExecutionHistoryResponse,
+  WaveMonitorOverviewResponse,
+  WaveLlmReviewQueueResponse,
   ReviewQueueResponse,
   MarineChokepointAnalyticalSummaryResponse,
   MarineIrelandOpwWaterLevelContextResponse,
@@ -1196,6 +1204,140 @@ export function useDataAiFeedFamilyReviewQueueQuery(
     enabled,
     staleTime: 60_000,
     refetchInterval: 120_000
+  });
+}
+
+export function useSourceDiscoveryRuntimeStatusQuery() {
+  return useQuery({
+    queryKey: ["source-discovery-runtime-status"],
+    queryFn: () =>
+      fetchJson<SourceDiscoveryRuntimeStatusResponse>("/api/source-discovery/runtime/status"),
+    staleTime: 15_000,
+    refetchInterval: 20_000
+  });
+}
+
+export function useSourceDiscoveryRuntimeServicesQuery(
+  platformName?: SourceDiscoveryRuntimeServiceBundleResponse["currentPlatform"] | null
+) {
+  const params = platformName ? `?platform_name=${platformName}` : "";
+  return useQuery({
+    queryKey: ["source-discovery-runtime-services", platformName ?? "default"],
+    queryFn: () =>
+      fetchJson<SourceDiscoveryRuntimeServiceBundleResponse>(
+        `/api/source-discovery/runtime/services${params}`
+      ),
+    staleTime: 30_000,
+    refetchInterval: 30_000
+  });
+}
+
+export function useSourceDiscoveryReviewQueueQuery(input?: {
+  limit?: number;
+  ownerLane?: string | null;
+}) {
+  const limit = input?.limit ?? 20;
+  const params = new URLSearchParams({
+    limit: String(limit)
+  });
+  if (input?.ownerLane) {
+    params.set("owner_lane", input.ownerLane);
+  }
+  return useQuery({
+    queryKey: ["source-discovery-review-queue", limit, input?.ownerLane ?? null],
+    queryFn: () =>
+      fetchJson<SourceDiscoveryReviewQueueResponse>(
+        `/api/source-discovery/review/queue?${params.toString()}`
+      ),
+    staleTime: 20_000,
+    refetchInterval: 30_000
+  });
+}
+
+export function useSourceDiscoveryMemoryDetailQuery(sourceId: string | null, limit = 10) {
+  return useQuery({
+    queryKey: ["source-discovery-memory-detail", sourceId, limit],
+    queryFn: () => {
+      if (!sourceId) {
+        throw new Error("Source detail query requires a source id.");
+      }
+      return fetchJson<SourceDiscoveryMemoryDetailResponse>(
+        `/api/source-discovery/memory/${encodeURIComponent(sourceId)}?limit=${limit}`
+      );
+    },
+    enabled: sourceId != null,
+    staleTime: 20_000,
+    refetchInterval: 30_000
+  });
+}
+
+export function useWaveLlmReviewQueueQuery(input?: {
+  limit?: number;
+  validationState?: string | null;
+  requiresHumanReview?: boolean | null;
+}) {
+  const limit = input?.limit ?? 10;
+  const params = new URLSearchParams({
+    limit: String(limit)
+  });
+  if (input?.validationState != null) {
+    params.set("validation_state", input.validationState);
+  }
+  if (input?.requiresHumanReview != null) {
+    params.set("requires_human_review", input.requiresHumanReview ? "true" : "false");
+  }
+  return useQuery({
+    queryKey: [
+      "wave-llm-review-queue",
+      limit,
+      input?.validationState ?? "needs_human_review",
+      input?.requiresHumanReview ?? true
+    ],
+    queryFn: () =>
+      fetchJson<WaveLlmReviewQueueResponse>(
+        `/api/tools/waves/llm/reviews?${params.toString()}`
+      ),
+    staleTime: 20_000,
+    refetchInterval: 30_000
+  });
+}
+
+export function useWaveLlmConfigQuery() {
+  return useQuery({
+    queryKey: ["wave-llm-config"],
+    queryFn: () => fetchJson<WaveLlmConfigResponse>("/api/tools/waves/llm/config"),
+    staleTime: 15_000
+  });
+}
+
+export function useWaveLlmExecutionHistoryQuery(input?: {
+  limit?: number;
+  monitorId?: string | null;
+}) {
+  const limit = input?.limit ?? 10;
+  const params = new URLSearchParams({
+    limit: String(limit)
+  });
+  if (input?.monitorId) {
+    params.set("monitor_id", input.monitorId);
+  }
+  return useQuery({
+    queryKey: ["wave-llm-executions", limit, input?.monitorId ?? null],
+    queryFn: () =>
+      fetchJson<WaveLlmExecutionHistoryResponse>(
+        `/api/tools/waves/llm/executions?${params.toString()}`
+      ),
+    staleTime: 15_000,
+    refetchInterval: 30_000
+  });
+}
+
+export function useWaveMonitorOverviewQuery() {
+  return useQuery({
+    queryKey: ["wave-monitor-overview-operator"],
+    queryFn: () => fetchJson<WaveMonitorOverviewResponse>("/api/tools/waves/overview"),
+    staleTime: 20_000,
+    refetchInterval: 30_000
   });
 }
 

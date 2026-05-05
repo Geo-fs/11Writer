@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "dataset_version": "7.0",
+    "inventory_scope": "global excluding ice sheets as documented",
+    "source_file": "RGI2000-v7.0-region-01-alaska",
+    "generated_at": "2024-11-15T00:00:00Z"
+  },
+  "glaciers": [
+    {
+      "glacier_id": "RGI2000-v7.0-G-01-00001",
+      "glacier_name": "Wolverine Glacier",
+      "region_code": "01",
+      "region_name": "Alaska",
+      "area_km2": 16.732,
+      "center_latitude": 60.4051,
+      "center_longitude": -148.9162,
+      "min_elevation_m": 350,
+      "max_elevation_m": 1675,
+      "median_elevation_m": 1015,
+      "terminus_type": "Land-terminating"
+    },
+    {
+      "glacier_id": "RGI2000-v7.0-G-01-00002",
+      "glacier_name": "Gulkana Glacier",
+      "region_code": "01",
+      "region_name": "Alaska",
+      "area_km2": 18.451,
+      "center_latitude": 63.2418,
+      "center_longitude": -145.4137,
+      "min_elevation_m": 1160,
+      "max_elevation_m": 2470,
+      "median_elevation_m": 1810,
+      "terminus_type": "Land-terminating"
+    },
+    {
+      "glacier_id": "RGI2000-v7.0-G-01-00003",
+      "glacier_name": "Taku Glacier",
+      "region_code": "01",
+      "region_name": "Alaska",
+      "area_km2": 671.224,
+      "center_latitude": 58.7564,
+      "center_longitude": -134.1379,
+      "min_elevation_m": 20,
+      "max_elevation_m": 2240,
+      "median_elevation_m": 980,
+      "terminus_type": "Marine-terminating"
+    },
+    {
+      "glacier_id": "RGI2000-v7.0-G-01-00004",
+      "glacier_name": "Unnamed Test Glacier <script>alert(1)</script>",
+      "region_code": "01",
+      "region_name": "Alaska",
+      "area_km2": 4.912,
+      "center_latitude": null,
+      "center_longitude": null,
+      "min_elevation_m": 540,
+      "max_elevation_m": 1325,
+      "median_elevation_m": 910,
+      "terminus_type": "Land-terminating"
+    }
+  ]
+}

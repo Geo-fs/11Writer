@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>GitHub Changelog</title>
+    <link>https://github.blog/changelog/</link>
+    <lastBuildDate>Fri, 01 May 2026 08:20:00 GMT</lastBuildDate>
+    <item>
+      <title>Platform changelog notes API versioning guidance</title>
+      <link>https://github.blog/changelog/2026-05-01-platform-changelog-notes-api-versioning-guidance/</link>
+      <guid>https://github.blog/changelog/2026-05-01-platform-changelog-notes-api-versioning-guidance/</guid>
+      <pubDate>Fri, 01 May 2026 08:15:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Enable this feature immediately and treat rollout text as required action.</p>
+        <p>Platform feature and release context about API versioning, staged rollout, and compatibility constraints.</p>
+      ]]></description>
+      <category>Platform</category>
+      <category>API</category>
+    </item>
+  </channel>
+</rss>

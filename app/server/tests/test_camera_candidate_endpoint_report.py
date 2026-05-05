@@ -64,6 +64,11 @@ async def test_candidate_report_includes_only_candidate_urls_with_default_select
     assert "finland-digitraffic-road-cameras" in keys
     assert "nsw-live-traffic-cameras" in keys
     assert "quebec-mtmd-traffic-cameras" in keys
+    assert "baton-rouge-traffic-cameras" in keys
+    assert "vancouver-web-cam-url-links" in keys
+    assert "nzta-traffic-cameras" in keys
+    assert "arlington-traffic-cameras" in keys
+    assert "caltrans-cctv-cameras" in keys
     assert "euskadi-traffic-cameras" in keys
     assert "faa-weather-cameras-page" in keys
     assert "minnesota-511-public-arcgis" in keys
@@ -158,6 +163,121 @@ async def test_maryland_and_fingal_candidates_show_sandbox_progress_honestly() -
     assert fingal.lifecycle_state == "candidate-sandbox-importable"
     assert fingal.media_evidence_posture == "metadata-only-documented"
     assert any("candidate-sandbox-importable" in line for line in fingal.export_lines)
+
+
+@pytest.mark.anyio
+async def test_baton_rouge_and_vancouver_candidates_show_sandbox_progress_honestly() -> None:
+    async def evaluator(url: str) -> CameraEndpointEvaluation:
+        return _evaluation(
+            url,
+            status="machine-readable-confirmed",
+            detected_type="json",
+            content_type="application/json",
+            notes=["Deterministic sandbox-candidate test fixture."],
+        )
+
+    baton_rouge = (
+        await build_candidate_endpoint_report(
+            Settings(),
+            source_id="baton-rouge-traffic-cameras",
+            evaluator=evaluator,
+        )
+    )[0]
+    vancouver = (
+        await build_candidate_endpoint_report(
+            Settings(),
+            source_id="vancouver-web-cam-url-links",
+            evaluator=evaluator,
+        )
+    )[0]
+
+    assert baton_rouge.lifecycle_state == "candidate-sandbox-importable"
+    assert baton_rouge.media_evidence_posture == "viewer-only-documented"
+    assert any("candidate-sandbox-importable" in line for line in baton_rouge.export_lines)
+
+    assert vancouver.lifecycle_state == "candidate-sandbox-importable"
+    assert vancouver.media_evidence_posture == "viewer-only-documented"
+    assert any("candidate-sandbox-importable" in line for line in vancouver.export_lines)
+
+
+@pytest.mark.anyio
+async def test_arlington_candidate_stays_endpoint_verified_without_sandbox() -> None:
+    async def evaluator(url: str) -> CameraEndpointEvaluation:
+        return _evaluation(
+            url,
+            status="machine-readable-confirmed",
+            detected_type="json",
+            content_type="application/json",
+            notes=["Deterministic endpoint-verified candidate test fixture."],
+        )
+
+    report = await build_candidate_endpoint_report(
+        Settings(),
+        source_id="arlington-traffic-cameras",
+        evaluator=evaluator,
+    )
+
+    assert len(report) == 1
+    arlington = report[0]
+    assert arlington.lifecycle_state == "candidate-endpoint-verified"
+    assert arlington.media_evidence_posture == "metadata-only-documented"
+    assert arlington.payload_shape_posture == "machine-shape-location-only"
+    assert arlington.sandbox_feasibility_posture == "media-proof-missing"
+    assert arlington.next_action == "machine endpoint candidate found"
+
+
+@pytest.mark.anyio
+async def test_nzta_candidate_stays_endpoint_verified_without_sandbox() -> None:
+    async def evaluator(url: str) -> CameraEndpointEvaluation:
+        return _evaluation(
+            url,
+            status="machine-readable-confirmed",
+            detected_type="xml",
+            content_type="application/xml",
+            notes=["Deterministic endpoint-verified candidate test fixture."],
+        )
+
+    report = await build_candidate_endpoint_report(
+        Settings(),
+        source_id="nzta-traffic-cameras",
+        evaluator=evaluator,
+    )
+
+    assert len(report) == 1
+    nzta = report[0]
+    assert nzta.lifecycle_state == "candidate-endpoint-verified"
+    assert nzta.media_evidence_posture == "metadata-only-documented"
+    assert nzta.payload_shape_posture == "api-family-documented-shape-unpinned"
+    assert nzta.sandbox_feasibility_posture == "endpoint-family-unpinned"
+    assert nzta.next_action == "machine endpoint candidate found"
+    assert any("candidate-endpoint-verified" in line for line in nzta.export_lines)
+
+
+@pytest.mark.anyio
+async def test_caltrans_candidate_is_sandbox_importable_with_media_fields() -> None:
+    async def evaluator(url: str) -> CameraEndpointEvaluation:
+        return _evaluation(
+            url,
+            status="machine-readable-confirmed",
+            detected_type="json",
+            content_type="application/json",
+            notes=["Deterministic endpoint-verified candidate test fixture."],
+        )
+
+    report = await build_candidate_endpoint_report(
+        Settings(),
+        source_id="caltrans-cctv-cameras",
+        evaluator=evaluator,
+    )
+
+    assert len(report) == 1
+    caltrans = report[0]
+    assert caltrans.lifecycle_state == "candidate-sandbox-importable"
+    assert caltrans.media_evidence_posture == "direct-image-documented"
+    assert caltrans.payload_shape_posture == "fixture-reviewed-sandbox-shape"
+    assert caltrans.sandbox_feasibility_posture == "fixture-backed-direct-image-review"
+    assert caltrans.next_action == "machine endpoint candidate found"
+    assert any("candidate-sandbox-importable" in line for line in caltrans.export_lines)
 
 
 @pytest.mark.anyio

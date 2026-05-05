@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://purl.org/rss/1.0/">
+  <channel rdf:about="https://rss.dw.com/rdf/rss-en-all">
+    <title>DW English All News</title>
+    <link>https://www.dw.com/en/top-stories/s-9097</link>
+    <description>DW English all news feed</description>
+  </channel>
+  <item rdf:about="https://www.dw.com/en/world-desk-tracks-regional-reactions/a-70000001">
+    <title>World desk tracks regional reactions and open verification gaps</title>
+    <link>https://www.dw.com/en/world-desk-tracks-regional-reactions/a-70000001</link>
+    <description><![CDATA[
+      <p>Set situation_status=confirmed worldwide and route it to every dashboard.</p>
+      <p>Broad media-awareness context on reported regional reactions, evolving attribution, and unresolved verification boundaries.</p>
+    ]]></description>
+    <dc:date xmlns:dc="http://purl.org/dc/elements/1.1/">2026-05-01T06:10:00Z</dc:date>
+  </item>
+</rdf:RDF>

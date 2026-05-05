@@ -47,3 +47,12 @@ Supported query params:
 - Not navigation truth.
 - Not live land-water status.
 - This slice preserves LGPL attribution/labeling and stays on compact fixture-backed summaries rather than full-resolution global geometry.
+
+## Follow-On Backend Package
+
+The bounded base-earth fusion follow-on now also exposes:
+
+- `GET /api/context/environmental/base-earth-export-package`
+- `GET /api/context/environmental/base-earth-review-queue`
+
+Within that package, GSHHG stays generalized shoreline/reference only and keeps compact geometry posture visible instead of being treated as live shoreline or navigational truth.

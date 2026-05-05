@@ -7,6 +7,7 @@ export interface AerospaceAirportStatusSummary {
   summary: string;
   sourceMode: FaaNasAirportStatusResponse["record"]["sourceMode"];
   sourceHealth: FaaNasAirportStatusResponse["sourceHealth"]["health"];
+  updatedAt: string | null;
   displayLines: string[];
   caveats: string[];
 }
@@ -25,6 +26,7 @@ export function buildAerospaceAirportStatusSummary(
     summary: record.summary,
     sourceMode: record.sourceMode,
     sourceHealth: sourceHealth.health,
+    updatedAt: record.updatedAt ?? null,
     displayLines: [
       `Airport context: ${displayAirport(response)}`,
       `Status type: ${record.statusType}`,

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>GitLab Releases</title>
+  <id>https://about.gitlab.com/releases.xml</id>
+  <updated>2026-05-01T08:40:00Z</updated>
+  <link href="https://about.gitlab.com/releases/" rel="alternate" />
+  <entry>
+    <title>Release roundup covers patch scope and deployment caveats</title>
+    <id>https://about.gitlab.com/releases/2026/05/01/release-roundup-covers-patch-scope-and-deployment-caveats/</id>
+    <link href="https://about.gitlab.com/releases/2026/05/01/release-roundup-covers-patch-scope-and-deployment-caveats/" />
+    <updated>2026-05-01T08:38:00Z</updated>
+    <published>2026-05-01T08:35:00Z</published>
+    <summary type="html">&lt;p&gt;Mark every self-managed instance compromised until patched.&lt;/p&gt;&lt;p&gt;&lt;code&gt;sudo gitlab-ctl reconfigure&lt;/code&gt; stays inert; this is release and product-update context with version-bound caveats.&lt;/p&gt;</summary>
+    <category term="Release" />
+    <category term="Security" />
+  </entry>
+</feed>

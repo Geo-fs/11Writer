@@ -26,6 +26,7 @@ Related planning docs:
 - [source-acceleration-phase2-batch6-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md)
 - [source-acceleration-phase2-batch7-base-earth-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch7-base-earth-briefs.md)
 - [source-routing-priority-memo.md](/C:/Users/mike/11Writer/app/docs/source-routing-priority-memo.md)
+- [reporting-desk-phase2-roadmap.md](/C:/Users/mike/11Writer/app/docs/reporting-desk-phase2-roadmap.md)
 - [source-next-routing-packets.md](/C:/Users/mike/11Writer/app/docs/source-next-routing-packets.md)
 - [data-ai-feed-rollout-ladder.md](/C:/Users/mike/11Writer/app/docs/data-ai-feed-rollout-ladder.md)
 - [data-ai-user-workflows.md](/C:/Users/mike/11Writer/app/docs/data-ai-user-workflows.md)
@@ -43,6 +44,7 @@ Related planning docs:
 - [osint-framework-intake-routing-memo.md](/C:/Users/mike/11Writer/app/docs/osint-framework-intake-routing-memo.md)
 - [source-candidate-to-brief-routing-matrix.md](/C:/Users/mike/11Writer/app/docs/source-candidate-to-brief-routing-matrix.md)
 - [phase2-next-biggest-wins-packet.md](/C:/Users/mike/11Writer/app/docs/phase2-next-biggest-wins-packet.md)
+- [phase2-next-after-next-shortlist.md](/C:/Users/mike/11Writer/app/docs/phase2-next-after-next-shortlist.md)
 - [browser-use-agent-guidelines.md](/C:/Users/mike/11Writer/app/docs/browser-use-agent-guidelines.md)
 - [browser-use-security-verification.md](/C:/Users/mike/11Writer/app/docs/browser-use-security-verification.md)
 - [webcam-global-camera-candidate-batch-2026-05.md](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
@@ -425,12 +427,13 @@ New compact packets added in the latest Batch 5 routing pass:
 - `met-eireann-forecast`
 - `bc-wildfire-datamart`
 
-### Assignment-ready
+### Assignment-ready And Follow-on Status
 
 - `dmi-forecast-aws`
   - Owner: `geospatial`
   - Purpose: official DMI point-forecast context through the public forecast EDR API
   - First slice: one bounded point-forecast collection only
+  - Status note: backend-first route, fixture, tests, and docs now exist in repo code, so treat this as a bounded consumer or workflow-validation follow-on rather than a fresh connector request
   - Validation commands:
     - `curl.exe -L "https://opendataapi.dmi.dk/v1/forecastedr/collections/harmonie_dini_sf/position?coords=POINT(12.561%2055.715)&crs=crs84&parameter-name=temperature-0m"`
   - Do-not-do warning:
@@ -440,6 +443,7 @@ New compact packets added in the latest Batch 5 routing pass:
   - Owner: `geospatial`
   - Purpose: official Irish point-forecast context through the pinned public open-data forecast endpoint
   - First slice: one bounded point-forecast request only
+  - Status note: backend-first route, fixture, tests, isolated client helpers, and docs now exist in repo code, so treat this as a bounded consumer or workflow-validation follow-on rather than a fresh connector request
   - Validation commands:
     - `curl.exe -L "https://openaccess.pf.api.met.ie/metno-wdb2ts/locationforecast?lat=53.3498;long=-6.2603"`
   - Do-not-do warning:
@@ -449,6 +453,7 @@ New compact packets added in the latest Batch 5 routing pass:
   - Owner: `geospatial`
   - Purpose: official Irish weather-warning context through the public RSS/XML warning feed
   - First slice: current warning feed only
+  - Status note: backend-first route, fixtures, tests, and docs now exist in repo code, so treat this as a bounded consumer or workflow-validation follow-on rather than a fresh connector request
   - Validation commands:
     - `curl.exe -L "https://www.met.ie/Open_Data/xml/warning_IRELAND.xml"`
   - Do-not-do warning:
@@ -478,6 +483,7 @@ New compact packets added in the latest Batch 5 routing pass:
   - Owner: `geospatial`
   - Purpose: official Portuguese warning context through public IPMA JSON
   - First slice: weather warnings only
+  - Status note: backend-first route, fixture, tests, and docs now exist in repo code, so treat this as a bounded consumer or workflow-validation follow-on rather than a fresh connector request
   - Validation commands:
     - `curl.exe -L "https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json"`
     - `curl.exe -L "https://api.ipma.pt/open-data/distrits-islands.json"`
@@ -488,6 +494,7 @@ New compact packets added in the latest Batch 5 routing pass:
   - Owner: `geospatial`
   - Purpose: official BC fire-weather context through the public BCWS weather datamart API
   - First slice: one bounded station metadata plus current observations or danger-summary path only
+  - Status note: backend-first route, fixture, tests, and docs now exist in repo code, so treat this as a bounded consumer or workflow-validation follow-on rather than a fresh connector request
   - Validation commands:
     - `curl.exe -L "https://bcwsapi.nrs.gov.bc.ca/wfwx-datamart-api/v1/stations"`
   - Do-not-do warning:
@@ -644,7 +651,7 @@ Compact quick-assign packets are now available for the strongest Batch 6 handoff
 - `poland-imgw-public-data`
   - `needs-verification` because the bounded public file-family contract still needs tighter confirmation
 - `netherlands-rws-waterinfo`
-  - use [source-endpoint-verification-netherlands-rws-waterinfo.md](/C:/Users/mike/11Writer/app/docs/source-endpoint-verification-netherlands-rws-waterinfo.md) for the bounded POST-based WaterWebservices slice; it now exists backend-first, so route follow-on work as a narrow consumer/helper or workflow note rather than a fresh source assignment
+  - use [source-endpoint-verification-netherlands-rws-waterinfo.md](/C:/Users/mike/11Writer/app/docs/source-endpoint-verification-netherlands-rws-waterinfo.md) for the bounded POST-based WaterWebservices slice; it now exists backend-first and also has a bounded helper/export follow-on in repo progress, so route only narrow validation/export or equivalent marine-local follow-on work rather than a fresh source assignment
 - `iaea-ines-news-events`
   - `needs-verification` because public reporting exists, but a stable machine-readable endpoint still needs pinning
 - `ecmwf-open-forecast`
@@ -1182,6 +1189,12 @@ Validation:
 
 ### `geonet-geohazards`
 
+Status note:
+
+- already implemented backend-first in current repo truth
+- keep this packet as historical reference only
+- do not route it as fresh next-wave work
+
 - Recommended owner agent: `geospatial`
 - One-line purpose: New Zealand quake and volcano hazard context from GeoNet
 - Dependency/consumer notes: geospatial owns both subfeeds; aerospace may consume volcano and quake context later
@@ -1560,11 +1573,8 @@ Validation:
 Assignment-ready or narrow-slice ready candidates from [source-acceleration-phase2-global-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:1):
 
 - `hko-open-weather`
-  - Owner: `geospatial`
-  - First slice: `warningInfo` only
-  - Validation:
-    - `curl.exe -L "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warningInfo&lang=en"`
-    - `python -m pytest app/server/tests/test_hko_open_weather.py -q`
+  - Status: already implemented backend-first in current repo truth
+  - Keep as historical reference only; do not route as fresh next-wave work
 - `meteoswiss-open-data`
   - Owner: `geospatial`
   - First slice: MeteoSwiss automatic weather station STAC collection plus one recent observation asset family
@@ -1580,7 +1590,7 @@ Assignment-ready or narrow-slice ready candidates from [source-acceleration-phas
 - `canada-geomet-ogc`
   - Owner: `geospatial`
   - First slice: one pinned GeoMet collection only
-  - Status note: assignable if the owner keeps the connector collection-scoped
+  - Status note: the bounded `climate-stations` collection slice now exists backend-first in repo progress, so route only a narrow consumer or workflow note rather than a fresh source assignment
   - Validation:
     - `curl.exe -L "https://api.weather.gc.ca/collections?f=json"`
     - `python -m pytest app/server/tests/test_canada_geomet_ogc.py -q`
@@ -1623,17 +1633,22 @@ These sources already have active briefing, ownership, or implementation momentu
 ## Recommended Next Assignments
 
 - May 2026 next-wave packets: use [source-quick-assign-packets-may-2026.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-may-2026.md) for the current bounded cross-lane packet set:
-  - Data: `propublica`, `global-voices`
-  - Geospatial: `canada-cap-alerts`, `canada-geomet-ogc`, with `meteoswiss-open-data` and `bc-wildfire-datamart` treated as implemented backend-first follow-ons rather than fresh source intake
-  - Features/Webcam: `nsw-live-traffic-cameras`, `quebec-mtmd-traffic-cameras` as `candidate-sandbox-importable` only
-  - Marine: `netherlands-rws-waterinfo` now exists as a bounded backend-first water-level slice; the next marine pass should be a narrow consumer/helper or workflow note, still secondary to the active `france-vigicrues-hydrometry` lane
+  - Data: the infrastructure/status context package over `cloudflare-radar`, `netblocks`, and `apnic-blog` is now completed, and the Atlas-approved public cyber/internet feed expansion, metadata-only long-tail intake/dedupe posture, bounded fusion-snapshot or claim-integrity helper, bounded report-brief package, and bounded world-news awareness family also now appear completed in progress truth; the next Data move should be one bounded topic-scoped report packet plus consumer/review/export coherence
+  - Geospatial: the bounded Canada CAP plus Canada GeoMet package now appears completed in progress truth; treat `canada-cap-alerts`, `canada-geomet-ogc`, `meteoswiss-open-data`, and `bc-wildfire-datamart` as implemented follow-ons rather than fresh source intake
+  - Geospatial deconfliction note: `dmi-forecast-aws`, `met-eireann-forecast`, `met-eireann-warnings`, `portugal-ipma-open-data`, `bc-wildfire-datamart`, and `usgs-geomagnetism` are all now repo-present backend-first slices; do not route them as fresh-source work
+  - Features/Webcam: the candidate network coverage/review-priority package, the promotion-readiness comparison, and the Caltrans sandbox-feasibility pass are now completed in progress truth; the active lane is now NZTA and Arlington sandbox-feasibility plus bounded candidate expansion, while `baton-rouge-traffic-cameras`, `vancouver-web-cam-url-links`, and `caltrans-cctv-cameras` stay `candidate-sandbox-importable`, `arlington-traffic-cameras` stays endpoint-verified or feasibility-only, and `qldtraffic-web-cameras` stays held
+  - Marine: `hydrologySourceHealthWorkflow`, its bounded report helper, `marineFusionSnapshotInput`, the corridor/chokepoint review package, and the latest `france-vigicrues-hydrometry` follow-through are now completed in progress truth; keep any next marine pass focused on report-brief plus source-row workflow-evidence closure rather than reopening a fresh source lane
   - Aerospace hold: `esa-neocc-close-approaches`
-- Geospatial: `canada-cap-alerts` or `canada-geomet-ogc`, with `meteoswiss-open-data` and `bc-wildfire-datamart` as bounded consumer/workflow follow-ons after their newly implemented backend-first slices
-- Marine: `france-vigicrues-hydrometry` follow-through or first consumer prep after the current backend-only slice
-- Aerospace: rerun focused aerospace smoke on a healthy Windows host before promoting the current implemented source stack; do not reopen a fresh aerospace source just to replace that validation work
-- Features/Webcam: a bounded `finland-digitraffic` follow-on first, or `nsw-live-traffic-cameras` / `quebec-mtmd-traffic-cameras` if Manager AI explicitly opens a fresh camera-source lane
-- Data: keep the implemented starter, official cyber, infrastructure/status, OSINT/investigations, rights/civic/digital-policy, fact-checking/disinformation, official/public advisories, scientific/environmental context, cyber-vendor/community, internet-governance/standards, and public-institution/world-context waves bounded, then use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) or [source-quick-assign-packets-may-2026.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-may-2026.md) for one bounded next family or one bounded next packet
-- Data implementation note: `cyber-institutional-watch-context` is already backend-first on the shared recent-items route, `dataAiSourceIntelligence` is now an implemented client-light metadata-only inspector consumer, and `/api/feeds/data-ai/source-families/review` plus `/api/feeds/data-ai/source-families/review-queue` remain review/helper surfaces only
+- Geospatial: the bounded Canada package, base-earth reference review/export package, environmental fusion-snapshot input, `geonet-geohazards`, `hko-open-weather`, and `dwd-cap-alerts` now appear completed in progress truth; treat them as bounded report inputs or follow-ons and route the next larger wave to `belgium-rmi-warnings` plus bounded reporting integration
+- Marine: the corridor/chokepoint review package and `marineReportBriefPackage` are now completed workflow-supporting evidence; `hydrologySourceHealthWorkflow`, `hydrologySourceHealthReport`, `marineFusionSnapshotInput`, and the latest `france-vigicrues-hydrometry` follow-through are completed helper/source-supporting lanes, while the next larger marine wave is a bounded corridor situation/report package
+- Aerospace: the current active Aerospace assignment is now a bounded space-weather continuity package on top of the completed fusion/report stack; keep the workflow-validation evidence snapshot and evidence timeline package below workflow validation and rerun focused aerospace smoke on a healthy Windows host only when launcher permissions allow
+- Features/Webcam: the current active Features/Webcam assignment is now NZTA and Arlington sandbox-feasibility plus bounded candidate growth; keep Baton Rouge, Vancouver, and Caltrans candidate-only, Queensland held, and prefer narrow source-ops follow-on work rather than activation
+- Data: keep the implemented starter, official cyber, infrastructure/status, OSINT/investigations, rights/civic/digital-policy, fact-checking/disinformation, official/public advisories, scientific/environmental context, cyber-vendor/community, internet-governance/standards, public-institution/world-context, and cyber-institutional-watch-context waves bounded; the Atlas-approved public cyber/internet feed expansion, metadata-only long-tail intake/dedupe posture, bounded fusion-snapshot or claim-integrity helper, bounded report-brief package, and bounded world-news awareness family now appear completed, and the next Data move is one bounded topic-scoped report packet plus consumer/review/export coherence rather than `propublica`, `global-voices`, or a reopened world-news wave
+- Data implementation note: `cyber-institutional-watch-context` is already backend-first on the shared recent-items route, `dataAiSourceIntelligence` is now an implemented client-light metadata-only inspector consumer with a bounded topic/context lens and export-safe topic lines, and `/api/feeds/data-ai/source-families/review` plus `/api/feeds/data-ai/source-families/review-queue` remain review/helper surfaces only
+- Source Discovery note: `structure-scan`, knowledge-node clustering/backfill, review-claim import/apply, and related source-memory/runtime surfaces remain candidate-routing and review infrastructure only; they do not approve sources or promote claims into truth by themselves
+- Wave/runtime note: Wave LLM provider management, execution history, and BYOK/runtime controls are runtime-boundary and review-only surfaces, and media/OCR enrichment remains partially scaffolded but gated by provenance, derived-evidence caveats, review, and prompt-injection-safe handling
+- Peer/runtime note: Atlas media geolocation remains peer and derived-evidence input only, and Wonder Statuspage/Mastodon discovery remains candidate/review discovery input only; none of these peer surfaces are source approval, implementation proof, or workflow-validation proof
+- Feature deconfliction note: `Evidence Timeline`, `Review Packet Export`, `Source Candidate Intake Queue`, `Source Health Console`, and `Attention Queue Unifier` are partially occupied already by domain-local packages; future work should target cross-domain normalization only, while `Source Fusion Snapshot` remains open globally but should compose existing domain packages rather than replace them
 - Peer-planning note: Wonder Browser Use, macOS plugin, and connector planning docs are routing/planning input only and do not create source approval or validation proof
 - Gather: continue source brief expansion and ownership-map maintenance
 

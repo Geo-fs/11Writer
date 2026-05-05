@@ -13,6 +13,19 @@ client lint/build evidence,
 prepared smoke assertions,
 and executed smoke evidence.
 
+## Current Validation Posture
+
+- Assignment-wave truth:
+  the `aerospaceWorkflowValidationEvidenceSnapshot` helper and its metadata/export wiring were completed before the current `2026-05-04 21:43 America/Chicago` wave, but the older progress log recorded that work under the stale assignment marker `2026-05-02 15:47 America/Chicago`.
+  Aerospace progress truth now acknowledges that stale-marker mismatch explicitly.
+- Current local validation truth must be recorded exactly as observed:
+  backend contract tests passed,
+  frontend build passed,
+  frontend lint passed on the current rerun, so the previously reported Marine-owned drift is not the active blocker now,
+  and Playwright aerospace smoke is still not executed workflow evidence on this Windows host when Chromium fails to launch with `spawn EPERM` before app assertions begin.
+- Guardrail:
+  do not collapse prepared smoke assertions, successful build output, or implemented helper presence into executed browser workflow evidence.
+
 ## Validation Goals
 
 - Confirm selected-target aerospace context appears without replacing the primary aircraft/satellite workflow.
@@ -28,6 +41,13 @@ and executed smoke evidence.
 - Confirm aerospace issue-export-bundle accounting is present without implying severity, operational consequence, failure proof, route impact, target exposure, threat, causation, or action recommendation.
 - Confirm aerospace context snapshot/report package accounting is present without implying severity, operational consequence, failure proof, route impact, target exposure, threat, causation, or action recommendation.
 - Confirm aerospace workflow-readiness package accounting is present without collapsing prepared smoke evidence into executed smoke evidence or implying source certainty, severity, airport availability, failure proof, causation, or action recommendation.
+- Confirm aerospace workflow-validation evidence snapshot accounting is present without collapsing prepared smoke into executed smoke, and without implying source certainty, airport/runway availability, target behavior, failure proof, route impact, causation, safety conclusion, or action recommendation.
+- Confirm aerospace evidence-timeline/export package accounting is present without collapsing timeline order into causation, and without implying intent, impact, failure, airport/runway availability, route consequence, safety conclusion, or action recommendation.
+- Confirm aerospace fusion-snapshot input accounting is present as a stable future cross-domain domain input over the existing aerospace package stack, without replacing those surfaces or collapsing distinct evidence classes together.
+- Confirm aerospace report-brief package accounting is present as a report-ready transformation over fusion input that keeps observe/orient/prioritize/explain sections bounded and does not duplicate existing aerospace review/export/timeline helpers.
+- Confirm aerospace space-weather continuity package accounting is present as a bounded continuity layer over current SWPC advisories, archival NCEI metadata, and observed USGS geomagnetism while keeping those source classes distinct.
+- Confirm aerospace VAAC advisory report-package accounting is present as a bounded advisory/source-reported transformation over the implemented VAAC context, without implying route impact, ash-plume precision beyond the source, aircraft exposure, or operational conclusions.
+- Confirm aerospace package-coherence accounting is present as a non-duplicative parity surface over the existing helper stack, without implying severity, source certification, behavior proof, operational consequence, or action recommendation.
 - Confirm optional geomagnetism context remains contextual-only and export-aware.
 - Confirm bounded VAAC advisory context remains contextual-only, provenance-preserving, and export-aware.
 - Confirm NOAA NCEI archive metadata remains archival/contextual, export-aware, and explicitly separate from NOAA SWPC current advisories.
@@ -52,6 +72,13 @@ and executed smoke evidence.
   - `cmd /c npm.cmd run lint`
 - Frontend build:
   - `cmd /c npm.cmd run build`
+- Focused regression:
+  - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceFusionSnapshotInputRegression.mjs`
+  - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceReportBriefPackageRegression.mjs`
+  - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceSpaceWeatherContinuityPackageRegression.mjs`
+  - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceVaacAdvisoryReportPackageRegression.mjs`
+  - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceEvidenceTimelineRegression.mjs`
+  - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospacePackageCoherenceRegression.mjs`
 
 If frontend build fails because of Connect-owned environmental or marine drift, record the blocking file and stop.
 Do not repair non-aerospace files as part of this checklist.
@@ -355,6 +382,8 @@ Required contract fields and caveats:
   It must preserve source ids, source modes, source health states, evidence bases, review-safe lines, export-safe lines, active export-profile linkage, and an explicit no-severity/no-consequence guardrail line in snapshot metadata.
 - `Aerospace Context Review Export Bundle` is present in snapshot/export metadata and preserves the queue's review lines, export-safe lines, source ids, source modes, source health states, evidence bases, caveats, and active export-profile linkage.
 - `Aerospace Context Report` is present and summarizes selected-target evidence, availability, readiness, review-queue state, and bounded caveats only.
+- `Aerospace Workflow Validation Evidence` is present and summarizes validation posture across the selected-target report package, context review queue/export bundle, workflow readiness package, and OurAirports reference context while keeping prepared-vs-executed smoke truth explicit.
+- `Aerospace Space-Weather Continuity Package` is present in snapshot/export metadata and keeps current advisory context, archive metadata, and observed geomagnetism explicitly separate.
 - `Aerospace Review Queue` is present and summarizes review ordering only.
 - `Current vs Archive Space-Weather Context` is present and keeps current NOAA SWPC advisory context separate from archival NOAA NCEI metadata in both inspector lines and export metadata.
 - `Aerospace Export Coherence` is present in snapshot/export metadata and checks that source-readiness bundle, context gap queue, current/archive separation, and export-profile metadata stay aligned.
@@ -403,6 +432,16 @@ Snapshot metadata should preserve, when applicable:
   including package profile, source ids, source modes, source health states, evidence bases, review lines, export lines, missing metadata keys, missing footer sections, guardrail lines, caveats, and any unguarded operational-phrase findings
 - `aerospaceWorkflowReadinessPackage`
   including source ids, source modes, source health states, evidence bases, validation rows, missing evidence rows, prepared/executed smoke status, export-profile linkages, guardrail lines, and caveats that preserve the prepared-vs-executed distinction
+- `aerospaceWorkflowValidationEvidenceSnapshot`
+  including validation posture, prepared/executed smoke status, selected-target report readiness, missing evidence count, source ids, source modes, source health states, evidence bases, report-profile linkage, and a validation-accounting guardrail line
+- `aerospaceFusionSnapshotInput`
+  including selected-target summary lines, active export-profile label, distinct observed/forecast/advisory/source-reported/archive/reference/comparison/validation sections, source ids, source modes, source health states, evidence bases, validation posture, export-readiness posture, attention counts, does-not-prove lines, and a metadata/accounting input guardrail line
+- `aerospaceReportBriefPackage`
+  including observe/orient/prioritize/explain sections, distinct context classes, source ids, source modes, source health states, evidence bases, validation posture, export-readiness posture, attention counts, and a report-ready metadata/accounting guardrail line
+- `aerospaceSpaceWeatherContinuityPackage`
+  including current/advisory, archive, and observed source ids, source modes, source health states, evidence bases, continuity posture, current freshness, archive coverage, observed timing, does-not-prove lines, and a distinct-source metadata/accounting guardrail line
+- `aerospaceVaacAdvisoryReportPackage`
+  including advisory source ids, source mode and health, evidence basis, advisory timestamps, affected-area or summary posture, advisory rows, caveats, does-not-prove lines, and a no-route-impact metadata/accounting guardrail line
 - `aerospaceContextReport`
 - `aerospaceReviewQueue`
 - `aerospaceExportProfile`
@@ -442,6 +481,11 @@ When the aerospace Playwright environment is healthy, smoke should validate meta
 - aerospace issue export bundle
 - aerospace context snapshot/report package
 - aerospace workflow readiness package
+- aerospace workflow validation evidence snapshot
+- aerospace fusion snapshot input
+- aerospace report brief package
+- aerospace space-weather continuity package
+- aerospace VAAC advisory report package
 - aerospace context report
 - aerospace review queue
 - aerospace export profile
@@ -473,6 +517,7 @@ Workflow evidence that still waits on successful smoke execution:
   `openskyAnonymousContext`,
   `openskyAnonymousContext.selectedTargetComparison`,
   `aerospaceCurrentArchiveContext`,
+  `aerospaceSpaceWeatherContinuityPackage`,
   `aerospaceOperationalContext`,
   `aerospaceContextAvailability`,
   `aerospaceContextIssues`,
@@ -484,6 +529,7 @@ Workflow evidence that still waits on successful smoke execution:
   `aerospaceIssueExportBundle`,
   `aerospaceContextSnapshotReport`,
   `aerospaceWorkflowReadinessPackage`,
+  `aerospaceWorkflowValidationEvidenceSnapshot`,
   `aerospaceReviewQueue`,
   and `aerospaceExportProfile`
 
@@ -508,6 +554,13 @@ Do not collapse the above prepared smoke coverage into executed workflow evidenc
 - Aerospace issue-export-bundle notes remain review-only export-accounting items; they are not severity scoring, operational consequence statements, failure proof, route-impact claims, target-exposure claims, threat calls, causation claims, or action guidance.
 - Aerospace context snapshot/report package notes remain compact report-facing metadata only; they are not source certification, severity scoring, operational consequence statements, failure proof, route-impact claims, target-exposure claims, threat calls, causation claims, or action guidance.
 - Aerospace workflow-readiness package notes remain workflow-evidence accounting only; they are not source certification, severity scoring, airport/runway availability truth, failure proof, route-impact claims, target-exposure claims, threat calls, causation claims, or action guidance.
+- Aerospace workflow-validation evidence snapshot notes remain validation-accounting only; they do not convert prepared smoke into executed smoke, and they are not source certification, airport/runway availability truth, target-behavior proof, route-impact claims, safety conclusions, causation claims, or action guidance.
+- Aerospace evidence-timeline/export notes remain review/accounting only; timeline order is not causation, and distinct observed, forecast, archive, reference, anonymous-comparison, and advisory/source-reported contexts must stay separate.
+- Aerospace fusion-snapshot input notes remain metadata/accounting inputs only; they keep observed, forecast, advisory/source-reported, archive, reference, anonymous-comparison, derived, and validation context distinct for a future cross-domain Source Fusion Snapshot and do not replace source-specific aerospace surfaces.
+- Aerospace report-brief package notes remain report-ready metadata/accounting only; they turn fusion input into bounded observe/orient/prioritize/explain sections and do not replace source-specific aerospace surfaces or existing aerospace review/export/timeline helpers.
+- Aerospace space-weather continuity package notes remain metadata/accounting only; they keep current advisories, archival metadata, and observed geomagnetism distinct and do not imply GPS/radio/satellite/aircraft failure, outage, route impact, causation, or operational consequence.
+- Aerospace VAAC advisory report-package notes remain report-ready metadata/accounting only; they preserve advisory/source-reported VAAC context from Washington, Anchorage, and Tokyo without implying route impact, aircraft exposure, ash-plume precision beyond the source, operational consequence, or action recommendation.
+- Aerospace package-coherence notes remain metadata/accounting only; they exist to avoid duplicating the existing review/export/timeline packages while checking parity across them.
 - Aerospace source-readiness families remain review-oriented context-family summaries only, not severity scores or operational consequence statements.
 - Aerospace export-readiness notes remain export-context completeness summaries only; they are not source reliability certification.
 - Aerospace context-report notes remain bounded explainability/export summaries only; they are not proof statements or action guidance.

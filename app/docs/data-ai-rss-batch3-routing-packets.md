@@ -70,6 +70,8 @@ Why:
 - scientific/environmental context is now implemented backend-first on the shared aggregate route and family overview
 - OSINT and rights/civic feeds are already implemented backend-first and should not be routed again as fresh source-creation work
 - policy/think-tank commentary is now implemented backend-first on the shared aggregate route and family overview
+- cyber/internet platform-watch is now implemented backend-first on the shared aggregate route, family overview, readiness/export snapshot, and family review surface
+- a bounded long-tail intake posture note now exists on the current client consumer, so future routing should treat provenance/dedupe semantics as metadata-only workflow support rather than permission for broader crawling
 
 ## OSINT / Investigations
 

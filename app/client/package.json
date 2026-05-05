@@ -8,8 +8,15 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --max-warnings=0",
+    "test:aerospace-fusion-snapshot-input": "node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceFusionSnapshotInputRegression.mjs",
+    "test:aerospace-report-brief-package": "node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceReportBriefPackageRegression.mjs",
+    "test:aerospace-space-weather-continuity-package": "node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceSpaceWeatherContinuityPackageRegression.mjs",
+    "test:aerospace-vaac-advisory-report-package": "node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceVaacAdvisoryReportPackageRegression.mjs",
+    "test:aerospace-package-coherence": "node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospacePackageCoherenceRegression.mjs",
+    "test:aerospace-evidence-timeline": "node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceEvidenceTimelineRegression.mjs",
     "test:data-ai-source-intelligence": "node --experimental-strip-types --experimental-specifier-resolution=node scripts/dataAiSourceIntelligenceRegression.mjs",
-    "test:marine-context-helpers": "node --experimental-strip-types --experimental-specifier-resolution=node scripts/marineContextHelperRegression.mjs"
+    "test:marine-context-helpers": "node --experimental-strip-types --experimental-specifier-resolution=node scripts/marineContextHelperRegression.mjs",
+    "test:reporting-loop-package-contract": "node --experimental-strip-types --experimental-specifier-resolution=node scripts/reportingLoopPackageContractRegression.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.51.1",

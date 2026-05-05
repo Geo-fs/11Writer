@@ -66,6 +66,7 @@ from src.services.metno_metalerts_service import (
     parse_bbox as parse_metno_bbox,
 )
 from src.services.canada_cap_service import CanadaCapAlertType, CanadaCapQuery, CanadaCapService, CanadaCapSeverity, CanadaCapSort
+from src.services.dwd_cap_alerts_service import DwdCapAlertsService, DwdCapQuery, DwdCapSeverity, DwdCapSort
 from src.services.bmkg_earthquakes_service import BmkgEarthquakesQuery, BmkgEarthquakesService, BmkgSort
 from src.services.ga_recent_earthquakes_service import (
     GaRecentEarthquakesQuery,
@@ -90,6 +91,7 @@ from src.services.nrc_event_notifications_service import NrcEventNotificationsQu
 from src.types.api import (
     BmkgEarthquakesResponse,
     CanadaCapAlertResponse,
+    DwdCapAlertResponse,
     EarthquakeEventsResponse,
     EmscSeismicPortalResponse,
     EonetEventsResponse,
@@ -435,6 +437,30 @@ async def recent_canada_cap_alerts(
             province=province,
             limit=limit,
             sort=cast(CanadaCapSort, sort),
+        )
+    )
+
+
+@router.get("/dwd-alerts/recent", response_model=DwdCapAlertResponse)
+async def recent_dwd_cap_alerts(
+    severity: str = Query(default="all"),
+    event: str | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=1000),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> DwdCapAlertResponse:
+    if severity not in {"all", "extreme", "severe", "moderate", "minor", "unknown"}:
+        raise HTTPException(status_code=400, detail="severity must be one of: all, extreme, severe, moderate, minor, unknown")
+    if sort not in {"newest", "severity"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, severity")
+
+    service = DwdCapAlertsService(settings)
+    return await service.list_recent(
+        DwdCapQuery(
+            severity=cast(DwdCapSeverity, severity),
+            event=event,
+            limit=limit,
+            sort=cast(DwdCapSort, sort),
         )
     )
 

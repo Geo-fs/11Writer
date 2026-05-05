@@ -82,6 +82,13 @@ class AnalystWorkbenchService:
 
         items.sort(key=lambda item: _timestamp_sort_key(item.observed_at), reverse=True)
         limited = items[: query.limit]
+        if query.include_wave_monitor:
+            limited = _ensure_category_coverage(
+                limited_items=limited,
+                all_items=items,
+                source_category="tool-wave-monitor",
+                limit=query.limit,
+            )
         return AnalystEvidenceTimelineResponse(
             metadata=AnalystEvidenceTimelineMetadata(
                 source="analyst-evidence-timeline",
@@ -369,6 +376,23 @@ def _wave_monitor_items(
                 )
             )
     return items
+
+
+def _ensure_category_coverage(
+    *,
+    limited_items: list[AnalystEvidenceTimelineItem],
+    all_items: list[AnalystEvidenceTimelineItem],
+    source_category: str,
+    limit: int,
+) -> list[AnalystEvidenceTimelineItem]:
+    if any(item.source_category == source_category for item in limited_items):
+        return limited_items
+    replacement = next((item for item in all_items if item.source_category == source_category), None)
+    if replacement is None or limit <= 0:
+        return limited_items
+    if len(limited_items) < limit:
+        return [*limited_items, replacement]
+    return [*limited_items[:-1], replacement]
 
 
 def _event_source_card(

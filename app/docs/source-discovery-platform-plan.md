@@ -26,6 +26,10 @@ Example:
 
 This is a major platform capability, but it must remain auditable and bounded. The system should learn trust from evidence, not from popularity, confidence language, or mission relevance alone.
 
+Current backend workflow reference:
+
+- `app/docs/source-discovery-public-web-workflow.md`
+
 ## Product Role
 
 Source Discovery should answer:
@@ -489,6 +493,11 @@ Implemented backend primitives:
   - `POST /api/source-discovery/content/snapshots`
   - `POST /api/source-discovery/jobs/article-fetch`
   - `POST /api/source-discovery/jobs/social-metadata`
+  - `GET /api/source-discovery/media/by-source/{source_id}`
+  - `GET /api/source-discovery/media/artifacts/{artifact_id}`
+  - `POST /api/source-discovery/jobs/media-artifact-fetch`
+  - `POST /api/source-discovery/jobs/media-ocr`
+  - `POST /api/source-discovery/jobs/media-interpret`
   - `POST /api/source-discovery/reputation/reverse-event`
   - `POST /api/source-discovery/scheduler/tick`
   - `GET /api/source-discovery/review/queue`
@@ -517,7 +526,15 @@ Implemented backend primitives:
 - content snapshots that store full text or extracted body text for later claim assessment
 - stronger structured HTML article extraction plus fallback parsing so stored snapshots can prefer article body, canonical URL, and metadata over headline-only text
 - bounded article-fetch jobs for reviewed approved/sandboxed article-class sources
-- public social/image metadata jobs that preserve metadata-only evidence without touching media blobs or private endpoints
+- bounded public social/image page-evidence jobs that preserve metadata, captions, alt text, and page text without touching media blobs or private endpoints
+- persistent media artifact, OCR-run, interpretation, and dedicated geolocation-run records linked to source memory
+- local-first media artifact fetch with runtime user-data storage, canonical URL normalization, hashes, MIME sniffing, dimensions, and EXIF/coordinate capture when available
+- fixture OCR plus local `tesseract` OCR for bounded public media artifacts
+- deterministic place/time/season/geolocation clue extraction from media metadata, OCR text, captions, and bounded pixel heuristics
+- dedicated media geolocation job flow for ranked candidate locations, optional specialized engines, and review-first fusion packets
+- structured media geolocation clue packets now preserve coordinate, place-text, script/language, environment, time, and rejected-clue evidence families
+- geolocation runs now persist engine-attempt audit data, confidence ceilings, supporting vs contradicting evidence, engine agreement, and duplicate/sequence lineage inheritance
+- optional local `ollama` scene/place interpretation behind explicit enablement, localhost-only routing, and strict no-people-recognition prompt rules
 - source packet list/detail/export surfaces for handoff and future UI
 - reversible reputation audit events
 - review queue and review-action audit APIs for lane assignment plus reviewed, sandboxed, approved, rejected, and archived transitions
@@ -526,6 +543,12 @@ Implemented backend primitives:
 - backend scheduler tick primitive for bounded source-discovery maintenance
 - persistent runtime worker state and run history plus a lease-safe scheduler coordinator/status surface for opt-in source-discovery and Wave Monitor background loops
 - startup backfill for older local SQLite files that predate the new source-memory columns
+
+Review-boundary note:
+
+- `structure-scan`, knowledge-node clustering, knowledge-backfill, review-claim import/apply, scheduler tick, and Wave-LLM bridge surfaces are candidate-routing, review, and runtime infrastructure only
+- those surfaces do not approve a source, increase source trust automatically, or promote claims into source truth by themselves
+- provider management, execution history, and runtime controls are runtime-boundary evidence only and must not be confused with source-validation proof
 
 What this proves:
 
@@ -540,20 +563,29 @@ What this proves:
 - one allowed catalog/API page can seed candidate memories without broad crawling
 - one reviewed article source can be fetched into full text without auto-fetching children or promoting claims
 - one public social/image page can contribute metadata-only context without opening the door to login scraping
+- one public media artifact can now be captured, OCR-processed, compared, clustered, and interpreted into review-only place/scene/time clues without promoting those hypotheses to truth
+- media evidence is now part of source-memory detail and export packets, so waves and operators can inspect artifacts, duplicate clusters, comparisons, OCR, frame sequences, interpretation lineage, and geolocation runs together
 - stored source snapshots can be routed into review-only Wave LLM interpretation without bypassing provider budgets or human review
 - accepted LLM claims remain inert until an explicit reviewed-claim application step writes audited claim outcomes
-- review/routing state can now be expressed through backend APIs before any frontend queue exists
+- review/routing state can now be expressed through backend APIs and the single-page operator console
 - backend-only or sidecar runtime can expose scheduler health, accept pause/resume/run-now controls, and conservatively skip duplicate worker execution across processes
 - health scheduling, full-text, expansion, reversal, review, and scheduler workflows now have backend contracts and fixture-safe tests
 
 What it does not do yet:
 
 - no mature autonomous discovery planner
-- no production-grade article extraction parser
-- no frontend review queue
-- no OS-managed service deployment yet; current runtime loops remain process-local even though lease-safe persistence exists
-- no broad social/image evidence ingestion beyond metadata-only public-page capture
-- no graphical operator-facing candidate approval and routing surface
+- no fully production-grade long-form readability or site-specific extraction engine
+- no fully production-grade media-change reasoning, advanced OCR packaging, or broad video understanding layer yet
+- no people recognition, identity analysis, or accusation workflow in the media layer
+- no cross-device companion operator surface yet; the current operator workflow is on the main single-page app
+- no host-agnostic guarantee that service-manager install/start actions will succeed on every machine without the expected local permissions and OS facilities
+- no broad social/image ingestion beyond bounded public-page and explicitly requested artifact capture
+
+Media/OCR status note:
+
+- media artifact capture, OCR fallback, deterministic comparison, duplicate clustering, localhost-only local vision adapters, dedicated media geolocation runs, and bounded frame sampling are now implemented and auditable
+- repo-safe media geolocation evaluation fixtures plus a local CLI harness now exist so future tuning can be benchmarked instead of improvised
+- broader enrichment still stays gated by provenance, review state, derived-evidence caveats, and prompt-injection-safe handling of OCR or caption text
 
 Validation:
 

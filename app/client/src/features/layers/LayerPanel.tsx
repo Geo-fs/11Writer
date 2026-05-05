@@ -14,6 +14,7 @@ import {
 import { groupPlanetImageryModes } from "../../lib/planetImagery";
 import { useAppStore } from "../../lib/store";
 import type { SourceStatusResponse } from "../../types/api";
+import { OperatorControlPanel } from "../operator/OperatorControlPanel";
 import { WebcamOperationsPanel } from "./WebcamOperationsPanel";
 
 interface LayerPanelProps {
@@ -1607,6 +1608,8 @@ export function LayerPanel({ status, onJumpToCity, onCopyPermalink }: LayerPanel
           ))}
         </div>
       </div>
+
+      <OperatorControlPanel />
 
       <WebcamOperationsPanel />
 

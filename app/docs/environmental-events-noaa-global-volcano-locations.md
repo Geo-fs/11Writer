@@ -48,3 +48,12 @@ Supported query params:
 - Not ash advisory status.
 - Not alert-level truth.
 - Source classification fields such as `Holocene` or `Historical` must not be treated as current activity claims.
+
+## Follow-On Backend Package
+
+The bounded base-earth fusion follow-on now also exposes:
+
+- `GET /api/context/environmental/base-earth-export-package`
+- `GET /api/context/environmental/base-earth-review-queue`
+
+Within that package, NOAA global volcano locations stay static/reference only and keep representative-point versus missing-geometry posture visible instead of being treated as eruption or hazard truth.

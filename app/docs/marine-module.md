@@ -1,4 +1,4 @@
-﻿# Marine Module
+# Marine Module
 
 ## Scope
 
@@ -996,6 +996,10 @@ This validates marine anomaly rendering and controls using deterministic fixture
 - snapshot metadata contains `marineAnomalySummary.irelandOpwWaterLevelContext` after export
 - snapshot metadata contains `marineAnomalySummary.netherlandsRwsWaterinfoContext` after export
 - snapshot metadata contains `marineAnomalySummary.hydrologyContext` after export
+- snapshot metadata contains `marineAnomalySummary.sourceHealthExportCoherence` after export
+- snapshot metadata contains `marineAnomalySummary.hydrologySourceHealthWorkflow` after export
+- snapshot metadata contains `marineAnomalySummary.hydrologySourceHealthReport` after export
+- snapshot metadata contains `marineAnomalySummary.corridorReviewPackage` after export
 - snapshot metadata contains `marineAnomalySummary.contextFusionSummary` after export
 - snapshot metadata contains `marineAnomalySummary.contextReviewReport` after export
 - snapshot metadata contains `marineAnomalySummary.activeNavigationTarget` after focus + export
@@ -1022,6 +1026,10 @@ Included export evidence fields:
 - Vigicrues hydrometry context summary (source mode/health, nearby station count, parameter filter, top station + top observation summary)
 - Ireland OPW water-level context summary (source mode/health, nearby station count, top station + top reading summary)
 - Netherlands RWS Waterinfo context summary (source mode/health, nearby station count, top station + top latest-observation summary)
+- marine source-health export coherence summary across CO-OPS, NDBC, Vigicrues, Ireland OPW, and Netherlands RWS Waterinfo (source mode, source health, evidence basis, nearby counts, latest timestamp posture, caveats)
+- marine fusion snapshot input package across replay, source-health, hydrology, corridor, chokepoint, and review/export helpers (review posture, source rows, hydrology posture, corridor posture, caveats, does-not-prove lines)
+- marine report brief package over the fusion snapshot input (observe/orient/prioritize/explain sections, Vigicrues and Waterinfo workflow-evidence lines, caveats, does-not-prove lines)
+- marine corridor situation package over the report-brief and corridor/chokepoint stack (selected corridor posture, replay/gap posture, source rows, hydrology workflow evidence, observe/orient/prioritize/explain sections, no-closure/no-intent guardrails)
 - composed marine hydrology context summary (loaded/empty counts, nearby station count, per-source review lines, caveats)
 - composed marine context fusion summary (family availability, export-readiness line, top caveats)
 - composed marine context review report (families included, review-needed items, export caveats, does-not-prove lines)
@@ -1039,6 +1047,26 @@ Intentionally excluded:
 Snapshot/export integration behavior:
 - compact marine evidence lines are appended to export footer when marine summary data is available
 - machine-readable `marineAnomalySummary` is attached to `window.__worldviewLastSnapshotMetadata` for downstream export metadata consumers
+- `marineAnomalySummary.fusionSnapshotInput` adds a stable, export-only reporting input over the existing marine package stack:
+  - replay posture
+  - source rows with ids/mode/health/evidence basis/caveats
+  - hydrology posture including Vigicrues-specific status when present
+  - corridor/chokepoint posture
+  - attention/review counts
+  - compact caveats and does-not-prove lines
+- `marineAnomalySummary.reportBriefPackage` adds a stable, export-only report brief over the fusion snapshot input:
+  - `observe`
+  - `orient`
+  - `prioritize`
+  - `explain`
+  - explicit Vigicrues and Waterinfo workflow-evidence lines
+  - compact does-not-prove lines that remain review/reporting guardrails only
+- `marineAnomalySummary.corridorSituationPackage` adds a stable, export-only corridor-focused reporting artifact over the report-brief and chokepoint/corridor review stack:
+  - selected corridor and bounded-area posture
+  - replay/gap posture
+  - source rows and hydrology workflow evidence
+  - `observe / orient / prioritize / explain`
+  - explicit no-closure, no-intent, no-wrongdoing, and no-action guardrails
 - `marineAnomalySummary.focusedReplayEvidence` adds compact focused-evidence metadata:
   - `rowCount`
   - `focusedRowKind`
@@ -1100,7 +1128,72 @@ Snapshot/export integration behavior:
   - `healthSummary`
   - `vigicrues`
   - `irelandOpw`
+  - `waterinfo`
   - `caveats`
+- `marineAnomalySummary.sourceHealthExportCoherence` adds compact cross-source source-health/export metadata:
+  - `sourceCount`
+  - `loadedSourceCount`
+  - `limitedSourceCount`
+  - `fixtureSourceCount`
+  - `latestTimestampKnownCount`
+  - `totalNearbyStationCount`
+  - `totalExportedObservationCount`
+  - `rows`
+  - `caveats`
+- `marineAnomalySummary.hydrologySourceHealthWorkflow` adds compact hydrology/source-health workflow metadata:
+  - `sourceCount`
+  - `hydrologySourceCount`
+  - `oceanMetSourceCount`
+  - `loadedSourceCount`
+  - `limitedSourceCount`
+  - `latestTimestampKnownCount`
+  - `rows`
+  - `familyLines`
+  - `caveats`
+- `marineAnomalySummary.hydrologySourceHealthReport` adds compact hydrology/source-health review/export metadata:
+  - `title`
+  - `summaryLine`
+  - `posture`
+  - `sourceCount`
+  - `hydrologySourceCount`
+  - `oceanMetSourceCount`
+  - `loadedSourceCount`
+  - `limitedSourceCount`
+  - `latestTimestampKnownCount`
+  - `familyLines`
+  - `rows`
+  - `vigicruesRow`
+  - `vigicruesStatusLine`
+  - `topSourceLines`
+  - `doesNotProveLines`
+  - `caveats`
+- `marineAnomalySummary.corridorReviewPackage` adds compact corridor/chokepoint review/export metadata:
+  - `title`
+  - `selectedCorridorLabel`
+  - `selectedProfileLabel`
+  - `posture`
+  - `sourceIds`
+  - `sourceModes`
+  - `sourceHealth`
+  - `evidenceBases`
+  - `sourceRows`
+  - `vigicruesRow`
+  - `vigicruesStatusLine`
+  - `vigicruesCaveat`
+  - `replayReviewCounts`
+  - `environmentalContextPosture`
+  - `hydrologyContextPosture`
+  - `hydrologySourceHealthPosture`
+  - `explainLines`
+  - `actLines`
+  - `doesNotProveLines`
+  - `caveats`
+- marine smoke currently validates the snapshot/export metadata presence and family/source counts for:
+  - `marineAnomalySummary.sourceHealthExportCoherence`
+  - `marineAnomalySummary.hydrologySourceHealthWorkflow`
+  - `marineAnomalySummary.hydrologySourceHealthReport`
+  - `marineAnomalySummary.corridorReviewPackage`
+  - explicit Vigicrues row/status-line preservation inside the hydrology and corridor packages
 - `marineAnomalySummary.contextFusionSummary` adds compact cross-family context-fusion metadata:
   - `familyCount`
   - `availableFamilyCount`
@@ -1346,3 +1439,4 @@ What still depends on real provider access:
 - true global live coverage quality and continuity
 - provider-specific legal/operational constraints (throttling, outages, payload drift)
 - production-volume ingest and replay performance characteristics beyond SQLite
+

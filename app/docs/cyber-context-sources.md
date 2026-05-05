@@ -84,6 +84,18 @@ Data AI owns bounded backend-only public internet-information source slices that
   - `cisco-talos-blog`
   - `mozilla-security-blog`
   - `github-security-blog`
+  - `trailofbits-blog`
+  - `mozilla-hacks`
+  - `chromium-blog`
+  - `webdev-google`
+  - `gitlab-releases`
+  - `github-changelog`
+  - `bbc-world`
+  - `guardian-world`
+  - `aljazeera-all`
+  - `dw-all`
+  - `france24-en`
+  - `npr-world`
   - `sans-isc-diary`
   - `cloudflare-status`
   - `cloudflare-radar`
@@ -148,6 +160,18 @@ Data AI owns bounded backend-only public internet-information source slices that
   - `cisco-talos-blog` -> `https://blog.talosintelligence.com/rss/`
   - `mozilla-security-blog` -> `https://blog.mozilla.org/security/feed/`
   - `github-security-blog` -> `https://github.blog/security/feed/`
+  - `trailofbits-blog` -> `https://blog.trailofbits.com/index.xml`
+  - `mozilla-hacks` -> `https://hacks.mozilla.org/feed/`
+  - `chromium-blog` -> `https://blog.chromium.org/feeds/posts/default`
+  - `webdev-google` -> `https://web.dev/static/blog/feed.xml`
+  - `gitlab-releases` -> `https://about.gitlab.com/releases.xml`
+  - `github-changelog` -> `https://github.blog/changelog/feed/`
+  - `bbc-world` -> `https://feeds.bbci.co.uk/news/world/rss.xml`
+  - `guardian-world` -> `https://www.theguardian.com/world/rss`
+  - `aljazeera-all` -> `https://www.aljazeera.com/xml/rss/all.xml`
+  - `dw-all` -> `https://rss.dw.com/rdf/rss-en-all`
+  - `france24-en` -> `https://www.france24.com/en/rss`
+  - `npr-world` -> `https://feeds.npr.org/1004/rss.xml`
   - `sans-isc-diary` -> `https://isc.sans.edu/rssfeed.xml`
   - `cloudflare-status` -> `https://www.cloudflarestatus.com/history.rss`
   - `cloudflare-radar` -> `https://blog.cloudflare.com/tag/cloudflare-radar/rss/`
@@ -221,6 +245,8 @@ Data AI owns bounded backend-only public internet-information source slices that
   - `source` accepts a comma-separated subset of configured source ids
   - official cyber-advisory family queries can stay bounded with `source=ncsc-uk-all,cert-fr-alerts,cert-fr-advisories`
   - cyber institutional watch queries can stay bounded with `source=cisa-news,jvn-en-new,debian-security,microsoft-security-blog,cisco-talos-blog,mozilla-security-blog,github-security-blog`
+  - cyber/internet platform-watch queries can stay bounded with `source=trailofbits-blog,mozilla-hacks,chromium-blog,webdev-google,gitlab-releases,github-changelog`
+  - world-news awareness queries can stay bounded with `source=bbc-world,guardian-world,aljazeera-all,dw-all,france24-en,npr-world`
   - official/public advisory family queries can stay bounded with `source=state-travel-advisories,eu-commission-press,un-press-releases,unaids-news`
   - public institutional/world-context queries can stay bounded with `source=who-news,undrr-news,nasa-breaking-news,noaa-news,esa-news,fda-news`
   - scientific/environmental family queries can stay bounded with `source=our-world-in-data,carbon-brief,eumetsat-news,smithsonian-volcano-news,eos-news`
@@ -258,6 +284,8 @@ Data AI owns bounded backend-only public internet-information source slices that
   - `scientific-environmental-context`
   - `policy-thinktank-commentary`
   - `cyber-vendor-community-follow-on`
+  - `cyber-internet-platform-watch`
+  - `world-news-awareness`
   - `cyber-community-context`
   - `infrastructure-status`
   - `internet-governance-standards-context`
@@ -315,6 +343,18 @@ Data AI owns bounded backend-only public internet-information source slices that
   - Cisco Talos remains vendor threat-research context, not independent incident confirmation, attribution proof, or required-action guidance
   - Mozilla Security Blog remains vendor security engineering context, not universal exploitation proof, compromise proof, or required-action guidance
   - GitHub Security Blog remains platform security context, not independent incident confirmation, exploitation proof, or required-action guidance
+  - Trail of Bits blog remains security-research and audit context, not exploit proof, compromise proof, incident confirmation, or required-action guidance
+  - Mozilla Hacks remains browser, web, and engineering context, not standards compliance proof, incident confirmation, or required-action guidance
+  - Chromium Blog remains browser-platform release and engineering context, not universal platform truth, incident confirmation, or required-action guidance
+  - web.dev remains web-platform guidance and engineering context, not standards compliance proof, incident confirmation, or required-action guidance
+  - GitLab releases remain platform release and product-update context, not compromise proof, incident confirmation, or universal remediation priority
+  - GitHub Changelog remains platform feature and release context, not platform-wide incident proof, security truth, or required-action guidance
+  - BBC World remains broad media-awareness context only, not primary event truth, field confirmation, impact certainty, or required-action guidance
+  - Guardian World remains editorially framed world-news context only, not intent proof, legal certainty, or required-action guidance
+  - Al Jazeera remains broad international media-awareness context only, not attribution proof, field confirmation, or required-action guidance
+  - DW English feed remains broad media-awareness context only, not event confirmation, impact certainty, or required-action guidance
+  - France 24 English remains world-news media-awareness context only, not field confirmation, impact proof, or required-action guidance
+  - NPR World remains world-news context preserving attribution and quote boundaries only, not settled wrongdoing proof, field confirmation, or required-action guidance
   - U.S. State travel advisories remain official travel-guidance context, not universal safety truth, field confirmation, or required action
   - European Commission Press Corner remains official institutional policy/announcement context, not field confirmation or legal conclusion
   - UN press releases remain official institutional statement context, not independent field confirmation, legal conclusion, or attribution proof
@@ -489,6 +529,11 @@ Data AI owns bounded backend-only public internet-information source slices that
 - Current client consumer:
   - the inspector now exposes a small Data AI Source Intelligence card built only from `GET /api/feeds/data-ai/source-families/readiness-export`, `GET /api/feeds/data-ai/source-families/review`, and `GET /api/feeds/data-ai/source-families/review-queue`
   - the inspector now also exposes a bounded topic/context lens built from existing recent-item metadata plus family review/readiness metadata
+  - the inspector now also exposes a bounded infrastructure/status context package scoped to `family=infrastructure-status` and `source=cloudflare-radar,netblocks,apnic-blog`
+  - the inspector now also exposes a bounded long-tail intake posture note built from existing readiness/review/review-queue metadata only
+  - the inspector now also exposes a bounded fusion/claim-integrity snapshot that composes the existing source-intelligence, topic/context, infrastructure/status, and long-tail posture metadata into one export-safe domain input
+  - the inspector now also exposes a bounded report-brief package that organizes the existing metadata-only Data AI surfaces into `observe`, `orient`, `prioritize`, and `explain` sections
+  - the inspector now also exposes a bounded topic-scoped report packet that answers "what does the current feed evidence say about this topic?" using existing family, topic, fusion, and report metadata only
 - Client scope:
   - review queue counts and top issue kinds
   - source mode and family/source health posture
@@ -497,11 +542,21 @@ Data AI owns bounded backend-only public internet-information source slices that
   - export-readiness gap count
   - compact export-safe lines
   - bounded topic hints such as cyber, infrastructure, public institution, investigation/civic, governance/standards, advisory, and science/environment
+  - bounded infrastructure/status methodology caveats, source ids, recent-item counts, dedupe posture, active filters, and export-safe metadata lines
+  - bounded long-tail intake posture lines for candidate-vs-validated state, provenance preservation, duplicate-cluster semantics, and `as_detailed_in_addition_to`-style related-coverage linkage
+  - bounded fusion/claim-integrity lines for family/source filters, active topics, corroboration posture, methodology caveats, and does-not-prove posture
+  - bounded report-brief section lines for source families, filter posture, evidence/methodology/corroboration posture, attention posture, caveats, and export-safe explainability
+  - bounded topic-report packet lines for topic filter posture, family/source coverage, metadata-only recent evidence lines, dedupe/corroboration posture, readiness gaps, and does-not-prove posture
 - Client guardrails:
   - this remains workflow-supporting evidence only unless explicit smoke or manual workflow validation is recorded
   - the client consumer does not fetch article bodies, linked pages, raw feed dumps, or linked-page URLs
   - topic/context groupings use family ids, source ids, source categories, tags, evidence bases, source health, source modes, caveat classes, and dedupe posture only
   - topic/context groupings do not infer hidden themes from article bodies, titles, or summaries
+  - the infrastructure/status context package keeps Cloudflare Radar, NetBlocks, and APNIC content methodology-bound and does not convert provider analysis or measurement language into whole-internet truth or operator-confirmed outage truth
+  - the long-tail intake note stays metadata-only and does not authorize broad crawling, linked-page fetching, article-body extraction, source promotion, truth scoring, severity scoring, or required-action guidance
+  - the fusion/claim-integrity snapshot composes only existing metadata-safe surfaces and does not rebuild Source Discovery structure-scan, candidate intake, knowledge-backfill, or review-claim lineage mechanics
+  - the report-brief package is a metadata-only reporting helper over the existing Data AI surfaces and does not introduce raw-text-heavy behavior, linked-page URLs, or Source Discovery truth weighting
+  - the topic-scoped report packet stays metadata-only, uses source ids/categories/evidence bases/health/timestamps rather than raw feed text, and does not turn duplicate headlines or media coverage into corroboration, field truth, or required action
   - the client consumer does not create credibility, truth, severity, threat, attribution, legal, remediation, policy, or action scores
 
 ### NIST NVD CVE

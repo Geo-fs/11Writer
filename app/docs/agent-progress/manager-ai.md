@@ -1,5 +1,622 @@
 # Manager AI Progress
 
+## 2026-05-05 10:22 America/Chicago
+
+Task:
+- check in after the `2026-05-05 09:47 America/Chicago` wave, verify actual completions, close Manager-owned peer alerts, and issue a bigger non-duplicate reporting-desk follow-on wave so no controlled lane sits idle
+
+What changed:
+- verified the actual controlled-agent progress docs instead of trusting stale "still active" assumptions
+- completed lanes:
+  - Connect AI completed `2026-05-05 09:47 America/Chicago`
+  - Gather AI completed `2026-05-05 09:47 America/Chicago`
+  - Data AI completed `2026-05-05 09:47 America/Chicago`
+  - Marine AI completed `2026-05-05 09:47 America/Chicago`
+  - Aerospace AI completed `2026-05-05 09:47 America/Chicago`
+  - Geospatial AI completed `2026-05-05 09:47 America/Chicago`
+  - Features/Webcam AI completed `2026-05-05 09:47 America/Chicago`
+- confirmed the finished wave added real reporting-desk value without reopening stale work:
+  - Connect added the neutral reporting-loop contract and focused compatibility regression
+  - Data added `world-news-awareness`
+  - Marine added `marineReportBriefPackage`
+  - Aerospace added the VAAC advisory report package
+  - Geospatial added `dwd-cap-alerts`
+  - Features/Webcam promoted Caltrans to `candidate-sandbox-importable`
+- found one real governance defect:
+  - Gather's progress doc claimed `app/docs/phase2-next-after-next-shortlist.md` was created and cross-linked
+  - Manager verified the file is still missing on disk
+  - the next Gather assignment starts with repairing that docs-truth defect
+- closed the two Manager-owned peer alerts by routing them into the new Connect and Gather wave:
+  - Atlas media geolocation
+  - Wonder Statuspage and Mastodon discovery
+- current mixed-tree posture after the rewrite is now:
+  - `modified=118`
+  - `untracked=84`
+  - `shared-high-collision=10`
+  - `unknown=37`
+- current alerts posture after the rewrite is now:
+  - `4` open
+  - `40` completed
+  - all open alerts are Atlas-owned peer notices
+
+New assignments:
+- Connect AI: `2026-05-05 10:22 America/Chicago` post-wave reporting-loop compatibility sweep, geospatial/webcam contract-gap closure, and peer/runtime classification pass
+- Gather AI: `2026-05-05 10:22 America/Chicago` docs-truth repair for the missing shortlist file plus routing/governance reconciliation for the new wave
+- Data AI: `2026-05-05 10:22 America/Chicago` bounded topic-scoped report packet over the existing Data AI family, topic, fusion, and report surfaces
+- Marine AI: `2026-05-05 10:22 America/Chicago` bounded corridor-situation report package over the existing marine reporting stack
+- Aerospace AI: `2026-05-05 10:22 America/Chicago` bounded space-weather continuity package over SWPC, NCEI archive, and geomagnetism context
+- Geospatial AI: `2026-05-05 10:22 America/Chicago` bounded `belgium-rmi-warnings` plus environmental reporting integration
+- Features/Webcam AI: `2026-05-05 10:22 America/Chicago` NZTA and Arlington sandbox-feasibility plus wider global candidate review
+
+Validation:
+- `python scripts/alerts_ledger.py --json` passed after the rewrite and now shows `4` open alerts and `40` completed alerts
+- `python scripts/list_changed_files_by_owner.py --summary` passed after the rewrite and shows the current mixed-tree counts
+- `rg -n "Assignment version: 2026-05-05 10:22 America/Chicago|Assignment version read: 2026-05-05 10:22 America/Chicago" app/docs/agent-next-tasks app/docs/agent-progress` confirmed the fresh next-task wave
+- `Test-Path app/docs/phase2-next-after-next-shortlist.md` still returns `False`, confirming the Gather docs-truth defect is real
+- next-task rewrite completed for every controlled lane
+- no staging, commit, or push
+- no production code changed by Manager AI in this check-in
+
+## 2026-05-05 09:47 America/Chicago
+
+Task:
+- check in after the `23:26` wave, cross-check completed work against the non-duplicate feature backlog, close Manager-owned peer alerts, and issue a larger fresh assignment wave so no controlled lane sits idle
+
+What changed:
+- verified the latest controlled-agent progress docs instead of trusting stale next-task state
+- completed lanes:
+  - Connect AI completed `2026-05-04 23:26 America/Chicago`
+  - Gather AI completed `2026-05-04 23:26 America/Chicago`
+  - Data AI completed `2026-05-04 23:26 America/Chicago`
+  - Marine AI completed `2026-05-04 23:26 America/Chicago`
+  - Aerospace AI completed `2026-05-04 23:26 America/Chicago`
+  - Geospatial AI completed `2026-05-04 23:26 America/Chicago`
+  - Features/Webcam AI completed `2026-05-04 22:59 America/Chicago`
+- cross-checked the earlier feature backlog against actual repo truth before assigning more work:
+  - `Source Fusion Snapshot` is still a real product direction, but current repo truth says the next safe move is contract and package compatibility work, not another blank-slate panel
+  - Data already has a report-brief package, so its next fresh win should be one bounded media-awareness family rather than another helper rename
+  - Geospatial already has broad recent Batch 5 coverage, so its clean fresh-source lane is `dwd-cap-alerts`, not another stale rebuilt source
+  - Marine now has a fusion input, so its next value is a report-brief plus workflow-evidence closure
+  - Aerospace already has a report-brief and geomagnetism context, so its clean next feature is a bounded VAAC consumer follow-through
+  - Features/Webcam already hardened endpoint candidates, so the next useful move is Caltrans sandbox-feasibility plus bounded candidate expansion
+- current mixed-tree posture remains:
+  - `modified=117`
+  - `untracked=57`
+  - `shared-high-collision=10`
+  - `unknown=28`
+- closed the two Manager-owned peer alerts by routing them into the new Connect and Gather wave
+- a new Wonder peer alert landed during the check-in and was also routed into the same Connect and Gather wave
+- alerts posture after the rewrite is expected to be:
+  - `3` open
+  - `38` completed
+
+New assignments:
+- Connect AI: `2026-05-05 09:47 America/Chicago` reporting-loop package contract, compatibility validation, and coordination refresh
+- Gather AI: `2026-05-05 09:47 America/Chicago` routing and governance reconciliation for the new larger assignment wave plus the next-after-next shortlist
+- Data AI: `2026-05-05 09:47 America/Chicago` bounded `world-news-awareness` feed family on the existing Data AI route
+- Marine AI: `2026-05-05 09:47 America/Chicago` `marineReportBriefPackage` plus Vigicrues and Waterinfo workflow-evidence closure
+- Aerospace AI: `2026-05-05 09:47 America/Chicago` bounded VAAC advisory consumer or report follow-through
+- Geospatial AI: `2026-05-05 09:47 America/Chicago` first-slice `dwd-cap-alerts` plus bounded environmental reporting integration
+- Features/Webcam AI: `2026-05-05 09:47 America/Chicago` Caltrans sandbox-feasibility plus bounded global candidate expansion
+
+Validation:
+- `python scripts/alerts_ledger.py --json` passed before the rewrite and showed `4` open alerts and `35` completed alerts
+- `python scripts/list_changed_files_by_owner.py --summary` passed and showed the current mixed-tree counts
+- next-task rewrite completed for every controlled lane
+- Manager-owned peer alerts were closed in `app/docs/alerts.md`
+- no staging, commit, or push
+- no production code changed by Manager AI in this check-in
+
+## 2026-05-04 23:26 America/Chicago
+
+Task:
+- check in after the `22:59` wave, classify completions vs real in-progress work, and issue the next larger reporting-desk-aligned assignment wave without duplicating already implemented sources
+
+What changed:
+- verified the latest controlled-agent progress docs instead of trusting prior assignment state
+- completed lanes:
+  - Connect AI completed `2026-05-04 22:59 America/Chicago`
+  - Gather AI completed `2026-05-04 22:59 America/Chicago`
+  - Data AI completed `2026-05-04 22:59 America/Chicago`
+  - Marine AI completed `2026-05-04 22:59 America/Chicago`
+  - Aerospace AI completed `2026-05-04 22:59 America/Chicago`
+  - Geospatial AI completed `2026-05-04 22:59 America/Chicago`
+- still active:
+  - Features/Webcam AI has only acknowledged `2026-05-04 22:59 America/Chicago` and remains the lone active controlled lane
+- current alerts posture remains:
+  - `2` open
+  - `35` completed
+- current mixed-tree posture is now:
+  - `modified=117`
+  - `untracked=48`
+  - `shared-high-collision=10`
+  - `unknown=27`
+- confirmed the reporting-desk direction is now the correct routing lens:
+  - broad monitoring plus question-driven detailed reporting
+  - fusion/report inputs, report-brief inputs, and workflow validation are better next-wave targets than more random helper renames or stale source reassignments
+- ignored one stale Gather routing drift instead of propagating it:
+  - `geonet-geohazards` and `hko-open-weather` should not be treated as fresh next geospatial work because repo truth already shows implementation
+
+New assignments:
+- Connect AI: `2026-05-04 23:26 America/Chicago` fusion/reporting-input integration sweep plus shared inventory and current blocker validation
+- Gather AI: `2026-05-04 23:26 America/Chicago` reporting-desk Phase 2 roadmap and routing repair packet
+- Data AI: `2026-05-04 23:26 America/Chicago` Data report-brief package over the existing fusion / claim-integrity snapshot
+- Marine AI: `2026-05-04 23:26 America/Chicago` `marineFusionSnapshotInput` package over current marine surfaces
+- Aerospace AI: `2026-05-04 23:26 America/Chicago` aerospace report-brief package over the existing fusion input
+- Geospatial AI: `2026-05-04 23:26 America/Chicago` `environmentalFusionSnapshotInput` package over current environmental surfaces
+- Features/Webcam AI: unchanged; continue the active `2026-05-04 22:59 America/Chicago` endpoint-hardening and candidate-expansion pass
+
+Validation:
+- `python scripts/alerts_ledger.py --json` passed and showed `2` open low-priority Atlas-owned alerts
+- `python scripts/list_changed_files_by_owner.py --summary` passed and showed the latest mixed-tree counts
+- next-task rewrite completed for all newly completed controlled lanes
+- no staging, commit, or push
+- no production code changed by Manager AI in this check-in
+
+## 2026-05-04 23:07 America/Chicago
+
+Task:
+- record the user's clarified end-state goal and align manager memory plus strategy docs to it
+
+What changed:
+- accepted the product-direction clarification that 11Writer should grow toward a broad world-event monitoring and reporting workflow
+- explicitly did not accept the unsafe shortcut that "other sources together figure out" intent, wrongdoing, targeting, threat, impact, causation, or action need automatically
+- updated strategic docs so future assignments can aim at an evidence-aware reporting desk while preserving source-trust and no-confidence-laundering rules
+
+Docs updated:
+- `app/docs/spatial-intelligence-loop.md`
+- `app/docs/fusion-layer-architecture.md`
+- `app/docs/manager-ai-project-deficiency-review.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Manager interpretation to preserve:
+- broad monitoring coverage is good
+- question-driven detailed reporting is a core end-state
+- cross-source synthesis strengthens reporting, prioritization, and review
+- unsupported conclusions still stay unsupported
+
+Validation:
+- docs-only strategy update
+- no production code changed
+- no staging, commit, or push
+
+## 2026-05-04 22:59 America/Chicago
+
+Task:
+- check in, repair stale task/routing drift, and issue one larger non-duplicate assignment wave for every controlled lane
+
+What changed:
+- verified current progress truth, next-task docs, alerts, and ownership posture instead of trusting the prior paper state
+- current alerts posture is now:
+  - `2` open
+  - `35` completed
+- current mixed-tree posture is now:
+  - `modified=109`
+  - `untracked=43`
+  - `shared-high-collision=10`
+  - `unknown=26`
+- found a real routing defect:
+  - Data AI was pointed at `propublica` and `global-voices` as if they were fresh next-wave feeds
+  - those feeds are already implemented in repo-local progress truth
+- found a management/orchestration defect:
+  - all controlled lanes had task docs, but none had actually read the `2026-05-04 22:51 America/Chicago` wave into their progress docs
+  - they were effectively paper-idle rather than actively in progress
+- closed the Manager-owned Wonder alert for cluster-aware Source Discovery follow-through by routing it into the new Connect and Gather assignments
+- absorbed a newly arrived Atlas peer alert for a local-first media evidence/OCR interpretation slice into the same Connect and Gather assignment wave and closed the Manager-owned alert
+- updated `app/docs/manager-ai-project-deficiency-review.md` so current snapshot, alert posture, mixed-tree counts, and stale-routing risk are now durable manager memory
+
+New assignments:
+- Connect AI: `2026-05-04 22:59 America/Chicago` shared-runtime validation sweep over Source Discovery clustering/backfill/claim lineage, Wave LLM provider-management/runtime, media evidence, scheduler, and analyst/runtime consumers
+- Gather AI: `2026-05-04 22:59 America/Chicago` governance/routing reconciliation for Source Discovery follow-through, Wave LLM/media planning, stale Data routing repair, and active-lane truth
+- Aerospace AI: `2026-05-04 22:59 America/Chicago` aerospace fusion-snapshot input package over existing domain packages
+- Geospatial AI: `2026-05-04 22:59 America/Chicago` fresh `rgi-glacier-inventory` reference slice plus one narrow base-earth/family follow-through
+- Marine AI: `2026-05-04 22:59 America/Chicago` Vigicrues hydrology follow-through into hydrology/corridor/source-health/export coherence
+- Features/Webcam AI: `2026-05-04 22:59 America/Chicago` endpoint-verified candidate hardening over NZTA/Arlington plus more global no-auth candidate review
+- Data AI: `2026-05-04 22:59 America/Chicago` Data fusion-snapshot and claim-integrity package over existing family/review/readiness/topic/infrastructure/long-tail surfaces
+
+Validation:
+- `python scripts/alerts_ledger.py --json` passed after rewrite and now shows `2` open alerts and `35` completed alerts
+- next-task rewrite completed for all controlled lanes
+- manager memory/doc updates completed
+- no staging, commit, or push
+- no production code changed by Manager AI in this check-in
+
+## 2026-05-04 22:30 America/Chicago
+
+Task:
+- continue the check-in after Gather reported completion and finish the deconflicted assignment wave
+
+What changed:
+- Gather AI was not idle; it completed the `2026-05-04 22:01 America/Chicago` docs/governance reconciliation pass and corrected stale `canada-cap-alerts` assignment-board truth
+- updated Gather's next-task doc to a new `2026-05-04 22:30 America/Chicago` stale-routing and feature-occupancy reconciliation pass
+- feature deconfliction remains the active routing guardrail:
+  - do not route `Evidence Timeline`, `Review Packet Export`, `Source Candidate Intake Queue`, `Source Health Console`, or `Attention Queue Unifier` as if they were blank features
+  - route only the real remaining gaps or explicit cross-domain unifiers
+
+Current controlled-lane status:
+- Connect AI completed `2026-05-04 22:01 America/Chicago` and now has `2026-05-04 22:11 America/Chicago`
+- Gather AI completed `2026-05-04 22:01 America/Chicago` and now has `2026-05-04 22:30 America/Chicago`
+- Aerospace AI completed `2026-05-04 21:52 America/Chicago` and now has `2026-05-04 22:11 America/Chicago`
+- Features/Webcam AI completed `2026-05-04 21:52 America/Chicago` and now has `2026-05-04 22:11 America/Chicago`
+- Geospatial AI completed `2026-05-04 21:52 America/Chicago` and now has `2026-05-04 22:11 America/Chicago`
+- Data AI remains in progress on `2026-05-04 22:01 America/Chicago`
+- Marine AI remains in progress on `2026-05-04 22:01 America/Chicago`
+
+Validation:
+- next-task sanity check confirmed the new Gather assignment version
+
+## 2026-05-04 22:11 America/Chicago
+
+Task:
+- check in, deconflict the feature backlog against current agent work, and reassign only the completed controlled lanes
+
+What changed:
+- checked alerts, current progress docs, active next-task docs, and the current routing/status surfaces
+- alerts ledger remains clean: `0` open, `31` completed
+- current worktree remains large and mixed:
+  - `modified=99`
+  - `untracked=26`
+  - `shared-high-collision=10`
+  - `unknown=21`
+- added a durable feature-overlap map to `app/docs/manager-ai-project-deficiency-review.md`
+- deconfliction result:
+  - `Evidence Timeline` is no longer a blank feature because Aerospace now has `aerospaceEvidenceTimelinePackage` and Atlas already has a peer evidence-timeline surface
+  - `Review Packet Export` is partially occupied across Geospatial, Marine, Aerospace, and Features/Webcam
+  - `Source Candidate Intake Queue` is partially occupied across Features/Webcam plus Gather/source-discovery governance
+  - `Source Health Console` is partially occupied across Geospatial, Marine, Aerospace, and Data AI
+  - `Attention Queue Unifier` is partially occupied across domain review/attention surfaces
+  - `Source Fusion Snapshot` remains open globally, but it should be composed from current domain packages instead of rebuilt from scratch
+  - several stale backlog items should not be reassigned as fresh source work because repo-local implementation evidence already exists:
+    - `dmi-forecast-aws`
+    - `met-eireann-forecast`
+    - `met-eireann-warnings`
+    - `portugal-ipma-open-data`
+    - `bc-wildfire-datamart`
+    - `usgs-geomagnetism`
+    - `noaa-ncei-space-weather-portal`
+
+Current controlled-lane status:
+- Connect AI completed `2026-05-04 22:01 America/Chicago`
+- Aerospace AI completed `2026-05-04 21:52 America/Chicago`
+- Features/Webcam AI completed `2026-05-04 21:52 America/Chicago`
+- Geospatial AI completed `2026-05-04 21:52 America/Chicago`
+- Data AI has started `2026-05-04 22:01 America/Chicago`
+- Marine AI has started `2026-05-04 22:01 America/Chicago`
+- Gather AI still has an assigned `2026-05-04 22:01 America/Chicago` task but no start entry yet
+
+New assignments:
+- Connect AI: `2026-05-04 22:11 America/Chicago` shared-surface consolidation and collision/deconfliction pass
+- Aerospace AI: `2026-05-04 22:11 America/Chicago` aerospace package-coherence and source-health/export parity hardening
+- Geospatial AI: `2026-05-04 22:11 America/Chicago` base-earth static/reference review/export package
+- Features/Webcam AI: `2026-05-04 22:11 America/Chicago` promotion-readiness comparison plus next safe camera-candidate expansion
+
+Left unchanged:
+- Data AI continues `2026-05-04 22:01 America/Chicago`
+- Marine AI continues `2026-05-04 22:01 America/Chicago`
+- Gather AI keeps `2026-05-04 22:01 America/Chicago`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` passed with `0` open alerts
+- next-task sanity check confirmed fresh `22:11` assignments for Connect, Aerospace, Geospatial, and Features/Webcam
+
+## 2026-05-04 22:01 America/Chicago
+
+Task:
+- check in, classify completed controlled-agent assignments, and issue larger follow-on work where lanes were finished
+
+What changed:
+- checked alerts, progress docs, next-task docs, peer progress, ownership scanner output, and current git status posture
+- alerts ledger remains clean: `0` open, `31` completed
+- current worktree is broader again:
+  - `modified=98`
+  - `untracked=23`
+  - `shared-high-collision=10`
+  - `unknown=18`
+- peer context:
+  - Atlas remains peer/user-directed input; no Manager task assignment was issued
+  - Wonder's long-tail discovery/dedupe strategy remains useful routing input for Data/Gather, not validation proof
+
+Current controlled-lane status:
+- Connect AI completed `2026-05-04 21:52 America/Chicago` consolidation-readiness/ownership-hygiene pass
+- Data AI completed `2026-05-04 21:43 America/Chicago` metadata-only infrastructure/status context package
+- Gather AI completed `2026-05-04 21:43 America/Chicago` governance/status reconciliation pass
+- Marine AI completed `2026-05-04 21:43 America/Chicago` hydrology source-health report/export consumer; its stale shared-build caveat should not be recycled unless reproduced
+- Features/Webcam AI has started but not completed `2026-05-04 21:52 America/Chicago`
+- Geospatial AI has started but not completed `2026-05-04 21:52 America/Chicago`
+- Aerospace AI remains on `2026-05-04 21:52 America/Chicago` with no current completion report
+
+New assignments:
+- Connect AI: `2026-05-04 22:01 America/Chicago` larger consolidation-readiness pass over high-collision/unknown files and future commit grouping
+- Data AI: `2026-05-04 22:01 America/Chicago` Atlas-approved cyber/internet RSS feed batch plus metadata-only long-tail intake/dedupe posture
+- Gather AI: `2026-05-04 22:01 America/Chicago` Phase 2 governance/routing packet covering latest completions, Batch 5, Atlas-approved feeds, and Wonder long-tail strategy
+- Marine AI: `2026-05-04 22:01 America/Chicago` marine corridor/chokepoint review/export package using existing bounded metadata without crisis/intent claims
+
+Left unchanged:
+- Aerospace AI continues `2026-05-04 21:52 America/Chicago`
+- Features/Webcam AI continues `2026-05-04 21:52 America/Chicago`
+- Geospatial AI continues `2026-05-04 21:52 America/Chicago`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` passed with `0` open alerts
+- `python scripts/list_changed_files_by_owner.py --summary` completed and shows active consolidation risk
+- next-task sanity check confirmed `22:01` assignments for Connect, Data, Gather, and Marine
+
+## 2026-05-04 21:57 America/Chicago
+
+Task:
+- check in on the current post-deficiency-review assignment wave
+
+What changed:
+- checked alerts, progress timestamps, next-task timestamps, ownership scanner output, and current git status
+- alerts ledger remains clean: `0` open, `31` completed
+- current worktree remains broad and mixed:
+  - `modified=88`
+  - `untracked=20`
+  - `shared-high-collision=10`
+  - `unknown=20`
+- peer context:
+  - Wonder AI updated `app/docs/long-tail-information-discovery-strategy.md` with public/no-auth/no-CAPTCHA discovery boundaries and a knowledge-node / duplicate-cluster model
+  - treat this as peer/user-directed strategy input for future Data/Gather/Source Discovery work, not implementation proof
+
+Current controlled-lane status:
+- Connect AI completed the earlier `2026-05-04 21:43 America/Chicago` sweep, but has not yet completed the current `2026-05-04 21:52 America/Chicago` assignment
+- Features/Webcam AI completed the older `2026-05-04 21:17 America/Chicago` camera candidate expansion and has started, but not completed, the current `2026-05-04 21:52 America/Chicago` coverage/review-priority assignment
+- Geospatial AI completed the `2026-05-04 21:43 America/Chicago` Canada CAP upgrade and has started, but not completed, the current `2026-05-04 21:52 America/Chicago` Canada context package assignment
+- Marine AI remains in progress on `2026-05-04 21:43 America/Chicago`
+- Data AI remains on `2026-05-04 21:43 America/Chicago` with no current completion report
+- Gather AI remains on `2026-05-04 21:43 America/Chicago` with no current completion report
+- Aerospace AI remains on `2026-05-04 21:52 America/Chicago` with no current completion report
+
+Routing decision:
+- no controlled next-task docs were rewritten during this check-in
+- all controlled lanes should continue their current next-task docs
+
+Validation:
+- `python scripts/alerts_ledger.py --json` passed with `0` open alerts
+- `python scripts/list_changed_files_by_owner.py --summary` completed and shows high active consolidation risk
+
+## 2026-05-04 21:52 America/Chicago
+
+Task:
+- check in and perform a Manager-level project deficiency/improvement review
+
+What changed:
+- checked alerts, progress docs, next-task docs, git status, and ownership scanner output
+- alerts ledger is clean: `0` open, `31` completed
+- current worktree is broad and mixed:
+  - `modified=85`
+  - `untracked=17`
+  - `shared-high-collision=10`
+  - `unknown=19`
+- created `app/docs/manager-ai-project-deficiency-review.md` as durable Manager memory for:
+  - mixed worktree and ownership drift
+  - progress truth drift
+  - workflow validation lag
+  - UI surface accretion
+  - under-validated runtime operator surface
+  - source discovery / AI enrichment guardrails
+  - high-value feature opportunities
+
+Check-in interpretation:
+- Connect AI appears represented in coordination docs as having completed the `21:43` validation sweep, but `app/docs/agent-progress/connect-ai.md` does not clearly have that final report at the top; routed progress-truth repair to Connect
+- Geospatial AI completed `2026-05-04 21:43 America/Chicago` Canada CAP contract/source-health upgrade
+- Aerospace AI completed `2026-05-04 21:43 America/Chicago` workflow-validation evidence posture alignment
+- Features/Webcam AI completed `2026-05-04 21:17 America/Chicago` camera candidate expansion with Baton Rouge and Vancouver sandbox-importable candidates, Arlington endpoint-verified, and Queensland held
+- Marine AI has started `2026-05-04 21:43 America/Chicago` but is still a stub/in-progress
+- Data AI and Gather AI have not yet recorded completion for their `2026-05-04 21:43 America/Chicago` assignments
+
+New assignments:
+- Connect AI: `2026-05-04 21:52 America/Chicago` progress-truth repair plus consolidation-readiness and ownership-hygiene pass
+- Geospatial AI: `2026-05-04 21:52 America/Chicago` Canada environmental context review/export package over Canada CAP and Canada GeoMet
+- Aerospace AI: `2026-05-04 21:52 America/Chicago` aerospace evidence timeline/export package
+- Features/Webcam AI: `2026-05-04 21:52 America/Chicago` camera candidate network coverage and review-priority package
+
+Left unchanged:
+- Data AI remains on `2026-05-04 21:43 America/Chicago`
+- Gather AI remains on `2026-05-04 21:43 America/Chicago`
+- Marine AI remains on `2026-05-04 21:43 America/Chicago`
+
+Validation:
+- next-task sanity check confirmed current assignment versions
+- `python scripts/alerts_ledger.py --json` passed with `0` open alerts
+
+## 2026-05-04 21:43 America/Chicago
+
+Task:
+- check in on the current large Phase 2 wave and route completed lanes/blockers
+
+What changed:
+- alerts initially showed one open Manager alert from Atlas AI for the runtime operator console slice
+- reviewed controlled progress docs and found mixed wave status:
+  - Data AI completed the `2026-05-04 21:17 America/Chicago` assignment by confirming/reconciling the already implemented official cyber advisory family and strengthening metadata-only regression/status truth
+  - Marine AI completed the `2026-05-04 21:17 America/Chicago` hydrology/source-health workflow package with helper regression and smoke-prep metadata coverage
+  - Aerospace AI completed the intended workflow-validation evidence snapshot but recorded the stale `2026-05-02 15:47 America/Chicago` assignment marker and reported a Marine-owned lint blocker
+  - Geospatial AI completed the older `canada-geomet-ogc` assignment, not the current Canada CAP task
+  - Gather AI completed an older reconciliation assignment, not the current `21:17` wave
+  - Features/Webcam AI only recorded startup for the `21:17` assignment and remains in progress
+  - Connect AI completed the older `21:06` validation sweep before the larger `21:17` assignment was picked up
+- marked the Atlas runtime operator console alert completed by routing it into controlled validation/governance assignments
+
+New or updated assignments:
+- Connect AI: `2026-05-04 21:43 America/Chicago` integration sweep for Atlas runtime operator console, Marine lint blocker, helper artifacts, ownership scan, and release/readiness truth
+- Data AI: `2026-05-04 21:43 America/Chicago` metadata-only infrastructure/status context package over `cloudflare-radar`, `netblocks`, and `apnic-blog`
+- Geospatial AI: `2026-05-04 21:43 America/Chicago` Canada CAP alerts source slice, with GeoMet treated as completed prior work
+- Marine AI: `2026-05-04 21:43 America/Chicago` Marine-owned lint cleanup if reproduced plus compact report/export consumer for `hydrologySourceHealthWorkflow`
+- Aerospace AI: `2026-05-04 21:43 America/Chicago` assignment-marker correction and workflow-validation evidence posture alignment while Marine/Connect handle lint
+- Gather AI: `2026-05-04 21:43 America/Chicago` mixed-wave governance reconciliation and Atlas peer-input routing
+
+Left unchanged:
+- Features/Webcam AI remains on `2026-05-04 21:17 America/Chicago` because its progress doc says implementation is still in progress, not completed
+
+Validation:
+- next-task sanity check confirmed new `21:43` assignment docs contain `Mission` and `Do first` sections
+- `python scripts/alerts_ledger.py --json` passed with `0` open alerts and `31` completed alerts
+
+## 2026-05-04 21:17 America/Chicago
+
+Task:
+- assign new larger Phase 2 work after user reported all controlled agents completed
+
+What changed:
+- treated the user's completion report as sufficient to prevent idle controlled lanes, while preserving progress-doc recovery requirements inside each new assignment
+- rewrote controlled next-task docs for Connect, Data, Geospatial, Marine, Aerospace, Features/Webcam, and Gather with assignment version `2026-05-04 21:17 America/Chicago`
+- each assignment requires the agent to record `Assignment version read: 2026-05-04 21:17 America/Chicago` before starting and append any missing prior final report before new implementation work
+
+New assignments:
+- Connect AI: repo-wide consolidation/validation sweep, ownership scan, Marine helper artifact investigation, and readiness/validation doc refresh
+- Data AI: fixture-first official advisory RSS expansion for `ncsc-uk-all` and `cert-fr-alerts`
+- Geospatial AI: backend-first `canada-cap-alerts` environmental alert source slice
+- Marine AI: larger hydrology/source-health workflow package across Vigicrues, OPW, Waterinfo, CO-OPS, and NDBC
+- Aerospace AI: workflow evidence consolidation package across selected-target reports, review queue/export bundle, readiness, OurAirports, NCEI/SWPC/CNEOS/AWC/FAA/OpenSky posture, and smoke status
+- Features/Webcam AI: global public no-auth camera candidate expansion plus fixture-first sandbox support for the safest two candidates if evidence supports it
+- Gather AI: governance/status reconciliation for the new large build wave and stale completion recovery
+
+Validation:
+- `rg` sanity check confirmed all seven next-task docs contain assignment version `2026-05-04 21:17 America/Chicago`, `Mission`, and `Do first` sections
+- `python scripts/alerts_ledger.py --json` passed with `0` open alerts
+
+## 2026-05-04 21:10 America/Chicago
+
+Task:
+- perform check-in after follow-up user request
+
+What changed:
+- confirmed alerts ledger remains clean: `0` open, `30` completed, within the 500-line target
+- checked progress/next-task timestamps and current assignment markers for all controlled lanes
+- found no new controlled-agent completion evidence since the prior check-in
+- noted Wonder AI peer progress update as context only: Wonder created a live Notion planning hub and preserved the Linear seed-pack fallback because Linear creation remains blocked by connector tooling
+
+Routing decision:
+- no controlled next-task docs were rewritten
+- Connect AI and Marine AI should continue their `2026-05-04 21:06 America/Chicago` assignments
+- Data AI, Gather AI, and Geospatial AI should continue their `2026-05-02 15:45 America/Chicago` assignments
+- Aerospace AI and Features/Webcam AI should continue their `2026-05-02 15:47 America/Chicago` assignments
+- Wonder AI remains peer/user-directed and was not assigned Manager-controlled work
+
+## 2026-05-04 21:09 America/Chicago
+
+Task:
+- perform check-in after user reported all controlled agents should be finished
+
+What changed:
+- confirmed alerts ledger is clean: `0` open, `30` completed, within the 500-line target
+- inspected controlled progress docs for Connect, Marine, Data, Gather, Geospatial, Aerospace, and Features/Webcam
+- found no controlled progress doc recording completion of the current next-task assignment versions beyond the already-handled Connect/Marine completions from the prior check-in
+
+Current next-task status:
+- Connect AI remains assigned to `2026-05-04 21:06 America/Chicago`
+- Marine AI remains assigned to `2026-05-04 21:06 America/Chicago`
+- Data AI, Gather AI, and Geospatial AI remain assigned to `2026-05-02 15:45 America/Chicago`
+- Aerospace AI and Features/Webcam AI remain assigned to `2026-05-02 15:47 America/Chicago`
+
+Routing decision:
+- no next-task docs were rewritten during this check-in because the repo progress docs do not show matching assignment-read plus completion evidence
+- agents should continue their existing next-task docs rather than receive replacement work
+
+## 2026-05-04 21:06 America/Chicago
+
+Task:
+- perform check-in after date rollover and reassign completed controlled lanes
+
+What changed:
+- confirmed alerts ledger is clean: `0` open
+- confirmed Connect AI completed assignment `2026-05-02 15:45 America/Chicago` with green runtime provider boundary validation and no reproduced blocker
+- confirmed Marine AI completed assignment `2026-05-02 15:47 America/Chicago` by replacing the stale progress stub and adding marine source-health export coherence helper/regression coverage
+- rewrote next-task docs for Connect AI and Marine AI with assignment version `2026-05-04 21:06 America/Chicago`
+
+New assignments:
+- Connect AI: focused current-state integration/validation sweep after Marine source-health export coherence
+- Marine AI: deterministic smoke-prep/export-consumer check for `marineAnomalySummary.sourceHealthExportCoherence`
+
+Not reassigned:
+- Data AI, Gather AI, and Geospatial AI remain on their `2026-05-02 15:45 America/Chicago` assignments with no newer completion evidence in progress docs
+- Aerospace AI and Features/Webcam AI remain on their `2026-05-02 15:47 America/Chicago` recovery assignments with no newer completion evidence in progress docs
+
+Files touched:
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- alerts review -> pass
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+
+## 2026-05-02 15:47 America/Chicago
+
+Task:
+- respond to user report that all agents should be finished and recover stale progress truth for missing lanes
+
+What changed:
+- checked alerts and controlled-agent progress docs
+- confirmed alerts remain clean: `0` open
+- confirmed progress docs do not yet show completion for:
+  - Aerospace AI assignment `2026-05-02 12:27 America/Chicago`
+  - Features/Webcam AI assignment `2026-05-02 12:27 America/Chicago`
+  - Marine AI assignment `2026-05-02 12:27 America/Chicago`, which still has an `in progress` stub
+- rewrote next-task docs for those three lanes with assignment version `2026-05-02 15:47 America/Chicago`
+- each recovery assignment requires the agent to first append or replace the missing final report for the prior assignment, then proceed only if the prior work is actually complete
+
+New assignments:
+- Aerospace AI: recover prior selected-target report-package final report, then add aerospace workflow-validation evidence snapshot
+- Features/Webcam AI: recover prior endpoint-verified non-sandbox summary final report, then add source-ops promotion-readiness guardrail package
+- Marine AI: replace Waterinfo consumer `in progress` stub with final report, then add marine hydrology/source-health export coherence package
+
+Files touched:
+- `app/docs/agent-next-tasks/aerospace-ai.md`
+- `app/docs/agent-next-tasks/features-webcam-ai.md`
+- `app/docs/agent-next-tasks/marine-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- next-task doc rewrite -> pass
+
+Blockers or caveats:
+- user reported all should be finished, but repo-local progress docs are the durable source of truth and still need these three agents to sync final outputs
+
+## 2026-05-02 15:45 America/Chicago
+
+Task:
+- perform Manager AI check-in, route new Atlas provider/runtime alert, and reassign completed controlled lanes
+
+What changed:
+- confirmed completed controlled assignments:
+  - Connect AI completed `2026-05-02 12:27 America/Chicago` Source Discovery ten-step backend validation
+  - Data AI completed `2026-05-02 12:27 America/Chicago` Data AI topic/context lens and export package
+  - Gather AI completed `2026-05-02 12:27 America/Chicago` latest wave reconciliation
+  - Geospatial AI completed `2026-05-02 12:27 America/Chicago` environmental weather/observation review queue/export bundle
+- confirmed in-flight or not-yet-reported lanes:
+  - Marine AI has started `2026-05-02 12:27 America/Chicago` and is in progress
+  - Aerospace AI has not reported `2026-05-02 12:27 America/Chicago`
+  - Features/Webcam AI has not reported `2026-05-02 12:27 America/Chicago`
+- closed Atlas `Runtime Service And Provider Slice Finished` alert by routing provider/runtime validation to Connect and governance interpretation to Gather
+- rewrote next-task docs for Connect, Gather, Data, and Geospatial with assignment version `2026-05-02 15:45 America/Chicago`
+
+New assignments:
+- Connect AI: validate Atlas runtime service/provider slice boundaries
+- Gather AI: reconcile latest partial wave plus provider/runtime peer alert
+- Data AI: Data AI report snapshot package
+- Geospatial AI: `canada-geomet-ogc` first slice if endpoint evidence is sufficient
+
+Files touched:
+- `app/docs/alerts.md`
+- `app/docs/agent-next-tasks/connect-ai.md`
+- `app/docs/agent-next-tasks/gather-ai.md`
+- `app/docs/agent-next-tasks/data-ai.md`
+- `app/docs/agent-next-tasks/geospatial-ai.md`
+- `app/docs/agent-progress/manager-ai.md`
+
+Validation:
+- progress-doc review -> pass
+- alert routing -> pass
+- next-task doc rewrite -> pass
+
+Blockers or caveats:
+- Atlas remains peer/user-directed input only
+- Marine remains in progress and should not be overwritten
+- Aerospace and Features/Webcam should be prompted to start or continue their existing `12:27` tasks
+
 ## 2026-05-02 12:27 America/Chicago
 
 Task:

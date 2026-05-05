@@ -1,7 +1,7 @@
 # Cross-Platform Implementation Playbook
 
 Last updated:
-- `2026-04-30 America/Chicago`
+- `2026-05-05 America/Chicago`
 
 Owner note:
 - Prepared by Atlas AI as a user-directed implementation guide.
@@ -12,6 +12,8 @@ Related:
 - `app/docs/runtime-interface-requirements.md`
 - `app/docs/cross-platform-agent-guidelines.md`
 - `app/docs/cross-platform-agent-broadcast.md`
+- `app/docs/media-evidence-ocr-ai-quality-plan.md`
+- `app/docs/media-geolocation-framework.md`
 - `app/docs/repo-workflow.md`
 - `app/docs/active-agent-worktree.md`
 
@@ -80,6 +82,33 @@ This avoids `file://` problems, keeps relative API calls useful, and narrows COR
 ### Treat Backend-Only As A Product Mode
 
 Backend-only is not just "the sidecar left running." It needs explicit mode, state, logs, task scheduling, service/agent lifecycle, and attach/inspect APIs.
+
+## Current Execution Queue
+
+These are the current five highest-priority platform follow-ons. Items `1` and `2` now have an implemented first slice in the backend and single-page app, so later agents should extend them instead of rebuilding them from scratch.
+
+1. Runtime install and lifecycle management:
+   - current slice: backend runtime worker entrypoint, persisted runtime worker state, generated service artifacts, and local action routes for materialize/install/start/restart/stop/status/uninstall across Windows Task Scheduler, macOS launchd, and Linux systemd-user
+   - next extension: hardened host-specific installers, restart-recovery validation, and packaged desktop integration
+2. Single-page operator control surface:
+   - current slice: in-app operator console for runtime status, worker pause/resume/run-now/stop controls, service install state, Source Discovery review queue actions, and reviewed Wave LLM claim application
+   - next extension: companion-web parity, richer filtering, and better mobile/operator ergonomics
+3. Secure BYOK and provider management:
+   - current slice: user-data-backed provider management, masked-secret config routes, per-wave provider overrides, inherited execution defaults, and execution-history visibility in the single-page operator console
+   - next extension: keychain-backed secret storage, provider-health telemetry, and companion-web parity
+4. Media evidence, OCR, and AI enrichment:
+   - current slice: bounded media artifact capture, duplicate-aware media persistence, deterministic image-to-image comparison, duplicate clustering, OCR fallback across `tesseract` and `rapidocr_onnx`, structured geolocation clue packets, confidence-aware fusion, engine-attempt audit trails, duplicate/sequence lineage inheritance, optional local `ollama` or localhost OpenAI-compatible clue analysts, repo-safe evaluation fixtures, and bounded fixture/`ffmpeg` frame-sequence sampling with strict no-people-recognition guardrails
+   - quality plan and current contract are captured in `app/docs/media-evidence-ocr-ai-quality-plan.md`
+   - specialized geolocation model/adaptor posture is captured in `app/docs/media-geolocation-framework.md`
+   - next extension: stronger production-grade OCR/model packaging, richer media-change reasoning, better label/landmark dictionaries, stronger review UX, and higher-quality bounded frame/video workflows
+   - preserve the same evidence basis, provenance, and review-first posture used elsewhere in the runtime
+5. End-to-end runtime and packaging validation:
+   - add service lifecycle smoke tests, migration safety checks, packaged backend-only validation, and cross-platform desktop/runtime verification gates
+
+Agent rule:
+
+- treat this queue as the current platform operating plan unless the user explicitly supersedes it
+- do not regress the implemented runtime-service or operator-console surfaces while working on items `3` through `5`
 
 ## Target Repository Shape
 

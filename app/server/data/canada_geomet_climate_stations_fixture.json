@@ -1,0 +1,75 @@
+{
+  "collection": {
+    "id": "climate-stations",
+    "updated": "2026-05-02T18:00:00Z",
+    "title": "Climate - Stations"
+  },
+  "items": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "id": "101AE00",
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-124.72, 48.82]
+        },
+        "properties": {
+          "CLIMATE_IDENTIFIER": "101AE00",
+          "STATION_NAME": "CHEMAINUS BARE POINT",
+          "PROV_STATE_TERR_CODE": "BC",
+          "ENG_PROV_NAME": "BRITISH COLUMBIA",
+          "STATION_TYPE": "CLIMATE",
+          "TC_IDENTIFIER": "YBP",
+          "WMO_IDENTIFIER": "71001",
+          "ELEVATION": "12.3",
+          "FIRST_DATE": "1969-01-01",
+          "LAST_DATE": "2026-05-01",
+          "HAS_HOURLY_DATA": "Y",
+          "HAS_NORMALS_DATA": "N"
+        }
+      },
+      {
+        "id": "702S006",
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-63.57, 44.65]
+        },
+        "properties": {
+          "CLIMATE_IDENTIFIER": "702S006",
+          "STATION_NAME": "HALIFAX <script>alert(1)</script> HARBOUR",
+          "PROV_STATE_TERR_CODE": "NS",
+          "ENG_PROV_NAME": "NOVA SCOTIA",
+          "STATION_TYPE": "CLIMATE",
+          "TC_IDENTIFIER": "YHZ",
+          "WMO_IDENTIFIER": "71395",
+          "ELEVATION": "145.0",
+          "FIRST_DATE": "1978-01-01",
+          "LAST_DATE": "2026-05-01",
+          "HAS_HOURLY_DATA": "Y",
+          "HAS_NORMALS_DATA": "Y"
+        }
+      },
+      {
+        "id": "6105978",
+        "type": "Feature",
+        "geometry": null,
+        "properties": {
+          "CLIMATE_IDENTIFIER": "6105978",
+          "STATION_NAME": "IQALUIT AIRPORT",
+          "PROV_STATE_TERR_CODE": "NU",
+          "ENG_PROV_NAME": "NUNAVUT",
+          "STATION_TYPE": "CLIMATE",
+          "TC_IDENTIFIER": "YFB",
+          "WMO_IDENTIFIER": "71909",
+          "ELEVATION": "34.0",
+          "FIRST_DATE": "1953-01-01",
+          "LAST_DATE": "2026-05-01",
+          "HAS_HOURLY_DATA": "Y",
+          "HAS_NORMALS_DATA": "Y"
+        }
+      }
+    ]
+  }
+}

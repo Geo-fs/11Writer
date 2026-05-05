@@ -1,12 +1,15 @@
 from pathlib import Path
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.config.settings import get_settings
-from src.main import app
+from src.routes.events import router as events_router
 
 
 def _client_with_fixture(fixture_path: Path) -> TestClient:
+    app = FastAPI()
+    app.include_router(events_router)
     app.dependency_overrides[get_settings] = lambda: get_settings().model_copy(
         update={
             "canada_cap_source_mode": "fixture",
@@ -16,8 +19,15 @@ def _client_with_fixture(fixture_path: Path) -> TestClient:
     return TestClient(app)
 
 
-def teardown_module() -> None:
-    app.dependency_overrides.clear()
+def _client_with_disabled_mode() -> TestClient:
+    app = FastAPI()
+    app.include_router(events_router)
+    app.dependency_overrides[get_settings] = lambda: get_settings().model_copy(
+        update={
+            "canada_cap_source_mode": "disabled",
+        }
+    )
+    return TestClient(app)
 
 
 def test_canada_cap_fixture_parsing_and_provenance() -> None:
@@ -27,6 +37,8 @@ def test_canada_cap_fixture_parsing_and_provenance() -> None:
     payload = client.get("/api/events/canada-cap/recent").json()
     assert payload["metadata"]["source"] == "environment-canada-cap-alerts"
     assert payload["metadata"]["sourceMode"] == "fixture"
+    assert payload["sourceHealth"]["health"] == "loaded"
+    assert payload["sourceHealth"]["sourceMode"] == "fixture"
     assert payload["count"] == 2
     assert payload["alerts"][0]["eventId"] == "cap-on-001"
 
@@ -60,6 +72,7 @@ def test_canada_cap_limit_sort_and_missing_geometry() -> None:
     assert statement["count"] == 1
     assert statement["alerts"][0]["latitude"] is None
     assert statement["alerts"][0]["geometrySummary"] is None
+    assert statement["sourceHealth"]["health"] == "loaded"
 
 
 def test_canada_cap_invalid_params_and_empty_case() -> None:
@@ -68,6 +81,7 @@ def test_canada_cap_invalid_params_and_empty_case() -> None:
 
     empty = client.get("/api/events/canada-cap/recent", params={"province": "AB"}).json()
     assert empty["count"] == 0
+    assert empty["sourceHealth"]["health"] == "empty"
 
     bad_type = client.get("/api/events/canada-cap/recent", params={"alert_type": "bad"})
     assert bad_type.status_code == 400
@@ -77,3 +91,23 @@ def test_canada_cap_invalid_params_and_empty_case() -> None:
 
     bad_sort = client.get("/api/events/canada-cap/recent", params={"sort": "bad"})
     assert bad_sort.status_code == 400
+
+
+def test_canada_cap_prompt_injection_inertness_and_disabled_mode() -> None:
+    fixture = Path(__file__).resolve().parents[1] / "data" / "canada_cap_index_fixture.html"
+    client = _client_with_fixture(fixture)
+    payload = client.get("/api/events/canada-cap/recent").json()
+    blob = " ".join(
+        payload["caveats"]
+        + [alert.get("title") or "" for alert in payload["alerts"]]
+        + [alert.get("areaDescription") or "" for alert in payload["alerts"]]
+    )
+
+    assert "<script" not in blob.lower()
+    assert "workflow behavior" in blob.lower()
+    assert "impact" in payload["metadata"]["caveat"].lower()
+
+    disabled_client = _client_with_disabled_mode()
+    disabled_payload = disabled_client.get("/api/events/canada-cap/recent").json()
+    assert disabled_payload["count"] == 0
+    assert disabled_payload["sourceHealth"]["health"] == "disabled"

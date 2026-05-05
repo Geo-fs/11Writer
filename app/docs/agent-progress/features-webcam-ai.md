@@ -1,5 +1,382 @@
 # Features/Webcam AI Progress
 
+## 2026-05-05 10:44:43 -05:00
+
+- Task: Compare NZTA and Arlington against the Caltrans sandbox comparator, harden backend sandbox-feasibility evidence, and re-review the backlog without widening the registry unless the same endpoint/media bar is met.
+- Assignment version read: `2026-05-05 10:22 America/Chicago`
+- What changed:
+  - added explicit `sandbox_feasibility_posture` to the backend-only candidate report, source-ops detail, candidate-network, and promotion-readiness surfaces so endpoint-verified holds can be compared conservatively against sandbox-importable candidates
+  - hardened the composed detail/export paths so they derive the same lifecycle, media-access, payload-shape, and sandbox-feasibility tuple as the primary candidate report builder rather than drifting on an older report shape
+  - recorded the actual hold outcome in docs: [`caltrans-cctv-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) remains the stronger `fixture-backed-direct-image-review` comparator, [`nzta-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) remains `candidate-endpoint-verified` with `endpoint-family-unpinned`, and [`arlington-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) remains `candidate-endpoint-verified` with `media-proof-missing`
+  - re-reviewed the extra backlog sources documented in the May candidate batch and kept the registry unchanged because none cleared the same endpoint-pinning plus media-posture bar already met by the sandbox-importable cohort
+  - updated the graduation-plan test helper and related assertions so the expanded candidate report shape stays fully covered in backend CI
+- Files touched:
+  - [`app/server/src/services/camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_candidate_endpoint_report.py)
+  - [`app/server/src/services/camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_detail.py)
+  - [`app/server/src/services/camera_source_ops_candidate_network_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_candidate_network_summary.py)
+  - [`app/server/src/services/camera_source_ops_promotion_readiness_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_promotion_readiness_summary.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_endpoint_report.py)
+  - [`app/server/tests/test_camera_candidate_graduation_plan.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_graduation_plan.py)
+  - [`app/server/tests/test_camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_detail.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q`
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - NZTA stays endpoint-verified and non-sandbox because the public REST/WADL family still does not pin a bounded camera payload or stable public media fields cleanly enough
+  - Arlington stays endpoint-verified and non-sandbox because the public county JSON inventory is still location/status metadata only and does not expose stable viewer or direct-image fields
+  - no new candidate records were added from the extra backlog review because the remaining public evidence is still weaker than the current sandbox-importable set
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - take the next strongest endpoint-only hold only if a new official public payload/media source clears the same bounded sandbox-feasibility bar now recorded in the backend surfaces; otherwise continue strengthening export-safe comparison and review-planning evidence without widening lifecycle claims
+
+## 2026-05-05 10:27:00 -05:00
+
+- Task: Record the new NZTA and Arlington sandbox-feasibility assignment version before implementation.
+- Assignment version read: `2026-05-05 10:22 America/Chicago`
+- What changed:
+  - re-read the repo-local next-task doc and confirmed a newer Manager assignment supersedes the completed Caltrans-only sandbox-feasibility pass
+  - started the new NZTA and Arlington sandbox-feasibility review under the updated assignment version
+- Files touched:
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - repo-local next-task doc re-read before work
+- Blockers or caveats:
+  - implementation is still in progress for this assignment
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred in this checkpoint
+- Next recommended task:
+  - inspect the current NZTA and Arlington candidate metadata, source-ops summaries, Caltrans comparator surfaces, and current backlog candidate evidence before deciding whether either source clears the bounded sandbox-importable bar
+
+## 2026-05-05 10:15:27 -05:00
+
+- Task: Take Caltrans through a bounded fixture-first sandbox-feasibility review, update source-ops lifecycle evidence, and re-review backlog candidates without widening the registry unless the endpoint/media bar is equally clean.
+- Assignment version read: `2026-05-05 09:47 America/Chicago`
+- What changed:
+  - added a fixture-only [`CaltransCctvCameraConnector`](/C:/Users/mike/11Writer/app/server/src/adapters/cameras.py) and synthetic fixture at [`app/server/data/caltrans_cctv_cameras_fixture.json`](/C:/Users/mike/11Writer/app/server/data/caltrans_cctv_cameras_fixture.json) with one usable direct-image sample and one degraded unavailable-frame sample so the mapping and review queue stay deterministic
+  - added Caltrans sandbox settings in [`app/server/src/config/settings.py`](/C:/Users/mike/11Writer/app/server/src/config/settings.py) and promoted [`caltrans-cctv-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) only as far as `candidate-sandbox-importable` by wiring the registry sandbox mode, connector id, and validation caveat helpers
+  - extended the backend-only sandbox validation report in [`app/server/src/services/camera_sandbox_validation_report.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_sandbox_validation_report.py) so Caltrans now emits a conservative direct-image sandbox recommendation centered on mapping, orientation caveats, and source-health review rather than activation
+  - updated the backend lifecycle/source-ops assertions so Caltrans now resolves as `candidate-sandbox-importable` across candidate reports, source-ops detail, source-ops index, export-summary, webcam inventory, and sandbox validation tests while remaining candidate-only, unscheduled, and unvalidated
+  - updated [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md), [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md), and [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md) to record the Caltrans sandbox-only posture and the additional backlog re-review result
+  - re-reviewed `euskadi-traffic-cameras`, `qldtraffic-web-cameras`, `seattle-traffic-cameras`, `nzta-traffic-cameras`, and `arlington-traffic-cameras`; no additional candidate records were added because none met the same clean endpoint-pinning plus media-posture bar already met by the current sandbox-importable set
+- Files touched:
+  - [`app/server/src/adapters/cameras.py`](/C:/Users/mike/11Writer/app/server/src/adapters/cameras.py)
+  - [`app/server/src/config/settings.py`](/C:/Users/mike/11Writer/app/server/src/config/settings.py)
+  - [`app/server/src/services/camera_registry.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py)
+  - [`app/server/src/services/camera_sandbox_validation_report.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_sandbox_validation_report.py)
+  - [`app/server/data/caltrans_cctv_cameras_fixture.json`](/C:/Users/mike/11Writer/app/server/data/caltrans_cctv_cameras_fixture.json)
+  - [`app/server/tests/test_camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_endpoint_report.py)
+  - [`app/server/tests/test_camera_sandbox_validation_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_sandbox_validation_report.py)
+  - [`app/server/tests/test_camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_detail.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_webcam_module.py`](/C:/Users/mike/11Writer/app/server/tests/test_webcam_module.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q`
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - Caltrans is sandbox-importable only; fixture-backed evidence still does not validate, activate, or schedule the source
+  - Caltrans orientation remains direction-derived and approximate in the bounded fixture path, so review burden stays explicit
+  - the extra backlog review did not justify any additional registry additions in this pass
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - take the strongest remaining endpoint-verified non-sandbox hold, currently [`nzta-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) or [`arlington-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py), through the same bounded fixture-feasibility bar only if payload/media evidence can be pinned without weakening the current lifecycle guardrails
+
+## 2026-05-05 10:24:22 -05:00
+
+- Task: Record the new Caltrans sandbox-feasibility assignment version before implementation.
+- Assignment version read: `2026-05-05 09:47 America/Chicago`
+- What changed:
+  - re-read the repo-local next-task doc and confirmed a newer Manager assignment supersedes the prior endpoint-hardening pass
+  - started the Caltrans fixture-first sandbox-feasibility review under the updated assignment version
+- Files touched:
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - repo-local next-task doc re-read before work
+- Blockers or caveats:
+  - implementation is still in progress for this assignment
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred in this checkpoint
+- Next recommended task:
+  - inspect the current Caltrans candidate registry record, source-ops summaries, and existing fixture-first sandbox connector patterns before deciding whether Caltrans clears the sandbox-importable bar
+
+## 2026-05-04 23:39:11 -05:00
+
+- Task: Harden endpoint-verified non-sandbox webcam candidates, add the next safest no-auth global candidate only where endpoint/media evidence is clean enough, and keep activation semantics unchanged.
+- Assignment version read: `2026-05-04 22:59 America/Chicago`
+- What changed:
+  - extended [`app/server/src/services/camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_candidate_endpoint_report.py) with explicit `payload_shape_posture` so endpoint-verified candidates now distinguish `api-family-documented-shape-unpinned`, `machine-shape-location-only`, `machine-shape-with-media-fields`, and sandbox-reviewed fixture posture
+  - carried that payload-shape posture through the backend candidate-network, promotion-readiness, and source-detail surfaces in [`app/server/src/services/camera_source_ops_candidate_network_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_candidate_network_summary.py), [`app/server/src/services/camera_source_ops_promotion_readiness_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_promotion_readiness_summary.py), [`app/server/src/services/camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_detail.py), and [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - kept [`nzta-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) endpoint-verified and non-sandbox because the official API-family evidence still only supports `api-family-documented-shape-unpinned`; the next safe step is bounded camera-payload review, not sandbox promotion
+  - kept [`arlington-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) endpoint-verified and non-sandbox because the public county JSON inventory still only supports `machine-shape-location-only`; the next safe step is public media-evidence review, not sandbox promotion
+  - added [`caltrans-cctv-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) as a new `candidate-endpoint-verified` source because the official Caltrans ArcGIS REST layer documents exact coordinates, direction, `currentImageURL`, and `streamingVideoURL`, but it still remains non-sandbox, inactive, unscheduled, and unvalidated
+  - completed the additional no-auth backlog review and kept Queensland held, NPRA credential-blocked, UDOT credential-blocked, AZ511 credential-blocked, and Seattle out of inventory because the current evidence is still viewer-page centric rather than a pinned machine-readable inventory
+  - updated backend assertions so NZTA, Arlington, and Caltrans payload/media posture stays explicit and export-safe in candidate reports, source-ops detail, source-ops index, export-summary surfaces, and webcam inventory invariants
+  - aligned [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md), [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md), and [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md) with the hardened payload-shape policy and the Caltrans candidate-only addition
+- Files touched:
+  - [`app/server/src/services/camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_candidate_endpoint_report.py)
+  - [`app/server/src/services/camera_source_ops_candidate_network_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_candidate_network_summary.py)
+  - [`app/server/src/services/camera_source_ops_promotion_readiness_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_promotion_readiness_summary.py)
+  - [`app/server/src/services/camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_detail.py)
+  - [`app/server/src/services/camera_registry.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_endpoint_report.py)
+  - [`app/server/tests/test_camera_candidate_graduation_plan.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_graduation_plan.py)
+  - [`app/server/tests/test_camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_detail.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_webcam_module.py`](/C:/Users/mike/11Writer/app/server/tests/test_webcam_module.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_detail.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_export_summary.py -q`
+  - `python -m pytest app/server/tests/test_webcam_module.py -q`
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - NZTA was intentionally not promoted because its current evidence still does not pin a bounded camera payload or stable media fields
+  - Arlington was intentionally not promoted because its current evidence is still metadata-only and does not prove a stable public media path
+  - Caltrans was intentionally added as endpoint-verified only; no fixture-first sandbox connector was added in this pass
+  - Seattle stayed out of the inventory because current public evidence is still viewer-page centric rather than a pinned machine-readable inventory
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - take the strongest remaining endpoint-verified non-sandbox candidate with documented media fields, currently [`caltrans-cctv-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py), through a bounded fixture-design and sandbox-feasibility review without changing lifecycle state
+
+## 2026-05-04 23:08:30 -05:00
+
+- Task: Record the new endpoint-verified hardening and bounded candidate-expansion assignment version before implementation.
+- Assignment version read: `2026-05-04 22:59 America/Chicago`
+- What changed:
+  - re-read the repo-local next-task doc and confirmed a newer Manager assignment supersedes the prior promotion-readiness comparison pass
+  - started the new endpoint-verified hardening pass under the updated assignment version
+- Files touched:
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - repo-local next-task doc re-read before work
+- Blockers or caveats:
+  - implementation is still in progress for this assignment
+  - no source activation, validation promotion, scraping, browser automation, staging, commit, or push occurred in this checkpoint
+- Next recommended task:
+  - inspect the current endpoint-verified candidates, May/global candidate docs, and source-ops summary surfaces before deciding whether any endpoint-verified source can be promoted safely to fixture-first sandbox status
+
+## 2026-05-04 22:32:18 -05:00
+
+- Task: Build a backend-only promotion-readiness comparison package across current webcam candidates and expand the no-auth candidate network with the next safest bounded addition.
+- Assignment version read: `2026-05-04 22:11 America/Chicago`
+- What changed:
+  - added a read-only promotion-readiness comparison summary for inventory-backed webcam candidates in [`app/server/src/services/camera_source_ops_promotion_readiness_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_promotion_readiness_summary.py)
+  - wired that summary into the existing source-ops index and export-summary surfaces through [`app/server/src/services/camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_report_index.py), [`app/server/src/services/camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_summary.py), and [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - promoted [`nzta-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) from docs-only hold into an inventory-backed `candidate-endpoint-verified` source with no sandbox connector, no activation, and no scheduling
+  - reviewed additional public camera inventories from the May/global backlog and kept Queensland held plus NPRA, UDOT, and AZ511 credential-blocked because they still fail the safe no-auth bar
+  - extended backend tests so NZTA and the new promotion-readiness buckets are explicit in source-ops index, export-summary, candidate endpoint-report, and webcam inventory invariants
+  - aligned webcam docs and lifecycle policy with the new comparison surface and the NZTA candidate posture
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_promotion_readiness_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_promotion_readiness_summary.py)
+  - [`app/server/src/services/camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_report_index.py)
+  - [`app/server/src/services/camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_summary.py)
+  - [`app/server/src/services/camera_registry.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/server/tests/test_camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_endpoint_report.py)
+  - [`app/server/tests/test_webcam_module.py`](/C:/Users/mike/11Writer/app/server/tests/test_webcam_module.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q`
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - NZTA remains endpoint-verified only because the public API-family docs are stronger than the prior hold posture, but bounded camera payload/media fields are still not pinned cleanly enough for sandbox importability
+  - Queensland remains held because the official unauthenticated camera API posture still returns `401`
+  - no live network checks were added to CI, and no activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - choose one endpoint-verified non-sandbox candidate such as NZTA or Arlington for bounded payload-shape review only if a stable no-auth camera response sample can be documented without weakening the current no-scrape and no-auth guardrails
+
+## 2026-05-04 22:20:40 -05:00
+
+- Task: Record the new backend-only promotion-readiness plus candidate-expansion assignment version before starting implementation.
+- Assignment version read: `2026-05-04 22:11 America/Chicago`
+- What changed:
+  - re-read the repo-local next-task doc and confirmed a newer Manager assignment supersedes the previous candidate network coverage task
+  - started the new promotion-readiness and bounded candidate-expansion pass under the updated assignment version
+- Files touched:
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - repo-local next-task doc re-read before work
+- Blockers or caveats:
+  - implementation is still in progress for this assignment
+  - no source activation, validation promotion, scraping, browser automation, staging, commit, or push occurred in this checkpoint
+- Next recommended task:
+  - add a backend-only promotion-readiness comparison package and only expand the candidate registry if additional reviewed public no-auth camera inventories meet the existing webcam safety bar
+
+## 2026-05-04 22:05:09 -05:00
+
+- Task: Build a backend-only camera candidate network coverage and review-priority package across current webcam candidates and sandbox-importable sources, with export-safe lifecycle summaries and no activation drift.
+- Assignment version read: `2026-05-04 21:52 America/Chicago`
+- What changed:
+  - added a new backend candidate network coverage helper that groups registry-tracked webcam candidates by:
+    - primary region
+    - lifecycle state
+    - media evidence posture
+    - direct-image/viewer-link posture
+    - missing evidence count
+    - source-health expectation
+    - next safe review step
+    - review priority
+  - wired the new candidate network coverage package into the existing read-only source-ops index and export summary responses without changing route semantics or lifecycle behavior
+  - kept current source postures explicit in the new rows:
+    - sandbox-importable candidates such as Finland, NSW, Quebec, Maryland, Fingal, Baton Rouge, and Vancouver
+    - endpoint-verified non-sandbox candidate Arlington
+    - blocked/do-not-scrape candidate Minnesota
+  - preserved export-safe behavior:
+    - no endpoint URLs or tokenized fields added to the compact candidate network export lines
+    - hostile prompt-like fixture/source text remains inert data only
+    - review-priority rows do not imply activation, validation, scheduling, or scraping
+  - updated webcam governance docs so the candidate network package is described as registry-only lifecycle evidence and so held/doc-only candidates such as Queensland remain outside backend summaries until safely inventoried
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_candidate_network_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_candidate_network_summary.py)
+  - [`app/server/src/services/camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_report_index.py)
+  - [`app/server/src/services/camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_summary.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q`
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - the new backend summary covers inventory-tracked candidates only; held/doc-only research entries such as `qldtraffic-web-cameras` remain documented but intentionally excluded
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - add a backend-only promotion-readiness comparison surface that contrasts stronger sandbox-importable candidates against endpoint-verified non-sandbox or held candidates without widening activation semantics
+
+## 2026-05-04 21:55:51 -05:00
+
+- Task: Record the new camera candidate coverage/review-priority assignment version before starting the backend-only source-ops consolidation pass.
+- Assignment version read: `2026-05-04 21:52 America/Chicago`
+- What changed:
+  - re-read the repo-local next-task doc and confirmed a newer Manager assignment supersedes the previous webcam candidate-expansion task
+  - started the new coverage/review-priority pass under the updated assignment version
+- Files touched:
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - repo-local next-task doc re-read before work
+- Blockers or caveats:
+  - implementation is still in progress for this assignment
+  - no source activation, validation promotion, scraping, browser automation, staging, commit, or push occurred in this checkpoint
+- Next recommended task:
+  - extend backend source-ops coverage summaries across all current candidate and sandbox-importable webcam sources with compact export-safe review-priority rows
+
+## 2026-05-04 21:44:18 -05:00
+
+- Task: Expand the webcam source-ops candidate package by documenting more public no-auth camera inventories and adding fixture-first sandbox support for the safest two newly reviewed candidates only.
+- Assignment version read: `2026-05-04 21:17 America/Chicago`
+- What changed:
+  - prior `2026-05-02 15:47 America/Chicago` final report was still blocked rather than recoverable; the progress log had no matching completed report to append safely, so this pass proceeded from the newer Manager assignment only
+  - reviewed and documented current public no-auth evidence for:
+    - `baton-rouge-traffic-cameras`
+    - `vancouver-web-cam-url-links`
+    - `arlington-traffic-cameras`
+    - `qldtraffic-web-cameras`
+  - strengthened `baton-rouge-traffic-cameras` from weaker endpoint-only posture to `candidate-sandbox-importable` after confirming the public rows.json payload exposes WKT coordinates plus viewer-link fields
+  - added `vancouver-web-cam-url-links` as a new `candidate-sandbox-importable` source after confirming the official municipal records API exposes coordinates plus viewer-link fields
+  - added `arlington-traffic-cameras` as a new `candidate-endpoint-verified` source only, with no sandbox connector, because the public county JSON inventory remains metadata-only and does not expose stable media fields
+  - kept `qldtraffic-web-cameras` held in docs because the documented camera API family does not currently satisfy the safe public no-auth bar; the manual unauthenticated probe to `/v1/webcams` returned `401`
+  - added fixture-first sandbox connectors, settings, deterministic fixtures, registry mappings, and source-ops visibility for:
+    - `baton-rouge-traffic-cameras`
+    - `vancouver-web-cam-url-links`
+  - preserved lifecycle truth across inventory, candidate reports, graduation plans, source-ops detail/index/export surfaces, and sandbox validation reporting:
+    - no activation
+    - no scheduling
+    - no validation promotion
+    - no direct-image overclaiming
+    - hostile prompt-like fixture/source text remains inert data only
+- Files touched:
+  - [`app/server/src/services/camera_registry.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py)
+  - [`app/server/src/adapters/cameras.py`](/C:/Users/mike/11Writer/app/server/src/adapters/cameras.py)
+  - [`app/server/src/config/settings.py`](/C:/Users/mike/11Writer/app/server/src/config/settings.py)
+  - [`app/server/src/services/camera_sandbox_validation_report.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_sandbox_validation_report.py)
+  - [`app/server/data/baton_rouge_traffic_cameras_fixture.json`](/C:/Users/mike/11Writer/app/server/data/baton_rouge_traffic_cameras_fixture.json)
+  - [`app/server/data/vancouver_web_cam_url_links_fixture.json`](/C:/Users/mike/11Writer/app/server/data/vancouver_web_cam_url_links_fixture.json)
+  - [`app/server/tests/test_webcam_module.py`](/C:/Users/mike/11Writer/app/server/tests/test_webcam_module.py)
+  - [`app/server/tests/test_camera_candidate_endpoint_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_candidate_endpoint_report.py)
+  - [`app/server/tests/test_camera_sandbox_validation_report.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_sandbox_validation_report.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_detail.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_detail.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q` passed
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q` passed
+  - `python -m compileall app/server/src` passed
+  - `python scripts/alerts_ledger.py --json` passed
+- Blockers or caveats:
+  - `arlington-traffic-cameras` intentionally remains endpoint-verified non-sandbox because stable public media fields are still missing
+  - `qldtraffic-web-cameras` remains held because the current no-auth posture is not clean enough for safe onboarding
+  - all new webcam candidates remain candidate-only, inactive, unscheduled, and not validated
+  - no scraping, browser automation, CAPTCHA/login/API-key bypass, activation, scheduling, validation promotion, staging, commit, or push occurred
+- Next recommended task:
+  - either take `arlington-traffic-cameras` through a bounded media-posture review if stronger public viewer evidence appears, or pin another official no-auth viewer/direct-image candidate into the same fixture-first sandbox pattern without widening into activation work
+
+## 2026-05-04 21:27:59 -05:00
+
+- Task: Record the new webcam candidate-expansion assignment version before starting the backend-only source-ops implementation pass.
+- Assignment version read: `2026-05-04 21:17 America/Chicago`
+- What changed:
+  - recorded the active assignment version from the repo-local next-task doc before starting implementation
+  - verified that no completed `2026-05-02 15:47 America/Chicago` final report was missing from this progress log
+- Files touched:
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - repo-local next-task doc re-read before work
+- Blockers or caveats:
+  - implementation is still in progress for this assignment
+  - no source activation, validation promotion, scraping, browser automation, staging, commit, or push occurred in this checkpoint
+- Next recommended task:
+  - add the next safe public no-auth camera candidates to source-ops docs and implement fixture-first sandbox support for the safest two candidates only if the media evidence remains strong enough
+
 ## 2026-05-02 11:59:29 -05:00
 
 - Task: Add a backend-only sandbox-candidate review-burden, source-health expectation, and next-review summary across webcam sandbox-importable candidates without activation or validation drift.

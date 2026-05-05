@@ -33,6 +33,8 @@ Status note:
 | `implemented-scientific-environmental-context` | `carbon-brief`, `our-world-in-data`, `eumetsat-news`, `smithsonian-volcano-news`, `eos-news` | `data` | Keep the current bounded scientific/environmental family implemented on the shared recent-items route and shared family overview; do not reopen it as fresh intake | Science and environmental reporting are contextual awareness, not primary event truth and not a bypass around geospatial ownership | Required now: recommendation-heavy or HTML-rich text remains untrusted and fixture-covered | `medium` because overlap with domain-owned event layers must stay explicit |
 | `implemented-policy-thinktank-commentary` | `ecfr`, `atlantic-council`, `war-on-the-rocks`, `modern-war-institute`, `irregular-warfare` | `data` | Keep the current bounded policy/think-tank family implemented on the shared recent-items route and shared family overview; do not reopen it as fresh intake | Commentary and analysis are contextual awareness, not primary incident truth | Required now: prescriptive or scenario-style text remains untrusted and fixture-covered | `high` because authority confusion and interpretation drift remain high even when implemented |
 | `implemented-cyber-vendor-community` | `google-security-blog`, `bleepingcomputer`, `krebs-on-security`, `securityweek`, `dfrlab` | `data` | Keep the current bounded cyber vendor/community family implemented on the shared recent-items route and shared family overview; do not reopen it as fresh intake | Vendor, cyber-media, and research/disinformation-monitoring reporting are contextual awareness only, not official incident confirmation, exploitation proof, or required-action guidance | Required now: sensational, quoted, exploit-like, and imperative text remains untrusted and fixture-covered | `high` because dedupe, source-authority drift, and headline overclaim risk remain high |
+| `implemented-cyber-internet-platform-watch` | `trailofbits-blog`, `mozilla-hacks`, `chromium-blog`, `webdev-google`, `gitlab-releases`, `github-changelog` | `data` | Keep the current bounded cyber/internet platform-watch family implemented on the shared recent-items route, shared family overview, shared readiness/export snapshot, and shared family review surface; do not reopen it as fresh intake | Security-research, browser engineering, web-platform guidance, and release/changelog reporting are contextual awareness only, not incident confirmation, exploit proof, standards compliance truth, or required-action guidance | Required now: release-like, guidance-like, and operational-looking text remains untrusted and fixture-covered | `high` because platform-authority drift, release-note overclaim, and dedupe/provenance semantics remain easy to over-read |
+| `implemented-world-news-awareness` | `bbc-world`, `guardian-world`, `aljazeera-all`, `dw-all`, `france24-en`, `npr-world` | `data` | Keep the current bounded world-news awareness family implemented on the shared recent-items route, shared family overview, shared readiness/export snapshot, shared family review surface, and existing metadata-only inspector summaries; do not reopen it as fresh intake | Media awareness is contextual reporting only, not primary event truth, field confirmation, impact certainty, attribution proof, legal certainty, or required-action guidance | Required now: quoted, imperative, attribution-heavy, and editorially framed text remains untrusted and fixture-covered | `high` because media overclaim, attribution drift, and headline-truth confusion remain easy to over-read |
 | `implemented-internet-governance-standards-context` | `ripe-labs`, `internet-society`, `lacnic-news`, `w3c-news`, `letsencrypt` | `data` | Keep the current bounded internet governance/standards family implemented on the shared recent-items route, shared family overview, and readiness/export snapshot; do not reopen it as fresh intake | Governance, standards, registry, and certificate/operations reporting are contextual awareness only, not whole-internet truth, outage proof, standards compliance proof, or required-action guidance | Required now: policy-like, standards-like, and operational-looking text remains untrusted and fixture-covered | `high` because authority drift and compliance overclaim risk remain high |
 | `held-excluded` | discontinued, duplicate, weak-authority, or too-broad feed families | `gather` for governance, `data` only if later reopened narrowly | No implementation work until Manager AI reopens a bounded family with a clear machine-readable path | Do not widen into broad polling, article scraping, or feed bundles with weak authority semantics | If reopened later, injection-like fixture coverage is still mandatory before any parser expansion | `high` because auth, scope, or authority posture is still too weak |
 
@@ -107,6 +109,18 @@ Current additional implemented feed-family waves:
 - `krebs-on-security`
 - `securityweek`
 - `dfrlab`
+- `trailofbits-blog`
+- `mozilla-hacks`
+- `chromium-blog`
+- `webdev-google`
+- `gitlab-releases`
+- `github-changelog`
+- `bbc-world`
+- `guardian-world`
+- `aljazeera-all`
+- `dw-all`
+- `france24-en`
+- `npr-world`
 - `ripe-labs`
 - `internet-society`
 - `lacnic-news`
@@ -121,12 +135,19 @@ Current repo-local implementation truth for those waves:
 - Data AI also exposes a compact backend family review queue at `GET /api/feeds/data-ai/source-families/review-queue` for family/source issue bundling, filterable review/export bundles, and metadata-only queue lines.
 - The client inspector now has a small Data AI Source Intelligence consumer built only on those metadata-only backend surfaces.
 - The client inspector also has a bounded topic/context lens built from recent-item metadata plus family review/readiness metadata; it remains metadata-only and workflow-supporting.
+- The client inspector now also has a bounded infrastructure/status context package over `cloudflare-radar`, `netblocks`, and `apnic-blog`; it remains metadata-only, methodology-caveated, and workflow-supporting.
+- The client inspector now also has a bounded long-tail intake posture note that preserves candidate-vs-validated, provenance, duplicate-cluster, and `as_detailed_in_addition_to`-style relationship semantics without enabling broad crawling.
+- The client inspector now also has a bounded fusion/claim-integrity snapshot that composes the existing metadata-only Data AI surfaces into one export-safe domain input for future cross-domain fusion follow-on.
+- The client inspector now also has a bounded report-brief package that organizes the existing metadata-only Data AI surfaces into report-ready `observe`, `orient`, `prioritize`, and `explain` sections.
+- The client inspector now also has a bounded topic-scoped report packet that answers one active topic at a time using existing family/topic/fusion/report metadata rather than raw feed text or new feed expansion.
 - They should be treated as workflow-supporting and contract-tested, not workflow-validated.
 - They should not be treated as workflow-validated until export confirmation plus explicit smoke or manual workflow evidence are recorded.
 
 ## Recommended Next Order
 
-1. `held/deferred family reopening only if Manager narrows scope`
+1. `consumer-review-export coherence first`
+2. `fusion-snapshot or claim-integrity helper follow-on`
+3. `held/deferred family reopening only if Manager narrows scope`
 
 Why:
 
@@ -134,7 +155,11 @@ Why:
 - `carbon-brief` and the rest of the scientific/environmental family are now implemented backend-first on the shared aggregate route and family overview
 - `ecfr` and the rest of the policy/think-tank family are now implemented backend-first on the shared aggregate route and family overview
 - `google-security-blog` and the rest of the bounded cyber vendor/community family are now implemented backend-first on the shared aggregate route and family overview
+- `trailofbits-blog` and the rest of the bounded cyber/internet platform-watch family are now implemented backend-first on the shared aggregate route, family overview, readiness/export snapshot, and family review surface
 - `propublica` and `global-voices` are now implemented backend-first on the shared aggregate route, family overview, readiness/export snapshot, and family review surface
+- the fusion/claim-integrity snapshot is now implemented as a client-light metadata-only helper and should be treated as workflow-supporting consumer evidence only
+- the report-brief package is now implemented as a client-light metadata-only helper and should be treated as workflow-supporting consumer evidence only
+- the active Data lane is now metadata-only coherence and bounded helper work over already implemented feed families, not a fresh `propublica`, `global-voices`, or second world-news family build
 
 ## Prompt-Injection Guardrail
 
@@ -149,7 +174,7 @@ Every stage in this ladder keeps the same rule:
 Keep these categories out of the next active Data AI wave:
 
 - duplicate feeds that collide with already implemented domain-owned sources unless Manager AI explicitly wants a discovery-only companion
-- media/news feeds before official and infrastructure feeds are stable
+- broad media/news families beyond the implemented bounded world-news awareness slice
 - broad article scraping or linked-page extraction
 - feeds that require login, signup, CAPTCHA, or interactive browser flows
 - large bundle polling across dozens of feeds in one patch

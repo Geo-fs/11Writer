@@ -259,6 +259,21 @@ def _recommended_next_step(source_id: str, fetch_result: CameraSourceFetchResult
             "Review viewer-only feed-url posture, coordinate mapping, and source-health assumptions "
             "before any manual lifecycle advancement decision."
         )
+    if source_id == "baton-rouge-traffic-cameras" and fetch_result.cameras:
+        return (
+            "Review viewer-only media posture, Socrata row mapping, and source-health assumptions "
+            "before any manual lifecycle advancement decision."
+        )
+    if source_id == "vancouver-web-cam-url-links" and fetch_result.cameras:
+        return (
+            "Review viewer-only media posture, records-api mapping, and source-health assumptions "
+            "before any manual lifecycle advancement decision."
+        )
+    if source_id == "caltrans-cctv-cameras" and fetch_result.cameras:
+        return (
+            "Review direct-image mapping, direction-derived orientation caveats, and source-health assumptions "
+            "before any manual lifecycle advancement decision."
+        )
     if source_id == "fingal-traffic-cameras" and fetch_result.cameras:
         return (
             "Review metadata-only media posture, identifier mapping, and source-health assumptions "

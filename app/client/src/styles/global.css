@@ -258,6 +258,54 @@ a {
   gap: 10px;
 }
 
+.operator-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.operator-console-card {
+  border: 1px solid rgba(87, 211, 255, 0.22);
+}
+
+.operator-console-textarea {
+  min-height: 86px;
+  resize: vertical;
+}
+
+.operator-subcard {
+  border: 1px solid rgba(103, 167, 201, 0.18);
+}
+
+.operator-subcard__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.operator-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.operator-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.operator-queue-button {
+  width: 100%;
+  text-align: left;
+}
+
+.operator-queue-button--selected {
+  border-color: rgba(87, 211, 255, 0.55);
+  box-shadow: 0 0 0 1px rgba(87, 211, 255, 0.32) inset;
+}
+
 .marine-anomaly-panel {
   border: 1px solid rgba(87, 211, 255, 0.24);
 }
@@ -518,6 +566,12 @@ a {
   gap: 8px;
   color: var(--text-muted);
   font-size: 0.78rem;
+}
+
+@media (max-width: 1280px) {
+  .operator-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .imagery-context-panel__tags {

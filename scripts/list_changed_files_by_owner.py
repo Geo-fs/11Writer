@@ -78,13 +78,18 @@ def is_connect_tooling(path: str) -> bool:
         "app/docs/alerts.md",
         "app/docs/browser-use-agent-guidelines.md",
         "app/docs/browser-use-security-verification.md",
+        "app/docs/cross-platform-implementation-playbook.md",
         "app/docs/fusion-layer-architecture.md",
         "app/docs/intelligence-loop.md",
+        "app/docs/manager-ai-project-deficiency-review.md",
         "app/docs/prompt-injection-defense.md",
+        "app/docs/reporting-loop-package-contract.md",
         "app/docs/safety-boundaries.md",
+        "app/docs/source-fusion-reporting-input-inventory.md",
         "app/docs/spatial-intelligence-loop.md",
+        "app/server/src/services/runtime_paths.py",
         "app/server/tests/run_playwright_smoke.py",
-    } or path.startswith("scripts/") or path.startswith("app/docs/agent-next-tasks/") or path.startswith("app/docs/agent-progress/")
+    } or path.startswith("scripts/") or path.startswith("app/docs/agent-next-tasks/") or path.startswith("app/docs/agent-progress/") or path.startswith("app/client/src/features/operator/") or path == "app/client/scripts/reportingLoopPackageContractRegression.mjs"
 
 
 def is_gather_ui_integration(path: str) -> bool:
@@ -122,9 +127,12 @@ def is_gather_ui_integration(path: str) -> bool:
 
 def is_data_ai(path: str) -> bool:
     return (
-        path == "app/docs/cyber-context-sources.md"
+        path == "app/client/scripts/dataAiSourceIntelligenceRegression.mjs"
+        or path == "app/client/src/features/inspector/dataAiSourceIntelligence.ts"
+        or path == "app/docs/cyber-context-sources.md"
         or path == "app/docs/data-ai-onboarding.md"
         or path == "app/docs/data-ai-feed-rollout-ladder.md"
+        or path == "app/docs/long-tail-information-discovery-strategy.md"
         or path == "app/docs/agent-next-tasks/data-ai.md"
         or path == "app/docs/agent-progress/data-ai.md"
         or path == "app/server/src/routes/cisa_cyber_advisories.py"
@@ -154,7 +162,13 @@ def is_geospatial_environmental(path: str) -> bool:
         return True
     if path.startswith("app/docs/environmental-events"):
         return True
-    if path == "app/docs/environmental-source-family-overview.md":
+    if path in {
+        "app/docs/environmental-events-canada-cap.md",
+        "app/docs/environmental-events-dwd-cap-alerts.md",
+        "app/docs/environmental-fusion-snapshot-input.md",
+        "app/docs/environmental-source-family-overview.md",
+        "app/docs/environmental-events-canada-geomet-ogc.md",
+    }:
         return True
     if path in {
         "app/server/src/routes/weather_context.py",
@@ -167,12 +181,16 @@ def is_geospatial_environmental(path: str) -> bool:
         "app/server/src/services/bmkg_earthquakes_service.py",
         "app/server/src/services/dmi_forecast_service.py",
         "app/server/src/services/emsc_seismicportal_realtime_service.py",
+        "app/server/src/services/canada_cap_service.py",
+        "app/server/src/services/dwd_cap_alerts_service.py",
         "app/server/src/services/environmental_source_families_overview_service.py",
+        "app/server/src/services/canada_geomet_ogc_service.py",
         "app/server/src/services/gshhg_shorelines_service.py",
         "app/server/src/services/ipma_warnings_service.py",
         "app/server/src/services/ireland_wfd_service.py",
         "app/server/src/services/ga_recent_earthquakes_service.py",
         "app/server/src/services/natural_earth_physical_service.py",
+        "app/server/src/services/rgi_glacier_inventory_service.py",
         "app/server/src/services/pb2002_plate_boundaries_service.py",
         "app/server/src/services/met_eireann_forecast_service.py",
         "app/server/src/services/met_eireann_warnings_service.py",
@@ -188,10 +206,16 @@ def is_geospatial_environmental(path: str) -> bool:
         "app/server/src/routes/water_quality_context.py",
         "app/server/tests/test_bmkg_earthquakes.py",
         "app/server/tests/test_base_earth_reference_bundle.py",
+        "app/server/tests/test_base_earth_reference_review.py",
         "app/server/tests/test_bc_wildfire_datamart.py",
         "app/server/tests/test_dmi_forecast.py",
         "app/server/tests/test_emsc_seismicportal_realtime.py",
+        "app/server/tests/test_canada_cap_events.py",
+        "app/server/tests/test_dwd_cap_alerts.py",
+        "app/server/tests/test_environmental_fusion_snapshot_input.py",
         "app/server/tests/test_environmental_source_families_overview.py",
+        "app/server/tests/test_canada_environmental_context.py",
+        "app/server/tests/test_canada_geomet_ogc.py",
         "app/server/tests/test_france_georisques.py",
         "app/server/tests/test_ga_recent_earthquakes.py",
         "app/server/tests/test_geosphere_austria_warnings.py",
@@ -224,6 +248,7 @@ def is_geospatial_environmental(path: str) -> bool:
         or "bmkg" in path.lower()
         or "ga_recent_earthquakes" in path.lower()
         or "natural_earth_physical" in path.lower()
+        or "rgi_glacier_inventory" in path.lower()
         or "noaa_global_volcano" in path.lower()
         or "orfeus_eida" in path.lower()
         or "gshhg_shorelines" in path.lower()
@@ -234,11 +259,14 @@ def is_geospatial_environmental(path: str) -> bool:
         or "catchments" in path.lower()
         or "georisques" in path.lower()
         or "water_quality" in path.lower()
+        or "dwd_cap" in path.lower()
         or "cap_alert" in path.lower()
         or "geosphere_austria" in path.lower()
         or "met_eireann_forecast" in path.lower()
         or "met_eireann" in path.lower()
         or "nasa_power" in path.lower()
+        or "canada_cap" in path.lower()
+        or "canada_geomet" in path.lower()
         or "fixture-warning-" in path.lower()
     ):
         return True
@@ -248,6 +276,9 @@ def is_geospatial_environmental(path: str) -> bool:
 def is_aerospace(path: str) -> bool:
     return (
         path in {
+            "app/client/scripts/aerospacePackageCoherenceRegression.mjs",
+            "app/client/scripts/aerospaceEvidenceTimelineRegression.mjs",
+            "app/client/scripts/aerospaceFusionSnapshotInputRegression.mjs",
             "app/docs/aerospace-ourairports-reference.md",
             "app/docs/aerospace-workflow-evidence-ledger.md",
             "app/client/src/layers/AircraftLayer.tsx",
@@ -327,6 +358,8 @@ def is_features_webcam(path: str) -> bool:
         or path == "app/server/src/services/camera_service.py"
         or path == "app/server/src/services/camera_source_ops_detail.py"
         or path == "app/server/src/services/camera_source_ops_artifact_timestamps.py"
+        or path == "app/server/src/services/camera_source_ops_candidate_network_summary.py"
+        or path == "app/server/src/services/camera_source_ops_promotion_readiness_summary.py"
         or path == "app/server/src/services/camera_source_ops_export_summary.py"
         or path == "app/server/src/services/camera_source_ops_export_readiness.py"
         or path == "app/server/src/services/camera_source_ops_evidence_packets.py"
@@ -343,6 +376,8 @@ def is_features_webcam(path: str) -> bool:
         or path == "app/server/tests/test_camera_source_ops_report_index.py"
         or path == "app/server/tests/test_finland_digitraffic.py"
         or path == "app/docs/webcam-global-camera-candidate-batch-2026-05.md"
+        or path == "app/server/data/baton_rouge_traffic_cameras_fixture.json"
+        or path == "app/server/data/vancouver_web_cam_url_links_fixture.json"
         or path.startswith("app/server/data/digitraffic_weather_")
     )
 

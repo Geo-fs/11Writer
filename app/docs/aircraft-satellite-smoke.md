@@ -25,8 +25,15 @@ Read [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/ae
 This smoke checklist records prepared assertion coverage and local runner behavior.
 The ledger is where aerospace distinguishes prepared smoke from executed workflow evidence.
 
+- Assignment-wave truth:
+  the `aerospaceWorkflowValidationEvidenceSnapshot` helper was completed before the `2026-05-04 21:43 America/Chicago` manager wave, but the earlier aerospace progress entry carried the stale assignment marker `2026-05-02 15:47 America/Chicago`.
+  That progress-truth mismatch is now acknowledged explicitly and does not change the underlying implementation or smoke-coverage semantics.
+
 - TypeScript compilation: passed.
 - Production Vite build: passed.
+- Frontend lint:
+  passed on the current rerun.
+  The earlier Marine-owned lint drift is now historical rather than the active blocker.
 - Playwright smoke runner:
   the analytical aircraft/satellite workflows are covered end to end in the deterministic fixture,
   and the required restore-driven aerospace flows now gate pass/fail.
@@ -48,6 +55,13 @@ The ledger is where aerospace distinguishes prepared smoke from executed workflo
   and `aerospaceIssueExportBundle`
   and `aerospaceContextSnapshotReport`
   and `aerospaceWorkflowReadinessPackage`
+  and `aerospaceWorkflowValidationEvidenceSnapshot`
+  and `aerospaceEvidenceTimelinePackage`
+  and `aerospaceFusionSnapshotInput`
+  and `aerospaceReportBriefPackage`
+  and `aerospaceSpaceWeatherContinuityPackage`
+  and `aerospaceVaacAdvisoryReportPackage`
+  and `aerospacePackageCoherence`
   in the aerospace export path.
   Local execution note for 2026-04-30:
   the aerospace smoke harness on this Windows host did not reach browser assertions because Playwright Chromium launch failed up front with `spawn EPERM`;
@@ -206,6 +220,59 @@ The ledger is where aerospace distinguishes prepared smoke from executed workflo
   The package preserves source ids, source modes, source health states, evidence bases, prepared-vs-executed validation rows, missing-evidence rows, guardrail wording, export lines, and caveats.
   This helper is workflow-accounting only.
   It does not imply source certification, airport/runway availability truth, severity, operational consequence, failure proof, target behavior evidence, threat, causation, or action recommendation.
+- Aerospace workflow-validation evidence snapshot helper:
+  snapshot/export metadata now also preserves an `aerospaceWorkflowValidationEvidenceSnapshot` package that composes
+  the selected-target report package,
+  the context review queue and export bundle,
+  the workflow-readiness package,
+  and OurAirports reference context
+  into one compact validation-accounting summary.
+  The snapshot preserves validation posture, prepared/executed smoke status, selected-target report readiness, missing-evidence count, source ids, source modes, source health states, evidence bases, and guardrail wording.
+  It keeps prepared smoke separate from executed smoke and does not imply source certainty, airport/runway availability, target behavior, failure proof, route impact, safety conclusion, causation, or action recommendation.
+- Aerospace evidence-timeline/export package helper:
+  snapshot/export metadata now also preserves an `aerospaceEvidenceTimelinePackage` package that summarizes source-backed selected-target context, context-availability accounting, workflow-validation posture, and missing-evidence rows as export-safe timeline entries.
+  The package preserves source ids, source modes, source health states, evidence bases, observed/source timestamps where available, and explicit separation between observed, forecast, archive, reference, anonymous-comparison, advisory/source-reported, and validation entries.
+  Timeline order is accounting/review only.
+  It must not be interpreted as causation, intent, target behavior, failure proof, route consequence, safety conclusion, or action recommendation.
+- Aerospace fusion-snapshot input helper:
+  snapshot/export metadata now also preserves an `aerospaceFusionSnapshotInput` package that composes the existing aerospace package stack into one stable domain input for a future cross-domain Source Fusion Snapshot.
+  It preserves selected-target summary lines, active export-profile label, source ids, source modes, source health states, evidence bases, validation posture, export-readiness posture, attention/review counts, compact source-summary lines, and explicit does-not-prove lines.
+  It keeps observed, forecast, advisory/source-reported, archive, reference, anonymous-comparison, derived, and validation context distinct rather than collapsing them into one mixed severity or behavior surface.
+  This helper is metadata/accounting input only and does not replace the existing aerospace review/export/timeline packages.
+- Aerospace report-brief package helper:
+  snapshot/export metadata now also preserves an `aerospaceReportBriefPackage` package that turns the existing fusion input into bounded report-ready sections:
+  `observe`,
+  `orient`,
+  `prioritize`,
+  and `explain`.
+  It preserves selected-target label, active profile, validation posture, export-readiness posture, attention counts, distinct context-class coverage, does-not-prove lines, and compact report-safe lines.
+  It remains metadata/accounting only and does not replace the underlying aerospace review/export/timeline packages or turn those lines into action guidance.
+- Aerospace space-weather continuity package helper:
+  snapshot/export metadata now also preserves an `aerospaceSpaceWeatherContinuityPackage` package that composes
+  `aerospaceCurrentArchiveContext`,
+  `geomagnetismContext`,
+  and `aerospaceReportBriefPackage`
+  into one bounded continuity layer.
+  It preserves current SWPC advisory source ids and freshness labels, archival NCEI source ids and coverage labels, observed USGS geomagnetism source ids and timing labels, source modes, source health states, evidence bases, caveats, and explicit does-not-prove lines.
+  It remains metadata/accounting only.
+  It keeps current advisory, archive metadata, and observed geomagnetism distinct and does not imply GPS, radio, satellite, aircraft, or operational failure.
+- Aerospace VAAC advisory report package helper:
+  snapshot/export metadata now also preserves an `aerospaceVaacAdvisoryReportPackage` package that turns the existing `vaacContext` into bounded advisory rows for Washington, Anchorage, and Tokyo.
+  It preserves advisory source ids, source mode and health, evidence basis, advisory timestamps, affected-area or summary posture, caveats, and does-not-prove lines.
+  It remains advisory/source-reported only and does not imply route impact, aircraft exposure, ash-plume precision beyond the source, operational consequence, or action recommendation.
+- Aerospace package-coherence helper:
+  snapshot/export metadata now also preserves an `aerospacePackageCoherence` package that checks parity across the existing
+  context-review queue,
+  context-review export bundle,
+  issue export bundle,
+  selected-target snapshot/report package,
+  workflow-readiness package,
+  workflow-validation evidence snapshot,
+  and evidence timeline package.
+  It preserves source-id, source-mode, source-health, evidence-basis, missing-evidence-count, review-count, metadata-key-coverage, and guardrail parity findings.
+  This helper is intentionally non-duplicative:
+  it checks the existing aerospace packages instead of creating another user-facing review surface.
+  It remains metadata/accounting only and does not imply severity, source certification, target behavior, failure proof, route consequence, or action recommendation.
 - Aerospace context-review queue helper:
   snapshot/export metadata now also preserves an `aerospaceContextReviewQueue` summary that composes
   context-availability rows,

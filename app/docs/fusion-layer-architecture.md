@@ -23,6 +23,8 @@ The fusion layer exists to support the [Spatial Intelligence Loop](C:/Users/mike
 
 11Writer is not just a globe renderer. The globe, inspector, panels, source workflows, export metadata, and review queues are all surfaces on top of the same fusion problem: how to keep many source families visible together without faking certainty or blending incompatible semantics.
 
+The long-term product direction is an evidence-aware reporting system over world events, not just persistent monitoring. The fusion layer should make it possible to answer user questions with thorough source-backed reports while keeping explicit boundaries between observed facts, derived context, scored prioritization, and unresolved uncertainty.
+
 ## Core Object Model
 
 These are conceptual platform objects. They do not require a single implementation module yet, but future connectors and UI unification should map cleanly to them.

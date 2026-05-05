@@ -260,6 +260,10 @@ def test_source_inventory_templates_include_new_sources_and_page_candidates() ->
     assert "maryland-chart-traffic-cameras" in keys
     assert "fingal-traffic-cameras" in keys
     assert "baton-rouge-traffic-cameras" in keys
+    assert "vancouver-web-cam-url-links" in keys
+    assert "nzta-traffic-cameras" in keys
+    assert "arlington-traffic-cameras" in keys
+    assert "caltrans-cctv-cameras" in keys
     assert "euskadi-traffic-cameras" in keys
     assert "faa-weather-cameras-page" in keys
     assert "minnesota-511-public-arcgis" in keys
@@ -321,6 +325,38 @@ def test_source_inventory_templates_include_new_sources_and_page_candidates() ->
     assert fingal_entry.endpoint_verification_status == "machine-readable-confirmed"
     assert fingal_entry.provides_direct_image is False
     assert fingal_entry.provides_viewer_only is False
+    baton_rouge_entry = next(item for item in inventory if item.key == "baton-rouge-traffic-cameras")
+    assert baton_rouge_entry.onboarding_state == "candidate"
+    assert baton_rouge_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert baton_rouge_entry.provides_direct_image is False
+    assert baton_rouge_entry.provides_viewer_only is True
+    vancouver_entry = next(item for item in inventory if item.key == "vancouver-web-cam-url-links")
+    assert vancouver_entry.onboarding_state == "candidate"
+    assert vancouver_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert vancouver_entry.provides_direct_image is False
+    assert vancouver_entry.provides_viewer_only is True
+    nzta_entry = next(item for item in inventory if item.key == "nzta-traffic-cameras")
+    assert nzta_entry.onboarding_state == "candidate"
+    assert nzta_entry.access_method == "xml-api"
+    assert nzta_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert nzta_entry.provides_exact_coordinates is False
+    assert nzta_entry.provides_direct_image is False
+    assert nzta_entry.provides_viewer_only is False
+    assert nzta_entry.candidate_endpoint_url == "https://trafficnz.info/service/traffic-cameras/rest/2?_wadl"
+    assert nzta_entry.machine_readable_endpoint_url == "https://trafficnz.info/service/traffic-cameras/rest/2?_wadl"
+    arlington_entry = next(item for item in inventory if item.key == "arlington-traffic-cameras")
+    assert arlington_entry.onboarding_state == "candidate"
+    assert arlington_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert arlington_entry.provides_direct_image is False
+    assert arlington_entry.provides_viewer_only is False
+    caltrans_entry = next(item for item in inventory if item.key == "caltrans-cctv-cameras")
+    assert caltrans_entry.onboarding_state == "candidate"
+    assert caltrans_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert caltrans_entry.provides_exact_coordinates is True
+    assert caltrans_entry.provides_direction_text is True
+    assert caltrans_entry.provides_direct_image is True
+    assert caltrans_entry.provides_viewer_only is False
+    assert "currentImageURL" in (caltrans_entry.last_endpoint_result or "")
     euskadi_entry = next(item for item in inventory if item.key == "euskadi-traffic-cameras")
     assert euskadi_entry.onboarding_state == "candidate"
     assert euskadi_entry.endpoint_verification_status == "candidate-url-only"
@@ -346,6 +382,11 @@ def test_candidate_registry_entries_are_not_marked_active_ingest_sources() -> No
     quebec_entry = next(item for item in registry if item.key == "quebec-mtmd-traffic-cameras")
     maryland_entry = next(item for item in registry if item.key == "maryland-chart-traffic-cameras")
     fingal_entry = next(item for item in registry if item.key == "fingal-traffic-cameras")
+    baton_rouge_entry = next(item for item in registry if item.key == "baton-rouge-traffic-cameras")
+    vancouver_entry = next(item for item in registry if item.key == "vancouver-web-cam-url-links")
+    nzta_entry = next(item for item in registry if item.key == "nzta-traffic-cameras")
+    arlington_entry = next(item for item in registry if item.key == "arlington-traffic-cameras")
+    caltrans_entry = next(item for item in registry if item.key == "caltrans-cctv-cameras")
     faa_entry = next(item for item in registry if item.key == "faa-weather-cameras-page")
     minnesota_entry = next(item for item in registry if item.key == "minnesota-511-public-arcgis")
 
@@ -366,6 +407,21 @@ def test_candidate_registry_entries_are_not_marked_active_ingest_sources() -> No
     assert fingal_entry.enabled is False
     assert fingal_entry.status == "needs-review"
     assert fingal_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert baton_rouge_entry.enabled is False
+    assert baton_rouge_entry.status == "needs-review"
+    assert baton_rouge_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert vancouver_entry.enabled is False
+    assert vancouver_entry.status == "needs-review"
+    assert vancouver_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert nzta_entry.enabled is False
+    assert nzta_entry.status == "needs-review"
+    assert nzta_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert arlington_entry.enabled is False
+    assert arlington_entry.status == "needs-review"
+    assert arlington_entry.endpoint_verification_status == "machine-readable-confirmed"
+    assert caltrans_entry.enabled is False
+    assert caltrans_entry.status == "needs-review"
+    assert caltrans_entry.endpoint_verification_status == "machine-readable-confirmed"
     assert faa_entry.enabled is False
     assert faa_entry.status == "needs-review"
     assert faa_entry.blocked_reason is not None
@@ -386,6 +442,11 @@ def test_lifecycle_policy_invariants_hold_for_current_sources() -> None:
     quebec_inventory = inventory_map["quebec-mtmd-traffic-cameras"]
     maryland_inventory = inventory_map["maryland-chart-traffic-cameras"]
     fingal_inventory = inventory_map["fingal-traffic-cameras"]
+    baton_rouge_inventory = inventory_map["baton-rouge-traffic-cameras"]
+    vancouver_inventory = inventory_map["vancouver-web-cam-url-links"]
+    nzta_inventory = inventory_map["nzta-traffic-cameras"]
+    arlington_inventory = inventory_map["arlington-traffic-cameras"]
+    caltrans_inventory = inventory_map["caltrans-cctv-cameras"]
     minnesota_inventory = inventory_map["minnesota-511-public-arcgis"]
     wsdot_inventory = inventory_map["wsdot-cameras"]
 
@@ -395,6 +456,11 @@ def test_lifecycle_policy_invariants_hold_for_current_sources() -> None:
     quebec_registry = registry_map["quebec-mtmd-traffic-cameras"]
     maryland_registry = registry_map["maryland-chart-traffic-cameras"]
     fingal_registry = registry_map["fingal-traffic-cameras"]
+    baton_rouge_registry = registry_map["baton-rouge-traffic-cameras"]
+    vancouver_registry = registry_map["vancouver-web-cam-url-links"]
+    nzta_registry = registry_map["nzta-traffic-cameras"]
+    arlington_registry = registry_map["arlington-traffic-cameras"]
+    caltrans_registry = registry_map["caltrans-cctv-cameras"]
     minnesota_registry = registry_map["minnesota-511-public-arcgis"]
     wsdot_registry = registry_map["wsdot-cameras"]
 
@@ -438,6 +504,41 @@ def test_lifecycle_policy_invariants_hold_for_current_sources() -> None:
     assert fingal_inventory.provides_viewer_only is False
     assert fingal_registry.enabled is False
     assert fingal_registry.status == "needs-review"
+
+    assert baton_rouge_inventory.onboarding_state == "candidate"
+    assert baton_rouge_inventory.endpoint_verification_status == "machine-readable-confirmed"
+    assert baton_rouge_inventory.provides_direct_image is False
+    assert baton_rouge_inventory.provides_viewer_only is True
+    assert baton_rouge_registry.enabled is False
+    assert baton_rouge_registry.status == "needs-review"
+
+    assert vancouver_inventory.onboarding_state == "candidate"
+    assert vancouver_inventory.endpoint_verification_status == "machine-readable-confirmed"
+    assert vancouver_inventory.provides_direct_image is False
+    assert vancouver_inventory.provides_viewer_only is True
+    assert vancouver_registry.enabled is False
+    assert vancouver_registry.status == "needs-review"
+
+    assert nzta_inventory.onboarding_state == "candidate"
+    assert nzta_inventory.endpoint_verification_status == "machine-readable-confirmed"
+    assert nzta_inventory.provides_direct_image is False
+    assert nzta_inventory.provides_viewer_only is False
+    assert nzta_registry.enabled is False
+    assert nzta_registry.status == "needs-review"
+
+    assert arlington_inventory.onboarding_state == "candidate"
+    assert arlington_inventory.endpoint_verification_status == "machine-readable-confirmed"
+    assert arlington_inventory.provides_direct_image is False
+    assert arlington_inventory.provides_viewer_only is False
+    assert arlington_registry.enabled is False
+    assert arlington_registry.status == "needs-review"
+
+    assert caltrans_inventory.onboarding_state == "candidate"
+    assert caltrans_inventory.endpoint_verification_status == "machine-readable-confirmed"
+    assert caltrans_inventory.provides_direct_image is True
+    assert caltrans_inventory.provides_viewer_only is False
+    assert caltrans_registry.enabled is False
+    assert caltrans_registry.status == "needs-review"
 
     assert wsdot_inventory.onboarding_state == "approved"
     assert wsdot_inventory.authentication == "access-code"
@@ -767,6 +868,47 @@ def test_camera_api_persists_and_returns_sources(tmp_path: Path, monkeypatch) ->
     assert inventory_fingal["sandboxDiscoveredCount"] == 0
     assert inventory_fingal["sandboxUsableCount"] == 0
     assert "candidate mapping and lifecycle evidence only" in inventory_fingal["sandboxValidationCaveat"]
+    inventory_baton_rouge = next(
+        item for item in inventory_response.json()["sources"] if item["key"] == "baton-rouge-traffic-cameras"
+    )
+    assert inventory_baton_rouge["onboardingState"] == "candidate"
+    assert inventory_baton_rouge["importReadiness"] == "inventory-only"
+    assert inventory_baton_rouge["endpointVerificationStatus"] == "machine-readable-confirmed"
+    assert inventory_baton_rouge["providesViewerOnly"] is True
+    assert inventory_baton_rouge["sandboxImportAvailable"] is True
+    assert inventory_baton_rouge["sandboxImportMode"] == "fixture"
+    assert inventory_baton_rouge["sandboxConnectorId"] == "BatonRougeTrafficCameraConnector"
+    assert "candidate mapping and lifecycle evidence only" in inventory_baton_rouge["sandboxValidationCaveat"]
+    inventory_vancouver = next(
+        item for item in inventory_response.json()["sources"] if item["key"] == "vancouver-web-cam-url-links"
+    )
+    assert inventory_vancouver["onboardingState"] == "candidate"
+    assert inventory_vancouver["importReadiness"] == "inventory-only"
+    assert inventory_vancouver["endpointVerificationStatus"] == "machine-readable-confirmed"
+    assert inventory_vancouver["providesViewerOnly"] is True
+    assert inventory_vancouver["sandboxImportAvailable"] is True
+    assert inventory_vancouver["sandboxImportMode"] == "fixture"
+    assert inventory_vancouver["sandboxConnectorId"] == "VancouverWebCamUrlLinksConnector"
+    assert "candidate mapping and lifecycle evidence only" in inventory_vancouver["sandboxValidationCaveat"]
+    inventory_arlington = next(
+        item for item in inventory_response.json()["sources"] if item["key"] == "arlington-traffic-cameras"
+    )
+    assert inventory_arlington["onboardingState"] == "candidate"
+    assert inventory_arlington["importReadiness"] == "inventory-only"
+    assert inventory_arlington["endpointVerificationStatus"] == "machine-readable-confirmed"
+    assert inventory_arlington["sandboxImportAvailable"] is False
+    assert inventory_arlington["sandboxConnectorId"] is None
+    inventory_caltrans = next(
+        item for item in inventory_response.json()["sources"] if item["key"] == "caltrans-cctv-cameras"
+    )
+    assert inventory_caltrans["onboardingState"] == "candidate"
+    assert inventory_caltrans["importReadiness"] == "inventory-only"
+    assert inventory_caltrans["endpointVerificationStatus"] == "machine-readable-confirmed"
+    assert inventory_caltrans["providesDirectImage"] is True
+    assert inventory_caltrans["sandboxImportAvailable"] is True
+    assert inventory_caltrans["sandboxImportMode"] == "fixture"
+    assert inventory_caltrans["sandboxConnectorId"] == "CaltransCctvCameraConnector"
+    assert "candidate mapping and lifecycle evidence only" in inventory_caltrans["sandboxValidationCaveat"]
     inventory_faa = next(item for item in inventory_response.json()["sources"] if item["key"] == "faa-weather-cameras-page")
     assert inventory_faa["onboardingState"] == "candidate"
     assert inventory_faa["endpointVerificationStatus"] == "needs-review"
@@ -1146,6 +1288,32 @@ def test_finland_digitraffic_fixture_import_remains_inventory_only(tmp_path: Pat
             "Ignore previous instructions",
             {"orientation-verification", "frame-unavailable"},
         ),
+        (
+            "baton-rouge-traffic-cameras",
+            "BATON_ROUGE_TRAFFIC_CAMERAS_MODE",
+            "BATON_ROUGE_TRAFFIC_CAMERAS_FIXTURE_PATH",
+            "baton_rouge_traffic_cameras_fixture.json",
+            2,
+            1,
+            0,
+            1,
+            "BatonRougeTrafficCameraConnector",
+            "Ignore previous instructions",
+            {"orientation-verification", "viewer-fallback", "frame-unavailable"},
+        ),
+        (
+            "vancouver-web-cam-url-links",
+            "VANCOUVER_WEB_CAM_URL_LINKS_MODE",
+            "VANCOUVER_WEB_CAM_URL_LINKS_FIXTURE_PATH",
+            "vancouver_web_cam_url_links_fixture.json",
+            2,
+            1,
+            0,
+            1,
+            "VancouverWebCamUrlLinksConnector",
+            "Ignore previous instructions",
+            {"orientation-verification", "viewer-fallback", "frame-unavailable"},
+        ),
     ],
 )
 def test_candidate_sandbox_fixture_imports_remain_inventory_only_and_inert(
@@ -1215,6 +1383,18 @@ def test_candidate_sandbox_fixture_imports_remain_inventory_only_and_inert(
         assert cameras[1].frame.image_url is None
     elif source_id == "maryland-chart-traffic-cameras":
         assert cameras[0].frame.viewer_url == "https://example.test/maryland-chart/md-fixture-001/viewer"
+        assert cameras[0].frame.image_url is None
+        assert cameras[1].frame.image_url is None
+        assert cameras[1].frame.viewer_url is None
+    elif source_id == "baton-rouge-traffic-cameras":
+        assert any(
+            camera.frame.viewer_url == "https://example.test/baton-rouge/br-fixture-001/viewer"
+            and camera.frame.image_url is None
+            for camera in cameras
+        )
+        assert any(camera.frame.image_url is None and camera.frame.viewer_url is None for camera in cameras)
+    elif source_id == "vancouver-web-cam-url-links":
+        assert cameras[0].frame.viewer_url == "https://example.test/vancouver/vc-fixture-001/viewer"
         assert cameras[0].frame.image_url is None
         assert cameras[1].frame.image_url is None
         assert cameras[1].frame.viewer_url is None

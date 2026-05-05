@@ -49,3 +49,12 @@ Supported query params:
 - Not live land/water status.
 - Feature bbox summaries are generalized reference metadata, not precise geometry for operational decision-making.
 - This first implementation stays on one theme only and does not broaden into the full Natural Earth catalog.
+
+## Follow-On Backend Package
+
+The bounded base-earth fusion follow-on now also exposes:
+
+- `GET /api/context/environmental/base-earth-export-package`
+- `GET /api/context/environmental/base-earth-review-queue`
+
+Within that package, Natural Earth stays static/reference only and keeps generalized geometry posture visible instead of being treated as live shoreline or hazard truth.

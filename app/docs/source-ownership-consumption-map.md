@@ -28,6 +28,7 @@ Scope:
 - [source-candidate-to-brief-routing-matrix.md](/C:/Users/mike/11Writer/app/docs/source-candidate-to-brief-routing-matrix.md)
 - [source-quick-assign-packets-may-2026.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-may-2026.md)
 - [phase2-next-biggest-wins-packet.md](/C:/Users/mike/11Writer/app/docs/phase2-next-biggest-wins-packet.md)
+- [reporting-desk-phase2-roadmap.md](/C:/Users/mike/11Writer/app/docs/reporting-desk-phase2-roadmap.md)
 
 ## Source Discovery / Shared Memory Addendum
 
@@ -79,7 +80,15 @@ Repo-local status note:
 - the Data AI public-institution/world-context wave is also implemented backend-first on the shared recent-items route.
 - the shared `/api/feeds/data-ai/source-families/review` helper is review metadata only and must not be treated as source truth or workflow-validation proof.
 - the shared `/api/feeds/data-ai/source-families/review-queue` helper is review metadata only and must not be treated as source truth, source scoring, or workflow-validation proof.
-- use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) for the next grouped expansion instead of reopening those implemented waves as fresh source-creation work.
+- use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) for the next bounded helper/coherence lane or any later narrow family reopening instead of reopening those implemented waves as fresh source-creation work.
+- `propublica` and `global-voices` are already implemented backend-first and should not be routed again as fresh next-wave Data work.
+- the next larger Data wave is one bounded topic-scoped report packet on top of the completed source-intelligence, fusion, report-brief, and world-news-awareness stack; do not reopen older implemented families as fresh work.
+
+Runtime-boundary note:
+
+- Source Discovery `structure-scan`, knowledge-node clustering/backfill, review-claim import/apply, and shared source-memory surfaces remain candidate/review/runtime evidence only.
+- Wave LLM provider management, BYOK/runtime controls, and execution history remain runtime-boundary and review-only surfaces.
+- Media/OCR enrichment remains partially scaffolded and derived-evidence-only until narrower provenance/review gates are satisfied.
 
 May 2026 camera-candidate note:
 
@@ -97,7 +106,7 @@ For compact Manager-facing handoffs on the strongest Batch 6 candidates, use [so
 | `geosphere-austria-warnings` | `geospatial` | `connect`, `marine` | current warning feed only | Shared warning-context route is appropriate if implemented; keep severity semantics source-owned and advisory-only | `medium` |
 | `geosphere-austria-datahub` | `geospatial` | `connect` | one pinned dataset family only | Keep local until one exact dataset endpoint is pinned and the contract stabilizes | `low` |
 | `poland-imgw-public-data` | `geospatial` | `marine`, `connect` | one bounded weather or hydrology file family only | Keep local first; repository-style sprawl is the main risk | `medium` |
-| `netherlands-rws-waterinfo` | `marine` | `geospatial`, `connect` | one bounded station-metadata plus latest water-level slice only | Marine should own raw WaterWebservices hydrology fetching for the narrow approved slice and the next marine-local consumer/helper follow-on; geospatial should consume normalized context only | `medium` |
+| `netherlands-rws-waterinfo` | `marine` | `geospatial`, `connect` | one bounded station-metadata plus latest water-level slice only | Marine should own raw WaterWebservices hydrology fetching for the narrow approved slice plus the bounded helper/export consumer path already recorded in progress; geospatial should consume normalized context only | `medium` |
 | `nasa-power-meteorology-solar` | `geospatial` | `connect`, `marine` | one point-based meteorology or solar context query only | Shared context route is fine if modeled-context caveats survive unchanged | `low` |
 | `first-epss` | `data` | `gather`, `connect` | one CVE-score lookup only | Keep Data-owned and bounded; do not let consumers fork their own cyber-risk scoring fetchers | `low` |
 | `nist-nvd-cve` | `data` | `gather`, `connect` | one bounded CVE detail or recent-CVE slice only | Shared Data-owned context route is fine if no-key lower-rate assumptions are preserved | `low` |
@@ -111,12 +120,20 @@ For compact Manager-facing handoffs on the strongest Batch 6 candidates, use [so
 
 ## Batch 5 Ownership Addendum
 
-These mappings are classification-only ownership recommendations for the latest Batch 5 candidates. They do not imply implementation has started.
+These mappings are classification-only ownership recommendations for the latest Batch 5 candidates. Current repo-local status truth overrides the original intake wording where later implementation has landed.
 
 Repo-local status note:
 
 - `noaa-ncei-space-weather-portal` now has an implemented aerospace archive/context slice plus bounded consumer/export path.
 - Keep ownership with `aerospace`, but treat the next handoff as workflow hardening rather than raw connector creation.
+- `dmi-forecast-aws`, `met-eireann-forecast`, `met-eireann-warnings`, `portugal-ipma-open-data`, `bc-wildfire-datamart`, and `usgs-geomagnetism` now also have backend-first implemented slices in repo code.
+- Keep ownership with `geospatial`, but treat their next handoffs as bounded consumer/workflow follow-ons rather than raw connector creation.
+
+Feature occupancy note:
+
+- `Evidence Timeline`, `Review Packet Export`, `Source Candidate Intake Queue`, `Source Health Console`, and `Attention Queue Unifier` are already partially occupied across domain-local helper/export/review packages.
+- Future ownership should target cross-domain normalization and composition only.
+- `Source Fusion Snapshot` remains open globally, but should compose those existing domain packages instead of replacing them.
 
 | Source id | Primary owner agent | Secondary consumer agents | First implementation slice | Shared-or-local guidance | Collision risk |
 | --- | --- | --- | --- | --- | --- |
@@ -136,6 +153,8 @@ Repo-local status note:
 
 - `bmkg-earthquakes` and `ga-recent-earthquakes` now have backend-first implemented slices in repo code.
 - Keep ownership with `geospatial`, but treat the next handoff as consumer/validation follow-on work rather than raw connector creation.
+- `environmentalFusionSnapshotInput` now exists as a backend-first geospatial reporting input over dynamic environmental, Canada, base-earth, and glacier context.
+- keep ownership with `geospatial`, but treat the next larger handoff as `belgium-rmi-warnings` plus bounded environmental reporting integration rather than another duplicate report-helper lane.
 
 | Source id | Primary owner agent | Secondary consumer agents | First implementation slice | Shared-or-local guidance | Collision risk |
 | --- | --- | --- | --- | --- | --- |

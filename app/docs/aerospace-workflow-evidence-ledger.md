@@ -9,6 +9,17 @@ client lint/build evidence,
 prepared smoke assertions,
 and executed smoke evidence are not interchangeable.
 
+## Current Local Posture
+
+- Current assignment-wave acknowledgment:
+  the `aerospaceWorkflowValidationEvidenceSnapshot` implementation was already completed before the `2026-05-04 21:43 America/Chicago` manager wave, but an older progress entry recorded it under the stale `2026-05-02 15:47 America/Chicago` assignment marker.
+  Aerospace progress truth now explicitly acknowledges that stale-marker mismatch without changing the underlying implementation history.
+- Current local validation truth:
+  backend aerospace contract suites passed,
+  frontend build passed,
+  frontend lint passed on the current rerun and the previously reported Marine-owned drift is no longer the active blocker,
+  and executed aerospace smoke remains blocked on this Windows host before app assertions because Chromium launch fails with `spawn EPERM`.
+
 ## Status Terms
 
 - `executed`:
@@ -39,11 +50,18 @@ It is not a source-certification, severity, readiness-for-action, or operational
   `aerospaceContextGapQueue`
   `aerospaceContextReviewQueue`
   `aerospaceContextReviewExportBundle`
+  `aerospaceEvidenceTimelinePackage`
+  `aerospaceFusionSnapshotInput`
+  `aerospaceReportBriefPackage`
+  `aerospaceSpaceWeatherContinuityPackage`
+  `aerospaceVaacAdvisoryReportPackage`
+  `aerospacePackageCoherence`
   `aerospaceCurrentArchiveContext`
   `aerospaceExportCoherence`
   `aerospaceIssueExportBundle`
   `aerospaceContextSnapshotReport`
   `aerospaceWorkflowReadinessPackage`
+  `aerospaceWorkflowValidationEvidenceSnapshot`
 - Meaning:
   these helpers exist in the client codebase and are typechecked by the current frontend build.
 - Caveat:
@@ -59,11 +77,18 @@ It is not a source-certification, severity, readiness-for-action, or operational
   `aerospaceContextGapQueue`
   `aerospaceContextReviewQueue`
   `aerospaceContextReviewExportBundle`
+  `aerospaceEvidenceTimelinePackage`
+  `aerospaceFusionSnapshotInput`
+  `aerospaceReportBriefPackage`
+  `aerospaceSpaceWeatherContinuityPackage`
+  `aerospaceVaacAdvisoryReportPackage`
+  `aerospacePackageCoherence`
   `aerospaceCurrentArchiveContext`
   `aerospaceExportCoherence`
   `aerospaceIssueExportBundle`
   `aerospaceContextSnapshotReport`
   `aerospaceWorkflowReadinessPackage`
+  `aerospaceWorkflowValidationEvidenceSnapshot`
 - Meaning:
   the current frontend export path preserves these machine-readable metadata keys.
 - Caveat:
@@ -108,11 +133,18 @@ It is not a source-certification, severity, readiness-for-action, or operational
   `aerospaceContextGapQueue`
   `aerospaceContextReviewQueue`
   `aerospaceContextReviewExportBundle`
+  `aerospaceEvidenceTimelinePackage`
+  `aerospaceFusionSnapshotInput`
+  `aerospaceReportBriefPackage`
+  `aerospaceSpaceWeatherContinuityPackage`
+  `aerospaceVaacAdvisoryReportPackage`
+  `aerospacePackageCoherence`
   `aerospaceCurrentArchiveContext`
   `aerospaceExportCoherence`
   `aerospaceIssueExportBundle`
   `aerospaceContextSnapshotReport`
   `aerospaceWorkflowReadinessPackage`
+  `aerospaceWorkflowValidationEvidenceSnapshot`
 - Meaning:
   the smoke runner is ready to assert these metadata surfaces when Chromium launches and reaches app assertions.
 - Caveat:

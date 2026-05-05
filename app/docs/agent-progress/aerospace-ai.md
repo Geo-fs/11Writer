@@ -1,5 +1,494 @@
 # Aerospace AI Progress
 
+## 2026-05-05 10:43 America/Chicago
+
+- Assignment version:
+  2026-05-05 10:22 America/Chicago
+- Task:
+  Build a bounded aerospace space-weather continuity package on top of the existing aerospace reporting stack without adding a new large panel.
+- What changed:
+  Added the new pure helper [aerospaceSpaceWeatherContinuityPackage.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceSpaceWeatherContinuityPackage.ts).
+  This helper builds on existing aerospace reporting surfaces only:
+  `aerospaceCurrentArchiveContext`,
+  `geomagnetismContext`,
+  and `aerospaceReportBriefPackage`.
+  It does not create a new source and it does not add a new large panel.
+  The package preserves:
+  current SWPC advisory source ids and freshness labels,
+  archival NCEI source ids and coverage labels,
+  observed USGS geomagnetism source ids and timing labels,
+  source modes,
+  source health states,
+  evidence bases,
+  continuity posture,
+  caveats,
+  and explicit does-not-prove lines.
+  Current advisory context, archive metadata, and observed geomagnetism remain explicitly distinct and the guardrails stay non-causal and non-failure-claiming.
+  Wired the package into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) as snapshot/export metadata under `aerospaceSpaceWeatherContinuityPackage` and into [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts) as a compact `space-weather-continuity-package` footer section plus export-profile metadata-key coverage.
+  Added the focused regression [aerospaceSpaceWeatherContinuityPackageRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/aerospaceSpaceWeatherContinuityPackageRegression.mjs) and exposed it in [package.json](/C:/Users/mike/11Writer/app/client/package.json).
+  Extended prepared aerospace smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so aircraft and satellite export-path checks now require `aerospaceSpaceWeatherContinuityPackage`, observed evidence-basis preservation, does-not-prove lines, and the distinct-source guardrail.
+  Updated [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts), [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md), [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md), and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) so the package is documented as bounded space-weather continuity accounting rather than a new analyst-facing surface.
+- Files touched:
+  [aerospaceSpaceWeatherContinuityPackage.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceSpaceWeatherContinuityPackage.ts)
+  [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [aerospaceSpaceWeatherContinuityPackageRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/aerospaceSpaceWeatherContinuityPackageRegression.mjs)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [package.json](/C:/Users/mike/11Writer/app/client/package.json)
+  [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  From `app/client`, `cmd /c node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceSpaceWeatherContinuityPackageRegression.mjs` passed and reported the expected package id, continuity posture, source ids, current freshness label, observed timing label, and archive coverage label.
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  From `app/client`, `cmd /c npm.cmd run lint` passed.
+  From `app/client`, `cmd /c npm.cmd run build` passed.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+  `python scripts/alerts_ledger.py --json` passed and currently reports `5` open low-priority alert lines owned by Atlas AI and Manager AI.
+- Blockers or caveats:
+  Prepared smoke remains prepared smoke and is still distinct from executed workflow evidence.
+  The current active blocker is still the same host-level Windows Chromium launch permission boundary before Playwright reaches app assertions.
+  The new space-weather continuity package is metadata/accounting only.
+  It does not replace existing SWPC, NCEI archive, geomagnetism, current/archive separation, fusion-input, or report-brief helpers and does not imply GPS/radio/satellite/aircraft failure, outage, route impact, target behavior, causation, safety conclusion, or action recommendation.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Chromium launch is permitted so the prepared `aerospaceSpaceWeatherContinuityPackage` assertions can move from prepared coverage to executed workflow evidence if they pass.
+
+## 2026-05-05 10:08 America/Chicago
+
+- Assignment version:
+  2026-05-05 09:47 America/Chicago
+- Task:
+  Build one bounded aerospace VAAC advisory consumer or report package on top of the existing aerospace reporting stack without adding a new large panel.
+- What changed:
+  Added the new pure helper [aerospaceVaacAdvisoryReportPackage.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceVaacAdvisoryReportPackage.ts).
+  This helper builds on the existing aerospace VAAC context and reporting stack only:
+  `vaacContext`
+  plus the completed `aerospaceReportBriefPackage`.
+  It does not create another review/export/timeline helper and it does not add a new large panel.
+  The package preserves:
+  advisory source ids,
+  source mode and health,
+  source state,
+  evidence basis,
+  advisory timestamps,
+  affected-area or summary posture,
+  caveats,
+  and explicit does-not-prove lines.
+  Washington, Anchorage, and Tokyo remain advisory/source-reported only inside the package.
+  Wired the package into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) as snapshot/export metadata under `aerospaceVaacAdvisoryReportPackage` and into [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts) as a compact `vaac-advisory-report-package` footer section plus metadata-key coverage across the aerospace export profiles.
+  Added the focused regression [aerospaceVaacAdvisoryReportPackageRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/aerospaceVaacAdvisoryReportPackageRegression.mjs) and exposed it in [package.json](/C:/Users/mike/11Writer/app/client/package.json).
+  Extended prepared aerospace smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so aircraft and satellite metadata checks now require `aerospaceVaacAdvisoryReportPackage`, advisory rows, VAAC source coverage, metadata-key coverage, does-not-prove lines, and the no-route-impact guardrail.
+  Updated [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts), [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md), [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md), and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) so the package is documented as a bounded VAAC advisory/report consumer rather than a new analyst-facing surface.
+- Files touched:
+  [aerospaceVaacAdvisoryReportPackage.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceVaacAdvisoryReportPackage.ts)
+  [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [aerospaceVaacAdvisoryReportPackageRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/aerospaceVaacAdvisoryReportPackageRegression.mjs)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [package.json](/C:/Users/mike/11Writer/app/client/package.json)
+  [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  From `app/client`, `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceVaacAdvisoryReportPackageRegression.mjs` passed and reported the expected package id, preserved VAAC advisory rows, timestamps, and affected-area fields.
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  From `app/client`, `cmd /c npm.cmd run lint` passed.
+  From `app/client`, `cmd /c npm.cmd run build` passed.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+  `python scripts/alerts_ledger.py --json` passed and currently reports `4` open low-priority alert lines owned by Atlas AI and Manager AI.
+- Blockers or caveats:
+  Prepared smoke remains prepared smoke and is still distinct from executed workflow evidence.
+  The current active blocker is still the same host-level Windows Chromium launch permission boundary before Playwright reaches app assertions.
+  The new VAAC advisory report package is report-ready metadata/accounting only.
+  It does not replace the existing VAAC context or broader aerospace reporting helpers and does not imply ash-plume precision beyond the source, route impact, aircraft exposure, flight intent, target behavior, threat, causation, safety conclusion, or action recommendation.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Chromium launch is permitted so the prepared `aerospaceVaacAdvisoryReportPackage` assertions can move from prepared coverage to executed workflow evidence if they pass.
+
+## 2026-05-05 09:36 America/Chicago
+
+- Assignment version:
+  2026-05-04 23:26 America/Chicago
+- Task:
+  Build a bounded aerospace report-brief package on top of the existing fusion-snapshot input without adding a new large analyst surface.
+- What changed:
+  Added the new pure helper [aerospaceReportBriefPackage.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceReportBriefPackage.ts).
+  This helper builds only on the existing `aerospaceFusionSnapshotInput` package and does not create another aerospace review/export/timeline surface.
+  It converts the fusion input into four bounded report-ready sections:
+  `observe`,
+  `orient`,
+  `prioritize`,
+  and `explain`.
+  The package preserves:
+  selected-target label,
+  active export-profile label,
+  validation posture,
+  export-readiness posture,
+  source ids,
+  source modes,
+  source health states,
+  evidence bases,
+  distinct context classes,
+  attention counts,
+  report-safe lines,
+  and explicit does-not-prove/guardrail wording.
+  It keeps observed, forecast, advisory, archive, anonymous-comparison, and validation context distinct by reading the grouped fusion-input sections rather than recomputing source semantics.
+  Wired the package into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) as snapshot/export metadata under `aerospaceReportBriefPackage` and into [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts) as a compact `report-brief-package` footer section plus metadata-key coverage across the aerospace export profiles.
+  Added the focused regression [aerospaceReportBriefPackageRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/aerospaceReportBriefPackageRegression.mjs) and exposed it in [package.json](/C:/Users/mike/11Writer/app/client/package.json).
+  Extended prepared aerospace smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so aircraft and satellite metadata checks now require `aerospaceReportBriefPackage`, the four report-brief sections, distinct context-class coverage, and the report-accounting guardrail.
+  Updated [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts), [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md), [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md), and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) so the package is documented as a report-ready transformation over fusion input rather than a new analyst-facing surface.
+- Files touched:
+  [aerospaceReportBriefPackage.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceReportBriefPackage.ts)
+  [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [aerospaceReportBriefPackageRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/aerospaceReportBriefPackageRegression.mjs)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [package.json](/C:/Users/mike/11Writer/app/client/package.json)
+  [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  From `app/client`, `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceReportBriefPackageRegression.mjs` passed and reported the expected report-brief package id, section ids, distinct context classes, validation posture, and export-readiness label.
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  From `app/client`, `cmd /c npm.cmd run lint` passed.
+  From `app/client`, `cmd /c npm.cmd run build` passed.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+  `python scripts/alerts_ledger.py --json` passed and currently reports `4` open low-priority alert lines owned by Atlas AI and Manager AI.
+- Blockers or caveats:
+  Prepared smoke remains prepared smoke and is still distinct from executed workflow evidence.
+  The current active blocker is still the same host-level Windows Chromium launch permission boundary before Playwright reaches app assertions.
+  The new report-brief package is report-ready metadata/accounting only.
+  It does not replace the underlying aerospace review/export/timeline helpers and does not imply flight intent, airport/runway availability, route impact, target behavior, GPS/radio/satellite failure, threat, causation, safety conclusion, or action recommendation.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Chromium launch is permitted so the prepared `aerospaceReportBriefPackage` assertions can move from prepared coverage to executed workflow evidence if they pass.
+
+## 2026-05-04 23:19 America/Chicago
+
+- Assignment version:
+  2026-05-04 22:59 America/Chicago
+- Task:
+  Build a bounded aerospace fusion-snapshot input package from the existing aerospace helper stack without adding a new review surface.
+- What changed:
+  Added the new pure helper [aerospaceFusionSnapshotInput.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceFusionSnapshotInput.ts).
+  This helper composes the existing aerospace package stack only:
+  selected-target evidence summary,
+  context snapshot/report,
+  context review queue and export bundle,
+  issue export bundle,
+  workflow readiness package,
+  workflow validation evidence snapshot,
+  evidence timeline package,
+  package coherence,
+  export profile,
+  and export readiness.
+  It does not add a new user-facing review panel.
+  Instead it creates a stable `aerospaceFusionSnapshotInput` metadata shape for a future cross-domain Source Fusion Snapshot.
+  The package preserves:
+  selected-target summary lines,
+  source ids,
+  source modes,
+  source health states,
+  evidence bases,
+  active export-profile label,
+  validation posture,
+  export-readiness posture,
+  compact source-summary lines,
+  review/issue/missing-evidence/coherence attention counts,
+  explicit does-not-prove lines,
+  and export-safe lines.
+  It keeps observed, forecast, advisory, source-reported, archive, reference, anonymous-comparison, derived, and validation context distinct by grouping the existing evidence-timeline entries instead of collapsing them.
+  Wired the package into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) as snapshot/export metadata under `aerospaceFusionSnapshotInput` and into [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts) as a compact `fusion-snapshot-input` footer section plus metadata-key coverage across the aerospace export profiles.
+  Added the focused regression [aerospaceFusionSnapshotInputRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/aerospaceFusionSnapshotInputRegression.mjs) and exposed it in [package.json](/C:/Users/mike/11Writer/app/client/package.json).
+  Extended prepared aerospace smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so aircraft and satellite metadata checks now require `aerospaceFusionSnapshotInput`, distinct archive/comparison or archive/validation section coverage, does-not-prove lines, and the metadata/accounting input guardrail.
+  Updated [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts), [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md), [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md), and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) so the new package is documented as a future cross-domain input rather than a new analyst-facing aerospace surface.
+- Files touched:
+  [aerospaceFusionSnapshotInput.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceFusionSnapshotInput.ts)
+  [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [aerospaceFusionSnapshotInputRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/aerospaceFusionSnapshotInputRegression.mjs)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [package.json](/C:/Users/mike/11Writer/app/client/package.json)
+  [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  From `app/client`, `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceFusionSnapshotInputRegression.mjs` passed and reported the expected fusion package id, evidence-class sections, validation posture, and export-readiness posture.
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  From `app/client`, `cmd /c npm.cmd run lint` passed.
+  From `app/client`, `cmd /c npm.cmd run build` passed.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+  `python scripts/alerts_ledger.py --json` passed and currently reports `2` open low-priority alert lines owned by Atlas AI.
+- Blockers or caveats:
+  Prepared smoke remains prepared smoke and is still distinct from executed workflow evidence.
+  The current active blocker is still the same host-level Windows Chromium launch permission boundary before Playwright reaches app assertions.
+  The new fusion-snapshot input package is metadata/accounting only.
+  It does not replace the existing aerospace review/export/timeline packages and does not imply flight intent, airport/runway availability, route impact, target behavior, GPS/radio/satellite failure, threat, causation, safety conclusion, or action recommendation.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Chromium launch is permitted so the prepared `aerospaceFusionSnapshotInput` assertions can move from prepared coverage to executed workflow evidence if they pass.
+
+## 2026-05-04 22:29 America/Chicago
+
+- Assignment version:
+  2026-05-04 22:11 America/Chicago
+- Task:
+  Add a bounded aerospace package-coherence and source-health/export parity surface across the existing aerospace helper/export stack without adding another renamed review/export/timeline package.
+- What changed:
+  Added the new pure helper [aerospacePackageCoherence.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospacePackageCoherence.ts).
+  This helper checks parity across the existing aerospace package stack only:
+  context-review queue,
+  context-review export bundle,
+  issue export bundle,
+  selected-target snapshot/report package,
+  workflow-readiness package,
+  workflow-validation evidence snapshot,
+  and evidence timeline package.
+  It avoids duplication by treating those existing packages as the stable aerospace domain surface instead of creating another user-facing review or export helper.
+  The new coherence surface checks:
+  stable source-id sets,
+  source-mode/source-health/evidence-basis parity where queue/export pairs should match,
+  prepared-vs-executed smoke posture consistency across workflow packages,
+  export-profile metadata-key coverage,
+  missing-evidence-count parity,
+  review-count parity,
+  and explicit no-inference/does-not-prove guardrail coverage.
+  Wired the package into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) as `aerospacePackageCoherence` and into [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts) as a compact `package-coherence` footer section plus metadata-key coverage for all aerospace export profiles.
+  Added the focused static regression [aerospacePackageCoherenceRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/aerospacePackageCoherenceRegression.mjs) and exposed it in [package.json](/C:/Users/mike/11Writer/app/client/package.json).
+  Extended prepared metadata smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so aircraft and satellite export checks now require `aerospacePackageCoherence`, aligned coherence state, zero unexpected review findings, metadata-key coverage, and the accounting-only guardrail.
+  Updated [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md), [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md), and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) to document the new parity surface as non-duplicative metadata/accounting only.
+- Files touched:
+  [aerospacePackageCoherence.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospacePackageCoherence.ts)
+  [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [aerospacePackageCoherenceRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/aerospacePackageCoherenceRegression.mjs)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [package.json](/C:/Users/mike/11Writer/app/client/package.json)
+  [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  From `app/client`, `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospacePackageCoherenceRegression.mjs` passed and reported an aligned case plus a review case.
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  From `app/client`, `cmd /c npm.cmd run lint` passed.
+  From `app/client`, `cmd /c npm.cmd run build` passed.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+  `python scripts/alerts_ledger.py --json` passed and currently reports `3` open low-priority alert lines owned by Atlas AI and Manager AI.
+- Blockers or caveats:
+  Prepared smoke remains prepared smoke and is still distinct from executed workflow evidence.
+  The current active blocker is the same host-level Windows Chromium launch permission boundary before Playwright reaches app assertions.
+  The new package-coherence surface is metadata/accounting only.
+  It does not imply source certification, flight intent, airport/runway availability, route impact, target behavior, GPS/radio/satellite failure, threat, causation, safety conclusion, or action recommendation.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Chromium launch is permitted so the prepared `aerospacePackageCoherence` assertions can move from prepared coverage to executed workflow evidence if they pass.
+
+## 2026-05-04 22:06 America/Chicago
+
+- Assignment version:
+  2026-05-04 21:52 America/Chicago
+- Task:
+  Add a bounded aerospace evidence timeline/export package over existing source-backed selected-target context, availability accounting, workflow-validation posture, and source-health evidence without adding new sources or collapsing prepared smoke into executed smoke.
+- What changed:
+  Added the new pure helper [aerospaceEvidenceTimelinePackage.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceEvidenceTimelinePackage.ts).
+  The package builds compact export-safe timeline entries from already-loaded aerospace summaries only:
+  selected-target data health,
+  AWC METAR/TAF,
+  FAA NAS airport status,
+  OurAirports reference context,
+  OpenSky anonymous comparison,
+  USGS geomagnetism,
+  CNEOS close-approach/fireball context,
+  SWPC current advisory context,
+  NCEI archive metadata,
+  VAAC advisory context,
+  context-availability accounting,
+  and workflow-validation posture.
+  It preserves source ids, source modes, source health states, evidence bases, observed/source timestamps where available, prepared/executed smoke posture, missing-evidence rows, export-safe lines, and a non-causation guardrail.
+  The helper keeps observed, forecast, archive, reference, anonymous-comparison, advisory/source-reported, derived, and validation entries distinct instead of flattening them into one blended status line.
+  Wired the package into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) as `aerospaceEvidenceTimelinePackage` and into [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts) as a compact `evidence-timeline` footer section plus metadata-key coverage for all aerospace export profiles.
+  Extended [aerospaceWeatherContext.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWeatherContext.ts) and [aerospaceAirportStatusContext.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceAirportStatusContext.ts) with bounded timestamp fields needed for honest timeline entries rather than scraping display strings.
+  Added a focused static regression at [aerospaceEvidenceTimelineRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/aerospaceEvidenceTimelineRegression.mjs) and exposed it in [package.json](/C:/Users/mike/11Writer/app/client/package.json).
+  Extended prepared smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so aircraft and satellite metadata checks now require `aerospaceEvidenceTimelinePackage`, timeline entry arrays, missing-evidence rows, export-profile metadata-key coverage, and the explicit non-causation guardrail.
+  Updated [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md), [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md), and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) so the new package is documented as export/review accounting only.
+- Files touched:
+  [aerospaceEvidenceTimelinePackage.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceEvidenceTimelinePackage.ts)
+  [aerospaceWeatherContext.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWeatherContext.ts)
+  [aerospaceAirportStatusContext.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceAirportStatusContext.ts)
+  [aerospaceWorkflowEvidenceLedger.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowEvidenceLedger.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [aerospaceEvidenceTimelineRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/aerospaceEvidenceTimelineRegression.mjs)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [package.json](/C:/Users/mike/11Writer/app/client/package.json)
+  [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  From `app/client`, `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceEvidenceTimelineRegression.mjs` passed.
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  From `app/client`, `cmd /c npm.cmd run lint` passed.
+  From `app/client`, `cmd /c npm.cmd run build` passed.
+  `python scripts/alerts_ledger.py --json` passed and reported zero open alert lines.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  Prepared smoke remains prepared smoke and is still separate from executed workflow evidence.
+  The current blocker is the same host-level Windows Chromium launch permission boundary before Playwright reaches app assertions.
+  The evidence timeline is export/review accounting only.
+  Timeline order is not causation, and the package does not imply flight intent, airport/runway availability, target behavior, GPS/radio/satellite failure, route impact, threat, causation, safety conclusion, or action recommendation.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Chromium launch is permitted so the prepared `aerospaceEvidenceTimelinePackage` metadata assertions can move from prepared smoke coverage to executed workflow evidence if they pass.
+
+## 2026-05-04 21:49 America/Chicago
+
+- Assignment version:
+  2026-05-04 21:43 America/Chicago
+- Task:
+  Align aerospace workflow-validation evidence docs and regression posture after the new snapshot, acknowledge the stale assignment-marker issue under the current wave, and prepare a clean validation rerun path without adding new aerospace sources.
+- What changed:
+  Recorded the current assignment version under the active manager wave and explicitly noted that the prior `aerospaceWorkflowValidationEvidenceSnapshot` work was completed under a stale `2026-05-02 15:47 America/Chicago` assignment marker rather than under the current `2026-05-04 21:43 America/Chicago` wave.
+  Reviewed the bounded helper/export/inspector/smoke-prep chain around [aerospaceWorkflowValidationEvidenceSnapshot.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowValidationEvidenceSnapshot.ts) and confirmed the current gap was documentation/regression-posture clarity rather than missing source or UI semantics.
+  Updated [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md), [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md), and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) so the current local validation posture is explicit:
+  backend contract tests passed,
+  frontend build passed,
+  frontend lint passed on the current rerun,
+  and Playwright aerospace smoke remains blocked before app assertions by the Windows Chromium `spawn EPERM` launcher boundary.
+  Added a focused docs-backed checklist/current-posture note instead of widening into new frontend churn or new source work.
+- Files touched:
+  [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  `python scripts/alerts_ledger.py --json` passed and reported zero open alert lines.
+  From `app/client`, `cmd /c npm.cmd run lint` passed.
+  From `app/client`, `cmd /c npm.cmd run build` passed.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before app assertions with Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  The stale assignment-marker issue is now corrected in progress truth.
+  Prepared smoke remains prepared smoke; it is not executed workflow evidence.
+  The current active blocker is the host-level Windows Playwright launcher boundary, not Marine lint and not an aerospace assertion failure.
+  No new source, source replacement, flight-intent, airport/runway availability, target-behavior, failure, route-impact, causation, safety-conclusion, or action-recommendation semantics were added.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Chromium launch is permitted so the prepared `aerospaceWorkflowValidationEvidenceSnapshot` assertions can move from prepared coverage to executed workflow evidence if they pass.
+
+## 2026-05-04 21:26 America/Chicago
+
+- Assignment version:
+  2026-05-02 15:47 America/Chicago
+- Task:
+  Recover the missing `2026-05-02 12:27 America/Chicago` progress truth, then add a bounded aerospace workflow-validation evidence snapshot over the existing selected-target report package, context review queue/export bundle, workflow readiness package, and OurAirports reference context.
+- What changed:
+  First, backfilled the missing final report for assignment `2026-05-02 12:27 America/Chicago` in this progress doc.
+  That prior assignment was already complete in code as the selected-target aerospace report package, and the missing issue was progress-doc truth rather than missing implementation.
+  Then added the new pure helper [aerospaceWorkflowValidationEvidenceSnapshot.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowValidationEvidenceSnapshot.ts).
+  The helper composes the existing selected-target report package, context review queue, context review export bundle, workflow readiness package, and OurAirports reference context into one compact validation-accounting snapshot.
+  It preserves:
+  validation posture,
+  prepared smoke status,
+  executed smoke status,
+  selected-target report readiness,
+  missing-evidence count,
+  source ids,
+  source modes,
+  source health states,
+  evidence bases,
+  compact display/export lines,
+  and explicit validation-accounting guardrail wording.
+  Wired the new snapshot into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) under `aerospaceWorkflowValidationEvidenceSnapshot`, added compact footer support in [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts), and added a compact `Aerospace Workflow Validation Evidence` inspector section in [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx).
+  Extended prepared smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so aircraft and satellite metadata checks now require `aerospaceWorkflowValidationEvidenceSnapshot`, require `sourceIds`, require export-profile metadata-key coverage, and require the validation-accounting guardrail wording.
+  Updated [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md), [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md), and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md) so the new validation snapshot is documented with the same prepared-vs-executed smoke distinction as the rest of the aerospace workflow model.
+- Files touched:
+  [aerospaceWorkflowValidationEvidenceSnapshot.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceWorkflowValidationEvidenceSnapshot.ts)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [InspectorPanel.tsx](/C:/Users/mike/11Writer/app/client/src/features/inspector/InspectorPanel.tsx)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-workflow-evidence-ledger.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-evidence-ledger.md)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q` passed (`6 passed`).
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` passed (`5 passed`).
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` passed (`26 passed`).
+  `python -m compileall app/server/src` passed.
+  From `app/client`, `cmd /c npm.cmd run build` passed.
+  From `app/client`, `cmd /c npm.cmd run lint` failed, but not because of aerospace; current blocker is unrelated marine lint drift in [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts): unused `MarineHydrologySourceHealthWorkflowSummary`.
+  `python app/server/tests/run_playwright_smoke.py aerospace` failed before browser assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  The prior `2026-05-02 12:27 America/Chicago` assignment was already complete in code and is now backfilled in this progress doc.
+  The new workflow-validation evidence snapshot is validation-accounting only.
+  It does not convert prepared smoke into executed smoke, and it does not imply source certainty, airport/runway availability, target behavior, failure proof, route impact, causation, safety conclusion, or action recommendation.
+  Executed aerospace smoke evidence remains blocked on this host by the Windows Playwright launcher boundary before app assertions begin.
+  Client lint is currently blocked by an unrelated marine file and was not fixed in this aerospace task.
+- Next recommended task:
+  Re-run `python app/server/tests/run_playwright_smoke.py aerospace` on a Windows host where Playwright Chromium can launch so the prepared `aerospaceWorkflowValidationEvidenceSnapshot` assertions can move from prepared coverage to executed workflow evidence if they pass, and let the marine owner clear the unrelated lint blocker before using lint as aerospace completion evidence again.
+
+## 2026-05-04 11:47 America/Chicago
+
+- Assignment version:
+  2026-05-02 12:27 America/Chicago
+- Task:
+  Backfilled missing final report for the already-completed selected-target aerospace report package assignment.
+- What changed:
+  Progress truth recovery only.
+  Manager AI's `2026-05-02 12:27 America/Chicago` assignment for Aerospace AI was `selected-target aerospace report package`, and the corresponding implementation was already present in the workspace as the bounded snapshot/report package helper [aerospaceContextSnapshotReport.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceContextSnapshotReport.ts) plus its export wiring.
+  This entry backfills the missing final report so the aerospace progress doc matches the code and manager check-in history.
+  That completed package composes the existing source-readiness bundle, context gap queue, current/archive separation, export coherence, and issue-export-bundle summaries into one compact report-facing metadata package.
+  It preserves package profile, source ids, source modes, source health states, evidence bases, review lines, export lines, caveats, guardrail wording, missing metadata keys, missing footer sections, and banned operational-phrase findings without changing source semantics.
+  It was wired into [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx) under `aerospaceContextSnapshotReport`, integrated into [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts) for compact footer prioritization, and documented in [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md) and [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md).
+- Files touched:
+  [aerospaceContextSnapshotReport.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceContextSnapshotReport.ts)
+  [aerospaceExportProfiles.ts](/C:/Users/mike/11Writer/app/client/src/features/inspector/aerospaceExportProfiles.ts)
+  [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx)
+  [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+  [aerospace-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/aerospace-workflow-validation.md)
+  [aircraft-satellite-smoke.md](/C:/Users/mike/11Writer/app/docs/aircraft-satellite-smoke.md)
+  [aerospace-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/aerospace-ai.md)
+- Validation:
+  `python -m pytest app/server/tests/test_ncei_space_weather_portal_contracts.py -q` had already passed for the completed package.
+  `python -m pytest app/server/tests/test_swpc_contracts.py app/server/tests/test_cneos_contracts.py app/server/tests/test_opensky_contracts.py app/server/tests/test_aviation_weather_contracts.py app/server/tests/test_faa_nas_status_contracts.py -q` had already passed for the completed package.
+  `python -m compileall app/server/src` had already passed for the completed package.
+  From `app/client`, `cmd /c npm.cmd run lint` had already passed for the completed package.
+  From `app/client`, `cmd /c npm.cmd run build` had already passed for the completed package.
+  `python app/server/tests/run_playwright_smoke.py aerospace` had remained blocked before browser assertions with Playwright Chromium launch `spawn EPERM`; runner diagnosis had remained `windows-playwright-launch-permission`.
+- Blockers or caveats:
+  This is a progress-truth recovery entry only.
+  The selected-target aerospace report package remained compact report/export metadata only and did not imply severity, operational consequence, failure proof, route impact, target exposure, threat, causation, or action recommendation.
+  Executed aerospace smoke evidence for the package remained blocked on this host by the Windows Playwright launcher boundary.
+- Next recommended task:
+  Proceed with the current `2026-05-02 15:47 America/Chicago` assignment now that the missing `12:27` final report has been restored to the aerospace progress doc.
+
 ## 2026-05-02 12:00 America/Chicago
 
 - Assignment version:

@@ -7,8 +7,11 @@ from src.services.camera_candidate_endpoint_report import CameraCandidateEndpoin
 from src.services.camera_candidate_endpoint_report import (
     _candidate_lifecycle_state,
     _evidence_basis,
+    _media_access_posture,
     _media_evidence_posture,
+    _payload_shape_posture,
     _report_caveats,
+    _sandbox_feasibility_posture,
     _source_health_expectation,
     _source_mode,
 )
@@ -113,9 +116,15 @@ def _candidate_report_item(
 ) -> CameraCandidateEndpointReportItem | None:
     if inventory.onboarding_state != "candidate" or not inventory.candidate_endpoint_url:
         return None
+    lifecycle_state = _candidate_lifecycle_state(inventory, settings)
     detected_type = _detected_machine_type(inventory)
     blocker_hints = _blocker_hints(inventory)
     status = inventory.endpoint_verification_status or "needs-review"
+    media_access_posture = _media_access_posture(inventory)
+    payload_shape_posture = _payload_shape_posture(
+        inventory,
+        lifecycle_state=lifecycle_state,
+    )
     notes = list(inventory.last_endpoint_notes)
     if inventory.blocked_reason:
         notes.append(f"Blocked reason: {inventory.blocked_reason}")
@@ -127,19 +136,30 @@ def _candidate_report_item(
         onboarding_state=inventory.onboarding_state,
         import_readiness=import_readiness,
         source_mode=_source_mode(inventory),
-        lifecycle_state=_candidate_lifecycle_state(inventory, settings),
+        lifecycle_state=lifecycle_state,
         candidate_url=inventory.candidate_endpoint_url,
         http_status=inventory.last_endpoint_http_status,
         content_type=inventory.last_endpoint_content_type,
         detected_machine_readable_type=detected_type,
         media_evidence_posture=_media_evidence_posture(inventory),
+        payload_shape_posture=payload_shape_posture,
+        sandbox_feasibility_posture=_sandbox_feasibility_posture(
+            lifecycle_state=lifecycle_state,
+            media_access_posture=media_access_posture,
+            payload_shape_posture=payload_shape_posture,
+        ),
         evidence_basis=_evidence_basis(inventory),
         source_health_expectation=_source_health_expectation(inventory),
         blocker_hints=blocker_hints,
         endpoint_verification_status=status,
         notes=notes,
         caveats=_report_caveats(inventory),
-        export_lines=_detail_candidate_export_lines(inventory, status, detected_type),
+        export_lines=_detail_candidate_export_lines(
+            inventory,
+            status,
+            detected_type,
+            lifecycle_state=lifecycle_state,
+        ),
         next_action=_next_action(status, blocker_hints),
     )
 
@@ -165,6 +185,8 @@ def _candidate_report_detail(
         content_type=item.content_type,
         detected_machine_readable_type=item.detected_machine_readable_type,
         media_evidence_posture=item.media_evidence_posture,
+        payload_shape_posture=item.payload_shape_posture,
+        sandbox_feasibility_posture=item.sandbox_feasibility_posture,
         evidence_basis=item.evidence_basis,
         source_health_expectation=item.source_health_expectation,
         blocker_hints=list(item.blocker_hints),
@@ -246,7 +268,9 @@ def _detail_export_lines(
             f"Endpoint status: {report_item.endpoint_verification_status} | Next action: {report_item.next_action}"
         )
         lines.append(
-            f"Report mode: {report_item.source_mode} | lifecycle={report_item.lifecycle_state} | media={report_item.media_evidence_posture}"
+            f"Report mode: {report_item.source_mode} | lifecycle={report_item.lifecycle_state} | "
+            f"media={report_item.media_evidence_posture} | shape={report_item.payload_shape_posture} | "
+            f"sandbox={report_item.sandbox_feasibility_posture}"
         )
     if inventory.sandbox_import_available or is_camera_source_sandbox_importable(inventory.key, settings):
         lines.append(
@@ -308,8 +332,13 @@ def _detail_candidate_export_lines(
     inventory: CameraSourceInventoryEntry,
     status: str,
     detected_type: str,
+    *,
+    lifecycle_state: str,
 ) -> list[str]:
     return [
         f"{inventory.key}: {status} | detected={detected_type}",
-        f"mode={_source_mode(inventory)} | media={_media_evidence_posture(inventory)}",
+        (
+            f"mode={_source_mode(inventory)} | media={_media_evidence_posture(inventory)} | "
+            f"shape={_payload_shape_posture(inventory, lifecycle_state=lifecycle_state)}"
+        ),
     ]

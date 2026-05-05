@@ -32,6 +32,8 @@ Related docs:
 - [osint-framework-intake-routing-memo.md](/C:/Users/mike/11Writer/app/docs/osint-framework-intake-routing-memo.md)
 - [source-candidate-to-brief-routing-matrix.md](/C:/Users/mike/11Writer/app/docs/source-candidate-to-brief-routing-matrix.md)
 - [phase2-next-biggest-wins-packet.md](/C:/Users/mike/11Writer/app/docs/phase2-next-biggest-wins-packet.md)
+- [phase2-next-after-next-shortlist.md](/C:/Users/mike/11Writer/app/docs/phase2-next-after-next-shortlist.md)
+- [reporting-desk-phase2-roadmap.md](/C:/Users/mike/11Writer/app/docs/reporting-desk-phase2-roadmap.md)
 - [data-ai-rss-source-candidates.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates.md)
 - [data-ai-rss-source-candidates-batch2.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates-batch2.md)
 - [data-ai-rss-source-candidates-batch3.md](/C:/Users/mike/11Writer/app/docs/data-ai-rss-source-candidates-batch3.md)
@@ -42,16 +44,19 @@ Related docs:
 
 ## Current Next Assignments
 
-- Geospatial next: `canada-cap-alerts` or `canada-geomet-ogc`; `meteoswiss-open-data` and `bc-wildfire-datamart` now exist backend-first, so the next geospatial pass for either should be a bounded consumer or explicit workflow note rather than a fresh source assignment
-- Marine next: the bounded backend-first `netherlands-rws-waterinfo` WaterWebservices slice now exists alongside the validated CO-OPS, NDBC, Scottish Water, Vigicrues, and Ireland OPW stack; the next marine pass should be either a narrow marine-local consumer for Waterinfo or additional workflow-validation evidence, without widening into portal/viewer ingestion
-- Aerospace next: keep the current implemented source stack stable, including the three-VAAC consumer package, the `noaa-ncei-space-weather-portal` archive/context consumer path, and the new `Aerospace Context Review Queue` / export-bundle helper surfaces, and rerun focused aerospace smoke on a Windows host where Playwright can launch before promoting any aerospace source beyond `implemented`
-- Features/Webcam next: prefer one bounded `finland-digitraffic` consumer or status-classification follow-on first, or a narrow follow-on over the new sandbox-candidate review-burden/source-health summary; if Manager AI opens a fresh camera-source lane instead, route `nsw-live-traffic-cameras` or `quebec-mtmd-traffic-cameras` from [source-quick-assign-packets-may-2026.md](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-may-2026.md), but keep them at `candidate-sandbox-importable` only until a real implementation lane is opened
+- Geospatial next: the bounded Canada environmental context package, the base-earth reference review/export package, the environmental fusion-snapshot input, `geonet-geohazards`, `hko-open-weather`, and `dwd-cap-alerts` now appear completed in repo truth; treat those slices as implemented workflow-supporting evidence, keep `canada-cap-alerts`, `canada-geomet-ogc`, `meteoswiss-open-data`, `bc-wildfire-datamart`, `dmi-forecast-aws`, `met-eireann-forecast`, `met-eireann-warnings`, `portugal-ipma-open-data`, and `usgs-geomagnetism` as follow-on-only, and route the next geospatial move to `belgium-rmi-warnings` plus bounded reporting integration rather than duplicate source intake
+- Geospatial occupancy note: `Evidence Timeline`, `Review Packet Export`, `Source Candidate Intake Queue`, `Source Health Console`, and `Attention Queue Unifier` are no longer blank feature spaces; future geospatial work should target cross-domain normalization or one fresh bounded source, not another renamed domain-local helper
+- Marine next: `hydrologySourceHealthWorkflow`, `hydrologySourceHealthReport`, `marineFusionSnapshotInput`, `marineReportBriefPackage`, the corridor/chokepoint review package, and the latest Vigicrues follow-through now appear completed in Marine progress; keep those packages below automatic workflow-validation promotion and route the next marine move toward a bounded corridor situation/report package rather than a fresh source wave
+- Aerospace next: the workflow-validation evidence snapshot, evidence timeline, package-coherence lane, fusion-snapshot input package, report-brief package, and bounded VAAC advisory report package are completed in progress truth; the current active Aerospace assignment is now a bounded space-weather continuity package, while executed browser smoke remains a separate host-blocked validation gap
+- Features/Webcam next: candidate expansion, the camera candidate network coverage/review-priority package, the promotion-readiness comparison, and the latest endpoint-verified hardening pass now appear completed in progress truth; keep Baton Rouge, Vancouver, and Caltrans `candidate-sandbox-importable`, Arlington and NZTA under bounded feasibility review, Queensland held, and route the next move toward NZTA and Arlington sandbox-feasibility plus bounded candidate growth rather than activation
 - Features/Webcam candidate discovery note: [`webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md) records a May 2026 batch of global no-auth camera candidates. Treat it as candidate-only source-ops evidence, not implementation, validation, activation, or scheduling proof.
-- Data next: preserve the implemented five-feed starter bundle plus the implemented official-cyber, infrastructure/status, OSINT/investigations, rights/civic/digital-policy, fact-checking/disinformation, official/public advisories, scientific/environmental context, cyber-vendor/community follow-on, internet-governance/standards context, public-institution/world-context, and cyber-institutional-watch-context waves, keep the bounded `nist-nvd-cve` and conservative CVE-context lane stable, treat the new Data AI Source Intelligence inspector card plus `/api/feeds/data-ai/source-families/review` and `/api/feeds/data-ai/source-families/review-queue` surfaces as metadata-only workflow support, and only then route one remaining grouped family or one bounded May 2026 candidate packet such as `propublica` or `global-voices`
+- Data next: preserve the implemented five-feed starter bundle plus the implemented official-cyber, infrastructure/status, OSINT/investigations, rights/civic/digital-policy, fact-checking/disinformation, official/public advisories, scientific/environmental context, cyber-vendor/community follow-on, cyber/internet platform-watch, world-news awareness, internet-governance/standards context, public-institution/world-context, and cyber-institutional-watch-context waves; the Atlas-approved feed expansion, metadata-only long-tail intake/dedupe posture, bounded fusion/claim-integrity snapshot, bounded report-brief package, and bounded world-news awareness family now appear completed in Data progress, so the next Data assignment should stay on a bounded topic-scoped report packet plus review/export/workflow coherence rather than broader crawling or fresh multi-family expansion
 - Gather next: verify `eea-air-quality`, `singapore-nea-weather`, `esa-neocc-close-approaches`, `imo-epos-geohazards`, and the remaining Batch 5 `needs-verification` sources before promoting any of them to assignment-ready, and treat Wonder/OSINT Framework audit artifacts as candidate-routing input only via [osint-framework-intake-routing-memo.md](/C:/Users/mike/11Writer/app/docs/osint-framework-intake-routing-memo.md)
 - Gather candidate-routing note: use [source-candidate-to-brief-routing-matrix.md](/C:/Users/mike/11Writer/app/docs/source-candidate-to-brief-routing-matrix.md) before converting any Wonder, Atlas, source-discovery, or candidate-only webcam lead into a Gather brief or quick-assign packet
-- Connect next: checkpoint sweeps, warning-reduction passes, smoke reruns, release-readiness truth, and narrow cross-domain governance cleanup; keep the current Atlas Source Discovery Ten-Step backend slice as peer/runtime input rather than source-validation proof, keep Wonder's macOS/plugin/connector planning docs as peer planning input only, and keep `runtime_scheduler_service.py` framed as conservative compatibility/status plumbing rather than hidden scheduler proof
+- Connect next: the last consolidation-readiness/ownership-hygiene pass and the reporting-loop package contract/regression wave are completed in progress truth, and the current active Connect assignment is a post-wave compatibility and peer/runtime classification sweep across the newly completed fusion/reporting-input surfaces; keep provider/runtime boundary truth as runtime-only evidence, keep the Atlas runtime operator-console slice as peer/runtime input pending Connect validation, and keep `runtime_scheduler_service.py` framed as conservative compatibility/status plumbing rather than hidden scheduler proof
 - Manager planning note: use [phase2-next-biggest-wins-packet.md](/C:/Users/mike/11Writer/app/docs/phase2-next-biggest-wins-packet.md) for the current top-three larger handoffs per controlled lane.
+- Next-after-next note: use [phase2-next-after-next-shortlist.md](/C:/Users/mike/11Writer/app/docs/phase2-next-after-next-shortlist.md) once the current larger controlled wave is closed and Manager needs the next compact bounded shortlist.
+- Reporting-desk note: use [reporting-desk-phase2-roadmap.md](/C:/Users/mike/11Writer/app/docs/reporting-desk-phase2-roadmap.md) for the current question-driven reporting direction, reporting-input map, and stale-source routing repairs.
 - Base-earth note: Batch 7 geography/base-earth sources are now in the registry, but should be assigned as narrow static/reference slices only; do not combine bathymetry, relief, soil, land-cover, hydrography, glaciers, tectonics, and volcano references into one broad platform task.
 - Data AI note: RSS/Atom source candidates now exist across the starter, official cyber, infrastructure/status, OSINT/investigations, rights/civic/digital-policy, fact-checking/disinformation, and broader Batch 3 context families; the implemented waves above are already backend-first, so the next expansion should be one bounded remaining family only rather than broader polling.
 
@@ -65,6 +70,7 @@ Status caution:
 - `data` is now a distinct implementation lane from `gather` and `connect`.
 - `gather` owns governance and status truth; `data` owns bounded implementation for assigned public internet-information sources; `connect` owns repo-wide validation and blocker truth.
 - source discovery, source reputation, claim-outcome memory, and shared source-memory surfaces create candidates and review evidence only; they do not promote a source to `implemented`, `workflow-validated`, `validated`, or `fully validated`.
+- Source Discovery `structure-scan`, knowledge-node clustering/backfill, review-claim import/apply, Wave LLM provider/runtime controls, and media/OCR interpretation surfaces are candidate-routing, review, derived-evidence, or runtime-boundary helpers only; they do not create source-validation proof by themselves.
 
 ## Source Discovery Governance
 
@@ -162,6 +168,8 @@ Manager note:
   - the official/public advisories wave is implemented backend-first on the same bounded aggregate route
   - the scientific/environmental context wave is implemented backend-first on the same bounded aggregate route
   - the cyber-vendor/community follow-on wave is implemented backend-first on the same bounded aggregate route
+  - the cyber/internet platform-watch wave is implemented backend-first on the same bounded aggregate route
+  - the world-news awareness wave is implemented backend-first on the same bounded aggregate route
   - the internet-governance/standards context wave is implemented backend-first on the same bounded aggregate route
   - the public-institution/world-context wave is implemented backend-first on the same bounded aggregate route
   - treat it as contract-tested, not workflow-validated
@@ -244,25 +252,30 @@ Batch 5 rows below originate from the intake decisions in [source-acceleration-p
 
 Manager note:
 
-- Top 3 newly assignment-ready Batch 5 handoffs after this verification pass:
-  1. `met-eireann-warnings`
-  2. `met-eireann-forecast`
-  3. `bc-wildfire-datamart`
+- Top 3 fresh assignment-ready Batch 5 handoffs after current repo reconciliation:
+  1. `ireland-opw-waterlevel`
+  2. `geoboundaries-admin`
+  3. `natural-earth-reference`
 
 ### Assignment-ready
 
 | Source id | Owner agent | Consumer agents | Next action | Implementation priority | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `dmi-forecast-aws` | `geospatial` | `marine`, `features-webcam`, `connect` | Assign one bounded point-forecast collection only. | `medium` | Forecast context only; do not treat model output as observation truth. |
-| `met-eireann-forecast` | `geospatial` | `marine`, `connect` | Assign one bounded public point-forecast route only. | `medium` | Forecast context only; do not treat model output as observed conditions. |
-| `met-eireann-warnings` | `geospatial` | `marine`, `connect` | Assign the public Ireland warning RSS/XML feed only. | `medium` | Advisory/contextual only; do not infer impact or damage from warning colors. |
 | `ireland-opw-waterlevel` | `marine` | `geospatial`, `connect` | Assign station metadata plus latest readings only from the documented machine endpoints. | `medium` | Provisional hydrometric observations only; not flood-impact confirmation. |
 | `ireland-epa-wfd-catchments` | `geospatial` | `marine`, `connect` | Assign catchment metadata and search only. | `low` | Reference/context layer only, not a live event feed. |
-| `portugal-ipma-open-data` | `geospatial` | `marine`, `connect` | Assign warnings-only JSON parsing first. | `medium` | One of the cleaner official warning APIs in the batch. |
-| `bc-wildfire-datamart` | `geospatial` | `connect` | Assign one bounded fire-weather station or danger-summary slice only. | `medium` | Public API is clear for fire-weather context, not wildfire incident truth. |
-| `usgs-geomagnetism` | `geospatial` | `aerospace`, `connect` | Backend-first slice is already implemented; next step is a bounded first consumer or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Context-only geophysical observations; do not infer downstream impacts. |
 | `natural-earth-reference` | `geospatial` | `connect` | Assign one ADM0 static reference layer only. | `low` | Static reference layer; preserve de facto boundary caveat. |
 | `geoboundaries-admin` | `geospatial` | `connect` | Assign one `gbOpen` country/ADM1 metadata query only. | `low` | Strong reference source if it stays country-scoped and license-aware. |
+
+### Implemented follow-on only
+
+| Source id | Owner agent | Consumer agents | Next action | Implementation priority | Notes |
+| --- | --- | --- | --- | --- | --- |
+| `dmi-forecast-aws` | `geospatial` | `marine`, `features-webcam`, `connect` | Backend-first slice already exists; next step is a bounded consumer or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Forecast context only; do not treat model output as observation truth. |
+| `met-eireann-forecast` | `geospatial` | `marine`, `connect` | Backend-first slice already exists; next step is a bounded consumer or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Forecast context only; do not treat model output as observed conditions. |
+| `met-eireann-warnings` | `geospatial` | `marine`, `connect` | Backend-first slice already exists; next step is a bounded consumer or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Advisory/contextual only; do not infer impact or damage from warning colors. |
+| `portugal-ipma-open-data` | `geospatial` | `marine`, `connect` | Backend-first slice already exists; next step is a bounded consumer, base-earth-adjacent export composition input, or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Advisory/contextual only; do not infer impact, damage, or certainty from warning text alone. |
+| `bc-wildfire-datamart` | `geospatial` | `connect` | Backend-first slice already exists; next step is a bounded consumer or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Public API is clear for fire-weather context, not wildfire incident truth. |
+| `usgs-geomagnetism` | `geospatial` | `aerospace`, `connect` | Backend-first slice is already implemented; next step is a bounded first consumer or explicit workflow-validation note, not a fresh connector assignment. | `medium` | Context-only geophysical observations; do not infer downstream impacts. |
 
 ### Needs-verification
 
@@ -718,7 +731,7 @@ Next action:
 | `noaa-ndbc-realtime` | `workflow-validated` | `marine` | `geospatial`, `connect` | [U.S. briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-briefs.md:402) | Keep source semantics caveats intact and promote only to `validated` after broader full-validation/live-behavior evidence is explicitly recorded | Do not assume every station exposes every file family | `high` | Contract-covered, marine-smoke-covered, and export-metadata-covered per [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md:1); not fully validated/live validated |
 | `noaa-tsunami-alerts` | `implemented` | `geospatial` | `marine`, `connect` | [Prompt index](/C:/Users/mike/11Writer/app/docs/source-prompt-index.md:432) | Keep Atom/CAP caveats stable and validate workflow before `validated` | Do not infer impact area beyond source messaging | `high` | Repo evidence found: route, tests, client query, layer, entities, inspector/app-shell consumption |
 | `uk-ea-flood-monitoring` | `implemented` | `geospatial` | `marine`, `reference`, `connect` | [International briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md:10) | Preserve route/filter behavior and evidence separation; promote to `validated` only after workflow validation is explicitly recorded | Do not merge warnings and observations into one score | `high` | Repo evidence found: route, service, types, tests, client query, layer, overview integration |
-| `geonet-geohazards` | `assignment-ready` | `geospatial` | `aerospace`, `connect` | [International briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md:147) | Assign NZ quake plus volcanic alert-level first slice | Do not flatten quake and volcano records into one severity scale | `high` | Strong next geospatial assignment candidate |
+| `geonet-geohazards` | `implemented` | `geospatial` | `aerospace`, `connect` | [International briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md:147) | Keep the existing backend quake plus volcanic alert-level slices bounded and add only a narrow report-input consumer or explicit workflow note before any higher promotion | Do not flatten quake and volcano records into one severity scale | `high` | Geospatial AI progress explicitly reconciled this source as already implemented backend-first with fixtures, routes, tests, and docs; current evidence is still below workflow validation |
 | `nasa-jpl-cneos` | `implemented` | `aerospace` | `geospatial`, `connect` | [International briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md:267) | Keep bounded event-type query and evidence-class separation stable; promote to `validated` only after workflow validation is explicitly recorded | Do not invent local threat scores | `high` | Repo evidence found: dedicated route module, tests, client hook, inspector/app-shell usage, and the export-aware aerospace context review summary; build/lint passed, but executed browser smoke is still blocked by `windows-browser-launch-permission` on this host |
 | `noaa-swpc-space-weather` | `implemented` | `aerospace` | `geospatial`, `connect` | [Batch 3 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch3-briefs.md:1) | Keep advisory/context-only semantics stable and rerun focused aerospace smoke before any promotion beyond `implemented` | Do not claim actual GPS, radio, satellite, or infrastructure failure from SWPC context alone | `medium` | Repo evidence found: dedicated route, tests, client hook, inspector/app-shell usage, and export-aware aerospace context review coverage; build/lint passed, but executed browser smoke is still blocked by `windows-browser-launch-permission` on this host |
 | `opensky-anonymous-states` | `implemented` | `aerospace` | `reference`, `connect` | [Batch 3 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch3-briefs.md:699) | Keep anonymous/rate-limited/non-authoritative caveats stable and rerun focused aerospace smoke before any promotion beyond `implemented` | Do not treat OpenSky as authoritative or as a replacement for the primary aircraft source | `medium` | Repo evidence found: dedicated route, tests, client hook, inspector/app-shell usage, comparison-guardrail coverage, and export-aware aerospace context review coverage; build/lint passed, but executed browser smoke is still blocked by `windows-browser-launch-permission` on this host |
@@ -727,19 +740,19 @@ Next action:
 | `tokyo-vaac-advisories` | `implemented` | `aerospace` | `geospatial`, `connect` | [Batch 6 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md:163) | Keep the bounded consumer/export package stable and rerun aerospace smoke before any promotion beyond `implemented` | Do not claim route impact, aircraft exposure, or ash-dispersion precision beyond source text | `medium` | Aerospace AI progress records the three-VAAC consumer/export package as complete for Washington, Anchorage, and Tokyo; browser-smoke evidence is still missing on this host |
 | `nrc-event-notifications` | `implemented` | `geospatial` | `connect` | [Batch 6 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md:116) | Keep the backend RSS slice bounded and add only a narrow consumer or explicit workflow note before any promotion beyond `implemented` | Do not infer radiological impact, release severity, or offsite consequences beyond source text | `medium` | Geospatial AI progress records a real backend-first RSS/event-notification slice with fixtures, tests, docs, and prompt-injection-safe free-text coverage; current evidence is still backend-first rather than workflow-validated |
 | `taiwan-cwa-aws-opendata` | `implemented` | `geospatial` | `connect`, `marine` | [Batch 6 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch6-briefs.md:121) | Keep the backend AWS-file slice bounded and add only a narrow consumer or explicit workflow note before any promotion beyond `implemented` | Do not drift into key-gated normal CWA APIs or overstate sparse station context | `medium` | Geospatial AI progress records a real backend-first AWS-backed weather slice with fixtures, tests, and docs; current evidence is still backend-first rather than workflow-validated |
-| `canada-cap-alerts` | `assignment-ready` | `geospatial` | `marine`, `connect` | [International briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md:386) | Assign current CAP directory discovery plus bounded CAP XML parsing | Do not traverse the full archive by default | `medium` | Directory-oriented but still considered assignment-ready |
-| `dwd-cap-alerts` | `assignment-ready` | `geospatial` | `connect` | [International briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md:504) | Assign one snapshot family, recommended `DISTRICT_DWD_STAT` | Do not mix snapshot and diff feeds | `medium` | Safe if kept to one family only |
+| `canada-cap-alerts` | `implemented` | `geospatial` | `marine`, `connect` | [International briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md:386) | Keep the backend-first CAP directory discovery and bounded CAP XML parsing slice stable, and add only a bounded consumer or explicit workflow-validation note before any higher promotion | Do not traverse the full archive by default | `medium` | Geospatial AI progress now records a real backend-first advisory slice plus a completed bounded Canada review/export package; current evidence is stronger than assignment-ready, but still below workflow-validated |
+| `dwd-cap-alerts` | `implemented` | `geospatial` | `connect` | [International briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md:504) | Keep the bounded `DISTRICT_DWD_STAT` snapshot-family advisory slice stable and add only a narrow consumer or explicit workflow note before any higher promotion | Do not mix snapshot and diff feeds | `medium` | Geospatial AI progress now records a real backend-first DWD CAP advisory slice plus bounded environmental reporting integration; current evidence is stronger than assignment-ready, but still below workflow-validated |
 | `finland-digitraffic` | `implemented` | `features-webcam` | `geospatial`, `connect` | [International briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md:620) | Keep the existing list/detail/freshness interpretation slice stable and add only a bounded consumer or follow-on status-classification field before any higher promotion | Do not combine road weather with cameras, AIS, and rail in one patch | `medium` | Features/Webcam AI progress now records route coverage for station list and detail, endpoint health, per-station freshness interpretation, fixtures, tests, and updated docs; current evidence is still backend-first and not workflow-validated |
-| `netherlands-rws-waterinfo` | `implemented` | `marine` | `geospatial`, `connect` | [May 2026 packets](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-may-2026.md:1) | Keep the backend-first WaterWebservices slice bounded and add only a narrow marine-local consumer, helper, or explicit workflow note before any higher promotion | Do not widen into portal/viewer ingestion, historical expansion, or inferred impact claims | `medium` | Marine AI progress records pinned POST endpoints, backend route, contracts, fixtures, docs, and passing backend tests; current evidence is backend-first and still below workflow validation |
+| `netherlands-rws-waterinfo` | `implemented` | `marine` | `geospatial`, `connect` | [May 2026 packets](/C:/Users/mike/11Writer/app/docs/source-quick-assign-packets-may-2026.md:1) | Keep the backend-first WaterWebservices slice plus the completed narrow helper/export follow-on bounded and record only a marine-local validation/export note before any higher promotion | Do not widen into portal/viewer ingestion, historical expansion, or inferred impact claims | `medium` | Marine AI progress records pinned POST endpoints, backend route, contracts, fixtures, docs, passing backend tests, and a completed bounded helper/export follow-on; current evidence is still below workflow validation |
 | `eea-air-quality` | `needs-verification` | `geospatial` | `geospatial`, `connect` | [Global briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:31) | Pin one stable bounded observation endpoint or keep to station metadata only | Do not start with Europe-wide multi-pollutant harvesting | `medium` | Main gap is exact backend-safe time-series endpoint confirmation |
-| `canada-geomet-ogc` | `assignment-ready` | `geospatial` | `geospatial`, `marine`, `connect` | [Global briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:122) | Assign one pinned collection only | Do not normalize the entire GeoMet catalog | `medium` | Collection-scoped implementation only |
+| `canada-geomet-ogc` | `implemented` | `geospatial` | `geospatial`, `marine`, `connect` | [Global briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:122) | Keep the completed one-collection `climate-stations` slice bounded and add only a narrow consumer or workflow note before any higher promotion | Do not normalize the entire GeoMet catalog | `medium` | Geospatial AI progress records a completed backend-first `climate-stations` collection slice with route, fixtures, tests, docs, and no-fake-coordinate handling; current evidence remains below workflow validation |
 | `dwd-open-weather` | `assignment-ready` | `geospatial` | `geospatial`, `marine`, `aerospace`, `connect` | [Global briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:205) | Assign one observation or forecast family only | Do not normalize the whole DWD tree | `medium` | Product-family scoping is the main constraint |
 | `bom-anonymous-ftp` | `deferred` | `geospatial` | `geospatial`, `marine`, `aerospace`, `connect` | [Global briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:287) | Narrow to one explicitly approved product family before any code work | Do not treat the whole BoM catalog as one connector | `low` | Official/public but still too broad for a safe first connector |
-| `hko-open-weather` | `assignment-ready` | `geospatial` | `geospatial`, `marine`, `connect` | [Global briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:343) | Assign `warningInfo` only | Do not assume all HKO datasets share one query model | `medium` | One of the cleanest global ready sources |
+| `hko-open-weather` | `implemented` | `geospatial` | `geospatial`, `marine`, `connect` | [Global briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:343) | Keep the existing `warningInfo` plus bounded tropical-cyclone context slice stable and add only a narrow report-input consumer or explicit workflow note before any higher promotion | Do not assume all HKO datasets share one query model | `medium` | Geospatial AI progress explicitly reconciled this source as already implemented backend-first with fixtures, routes, tests, and docs; current evidence is still below workflow validation |
 | `singapore-nea-weather` | `needs-verification` | `geospatial` | `geospatial`, `connect` | [Global briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:425) | Re-verify current no-auth posture, then pin PM2.5 plus one station family | Do not assume the entire family is uniformly keyless | `medium` | Endpoint behavior looked keyless, docs still mention key flows |
 | `meteoswiss-open-data` | `implemented` | `geospatial` | `geospatial`, `connect` | [Global briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:511) | Keep the bounded SwissMetNet STAC plus one `t_now` asset-family slice stable and add only a narrow consumer or explicit workflow note before any higher promotion | Do not attempt the full product catalog or widen beyond the selected observation asset family | `medium` | Geospatial AI progress records a real backend-first station-context slice with route, fixture bundle, tests, and docs; current evidence is backend-first and not workflow-validated |
 | `scottish-water-overflows` | `workflow-validated` | `marine` | `geospatial`, `connect` | [Global briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:593) | Keep overflow-status caveats intact and promote only to `validated` after broader full-validation/live-behavior evidence is explicitly recorded | Do not present activation as confirmed contamination | `medium` | Contract-covered, marine-smoke-covered, and export-metadata-covered per [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md:1); still contextual only and not fully validated/live validated |
-| `france-vigicrues-hydrometry` | `in-progress` | `marine` | `geospatial`, `connect` | [Batch 4 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch4-briefs.md:829) | Keep the new backend-only hydrometry slice bounded, preserve observed-vs-context semantics, and only promote after client or workflow evidence is explicitly recorded | Do not infer inundation, damage, pollution impact, health impact, or vessel behavior from station values | `medium` | Marine AI progress now shows pinned Hub'Eau endpoint family, backend route, contracts, fixtures, docs, and passing backend tests; current evidence is backend-only, so this stays `in-progress` rather than `implemented` |
+| `france-vigicrues-hydrometry` | `implemented` | `marine` | `geospatial`, `connect` | [Batch 4 briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch4-briefs.md:829) | Keep the hydrometry slice plus the completed reporting/helper follow-through bounded, preserve observed-vs-context semantics, and only promote after explicit source-row workflow evidence is recorded | Do not infer inundation, damage, pollution impact, health impact, or vessel behavior from station values | `medium` | Marine AI progress now shows pinned Hub'Eau endpoint family, backend route, contracts, fixtures, docs, passing backend tests, and completed hydrology/corridor export follow-through; current evidence is stronger than `in-progress`, but still below workflow-validated |
 | `esa-neocc-close-approaches` | `needs-verification` | `aerospace` | `aerospace`, `connect` | [Global briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:670) | Pin one exact raw-text endpoint from official docs before code work | Do not assume the experimental interface is stable | `medium` | Official docs exist, exact machine endpoint still not pinned |
 | `imo-epos-geohazards` | `needs-verification` | `geospatial` | `geospatial`, `connect` | [Global briefs](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-global-briefs.md:749) | Verify one stable official machine endpoint or keep blocked | Do not implement from unofficial Iceland feeds | `low` | Official-path confirmation is still too weak for connector work |
 
@@ -770,7 +783,12 @@ Current interpretation:
 - `noaa-global-volcano-locations`
 - `geosphere-austria-warnings`
 - `nasa-power-meteorology-solar`
+- `geonet-geohazards`
+- `hko-open-weather`
 - `usgs-geomagnetism`
+- `canada-cap-alerts`
+- `canada-geomet-ogc`
+- `bc-wildfire-datamart`
 - `noaa-aviation-weather-center-data-api`
 - `faa-nas-airport-status`
 - `noaa-tsunami-alerts`
@@ -783,6 +801,7 @@ Current interpretation:
 - `anchorage-vaac-advisories`
 - `tokyo-vaac-advisories`
 - `nrc-event-notifications`
+- `france-vigicrues-hydrometry`
 - `taiwan-cwa-aws-opendata`
 - `meteoswiss-open-data`
 - `nist-nvd-cve`
@@ -798,22 +817,16 @@ Current interpretation:
 
 ### In Progress
 
-- `france-vigicrues-hydrometry`
+- no current source rows
 
 Current interpretation:
 
-- backend route, contracts, fixtures, and tests now exist
-- current evidence is still backend-only, so this remains below `implemented`
-- do not promote until an operational consumer path or equivalent implementation-completeness evidence is explicitly recorded
+- use this bucket only when implementation has clearly started but code presence or bounded source-slice completeness is still not explicit enough for `implemented`
 
 ### Assignment-Ready
 
-- `geonet-geohazards`
-- `canada-cap-alerts`
 - `dwd-cap-alerts`
-- `canada-geomet-ogc`
 - `dwd-open-weather`
-- `hko-open-weather`
 - `unhcr-refugee-data-finder`
 - `worldbank-indicators`
 - `uk-police-crime`
@@ -851,26 +864,27 @@ Related registry-side rejected example outside this board scope:
 
 ## Recommended Next Assignments
 
-- Geospatial: `geonet-geohazards` or `hko-open-weather`, with `canada-cap-alerts` or `canada-geomet-ogc` as the cleanest fresh-source follow-ons and `meteoswiss-open-data` as a bounded consumer/workflow follow-on only
-- Aerospace: rerun focused aerospace smoke on a healthy Windows host before any source promotion; next fresh aerospace source should stay out of the current implemented stack unless Manager AI explicitly reopens it
-- Marine: finish the current `france-vigicrues-hydrometry` backend-only lane and record any first consumer or marine `unavailable` / selective `degraded` workflow evidence before handing out a different fresh marine source
-- Features/Webcam: add a bounded `finland-digitraffic` follow-on only if it stays on road-weather status interpretation or a first consumer path; otherwise use the source-ops export-summary/export-bundle lane or route the next fresh assignment elsewhere
+- Geospatial: the latest Canada environmental context package, base-earth reference review/export package, `geonet-geohazards`, `hko-open-weather`, and `dwd-cap-alerts` all appear completed in progress truth; treat them as bounded report inputs or follow-ons rather than fresh source intake, and reopen a fresh geospatial warning lane only for real missing coverage such as `belgium-rmi-warnings`
+- Aerospace: the package-coherence, fusion-snapshot-input, report-brief, and bounded VAAC report-package lanes are completed, and the current active Aerospace lane is the bounded space-weather continuity package; keep executed smoke as a host-specific validation gap and keep fresh aerospace source work out of the current implemented stack unless Manager AI explicitly reopens it
+- Marine: the corridor/chokepoint review package, `marineReportBriefPackage`, and the latest Vigicrues follow-through are now completed workflow-supporting evidence; treat Waterinfo as bounded follow-on only and route the next marine move toward a bounded corridor situation/report package rather than a fresh source wave
+- Features/Webcam: current candidate expansion, network coverage/review-priority work, promotion-readiness comparison, and Caltrans sandbox-feasibility are complete; Baton Rouge/Vancouver/Caltrans stay `candidate-sandbox-importable`, Arlington and NZTA stay bounded feasibility-only, and Queensland stays held
 - Gather: verify `needs-verification` sources
-- Connect: repo-wide blocker fixing and release dry-run support
+- Connect: the current active Connect assignment is the post-wave compatibility and peer/runtime classification sweep over the newly completed reporting-input surfaces
 
 ## Manager Routing Note
 
-After the current in-flight lanes (`france-vigicrues-hydrometry`, `finland-digitraffic`, backend-first `usgs-geomagnetism`, and the existing aerospace validation lane), the strongest next-wave implementation handoffs are:
+After the current in-flight lanes (Connect's post-wave compatibility sweep, Data's topic-scoped report packet, Marine's corridor situation/report package, Aerospace's space-weather continuity package, Geospatial's Belgium warning wave, and Features/Webcam's NZTA or Arlington feasibility wave), the strongest next-after-next implementation handoffs are:
 
-1. `canada-cap-alerts`
-2. `canada-geomet-ogc`
-3. `bc-wildfire-datamart`
+1. `meteoalarm-atom-feeds`
+2. `geoboundaries-admin`
+3. `one bounded Data workflow-validation or topic-coverage closure`
 
 Why:
 
 - each remains officially no-auth and machine-readable
-- each has a narrow first slice already documented
-- none requires reopening a currently in-flight source lane just to make progress
+- the latest Canada CAP, Canada GeoMet, and Canada context-package work now appear repo-present or completed in progress truth, so they no longer belong in the clean fresh-routing block
+- the remaining strongest fresh handoffs now avoid reopening already implemented Batch 5 geospatial slices
+- they preserve bounded next-after-next work instead of reopening already implemented reporting-input or warning waves
 
 ## Recently Implemented / Started
 
@@ -880,6 +894,15 @@ Recently implemented or clearly code-present in the repo:
   - Route, service, tests, query hook, and UI-layer consumption are present.
 - NOAA Tsunami Alerts
   - Route, tests, query hook, and UI-layer consumption are present.
+- Canada CAP Alerts
+  - Geospatial AI progress now records a real backend-first CAP route with source health, advisory-only caveats, inert-text hardening, tests, and a later bounded Canada context package that consumes it.
+  - The board now keeps it at `implemented`, not `assigned`, because the raw source slice is already present and the latest geospatial work moved into package follow-on territory.
+- Canada GeoMet OGC
+  - Geospatial AI progress now records a backend-first bounded `climate-stations` slice plus the later bounded Canada context package that consumes it.
+  - The board keeps it at `implemented`, not `assignment-ready`, because the source slice is already present in repo code.
+- BC Wildfire Datamart
+  - Geospatial AI progress now records a backend-first fire-weather context slice with route, fixtures, tests, docs, and environmental family-overview participation.
+  - The board keeps it at `implemented`, not `assignment-ready`, because the source slice is already present in repo code.
 - NOAA CO-OPS
   - Marine context route, service, tests, query hook, export/evidence consumption, and workflow-validation evidence are present.
 - NOAA NDBC
@@ -887,8 +910,8 @@ Recently implemented or clearly code-present in the repo:
 - Scottish Water Overflows
   - Marine context route, service, tests, query hook, export/evidence consumption, and workflow-validation evidence are present.
 - France Vigicrues Hydrometry
-  - Marine AI progress now records pinned public Hub'Eau hydrometry endpoints, a backend route, typed contracts, fixtures, docs, and passing backend tests.
-  - The current slice is still backend-only, so the board keeps it at `in-progress`.
+  - Marine AI progress now records pinned public Hub'Eau hydrometry endpoints, a backend route, typed contracts, fixtures, docs, passing backend tests, and completed hydrology/corridor export follow-through.
+  - The board keeps it at `implemented`, not `workflow-validated`, because no explicit source-row workflow-validation record is recorded yet.
 - USGS Geomagnetism
   - Geospatial AI progress now records a backend-first implemented slice with settings, route, service, fixture, tests, source-health/export fields, and source-specific docs.
   - The board keeps it at `implemented`, not `workflow-validated`, because no frontend or workflow-validation record is explicit yet.
@@ -938,7 +961,7 @@ Recently implemented or clearly code-present in the repo:
   - The board keeps it at `implemented`, not `workflow-validated`, because no stable consumer or explicit workflow-validation record is recorded yet.
 - Data AI RSS implemented waves
   - Data AI progress now records the five-feed starter bundle, the official cyber advisory wave (`ncsc-uk-all`, `cert-fr-alerts`, `cert-fr-advisories`), the infrastructure/status wave (`cloudflare-radar`, `netblocks`, `apnic-blog`), the OSINT/investigations wave (`bellingcat`, `citizen-lab`, `occrp`, `icij`), the rights/civic/digital-policy wave (`eff-updates`, `access-now`, `privacy-international`, `freedom-house`), and the fact-checking/disinformation wave (`full-fact`, `snopes`, `politifact`, `factcheck-org`, `euvsdisinfo`) on the bounded shared recent-items route.
-  - These waves are implemented backend-first and contract-tested, but they remain below `workflow-validated` because no stable consumer-path or explicit workflow-validation record is recorded yet.
+  - These waves are implemented backend-first and contract-tested, and they now have a stable metadata-only inspector consumer path, but they remain below `workflow-validated` because no explicit smoke/manual workflow-validation record is recorded yet.
 - Data AI Official/Public Advisories Wave
   - Data AI progress now records `state-travel-advisories`, `eu-commission-press`, `un-press-releases`, and `unaids-news` on the same bounded shared recent-items route plus the `official-public-advisories` family definition on the family overview helper.
   - This wave is implemented backend-first and contract-tested, but it remains below `workflow-validated` because no stable consumer-path or explicit workflow-validation record is recorded yet.
@@ -958,7 +981,11 @@ Recently implemented or clearly code-present in the repo:
   - Data AI progress now records `/api/feeds/data-ai/source-families/review-queue` as a bounded family/source issue bundling and export-safe review helper over the implemented feed families.
   - This is helper-package evidence only and must not be treated as source truth, source scoring, connector proof, or workflow-validation proof.
 - Data AI Source Intelligence
-  - Data AI progress now records a client-light inspector card over readiness/export, family review, and review-queue metadata surfaces.
+  - Data AI progress now records a client-light inspector card over readiness/export, family review, and review-queue metadata surfaces plus a bounded topic/context lens over recent-item metadata.
+  - Data AI progress now also records a bounded infrastructure/status context package over `cloudflare-radar`, `netblocks`, and `apnic-blog`, using scoped metadata-only family/recent/review/review-queue views with methodology caveats and export-safe lines.
+  - Data AI progress now also records a bounded long-tail intake posture note that preserves candidate-vs-validated state, provenance, duplicate-cluster semantics, and `as_detailed_in_addition_to`-style related-coverage linkage without enabling broad crawling.
+  - Data AI progress now also records a bounded fusion/claim-integrity snapshot that composes the existing metadata-only Data AI surfaces into one export-safe domain input without rebuilding Source Discovery backend mechanics or reopening feed-family ingestion.
+  - Data AI progress now also records a bounded report-brief package that organizes the existing metadata-only Data AI surfaces into `observe`, `orient`, `prioritize`, and `explain` sections without introducing raw-text-heavy reporting behavior.
   - This is workflow-supporting metadata-only consumer evidence only and must not be treated as feed truth, source scoring, or workflow-validation proof.
 - EMSC SeismicPortal Realtime
   - Geospatial AI progress now records a backend-first implemented seismic-event slice with a bounded recent-events route, fixture-backed contracts, and source-specific docs.
@@ -1054,7 +1081,7 @@ Current planning docs are now closer to aligned, but a few notes remain:
   - Marine workflow evidence now supports `workflow-validated`, but not `validated`.
 - `france-vigicrues-hydrometry`
   - Earlier planning treated this as assignment-ready.
-  - Marine AI progress now supports `in-progress` because the backend slice exists, but current evidence is still backend-only and not yet complete enough for `implemented`.
+  - Marine AI progress now supports `implemented` because the backend slice, tests, docs, and bounded hydrology/corridor follow-through are all explicit, but no source-row workflow-validation record is recorded yet.
 - `usgs-geomagnetism`
   - Earlier Batch 5 planning treated this as assignment-ready.
   - Geospatial AI progress now supports `implemented`, but only as a backend-first context slice; no workflow validation is implied.

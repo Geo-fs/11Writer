@@ -26,14 +26,23 @@ import { buildAerospaceContextReportSummary } from "./aerospaceContextReport";
 import { buildAerospaceContextGapQueueSummary } from "./aerospaceContextGapQueue";
 import { buildAerospaceContextReviewQueueSummary } from "./aerospaceContextReviewQueue";
 import { buildAerospaceContextReviewExportBundleSummary } from "./aerospaceContextReviewExportBundle";
+import { buildAerospaceContextSnapshotReportSummary } from "./aerospaceContextSnapshotReport";
 import { buildAerospaceCurrentArchiveContextSummary } from "./aerospaceCurrentArchiveContext";
 import { buildAerospaceWorkflowEvidenceLedger } from "./aerospaceWorkflowEvidenceLedger";
 import { buildAerospaceWorkflowReadinessPackageSummary } from "./aerospaceWorkflowReadinessPackage";
+import { buildAerospaceWorkflowValidationEvidenceSnapshotSummary } from "./aerospaceWorkflowValidationEvidenceSnapshot";
 import { buildAerospaceExportCoherenceSummary } from "./aerospaceExportCoherence";
 import { buildAerospaceIssueExportBundleSummary } from "./aerospaceIssueExportBundle";
 import {
+  buildDataAiFusionSnapshotSummary,
+  buildDataAiInfrastructureStatusContextSummary,
+  buildDataAiLongTailDiscoverySummary,
+  buildDataAiReportBriefSummary,
   buildDataAiSourceIntelligenceSummary,
-  buildDataAiTopicLensSummary
+  buildDataAiTopicReportPacket,
+  buildDataAiTopicLensSummary,
+  DATA_AI_INFRASTRUCTURE_STATUS_FAMILY_ID,
+  DATA_AI_INFRASTRUCTURE_STATUS_SOURCE_IDS
 } from "./dataAiSourceIntelligence";
 import {
   AEROSPACE_SOURCE_READINESS_BUNDLES,
@@ -155,6 +164,21 @@ export function InspectorPanel() {
   const dataAiRecentQuery = useDataAiRecentFeedQuery();
   const dataAiReviewQuery = useDataAiFeedFamilyReviewQuery();
   const dataAiReviewQueueQuery = useDataAiFeedFamilyReviewQueueQuery();
+  const dataAiInfrastructureReadinessQuery = useDataAiFeedFamilyReadinessExportQuery({
+    familyIds: [DATA_AI_INFRASTRUCTURE_STATUS_FAMILY_ID],
+    sourceIds: [...DATA_AI_INFRASTRUCTURE_STATUS_SOURCE_IDS]
+  });
+  const dataAiInfrastructureRecentQuery = useDataAiRecentFeedQuery({
+    sourceIds: [...DATA_AI_INFRASTRUCTURE_STATUS_SOURCE_IDS]
+  });
+  const dataAiInfrastructureReviewQuery = useDataAiFeedFamilyReviewQuery({
+    familyIds: [DATA_AI_INFRASTRUCTURE_STATUS_FAMILY_ID],
+    sourceIds: [...DATA_AI_INFRASTRUCTURE_STATUS_SOURCE_IDS]
+  });
+  const dataAiInfrastructureReviewQueueQuery = useDataAiFeedFamilyReviewQueueQuery({
+    familyIds: [DATA_AI_INFRASTRUCTURE_STATUS_FAMILY_ID],
+    sourceIds: [...DATA_AI_INFRASTRUCTURE_STATUS_SOURCE_IDS]
+  });
   const [cameraFrameNonce, setCameraFrameNonce] = useState<number>(Date.now());
 
   const related = useMemo(() => {
@@ -513,6 +537,19 @@ export function InspectorPanel() {
     currentArchiveContextSummary: aerospaceCurrentArchiveContextSummary,
     exportCoherenceSummary: aerospaceExportCoherenceSummary,
   });
+  const aerospaceContextSnapshotReportSummary = buildAerospaceContextSnapshotReportSummary({
+    profileId:
+      selectedAerospaceExportProfile === "source-health"
+        ? "source-health-review"
+        : selectedAerospaceExportProfile === "space-context"
+          ? "space-weather-context"
+          : "default",
+    sourceReadinessBundleSummary: aerospaceSourceReadinessBundleSummary,
+    contextGapQueueSummary: aerospaceContextGapQueueSummary,
+    currentArchiveContextSummary: aerospaceCurrentArchiveContextSummary,
+    exportCoherenceSummary: aerospaceExportCoherenceSummary,
+    issueExportBundleSummary: aerospaceIssueExportBundleSummary,
+  });
   const aerospaceContextReviewQueueSummary = buildAerospaceContextReviewQueueSummary({
     availabilitySummary: operationalContextAvailabilitySummary,
     sourceReadinessBundleSummary: aerospaceSourceReadinessBundleSummary,
@@ -526,6 +563,14 @@ export function InspectorPanel() {
   const aerospaceContextReviewExportBundleSummary =
     buildAerospaceContextReviewExportBundleSummary({
       reviewQueueSummary: aerospaceContextReviewQueueSummary,
+    });
+  const aerospaceWorkflowValidationEvidenceSnapshotSummary =
+    buildAerospaceWorkflowValidationEvidenceSnapshotSummary({
+      contextSnapshotReportSummary: aerospaceContextSnapshotReportSummary,
+      contextReviewQueueSummary: aerospaceContextReviewQueueSummary,
+      contextReviewExportBundleSummary: aerospaceContextReviewExportBundleSummary,
+      workflowReadinessPackageSummary: aerospaceWorkflowReadinessPackageSummary,
+      ourAirportsReferenceSummary,
     });
   const aerospaceContextReportSummary = buildAerospaceContextReportSummary({
     selectedTargetSummary: selectedEvidenceSummary,
@@ -612,6 +657,61 @@ export function InspectorPanel() {
       }),
     [dataAiReadinessQuery.data, dataAiReviewQuery.data, dataAiReviewQueueQuery.data]
   );
+  const dataAiLongTailDiscoverySummary = useMemo(
+    () =>
+      buildDataAiLongTailDiscoverySummary({
+        readiness: dataAiReadinessQuery.data,
+        review: dataAiReviewQuery.data,
+        reviewQueue: dataAiReviewQueueQuery.data
+      }),
+    [dataAiReadinessQuery.data, dataAiReviewQuery.data, dataAiReviewQueueQuery.data]
+  );
+  const dataAiFusionSnapshotSummary = useMemo(
+    () =>
+      buildDataAiFusionSnapshotSummary({
+        recent: dataAiRecentQuery.data,
+        readiness: dataAiReadinessQuery.data,
+        review: dataAiReviewQuery.data,
+        reviewQueue: dataAiReviewQueueQuery.data,
+        infrastructureRecent: dataAiInfrastructureRecentQuery.data,
+        infrastructureReadiness: dataAiInfrastructureReadinessQuery.data,
+        infrastructureReview: dataAiInfrastructureReviewQuery.data,
+        infrastructureReviewQueue: dataAiInfrastructureReviewQueueQuery.data
+      }),
+    [
+      dataAiRecentQuery.data,
+      dataAiReadinessQuery.data,
+      dataAiReviewQuery.data,
+      dataAiReviewQueueQuery.data,
+      dataAiInfrastructureRecentQuery.data,
+      dataAiInfrastructureReadinessQuery.data,
+      dataAiInfrastructureReviewQuery.data,
+      dataAiInfrastructureReviewQueueQuery.data
+    ]
+  );
+  const dataAiReportBriefSummary = useMemo(
+    () =>
+      buildDataAiReportBriefSummary({
+        recent: dataAiRecentQuery.data,
+        readiness: dataAiReadinessQuery.data,
+        review: dataAiReviewQuery.data,
+        reviewQueue: dataAiReviewQueueQuery.data,
+        infrastructureRecent: dataAiInfrastructureRecentQuery.data,
+        infrastructureReadiness: dataAiInfrastructureReadinessQuery.data,
+        infrastructureReview: dataAiInfrastructureReviewQuery.data,
+        infrastructureReviewQueue: dataAiInfrastructureReviewQueueQuery.data
+      }),
+    [
+      dataAiRecentQuery.data,
+      dataAiReadinessQuery.data,
+      dataAiReviewQuery.data,
+      dataAiReviewQueueQuery.data,
+      dataAiInfrastructureRecentQuery.data,
+      dataAiInfrastructureReadinessQuery.data,
+      dataAiInfrastructureReviewQuery.data,
+      dataAiInfrastructureReviewQueueQuery.data
+    ]
+  );
   const dataAiTopicLensSummary = useMemo(
     () =>
       buildDataAiTopicLensSummary({
@@ -627,12 +727,62 @@ export function InspectorPanel() {
       dataAiReviewQueueQuery.data
     ]
   );
+  const dataAiTopicReportPacket = useMemo(
+    () =>
+      buildDataAiTopicReportPacket({
+        topicId: dataAiTopicLensSummary?.topics[0]?.topicId ?? null,
+        recent: dataAiRecentQuery.data,
+        readiness: dataAiReadinessQuery.data,
+        review: dataAiReviewQuery.data,
+        reviewQueue: dataAiReviewQueueQuery.data,
+        infrastructureRecent: dataAiInfrastructureRecentQuery.data,
+        infrastructureReadiness: dataAiInfrastructureReadinessQuery.data,
+        infrastructureReview: dataAiInfrastructureReviewQuery.data,
+        infrastructureReviewQueue: dataAiInfrastructureReviewQueueQuery.data
+      }),
+    [
+      dataAiInfrastructureReadinessQuery.data,
+      dataAiInfrastructureRecentQuery.data,
+      dataAiInfrastructureReviewQuery.data,
+      dataAiInfrastructureReviewQueueQuery.data,
+      dataAiReadinessQuery.data,
+      dataAiRecentQuery.data,
+      dataAiReviewQuery.data,
+      dataAiReviewQueueQuery.data,
+      dataAiTopicLensSummary?.topics
+    ]
+  );
+  const dataAiInfrastructureStatusSummary = useMemo(
+    () =>
+      buildDataAiInfrastructureStatusContextSummary({
+        recent: dataAiInfrastructureRecentQuery.data,
+        readiness: dataAiInfrastructureReadinessQuery.data,
+        review: dataAiInfrastructureReviewQuery.data,
+        reviewQueue: dataAiInfrastructureReviewQueueQuery.data
+      }),
+    [
+      dataAiInfrastructureRecentQuery.data,
+      dataAiInfrastructureReadinessQuery.data,
+      dataAiInfrastructureReviewQuery.data,
+      dataAiInfrastructureReviewQueueQuery.data
+    ]
+  );
   const dataAiSourceIntelligenceLoading =
     dataAiReadinessQuery.isLoading || dataAiReviewQuery.isLoading || dataAiReviewQueueQuery.isLoading;
   const dataAiSourceIntelligenceError =
     dataAiReadinessQuery.isError || dataAiReviewQuery.isError || dataAiReviewQueueQuery.isError;
   const dataAiTopicLensLoading = dataAiRecentQuery.isLoading;
   const dataAiTopicLensError = dataAiRecentQuery.isError;
+  const dataAiInfrastructureStatusLoading =
+    dataAiInfrastructureReadinessQuery.isLoading ||
+    dataAiInfrastructureRecentQuery.isLoading ||
+    dataAiInfrastructureReviewQuery.isLoading ||
+    dataAiInfrastructureReviewQueueQuery.isLoading;
+  const dataAiInfrastructureStatusError =
+    dataAiInfrastructureReadinessQuery.isError ||
+    dataAiInfrastructureRecentQuery.isError ||
+    dataAiInfrastructureReviewQuery.isError ||
+    dataAiInfrastructureReviewQueueQuery.isError;
   const cameraSourceInventory =
     entity?.type === "camera"
       ? (cameraSourceInventoryQuery.data?.sources ?? []).find((source) => source.key === entity.source)
@@ -712,6 +862,59 @@ export function InspectorPanel() {
               {dataAiSourceIntelligenceSummary.exportLines.map((line) => (
                 <span key={line}>Export-safe: {line}</span>
               ))}
+              {dataAiInfrastructureStatusSummary ? (
+                <div className="panel__section" data-testid="data-ai-infrastructure-status-context">
+                  <p className="panel__eyebrow">Infrastructure/Status Context</p>
+                  <strong>{dataAiInfrastructureStatusSummary.workflowValidationLine}</strong>
+                  {dataAiInfrastructureStatusSummary.displayLines.map((line) => (
+                    <span key={line}>{line}</span>
+                  ))}
+                  <div className="stack">
+                    <StatusBadge tone="info">{dataAiInfrastructureStatusSummary.sourceMode}</StatusBadge>
+                    <StatusBadge tone="info">
+                      Prompt injection {dataAiInfrastructureStatusSummary.promptInjectionTestPosture}
+                    </StatusBadge>
+                    <StatusBadge
+                      tone={
+                        dataAiInfrastructureStatusSummary.exportReadinessGapCount > 0
+                          ? "warning"
+                          : "available"
+                      }
+                    >
+                      Export gaps {dataAiInfrastructureStatusSummary.exportReadinessGapCount}
+                    </StatusBadge>
+                  </div>
+                  <div className="stack">
+                    {dataAiInfrastructureStatusSummary.sourceIds.map((sourceId) => (
+                      <StatusBadge key={sourceId} tone="neutral">
+                        {sourceId}
+                      </StatusBadge>
+                    ))}
+                  </div>
+                  {dataAiInfrastructureStatusSummary.methodologyCaveats.slice(0, 3).map((line) => (
+                    <span key={line}>Methodology: {line}</span>
+                  ))}
+                  {dataAiInfrastructureStatusSummary.exportLines.slice(0, 4).map((line) => (
+                    <span key={line}>Infrastructure export-safe: {line}</span>
+                  ))}
+                </div>
+              ) : dataAiInfrastructureStatusLoading ? (
+                <div
+                  className="empty-state compact"
+                  data-testid="data-ai-infrastructure-status-context-loading"
+                >
+                  <p>Loading infrastructure/status context.</p>
+                  <span>Cloudflare Radar, NetBlocks, and APNIC metadata is being summarized.</span>
+                </div>
+              ) : dataAiInfrastructureStatusError ? (
+                <div
+                  className="empty-state compact"
+                  data-testid="data-ai-infrastructure-status-context-error"
+                >
+                  <p>Infrastructure/status context is unavailable.</p>
+                  <span>Provider methodology caveats stay metadata-only when the scoped views fail.</span>
+                </div>
+              ) : null}
               {dataAiTopicLensSummary ? (
                 <div className="panel__section" data-testid="data-ai-topic-lens">
                   <p className="panel__eyebrow">Data AI Topic Lens</p>
@@ -749,6 +952,121 @@ export function InspectorPanel() {
                 <div className="empty-state compact" data-testid="data-ai-topic-lens-error">
                   <p>Data AI topic/context lens is unavailable.</p>
                   <span>Only the existing source-intelligence posture is shown.</span>
+                </div>
+              ) : null}
+              {dataAiLongTailDiscoverySummary ? (
+                <div className="panel__section" data-testid="data-ai-long-tail-discovery">
+                  <p className="panel__eyebrow">Long-Tail Intake Posture</p>
+                  <strong>{dataAiLongTailDiscoverySummary.workflowValidationLine}</strong>
+                  {dataAiLongTailDiscoverySummary.displayLines.map((line) => (
+                    <span key={line}>{line}</span>
+                  ))}
+                  <div className="stack">
+                    <StatusBadge tone="info">
+                      Implemented families {dataAiLongTailDiscoverySummary.implementedFamilyCount}
+                    </StatusBadge>
+                    <StatusBadge tone="info">
+                      Implemented sources {dataAiLongTailDiscoverySummary.implementedSourceCount}
+                    </StatusBadge>
+                    <StatusBadge tone="warning">
+                      Duplicate-heavy issues {dataAiLongTailDiscoverySummary.duplicateHeavyIssueCount}
+                    </StatusBadge>
+                  </div>
+                  {dataAiLongTailDiscoverySummary.exportLines.slice(0, 3).map((line) => (
+                    <span key={line}>Long-tail export-safe: {line}</span>
+                  ))}
+                </div>
+              ) : null}
+              {dataAiFusionSnapshotSummary ? (
+                <div className="panel__section" data-testid="data-ai-fusion-snapshot">
+                  <p className="panel__eyebrow">Fusion / Claim Integrity Snapshot</p>
+                  <strong>{dataAiFusionSnapshotSummary.workflowValidationLine}</strong>
+                  {dataAiFusionSnapshotSummary.displayLines.slice(0, 5).map((line) => (
+                    <span key={line}>{line}</span>
+                  ))}
+                  <div className="stack">
+                    <StatusBadge tone="info">{dataAiFusionSnapshotSummary.sourceMode}</StatusBadge>
+                    <StatusBadge tone="info">
+                      Topics {dataAiFusionSnapshotSummary.activeTopicIds.length}
+                    </StatusBadge>
+                    <StatusBadge tone="warning">
+                      Review issues {dataAiFusionSnapshotSummary.issueCount}
+                    </StatusBadge>
+                  </div>
+                  {dataAiFusionSnapshotSummary.exportLines.slice(0, 3).map((line) => (
+                    <span key={line}>Fusion export-safe: {line}</span>
+                  ))}
+                </div>
+              ) : null}
+              {dataAiReportBriefSummary ? (
+                <div className="panel__section" data-testid="data-ai-report-brief">
+                  <p className="panel__eyebrow">Report Brief Package</p>
+                  <strong>{dataAiReportBriefSummary.workflowValidationLine}</strong>
+                  {dataAiReportBriefSummary.displayLines.map((line) => (
+                    <span key={line}>{line}</span>
+                  ))}
+                  <div className="stack">
+                    <StatusBadge tone="info">{dataAiReportBriefSummary.sourceMode}</StatusBadge>
+                    <StatusBadge tone="warning">
+                      Report issues {dataAiReportBriefSummary.issueCount}
+                    </StatusBadge>
+                    <StatusBadge tone="warning">
+                      Export gaps {dataAiReportBriefSummary.exportReadinessGapCount}
+                    </StatusBadge>
+                  </div>
+                  <div className="stack">
+                    {dataAiReportBriefSummary.sections.map((section) => (
+                      <div
+                        key={section.sectionId}
+                        className="data-card data-card--compact"
+                        data-testid={`data-ai-report-brief-${section.sectionId}`}
+                      >
+                        <strong>{section.label}</strong>
+                        <span>{section.lines[0]}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {dataAiReportBriefSummary.exportLines.slice(0, 3).map((line) => (
+                    <span key={line}>Report export-safe: {line}</span>
+                  ))}
+                  {dataAiTopicReportPacket ? (
+                    <div className="panel__section" data-testid="data-ai-topic-report-packet">
+                      <p className="panel__eyebrow">Topic Report Packet</p>
+                      <strong>{dataAiTopicReportPacket.workflowValidationLine}</strong>
+                      {dataAiTopicReportPacket.displayLines.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                      <div className="stack">
+                        <StatusBadge tone="info">{dataAiTopicReportPacket.sourceMode}</StatusBadge>
+                        <StatusBadge tone="info">{dataAiTopicReportPacket.topicLabel}</StatusBadge>
+                        <StatusBadge tone="warning">
+                          Topic issues {dataAiTopicReportPacket.issueCount}
+                        </StatusBadge>
+                      </div>
+                      <div className="stack">
+                        {dataAiTopicReportPacket.selectedSourceIds.slice(0, 6).map((sourceId) => (
+                          <StatusBadge key={sourceId} tone="neutral">
+                            {sourceId}
+                          </StatusBadge>
+                        ))}
+                      </div>
+                      <div className="stack">
+                        {dataAiTopicReportPacket.sections.map((section) => (
+                          <div
+                            key={section.sectionId}
+                            className="data-card data-card--compact"
+                            data-testid={`data-ai-topic-report-packet-${section.sectionId}`}
+                          >
+                            <strong>{section.label}</strong>
+                            <span>{section.lines[0]}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {dataAiTopicReportPacket.exportLines.slice(0, 3).map((line) => (
+                        <span key={line}>Topic packet export-safe: {line}</span>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
               <CaveatBlock heading="Data AI Caveats" tone="evidence" compact>
@@ -1599,6 +1917,41 @@ export function InspectorPanel() {
                     </div>
                     {aerospaceWorkflowReadinessPackageSummary.caveats.slice(0, 2).map((caveat) => (
                       <CaveatBlock key={caveat} heading="Workflow-readiness caveat" tone="evidence" compact>
+                        {caveat}
+                      </CaveatBlock>
+                    ))}
+                  </div>
+                ) : null}
+
+                {aerospaceWorkflowValidationEvidenceSnapshotSummary ? (
+                  <div className="panel__section">
+                    <p className="panel__eyebrow">Aerospace Workflow Validation Evidence</p>
+                    <div className="data-card data-card--compact">
+                      <strong>{aerospaceWorkflowValidationEvidenceSnapshotSummary.snapshotLabel}</strong>
+                      <div className="stack stack--actions">
+                        <StatusBadge
+                          tone={
+                            aerospaceWorkflowValidationEvidenceSnapshotSummary.posture === "executed-smoke-ready"
+                              ? "available"
+                              : aerospaceWorkflowValidationEvidenceSnapshotSummary.posture === "blocked-smoke-environment"
+                                ? "warning"
+                                : aerospaceWorkflowValidationEvidenceSnapshotSummary.posture === "prepared-smoke-only"
+                                  ? "advisory"
+                                  : "neutral"
+                          }
+                        >
+                          {aerospaceWorkflowValidationEvidenceSnapshotSummary.posture}
+                        </StatusBadge>
+                        <StatusBadge tone="info">
+                          missing evidence {aerospaceWorkflowValidationEvidenceSnapshotSummary.missingEvidenceCount}
+                        </StatusBadge>
+                      </div>
+                      {aerospaceWorkflowValidationEvidenceSnapshotSummary.displayLines.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                    </div>
+                    {aerospaceWorkflowValidationEvidenceSnapshotSummary.caveats.slice(0, 2).map((caveat) => (
+                      <CaveatBlock key={caveat} heading="Validation-evidence caveat" tone="evidence" compact>
                         {caveat}
                       </CaveatBlock>
                     ))}

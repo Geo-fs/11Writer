@@ -1151,3 +1151,335 @@ Blockers or caveats:
 
 Next recommended task:
 - wire the generated runtime worker/service artifacts into the desktop/backend packaging path, then add operator-facing UI for runtime worker control and source evidence review
+
+## 2026-05-04 21:37 America/Chicago
+
+Task:
+- implement the first two current platform priorities: real runtime install/manage support and a single-page operator control surface, then save the full current top-five platform queue in the planning doc with media/OCR/AI called out as a major next slice
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added runtime path resolution inputs to backend settings and a shared runtime path resolver for resource, user-data, cache, log, and service-artifact roots
+- extended Source Discovery runtime status and service bundle contracts with runtime paths plus persisted service-installation state
+- added persisted runtime service installation and action audit tables in the Source Discovery SQLite schema
+- added `POST /api/source-discovery/runtime/services/{worker_name}/actions` with local materialize/install/start/restart/stop/status/uninstall actions for Windows Task Scheduler, macOS launchd, and Linux systemd-user worker deployment
+- added Wave LLM review listing via `GET /api/tools/waves/llm/reviews` so reviewed claim packets can be surfaced to operators without guessing review ids
+- added a single-page operator console in the main client shell for:
+  - runtime status and runtime paths
+  - worker pause/resume/run-now/stop controls
+  - service install/lifecycle actions
+  - Source Discovery review queue actions
+  - reviewed Wave LLM claim application
+- updated the cross-platform implementation playbook with the current platform operating queue:
+  - runtime install/manage path
+  - single-page operator control surface
+  - secure BYOK/provider management
+  - media evidence/OCR/AI enrichment
+  - end-to-end runtime and packaging validation
+- updated the Source Discovery platform plan so it no longer falsely says there is no frontend review queue or no OS-managed deployment path
+
+Files touched:
+- `app/client/src/features/layers/LayerPanel.tsx`
+- `app/client/src/features/operator/OperatorControlPanel.tsx`
+- `app/client/src/lib/api.ts`
+- `app/client/src/lib/queries.ts`
+- `app/client/src/styles/global.css`
+- `app/client/src/types/api.ts`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/cross-platform-implementation-playbook.md`
+- `app/docs/source-discovery-platform-plan.md`
+- `app/server/src/config/settings.py`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/routes/wave_llm.py`
+- `app/server/src/services/runtime_paths.py`
+- `app/server/src/services/runtime_scheduler_service.py`
+- `app/server/src/services/wave_llm_service.py`
+- `app/server/src/source_discovery/models.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/src/types/wave_monitor.py`
+- `app/server/tests/test_source_discovery_memory.py`
+- `app/server/tests/test_wave_monitor.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+- `python -m pytest app/server/tests/test_wave_monitor.py -q`
+
+Blockers or caveats:
+- the new service actions are real local-management paths, but success still depends on the target machine's service manager, permissions, and host environment
+- the operator console is a desktop/full-app surface only in this slice; companion-web parity still needs to be built
+- media/OCR/AI enrichment is still the next major follow-on, not part of this implementation
+
+Next recommended task:
+- build the secure BYOK/provider management surface, then start the bounded media evidence/OCR/AI enrichment layer on top of the new operator/runtime foundation
+
+## 2026-05-04 22:19 America/Chicago
+
+Task:
+- implement the current platform item `3` by adding managed Wave LLM BYOK/provider configuration, per-wave overrides, operator-console controls, and execution-history visibility; then prep platform item `4` with a dedicated media/OCR/AI quality plan
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added a shared Wave LLM provider-config service that stores local provider settings under user data, masks saved secrets in API responses, resolves global defaults, and resolves per-wave provider/model/budget/timeout overrides
+- added new Wave LLM config routes:
+  - `GET /api/tools/waves/llm/config`
+  - `POST /api/tools/waves/llm/config/defaults`
+  - `POST /api/tools/waves/llm/config/providers/{provider}`
+  - `POST /api/tools/waves/llm/config/monitors/{monitor_id}`
+  - `GET /api/tools/waves/llm/executions`
+- added Wave LLM execution-history persistence and per-wave provider-preference persistence in the Wave Monitor SQLite schema
+- updated Wave LLM task creation and execution so provider/model/network/budget/retry/timeout resolution comes from one managed config path instead of raw env defaults
+- updated Source Discovery scheduler-created Wave LLM tasks to inherit per-wave provider/model preferences when no explicit scheduler override is supplied
+- expanded the single-page operator console to include:
+  - global Wave LLM defaults
+  - per-provider config editing
+  - per-wave provider overrides
+  - recent provider execution history
+- added a quality-plan doc for the long media-evidence slice so future OCR/image/AI work starts from explicit provenance and review rules
+- added a small analyst-workbench timeline coverage rule so mixed timelines keep at least one Wave Monitor item when that lane is requested and data volume from other lanes would otherwise crowd it out
+
+Files touched:
+- `app/client/src/features/operator/OperatorControlPanel.tsx`
+- `app/client/src/lib/queries.ts`
+- `app/client/src/types/api.ts`
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/cross-platform-implementation-playbook.md`
+- `app/docs/media-evidence-ocr-ai-quality-plan.md`
+- `app/docs/wave-llm-interpretation-framework.md`
+- `app/server/src/routes/wave_llm.py`
+- `app/server/src/services/analyst_workbench_service.py`
+- `app/server/src/services/runtime_scheduler_service.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/services/wave_llm_adapters.py`
+- `app/server/src/services/wave_llm_provider_config_service.py`
+- `app/server/src/services/wave_llm_service.py`
+- `app/server/src/types/wave_monitor.py`
+- `app/server/src/wave_monitor/models.py`
+- `app/server/tests/test_source_discovery_memory.py`
+- `app/server/tests/test_wave_monitor.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_wave_monitor.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+- `npm.cmd run build`
+
+Blockers or caveats:
+- provider secrets are masked in API responses and stored under local user data, but OS keychain integration is still future work
+- the operator console now manages Wave LLM provider state in the full app only; companion-web parity still needs to be built
+- the media/OCR/AI slice is still intentionally unimplemented here; the new quality-plan doc is the prep boundary, not the full feature build
+
+Next recommended task:
+- start the bounded media-artifact layer from `app/docs/media-evidence-ocr-ai-quality-plan.md`, beginning with artifact identity, deterministic metadata capture, OCR scaffolding, and perceptual/media dedupe before broad visual AI interpretation work
+
+## 2026-05-04 22:59 America/Chicago
+
+Task:
+- implement the current platform item `4` by adding a local-first media-evidence layer for Source Discovery, including bounded public artifact capture, OCR, and review-only place/scene/time interpretation
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added a new media-evidence backend service for bounded public image artifact capture, MIME sniffing, hashing, local runtime storage, dimension parsing, and optional richer Pillow-backed inspection
+- added persistent Source Discovery media tables for artifacts, OCR runs, and interpretation runs
+- added new Source Discovery media routes:
+  - `GET /api/source-discovery/media/by-source/{source_id}`
+  - `GET /api/source-discovery/media/artifacts/{artifact_id}`
+  - `POST /api/source-discovery/jobs/media-artifact-fetch`
+  - `POST /api/source-discovery/jobs/media-ocr`
+  - `POST /api/source-discovery/jobs/media-interpret`
+- added fixture OCR plus local `tesseract` OCR support with raw text, confidence, block geometry, preprocessing metadata, and OCR-to-snapshot linkage
+- added deterministic scene/place/time-of-day/season/geolocation clue extraction from media metadata, OCR text, captions, and bounded pixel heuristics
+- added optional local `ollama` scene/place interpretation behind explicit enablement, localhost-only routing, and strict no-people-recognition guardrails
+- extended Source Discovery memory detail and export packets so media artifacts, OCR runs, and interpretation lineage are inspectable with the rest of source memory
+- updated shared planning docs so the repo now treats the media/OCR/place-recognition slice as implemented backend infrastructure instead of future-only planning
+- fixed claim-support fallback logic in Source Discovery so corroborating and corrective claim application remains consistent across nearby snapshots and duplicate classifications
+
+Files touched:
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/cross-platform-implementation-playbook.md`
+- `app/docs/media-evidence-ocr-ai-quality-plan.md`
+- `app/docs/source-discovery-platform-plan.md`
+- `app/server/src/config/settings.py`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/media_evidence_service.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/source_discovery/models.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/test_source_discovery_memory.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+
+Blockers or caveats:
+- local `tesseract` OCR works only when the binary is installed on the host; fixture OCR remains the fallback for tests
+- local `ollama` scene/place interpretation is optional and requires explicit enablement plus a localhost model route
+- people recognition, identity analysis, accusation workflows, and broad video understanding remain intentionally out of scope
+- this is a strong first-pass media layer, not yet a production-grade readability-equivalent engine for arbitrary image/video interpretation
+
+Next recommended task:
+- build bounded image-to-image comparison, stronger media dedupe, and optional higher-quality local OCR/vision model adapters before expanding into frame/video workflows
+
+## 2026-05-04 23:44 America/Chicago
+
+Task:
+- implement Media Evidence Phase 2.5 for Source Discovery: still-image comparison, duplicate clustering, OCR adapter fallback, localhost-only local vision adapters, and bounded frame-sequence sampling
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added the remaining Source Discovery media routes for manual comparison detail/job access and bounded frame-sequence sampling:
+  - `GET /api/source-discovery/media/comparisons/{comparison_id}`
+  - `GET /api/source-discovery/media/sequences/{sequence_id}`
+  - `POST /api/source-discovery/jobs/media-compare`
+  - `POST /api/source-discovery/jobs/media-frame-sample`
+- extended media artifact persistence so same-hash captures are no longer collapsed before comparison when their URL/context differs, while bounded frame sampling can also keep identical frames as separate artifacts
+- implemented deterministic media comparison scoring with comparison records, duplicate-cluster updates, auto media signals, and pending-claim confidence nudging that does not change source reputation directly
+- completed OCR adapter fallback plumbing so `tesseract` can defer to `rapidocr_onnx`, with stored attempt history, selected-result tracking, and disagreement caveats
+- completed localhost-only OpenAI-compatible local vision adapter routing alongside deterministic and `ollama` scene/place interpretation paths
+- completed bounded frame-sequence ingestion with stored sequence rows, per-frame artifacts, adjacent-frame comparisons, and first-versus-last comparisons
+- expanded Source Discovery detail/export packets so duplicate clusters, comparisons, auto media signals, and frame sequences are now visible to operators and future agents
+- updated shared docs so platform planning no longer describes comparison and bounded frame sampling as future-only work
+
+Files touched:
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/cross-platform-implementation-playbook.md`
+- `app/docs/media-evidence-ocr-ai-quality-plan.md`
+- `app/docs/source-discovery-platform-plan.md`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/tests/test_source_discovery_memory.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+
+Blockers or caveats:
+- duplicate clustering, OCR fallback, and frame-sequence sampling are now implemented, but higher-grade packaging/distribution for optional local OCR and vision runtimes is still future work
+- comparison signals can raise or lower pending review-claim confidence, but they still do not create final truth outcomes or source-reputation changes without explicit reviewed application
+- bounded frame sampling works with fixture input today and with `ffmpeg` when present on the host, but this is still not a broad video-understanding system
+
+Next recommended task:
+- harden the media stack for production packaging and operator use: optional dependency install guidance, richer comparison/change heuristics, stronger OCR/model health reporting, and better review UX around duplicate clusters and frame sequences
+
+## 2026-05-05 09:57 America/Chicago
+
+Task:
+- add a dedicated media geolocation framework for Source Discovery, covering docs, storage, routes, and initial adapter scaffolding for GeoCLIP, StreetCLIP, and local VLM clue analysts
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added `app/docs/media-geolocation-framework.md` to define the model roles, guardrails, runtime posture, and current implementation contract for media geolocation inside 11Writer
+- updated shared platform docs so media geolocation is now described as a dedicated review-first backend lane rather than an implied side effect of generic media interpretation
+- added dedicated Source Discovery geolocation storage with persisted media geolocation run records linked to artifacts, OCR runs, and prior interpretations
+- added new Source Discovery media geolocation API surfaces:
+  - `POST /api/source-discovery/jobs/media-geolocate`
+  - `GET /api/source-discovery/media/geolocations/{geolocation_run_id}`
+- extended artifact detail plus source-memory detail/export packets so geolocation runs now travel with media artifacts, OCR runs, comparisons, interpretations, and frame sequences
+- added deterministic geolocation candidate extraction from observed coordinates, OCR/caption coordinate pairs, and prior media place/geolocation hypotheses
+- added review-first adapter scaffolding for:
+  - `geoclip`
+  - `streetclip`
+  - `ollama`
+  - `openai_compat_local`
+  - `qwen_vl_local`
+  - `internvl_local`
+  - `llava_local`
+- kept specialized geolocation engines explicitly gated so the framework can exist now without pretending the heavier local runtime packages are already production-ready everywhere
+- added fixture-safe tests covering deterministic media geolocation, detail/export lineage, and localhost-only local analyst fallback behavior
+
+Files touched:
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/cross-platform-implementation-playbook.md`
+- `app/docs/media-evidence-ocr-ai-quality-plan.md`
+- `app/docs/media-geolocation-framework.md`
+- `app/docs/source-discovery-platform-plan.md`
+- `app/server/src/config/settings.py`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/media_evidence_service.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/source_discovery/models.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/test_source_discovery_memory.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+- `git diff --check -- app/docs/media-geolocation-framework.md app/docs/media-evidence-ocr-ai-quality-plan.md app/docs/source-discovery-platform-plan.md app/docs/cross-platform-implementation-playbook.md app/server/src/config/settings.py app/server/src/routes/source_discovery.py app/server/src/services/media_evidence_service.py app/server/src/services/source_discovery_service.py app/server/src/source_discovery/models.py app/server/src/types/source_discovery.py app/server/tests/test_source_discovery_memory.py`
+
+Blockers or caveats:
+- GeoCLIP and StreetCLIP are framework-ready but still explicitly gated behind optional local runtime setup; this slice does not pretend those heavyweight dependencies are already packaged or benchmarked everywhere
+- local VLM clue analysts remain localhost-only and review-only, and they may fall back to deterministic clues when unavailable
+- deterministic geolocation is useful now, but landmark dictionaries, better clue extraction, and benchmark harnesses are still needed before the geolocation lane should be treated as mature
+- `git diff --check` reported only LF/CRLF warnings on touched files
+
+Next recommended task:
+- harden the specialized local geolocation runtime: package GeoCLIP and StreetCLIP more safely, improve deterministic landmark/script/terrain clues, and add a benchmarked fusion/evaluation lane before widening operator reliance on media geolocation
+
+## 2026-05-05 10:35 America/Chicago
+
+Task:
+- implement the Media Geolocation Hardening Plan across Source Discovery media evidence and geolocation backend services
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- upgraded media geolocation from a thin candidate list into a structured clue-engine workflow with persisted coordinate, place-text, script/language, environment, time, and rejected-clue packets
+- added deterministic parsing for decimal coordinates, DMS coordinates, directional `N/S/E/W` coordinates, UTM/MGRS-like references, bounded place phrases, transit/operator tokens, script-family hints, and time/environment heuristics
+- added duplicate-cluster and frame-sequence lineage inheritance so related artifacts can contribute down-weighted clues with explicit artifact/run/comparison provenance
+- hardened GeoCLIP and StreetCLIP runtime posture with explicit local cache/weights configuration, pinned-version checks, warm/cold runtime state, and no-surprise-download behavior by default
+- unified local VLM clue-analysis outputs behind a stricter JSON contract with negative-evidence capture and localhost-only enforcement
+- replaced simple ranking with scored fusion that preserves confidence score, confidence ceiling, supporting evidence, contradicting evidence, engine agreement, and provenance chain per candidate
+- extended stored geolocation runs, detail surfaces, and export packets so clue packets, engine-attempt audits, inherited lineage, and richer candidate metadata are persisted and surfaced together
+- added a repo-safe media geolocation evaluation harness plus manifests and CLI for deterministic regression, distance-band scoring, clue-family recall, and engine-unavailable reporting
+- added targeted regression tests for structured clue packets, unavailable specialized-engine attempts, inherited cluster lineage, and the evaluation harness
+
+Files touched:
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/cross-platform-implementation-playbook.md`
+- `app/docs/media-evidence-ocr-ai-quality-plan.md`
+- `app/docs/media-geolocation-framework.md`
+- `app/docs/source-discovery-platform-plan.md`
+- `app/server/data/media_geolocation_eval_fixtures.json`
+- `app/server/data/media_geolocation_eval_local_manifest.example.json`
+- `app/server/src/config/settings.py`
+- `app/server/src/services/media_evidence_service.py`
+- `app/server/src/services/media_geolocation_eval_service.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/run_media_geolocation_eval.py`
+- `app/server/tests/test_media_geolocation_eval.py`
+- `app/server/tests/test_source_discovery_memory.py`
+
+Validation:
+- `python -m compileall app/server/src`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_media_geolocation_eval.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_media_geolocation_eval.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+
+Blockers or caveats:
+- GeoCLIP and StreetCLIP are now runtime-disciplined and auditable, but they still depend on optional local heavyweight packages and prepared local model assets
+- deterministic clue extraction is materially better now, but landmark dictionaries and richer regional label banks are still future quality work
+- evaluation is fixture-safe and repeatable now, but wider external benchmark manifests are still optional follow-on work for high-end local installs
+
+Next recommended task:
+- build the next operator-facing quality layer on top of this backend: map preview, candidate comparison UI, and better landmark/label-bank enrichment for review workflows

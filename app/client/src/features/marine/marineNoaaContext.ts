@@ -24,6 +24,7 @@ export interface MarineNoaaContextSummary {
       | "unknown";
     nearbyStationCount: number;
     contextKind: "viewport" | "chokepoint";
+    topObservedAt?: string | null;
     topStation:
       | {
           stationId: string;
@@ -68,13 +69,17 @@ export function buildMarineNoaaContextSummary(
     sourceLine,
     stationLines,
     exportLines,
-    metadata: {
-      sourceId: response.sourceHealth.sourceId,
-      sourceMode: response.sourceHealth.sourceMode,
-      health: response.sourceHealth.health,
-      nearbyStationCount: response.count,
-      contextKind: response.contextKind,
-      topStation: topStation
+      metadata: {
+        sourceId: response.sourceHealth.sourceId,
+        sourceMode: response.sourceHealth.sourceMode,
+        health: response.sourceHealth.health,
+        nearbyStationCount: response.count,
+        contextKind: response.contextKind,
+        topObservedAt:
+          topStation?.latestWaterLevel?.observedAt ??
+          topStation?.latestCurrent?.observedAt ??
+          null,
+        topStation: topStation
         ? {
             stationId: topStation.stationId,
             stationName: topStation.stationName,

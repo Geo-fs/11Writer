@@ -11,7 +11,8 @@ from urllib.parse import urljoin
 import httpx
 
 from src.config.settings import Settings
-from src.types.api import CanadaCapAlertEvent, CanadaCapAlertResponse, CanadaCapMetadata
+from src.services.source_registry import record_source_failure, record_source_success
+from src.types.api import CanadaCapAlertEvent, CanadaCapAlertResponse, CanadaCapMetadata, CanadaCapSourceHealth
 
 CanadaCapAlertType = Literal["all", "warning", "watch", "advisory", "statement", "unknown"]
 CanadaCapSeverity = Literal["all", "extreme", "severe", "moderate", "minor", "unknown"]
@@ -41,7 +42,50 @@ class CanadaCapService:
         self._settings = settings
 
     async def list_recent(self, query: CanadaCapQuery) -> CanadaCapAlertResponse:
-        alerts = await self._load_alerts()
+        fetched_at = datetime.now(tz=timezone.utc).isoformat()
+        source_mode = self._source_mode_label()
+        if self._settings.canada_cap_source_mode.strip().lower() == "disabled":
+            return CanadaCapAlertResponse(
+                metadata=CanadaCapMetadata(
+                    source="environment-canada-cap-alerts",
+                    feed_name="canada-cap-alerts",
+                    feed_url=self._settings.canada_cap_feed_url,
+                    source_mode=source_mode,
+                    fetched_at=fetched_at,
+                    generated_at=None,
+                    count=0,
+                    caveat=_CANADA_CAP_CAVEAT,
+                ),
+                count=0,
+                source_health=CanadaCapSourceHealth(
+                    source_id="environment-canada-cap-alerts",
+                    source_label="Canada CAP Alerts",
+                    enabled=False,
+                    source_mode=source_mode,
+                    health="disabled",
+                    loaded_count=0,
+                    last_fetched_at=fetched_at,
+                    source_generated_at=None,
+                    detail="Canada CAP source is disabled for this runtime.",
+                    error_summary=None,
+                    caveat=_CANADA_CAP_CAVEAT,
+                ),
+                alerts=[],
+                caveats=[
+                    _CANADA_CAP_CAVEAT,
+                    "Disabled mode is an explicit runtime posture only and does not imply alert absence.",
+                ],
+            )
+        try:
+            alerts = await self._load_alerts()
+        except Exception as exc:
+            record_source_failure(
+                "environment-canada-cap-alerts",
+                degraded_reason=str(exc),
+                freshness_seconds=3600,
+                stale_after_seconds=21600,
+            )
+            raise
         filtered = [item for item in alerts if self._matches_filters(item, query)]
         if query.sort == "severity":
             filtered.sort(
@@ -51,23 +95,60 @@ class CanadaCapService:
         else:
             filtered.sort(key=lambda item: _iso_sort_key(item.sent_at), reverse=True)
         limited = filtered[: query.limit]
-        fetched_at = datetime.now(tz=timezone.utc).isoformat()
+        generated_at = max((item.sent_at for item in alerts if item.sent_at), default=None)
+        health = "loaded" if limited else "empty"
+        detail = (
+            "Canada CAP alerts loaded successfully."
+            if limited
+            else "Canada CAP alert feed loaded but no alerts matched the current filters."
+        )
+        if health == "loaded":
+            record_source_success(
+                "environment-canada-cap-alerts",
+                freshness_seconds=3600,
+                stale_after_seconds=21600,
+                warning_count=0,
+            )
+        else:
+            record_source_failure(
+                "environment-canada-cap-alerts",
+                degraded_reason="Canada CAP alert feed returned no matching active alerts.",
+                state="stale",
+                freshness_seconds=3600,
+                stale_after_seconds=21600,
+                warning_count=0,
+            )
         return CanadaCapAlertResponse(
             metadata=CanadaCapMetadata(
                 source="environment-canada-cap-alerts",
                 feed_name="canada-cap-alerts",
                 feed_url=self._settings.canada_cap_feed_url,
-                source_mode=self._source_mode_label(),
+                source_mode=source_mode,
                 fetched_at=fetched_at,
-                generated_at=None,
+                generated_at=generated_at,
                 count=len(limited),
-                caveat=(
-                    "Canada CAP alerts are advisory/contextual weather-alert records from official Datamart distribution. "
-                    "This layer does not infer damage, risk, or local impact."
-                ),
+                caveat=_CANADA_CAP_CAVEAT,
             ),
             count=len(limited),
+            source_health=CanadaCapSourceHealth(
+                source_id="environment-canada-cap-alerts",
+                source_label="Canada CAP Alerts",
+                enabled=True,
+                source_mode=source_mode,
+                health=health,
+                loaded_count=len(limited),
+                last_fetched_at=fetched_at,
+                source_generated_at=generated_at,
+                detail=detail,
+                error_summary=None,
+                caveat=_CANADA_CAP_CAVEAT,
+            ),
             alerts=limited,
+            caveats=[
+                _CANADA_CAP_CAVEAT,
+                "Alert text remains advisory/contextual only and does not confirm impact, damage, or required action.",
+                "Free-form CAP text remains inert source data only and never changes validation state, source health, or workflow behavior.",
+            ],
         )
 
     async def _load_alerts(self) -> list[CanadaCapAlertEvent]:
@@ -181,7 +262,15 @@ class CanadaCapService:
             return "fixture"
         if mode == "live":
             return "live"
+        if mode == "disabled":
+            return "unknown"
         return "unknown"
+
+
+_CANADA_CAP_CAVEAT = (
+    "Canada CAP alerts are advisory/contextual weather-alert records from official Datamart distribution. "
+    "This layer does not infer damage, risk, certainty, responsibility, or local impact."
+)
 
 
 def _discover_xml_files(index_html: str) -> list[str]:
@@ -202,7 +291,7 @@ def _xml_text(node: ET.Element | None, path: str) -> str | None:
     child = node.find(path, CAP_NS)
     if child is None or child.text is None:
         return None
-    text = child.text.strip()
+    text = _sanitize_text(child.text)
     return text or None
 
 
@@ -255,6 +344,18 @@ def _parse_polygon_geometry(polygon: str | None) -> tuple[float | None, float | 
     latitude = sum(point[0] for point in points) / len(points)
     longitude = sum(point[1] for point in points) / len(points)
     return (latitude, longitude, f"polygon-centroid:{len(points)}")
+
+
+def _sanitize_text(value: str | None) -> str | None:
+    if value is None:
+        return None
+    text = value.strip()
+    if not text:
+        return None
+    without_script = re.sub(r"(?is)<(script|style).*?>.*?</\1>", " ", text)
+    without_tags = re.sub(r"(?s)<[^>]+>", " ", without_script)
+    collapsed = " ".join(without_tags.split())
+    return collapsed or None
 
 
 def _iso_sort_key(value: str | None) -> float:

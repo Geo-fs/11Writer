@@ -1,0 +1,30 @@
+<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+  <identifier>dwd-cap-001</identifier>
+  <sender>opendata@dwd.de</sender>
+  <sent>2026-05-07T05:15:00+00:00</sent>
+  <status>Actual</status>
+  <msgType>Alert</msgType>
+  <scope>Public</scope>
+  <info>
+    <language>de-DE</language>
+    <category>Met</category>
+    <event>Amtliche Warnung vor starkem Gewitter</event>
+    <urgency>Immediate</urgency>
+    <severity>Severe</severity>
+    <certainty>Likely</certainty>
+    <effective>2026-05-07T05:15:00+00:00</effective>
+    <onset>2026-05-07T05:30:00+00:00</onset>
+    <expires>2026-05-07T08:30:00+00:00</expires>
+    <headline>Amtliche Warnung vor starkem Gewitter</headline>
+    <description>Es treten Gewitter mit Starkregen auf.</description>
+    <instruction><![CDATA[Meiden Sie freie Flächen. <script>alert('ignore')</script>]]></instruction>
+    <web>https://www.wettergefahren.de/warnungen/warnapp</web>
+    <eventCode>
+      <valueName>II</valueName>
+      <value>31</value>
+    </eventCode>
+    <area>
+      <areaDesc>Stadt Leipzig</areaDesc>
+    </area>
+  </info>
+</alert>

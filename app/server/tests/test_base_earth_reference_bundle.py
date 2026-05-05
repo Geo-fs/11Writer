@@ -20,6 +20,8 @@ def _settings() -> Settings:
         PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=str(base / "pb2002_plate_boundaries_fixture.json"),
         NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
         NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=str(base / "noaa_global_volcano_locations_fixture.json"),
+        RGI_GLACIER_INVENTORY_SOURCE_MODE="fixture",
+        RGI_GLACIER_INVENTORY_FIXTURE_PATH=str(base / "rgi_glacier_inventory_fixture.json"),
     )
 
 
@@ -34,6 +36,8 @@ def _natural_earth_empty_settings() -> Settings:
         PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=str(base / "pb2002_plate_boundaries_fixture.json"),
         NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
         NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=str(base / "noaa_global_volcano_locations_fixture.json"),
+        RGI_GLACIER_INVENTORY_SOURCE_MODE="fixture",
+        RGI_GLACIER_INVENTORY_FIXTURE_PATH=str(base / "rgi_glacier_inventory_fixture.json"),
     )
 
 
@@ -48,6 +52,8 @@ def _noaa_volcano_empty_settings() -> Settings:
         PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=str(base / "pb2002_plate_boundaries_fixture.json"),
         NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
         NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=str(base / "noaa_global_volcano_locations_empty_fixture.json"),
+        RGI_GLACIER_INVENTORY_SOURCE_MODE="fixture",
+        RGI_GLACIER_INVENTORY_FIXTURE_PATH=str(base / "rgi_glacier_inventory_fixture.json"),
     )
 
 
@@ -62,6 +68,8 @@ def _gshhg_empty_settings() -> Settings:
         PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=str(base / "pb2002_plate_boundaries_fixture.json"),
         NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
         NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=str(base / "noaa_global_volcano_locations_fixture.json"),
+        RGI_GLACIER_INVENTORY_SOURCE_MODE="fixture",
+        RGI_GLACIER_INVENTORY_FIXTURE_PATH=str(base / "rgi_glacier_inventory_fixture.json"),
     )
 
 
@@ -76,6 +84,8 @@ def _pb2002_empty_settings() -> Settings:
         PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=str(base / "pb2002_plate_boundaries_empty_fixture.json"),
         NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
         NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=str(base / "noaa_global_volcano_locations_fixture.json"),
+        RGI_GLACIER_INVENTORY_SOURCE_MODE="fixture",
+        RGI_GLACIER_INVENTORY_FIXTURE_PATH=str(base / "rgi_glacier_inventory_fixture.json"),
     )
 
 
@@ -291,3 +301,52 @@ def test_noaa_global_volcano_invalid_sort_returns_400() -> None:
 
     response = client.get("/api/context/reference/noaa-global-volcanoes", params={"sort": "bad"})
     assert response.status_code == 400
+
+
+def test_rgi_glacier_inventory_fixture_parsing_and_provenance() -> None:
+    client = _client()
+
+    payload = client.get("/api/context/reference/rgi-glacier-inventory").json()
+
+    assert payload["metadata"]["source"] == "rgi-glacier-inventory"
+    assert payload["metadata"]["sourceName"] == "Randolph Glacier Inventory"
+    assert payload["metadata"]["sourceUrl"] == "https://nsidc.org/data/nsidc-0770/versions/7"
+    assert payload["metadata"]["documentationUrl"] == "https://www.glims.org/rgi_user_guide/welcome.html"
+    assert payload["metadata"]["datasetVersion"] == "7.0"
+    assert payload["metadata"]["sourceMode"] == "fixture"
+    assert payload["count"] == 4
+    assert payload["sourceHealth"]["health"] == "loaded"
+    assert payload["regionSummary"]["regionCode"] == "01"
+    assert payload["glaciers"][0]["evidenceBasis"] == "reference"
+
+
+def test_rgi_glacier_inventory_region_filter_name_filter_and_limit() -> None:
+    client = _client()
+
+    payload = client.get(
+        "/api/context/reference/rgi-glacier-inventory",
+        params={"region_code": "01", "glacier_name": "Taku", "limit": 1},
+    ).json()
+
+    assert payload["count"] == 1
+    assert payload["glaciers"][0]["glacierName"] == "Taku Glacier"
+    assert payload["regionSummary"]["glacierCount"] == 1
+
+
+def test_rgi_glacier_inventory_empty_behavior_and_inert_text() -> None:
+    client = _client()
+
+    payload = client.get(
+        "/api/context/reference/rgi-glacier-inventory",
+        params={"region_code": "99"},
+    ).json()
+    full_payload = client.get("/api/context/reference/rgi-glacier-inventory").json()
+    blob = " ".join(
+        full_payload["caveats"]
+        + [item.get("glacierName") or "" for item in full_payload["glaciers"]]
+    )
+
+    assert payload["count"] == 0
+    assert payload["sourceHealth"]["health"] == "empty"
+    assert "<script" not in blob.lower()
+    assert "current glacier extent" in blob.lower()

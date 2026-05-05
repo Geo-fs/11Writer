@@ -8,6 +8,8 @@ export interface AerospaceWeatherContextSummary {
   sourceHealthState: SourceStatus["state"] | "unavailable";
   metarAvailable: boolean;
   tafAvailable: boolean;
+  metarReportedAt: string | null;
+  tafIssuedAt: string | null;
   displayLines: string[];
   caveats: string[];
 }
@@ -36,6 +38,8 @@ export function buildAerospaceWeatherContextSummary(input: {
     sourceHealthState: input.sourceHealth?.state ?? "unavailable",
     metarAvailable: metar != null,
     tafAvailable: taf != null,
+    metarReportedAt: metar?.reportAt ?? metar?.observedAt ?? null,
+    tafIssuedAt: taf?.issueTime ?? null,
     displayLines: [
       `Airport context: ${displayAirport(input.weather)}`,
       `Provider: ${input.weather.sourceDetail}`,

@@ -1,0 +1,28 @@
+{
+  "cases": [
+    {
+      "caseId": "local-high-end-sample-1",
+      "artifactMetadata": {
+        "width": 1920,
+        "height": 1080
+      },
+      "observedLatitude": null,
+      "observedLongitude": null,
+      "exifTimestamp": null,
+      "ocrText": "Example local OCR text",
+      "captions": [
+        "Optional local caption text"
+      ],
+      "candidateLabels": [
+        "Example City",
+        "Example Country"
+      ],
+      "engine": "fusion",
+      "expected": {
+        "latitude": null,
+        "longitude": null,
+        "countryOrRegion": "Example Region"
+      }
+    }
+  ]
+}

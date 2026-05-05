@@ -27,6 +27,7 @@ def test_source_ops_detail_composes_finland_candidate_artifacts() -> None:
     assert detail.candidate_endpoint_report.source_mode == "official-dot-api:json-api"
     assert detail.candidate_endpoint_report.lifecycle_state == "candidate-sandbox-importable"
     assert detail.candidate_endpoint_report.media_evidence_posture == "direct-image-documented"
+    assert detail.candidate_endpoint_report.payload_shape_posture == "fixture-reviewed-sandbox-shape"
     assert detail.candidate_endpoint_report.export_lines
     assert detail.candidate_endpoint_report.next_action == "machine endpoint candidate found"
     assert detail.graduation_plan.available is True
@@ -98,6 +99,38 @@ def test_source_ops_detail_composes_new_sandbox_candidate_metadata() -> None:
     assert fingal.candidate_endpoint_report.media_evidence_posture == "metadata-only-documented"
     assert fingal.graduation_plan.sandbox_readiness_posture == "sandbox-importable"
     assert fingal.sandbox_validation_report.available is True
+
+    baton_rouge = build_camera_source_ops_detail(Settings(), "baton-rouge-traffic-cameras")
+    assert baton_rouge is not None
+    assert baton_rouge.lifecycle_bucket == "candidate-sandbox-importable"
+    assert baton_rouge.candidate_endpoint_report.media_evidence_posture == "viewer-only-documented"
+    assert baton_rouge.graduation_plan.sandbox_readiness_posture == "sandbox-importable"
+    assert baton_rouge.sandbox_validation_report.available is True
+
+    vancouver = build_camera_source_ops_detail(Settings(), "vancouver-web-cam-url-links")
+    assert vancouver is not None
+    assert vancouver.lifecycle_bucket == "candidate-sandbox-importable"
+    assert vancouver.candidate_endpoint_report.media_evidence_posture == "viewer-only-documented"
+    assert vancouver.graduation_plan.sandbox_readiness_posture == "sandbox-importable"
+    assert vancouver.sandbox_validation_report.available is True
+
+    arlington = build_camera_source_ops_detail(Settings(), "arlington-traffic-cameras")
+    assert arlington is not None
+    assert arlington.lifecycle_bucket == "candidate-endpoint-verified"
+    assert arlington.candidate_endpoint_report.media_evidence_posture == "metadata-only-documented"
+    assert arlington.candidate_endpoint_report.payload_shape_posture == "machine-shape-location-only"
+    assert arlington.candidate_endpoint_report.sandbox_feasibility_posture == "media-proof-missing"
+    assert arlington.graduation_plan.sandbox_readiness_posture == "sandbox-missing"
+    assert arlington.sandbox_validation_report.available is False
+
+    caltrans = build_camera_source_ops_detail(Settings(), "caltrans-cctv-cameras")
+    assert caltrans is not None
+    assert caltrans.lifecycle_bucket == "candidate-sandbox-importable"
+    assert caltrans.candidate_endpoint_report.media_evidence_posture == "direct-image-documented"
+    assert caltrans.candidate_endpoint_report.payload_shape_posture == "fixture-reviewed-sandbox-shape"
+    assert caltrans.candidate_endpoint_report.sandbox_feasibility_posture == "fixture-backed-direct-image-review"
+    assert caltrans.graduation_plan.sandbox_readiness_posture == "sandbox-importable"
+    assert caltrans.sandbox_validation_report.available is True
 
 
 def test_source_ops_detail_preserves_blocked_and_validated_boundaries() -> None:

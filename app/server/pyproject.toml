@@ -25,6 +25,11 @@ dev = [
   "pytest>=8.2.2",
   "ruff>=0.5.1"
 ]
+media = [
+  "Pillow>=10.4.0",
+  "opencv-python-headless>=4.10.0.84",
+  "rapidocr-onnxruntime>=1.3.24"
+]
 
 [tool.setuptools]
 py-modules = []

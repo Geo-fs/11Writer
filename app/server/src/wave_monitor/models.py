@@ -206,3 +206,42 @@ class WaveLlmReviewORM(WaveMonitorBase):
     requires_human_review: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     created_at: Mapped[str] = mapped_column(String(64), index=True)
     caveats_json: Mapped[str] = mapped_column(Text, default="[]")
+
+
+class WaveLlmExecutionORM(WaveMonitorBase):
+    __tablename__ = "wave_llm_executions"
+
+    execution_id: Mapped[str] = mapped_column(String(180), primary_key=True)
+    task_id: Mapped[str] = mapped_column(String(180), index=True)
+    review_id: Mapped[str | None] = mapped_column(String(180), index=True)
+    monitor_id: Mapped[str] = mapped_column(String(128), index=True)
+    provider: Mapped[str] = mapped_column(String(64), index=True)
+    model: Mapped[str] = mapped_column(String(160), default="")
+    status: Mapped[str] = mapped_column(String(64), default="blocked", index=True)
+    adapter_status: Mapped[str] = mapped_column(String(64), default="blocked", index=True)
+    allow_network: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    request_budget: Mapped[int] = mapped_column(Integer, default=0)
+    used_requests: Mapped[int] = mapped_column(Integer, default=0)
+    retry_count: Mapped[int] = mapped_column(Integer, default=0)
+    timeout_seconds: Mapped[int] = mapped_column(Integer, default=0)
+    raw_output: Mapped[str] = mapped_column(Text, default="")
+    error_summary: Mapped[str | None] = mapped_column(Text)
+    review_validation_state: Mapped[str | None] = mapped_column(String(64), index=True)
+    created_at: Mapped[str] = mapped_column(String(64), index=True)
+    caveats_json: Mapped[str] = mapped_column(Text, default="[]")
+
+
+class WaveLlmMonitorPreferenceORM(WaveMonitorBase):
+    __tablename__ = "wave_llm_monitor_preferences"
+
+    monitor_id: Mapped[str] = mapped_column(
+        ForeignKey("wave_monitors.monitor_id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    provider: Mapped[str | None] = mapped_column(String(64), index=True)
+    model: Mapped[str | None] = mapped_column(String(160))
+    allow_network: Mapped[bool | None] = mapped_column(Boolean)
+    request_budget: Mapped[int | None] = mapped_column(Integer)
+    max_retries: Mapped[int | None] = mapped_column(Integer)
+    timeout_seconds: Mapped[int | None] = mapped_column(Integer)
+    updated_at: Mapped[str] = mapped_column(String(64), index=True)

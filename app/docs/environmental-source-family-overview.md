@@ -10,6 +10,9 @@ Route:
 - `GET /api/context/environmental/situation-snapshot-package`
 - `GET /api/context/environmental/weather-observation-export-bundle`
 - `GET /api/context/environmental/weather-observation-review-queue`
+- `GET /api/context/environmental/base-earth-export-package`
+- `GET /api/context/environmental/base-earth-review-queue`
+- `GET /api/context/environmental/fusion-snapshot-input`
 
 Purpose:
 - provide fusion-ready backend review context across implemented environmental source families
@@ -45,6 +48,7 @@ Current `base-earth-reference` members:
 - `natural-earth-physical`
 - `gshhg-shorelines`
 - `pb2002-plate-boundaries`
+- `rgi-glacier-inventory`
 
 Behavior:
 - calls a bounded set of existing fixture-backed or live-capable backend services with small default queries
@@ -213,7 +217,7 @@ Environmental situation snapshot package:
   - future export/report builders can consume one compact package instead of reassembling overview, export bundle, and issue queue manually
 
 Widened second-pass coverage:
-- `weather-alert-advisory` now includes HKO Open Weather, Canada CAP Alerts, MET Norway MetAlerts, IPMA warnings, Met Eireann warnings, and GeoSphere Austria warnings
+- `weather-alert-advisory` now includes HKO Open Weather, Canada CAP Alerts, DWD CAP Alerts, MET Norway MetAlerts, IPMA warnings, Met Eireann warnings, and GeoSphere Austria warnings
 - `weather-flood-hydrology` now also includes Met Eireann forecast alongside DMI forecast, NASA POWER, Taiwan CWA weather, and UK EA flood monitoring
 - `infrastructure-event-context` now includes NRC event notifications as source-reported infrastructure-event context
 
@@ -221,6 +225,7 @@ Current `weather-flood-hydrology` members:
 - `uk-ea-flood-monitoring`
 - `bc-wildfire-datamart`
 - `meteoswiss-open-data`
+- `canada-geomet-ogc`
 - `taiwan-cwa-aws-opendata`
 - `dmi-forecast-aws`
 - `met-eireann-forecast`
@@ -254,6 +259,57 @@ Weather-observation follow-on surfaces:
 - guardrails:
   - review/export context only
   - no hazard, impact, damage, risk, responsibility, or action claims
+
+Base-earth reference follow-on surfaces:
+- `GET /api/context/environmental/base-earth-export-package`
+- `GET /api/context/environmental/base-earth-review-queue`
+- bounded current-source coverage:
+  - `natural-earth-physical`
+  - `gshhg-shorelines`
+  - `pb2002-plate-boundaries`
+  - `rgi-glacier-inventory`
+  - `noaa-global-volcano-locations`
+- intended role:
+  - compact backend export/review context for implemented static/reference geospatial layers
+  - explicit source-mode, source-health, geometry-posture, static-reference-only posture, and export-readiness visibility
+- review issue coverage may include:
+  - `fixture-only`
+  - `source-health-empty`
+  - `source-health-stale`
+  - `source-health-error`
+  - `source-health-disabled`
+  - `source-health-unknown`
+  - `missing-geometry`
+  - `static-reference-only`
+  - `export-readiness-gap`
+  - `missing-source`
+- guardrails:
+  - review/export context only
+  - no live shoreline truth, eruption truth, tectonic truth, hazard scoring, impact, damage, or action claims
+
+Environmental fusion snapshot input:
+- `GET /api/context/environmental/fusion-snapshot-input`
+- bounded backend geospatial domain input for later cross-domain reporting/fusion work
+- composes:
+  - dynamic environmental situation snapshot
+  - Canada context export/review packages
+  - base-earth export/review packages
+  - direct RGI glacier reference summary
+- preserves:
+  - live/advisory/event context separately from static/reference and glacier snapshot context
+  - source ids
+  - source modes
+  - source health
+  - evidence bases
+  - overlap source ids
+  - review issue counts
+  - export-safe provenance lines
+  - explicit does-not-prove lines
+- guardrails:
+  - no common hazard score
+  - no impact or damage truth
+  - no certainty or action model
+  - no current glacier extent, glacier-change, shoreline-truth, tectonic-truth, or eruption-status claims
 
 Intentional exclusions:
 - this helper still does not cover every implemented backend slice in the repo

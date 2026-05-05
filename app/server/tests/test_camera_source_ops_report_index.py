@@ -19,14 +19,38 @@ def test_source_ops_report_index_summarizes_existing_lifecycle_artifacts() -> No
     response = build_camera_source_ops_report_index(Settings())
 
     assert response.summary.total_sources == response.count
-    assert response.summary.candidate_sources >= 9
-    assert response.summary.endpoint_reportable_sources >= 9
-    assert response.summary.graduation_plannable_sources >= 9
-    assert response.summary.sandbox_reportable_sources >= 5
+    assert response.summary.candidate_sources >= 10
+    assert response.summary.endpoint_reportable_sources >= 10
+    assert response.summary.graduation_plannable_sources >= 10
+    assert response.summary.sandbox_reportable_sources >= 7
     assert response.summary.blocked_sources >= 1
     assert response.summary.credential_blocked_sources >= 1
-    assert response.sandbox_candidate_summary.total_candidates >= 5
+    assert response.sandbox_candidate_summary.total_candidates >= 7
     assert response.sandbox_candidate_summary.export_lines
+    assert response.candidate_network_summary.total_candidates >= 11
+    assert response.candidate_network_summary.export_lines
+    assert response.promotion_readiness_summary.total_candidates >= 11
+    assert response.promotion_readiness_summary.export_lines
+    assert any(
+        group.key == "candidate-sandbox-importable"
+        for group in response.candidate_network_summary.by_lifecycle_state
+    )
+    assert any(
+        group.key == "candidate-endpoint-verified"
+        for group in response.candidate_network_summary.by_lifecycle_state
+    )
+    assert any(
+        group.key == "fixture-reviewed-sandbox-shape"
+        for group in response.candidate_network_summary.by_payload_shape_posture
+    )
+    assert any(
+        group.key == "api-family-documented-shape-unpinned"
+        for group in response.candidate_network_summary.by_payload_shape_posture
+    )
+    assert any(
+        group.key == "blocked-do-not-scrape"
+        for group in response.candidate_network_summary.by_lifecycle_state
+    )
     assert any(
         group.key == "direct-image-documented"
         for group in response.sandbox_candidate_summary.by_media_posture
@@ -39,6 +63,18 @@ def test_source_ops_report_index_summarizes_existing_lifecycle_artifacts() -> No
         group.key == "metadata-only-documented"
         for group in response.sandbox_candidate_summary.by_media_posture
     )
+    assert any(
+        group.key == "sandbox-stronger-follow-up"
+        for group in response.promotion_readiness_summary.by_bucket
+    )
+    assert any(
+        group.key == "endpoint-verified-held"
+        for group in response.promotion_readiness_summary.by_bucket
+    )
+    assert any(
+        group.key == "blocked-hold"
+        for group in response.promotion_readiness_summary.by_bucket
+    )
     assert "read-only lifecycle evidence" in response.caveat
     assert response.export_lines
 
@@ -49,6 +85,14 @@ def test_source_ops_report_index_tracks_finland_ashcam_minnesota_and_wsdot() -> 
     sandbox_rows = {
         row.source_id: row
         for row in response.sandbox_candidate_summary.rows
+    }
+    candidate_rows = {
+        row.source_id: row
+        for row in response.candidate_network_summary.rows
+    }
+    promotion_rows = {
+        row.source_id: row
+        for row in response.promotion_readiness_summary.rows
     }
 
     ashcam = entries["usgs-ashcam"]
@@ -110,9 +154,77 @@ def test_source_ops_report_index_tracks_finland_ashcam_minnesota_and_wsdot() -> 
     assert sandbox_rows["nsw-live-traffic-cameras"].next_review_priority == "review-next"
     assert sandbox_rows["quebec-mtmd-traffic-cameras"].media_evidence_posture == "viewer-only-documented"
     assert sandbox_rows["maryland-chart-traffic-cameras"].media_evidence_posture == "viewer-only-documented"
+    assert sandbox_rows["baton-rouge-traffic-cameras"].media_evidence_posture == "viewer-only-documented"
+    assert sandbox_rows["vancouver-web-cam-url-links"].media_evidence_posture == "viewer-only-documented"
     assert sandbox_rows["fingal-traffic-cameras"].media_evidence_posture == "metadata-only-documented"
     assert "direct-image evidence" in sandbox_rows["fingal-traffic-cameras"].missing_evidence
     assert sandbox_rows["fingal-traffic-cameras"].next_review_priority == "hold"
+
+    baton_rouge = entries["baton-rouge-traffic-cameras"]
+    assert baton_rouge.lifecycle_bucket == "candidate-sandbox-importable"
+    assert any(
+        artifact.artifact_key == "sandbox-validation-report" and artifact.available
+        for artifact in baton_rouge.artifacts
+    )
+
+    vancouver = entries["vancouver-web-cam-url-links"]
+    assert vancouver.lifecycle_bucket == "candidate-sandbox-importable"
+    assert any(
+        artifact.artifact_key == "sandbox-validation-report" and artifact.available
+        for artifact in vancouver.artifacts
+    )
+    assert candidate_rows["vancouver-web-cam-url-links"].media_access_posture == "viewer-link-documented"
+    assert candidate_rows["vancouver-web-cam-url-links"].review_priority == "follow-up"
+    assert candidate_rows["vancouver-web-cam-url-links"].next_safe_review_step == "review sandbox mapping"
+    assert candidate_rows["vancouver-web-cam-url-links"].primary_region == "Vancouver"
+
+    arlington = entries["arlington-traffic-cameras"]
+    assert arlington.lifecycle_bucket == "candidate-endpoint-verified"
+    assert any(
+        artifact.artifact_key == "candidate-endpoint-report" and artifact.available
+        for artifact in arlington.artifacts
+    )
+    assert candidate_rows["arlington-traffic-cameras"].media_access_posture == "no-public-media-link-documented"
+    assert candidate_rows["arlington-traffic-cameras"].payload_shape_posture == "machine-shape-location-only"
+    assert candidate_rows["arlington-traffic-cameras"].sandbox_feasibility_posture == "media-proof-missing"
+    assert candidate_rows["arlington-traffic-cameras"].review_priority == "hold"
+    assert "fixture or sandbox connector" in candidate_rows["arlington-traffic-cameras"].missing_evidence
+    assert "public media access evidence" in candidate_rows["arlington-traffic-cameras"].missing_evidence
+    assert candidate_rows["arlington-traffic-cameras"].next_safe_review_step == "document media evidence"
+
+    nzta = entries["nzta-traffic-cameras"]
+    assert nzta.lifecycle_bucket == "candidate-endpoint-verified"
+    assert any(
+        artifact.artifact_key == "candidate-endpoint-report" and artifact.available
+        for artifact in nzta.artifacts
+    )
+    assert candidate_rows["nzta-traffic-cameras"].media_access_posture == "no-public-media-link-documented"
+    assert candidate_rows["nzta-traffic-cameras"].payload_shape_posture == "api-family-documented-shape-unpinned"
+    assert candidate_rows["nzta-traffic-cameras"].sandbox_feasibility_posture == "endpoint-family-unpinned"
+    assert candidate_rows["nzta-traffic-cameras"].review_priority == "hold"
+    assert candidate_rows["nzta-traffic-cameras"].next_safe_review_step == "pin bounded camera payload"
+    assert "bounded payload-shape review" in candidate_rows["nzta-traffic-cameras"].missing_evidence
+    assert "public media access evidence" in candidate_rows["nzta-traffic-cameras"].missing_evidence
+    assert promotion_rows["nzta-traffic-cameras"].promotion_readiness_bucket == "endpoint-verified-held"
+    assert promotion_rows["nzta-traffic-cameras"].payload_shape_posture == "api-family-documented-shape-unpinned"
+    assert promotion_rows["nzta-traffic-cameras"].comparison_basis.startswith("Endpoint family is documented")
+
+    caltrans = entries["caltrans-cctv-cameras"]
+    assert caltrans.lifecycle_bucket == "candidate-sandbox-importable"
+    assert any(
+        artifact.artifact_key == "candidate-endpoint-report" and artifact.available
+        for artifact in caltrans.artifacts
+    )
+    assert any(
+        artifact.artifact_key == "sandbox-validation-report" and artifact.available
+        for artifact in caltrans.artifacts
+    )
+    assert candidate_rows["caltrans-cctv-cameras"].media_access_posture == "direct-image-link-documented"
+    assert candidate_rows["caltrans-cctv-cameras"].payload_shape_posture == "fixture-reviewed-sandbox-shape"
+    assert candidate_rows["caltrans-cctv-cameras"].sandbox_feasibility_posture == "fixture-backed-direct-image-review"
+    assert candidate_rows["caltrans-cctv-cameras"].review_priority == "review-next"
+    assert candidate_rows["caltrans-cctv-cameras"].next_safe_review_step == "review sandbox mapping"
+    assert promotion_rows["caltrans-cctv-cameras"].promotion_readiness_bucket == "sandbox-stronger-follow-up"
 
     euskadi = entries["euskadi-traffic-cameras"]
     assert euskadi.lifecycle_bucket == "candidate-needs-review"
@@ -120,6 +232,8 @@ def test_source_ops_report_index_tracks_finland_ashcam_minnesota_and_wsdot() -> 
         artifact.artifact_key == "candidate-endpoint-report" and artifact.available
         for artifact in euskadi.artifacts
     )
+    assert candidate_rows["euskadi-traffic-cameras"].review_priority == "follow-up"
+    assert "endpoint verification" in candidate_rows["euskadi-traffic-cameras"].missing_evidence
 
     minnesota = entries["minnesota-511-public-arcgis"]
     assert minnesota.lifecycle_bucket == "blocked-do-not-scrape"
@@ -128,6 +242,9 @@ def test_source_ops_report_index_tracks_finland_ashcam_minnesota_and_wsdot() -> 
         artifact.artifact_key == "candidate-endpoint-report" and artifact.available
         for artifact in minnesota.artifacts
     )
+    assert candidate_rows["minnesota-511-public-arcgis"].review_priority == "blocked"
+    assert candidate_rows["minnesota-511-public-arcgis"].next_safe_review_step == "document compliant alternative"
+    assert candidate_rows["minnesota-511-public-arcgis"].missing_evidence == ["compliant machine-readable alternative"]
 
     wsdot = entries["wsdot-cameras"]
     assert wsdot.lifecycle_bucket == "credential-blocked"
@@ -148,8 +265,26 @@ def test_source_ops_index_route_is_read_only_and_compact() -> None:
         artifact["artifactKey"] == "sandbox-validation-report" and artifact["available"]
         for artifact in finland["artifacts"]
     )
-    assert payload["sandboxCandidateSummary"]["totalCandidates"] >= 5
+    assert payload["sandboxCandidateSummary"]["totalCandidates"] >= 7
     assert payload["sandboxCandidateSummary"]["exportLines"]
+    assert payload["candidateNetworkSummary"]["totalCandidates"] >= 11
+    assert payload["candidateNetworkSummary"]["exportLines"]
+    assert payload["promotionReadinessSummary"]["totalCandidates"] >= 11
+    assert payload["promotionReadinessSummary"]["exportLines"]
+    assert any(
+        row["sourceId"] == "arlington-traffic-cameras" and row["reviewPriority"] == "hold"
+        for row in payload["candidateNetworkSummary"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "nzta-traffic-cameras"
+        and row["promotionReadinessBucket"] == "endpoint-verified-held"
+        for row in payload["promotionReadinessSummary"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "caltrans-cctv-cameras"
+        and row["promotionReadinessBucket"] == "sandbox-stronger-follow-up"
+        for row in payload["promotionReadinessSummary"]["rows"]
+    )
     assert any("does not activate the source" in caveat.lower() for caveat in finland["caveats"])
 
 

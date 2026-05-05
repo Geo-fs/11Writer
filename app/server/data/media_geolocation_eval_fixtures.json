@@ -1,0 +1,91 @@
+{
+  "cases": [
+    {
+      "caseId": "observed-oslo-coordinates",
+      "artifactMetadata": {
+        "width": 2,
+        "height": 2,
+        "seasonalSignals": {
+          "greenRatio": 0.31,
+          "blueRatio": 0.18,
+          "warmRatio": 0.12,
+          "snowRatio": 0.0
+        },
+        "daylightSignals": {
+          "brightness": 0.66,
+          "darkPixelRatio": 0.03,
+          "warmHighlightRatio": 0.08
+        }
+      },
+      "observedLatitude": 59.9127,
+      "observedLongitude": 10.7461,
+      "exifTimestamp": "2026-04-28T12:30:00Z",
+      "ocrText": "Oslo Central Station 59.9127, 10.7461",
+      "captions": [
+        "Oslo Central Station platform entrance"
+      ],
+      "engine": "deterministic",
+      "expected": {
+        "latitude": 59.9127,
+        "longitude": 10.7461,
+        "countryOrRegion": "Oslo"
+      }
+    },
+    {
+      "caseId": "dms-tokyo-reference",
+      "artifactMetadata": {
+        "width": 2,
+        "height": 2,
+        "seasonalSignals": {
+          "greenRatio": 0.14,
+          "blueRatio": 0.28,
+          "warmRatio": 0.18,
+          "snowRatio": 0.0
+        },
+        "daylightSignals": {
+          "brightness": 0.54,
+          "darkPixelRatio": 0.09,
+          "warmHighlightRatio": 0.05
+        }
+      },
+      "ocrText": "Tokyo Tower 35°39'29\"N 139°44'43\"E",
+      "captions": [
+        "Tokyo Tower skyline view"
+      ],
+      "engine": "deterministic",
+      "expected": {
+        "latitude": 35.658056,
+        "longitude": 139.745278,
+        "countryOrRegion": "Tokyo"
+      }
+    },
+    {
+      "caseId": "cardinal-bengaluru-reference",
+      "artifactMetadata": {
+        "width": 2,
+        "height": 2,
+        "seasonalSignals": {
+          "greenRatio": 0.22,
+          "blueRatio": 0.1,
+          "warmRatio": 0.2,
+          "snowRatio": 0.0
+        },
+        "daylightSignals": {
+          "brightness": 0.6,
+          "darkPixelRatio": 0.05,
+          "warmHighlightRatio": 0.11
+        }
+      },
+      "ocrText": "Bengaluru N 12.9716 E 77.5946 Metro",
+      "captions": [
+        "Metro station entrance"
+      ],
+      "engine": "deterministic",
+      "expected": {
+        "latitude": 12.9716,
+        "longitude": 77.5946,
+        "countryOrRegion": "Bengaluru"
+      }
+    }
+  ]
+}

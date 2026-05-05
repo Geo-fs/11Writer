@@ -18,6 +18,11 @@ Status note:
 - A compact backend family review queue now exists at `GET /api/feeds/data-ai/source-families/review-queue`; use it for filterable family/source issue review before reopening any new family expansion.
 - A client-light inspector consumer now exists on top of those metadata-only surfaces, but it remains workflow-supporting evidence only until explicit smoke or manual workflow validation is recorded.
 - The client also exposes a bounded topic/context lens over recent-item metadata plus family metadata; treat it as workflow-supporting grouping only, not as claim truth, severity, or action guidance.
+- The client also exposes a bounded infrastructure/status context package scoped to the already implemented `cloudflare-radar`, `netblocks`, and `apnic-blog` family; treat it as methodology-caveated workflow support only, not as whole-internet truth or operator-confirmed outage truth.
+- The client also exposes a bounded long-tail intake posture note over readiness/review/review-queue metadata; treat it as candidate/provenance/dedupe guidance only, not as permission for broad crawling or source promotion.
+- The client also exposes a bounded fusion/claim-integrity snapshot over the current Data AI metadata surfaces; treat it as workflow-supporting fusion input only, not as Source Discovery replacement, truth weighting, or claim adjudication.
+- The client also exposes a bounded report-brief package over the current Data AI metadata surfaces; treat it as report-ready metadata organization only, not as raw-text reporting, claim proof, or Source Discovery replacement.
+- The client also exposes a bounded topic-scoped report packet over the current Data AI metadata surfaces; treat it as topic-filtered metadata organization only, not as headline corroboration, field-truth inference, or required-action guidance.
 - The implemented Data AI waves already cover:
   - starter bundle
   - official cyber advisory wave
@@ -27,6 +32,8 @@ Status note:
   - scientific/environmental context wave
   - policy/think-tank commentary wave
   - cyber vendor/community follow-on wave
+  - cyber/internet platform-watch wave
+  - world-news awareness wave
   - internet governance/standards context wave
   - infrastructure/status wave
   - OSINT/investigations wave
@@ -36,7 +43,9 @@ Status note:
 
 ## Recommended Next Order
 
-1. `held-deferred-groups`
+1. `topic-scoped-report-packet-over-existing-families`
+2. `data-workflow-validation-or-topic-coverage-closure`
+3. `held-deferred-groups`
 
 Why:
 
@@ -45,7 +54,42 @@ Why:
 - policy/think-tank commentary is now implemented backend-first and should not be routed again as fresh source-creation work
 - cyber vendor/community follow-on is now implemented backend-first and should not be routed again as fresh source-creation work
 - investigative/civic context is now implemented backend-first and should not be routed again as fresh source-creation work
+- the current fusion/claim-integrity consumer package already composes existing metadata-only surfaces, so the next Data AI follow-on should stay on topic-scoped reporting or validation/export coherence rather than new family creation
+- the current report-brief package already organizes existing metadata-only surfaces into report sections, so the next Data AI follow-on should stay on topic-scoped reporting or validation/export coherence rather than raw-text-heavy reporting behavior
+- the current topic-scoped report packet already answers one active topic from existing metadata-only surfaces, so the next Data AI follow-on should stay on validation/export coherence rather than new feed-family creation
+- the bounded `world-news-awareness` family is now implemented on the shared route and metadata-only consumer surfaces, so it should not be routed again as fresh source-creation work
+- do not route `propublica` or `global-voices` as fresh next-wave work because both are already implemented backend-first within the investigative/civic context family
 - held/deferred groups should stay closed unless Manager explicitly reopens one narrow family
+
+## Post-World-News Follow-On
+
+### `topic-scoped-report-packet-over-existing-families`
+
+- Recommended timing:
+  - `next`
+- First safe slice:
+  - one bounded topic-scoped report packet over already implemented families only
+- Why:
+  - the implemented family stack is now wide enough that the next useful move is question-driven composition rather than another fresh family
+- Caveats:
+  - contextual feed text remains untrusted data
+  - evidence classes must stay separate
+- Do-not-do rules:
+  - do not reopen `world-news-awareness`, `propublica`, or `global-voices` as fresh source work
+  - do not turn composed report text into event confirmation, attribution proof, or action guidance
+
+### `data-workflow-validation-or-topic-coverage-closure`
+
+- Recommended timing:
+  - `soon`
+- First safe slice:
+  - one bounded workflow/export closure or one narrow topic-coverage follow-on
+- Why:
+  - this keeps Data on validation and reporting quality instead of broad family churn
+- Caveats:
+  - review/export helpers remain workflow-supporting only
+- Do-not-do rules:
+  - do not widen into broad multi-family polling
 
 ## Post-Summary Families
 
@@ -191,7 +235,7 @@ Status:
 - Recommended timing:
   - `hold`
 - Candidate groups:
-  - broad regional news families
+  - broad regional news families beyond the implemented bounded `world-news-awareness` slice
   - duplicate event-adjacent feeds already owned by another domain
   - weak-authority or high-dedupe feed families
   - any family Manager has not narrowed to one evidence class

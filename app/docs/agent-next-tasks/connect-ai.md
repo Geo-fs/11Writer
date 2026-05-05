@@ -2,46 +2,85 @@
 
 You are Connect AI, working on repo-wide integration, validation, blocker triage, ownership scanning, and release/readiness coordination for 11Writer.
 
-Assignment version: 2026-05-02 12:27 America/Chicago
+Assignment version: 2026-05-05 10:22 America/Chicago
 
 Recent Manager/Workflow Updates:
-- You completed the Source Discovery runtime/review/scheduler boundary sweep with green validation and no reproduced repo-wide blocker.
-- Atlas opened a new peer alert for a Source Discovery ten-step backend slice: catalog scan, article fetch, social/image metadata, source packet export, runtime worker control, lease-safe scheduler state, live-gated OpenAI execution, scheduler-created article-claim tasks, and reviewed-claim application.
-- Atlas is a peer/user-directed agent. Treat its work as important integration input, not source validation proof or autonomous runtime approval.
-- Record `Assignment version read: 2026-05-02 12:27 America/Chicago` in your progress doc before starting.
+- The entire `2026-05-05 09:47 America/Chicago` controlled wave is complete; nobody should keep working from it.
+- 11Writer is being steered toward a question-driven reporting desk, not just broad monitoring or disconnected helper growth.
+- Cross-source fusion still does not prove intent, wrongdoing, threat, impact, causation, or action need.
+- Wonder and Atlas Source Discovery, platform-root, Mastodon, Statuspage, media-geolocation, and media-evidence additions remain candidate, review, derived-evidence, or runtime surfaces only unless controlled validation explicitly promotes them.
+
+Current state:
+- `app/docs/reporting-loop-package-contract.md` exists and the focused reporting-loop regression is already live.
+- The latest completed domain wave now also includes:
+  - Data AI `world-news-awareness`
+  - Marine `marineReportBriefPackage`
+  - Aerospace VAAC advisory report package
+  - Geospatial `dwd-cap-alerts`
+  - Features/Webcam Caltrans `candidate-sandbox-importable`
+- Manager-owned peer alerts for Atlas media geolocation and Wonder Statuspage or Mastodon discovery are being routed into this assignment and the matching Gather assignment.
 
 Mission:
-- Validate the new Source Discovery ten-step backend slice at current repo state and run a repo-wide pre-consolidation sweep focused on runtime, claim, worker, scheduler, and shared-contract boundaries.
+- Run the next current-state integration sweep, close the remaining shared compatibility gap around the newly completed domain surfaces, and make sure peer/runtime additions are classified honestly instead of drifting into fake validation proof.
+
+Do first:
+1. Record `Assignment version read: 2026-05-05 10:22 America/Chicago` in `app/docs/agent-progress/connect-ai.md`.
 
 Tasks:
-1. Reproduce current validation before changing anything.
-2. Verify catalog scan, article fetch, social/image metadata, source packet export, runtime worker control, lease-safe scheduler state, live-gated OpenAI execution, scheduler-created article-claim tasks, and reviewed-claim application are explicitly gated, review-oriented, auditable, and non-autonomous.
-3. Confirm no path auto-promotes, auto-validates, auto-activates, auto-schedules unapproved sources, applies claims without review, changes source truth without audit, or treats LLM output as trusted state.
-4. Fix only reproduced repo-wide blockers, import/type failures, unsafe runtime-boundary bugs, broken validation snapshots, or obvious docs/scanner drift.
-5. Update `active-agent-worktree.md`, `release-readiness.md`, and `validation-matrix.md` with scanner counts, warning posture, validation truth, runtime-boundary truth, and residual consolidation risk.
-6. Append your final output to `app/docs/agent-progress/connect-ai.md`.
+1. Run current-state `git status`, ownership scanner, release dry-run, alerts, compile, lint, and build before editing.
+2. Inspect the newly completed domain surfaces and the current high-collision shared files, especially:
+   - `app/client/src/features/app-shell/AppShell.tsx`
+   - `app/client/src/features/inspector/InspectorPanel.tsx`
+   - `app/client/src/features/inspector/aerospaceVaacAdvisoryReportPackage.ts`
+   - `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+   - `app/client/src/features/marine/marineReportBriefPackage.ts`
+   - `app/server/src/services/dwd_cap_alerts_service.py`
+   - `app/server/src/services/camera_sandbox_validation_report.py`
+   - `app/server/src/types/api.py`
+   - `app/client/src/types/api.ts`
+   - `app/client/scripts/playwright_smoke.mjs`
+3. Update the reporting-loop contract and focused validation surfaces so the current wave is classified cleanly:
+   - domain fusion-snapshot inputs
+   - domain report-brief packages
+   - server-side environmental reporting inputs
+   - backend-only webcam source-ops or sandbox-validation reporting surfaces where they fit the contract, or explicitly mark them as adjacent but not yet first-class contract peers
+4. Extend or add one focused compatibility validation surface for the newly completed wave without rewriting domain semantics or growing the UI.
+5. Validate the peer/runtime additions tied to the two routed alerts:
+   - Atlas media geolocation
+   - Wonder Statuspage and Mastodon discovery
+   Keep them explicitly candidate, review, derived-evidence, or runtime only in coordination docs and ownership notes.
+6. Reproduce and fix only current shared compile, import, type, or build blockers if any appear while doing the sweep.
+7. Refresh:
+   - `app/docs/source-fusion-reporting-input-inventory.md`
+   - `app/docs/active-agent-worktree.md`
+   - `app/docs/release-readiness.md`
+   - `app/docs/validation-matrix.md`
+   - `app/docs/commit-groups.current.md`
+8. Reduce scanner ambiguity only where ownership is obvious and stable.
+9. Append your final output to `app/docs/agent-progress/connect-ai.md`.
 
 Constraints:
-- Do not implement new domain features, source connectors, live polling expansion, source promotions, UI polish, or autonomous scheduler behavior.
-- Do not hide real shared risk with cosmetic ownership scanner rules.
-- Do not stage, commit, or push.
+- No source or domain semantics changes.
+- No broad refactors.
+- No new large UI surface.
+- If a peer/runtime addition cannot be validated cleanly, document the boundary instead of force-promoting it.
+- No staging, commit, or push.
 
 Validation:
 - `git status --short --branch`
 - `python scripts/list_changed_files_by_owner.py --summary`
+- `python scripts/release_dry_run.py --json`
 - `python scripts/alerts_ledger.py --json`
 - `python -m compileall app/server/src`
-- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
-- `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
-- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q`
-- `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py app/server/tests/test_webcam_module.py -q`
-- `python -m pytest app/server/tests/test_ourairports_reference_contracts.py -q`
 - From `app/client`: `cmd /c npm.cmd run lint`
 - From `app/client`: `cmd /c npm.cmd run build`
-- If compile/lint/build pass: `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+- From `app/client`: `cmd /c npm.cmd run test:reporting-loop-package-contract`
+- If compile, lint, and build pass: `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
 
 Final report requirements:
-- Start with `Assignment version read: 2026-05-02 12:27 America/Chicago`.
-- Report validation results, scanner counts, warning posture, and runtime-boundary truth.
-- State exactly what blockers were fixed, routed, or not reproduced.
-- State no staging/commit/push.
+- Start with `Assignment version read: 2026-05-05 10:22 America/Chicago`.
+- Report any reproduced shared blocker and the exact smallest safe fix, if one was required.
+- State whether the reporting-loop contract doc and focused validation surface were updated for the new domain wave.
+- State how Atlas media geolocation and Wonder Statuspage or Mastodon discovery were classified after the sweep.
+- Report ownership counts, release posture, and the top shared-file collision risks that still need manual hunk review.
+- State no staging, commit, or push.

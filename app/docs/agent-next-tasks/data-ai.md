@@ -1,35 +1,58 @@
 # Data AI Next Task
 
-You are Data AI, working on public internet-information sources, cybersecurity/network feeds, institutional feeds, RSS/Atom ingestion, and source-honest context workflows for 11Writer.
+You are Data AI, working on public internet-information sources, cybersecurity, institutional feeds, RSS and Atom ingestion, and source-honest context workflows for 11Writer.
 
-Assignment version: 2026-05-02 12:27 America/Chicago
+Assignment version: 2026-05-05 10:22 America/Chicago
 
 Recent Manager/Workflow Updates:
-- You completed the client-light Data AI Source Intelligence consumer.
-- The next Data win is a workflow feature over existing feeds, not another feed dump.
-- Feed text, rendered text, article snippets, and source titles remain untrusted data.
-- Record `Assignment version read: 2026-05-02 12:27 America/Chicago` in your progress doc before starting.
+- The product direction is now explicit question-driven reporting plus broad awareness, not just more feed volume.
+- The Data AI fusion or claim-integrity snapshot, report-brief package, and `world-news-awareness` family are complete.
+- `propublica` and `global-voices` are already implemented and remain stale-routing traps, not fresh work.
+- Peer Source Discovery roots, Statuspage, Mastodon, and long-tail discovery surfaces remain candidate or review infrastructure only unless Gather and Connect explicitly promote them.
+
+Current state:
+- Data AI now has broad bounded family coverage, but the next product gap is answering topic-scoped reporting questions over that coverage without turning media or repeated headlines into fake certainty.
 
 Mission:
-- Add a Data AI topic/context lens and export package over existing feed-family metadata so users can review themes without turning feed text into truth, severity, or action guidance.
+- Build one bounded topic-scoped Data AI report packet on top of the existing metadata-only family, topic, fusion, and report surfaces so the app can answer "what does the current feed evidence say about this topic?" without crawling pages or laundering confidence.
+
+Do first:
+1. Record `Assignment version read: 2026-05-05 10:22 America/Chicago` in `app/docs/agent-progress/data-ai.md`.
 
 Tasks:
-1. Add a pure client helper, backend helper, or both, depending on current patterns, that groups existing Data AI recent items/review metadata by bounded topic hints such as cyber, infrastructure, public institution, investigation/civic, governance/standards, advisory, and science/environment.
-2. Use metadata, family IDs, source IDs, tags, evidence bases, source health, source modes, caveat classes, and dedupe posture. Do not infer hidden topics from article bodies.
-3. Add compact export-safe topic/context lines with caveats, source-health posture, and no-truth/no-action guardrails.
-4. Add a small UI-light inspector/source-intelligence section only if it fits current Data AI consumer patterns.
-5. Add tests proving no free-form text leakage, no linked-page URLs, no scoring, no action recommendations, and prompt-injection text remains inert.
-6. Update Data AI docs to mark this as workflow-supporting evidence only.
+1. Inspect the existing:
+   - aggregate Data AI recent route and family registry
+   - family review and review queue
+   - readiness/export snapshot
+   - topic/context lens
+   - fusion / claim-integrity snapshot
+   - report-brief package
+   - `world-news-awareness` family threading
+2. Add one pure bounded helper, suggested name `buildDataAiTopicReportPacket`, that produces a topic-scoped packet over the current metadata surfaces only.
+3. Preserve, at minimum:
+   - active topic label or filter posture
+   - source-family coverage by evidence class
+   - source ids, source modes, and source health posture
+   - bounded recent-item or evidence lines only where they remain sanitized, inert, and export-safe
+   - dedupe and corroboration posture
+   - review or readiness gaps
+   - `observe`, `orient`, `prioritize`, and `explain`
+   - explicit does-not-prove lines
+4. Thread the new packet into the existing Data AI source-intelligence or report surface only; no new large panel and no fresh feed-family build.
+5. Extend deterministic regressions, fixtures, and docs so the topic packet is visible, export-safe, and prompt-injection inert.
+6. Keep Source Discovery, long-tail candidate intake, reviewed-claim lineage, Statuspage/Mastodon discovery, and platform-root discovery below truth-weighting or source-promotion behavior.
 7. Append your final output to `app/docs/agent-progress/data-ai.md`.
 
 Constraints:
-- No new feed sources.
-- No linked-page fetching, article-body extraction, browser automation, live-network tests, credentials, tokenized URLs, or broad polling.
-- No credibility, truth, severity, threat, incident, exploitation, compromise, attribution, legal, remediation, policy, or action scores.
+- No live-network tests.
+- No browser automation, broad crawling, linked-page fetching, article-body extraction, private URLs, tokenized feeds, credentials, or raw feed dumps.
+- No headline-based severity scoring, no duplicate headline counts becoming corroboration, and no media or commentary text becoming field-truth, impact, wrongdoing, intent, attribution, legal status, urgency, remediation priority, or required action.
+- If a compact evidence line cannot be kept inert and export-safe, leave it out.
 - Do not stage, commit, or push.
 
 Validation:
-- Run focused tests you add.
+- Focused tests and regressions you add.
+- `cmd /c npm.cmd run test:data-ai-source-intelligence`
 - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q`
 - `python -m compileall app/server/src`
 - From `app/client`: `cmd /c npm.cmd run lint`
@@ -37,8 +60,8 @@ Validation:
 - `python scripts/alerts_ledger.py --json`
 
 Final report requirements:
-- Start with `Assignment version read: 2026-05-02 12:27 America/Chicago`.
-- Describe topic/context lens and export behavior.
-- State no-leakage, no-scoring, prompt-injection, caveat, and export guardrails.
+- Start with `Assignment version read: 2026-05-05 10:22 America/Chicago`.
+- Describe the new topic-scoped report packet and how it builds on existing Data AI surfaces without reopening stale families.
+- State prompt-injection, no-leakage, no-scoring, dedupe, corroboration, and media-context safety guardrails.
 - Report validation results.
-- State no staging/commit/push.
+- State no staging, commit, or push.

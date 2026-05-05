@@ -813,32 +813,32 @@ _SOURCE_DEFINITIONS: tuple[CameraSourceDefinition, ...] = (
         provides_direction_text=False,
         provides_numeric_heading=False,
         provides_direct_image=False,
-        provides_viewer_only=False,
+        provides_viewer_only=True,
         supports_embed=False,
         supports_storage=False,
         rate_limit_notes=(
             "Public municipal JSON dataset; keep polling conservative until connector and cadence review exist.",
         ),
-        quality_notes=("Official municipal traffic camera location dataset with JSON, XML, and CSV distributions.",),
-        stability_notes=("Official Open Data BR dataset with explicit rows.json download URL.",),
+        quality_notes=("Official municipal traffic camera dataset with JSON, XML, and CSV distributions.",),
+        stability_notes=("Official Open Data BR dataset with explicit rows.json download URL and per-camera viewer links.",),
         compliance_risk="low",
         extraction_feasibility="medium",
         endpoint_verification_status="machine-readable-confirmed",
         candidate_endpoint_url="https://data.brla.gov/api/views/6z6u-ts44/rows.json?accessType=DOWNLOAD",
         machine_readable_endpoint_url="https://data.brla.gov/api/views/6z6u-ts44/rows.json?accessType=DOWNLOAD",
-        last_endpoint_check_at="2026-05-02",
-        last_endpoint_http_status=None,
-        last_endpoint_content_type=None,
-        last_endpoint_result="Official Open Data BR metadata identifies a public JSON traffic camera dataset for the Greater Baton Rouge area. Runtime connector verification is still pending.",
+        last_endpoint_check_at="2026-05-04",
+        last_endpoint_http_status=200,
+        last_endpoint_content_type="application/json;charset=utf-8",
+        last_endpoint_result="Official Open Data BR rows.json endpoint responded publicly and exposes coordinates plus per-camera viewer URLs in machine-readable JSON rows.",
         last_endpoint_notes=(
-            "Documentation-first candidate evidence only; this task does not activate, validate, or schedule ingestion.",
-            "Current public description confirms a traffic camera dataset, but direct-image and viewer-field posture remain unverified until fixture review.",
+            "Public rows.json payload includes IMAGE VIEW and GEOMETRY fields for camera inventory mapping.",
+            "Viewer-link evidence is stronger than direct-image evidence and must stay conservative until fixture-backed review completes.",
         ),
-        verification_caveat="Machine-readable location dataset availability does not establish direct-image capability, validated mapping, or production ingest readiness.",
+        verification_caveat="Machine-readable viewer-link evidence does not establish direct-image capability, validated mapping, or production ingest readiness.",
         blocked_reason="Candidate only. Fixture design, connector mapping, compliance review, and source-health validation are still required before any activation decision.",
         notes=(
             "Official Baton Rouge open data traffic camera candidate.",
-            "Treat the current evidence as location-centric until per-camera media fields are confirmed in fixtures.",
+            "Treat the current evidence as viewer-only-documented until fixture-backed review confirms media handling.",
         ),
         compliance=CameraComplianceMetadata(
             attribution_text="Open Data BR Traffic Camera",
@@ -852,6 +852,280 @@ _SOURCE_DEFINITIONS: tuple[CameraSourceDefinition, ...] = (
             notes=[
                 "Candidate-only lifecycle posture remains in force until fixture-backed review is complete.",
                 "Do not assume media ingest rights from dataset availability alone.",
+            ],
+        ),
+    ),
+    CameraSourceDefinition(
+        key="vancouver-web-cam-url-links",
+        display_name="Vancouver Web Cam URL Links",
+        owner="City of Vancouver",
+        source_type="official-dot",
+        inventory_source_type="official-dot-api",
+        source_family="vancouver-open-data-cameras",
+        access_method="json-api",
+        onboarding_state="candidate",
+        coverage="City of Vancouver traffic web camera inventory",
+        coverage_states=(),
+        coverage_regions=("Vancouver", "British Columbia", "Canada"),
+        priority=79,
+        authentication="none",
+        default_refresh_interval_seconds=1800,
+        refresh_policy=RefreshPolicy(1800, 1800, 1800, False, 1800, 1800, 7200),
+        provides_exact_coordinates=True,
+        provides_direction_text=False,
+        provides_numeric_heading=False,
+        provides_direct_image=False,
+        provides_viewer_only=True,
+        supports_embed=False,
+        supports_storage=False,
+        rate_limit_notes=(
+            "Public municipal open-data records endpoint; keep polling conservative until connector and cadence review exist.",
+        ),
+        quality_notes=("Official municipal web camera inventory with per-camera viewer URLs and coordinates.",),
+        stability_notes=("Official Vancouver open-data API exposes records with stable map IDs, names, and web camera URLs.",),
+        compliance_risk="low",
+        extraction_feasibility="medium",
+        endpoint_verification_status="machine-readable-confirmed",
+        candidate_endpoint_url="https://opendata.vancouver.ca/api/explore/v2.1/catalog/datasets/web-cam-url-links/records?limit=2",
+        machine_readable_endpoint_url="https://opendata.vancouver.ca/api/explore/v2.1/catalog/datasets/web-cam-url-links/records?limit=2",
+        last_endpoint_check_at="2026-05-04",
+        last_endpoint_http_status=200,
+        last_endpoint_content_type="application/json; charset=utf-8",
+        last_endpoint_result="Official City of Vancouver records API responded publicly and exposes coordinates plus per-camera viewer URLs for traffic webcams.",
+        last_endpoint_notes=(
+            "Public records API includes mapid, camera name, geo_point_2d, and per-camera URL fields.",
+            "Current evidence supports viewer-only-documented posture; direct-image capability must not be inferred.",
+        ),
+        verification_caveat="Machine-readable viewer-link evidence does not establish direct-image capability, validated mapping, or production ingest readiness.",
+        blocked_reason="Candidate only. Fixture design, connector mapping, compliance review, and source-health validation are still required before any activation decision.",
+        notes=(
+            "Official City of Vancouver traffic web camera inventory candidate.",
+            "Treat the current evidence as viewer-only-documented until fixture-backed review confirms media handling.",
+        ),
+        compliance=CameraComplianceMetadata(
+            attribution_text="City of Vancouver Web Cam URL Links",
+            attribution_url="https://opendata.vancouver.ca/explore/dataset/web-cam-url-links",
+            terms_url="https://opendata.vancouver.ca/pages/licence/",
+            license_summary="Official municipal open data web camera inventory. Preserve attribution and keep media/storage assumptions conservative until reviewed.",
+            requires_authentication=False,
+            supports_embedding=False,
+            supports_frame_storage=False,
+            review_required=True,
+            notes=[
+                "Candidate-only lifecycle posture remains in force until fixture-backed review is complete.",
+                "Do not assume viewer-page availability implies image archival or embed rights.",
+            ],
+        ),
+    ),
+    CameraSourceDefinition(
+        key="nzta-traffic-cameras",
+        display_name="NZTA Traffic Cameras",
+        owner="NZ Transport Agency Waka Kotahi",
+        source_type="official-dot",
+        inventory_source_type="official-dot-api",
+        source_family="nzta-traffic-cameras",
+        access_method="xml-api",
+        onboarding_state="candidate",
+        coverage="New Zealand nationwide traffic camera network",
+        coverage_states=(),
+        coverage_regions=("New Zealand",),
+        priority=81,
+        authentication="none",
+        default_refresh_interval_seconds=1800,
+        refresh_policy=RefreshPolicy(1800, 1800, 1800, False, 1800, 1800, 7200),
+        provides_exact_coordinates=False,
+        provides_direction_text=False,
+        provides_numeric_heading=False,
+        provides_direct_image=False,
+        provides_viewer_only=False,
+        supports_embed=False,
+        supports_storage=False,
+        rate_limit_notes=(
+            "Official public traffic-and-travel API family; keep polling conservative until a bounded camera response shape is fixture-pinned.",
+        ),
+        quality_notes=(
+            "Official NZTA traffic-and-travel API family documents static images from over 100 cameras.",
+        ),
+        stability_notes=(
+            "Official NZTA API docs and public service list advertise camera SOAP and REST/WADL endpoints.",
+        ),
+        compliance_risk="low",
+        extraction_feasibility="medium",
+        endpoint_verification_status="machine-readable-confirmed",
+        candidate_endpoint_url="https://trafficnz.info/service/traffic-cameras/rest/2?_wadl",
+        machine_readable_endpoint_url="https://trafficnz.info/service/traffic-cameras/rest/2?_wadl",
+        last_endpoint_check_at="2026-05-04",
+        last_endpoint_http_status=None,
+        last_endpoint_content_type=None,
+        last_endpoint_result="Official NZTA traffic-and-travel docs say the public API does not require an account and includes static images from over 100 cameras; the public trafficnz service list also advertises camera SOAP and REST/WADL endpoints.",
+        last_endpoint_notes=(
+            "Official use-our-data docs describe the Traffic and Travel APIs as open data that do not require an account.",
+            "Official about-the-apis docs explicitly list static images from over 100 cameras and identify camera SOAP services.",
+            "The public trafficnz service list advertises traffic-cameras SOAP and REST/WADL endpoints.",
+            "This pass does not yet pin a bounded camera payload sample or stable media field mapping.",
+        ),
+        verification_caveat="Official camera API-family documentation is strong enough for endpoint-verified candidate posture, but direct camera response shape, media fields, and production ingest readiness still need bounded review.",
+        blocked_reason="Candidate only. Public no-auth camera service is documented, but response schema, media-field proof, fixture design, connector mapping, compliance review, and source-health validation are still required before any activation decision.",
+        notes=(
+            "Official NZTA traffic camera candidate from the public traffic-and-travel API family.",
+            "Keep this source endpoint-verified and non-sandbox until a bounded camera payload shape is pinned and reviewed.",
+        ),
+        compliance=CameraComplianceMetadata(
+            attribution_text="NZ Transport Agency Waka Kotahi Traffic and Travel APIs",
+            attribution_url="https://www.nzta.govt.nz/traffic-and-travel-information/use-our-data/",
+            terms_url="https://www.nzta.govt.nz/traffic-and-travel-information/use-our-data/terms-of-use",
+            license_summary="Official NZTA traffic-and-travel API family. Preserve attribution and keep media/storage assumptions conservative until camera response review is complete.",
+            requires_authentication=False,
+            supports_embedding=False,
+            supports_frame_storage=False,
+            review_required=True,
+            notes=[
+                "Candidate-only lifecycle posture remains in force until bounded camera payload review is complete.",
+                "Do not infer direct-image, viewer-only, coordinate, or sandbox posture from API-family docs alone.",
+            ],
+        ),
+    ),
+    CameraSourceDefinition(
+        key="arlington-traffic-cameras",
+        display_name="Arlington Traffic Cameras",
+        owner="Arlington County, Virginia",
+        source_type="official-dot",
+        inventory_source_type="official-dot-api",
+        source_family="arlington-open-data-cameras",
+        access_method="json-api",
+        onboarding_state="candidate",
+        coverage="Arlington County traffic camera inventory",
+        coverage_states=("VA",),
+        coverage_regions=("Virginia", "United States"),
+        priority=80,
+        authentication="none",
+        default_refresh_interval_seconds=1800,
+        refresh_policy=RefreshPolicy(1800, 1800, 1800, False, 1800, 1800, 7200),
+        provides_exact_coordinates=True,
+        provides_direction_text=False,
+        provides_numeric_heading=False,
+        provides_direct_image=False,
+        provides_viewer_only=False,
+        supports_embed=False,
+        supports_storage=False,
+        rate_limit_notes=(
+            "Public county JSON inventory; keep polling conservative until media posture and cadence review exist.",
+        ),
+        quality_notes=("Official county traffic camera inventory with exact coordinates and status fields.",),
+        stability_notes=("Official Arlington open-data JSON export exposes stable site IDs, coordinates, and status fields.",),
+        compliance_risk="low",
+        extraction_feasibility="medium",
+        endpoint_verification_status="machine-readable-confirmed",
+        candidate_endpoint_url="https://datahub-v2-s3.arlingtonva.us/Uploads/AutomatedJobs/Traffic+Cameras.json",
+        machine_readable_endpoint_url="https://datahub-v2-s3.arlingtonva.us/Uploads/AutomatedJobs/Traffic+Cameras.json",
+        last_endpoint_check_at="2026-05-04",
+        last_endpoint_http_status=200,
+        last_endpoint_content_type="application/json",
+        last_endpoint_result="Official Arlington County JSON inventory responded publicly and exposes camera site identifiers, coordinates, and status fields without viewer/media URLs.",
+        last_endpoint_notes=(
+            "Public JSON export includes Camera Site, Camera EncoderB2, Latitude, Longitude, port, and STATUS fields.",
+            "Current evidence is still location-centric because the payload does not expose stable viewer or direct-image fields.",
+        ),
+        verification_caveat="Machine-readable inventory evidence does not establish viewer-only or direct-image capability, validated mapping, or production ingest readiness.",
+        blocked_reason="Candidate only. Media posture is still metadata-only, and fixture design, connector mapping, compliance review, and source-health validation are still required before any activation decision.",
+        notes=(
+            "Official Arlington County traffic camera inventory candidate.",
+            "Keep this source endpoint-verified but non-sandbox until stable public media fields are documented.",
+        ),
+        compliance=CameraComplianceMetadata(
+            attribution_text="Arlington County Traffic Cameras",
+            attribution_url="https://datahub.arlingtonva.us/",
+            terms_url="https://datahub.arlingtonva.us/pages/terms-of-service",
+            license_summary="Official county traffic camera inventory. Preserve attribution and keep media/storage assumptions conservative until reviewed.",
+            requires_authentication=False,
+            supports_embedding=False,
+            supports_frame_storage=False,
+            review_required=True,
+            notes=[
+                "Candidate-only lifecycle posture remains in force until fixture-backed review is complete.",
+                "Do not infer public viewer access from metadata-only inventory fields.",
+            ],
+        ),
+    ),
+    CameraSourceDefinition(
+        key="caltrans-cctv-cameras",
+        display_name="Caltrans CCTV Cameras",
+        owner="California Department of Transportation",
+        source_type="official-dot",
+        inventory_source_type="official-dot-api",
+        source_family="caltrans-cctv",
+        access_method="json-api",
+        onboarding_state="candidate",
+        coverage="California statewide highway CCTV inventory",
+        coverage_states=("CA",),
+        coverage_regions=("California", "United States"),
+        priority=79,
+        authentication="none",
+        default_refresh_interval_seconds=1800,
+        refresh_policy=RefreshPolicy(1800, 1800, 1800, False, 1800, 1800, 7200),
+        provides_exact_coordinates=True,
+        provides_direction_text=True,
+        provides_numeric_heading=False,
+        provides_direct_image=True,
+        provides_viewer_only=False,
+        supports_embed=False,
+        supports_storage=False,
+        rate_limit_notes=(
+            "Official ArcGIS REST camera layer; keep polling conservative until bounded query posture and source-health review are fixture-pinned.",
+        ),
+        quality_notes=(
+            "Official statewide CCTV dataset with exact coordinates, service status, direction, and documented image/video fields.",
+        ),
+        stability_notes=(
+            "Official California Open Data dataset advertises GeoJSON download plus ArcGIS REST query support for the CCTV layer.",
+        ),
+        compliance_risk="low",
+        extraction_feasibility="medium",
+        endpoint_verification_status="machine-readable-confirmed",
+        candidate_endpoint_url=(
+            "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/CCTV/FeatureServer/0/query"
+            "?where=1%3D1&outFields=*&f=pjson"
+        ),
+        machine_readable_endpoint_url=(
+            "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/CCTV/FeatureServer/0/query"
+            "?where=1%3D1&outFields=*&f=pjson"
+        ),
+        last_endpoint_check_at="2026-05-04",
+        last_endpoint_http_status=None,
+        last_endpoint_content_type=None,
+        last_endpoint_result=(
+            "Official California Open Data documents the Caltrans CCTV dataset and its ArcGIS REST layer, "
+            "which supports JSON and geoJSON queries and documents exact coordinates plus currentImageURL and streamingVideoURL fields."
+        ),
+        last_endpoint_notes=(
+            "Official dataset page links both a GeoJSON download and an ArcGIS GeoService for the CCTV layer.",
+            "Official ArcGIS REST layer documentation lists latitude, longitude, direction, inService, imageDescription, streamingVideoURL, and currentImageURL fields.",
+            "This pass does not yet pin a bounded query fixture, connector mapping, or source-health review.",
+        ),
+        verification_caveat=(
+            "Official machine-readable endpoint and media-field documentation are strong enough for endpoint-verified candidate posture, "
+            "but connector mapping, fixture design, compliance review, and source-health validation are still required."
+        ),
+        blocked_reason=(
+            "Candidate only. Public ArcGIS REST query support and media-field documentation exist, but fixture design, connector mapping, "
+            "compliance review, and source-health validation are still required before any activation decision."
+        ),
+        notes=(
+            "Official Caltrans CCTV candidate from the California Open Data dataset and ArcGIS REST layer.",
+            "Keep this source endpoint-verified and non-sandbox until a bounded query fixture and connector review are complete.",
+        ),
+        compliance=CameraComplianceMetadata(
+            attribution_text="California Department of Transportation Closed Circuit Television dataset",
+            attribution_url="https://lab.data.ca.gov/dataset/closed-circuit-television",
+            terms_url="https://lab.data.ca.gov/dataset/closed-circuit-television",
+            license_summary="Official Caltrans open data CCTV dataset. Preserve attribution and keep media/storage assumptions conservative until reviewed.",
+            requires_authentication=False,
+            supports_embedding=False,
+            supports_frame_storage=False,
+            review_required=True,
+            notes=[
+                "Candidate-only lifecycle posture remains in force until bounded query review and fixture-backed validation are complete.",
+                "Do not infer validated ingest, archival rights, or scheduled refresh eligibility from public currentImageURL or streamingVideoURL fields alone.",
             ],
         ),
     ),
@@ -1421,6 +1695,15 @@ def get_camera_source_sandbox_mode(key: str, settings: Settings) -> str | None:
     if key == "fingal-traffic-cameras":
         mode = settings.fingal_traffic_cameras_mode.lower()
         return "fixture" if mode == "fixture" else None
+    if key == "baton-rouge-traffic-cameras":
+        mode = settings.baton_rouge_traffic_cameras_mode.lower()
+        return "fixture" if mode == "fixture" else None
+    if key == "vancouver-web-cam-url-links":
+        mode = settings.vancouver_web_cam_url_links_mode.lower()
+        return "fixture" if mode == "fixture" else None
+    if key == "caltrans-cctv-cameras":
+        mode = settings.caltrans_cctv_cameras_mode.lower()
+        return "fixture" if mode == "fixture" else None
     return None
 
 
@@ -1435,6 +1718,12 @@ def get_camera_source_sandbox_connector_id(key: str) -> str | None:
         return "MarylandChartTrafficCameraConnector"
     if key == "fingal-traffic-cameras":
         return "FingalTrafficCameraConnector"
+    if key == "baton-rouge-traffic-cameras":
+        return "BatonRougeTrafficCameraConnector"
+    if key == "vancouver-web-cam-url-links":
+        return "VancouverWebCamUrlLinksConnector"
+    if key == "caltrans-cctv-cameras":
+        return "CaltransCctvCameraConnector"
     return None
 
 
@@ -1449,6 +1738,9 @@ def get_camera_source_sandbox_validation_caveat(key: str) -> str | None:
         "quebec-mtmd-traffic-cameras",
         "maryland-chart-traffic-cameras",
         "fingal-traffic-cameras",
+        "baton-rouge-traffic-cameras",
+        "vancouver-web-cam-url-links",
+        "caltrans-cctv-cameras",
     }:
         return (
             "Sandbox fixture import proves candidate mapping and lifecycle evidence only. "

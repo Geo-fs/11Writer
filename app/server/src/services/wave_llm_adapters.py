@@ -23,6 +23,9 @@ class WaveLlmAdapterRequest:
     allow_network: bool
     request_budget: int
     max_retries: int
+    timeout_seconds: int
+    api_key: str | None
+    base_url: str | None
     caveats: list[str]
 
 
@@ -74,13 +77,13 @@ def _execute_openai(request: WaveLlmAdapterRequest) -> WaveLlmExecutionSummary:
     return _execute_live_provider(
         request,
         provider_name="openai",
-        configured=bool(request.settings.openai_api_key),
-        missing_error="OPENAI_API_KEY is not configured.",
+        configured=bool(request.api_key),
+        missing_error="OpenAI is not configured with an API key.",
         adapter_status="openai_live",
         performer=lambda adapter_request: _perform_openai_compatible_request(
             adapter_request,
-            url="https://api.openai.com/v1/chat/completions",
-            api_key=adapter_request.settings.openai_api_key,
+            url=(adapter_request.base_url or "https://api.openai.com/v1/chat/completions"),
+            api_key=adapter_request.api_key,
         ),
         success_caveat="OpenAI output is still low-trust until review validation accepts specific claims for review.",
     )
@@ -90,13 +93,13 @@ def _execute_openrouter(request: WaveLlmAdapterRequest) -> WaveLlmExecutionSumma
     return _execute_live_provider(
         request,
         provider_name="openrouter",
-        configured=bool(request.settings.openrouter_api_key),
-        missing_error="OPENROUTER_API_KEY is not configured.",
+        configured=bool(request.api_key),
+        missing_error="OpenRouter is not configured with an API key.",
         adapter_status="openrouter_live",
         performer=lambda adapter_request: _perform_openai_compatible_request(
             adapter_request,
-            url="https://openrouter.ai/api/v1/chat/completions",
-            api_key=adapter_request.settings.openrouter_api_key,
+            url=(adapter_request.base_url or "https://openrouter.ai/api/v1/chat/completions"),
+            api_key=adapter_request.api_key,
             extra_headers={
                 "HTTP-Referer": "https://local.11writer.invalid",
                 "X-Title": "11Writer Wave Monitor",
@@ -110,13 +113,13 @@ def _execute_xai(request: WaveLlmAdapterRequest) -> WaveLlmExecutionSummary:
     return _execute_live_provider(
         request,
         provider_name="xai",
-        configured=bool(request.settings.xai_api_key),
-        missing_error="XAI_API_KEY is not configured.",
+        configured=bool(request.api_key),
+        missing_error="xAI is not configured with an API key.",
         adapter_status="xai_live",
         performer=lambda adapter_request: _perform_openai_compatible_request(
             adapter_request,
-            url="https://api.x.ai/v1/chat/completions",
-            api_key=adapter_request.settings.xai_api_key,
+            url=(adapter_request.base_url or "https://api.x.ai/v1/chat/completions"),
+            api_key=adapter_request.api_key,
         ),
         success_caveat="xAI output is still low-trust until review validation accepts specific claims for review.",
     )
@@ -126,8 +129,8 @@ def _execute_anthropic(request: WaveLlmAdapterRequest) -> WaveLlmExecutionSummar
     return _execute_live_provider(
         request,
         provider_name="anthropic",
-        configured=bool(request.settings.anthropic_api_key),
-        missing_error="ANTHROPIC_API_KEY is not configured.",
+        configured=bool(request.api_key),
+        missing_error="Anthropic is not configured with an API key.",
         adapter_status="anthropic_live",
         performer=_perform_anthropic_request,
         success_caveat="Anthropic output is still low-trust until review validation accepts specific claims for review.",
@@ -138,8 +141,8 @@ def _execute_google(request: WaveLlmAdapterRequest) -> WaveLlmExecutionSummary:
     return _execute_live_provider(
         request,
         provider_name="google",
-        configured=bool(request.settings.google_ai_api_key),
-        missing_error="GOOGLE_AI_API_KEY is not configured.",
+        configured=bool(request.api_key),
+        missing_error="Google is not configured with an API key.",
         adapter_status="google_live",
         performer=_perform_google_request,
         success_caveat="Google output is still low-trust until review validation accepts specific claims for review.",
@@ -150,13 +153,13 @@ def _execute_openclaw(request: WaveLlmAdapterRequest) -> WaveLlmExecutionSummary
     return _execute_live_provider(
         request,
         provider_name="openclaw",
-        configured=bool(request.settings.openclaw_base_url),
-        missing_error="OPENCLAW_BASE_URL is not configured.",
+        configured=bool(request.base_url),
+        missing_error="OpenClaw is not configured with a base URL.",
         adapter_status="openclaw_live",
         performer=lambda adapter_request: _perform_openai_compatible_request(
             adapter_request,
-            url=adapter_request.settings.openclaw_base_url.rstrip("/") + "/v1/chat/completions",  # type: ignore[union-attr]
-            api_key=None,
+            url=(adapter_request.base_url or "").rstrip("/") + "/v1/chat/completions",
+            api_key=adapter_request.api_key,
         ),
         success_caveat="OpenClaw output is still low-trust until review validation accepts specific claims for review.",
     )
@@ -166,11 +169,11 @@ def _execute_ollama(request: WaveLlmAdapterRequest) -> WaveLlmExecutionSummary:
     settings = request.settings
     if not settings.wave_llm_enabled:
         return _blocked_execution(request.task, request.request_budget, "Wave LLM execution is disabled by WAVE_LLM_ENABLED.")
-    if not settings.ollama_base_url:
+    if not request.base_url:
         return _blocked_execution(
             request.task,
             request.request_budget,
-            "OLLAMA_BASE_URL is not configured.",
+            "Ollama is not configured with a base URL.",
             caveats=request.caveats,
         )
     if _is_mock_model(request.task.model):
@@ -309,7 +312,7 @@ def _perform_openai_compatible_request(
     if extra_headers:
         headers.update(extra_headers)
     provider_request = Request(url, data=payload, headers=headers, method="POST")
-    with urlopen(provider_request, timeout=request.settings.wave_llm_http_timeout_seconds) as response:
+    with urlopen(provider_request, timeout=request.timeout_seconds) as response:
         raw = response.read(request.settings.wave_llm_max_output_chars + 4096).decode("utf-8", errors="replace")
     parsed = json.loads(raw)
     choices = parsed.get("choices")
@@ -335,17 +338,17 @@ def _perform_anthropic_request(request: WaveLlmAdapterRequest) -> str:
         "messages": [{"role": "user", "content": _adapter_prompt(request.task)}],
     }).encode("utf-8")
     provider_request = Request(
-        "https://api.anthropic.com/v1/messages",
+        (request.base_url or "https://api.anthropic.com/v1/messages"),
         data=payload,
         headers={
             "Content-Type": "application/json",
             "User-Agent": "11Writer-WaveLLM/phase2",
-            "x-api-key": str(request.settings.anthropic_api_key),
+            "x-api-key": str(request.api_key),
             "anthropic-version": "2023-06-01",
         },
         method="POST",
     )
-    with urlopen(provider_request, timeout=request.settings.wave_llm_http_timeout_seconds) as response:
+    with urlopen(provider_request, timeout=request.timeout_seconds) as response:
         raw = response.read(request.settings.wave_llm_max_output_chars + 4096).decode("utf-8", errors="replace")
     parsed = json.loads(raw)
     content = parsed.get("content")
@@ -358,8 +361,8 @@ def _perform_anthropic_request(request: WaveLlmAdapterRequest) -> str:
 def _perform_google_request(request: WaveLlmAdapterRequest) -> str:
     model = quote(request.task.model, safe="")
     url = (
-        "https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{model}:generateContent?key={request.settings.google_ai_api_key}"
+        f"{(request.base_url or 'https://generativelanguage.googleapis.com/v1beta/models').rstrip('/')}/"
+        f"{model}:generateContent?key={request.api_key}"
     )
     payload = json.dumps({
         "contents": [
@@ -390,7 +393,7 @@ def _perform_google_request(request: WaveLlmAdapterRequest) -> str:
         },
         method="POST",
     )
-    with urlopen(provider_request, timeout=request.settings.wave_llm_http_timeout_seconds) as response:
+    with urlopen(provider_request, timeout=request.timeout_seconds) as response:
         raw = response.read(request.settings.wave_llm_max_output_chars + 4096).decode("utf-8", errors="replace")
     parsed = json.loads(raw)
     candidates = parsed.get("candidates")
@@ -411,12 +414,12 @@ def _perform_ollama_request(request: WaveLlmAdapterRequest) -> str:
         "format": "json",
     }).encode("utf-8")
     provider_request = Request(
-        request.settings.ollama_base_url.rstrip("/") + "/api/generate",  # type: ignore[union-attr]
+        request.base_url.rstrip("/") + "/api/generate",  # type: ignore[union-attr]
         data=payload,
         headers={"Content-Type": "application/json", "User-Agent": "11Writer-WaveLLM/phase2"},
         method="POST",
     )
-    with urlopen(provider_request, timeout=request.settings.wave_llm_http_timeout_seconds) as response:
+    with urlopen(provider_request, timeout=request.timeout_seconds) as response:
         raw = response.read(request.settings.wave_llm_max_output_chars + 2048).decode("utf-8", errors="replace")
     parsed = json.loads(raw)
     return str(parsed.get("response", "")).strip()

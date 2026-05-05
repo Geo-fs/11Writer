@@ -1,5 +1,635 @@
 # Connect AI Progress
 
+## 2026-05-05 10:41:19 -05:00
+
+- Task:
+  - Run the `2026-05-05 10:22 America/Chicago` reporting-loop compatibility sweep, close the current shared compatibility gap for the newly completed domain wave, and keep peer/runtime additions honestly below fake validation proof
+- Assignment version read:
+  - `2026-05-05 10:22 America/Chicago`
+- What changed:
+  - Re-read the active Connect next-task doc before doing any work
+  - Ran the required current-state sweep:
+    - `git status --short --branch`
+    - ownership scanner summary
+    - release dry run
+    - alerts ledger
+    - compile
+    - client lint
+    - client build
+    - focused reporting-loop package-contract regression
+  - Reproduced one current shared blocker in `app/client/src/features/marine/marineCorridorSituationPackage.ts`
+  - Fixed the blocker with the smallest safe change:
+    - changed `input.reportBriefPackage?.explain.find(...)` to `input.reportBriefPackage?.explain.lines.find(...)`
+    - kept the fix type-only with no Marine semantic change
+  - Extended `app/client/scripts/reportingLoopPackageContractRegression.mjs` so the focused shared compatibility surface now validates:
+    - Aerospace fusion snapshot input
+    - Aerospace report brief
+    - Aerospace VAAC advisory report package as an adjacent reporting/support package
+    - Data AI fusion snapshot
+    - Data AI report brief
+    - Marine fusion snapshot input
+    - Marine report brief
+  - Updated `app/docs/reporting-loop-package-contract.md` so it now distinguishes:
+    - first-class fusion-snapshot inputs and report-brief packages
+    - adjacent reporting/support packages
+  - Updated `app/docs/source-fusion-reporting-input-inventory.md` so it now:
+    - records the Aerospace VAAC advisory report package as an adjacent report-support peer
+    - records DWD CAP as part of the environmental reporting-input wave
+    - keeps backend webcam sandbox/source-ops reporting helpers adjacent rather than first-class reporting-loop peers
+    - keeps Atlas media geolocation and Wonder Statuspage/Mastodon discovery explicitly in derived-evidence, candidate, review, or runtime posture
+  - Reduced scanner ambiguity only where ownership is obvious and stable:
+    - `app/docs/environmental-events-dwd-cap-alerts.md`
+    - `app/server/src/services/dwd_cap_alerts_service.py`
+    - `app/server/tests/test_dwd_cap_alerts.py`
+    - `app/server/data/dwd_cap_*`
+    - all now classify as `geospatial-environmental`
+  - Refreshed:
+    - `app/docs/active-agent-worktree.md`
+    - `app/docs/release-readiness.md`
+    - `app/docs/validation-matrix.md`
+    - `app/docs/commit-groups.current.md`
+- Files touched:
+  - `app/client/src/features/marine/marineCorridorSituationPackage.ts`
+  - `app/client/scripts/reportingLoopPackageContractRegression.mjs`
+  - `app/docs/reporting-loop-package-contract.md`
+  - `app/docs/source-fusion-reporting-input-inventory.md`
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/commit-groups.current.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed and reported:
+    - `modified=118`
+    - `untracked=89`
+    - `shared-high-collision: 10`
+    - `unknown: 35`
+  - `python scripts/release_dry_run.py --json` returned advisory red flags and a nonzero exit
+  - `python scripts/alerts_ledger.py --json` passed and reported `5` open low-priority alerts:
+    - `Atlas AI: 4`
+    - `Manager AI: 1`
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed
+  - `python -m compileall app/server/src` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` failed once in `marineCorridorSituationPackage.ts`, then passed after the type-only fix
+  - `cmd /c npm.cmd run test:reporting-loop-package-contract` passed and now validates the Aerospace VAAC adjacent package too
+  - `python -m pytest app/server/tests/test_environmental_fusion_snapshot_input.py -q` passed (`3 passed`)
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+- Blockers or caveats:
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the tree is mixed and the heuristic secret scanner still matches provider/settings/test token strings; that is not confirmed live-secret leakage by itself
+  - The tree remains validation-green but not consolidation-ready:
+    - `shared-high-collision: 10`
+    - `unknown: 35`
+  - Atlas media geolocation remains derived-evidence and candidate-location scaffolding only
+  - Wonder Statuspage and Mastodon discovery remain bounded public-discovery/runtime surfaces only
+  - Backend webcam sandbox/source-ops reporting helpers remain adjacent reporting/support surfaces, not first-class reporting-loop peers
+- Next recommended task:
+  - If Manager keeps Connect on this wave, run the next current-state sweep from the then-current next-task doc and continue reducing only obvious stable ownership ambiguity while holding shared runtime and high-collision surfaces for manual hunk review
+
+
+## 2026-05-05 10:05:20 -05:00
+
+- Task:
+  - Run the `2026-05-05 09:47 America/Chicago` shared reporting-loop compatibility assignment, create the neutral package-contract doc, add one focused validation surface, and refresh coordination docs without changing package semantics
+- Assignment version read:
+  - `2026-05-05 09:47 America/Chicago`
+- What changed:
+  - Re-read the active Connect next-task doc before continuing
+  - Ran the required current-state status, ownership, release-dry-run, alerts, compile, lint, and build commands against the live mixed tree before editing
+  - Confirmed the current tree is still green for compile, lint, and build and that no shared compile/import/lint/build blocker reproduced
+  - Inspected the current reporting-loop package wave across:
+    - `AppShell.tsx`
+    - `InspectorPanel.tsx`
+    - `aerospaceReportBriefPackage.ts`
+    - `dataAiSourceIntelligence.ts`
+    - `marineFusionSnapshotInput.ts`
+    - `environmental_context.py`
+    - shared API contracts in `app/server/src/types/api.py` and `app/client/src/types/api.ts`
+    - `playwright_smoke.mjs`
+  - Created `app/docs/reporting-loop-package-contract.md` as a neutral compatibility contract for current fusion-snapshot inputs and report-brief packages
+  - Kept the contract semantic rather than schema-rigid:
+    - direct lineage fields, row-level lineage, and companion-fusion lineage are all treated as valid current compatibility paths
+    - report-brief packages must preserve `observe`, `orient`, `prioritize`, and `explain`, but current domains may expose them as section arrays or keyed sections
+  - Added one focused validation surface:
+    - `app/client/scripts/reportingLoopPackageContractRegression.mjs`
+    - `cmd /c npm.cmd run test:reporting-loop-package-contract`
+  - The new regression validates the current Aerospace, Data AI, and Marine package wave against the neutral minimum contract:
+    - source ids
+    - source modes
+    - source health
+    - evidence basis
+    - caveats
+    - does-not-prove posture
+    - review/attention posture
+    - export-safe lines
+    - `observe` / `orient` / `prioritize` / `explain`
+  - Kept backend environmental fusion snapshot input on its existing server test surface rather than forcing a client-side mirror
+  - Refreshed `source-fusion-reporting-input-inventory.md` so it now points at the neutral shared contract and the focused validation hook
+  - Reduced scanner ambiguity only where ownership is obvious and stable:
+    - `app/docs/reporting-loop-package-contract.md` -> `connect-tooling`
+    - `app/client/scripts/reportingLoopPackageContractRegression.mjs` -> `connect-tooling`
+    - `app/docs/environmental-fusion-snapshot-input.md` -> `geospatial-environmental`
+    - `app/server/tests/test_environmental_fusion_snapshot_input.py` -> `geospatial-environmental`
+  - Refreshed coordination docs so the latest mixed-tree counts, alert posture, reporting-loop contract truth, and validation path all match the live tree
+- Files touched:
+  - `app/docs/reporting-loop-package-contract.md`
+  - `app/client/scripts/reportingLoopPackageContractRegression.mjs`
+  - `app/client/package.json`
+  - `app/docs/source-fusion-reporting-input-inventory.md`
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/commit-groups.current.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed and reported:
+    - `modified=118`
+    - `untracked=79`
+    - `shared-high-collision: 10`
+    - `unknown: 32`
+  - `python scripts/release_dry_run.py --json` returned advisory red flags and a nonzero exit
+  - `python scripts/alerts_ledger.py --json` passed and reported `6` open low-priority alerts:
+    - `Atlas AI: 4`
+    - `Manager AI: 2`
+  - `python -m compileall app/server/src` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `cmd /c npm.cmd run test:reporting-loop-package-contract` initially failed twice on compatibility-normalizer assumptions, then passed after the neutral contract regression was tightened to accept current Data AI and Marine package shapes
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+- Blockers or caveats:
+  - No repo-wide shared compile, import, lint, or build blocker reproduced in this assignment
+  - `release_dry_run.py --json` remains non-green because the tree is mixed and the heuristic secret scanner matches provider/settings/test token strings; this is not evidence of leaked live secrets by itself
+  - The tree remains validation-green but not consolidation-ready:
+    - `shared-high-collision: 10`
+    - `unknown: 32`
+  - The top manual hunk-review files remain:
+    - `app/client/src/features/app-shell/AppShell.tsx`
+    - `app/client/src/features/inspector/InspectorPanel.tsx`
+    - `app/client/src/lib/queries.ts`
+    - `app/server/src/config/settings.py`
+    - `app/server/src/types/api.py`
+  - Backend environmental fusion snapshot input remains validated separately on the server test surface; the new client regression does not replace that route-level coverage
+- Next recommended task:
+  - If Manager AI keeps this lane open, the next useful Connect move is a fresh current-state pass after the next shared-shell or reporting-loop expansion lands, with manual hunk-review guidance focused on the 10 current high-collision files and the still-broad mixed-tree release posture
+
+## 2026-05-05 09:35:24 -05:00
+
+- Task:
+  - Run the `2026-05-04 23:26 America/Chicago` fusion/reporting-input integration sweep, reproduce only real shared blockers, create a shared inventory doc, reduce only obvious stable scanner ambiguity, and refresh coordination docs
+- Assignment version read:
+  - `2026-05-04 23:26 America/Chicago`
+- What changed:
+  - Re-read the active Connect next-task doc before continuing
+  - Ran the required current-state status, ownership, release-dry-run, alerts, compile, lint, and build commands against the live mixed tree
+  - Confirmed compile, lint, and build are green in the current tree and that the stale-vs-real `AppShell.tsx` mismatch pattern reported by Data AI did not reproduce
+  - Inspected the current shared reporting/fusion-input wave across:
+    - `AppShell.tsx`
+    - `InspectorPanel.tsx`
+    - `aerospaceFusionSnapshotInput.ts`
+    - `dataAiSourceIntelligence.ts`
+    - `marineEvidenceSummary.ts`
+    - `base_earth_context.py`
+    - `rgi_glacier_inventory_service.py`
+    - shared API contracts in `app/server/src/types/api.py` and `app/client/src/types/api.ts`
+  - Created `app/docs/source-fusion-reporting-input-inventory.md` to record which current surfaces are already real bounded reporting/fusion inputs versus user-facing panels or runtime-boundary-only infrastructure
+  - Captured current shared truth:
+    - Aerospace already has bounded evidence-timeline, package-coherence, workflow-validation, and fusion-snapshot input surfaces
+    - Data AI already has bounded source-intelligence, fusion snapshot, infrastructure-status, topic-lens, and long-tail discovery posture surfaces
+    - Marine already has bounded evidence summary, context fusion/reporting, corridor review, and source-health export workflow surfaces
+    - Base Earth / environmental reference context already has bounded export-package and review-queue surfaces, including RGI glacier inventory context
+    - Source Discovery, Wave LLM, media evidence, and analyst workbench remain implemented shared runtime/review infrastructure, but still runtime-boundary or review-only rather than full reporting-desk proof
+  - Confirmed that stale “fresh source” suggestions for `propublica`, `global-voices`, `geonet-geohazards`, and `hko-open-weather` are no longer valid next-wave builds where repo truth already shows implementation or newer routing guidance
+  - Reduced scanner ambiguity only where ownership is obvious and stable:
+    - `app/client/scripts/aerospaceFusionSnapshotInputRegression.mjs`
+    - `app/server/src/services/rgi_glacier_inventory_service.py`
+    - `app/server/data/rgi_glacier_inventory_fixture.json`
+    - `app/docs/source-fusion-reporting-input-inventory.md`
+  - Refreshed coordination docs so the latest `23:26` checkpoint truth, open-alert posture, inventory doc, and shared/high-collision guidance match the live tree
+- Files touched:
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/source-fusion-reporting-input-inventory.md`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/commit-groups.current.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed and reported:
+    - `modified=117`
+    - `untracked=50`
+    - `shared-high-collision: 10`
+    - `unknown: 24`
+  - `python scripts/release_dry_run.py --json` returned advisory red flags and a nonzero exit
+  - `python scripts/alerts_ledger.py --json` passed and reported `4` open low-priority alerts:
+    - `Atlas AI: 2`
+    - `Manager AI: 2`
+  - `python -m compileall app/server/src` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed
+- Blockers or caveats:
+  - No repo-wide shared compile, import, lint, or build blocker reproduced in this assignment
+  - `release_dry_run.py --json` remains non-green because the tree is mixed and the heuristic secret scanner matches provider/settings/test token strings; this is not evidence of leaked live secrets by itself
+  - The tree remains validation-green but not consolidation-ready:
+    - `shared-high-collision: 10`
+    - `unknown: 24`
+  - The top manual hunk-review files remain:
+    - `app/client/src/features/app-shell/AppShell.tsx`
+    - `app/client/src/features/inspector/InspectorPanel.tsx`
+    - `app/client/src/lib/queries.ts`
+    - `app/server/src/config/settings.py`
+    - `app/server/src/types/api.py`
+- Next recommended task:
+  - If Manager AI keeps this lane open, the next useful Connect move is another current-state pass after the next reporting-desk or shared-shell wave lands, using the new fusion/reporting-input inventory doc plus manual hunk-review guidance for the 10 current high-collision files
+
+## 2026-05-04 23:09:09 -05:00
+
+- Task:
+  - Run the `2026-05-04 22:59 America/Chicago` shared-runtime and consolidation-readiness pass, fix only a currently reproduced runtime blocker if one persists, reduce only obvious stable scanner ambiguity, and refresh the coordination docs
+- Assignment version read:
+  - `2026-05-04 22:59 America/Chicago`
+- What changed:
+  - Re-read the active Connect next-task doc before continuing
+  - Ran the required current-state ownership, release-dry-run, alerts, shared-runtime pytest, compile, lint, and build commands against the live tree
+  - Investigated one transient shared-runtime failure where `SourceDiscoverySchedulerTickResponse` was reported once as missing `publicDiscoveryJobsCompleted`
+  - Verified the live route/service/model path already returns that field, reproduced the scheduler route directly, and reran the full shared-runtime suite cleanly without editing runtime code
+  - Inspected the current shared runtime surfaces and documented the current truth:
+    - bounded Source Discovery structure-scan, public-discovery, knowledge-backfill, review-claim import/apply, and media fetch/OCR/interpret paths are real
+    - knowledge nodes and duplicate-aware clustering exist, but remain corroboration/accounting helpers rather than proof of event truth
+    - Wave LLM provider-management/config surfaces are real, but remain config-gated review/runtime boundaries rather than proof of live-provider execution
+    - live provider execution still requires provider configuration, explicit network permission, and positive request budget
+  - Confirmed the newer coordination/routing docs already supersede stale Data AI packet/history suggestions to route `propublica` or `global-voices` as fresh next-wave work
+  - Reduced scanner ambiguity only where ownership is obvious and stable:
+    - `app/client/scripts/aerospacePackageCoherenceRegression.mjs`
+    - `app/server/src/services/camera_source_ops_promotion_readiness_summary.py`
+    - `app/server/tests/test_base_earth_reference_review.py`
+  - Updated coordination docs and commit-planning docs so the latest `22:59` checkpoint truth, alert posture, shared-runtime boundaries, and mixed-tree counts match the live worktree
+- Files touched:
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/commit-groups.current.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed and reported:
+    - `modified=116`
+    - `untracked=48`
+    - `shared-high-collision: 10`
+    - `unknown: 27`
+  - `python scripts/release_dry_run.py --json` returned advisory red flags and a nonzero exit
+  - `python scripts/alerts_ledger.py --json` passed and reported `2` open low-priority `Atlas AI` alerts
+  - `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q` passed (`76 passed`)
+  - `python -m compileall app/server/src` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed
+- Blockers or caveats:
+  - No current repo-wide blocker remained reproduced at the end of the assignment
+  - The earlier scheduler-response validation failure did not persist after direct route/service inspection and rerun, so it should be treated as stale or concurrent-tree drift rather than fixed runtime behavior
+  - `release_dry_run.py --json` remains non-green because the tree is mixed and the heuristic secret scanner matches provider/settings/test token strings; this is not evidence of leaked live secrets by itself
+  - The tree remains validation-green but not consolidation-ready:
+    - `shared-high-collision: 10`
+    - `unknown: 27`
+  - Older packet/history docs still contain stale Data AI routing suggestions for `propublica` / `global-voices`; they should be treated as superseded planning artifacts rather than current coordination truth
+- Next recommended task:
+  - If Manager AI keeps this lane open, the next useful Connect move is another current-state pass after the next shared runtime or shared-shell wave lands, with manual hunk-review guidance focused on the 10 current high-collision files and the still-broad shared runtime `unknown` set
+
+## 2026-05-04 22:20:06 -05:00
+
+- Task:
+  - Run the `2026-05-04 22:11 America/Chicago` shared-surface consolidation pass, verify current validation truth, reduce only obvious stable scanner ambiguity, and document existing shared review/export/intake occupancy
+- Assignment version read:
+  - `2026-05-04 22:11 America/Chicago`
+- What changed:
+  - Re-read the active Connect next-task doc before continuing
+  - Ran the required current-state validation and readiness commands against the live mixed tree
+  - Inspected the current high-collision shared files and shared contract layers to document which review, export, timeline, source-health, and candidate-intake surfaces already exist
+  - Confirmed that several “future” surfaces are already occupied in shared files:
+    - aerospace evidence timeline, workflow validation snapshot, context review/export bundles, export coherence, issue export bundle, and source readiness bundle
+    - webcam candidate endpoint report, candidate network summary, review queue, review queue export bundle, and source lifecycle summary
+    - environmental source health and Canada/weather review queue packages
+    - Data AI review queue, Source Discovery review queue, Wave LLM review queue, and analyst evidence timeline/source-readiness responses
+  - Reduced scanner ambiguity only where ownership is obvious and stable:
+    - `app/client/scripts/aerospaceEvidenceTimelineRegression.mjs`
+    - `app/server/src/services/camera_source_ops_candidate_network_summary.py`
+    - `app/server/tests/test_canada_environmental_context.py`
+  - Updated coordination docs so the latest mixed-tree counts, alert posture, deconfliction truth, and top manual-review files match the live tree
+- Files touched:
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/commit-groups.current.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed and reported:
+    - `modified=105`
+    - `untracked=36`
+    - `shared-high-collision: 10`
+    - `unknown: 21`
+  - `python scripts/release_dry_run.py --json` returned advisory red flags and a nonzero exit
+  - `python scripts/alerts_ledger.py --json` passed and reported `2` open low-priority alerts
+  - `python -m compileall app/server/src` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+- Blockers or caveats:
+  - No repo-wide compile, lint, or build blocker reproduced in this assignment
+  - `release_dry_run.py --json` remains non-green because the tree is mixed and the heuristic secret scanner matches provider-key strings in settings/tests; this is not evidence of leaked live secrets by itself
+  - The tree is validation-green but still not consolidation-ready:
+    - `shared-high-collision: 10`
+    - `unknown: 21`
+  - The top manual consolidation-review files remain:
+    - `app/client/src/features/app-shell/AppShell.tsx`
+    - `app/client/src/features/inspector/InspectorPanel.tsx`
+    - `app/client/src/lib/queries.ts`
+    - `app/server/src/config/settings.py`
+    - `app/server/src/types/api.py`
+  - The remaining `unknown` bucket still contains real shared Source Discovery, Wave LLM, scheduler, and cross-runtime surfaces and should remain visible as consolidation-review debt
+- Next recommended task:
+  - If Manager AI keeps this lane open, the next useful Connect move is a fresh current-state pass after the next shared-shell or shared-runtime wave lands, with manual hunk-review guidance focused on the 10 current high-collision files
+
+## 2026-05-04 22:07:11 -05:00
+
+- Task:
+  - Run the `2026-05-04 22:01 America/Chicago` consolidation-readiness pass, classify only obvious stable ownership, verify current compile/lint/build truth, and refresh commit-planning docs without staging
+- Assignment version read:
+  - `2026-05-04 22:01 America/Chicago`
+- What changed:
+  - Re-read the active Connect next-task doc before continuing
+  - Ran the current-state ownership scan, release dry-run, alerts check, compile check, and client lint/build validation against the live mixed tree
+  - Reduced scanner ambiguity only where ownership is obvious and stable:
+    - `app/docs/cross-platform-implementation-playbook.md`
+    - `app/docs/manager-ai-project-deficiency-review.md`
+    - `app/docs/long-tail-information-discovery-strategy.md`
+    - `app/docs/environmental-events-canada-cap.md`
+    - `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+    - `app/server/src/services/canada_cap_service.py`
+    - `app/server/tests/test_canada_cap_events.py`
+    - `app/server/data/baton_rouge_traffic_cameras_fixture.json`
+    - `app/server/data/vancouver_web_cam_url_links_fixture.json`
+  - Reproduced one transient frontend build failure on an earlier build attempt:
+    - `src/features/app-shell/AppShell.tsx(1421,9): TS18004 No value exists in scope for the shorthand property 'vaacSummary'`
+  - Inspected the current file state immediately and confirmed the current tree already uses `vaacSummary: vaacContextSummary`
+  - Re-ran lint and build before editing; both passed, so I did not make a stale source fix against a moving worktree
+  - Refreshed the coordination docs and commit-group manifest with the corrected checkpoint truth:
+    - validation is green on rerun
+    - release posture is still advisory-red because the tree remains mixed
+    - the top 5 manual consolidation-review files remain unchanged
+- Files touched:
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/commit-groups.current.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed and reported:
+    - `modified=99`
+    - `untracked=26`
+    - `shared-high-collision: 10`
+    - `unknown: 21`
+  - `python scripts/release_dry_run.py --json` returned advisory red flags and a nonzero exit
+  - `python scripts/alerts_ledger.py --json` passed and reported `0` open alerts
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed
+  - `python -m compileall app/server/src` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+- Blockers or caveats:
+  - No current repo-wide blocker remained reproduced at the end of the assignment
+  - `release_dry_run.py --json` remains non-green because the tree is mixed and the heuristic secret scanner matches provider-key strings in settings/tests; this is not evidence of leaked live secrets by itself
+  - The earlier `AppShell.tsx(1421,9)` `TS18004` error did not persist on immediate inspection and rerun, so it should be treated as stale or concurrent-tree drift rather than fixed source behavior
+  - The current top 5 manual consolidation-review files remain:
+    - `app/client/src/features/app-shell/AppShell.tsx`
+    - `app/client/src/features/inspector/InspectorPanel.tsx`
+    - `app/client/src/lib/queries.ts`
+    - `app/server/src/config/settings.py`
+    - `app/server/src/types/api.py`
+  - The remaining `unknown` bucket still contains real shared Source Discovery, Wave LLM, scheduler, and cross-runtime surfaces and should remain visible as consolidation-review debt
+- Next recommended task:
+  - If Manager AI keeps this lane open, the next useful Connect move is a fresh current-state consolidation pass after the next shared-runtime or shared-shell slice lands, with targeted hunk review guidance for the 10 high-collision files
+
+## 2026-05-04 21:58:38 -05:00
+
+- Task:
+  - Run the `2026-05-04 21:52 America/Chicago` consolidation-readiness and ownership-hygiene pass, repair progress truth if needed, and reduce only obvious scanner ambiguity
+- Assignment version read:
+  - `2026-05-04 21:52 America/Chicago`
+- What changed:
+  - Re-read the active Connect next-task doc before continuing
+  - Verified that the `2026-05-04 21:43 America/Chicago` Connect checkpoint already has a clear final report near the top of the progress doc, so no missing-final-report backfill was required
+  - Ran the current-state ownership scan, alerts check, and release dry-run posture check
+  - Reduced scanner ambiguity only where ownership is obvious and stable:
+    - `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+    - `app/docs/cross-platform-implementation-playbook.md`
+    - `app/docs/manager-ai-project-deficiency-review.md`
+    - `app/docs/long-tail-information-discovery-strategy.md`
+    - `app/docs/environmental-events-canada-cap.md`
+    - `app/server/src/services/canada_cap_service.py`
+    - `app/server/tests/test_canada_cap_events.py`
+    - `app/server/data/baton_rouge_traffic_cameras_fixture.json`
+    - `app/server/data/vancouver_web_cam_url_links_fixture.json`
+  - Left genuinely shared runtime and contract files in `unknown` rather than hiding them cosmetically
+  - Updated coordination docs with the reduced-ambiguity ownership counts, the current release-dry-run posture, and the top manual consolidation-review files
+- Files touched:
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed and reported:
+    - `modified=88`
+    - `untracked=20`
+    - `shared-high-collision: 10`
+    - `unknown: 12`
+  - `python scripts/release_dry_run.py --json` returned advisory red flags and a nonzero exit
+  - `python scripts/alerts_ledger.py --json` passed and reported `0` open alerts
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed
+  - `python -m compileall app/server/src` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+- Blockers or caveats:
+  - No repo-wide blocker reproduced in this assignment
+  - `release_dry_run.py --json` remains non-green because the tree is still mixed and the heuristic secret scanner matches provider-key strings in settings/tests; this is not evidence of leaked live secrets by itself
+  - The top 5 manual consolidation-review files remain:
+    - `app/client/src/features/app-shell/AppShell.tsx`
+    - `app/client/src/features/inspector/InspectorPanel.tsx`
+    - `app/client/src/lib/queries.ts`
+    - `app/server/src/config/settings.py`
+    - `app/server/src/types/api.py`
+  - The remaining `unknown` bucket still contains real shared Source Discovery and Wave LLM runtime surfaces and should stay visible as consolidation-review debt
+- Next recommended task:
+  - If Manager AI keeps this lane open, the next useful Connect move is a fresh current-state sweep after the next shared-runtime or shared-shell slice lands, or a manual consolidation-readiness pass focused on the 10 current high-collision files
+
+## 2026-05-04 21:52:00 -05:00
+
+- Task:
+  - Run the `2026-05-04 21:43 America/Chicago` Atlas operator-console plus Marine lint/current-state integration sweep, fixing only reproduced blockers or safe artifact/scanner drift
+- Assignment version read:
+  - `2026-05-04 21:43 America/Chicago`
+- What changed:
+  - Re-read the active Connect next-task doc before continuing
+  - Confirmed there was no separate completed `2026-05-04 21:17 America/Chicago` Connect assignment entry to recover; nothing was missing from the progress log, so that earlier state was treated as superseded/not present rather than silently skipped
+  - Validated the current mixed worktree before making edits
+  - Reproduced the full assigned backend, helper, lint, and build surface against the live tree
+  - Verified the shared-boundary Atlas runtime operator console slice from code and build behavior:
+    - runtime path resolver exists
+    - Source Discovery runtime worker and service action routes exist
+    - Wave LLM review listing route exists
+    - the client operator panel imports and builds
+    - no dedicated operator end-to-end validation exists in this sweep
+  - Verified the reported Aerospace lint blocker in `marineEvidenceSummary.ts` did not reproduce
+  - Inspected the extensionless and `.js` Marine helper artifacts and left them untouched because they are currently harmless re-export stubs and are not breaking helper tests, lint, or build
+  - Removed one stray zero-byte repo-root junk artifact: `=`
+  - Refined the ownership scanner for a few obvious current files:
+    - `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`
+    - `app/client/src/features/operator/`
+    - `app/server/src/services/runtime_paths.py`
+    - `app/server/src/services/canada_geomet_ogc_service.py`
+    - `app/server/tests/test_canada_geomet_ogc.py`
+    - `app/docs/environmental-events-canada-geomet-ogc.md`
+  - Updated coordination docs so the current validation truth, scanner counts, Atlas peer-input status, and mixed-tree risk match the live tree again
+- Files touched:
+  - `scripts/list_changed_files_by_owner.py`
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/agent-progress/connect-ai.md`
+  - deleted stray root artifact: `=`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed and reported:
+    - `modified=85`
+    - `untracked=17`
+    - `shared-high-collision: 10`
+    - `unknown: 19`
+  - `python scripts/alerts_ledger.py --json` passed and reported `0` open alerts
+  - `python -m py_compile scripts/list_changed_files_by_owner.py` passed
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py -q` passed (`52 passed`)
+  - `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_netherlands_rws_waterinfo.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` passed (`71 passed`)
+  - `cmd /c npm.cmd run test:marine-context-helpers` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+- Blockers or caveats:
+  - No repo-wide blocker reproduced in this assignment
+  - The Atlas runtime operator console slice is only partially validated:
+    - shared-boundary routes, imports, and build behavior are green
+    - no dedicated operator end-to-end test or workflow smoke exists in this sweep
+  - The tree is mixed again:
+    - `shared-high-collision: 10`
+    - `unknown: 19`
+  - The current unknown bucket still contains real shared runtime, API, and planning surfaces and should remain visible as consolidation-review debt
+- Next recommended task:
+  - If Manager AI keeps this lane open, the next useful Connect move is a fresh current-state sweep after the next shared runtime or operator-console slice lands, or a consolidation-risk pass focused on the 10 current high-collision files
+
+## 2026-05-04 21:22:42 -05:00
+
+- Task:
+  - Run the `2026-05-04 21:06 America/Chicago` post-Marine source-health export coherence integration and validation sweep, fixing only reproduced blockers
+- Assignment version read:
+  - `2026-05-04 21:06 America/Chicago`
+- What changed:
+  - Re-read the active Connect next-task doc before continuing
+  - Validated the live tree before making any edits
+  - Reproduced the focused Marine and client-helper validation surface against the current worktree
+  - Found no repo-wide blocker to fix in this assignment
+  - Updated coordination docs so the current scanner counts, dirty-tree posture, Marine helper validation truth, and residual risk match the live tree
+  - Corrected one coordination-doc drift:
+    - the active worktree doc had still described a broad current `unknown` bucket even though the latest scanner run reported `unknown: 0`
+- Files touched:
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed and reported:
+    - `modified=9`
+    - `untracked=0`
+    - `shared-high-collision: 0`
+    - `unknown: 0`
+  - `python scripts/alerts_ledger.py --json` passed and reported `0` open alerts
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_netherlands_rws_waterinfo.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` passed (`71 passed`)
+  - `cmd /c npm.cmd run test:marine-context-helpers` passed
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+- Blockers or caveats:
+  - No repo-wide blocker reproduced in this assignment
+  - The current changed-file set is low-collision and integration-friendly, but the tree is still dirty because next-task docs, manager progress, and alerts remain modified
+  - No domain semantics were touched; this was a validation and coordination-doc refresh only
+- Next recommended task:
+  - If Manager AI keeps this lane open, the next useful Connect move is a similarly narrow current-state sweep after the next domain slice lands, or a consolidation-readiness pass once the coordination-doc churn settles
+
+## 2026-05-02 16:02:18 -05:00
+
+- Task:
+  - Run the `2026-05-02 15:45 America/Chicago` runtime service and provider boundary sweep, fix only reproduced blockers, and refresh coordination truth
+- Assignment version read:
+  - `2026-05-02 15:45 America/Chicago`
+- What changed:
+  - Re-read the active Connect next-task doc before continuing
+  - Validated the live tree before making any edits
+  - Inspected the current runtime worker, provider adapter, social and article extraction, scheduler, and review/application paths from code and tests
+  - Confirmed current provider/runtime truth:
+    - capability responses expose configuration presence by key-source name only and do not leak secret values
+    - `fixture` remains deterministic and review-only
+    - `openai`, `openrouter`, `anthropic`, `xai`, `google`, `openclaw`, and `ollama` all remain gated by provider configuration, explicit network permission, and positive request budget
+    - mock-model paths keep provider tests deterministic and do not require live provider calls
+    - scheduler-created Source Discovery Wave LLM work remains review-only `article_claim_extraction`
+    - review parsing still schema-validates claims, caps confidence, filters forbidden actions, and flags prompt-injection-like language
+    - no reproduced path allows provider output to promote sources, validate claims, change source truth, activate connectors, or create direct action guidance
+  - Found no repo-wide blocker to fix in this assignment
+  - Updated coordination docs so the latest counts, provider/runtime boundary truth, alert state, and residual risk match the live tree
+- Files touched:
+  - `app/docs/active-agent-worktree.md`
+  - `app/docs/release-readiness.md`
+  - `app/docs/validation-matrix.md`
+  - `app/docs/agent-progress/connect-ai.md`
+- Validation:
+  - `git status --short --branch` passed
+  - `python scripts/list_changed_files_by_owner.py --summary` passed and reported:
+    - `modified=9`
+    - `untracked=0`
+    - `shared-high-collision: 0`
+    - `unknown: 0`
+  - `python scripts/alerts_ledger.py --json` passed and reported `0` open alerts
+  - `python -m compileall app/server/src` passed
+  - `python -m pytest app/server/tests/test_source_discovery_memory.py -q` passed (`28 passed`)
+  - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q` passed (`26 passed`)
+  - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` passed (`29 passed`)
+  - `cmd /c npm.cmd run lint` passed from `app/client`
+  - `cmd /c npm.cmd run build` passed from `app/client`
+  - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed` passed
+- Blockers or caveats:
+  - No repo-wide blocker reproduced in this assignment
+  - Current pytest output for the assigned suites did not emit warning summary lines
+  - Earlier Source Discovery and Wave Monitor checkpoints did emit non-blocking Pydantic warning noise, so warning cleanup is still a reasonable future Connect task
+  - The current dirty tree is now docs-only from this sweep:
+    - `shared-high-collision: 0`
+    - `unknown: 0`
+- Next recommended task:
+  - If Manager AI keeps this lane open, the next useful Connect move is either a focused warning-noise cleanup pass or a docs/readiness sweep for any upcoming shared runtime worker bundling before consolidation
+
 ## 2026-05-02 12:35:47 -05:00
 
 - Task:

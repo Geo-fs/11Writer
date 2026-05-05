@@ -31,13 +31,17 @@ def _report_item(
         content_type="text/html",
         detected_machine_readable_type="html",
         media_evidence_posture="metadata-only-documented",
+        payload_shape_posture="machine-shape-unclassified",
+        sandbox_feasibility_posture="media-proof-missing",
         evidence_basis="Stored candidate metadata under test.",
         source_health_expectation="Use conservative polling and require source-health review.",
         blocker_hints=blocker_hints or [],
         endpoint_verification_status=status,
         notes=notes or [],
         caveats=["Candidate-only lifecycle posture remains in force."],
-        export_lines=["candidate-source: candidate-endpoint-verified | needs-review | metadata-only-documented"],
+        export_lines=[
+            "candidate-source: candidate-endpoint-verified | needs-review | metadata-only-documented | machine-shape-unclassified"
+        ],
         next_action="keep candidate",
     )
 
@@ -47,6 +51,7 @@ def test_machine_readable_endpoint_becomes_approved_unvalidated_candidate() -> N
         **{
             **_report_item(status="machine-readable-confirmed", notes=["Public JSON endpoint detected."]).to_dict(),
             "lifecycle_state": "candidate-sandbox-importable",
+            "sandbox_feasibility_posture": "fixture-backed-direct-image-review",
         }
     )
     plan = build_camera_candidate_graduation_plan(item)
@@ -158,6 +163,7 @@ def test_quebec_viewer_documented_candidate_keeps_direct_image_claim_conservativ
             "source_name": "Quebec MTMD Traffic Cameras",
             "lifecycle_state": "candidate-sandbox-importable",
             "media_evidence_posture": "viewer-only-documented",
+            "sandbox_feasibility_posture": "fixture-backed-viewer-only-review",
         }
     )
 
@@ -179,6 +185,7 @@ def test_fingal_metadata_only_candidate_requires_media_posture_evidence() -> Non
             "source_name": "Fingal Traffic Cameras",
             "lifecycle_state": "candidate-sandbox-importable",
             "media_evidence_posture": "metadata-only-documented",
+            "sandbox_feasibility_posture": "fixture-backed-metadata-only-review",
         }
     )
 
@@ -201,6 +208,7 @@ def test_maryland_viewer_documented_candidate_tracks_sandbox_importability() -> 
             "source_name": "Maryland CHART Traffic Cameras",
             "lifecycle_state": "candidate-sandbox-importable",
             "media_evidence_posture": "viewer-only-documented",
+            "sandbox_feasibility_posture": "fixture-backed-viewer-only-review",
         }
     )
 

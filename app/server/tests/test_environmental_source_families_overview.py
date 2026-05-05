@@ -37,6 +37,8 @@ def _settings() -> Settings:
         METNO_METALERTS_FIXTURE_PATH=_fixture("metno_metalerts_fixture.json"),
         CANADA_CAP_SOURCE_MODE="fixture",
         CANADA_CAP_FIXTURE_PATH=_fixture("canada_cap_index_fixture.html"),
+        DWD_CAP_SOURCE_MODE="fixture",
+        DWD_CAP_FIXTURE_PATH=_fixture("dwd_cap_directory_fixture.html"),
         IPMA_SOURCE_MODE="fixture",
         IPMA_FIXTURE_PATH=_fixture("ipma_warnings_fixture.json"),
         MET_EIREANN_WARNINGS_SOURCE_MODE="fixture",
@@ -63,6 +65,8 @@ def _settings() -> Settings:
         BC_WILDFIRE_DATAMART_FIXTURE_PATH=_fixture("bc_wildfire_datamart_fixture.json"),
         METEOSWISS_OPEN_DATA_SOURCE_MODE="fixture",
         METEOSWISS_OPEN_DATA_FIXTURE_PATH=_fixture("meteoswiss_open_data_fixture.json"),
+        CANADA_GEOMET_OGC_SOURCE_MODE="fixture",
+        CANADA_GEOMET_OGC_FIXTURE_PATH=_fixture("canada_geomet_climate_stations_fixture.json"),
         GA_RECENT_EARTHQUAKES_SOURCE_MODE="fixture",
         GA_RECENT_EARTHQUAKES_FIXTURE_PATH=_fixture("ga_recent_earthquakes_fixture.kml"),
         DMI_FORECAST_SOURCE_MODE="fixture",
@@ -97,7 +101,7 @@ def test_environmental_source_families_overview_shape_and_family_grouping() -> N
     assert payload["metadata"]["source"] == "environmental-source-family-overview"
     assert payload["metadata"]["sourceMode"] == "fixture"
     assert payload["familyCount"] >= 10
-    assert payload["sourceCount"] >= 32
+    assert payload["sourceCount"] >= 33
     family_ids = [family["familyId"] for family in payload["families"]]
     assert "seismic" in family_ids
     assert "environmental-event-context" in family_ids
@@ -116,6 +120,7 @@ def test_environmental_source_families_overview_shape_and_family_grouping() -> N
     weather_alerts = next(family for family in payload["families"] if family["familyId"] == "weather-alert-advisory")
     assert "hong-kong-observatory-open-weather" in weather_alerts["sourceIds"]
     assert "environment-canada-cap-alerts" in weather_alerts["sourceIds"]
+    assert "dwd-cap-alerts" in weather_alerts["sourceIds"]
     assert "met-norway-metalerts" in weather_alerts["sourceIds"]
     assert "portugal-ipma-open-data" in weather_alerts["sourceIds"]
     assert "met-eireann-warnings" in weather_alerts["sourceIds"]
@@ -164,6 +169,7 @@ def test_environmental_source_families_overview_review_lines_and_runtime_states_
     water_family = families["weather-flood-hydrology"]
     assert "bc-wildfire-datamart" in water_family["sourceIds"]
     assert "meteoswiss-open-data" in water_family["sourceIds"]
+    assert "canada-geomet-ogc" in water_family["sourceIds"]
     assert "met-eireann-forecast" in water_family["sourceIds"]
     assert water_family["familyHealth"] in {"loaded", "mixed", "empty", "degraded", "unknown"}
     assert all("hazard score" not in line.lower() for line in water_family["exportLines"])

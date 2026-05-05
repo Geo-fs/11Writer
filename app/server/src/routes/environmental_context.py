@@ -3,6 +3,11 @@ from fastapi import APIRouter, Depends, Query
 from src.config.settings import Settings, get_settings
 from src.services.environmental_source_families_overview_service import EnvironmentalSourceFamiliesOverviewService
 from src.types.api import (
+    EnvironmentalBaseEarthExportPackage,
+    EnvironmentalBaseEarthReviewQueuePackage,
+    EnvironmentalCanadaContextExportPackage,
+    EnvironmentalCanadaContextReviewQueuePackage,
+    EnvironmentalFusionSnapshotInput,
     EnvironmentalSourceHealthIssueQueuePackage,
     EnvironmentalContextExportPackage,
     EnvironmentalSituationSnapshotPackage,
@@ -83,3 +88,47 @@ async def environmental_weather_observation_review_queue(
 ) -> EnvironmentalWeatherObservationReviewQueuePackage:
     service = EnvironmentalSourceFamiliesOverviewService(settings)
     return await service.get_weather_observation_review_queue(source_ids=source)
+
+
+@router.get("/canada-context-export-package", response_model=EnvironmentalCanadaContextExportPackage)
+async def environmental_canada_context_export_package(
+    source: list[str] | None = Query(default=None, description="Optional repeated source filter, e.g. ?source=environment-canada-cap-alerts&source=canada-geomet-ogc"),
+    settings: Settings = Depends(get_settings),
+) -> EnvironmentalCanadaContextExportPackage:
+    service = EnvironmentalSourceFamiliesOverviewService(settings)
+    return await service.get_canada_context_export_package(source_ids=source)
+
+
+@router.get("/canada-context-review-queue", response_model=EnvironmentalCanadaContextReviewQueuePackage)
+async def environmental_canada_context_review_queue(
+    source: list[str] | None = Query(default=None, description="Optional repeated source filter, e.g. ?source=environment-canada-cap-alerts&source=canada-geomet-ogc"),
+    settings: Settings = Depends(get_settings),
+) -> EnvironmentalCanadaContextReviewQueuePackage:
+    service = EnvironmentalSourceFamiliesOverviewService(settings)
+    return await service.get_canada_context_review_queue(source_ids=source)
+
+
+@router.get("/base-earth-export-package", response_model=EnvironmentalBaseEarthExportPackage)
+async def environmental_base_earth_export_package(
+    source: list[str] | None = Query(default=None, description="Optional repeated source filter, e.g. ?source=natural-earth-physical&source=gshhg-shorelines"),
+    settings: Settings = Depends(get_settings),
+) -> EnvironmentalBaseEarthExportPackage:
+    service = EnvironmentalSourceFamiliesOverviewService(settings)
+    return await service.get_base_earth_export_package(source_ids=source)
+
+
+@router.get("/base-earth-review-queue", response_model=EnvironmentalBaseEarthReviewQueuePackage)
+async def environmental_base_earth_review_queue(
+    source: list[str] | None = Query(default=None, description="Optional repeated source filter, e.g. ?source=natural-earth-physical&source=gshhg-shorelines"),
+    settings: Settings = Depends(get_settings),
+) -> EnvironmentalBaseEarthReviewQueuePackage:
+    service = EnvironmentalSourceFamiliesOverviewService(settings)
+    return await service.get_base_earth_review_queue(source_ids=source)
+
+
+@router.get("/fusion-snapshot-input", response_model=EnvironmentalFusionSnapshotInput)
+async def environmental_fusion_snapshot_input(
+    settings: Settings = Depends(get_settings),
+) -> EnvironmentalFusionSnapshotInput:
+    service = EnvironmentalSourceFamiliesOverviewService(settings)
+    return await service.get_environmental_fusion_snapshot_input()

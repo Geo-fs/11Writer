@@ -48,7 +48,11 @@ The response currently returns:
 - `alerts`
   - active CAP warning/advisory-style records
 - `metadata`
-  - source, mode, fetched time, count, and caveat text
+  - source, mode, fetched time, generated time, count, and caveat text
+- `source_health`
+  - explicit source mode, health, loaded count, fetched time, source-generated time, and detail text
+- `caveats`
+  - response-level advisory and inert-text guardrails
 
 ### Alert fields
 
@@ -102,9 +106,19 @@ The current operational geospatial UI adds:
 
 This is operational UI, not final product polish.
 
+## Follow-On Backend Package
+
+The bounded Canada fusion follow-on now also exposes:
+
+- `GET /api/context/environmental/canada-context-export-package`
+- `GET /api/context/environmental/canada-context-review-queue`
+
+Within that package, Canada CAP stays advisory/contextual only and keeps its own geometry and source-health caveats visible instead of being merged into a shared hazard score.
+
 ## Caveats
 
 - Fixture mode is deterministic local test data, not a live Datamart feed.
+- Disabled mode is explicit runtime posture only and does not imply alert absence.
 - The Datamart CAP distribution is directory-oriented and rotating.
 - This first slice does not traverse the full historical archive.
 - CAP geometry and regional geocodes can support richer later enrichment, but that remains out of scope for this patch.

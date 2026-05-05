@@ -4,6 +4,7 @@ from typing import cast
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.config.settings import Settings, get_settings
+from src.services.canada_geomet_ogc_service import CanadaGeoMetOgcQuery, CanadaGeoMetOgcService
 from src.services.dmi_forecast_service import DmiForecastQuery, DmiForecastService
 from src.services.met_eireann_forecast_service import MetEireannForecastQuery, MetEireannForecastService
 from src.services.meteoswiss_open_data_service import MeteoSwissOpenDataQuery, MeteoSwissOpenDataService
@@ -12,7 +13,7 @@ from src.services.nasa_power_meteorology_solar_service import (
     NasaPowerMeteorologySolarService,
 )
 from src.services.taiwan_cwa_weather_service import TaiwanCwaSort, TaiwanCwaWeatherQuery, TaiwanCwaWeatherService
-from src.types.api import DmiForecastResponse, MeteoSwissOpenDataResponse, MetEireannForecastResponse, NasaPowerMeteorologySolarResponse, TaiwanCwaWeatherResponse
+from src.types.api import CanadaGeoMetOgcResponse, DmiForecastResponse, MeteoSwissOpenDataResponse, MetEireannForecastResponse, NasaPowerMeteorologySolarResponse, TaiwanCwaWeatherResponse
 
 router = APIRouter(prefix="/api/context/weather", tags=["geospatial-context"])
 
@@ -116,6 +117,23 @@ async def meteoswiss_open_data_context(
         MeteoSwissOpenDataQuery(
             station_abbr=station_abbr,
             canton=canton,
+            limit=limit,
+        )
+    )
+
+
+@router.get("/canada-geomet/climate-stations", response_model=CanadaGeoMetOgcResponse)
+async def canada_geomet_climate_stations_context(
+    province_code: str | None = Query(default=None),
+    station_name: str | None = Query(default=None),
+    limit: int = Query(default=25, ge=1, le=100),
+    settings: Settings = Depends(get_settings),
+) -> CanadaGeoMetOgcResponse:
+    service = CanadaGeoMetOgcService(settings)
+    return await service.get_context(
+        CanadaGeoMetOgcQuery(
+            province_code=province_code,
+            station_name=station_name,
             limit=limit,
         )
     )

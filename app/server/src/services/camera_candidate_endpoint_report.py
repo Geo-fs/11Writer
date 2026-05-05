@@ -31,6 +31,8 @@ class CameraCandidateEndpointReportItem:
     content_type: str | None
     detected_machine_readable_type: str
     media_evidence_posture: str
+    payload_shape_posture: str
+    sandbox_feasibility_posture: str
     evidence_basis: str
     source_health_expectation: str
     blocker_hints: list[str] = field(default_factory=list)
@@ -82,6 +84,9 @@ async def build_candidate_endpoint_report(
         if not candidate_url:
             continue
         evaluation = await evaluate(candidate_url)
+        lifecycle_state = _candidate_lifecycle_state(source, settings)
+        payload_shape_posture = _payload_shape_posture(source, lifecycle_state=lifecycle_state)
+        media_access_posture = _media_access_posture(source)
         report.append(
             CameraCandidateEndpointReportItem(
                 source_id=source.key,
@@ -89,12 +94,18 @@ async def build_candidate_endpoint_report(
                 onboarding_state=source.onboarding_state,
                 import_readiness=source.import_readiness,
                 source_mode=_source_mode(source),
-                lifecycle_state=_candidate_lifecycle_state(source, settings),
+                lifecycle_state=lifecycle_state,
                 candidate_url=candidate_url,
                 http_status=evaluation.http_status,
                 content_type=evaluation.content_type,
                 detected_machine_readable_type=evaluation.detected_machine_readable_type,
                 media_evidence_posture=_media_evidence_posture(source),
+                payload_shape_posture=payload_shape_posture,
+                sandbox_feasibility_posture=_sandbox_feasibility_posture(
+                    lifecycle_state=lifecycle_state,
+                    media_access_posture=media_access_posture,
+                    payload_shape_posture=payload_shape_posture,
+                ),
                 evidence_basis=_evidence_basis(source),
                 source_health_expectation=_source_health_expectation(source),
                 blocker_hints=list(evaluation.blocker_hints),
@@ -126,6 +137,8 @@ def render_candidate_endpoint_report(report: list[CameraCandidateEndpointReportI
                 f"  Content type: {item.content_type or 'unknown'}",
                 f"  Detected type: {item.detected_machine_readable_type}",
                 f"  Media evidence: {item.media_evidence_posture}",
+                f"  Payload shape: {item.payload_shape_posture}",
+                f"  Sandbox feasibility: {item.sandbox_feasibility_posture}",
                 f"  Evidence basis: {item.evidence_basis}",
                 f"  Source-health expectation: {item.source_health_expectation}",
                 f"  Blocker hints: {', '.join(item.blocker_hints) if item.blocker_hints else 'none'}",
@@ -209,6 +222,75 @@ def _media_evidence_posture(source: CameraSourceInventoryEntry) -> str:
     return "metadata-only-documented"
 
 
+def _payload_shape_posture(
+    source: CameraSourceInventoryEntry,
+    *,
+    lifecycle_state: str,
+) -> str:
+    if lifecycle_state == "candidate-sandbox-importable":
+        return "fixture-reviewed-sandbox-shape"
+    if source.endpoint_verification_status == "candidate-url-only":
+        return "catalog-only-endpoint-unpinned"
+    if (
+        source.endpoint_verification_status == "machine-readable-confirmed"
+        and source.access_method == "xml-api"
+        and not source.provides_exact_coordinates
+        and not source.provides_direct_image
+        and not source.provides_viewer_only
+    ):
+        return "api-family-documented-shape-unpinned"
+    if (
+        source.endpoint_verification_status == "machine-readable-confirmed"
+        and source.provides_exact_coordinates
+        and not source.provides_direct_image
+        and not source.provides_viewer_only
+    ):
+        return "machine-shape-location-only"
+    if (
+        source.endpoint_verification_status == "machine-readable-confirmed"
+        and (source.provides_direct_image or source.provides_viewer_only)
+    ):
+        return "machine-shape-with-media-fields"
+    if source.endpoint_verification_status == "needs-review":
+        return "review-gated-shape-unpinned"
+    return "machine-shape-unclassified"
+
+
+def _media_access_posture(source: CameraSourceInventoryEntry) -> str:
+    if source.provides_direct_image:
+        if source.endpoint_verification_status == "candidate-url-only":
+            return "direct-image-claim-unverified"
+        return "direct-image-link-documented"
+    if source.provides_viewer_only:
+        return "viewer-link-documented"
+    return "no-public-media-link-documented"
+
+
+def _sandbox_feasibility_posture(
+    *,
+    lifecycle_state: str,
+    media_access_posture: str,
+    payload_shape_posture: str,
+) -> str:
+    if lifecycle_state == "candidate-sandbox-importable":
+        if media_access_posture == "direct-image-link-documented":
+            return "fixture-backed-direct-image-review"
+        if media_access_posture == "viewer-link-documented":
+            return "fixture-backed-viewer-only-review"
+        return "fixture-backed-metadata-only-review"
+    if lifecycle_state == "candidate-endpoint-verified":
+        if payload_shape_posture == "api-family-documented-shape-unpinned":
+            return "endpoint-family-unpinned"
+        if media_access_posture == "no-public-media-link-documented":
+            return "media-proof-missing"
+        return "sandbox-path-not-built"
+    if lifecycle_state == "candidate-needs-review":
+        return "endpoint-pinning-needed"
+    if lifecycle_state == "blocked-do-not-scrape":
+        return "blocked-no-sandbox-path"
+    return "not-applicable"
+
+
 def _evidence_basis(source: CameraSourceInventoryEntry) -> str:
     if source.last_endpoint_result:
         return source.last_endpoint_result
@@ -246,6 +328,10 @@ def _export_lines(
     lifecycle_state = _candidate_lifecycle_state(source, settings)
     media_evidence = _media_evidence_posture(source)
     return [
-        f"{source.key}: {lifecycle_state} | {evaluation.endpoint_verification_status} | {media_evidence}",
+        (
+            f"{source.key}: {lifecycle_state} | {evaluation.endpoint_verification_status} | "
+            f"{media_evidence} | {_payload_shape_posture(source, lifecycle_state=lifecycle_state)} | "
+            f"{_sandbox_feasibility_posture(lifecycle_state=lifecycle_state, media_access_posture=_media_access_posture(source), payload_shape_posture=_payload_shape_posture(source, lifecycle_state=lifecycle_state))}"
+        ),
         f"next={_derive_next_action(source, evaluation)} | mode={_source_mode(source)}",
     ]

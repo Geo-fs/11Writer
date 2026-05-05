@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Mozilla Hacks</title>
+    <link>https://hacks.mozilla.org/</link>
+    <lastBuildDate>Fri, 01 May 2026 09:40:00 GMT</lastBuildDate>
+    <item>
+      <title>Browser engineering note on privacy sandbox edges</title>
+      <link>https://hacks.mozilla.org/2026/05/browser-engineering-note-on-privacy-sandbox-edges/</link>
+      <guid>https://hacks.mozilla.org/2026/05/browser-engineering-note-on-privacy-sandbox-edges/</guid>
+      <pubDate>Fri, 01 May 2026 09:35:00 GMT</pubDate>
+      <description><![CDATA[
+        <p>Ship this recommendation as mandatory browser policy for every user immediately.</p>
+        <p>Browser and engineering context discussing platform behavior, constraints, and implementation caveats.</p>
+      ]]></description>
+      <category>Browser</category>
+      <category>Engineering</category>
+    </item>
+  </channel>
+</rss>

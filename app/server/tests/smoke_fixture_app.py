@@ -3476,6 +3476,85 @@ async def marine_ireland_opw_waterlevel_context() -> dict[str, Any]:
     }
 
 
+@app.get("/api/marine/context/netherlands-rws-waterinfo")
+async def marine_netherlands_rws_waterinfo_context() -> dict[str, Any]:
+    return {
+        "fetchedAt": _iso(NOW),
+        "centerLat": 51.98,
+        "centerLon": 4.12,
+        "radiusKm": 250.0,
+        "count": 2,
+        "sourceHealth": {
+            "sourceId": "netherlands-rws-waterinfo",
+            "sourceLabel": "Netherlands RWS Waterinfo",
+            "enabled": True,
+            "sourceMode": "fixture",
+            "health": "degraded",
+            "loadedCount": 2,
+            "lastFetchedAt": _iso(NOW),
+            "sourceGeneratedAt": _iso(NOW - timedelta(minutes=6)),
+            "detail": "Fixture Netherlands RWS Waterinfo context includes partial metadata and should be treated as degraded source health.",
+            "errorSummary": None,
+            "caveat": "Fixture/local mode. Waterinfo remains bounded to metadata plus latest water-level observations and does not confirm flood impact, navigation safety, or vessel behavior. Partial metadata degrades source-health confidence for this review.",
+        },
+        "stations": [
+            {
+                "stationId": "HOEKVHLD",
+                "stationName": "Hoek van Holland",
+                "latitude": 51.9775,
+                "longitude": 4.1208,
+                "distanceKm": 0.9,
+                "waterBody": "Nieuwe Waterweg",
+                "statusLine": "water level 126.0 centimeter",
+                "stationSourceUrl": "https://waterwebservices.apps.rijkswaterstaat.nl/ddapi20-waterwebservices/api/METADATASERVICES_DBO/OphalenCatalogus",
+                "latestObservation": {
+                    "observedAt": _iso(NOW - timedelta(minutes=19)),
+                    "waterLevelValue": 126.0,
+                    "unitCode": "cm",
+                    "unitLabel": "centimeter",
+                    "parameterCode": "WATHTE",
+                    "parameterLabel": "Waterhoogte",
+                    "sourceDetail": "Fixture latest Waterinfo water-level observation for Nieuwe Waterweg context review.",
+                    "sourceUrl": "https://waterwebservices.apps.rijkswaterstaat.nl/ddapi20-waterwebservices/api/ONLINEWAARNEMINGENSERVICES_DBO/OphalenLaatsteWaarnemingen",
+                    "observedBasis": "observed",
+                },
+                "caveats": [
+                    "Waterinfo water-level observations are hydrology context only and do not prove flood impact, navigation safety, or vessel intent."
+                ],
+            },
+            {
+                "stationId": "DORDT",
+                "stationName": "Dordrecht",
+                "latitude": 51.8133,
+                "longitude": 4.6901,
+                "distanceKm": 61.4,
+                "waterBody": None,
+                "statusLine": "water level 118.0 centimeter",
+                "stationSourceUrl": "https://waterwebservices.apps.rijkswaterstaat.nl/ddapi20-waterwebservices/api/METADATASERVICES_DBO/OphalenCatalogus",
+                "latestObservation": {
+                    "observedAt": _iso(NOW - timedelta(minutes=26)),
+                    "waterLevelValue": 118.0,
+                    "unitCode": "cm",
+                    "unitLabel": None,
+                    "parameterCode": "WATHTE",
+                    "parameterLabel": "Waterhoogte",
+                    "sourceDetail": "Fixture latest Waterinfo water-level observation with intentionally partial metadata for contract and smoke coverage.",
+                    "sourceUrl": "https://waterwebservices.apps.rijkswaterstaat.nl/ddapi20-waterwebservices/api/ONLINEWAARNEMINGENSERVICES_DBO/OphalenLaatsteWaarnemingen",
+                    "observedBasis": "observed",
+                },
+                "caveats": [
+                    "Water body and unit label metadata are intentionally partial in this fixture to preserve degraded-source contract coverage."
+                ],
+            },
+        ],
+        "caveats": [
+            "Waterinfo latest observations are contextual hydrology data only; do not infer flood impact, navigation safety, anomaly cause, or vessel intent from station values alone.",
+            "Partial metadata degrades source-health confidence for this fixture review path.",
+            "Fixture/local mode is explicit in this first slice and should not be mistaken for live national Waterinfo coverage.",
+        ],
+    }
+
+
 @app.get("/api/reference/link/aircraft")
 async def reference_link_aircraft(
     lat: float = Query(...),

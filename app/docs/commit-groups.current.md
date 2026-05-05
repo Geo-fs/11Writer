@@ -9,6 +9,7 @@ Use this together with:
 - `app/docs/active-agent-worktree.md`
 - `app/docs/repo-workflow.md`
 - `app/docs/validation-matrix.md`
+- `app/docs/source-fusion-reporting-input-inventory.md`
 
 This file is planning only. Do not treat it as staging authorization.
 
@@ -16,9 +17,112 @@ This file is planning only. Do not treat it as staging authorization.
 
 - Branch: `main`
 - Worktree: mixed and dirty across multiple active agent lanes
+- Latest Connect consolidation-readiness snapshot for assignment `2026-05-05 10:22 America/Chicago`:
+  - `modified=118`
+  - `untracked=89`
+  - `shared-high-collision: 10`
+  - `unknown: 35`
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the tree is mixed and the heuristic secret scanner matches provider/settings/test token strings
+  - `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, `cmd /c npm.cmd run build`, `cmd /c npm.cmd run test:reporting-loop-package-contract`, and `python -m pytest app/server/tests/test_environmental_fusion_snapshot_input.py -q` are green
+  - `python scripts/alerts_ledger.py --json` currently reports `5` open low-priority alerts:
+    - `Atlas AI: 4`
+    - `Manager AI: 1`
+  - `app/docs/reporting-loop-package-contract.md` now records:
+    - first-class fusion-snapshot inputs and report-brief packages
+    - adjacent reporting/support packages such as the Aerospace VAAC advisory report package
+  - backend environmental fusion snapshot input remains on its dedicated server test surface
+  - backend webcam sandbox/source-ops reporting helpers remain adjacent reporting/support surfaces, not first-class reporting-loop peers
+  - Atlas media geolocation remains derived-evidence/candidate-location scaffolding only
+  - Wonder Statuspage and Mastodon discovery remain bounded public-discovery/runtime surfaces only
+- Latest Connect consolidation-readiness snapshot for assignment `2026-05-05 09:47 America/Chicago`:
+  - `modified=118`
+  - `untracked=79`
+  - `shared-high-collision: 10`
+  - `unknown: 32`
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the tree is mixed and the heuristic secret scanner matches provider/settings/test token strings
+  - `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, `cmd /c npm.cmd run build`, and `cmd /c npm.cmd run test:reporting-loop-package-contract` are green
+  - `python scripts/alerts_ledger.py --json` currently reports `6` open low-priority alerts:
+    - `Atlas AI: 4`
+    - `Manager AI: 2`
+  - `app/docs/reporting-loop-package-contract.md` now records the neutral compatibility minimum for current fusion-snapshot inputs and report-brief packages
+  - the focused regression validates current Aerospace, Data AI, and Marine package surfaces without widening UI or semantics
+  - backend environmental fusion snapshot input remains on its dedicated server test surface
+- Latest Connect consolidation-readiness snapshot for assignment `2026-05-04 23:26 America/Chicago`:
+  - `modified=117`
+  - `untracked=50`
+  - `shared-high-collision: 10`
+  - `unknown: 24`
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the tree is mixed and the heuristic secret scanner matches provider/settings/test token strings
+  - `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, and `cmd /c npm.cmd run build` are green
+  - `python scripts/alerts_ledger.py --json` currently reports `4` open low-priority alerts:
+    - `Atlas AI: 2`
+    - `Manager AI: 2`
+  - no current shared compile/import/build blocker reproduced
+  - `app/docs/source-fusion-reporting-input-inventory.md` now records which reporting/fusion surfaces are already real bounded inputs versus shared runtime-boundary or manual-review debt
+  - stale packet/history suggestions for `propublica`, `global-voices`, `geonet-geohazards`, and `hko-open-weather` should be treated as superseded planning artifacts where repo truth already shows implementation or newer routing guidance
+- Latest Connect consolidation-readiness snapshot for assignment `2026-05-04 22:59 America/Chicago`:
+  - `modified=116`
+  - `untracked=48`
+  - `shared-high-collision: 10`
+  - `unknown: 27`
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the tree is mixed and the heuristic secret scanner matches provider/settings/test token strings
+  - `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q` reran cleanly with `76` tests after one earlier stale/concurrent scheduler-response validation failure
+  - `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, and `cmd /c npm.cmd run build` are green
+  - `python scripts/alerts_ledger.py --json` currently reports `2` open low-priority alerts owned by `Atlas AI`
+  - core Data AI routing truth now lives in the newer routing docs; older packet/history docs that still route `propublica` or `global-voices` as fresh next-wave work should be treated as superseded planning artifacts
+- Latest Connect consolidation-readiness snapshot for assignment `2026-05-04 22:11 America/Chicago`:
+  - `modified=105`
+  - `untracked=36`
+  - `shared-high-collision: 10`
+  - `unknown: 21`
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the tree is mixed and the heuristic secret scanner matches provider/settings/test token strings
+  - `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, and `cmd /c npm.cmd run build` are green on rerun
 - No force push
 - No `git add .`
 - No mixed-agent commits
+
+## Immediate manual-review set
+
+- Top 5 files requiring manual consolidation review before any future staging:
+  - `app/client/src/features/app-shell/AppShell.tsx`
+  - `app/client/src/features/inspector/InspectorPanel.tsx`
+  - `app/client/src/lib/queries.ts`
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+
+## Shared-surface occupancy map
+
+- Already occupied shared feature families:
+  - aerospace:
+    - evidence timeline package
+    - workflow validation evidence snapshot
+    - context review queue
+    - context review export bundle
+    - export coherence
+    - issue export bundle
+    - context snapshot report
+    - source readiness and source readiness bundle
+  - webcam/source ops:
+    - candidate endpoint report
+    - candidate network summary
+    - review queue
+    - review queue export bundle
+    - source lifecycle summary
+  - environmental:
+    - source health issue queue package
+    - weather observation review queue package
+    - Canada context review queue package
+  - shared runtime and analysis:
+    - Data AI feed family review queue
+    - Source Discovery review queue
+    - Wave LLM review queue
+    - analyst evidence timeline
+    - analyst source readiness
+- New work should extend or reconcile these surfaces before introducing parallel duplicate helpers with overlapping names.
+- Shared reporting-loop package compatibility now also exists:
+  - `app/docs/reporting-loop-package-contract.md`
+  - `app/client/scripts/reportingLoopPackageContractRegression.mjs`
+  - use these before adding another package-normalization helper in shared files
 
 ## Proposed commit groups
 

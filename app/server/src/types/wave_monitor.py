@@ -69,10 +69,89 @@ class WaveLlmCapabilityResponse(CamelModel):
     guardrails: list[str] = Field(default_factory=list)
 
 
+class WaveLlmDefaultsSummary(CamelModel):
+    default_provider: WaveLlmProvider
+    default_model: str
+    allow_network_default: bool
+    request_budget_default: int
+    max_retries_default: int
+    timeout_seconds_default: int
+
+
+class WaveLlmProviderConfigSummary(CamelModel):
+    provider: WaveLlmProvider
+    configured: bool
+    key_source: str
+    local: bool = False
+    adapter_mode: str
+    supports_api_key: bool
+    supports_base_url: bool
+    env_fallback_configured: bool = False
+    masked_secret: str | None = None
+    base_url: str | None = None
+    default_model: str | None = None
+    allow_network_default: bool | None = None
+    request_budget_default: int | None = None
+    max_retries_default: int | None = None
+    timeout_seconds_default: int | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class WaveLlmMonitorPreferenceSummary(CamelModel):
+    monitor_id: str
+    monitor_title: str
+    provider: WaveLlmProvider | None = None
+    model: str | None = None
+    allow_network: bool | None = None
+    request_budget: int | None = None
+    max_retries: int | None = None
+    timeout_seconds: int | None = None
+    updated_at: str
+
+
+class WaveLlmConfigResponse(CamelModel):
+    enabled: bool
+    config_path: str
+    defaults: WaveLlmDefaultsSummary
+    providers: list[WaveLlmProviderConfigSummary] = Field(default_factory=list)
+    monitor_preferences: list[WaveLlmMonitorPreferenceSummary] = Field(default_factory=list)
+    guardrails: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class WaveLlmDefaultsUpdateRequest(CamelModel):
+    default_provider: WaveLlmProvider
+    default_model: str
+    allow_network_default: bool
+    request_budget_default: int
+    max_retries_default: int
+    timeout_seconds_default: int
+
+
+class WaveLlmProviderConfigUpdateRequest(CamelModel):
+    api_key: str | None = None
+    clear_api_key: bool = False
+    base_url: str | None = None
+    default_model: str | None = None
+    allow_network_default: bool | None = None
+    request_budget_default: int | None = None
+    max_retries_default: int | None = None
+    timeout_seconds_default: int | None = None
+
+
+class WaveLlmMonitorPreferenceUpdateRequest(CamelModel):
+    provider: WaveLlmProvider | None = None
+    model: str | None = None
+    allow_network: bool | None = None
+    request_budget: int | None = None
+    max_retries: int | None = None
+    timeout_seconds: int | None = None
+
+
 class WaveLlmInterpretationTaskRequest(CamelModel):
     monitor_id: str
     task_type: Literal["article_claim_extraction", "source_summary", "relationship_hypothesis"] = "article_claim_extraction"
-    provider: WaveLlmProvider = "fixture"
+    provider: WaveLlmProvider | None = None
     model: str | None = None
     input_text: str
     source_ids: list[str] = Field(default_factory=list)
@@ -107,16 +186,17 @@ class WaveLlmValidatedClaim(CamelModel):
 class WaveLlmReviewRequest(CamelModel):
     task_id: str
     raw_output: str
-    provider: WaveLlmProvider = "fixture"
+    provider: WaveLlmProvider | None = None
     model: str | None = None
     caveats: list[str] = Field(default_factory=list)
 
 
 class WaveLlmTaskExecuteRequest(CamelModel):
     task_id: str
-    allow_network: bool = False
-    request_budget: int = 0
+    allow_network: bool | None = None
+    request_budget: int | None = None
     max_retries: int | None = None
+    timeout_seconds: int | None = None
     caveats: list[str] = Field(default_factory=list)
 
 
@@ -148,6 +228,20 @@ class WaveLlmReviewResponse(CamelModel):
     guardrails: list[str] = Field(default_factory=list)
 
 
+class WaveLlmReviewQueueItem(CamelModel):
+    task: WaveLlmTaskSummary
+    review: WaveLlmReviewSummary
+    source_ids: list[str] = Field(default_factory=list)
+    record_ids: list[str] = Field(default_factory=list)
+    primary_source_id: str | None = None
+
+
+class WaveLlmReviewQueueResponse(CamelModel):
+    metadata: dict[str, object]
+    items: list[WaveLlmReviewQueueItem] = Field(default_factory=list)
+    guardrails: list[str] = Field(default_factory=list)
+
+
 class WaveLlmExecutionSummary(CamelModel):
     task_id: str
     provider: str
@@ -166,6 +260,34 @@ class WaveLlmExecutionResponse(CamelModel):
     task: WaveLlmTaskSummary
     execution: WaveLlmExecutionSummary
     review: WaveLlmReviewSummary | None = None
+    guardrails: list[str] = Field(default_factory=list)
+
+
+class WaveLlmExecutionHistoryItem(CamelModel):
+    execution_id: str
+    task_id: str
+    monitor_id: str
+    task_type: str
+    provider: str
+    model: str
+    status: str
+    adapter_status: str
+    allow_network: bool
+    request_budget: int
+    used_requests: int
+    retry_count: int
+    timeout_seconds: int
+    created_at: str
+    review_id: str | None = None
+    review_validation_state: str | None = None
+    error_summary: str | None = None
+    input_summary: str
+    caveats: list[str] = Field(default_factory=list)
+
+
+class WaveLlmExecutionHistoryResponse(CamelModel):
+    metadata: dict[str, object]
+    items: list[WaveLlmExecutionHistoryItem] = Field(default_factory=list)
     guardrails: list[str] = Field(default_factory=list)
 
 

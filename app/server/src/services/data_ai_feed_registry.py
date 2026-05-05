@@ -161,6 +161,138 @@ DATA_AI_MULTI_FEED_DEFINITIONS: tuple[DataAiFeedSourceDefinition, ...] = (
         ),
     ),
     DataAiFeedSourceDefinition(
+        source_id="trailofbits-blog",
+        source_name="Trail of Bits Blog",
+        source_category="cyber-research",
+        feed_url="https://blog.trailofbits.com/index.xml",
+        fixture_file_name="trailofbits_blog.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "Trail of Bits blog items are security-research and audit context only; they are not universal exploit proof, compromise proof, incident confirmation, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="mozilla-hacks",
+        source_name="Mozilla Hacks",
+        source_category="internet-tech",
+        feed_url="https://hacks.mozilla.org/feed/",
+        fixture_file_name="mozilla_hacks.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "Mozilla Hacks items are browser, web, and engineering context only; they are not universal standards compliance proof, incident confirmation, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="chromium-blog",
+        source_name="Chromium Blog",
+        source_category="internet-tech",
+        feed_url="https://blog.chromium.org/feeds/posts/default",
+        fixture_file_name="chromium_blog.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "Chromium Blog items are browser-platform release and engineering context only; they are not universal platform truth, incident confirmation, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="webdev-google",
+        source_name="web.dev Blog",
+        source_category="internet-tech",
+        feed_url="https://web.dev/static/blog/feed.xml",
+        fixture_file_name="webdev_google.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "web.dev items are web-platform guidance and engineering context only; they are not standards compliance proof, incident confirmation, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="gitlab-releases",
+        source_name="GitLab Releases",
+        source_category="cyber-vendor",
+        feed_url="https://about.gitlab.com/releases.xml",
+        fixture_file_name="gitlab_releases.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "GitLab release items are platform release and product-update context only; they are not compromise proof, incident confirmation, or universal remediation priority."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="github-changelog",
+        source_name="GitHub Changelog",
+        source_category="internet-tech",
+        feed_url="https://github.blog/changelog/feed/",
+        fixture_file_name="github_changelog.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "GitHub Changelog items are platform feature and release context only; they are not platform-wide incident proof, security truth, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="bbc-world",
+        source_name="BBC World",
+        source_category="media-world",
+        feed_url="https://feeds.bbci.co.uk/news/world/rss.xml",
+        fixture_file_name="bbc_world.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "BBC World items are broad media-awareness context only; preserve attribution and do not infer primary event truth, impact certainty, attribution proof, legal status, or required action from headline text alone."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="guardian-world",
+        source_name="The Guardian World",
+        source_category="media-world",
+        feed_url="https://www.theguardian.com/world/rss",
+        fixture_file_name="guardian_world.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "Guardian World items are broad media-awareness and editorially framed context only; they are not primary event confirmation, intent proof, legal status, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="aljazeera-all",
+        source_name="Al Jazeera All News",
+        source_category="media-world",
+        feed_url="https://www.aljazeera.com/xml/rss/all.xml",
+        fixture_file_name="aljazeera_all.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "Al Jazeera items are broad international media-awareness context only; preserve source attribution and do not infer primary field truth, impact certainty, attribution proof, or required action from feed text alone."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="dw-all",
+        source_name="DW English All News",
+        source_category="media-world",
+        feed_url="https://rss.dw.com/rdf/rss-en-all",
+        fixture_file_name="dw_all.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "DW all-news items are broad media-awareness context only; they are not primary event confirmation, whole-situation truth, legal status, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="france24-en",
+        source_name="France 24 English",
+        source_category="media-world",
+        feed_url="https://www.france24.com/en/rss",
+        fixture_file_name="france24_en.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "France 24 English items are broad media-awareness context only; they are not primary event truth, field confirmation, legal status, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
+        source_id="npr-world",
+        source_name="NPR World",
+        source_category="media-world",
+        feed_url="https://feeds.npr.org/1004/rss.xml",
+        fixture_file_name="npr_world.xml",
+        evidence_basis="contextual",
+        caveat=(
+            "NPR World items are broad world-news context only; they are not primary event confirmation, impact proof, attribution proof, or required-action guidance."
+        ),
+    ),
+    DataAiFeedSourceDefinition(
         source_id="sans-isc-diary",
         source_name="SANS Internet Storm Center Diary",
         source_category="cyber-community",
@@ -836,12 +968,44 @@ DATA_AI_FEED_FAMILY_DEFINITIONS: tuple[DataAiFeedFamilyDefinition, ...] = (
         ),
     ),
     DataAiFeedFamilyDefinition(
+        family_id="cyber-internet-platform-watch",
+        family_label="Cyber and Internet Platform Watch",
+        source_ids=(
+            "trailofbits-blog",
+            "mozilla-hacks",
+            "chromium-blog",
+            "webdev-google",
+            "gitlab-releases",
+            "github-changelog",
+        ),
+        tags=("cyber", "internet", "platform", "release", "contextual"),
+        caveat=(
+            "Cyber/internet platform-watch rows summarize security research, browser engineering, web-platform guidance, and release/changelog context only; they do not create incident confirmation, exploit proof, standards compliance truth, or required-action guidance."
+        ),
+    ),
+    DataAiFeedFamilyDefinition(
         family_id="cyber-community-context",
         family_label="Cyber Community Context",
         source_ids=("sans-isc-diary",),
         tags=("cyber", "community", "contextual"),
         caveat=(
             "Cyber community rows summarize analyst/community context only; they do not convert commentary into official truth, incident proof, or validated action guidance."
+        ),
+    ),
+    DataAiFeedFamilyDefinition(
+        family_id="world-news-awareness",
+        family_label="World News Awareness",
+        source_ids=(
+            "bbc-world",
+            "guardian-world",
+            "aljazeera-all",
+            "dw-all",
+            "france24-en",
+            "npr-world",
+        ),
+        tags=("media", "world-news", "awareness", "contextual"),
+        caveat=(
+            "World-news-awareness rows summarize broad media context only; they do not create primary event truth, field confirmation, impact certainty, intent proof, legal status, attribution proof, or required-action guidance."
         ),
     ),
     DataAiFeedFamilyDefinition(

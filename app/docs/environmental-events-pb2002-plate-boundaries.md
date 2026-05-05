@@ -48,3 +48,12 @@ Supported query params:
 - Not live hazard truth.
 - Not earthquake-risk proof by itself.
 - Boundary types and plate IDs remain model-era reference labels and must not be promoted into impact, damage, or target evidence.
+
+## Follow-On Backend Package
+
+The bounded base-earth fusion follow-on now also exposes:
+
+- `GET /api/context/environmental/base-earth-export-package`
+- `GET /api/context/environmental/base-earth-review-queue`
+
+Within that package, PB2002 stays static/reference only and keeps generalized boundary-geometry posture visible instead of being treated as live tectonic or hazard truth.

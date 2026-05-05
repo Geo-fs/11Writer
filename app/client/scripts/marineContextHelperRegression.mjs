@@ -1,10 +1,17 @@
 import { buildMarineEvidenceSummary } from "../src/features/marine/marineEvidenceSummary.ts";
 import { buildMarineChokepointReviewPackage } from "../src/features/marine/marineChokepointReviewPackage.ts";
+import { buildMarineCorridorReviewPackage } from "../src/features/marine/marineCorridorReviewPackage.ts";
+import { buildMarineCorridorSituationPackage } from "../src/features/marine/marineCorridorSituationPackage.ts";
 import { getMarineEvidenceInterpretationCards } from "../src/features/marine/marineEvidenceInterpretation.ts";
 import { buildMarineContextFusionSummary } from "../src/features/marine/marineContextFusionSummary.ts";
 import { buildMarineContextIssueExportBundle } from "../src/features/marine/marineContextIssueExportBundle.ts";
 import { buildMarineContextIssueQueue } from "../src/features/marine/marineContextIssueQueue.ts";
 import { buildMarineContextReviewReport } from "../src/features/marine/marineContextReviewReport.ts";
+import { buildMarineFusionSnapshotInput } from "../src/features/marine/marineFusionSnapshotInput.ts";
+import { buildMarineHydrologySourceHealthReportSummary } from "../src/features/marine/marineHydrologySourceHealthReport.ts";
+import { buildMarineHydrologySourceHealthWorkflowSummary } from "../src/features/marine/marineHydrologySourceHealthWorkflow.ts";
+import { buildMarineReportBriefPackage } from "../src/features/marine/marineReportBriefPackage.ts";
+import { buildMarineSourceHealthExportCoherenceSummary } from "../src/features/marine/marineSourceHealthExportCoherence.ts";
 import {
   buildMarineContextSnapshot,
   buildMarineContextTimelineSummary,
@@ -219,6 +226,7 @@ function buildNoaaContextSummary() {
       health: "loaded",
       nearbyStationCount: 2,
       contextKind: "chokepoint",
+      topObservedAt: "2026-04-04T11:38:00Z",
       topStation: {
         stationId: "coops-1",
         stationName: "Galveston",
@@ -243,6 +251,7 @@ function buildNdbcContextSummary() {
       health: "empty",
       nearbyStationCount: 0,
       contextKind: "chokepoint",
+      topObservedAt: null,
       topStation: null,
       topObservationSummary: null,
       caveats: ["No nearby buoy observations matched the current marine review radius."]
@@ -1520,6 +1529,85 @@ function runRegression() {
     sourceRegistrySummary: limitedSourceRegistrySummary,
     issueQueueSummary: limitedIssueQueueSummary
   });
+  const limitedVigicruesContextSummary = {
+    sourceLine: "France Vigicrues Hydrometry: unavailable | fixture/local | 0 nearby stations",
+    stationLines: [],
+    exportLines: ["France Vigicrues Hydrometry: unavailable | fixture/local | 0 nearby stations"],
+    metadata: {
+      sourceId: "france-vigicrues-hydrometry",
+      sourceMode: "fixture",
+      health: "unavailable",
+      nearbyStationCount: 0,
+      parameterFilter: "all",
+      topStation: null,
+      topObservationSummary: null,
+      topObservationObservedAt: null,
+      hasPartialMetadata: false,
+      caveats: ["Current Vigicrues context is unavailable in this limited review path."]
+    }
+  };
+  const limitedIrelandOpwContextSummary = {
+    sourceLine: "Ireland OPW Water Level: loaded | fixture/local | 1 nearby station",
+    stationLines: [],
+    exportLines: ["Ireland OPW Water Level: loaded | fixture/local | 1 nearby station"],
+    metadata: {
+      sourceId: "ireland-opw-waterlevel",
+      sourceMode: "fixture",
+      health: "loaded",
+      nearbyStationCount: 1,
+      topStation: {
+        stationId: "opw-1",
+        stationName: "Ballyduff",
+        distanceKm: 0.7,
+        waterbody: "River Feale",
+        hydrometricArea: "Shannon Estuary South"
+      },
+      topObservationSummary: "Ballyduff | 1.18 m | River Feale",
+      topReadingAt: "2026-04-04T11:42:00Z",
+      hasPartialMetadata: false,
+      caveats: ["OPW readings are contextual hydrometric data only."]
+    }
+  };
+  const limitedWaterinfoContextSummary = {
+    ...waterinfoContextSummary,
+    sourceLine: "Netherlands RWS Waterinfo: degraded | fixture/local | 1 nearby station",
+    exportLines: ["Netherlands RWS Waterinfo: degraded | fixture/local | 1 nearby station"],
+    metadata: {
+      ...waterinfoContextSummary.metadata,
+      health: "degraded",
+      nearbyStationCount: 1,
+      topObservationObservedAt: "2026-04-04T11:41:00Z",
+      hasPartialMetadata: true,
+      caveats: ["Waterinfo is partial context only in this limited source mix."]
+    }
+  };
+  const limitedSourceHealthExportCoherenceSummary =
+    buildMarineSourceHealthExportCoherenceSummary({
+      noaaCoops: {
+        ...noaaContextSummary,
+        metadata: {
+          ...noaaContextSummary.metadata,
+          health: "disabled",
+          nearbyStationCount: 0,
+          topObservedAt: null,
+          caveats: ["CO-OPS is disabled by the current marine preset/source-toggle state."]
+        }
+      },
+      ndbc: {
+        ...ndbcContextSummary,
+        metadata: {
+          ...ndbcContextSummary.metadata,
+          health: "loaded",
+          nearbyStationCount: 1,
+          topObservedAt: "2026-04-04T11:45:00Z"
+        }
+      },
+      vigicrues: limitedVigicruesContextSummary,
+      irelandOpw: limitedIrelandOpwContextSummary,
+      netherlandsRwsWaterinfo: limitedWaterinfoContextSummary
+    });
+  const limitedHydrologySourceHealthWorkflowSummary =
+    buildMarineHydrologySourceHealthWorkflowSummary(limitedSourceHealthExportCoherenceSummary);
 
   assert(limitedFusionSummary, "Limited preset fusion summary should be created.");
   assert(
@@ -1531,8 +1619,57 @@ function runRegression() {
     "Limited preset fusion summary should use partial-context wording."
   );
   assert(
-    limitedIssueQueueSummary.topIssues.some((issue) => issue.issueType === "disabled"),
-    "Limited preset issue queue should surface at least one disabled-source issue."
+    limitedSourceHealthExportCoherenceSummary,
+    "Limited source-health export coherence summary should be created."
+  );
+  assert(
+    limitedSourceHealthExportCoherenceSummary.metadata.limitedSourceCount === 3,
+    "Limited source-health export coherence summary should preserve disabled/unavailable/degraded source counts."
+  );
+  assert(
+    limitedSourceHealthExportCoherenceSummary.metadata.latestTimestampKnownCount === 3,
+    "Limited source-health export coherence summary should preserve only known latest timestamps."
+  );
+  assert(
+    limitedSourceHealthExportCoherenceSummary.rows.some(
+      (row) =>
+        row.sourceId === "noaa-coops-tides-currents" &&
+        row.health === "disabled" &&
+        /unavailable/i.test(row.latestTimestampPosture)
+    ),
+    "Limited source-health export coherence summary should preserve disabled CO-OPS timestamp posture."
+  );
+  assert(
+    limitedHydrologySourceHealthWorkflowSummary,
+    "Limited hydrology/source-health workflow summary should be created."
+  );
+  assert(
+    limitedHydrologySourceHealthWorkflowSummary.metadata.hydrologySourceCount === 3 &&
+      limitedHydrologySourceHealthWorkflowSummary.metadata.oceanMetSourceCount === 2,
+    "Limited hydrology/source-health workflow summary should preserve 3 hydrology and 2 ocean/met sources."
+  );
+  assert(
+    limitedHydrologySourceHealthWorkflowSummary.metadata.limitedSourceCount === 3,
+    "Limited hydrology/source-health workflow summary should preserve limited-source count."
+  );
+  assert(
+    limitedIssueQueueSummary.noticeCount >= 1,
+    "Limited preset issue queue should preserve at least one notice-level source-health issue."
+  );
+  assert(
+    limitedIssueQueueSummary.metadata.issueCount >= 1,
+    "Limited preset issue queue should preserve source-health issue coverage."
+  );
+  assert(
+    limitedSourceRegistrySummary.rows.some(
+      (row) => row.sourceId === "noaa-coops-tides-currents" && row.availability === "disabled"
+    ),
+    "Limited preset source registry should preserve disabled CO-OPS row state."
+  );
+  assert(
+    limitedIssueQueueSummary.metadata.topIssues.every((issue) => issue.issueType !== "disabled") ||
+      limitedIssueQueueSummary.metadata.noticeCount >= 1,
+    "Limited preset top-issue truncation should not erase the underlying disabled-source posture."
   );
   assert(
     limitedIssueExportBundle.rows.some(
@@ -1573,7 +1710,6 @@ function runRegression() {
     hydrologyContextSummary: limitedHydrologyContextSummary,
     environmentalContextSummary: limitedEnvironmentalContextSummary
   });
-
   const broadSnapshot = buildMarineContextSnapshot({
     environmentalContextSummary: broadEnvironmentalContextSummary,
     contextSourceRegistrySummary: broadSourceRegistrySummary,
@@ -1743,10 +1879,8 @@ function runRegression() {
     "Limited transition export metadata should preserve disabled source row state."
   );
   assert(
-    limitedTransitionMetadata.contextIssueQueue?.topIssues.some(
-      (issue) => issue.issueType === "disabled"
-    ),
-    "Limited transition export metadata should preserve disabled-source issue visibility."
+    (limitedTransitionMetadata.contextIssueQueue?.noticeCount ?? 0) >= 1,
+    "Limited transition export metadata should preserve notice-level source-health issue coverage."
   );
   assert(
     limitedTransitionMetadata.contextIssueExportBundle?.rows.some(
@@ -1892,6 +2026,7 @@ function runRegression() {
       ...noaaContextSummary.metadata,
       nearbyStationCount: 3,
       contextKind: "viewport",
+      topObservedAt: "2026-04-04T11:39:00Z",
       topStation: {
         stationId: "coops-2",
         stationName: "Galveston Pier 21",
@@ -1910,6 +2045,7 @@ function runRegression() {
       health: "loaded",
       nearbyStationCount: 2,
       contextKind: "viewport",
+      topObservedAt: "2026-04-04T11:45:00Z",
       topStation: {
         stationId: "ndbc-42035",
         stationName: "NDBC 42035",
@@ -1965,6 +2101,66 @@ function runRegression() {
       caveats: ["OPW readings are contextual hydrometric data only."]
     }
   };
+  const broadSourceHealthExportCoherenceSummary =
+    buildMarineSourceHealthExportCoherenceSummary({
+      noaaCoops: broadNoaaContextSummary,
+      ndbc: broadNdbcContextSummary,
+      vigicrues: broadVigicruesContextSummary,
+      irelandOpw: broadIrelandOpwContextSummary,
+      netherlandsRwsWaterinfo: {
+        ...waterinfoContextSummary,
+        sourceLine: "Netherlands RWS Waterinfo: loaded | fixture/local | 2 nearby stations",
+        exportLines: ["Netherlands RWS Waterinfo: loaded | fixture/local | 2 nearby stations"],
+        metadata: {
+          ...waterinfoContextSummary.metadata,
+          health: "loaded",
+          hasPartialMetadata: false,
+          caveats: ["Waterinfo readings remain hydrology context only."]
+        }
+      }
+    });
+  const broadHydrologySourceHealthWorkflowSummary =
+    buildMarineHydrologySourceHealthWorkflowSummary(broadSourceHealthExportCoherenceSummary);
+
+  assert(
+    broadSourceHealthExportCoherenceSummary,
+    "Broad source-health export coherence summary should be created."
+  );
+  assert(
+    broadSourceHealthExportCoherenceSummary.metadata.sourceCount === 5,
+    "Broad source-health export coherence summary should include five compared sources."
+  );
+  assert(
+    broadSourceHealthExportCoherenceSummary.metadata.loadedSourceCount === 5,
+    "Broad source-health export coherence summary should preserve fully loaded broad source posture."
+  );
+  assert(
+    broadSourceHealthExportCoherenceSummary.metadata.latestTimestampKnownCount === 5,
+    "Broad source-health export coherence summary should preserve known latest timestamps for all compared sources."
+  );
+  assert(
+    broadSourceHealthExportCoherenceSummary.rows.some(
+      (row) =>
+        row.sourceId === "netherlands-rws-waterinfo" &&
+        /latest waterinfo time 2026-04-04T11:41:00Z/i.test(row.latestTimestampPosture)
+    ),
+    "Broad source-health export coherence summary should preserve Waterinfo timestamp posture."
+  );
+  assert(
+    broadHydrologySourceHealthWorkflowSummary,
+    "Broad hydrology/source-health workflow summary should be created."
+  );
+  assert(
+    broadHydrologySourceHealthWorkflowSummary.metadata.hydrologySourceCount === 3 &&
+      broadHydrologySourceHealthWorkflowSummary.metadata.oceanMetSourceCount === 2,
+    "Broad hydrology/source-health workflow summary should preserve 3 hydrology and 2 ocean/met sources."
+  );
+  assert(
+    broadHydrologySourceHealthWorkflowSummary.familyLines.some(
+      (line) => line.family === "hydrology" && line.loadedSourceCount === 3
+    ),
+    "Broad hydrology/source-health workflow summary should preserve fully loaded hydrology family state."
+  );
 
   const selectedVesselEnvironmentalContextSummary = {
     ...broadEnvironmentalContextSummary,
@@ -2291,6 +2487,458 @@ function runRegression() {
     "Radius changes should preserve source ids, health states, and evidence bases."
   );
 
+  const evidenceSummaryVigicruesContextSummary = {
+    sourceLine: "France Vigicrues Hydrometry: unavailable | fixture/local | 0 nearby stations",
+    stationLines: [],
+    exportLines: [
+      "France Vigicrues Hydrometry: unavailable | fixture/local | 0 nearby stations"
+    ],
+    metadata: {
+      sourceId: "france-vigicrues-hydrometry",
+      sourceMode: "fixture",
+      health: "unavailable",
+      nearbyStationCount: 0,
+      parameterFilter: "all",
+      topStation: null,
+      topObservationSummary: null,
+      topObservationObservedAt: null,
+      hasPartialMetadata: false,
+      caveats: [
+        "Vigicrues retrieval failed, so current hydrology context is unavailable and should not be treated as negative vessel evidence."
+      ]
+    }
+  };
+  const evidenceSummaryIrelandOpwContextSummary = {
+    sourceLine: "Ireland OPW Water Level: degraded | fixture/local | 2 nearby stations",
+    stationLines: [],
+    exportLines: [
+      "Ireland OPW Water Level: degraded | fixture/local | 2 nearby stations"
+    ],
+    metadata: {
+      sourceId: "ireland-opw-waterlevel",
+      sourceMode: "fixture",
+      health: "degraded",
+      nearbyStationCount: 2,
+      topStation: {
+        stationId: "opw-1",
+        stationName: "Ballyduff",
+        distanceKm: 0.7,
+        waterbody: "River Feale",
+        hydrometricArea: "Shannon Estuary South"
+      },
+      topObservationSummary: "Ballyduff | 1.42 m | River Feale",
+      topReadingAt: "2026-04-04T11:42:00Z",
+      hasPartialMetadata: true,
+      caveats: [
+        "Partial metadata degrades source-health confidence for this fixture review path."
+      ]
+    }
+  };
+  const evidenceSummarySourceHealthExportCoherenceSummary =
+    buildMarineSourceHealthExportCoherenceSummary({
+      noaaCoops: noaaContextSummary,
+      ndbc: ndbcContextSummary,
+      vigicrues: evidenceSummaryVigicruesContextSummary,
+      irelandOpw: evidenceSummaryIrelandOpwContextSummary,
+      netherlandsRwsWaterinfo: waterinfoContextSummary
+    });
+  const evidenceSummaryHydrologySourceHealthWorkflowSummary =
+    buildMarineHydrologySourceHealthWorkflowSummary(
+      evidenceSummarySourceHealthExportCoherenceSummary
+    );
+  const evidenceSummaryHydrologySourceHealthReportSummary =
+    buildMarineHydrologySourceHealthReportSummary(
+      evidenceSummaryHydrologySourceHealthWorkflowSummary
+    );
+  assert(
+    evidenceSummaryHydrologySourceHealthReportSummary?.posture === "limited",
+    "Limited marine source mix should classify hydrology/source-health report posture as limited."
+  );
+  assert(
+    evidenceSummaryHydrologySourceHealthReportSummary?.doesNotProveLines.some((line) =>
+      /vessel intent|wrongdoing/i.test(line)
+    ),
+    "Hydrology/source-health report should preserve no-intent/no-wrongdoing guardrails."
+  );
+  assert(
+    evidenceSummaryHydrologySourceHealthReportSummary?.metadata.vigicruesRow?.health === "unavailable",
+    "Hydrology/source-health report should preserve the limited Vigicrues row in degraded posture."
+  );
+  assert(
+    /vigicrues posture/i.test(
+      evidenceSummaryHydrologySourceHealthReportSummary?.metadata.vigicruesStatusLine ?? ""
+    ),
+    "Hydrology/source-health report should export a dedicated Vigicrues status line."
+  );
+
+  const broadHydrologySourceHealthReportSummary =
+    buildMarineHydrologySourceHealthReportSummary(
+      broadHydrologySourceHealthWorkflowSummary
+    );
+  assert(
+    broadHydrologySourceHealthReportSummary?.posture === "broad",
+    "Broad marine source mix should classify hydrology/source-health report posture as broad."
+  );
+  assert(
+    broadHydrologySourceHealthReportSummary?.metadata.vigicruesRow?.health === "loaded",
+    "Broad hydrology/source-health report should preserve a loaded Vigicrues row."
+  );
+
+  const emptyStaleHydrologySourceHealthWorkflowSummary =
+    buildMarineHydrologySourceHealthWorkflowSummary({
+      sourceLine: "Marine hydrology/source-health workflow: 3 sources | 0 loaded | 3 limited",
+      familyLines: [
+        {
+          family: "hydrology",
+          label: "Hydrology sources",
+          sourceCount: 2,
+          loadedSourceCount: 0,
+          limitedSourceCount: 2,
+          latestTimestampKnownCount: 1,
+          detail: "0/2 loaded | 2 limited | 1/2 latest timestamps known",
+          caveat: "Hydrology lines remain river/water-level context only."
+        },
+        {
+          family: "ocean-met",
+          label: "Ocean/met comparison sources",
+          sourceCount: 1,
+          loadedSourceCount: 0,
+          limitedSourceCount: 1,
+          latestTimestampKnownCount: 1,
+          detail: "0/1 loaded | 1 limited | 1/1 latest timestamps known",
+          caveat: "Ocean/met comparison lines remain oceanographic/meteorological context only."
+        }
+      ],
+      exportLines: [],
+      metadata: {
+        sourceCount: 3,
+        hydrologySourceCount: 2,
+        oceanMetSourceCount: 1,
+        loadedSourceCount: 0,
+        limitedSourceCount: 3,
+        latestTimestampKnownCount: 2,
+        rows: [
+          {
+            sourceId: "france-vigicrues-hydrometry",
+            label: "France Vigicrues Hydrometry",
+            category: "hydrology",
+            sourceMode: "fixture",
+            health: "stale",
+            evidenceBasis: "observed",
+            nearbyStationCount: 1,
+            exportedObservationCount: 1,
+            latestTimestampPosture: "latest hydrometry time 2026-04-01T03:00:00Z",
+            caveat: "Hydrology context is stale and should be treated as limited review support only."
+          },
+          {
+            sourceId: "ireland-opw-waterlevel",
+            label: "Ireland OPW Water Level",
+            category: "hydrology",
+            sourceMode: "fixture",
+            health: "empty",
+            evidenceBasis: "observed",
+            nearbyStationCount: 0,
+            exportedObservationCount: 0,
+            latestTimestampPosture: "latest water-level time unavailable",
+            caveat: "No nearby OPW stations matched the current marine review radius."
+          },
+          {
+            sourceId: "noaa-coops-tides-currents",
+            label: "NOAA CO-OPS",
+            category: "oceanographic",
+            sourceMode: "fixture",
+            health: "stale",
+            evidenceBasis: "observed",
+            nearbyStationCount: 1,
+            exportedObservationCount: 1,
+            latestTimestampPosture: "latest observed station time 2026-04-01T03:05:00Z",
+            caveat: "CO-OPS context is stale and remains oceanographic context only."
+          }
+        ],
+        caveats: [
+          "Marine hydrology/source-health workflow package summarizes current exported context-source posture only."
+        ]
+      }
+    });
+  const emptyStaleHydrologySourceHealthReportSummary =
+    buildMarineHydrologySourceHealthReportSummary(
+      emptyStaleHydrologySourceHealthWorkflowSummary
+    );
+  assert(
+    emptyStaleHydrologySourceHealthReportSummary?.posture === "empty-stale",
+    "Empty/stale marine source mix should classify hydrology/source-health report posture as empty-stale."
+  );
+  assert(
+    /empty\/stale context/i.test(emptyStaleHydrologySourceHealthReportSummary?.summaryLine ?? ""),
+    "Empty/stale hydrology/source-health report should preserve empty/stale wording."
+  );
+  assert(
+    emptyStaleHydrologySourceHealthReportSummary?.metadata.vigicruesRow?.health === "stale",
+    "Empty/stale hydrology/source-health report should preserve a stale Vigicrues row."
+  );
+  assert(
+    buildMarineHydrologySourceHealthReportSummary(null) === null,
+    "Missing-source marine source mix should not fabricate a hydrology/source-health report."
+  );
+  const broadCorridorReviewPackage = buildMarineCorridorReviewPackage({
+    chokepointReviewPackage: broadChokepointReviewPackage,
+    chokepointSummary,
+    activeNavigationTarget,
+    focusedEvidenceRows,
+    chokepointReviewContext,
+    contextSourceRegistrySummary: broadSourceRegistrySummary,
+    environmentalContextSummary: broadEnvironmentalContextSummary,
+    hydrologyContextSummary: broadHydrologyContextSummary,
+    hydrologySourceHealthReportSummary: broadHydrologySourceHealthReportSummary
+  });
+  const limitedCorridorReviewPackage = buildMarineCorridorReviewPackage({
+    chokepointReviewPackage: limitedChokepointReviewPackage,
+    chokepointSummary,
+    activeNavigationTarget,
+    focusedEvidenceRows,
+    chokepointReviewContext,
+    contextSourceRegistrySummary: limitedSourceRegistrySummary,
+    environmentalContextSummary: limitedEnvironmentalContextSummary,
+    hydrologyContextSummary: limitedHydrologyContextSummary,
+    hydrologySourceHealthReportSummary: evidenceSummaryHydrologySourceHealthReportSummary
+  });
+  const emptyNoMatchCorridorReviewPackage = buildMarineCorridorReviewPackage({
+    chokepointReviewPackage: broadChokepointReviewPackage,
+    chokepointSummary,
+    activeNavigationTarget,
+    focusedEvidenceRows,
+    chokepointReviewContext,
+    contextSourceRegistrySummary: {
+      rows: [
+        {
+          sourceId: "noaa-coops-tides-currents",
+          label: "NOAA CO-OPS",
+          category: "oceanographic",
+          sourceMode: "fixture",
+          health: "empty",
+          availability: "empty",
+          nearbyCount: 0,
+          activeCount: null,
+          topSummary: null,
+          caveats: ["No nearby CO-OPS stations matched the current corridor radius."],
+          evidenceBasis: "observed"
+        },
+        {
+          sourceId: "france-vigicrues-hydrometry",
+          label: "France Vigicrues Hydrometry",
+          category: "hydrology",
+          sourceMode: "fixture",
+          health: "stale",
+          availability: "empty",
+          nearbyCount: 0,
+          activeCount: null,
+          topSummary: null,
+          caveats: ["Hydrology observations are stale and should be treated as empty local corridor support."],
+          evidenceBasis: "observed"
+        }
+      ],
+      sourceCount: 2,
+      availableSourceCount: 0,
+      degradedSourceCount: 0,
+      unavailableSourceCount: 0,
+      fixtureSourceCount: 2,
+      disabledSourceCount: 0,
+      caveats: ["Marine context source registry summarizes availability only; it does not imply vessel behavior."],
+      exportLines: [],
+      metadata: {
+        rows: [
+          {
+            sourceId: "noaa-coops-tides-currents",
+            label: "NOAA CO-OPS",
+            category: "oceanographic",
+            sourceMode: "fixture",
+            health: "empty",
+            availability: "empty",
+            nearbyCount: 0,
+            activeCount: null,
+            topSummary: null,
+            caveats: ["No nearby CO-OPS stations matched the current corridor radius."],
+            evidenceBasis: "observed"
+          },
+          {
+            sourceId: "france-vigicrues-hydrometry",
+            label: "France Vigicrues Hydrometry",
+            category: "hydrology",
+            sourceMode: "fixture",
+            health: "stale",
+            availability: "empty",
+            nearbyCount: 0,
+            activeCount: null,
+            topSummary: null,
+            caveats: ["Hydrology observations are stale and should be treated as empty local corridor support."],
+            evidenceBasis: "observed"
+          }
+        ],
+        sourceCount: 2,
+        availableSourceCount: 0,
+        degradedSourceCount: 0,
+        unavailableSourceCount: 0,
+        fixtureSourceCount: 2,
+        disabledSourceCount: 0,
+        caveats: ["Marine context source registry summarizes availability only; it does not imply vessel behavior."]
+      }
+    },
+    environmentalContextSummary: limitedEnvironmentalContextSummary,
+    hydrologyContextSummary: {
+      ...limitedHydrologyContextSummary,
+      metadata: {
+        ...limitedHydrologyContextSummary.metadata,
+        loadedSourceCount: 0,
+        nearbyStationCount: 0,
+        healthSummary: "0/3 hydrology sources loaded; empty/stale corridor support"
+      }
+    },
+    hydrologySourceHealthReportSummary: emptyStaleHydrologySourceHealthReportSummary
+  });
+  const missingSourceCorridorReviewPackage = buildMarineCorridorReviewPackage({
+    chokepointReviewPackage: broadChokepointReviewPackage,
+    chokepointSummary,
+    activeNavigationTarget,
+    focusedEvidenceRows,
+    chokepointReviewContext,
+    contextSourceRegistrySummary: null,
+    environmentalContextSummary: null,
+    hydrologyContextSummary: null,
+    hydrologySourceHealthReportSummary: null
+  });
+  assert(
+    broadCorridorReviewPackage?.metadata.posture === "normal",
+    "Broad corridor review package should preserve normal posture."
+  );
+  assert(
+    limitedCorridorReviewPackage?.metadata.posture === "degraded",
+    "Limited corridor review package should preserve degraded posture."
+  );
+  assert(
+    emptyNoMatchCorridorReviewPackage?.metadata.posture === "empty-no-match",
+    "Empty/no-match corridor review package should preserve empty-no-match posture."
+  );
+  assert(
+    missingSourceCorridorReviewPackage?.metadata.posture === "missing-source",
+    "Missing-source corridor review package should preserve missing-source posture."
+  );
+  assert(
+    limitedCorridorReviewPackage?.doesNotProveLines.some((line) =>
+      /escort|wrongdoing|action need/i.test(line)
+    ),
+    "Corridor review package should preserve no-escort/no-wrongdoing/no-action guardrails."
+  );
+  assert(
+    limitedCorridorReviewPackage?.actLines.some((line) => /partial context|fixture\/local mode/i.test(line)),
+    "Corridor review package should preserve bounded review/export act lines."
+  );
+  assert(
+    limitedCorridorReviewPackage?.metadata.vigicruesRow?.health === "unavailable",
+    "Corridor review package should preserve the limited Vigicrues row."
+  );
+  assert(
+    /vigicrues corridor posture/i.test(limitedCorridorReviewPackage?.metadata.vigicruesStatusLine ?? ""),
+    "Corridor review package should export a dedicated Vigicrues corridor status line."
+  );
+  assert(
+    emptyNoMatchCorridorReviewPackage?.metadata.vigicruesRow?.health === "stale",
+    "Empty/no-match corridor review package should preserve a stale Vigicrues row."
+  );
+  assert(
+    missingSourceCorridorReviewPackage?.metadata.vigicruesRow === null,
+    "Missing-source corridor review package should not fabricate a Vigicrues row."
+  );
+  const fusionSnapshotInput = buildMarineFusionSnapshotInput({
+    attentionQueue: {
+      itemCount: 3,
+      topItem: {
+        type: "selected-vessel",
+        label: "Selected vessel attention priority"
+      }
+    },
+    focusedReplayEvidence: {
+      rowCount: focusedEvidenceRows.length,
+      caveats: focusedEvidenceRows
+        .map((row) => row.caveat)
+        .filter(Boolean)
+        .slice(0, 3)
+    },
+    focusedEvidenceInterpretation: {
+      trustLevel: focusedEvidenceInterpretation.trustLevel,
+      topCaveats: focusedEvidenceInterpretation.caveats.slice(0, 3)
+    },
+    sourceHealthExportCoherenceSummary: evidenceSummarySourceHealthExportCoherenceSummary,
+    hydrologySourceHealthReportSummary: evidenceSummaryHydrologySourceHealthReportSummary,
+    corridorReviewPackage: limitedCorridorReviewPackage,
+    chokepointReviewPackage,
+    contextFusionSummary: fusionSummary,
+    contextReviewReportSummary: reviewReport,
+    contextIssueQueueSummary: issueQueueSummary,
+    contextIssueExportBundle: issueExportBundle
+  });
+  assert(
+    fusionSnapshotInput?.metadata.sourceCount === sourceRegistrySummary.metadata.rows.length,
+    "Fusion snapshot input should preserve the current marine source-row count."
+  );
+  assert(
+    fusionSnapshotInput?.metadata.hydrologyPosture?.vigicruesStatusLine?.toLowerCase().includes("vigicrues posture"),
+    "Fusion snapshot input should preserve the Vigicrues-specific hydrology status line."
+  );
+  assert(
+    fusionSnapshotInput?.metadata.corridorPosture?.posture === "degraded",
+    "Fusion snapshot input should preserve degraded corridor posture in the limited source mix."
+  );
+  assert(
+    fusionSnapshotInput?.doesNotProveLines.some((line) =>
+      /intent|wrongdoing|action need/i.test(line)
+    ),
+    "Fusion snapshot input should preserve no-intent/no-wrongdoing/no-action guardrails."
+  );
+  const reportBriefPackage = buildMarineReportBriefPackage(fusionSnapshotInput);
+  assert(
+    reportBriefPackage?.observe.lines.length >= 2,
+    "Marine report brief package should preserve observe lines from the fusion snapshot input."
+  );
+  assert(
+    reportBriefPackage?.vigicruesWorkflowEvidenceLine?.toLowerCase().includes("vigicrues workflow evidence"),
+    "Marine report brief package should preserve an explicit Vigicrues workflow-evidence line."
+  );
+  assert(
+    reportBriefPackage?.waterinfoWorkflowEvidenceLine?.toLowerCase().includes("waterinfo workflow evidence"),
+    "Marine report brief package should preserve an explicit Waterinfo workflow-evidence line."
+  );
+  assert(
+    reportBriefPackage?.doesNotProveLines.some((line) =>
+      /intent|wrongdoing|action need/i.test(line)
+    ),
+    "Marine report brief package should preserve no-intent/no-wrongdoing/no-action guardrails."
+  );
+  const corridorSituationPackage = buildMarineCorridorSituationPackage({
+    fusionSnapshotInput,
+    reportBriefPackage,
+    chokepointReviewPackage
+  });
+  assert(
+    corridorSituationPackage?.metadata.posture === "degraded",
+    "Marine corridor situation package should preserve degraded corridor posture in the limited source mix."
+  );
+  assert(
+    corridorSituationPackage?.observe.some((line) => /Selected corridor:/i.test(line)),
+    "Marine corridor situation package should preserve selected corridor observe wording."
+  );
+  assert(
+    corridorSituationPackage?.explain.some((line) =>
+      /vigicrues workflow evidence|waterinfo workflow evidence/i.test(line)
+    ),
+    "Marine corridor situation package should preserve Vigicrues/Waterinfo workflow-evidence wording."
+  );
+  assert(
+    corridorSituationPackage?.doesNotProveLines.some((line) =>
+      /closure certainty|wrongdoing|action need/i.test(line)
+    ),
+    "Marine corridor situation package should preserve no-closure/no-wrongdoing/no-action guardrails."
+  );
+
   const evidenceSummary = buildMarineEvidenceSummary({
     selectedVesselSummary,
     viewportSummary,
@@ -2305,53 +2953,8 @@ function runRegression() {
     noaaContextSummary,
     ndbcContextSummary,
     scottishWaterContextSummary,
-    vigicruesContextSummary: {
-      sourceLine: "France Vigicrues Hydrometry: unavailable | fixture/local | 0 nearby stations",
-      stationLines: [],
-      exportLines: [
-        "France Vigicrues Hydrometry: unavailable | fixture/local | 0 nearby stations"
-      ],
-      metadata: {
-        sourceId: "france-vigicrues-hydrometry",
-        sourceMode: "fixture",
-        health: "unavailable",
-        nearbyStationCount: 0,
-        parameterFilter: "all",
-        topStation: null,
-        topObservationSummary: null,
-        topObservationObservedAt: null,
-        hasPartialMetadata: false,
-        caveats: [
-          "Vigicrues retrieval failed, so current hydrology context is unavailable and should not be treated as negative vessel evidence."
-        ]
-      }
-    },
-    irelandOpwContextSummary: {
-      sourceLine: "Ireland OPW Water Level: degraded | fixture/local | 2 nearby stations",
-      stationLines: [],
-      exportLines: [
-        "Ireland OPW Water Level: degraded | fixture/local | 2 nearby stations"
-      ],
-      metadata: {
-        sourceId: "ireland-opw-waterlevel",
-        sourceMode: "fixture",
-        health: "degraded",
-        nearbyStationCount: 2,
-        topStation: {
-          stationId: "opw-1",
-          stationName: "Ballyduff",
-          distanceKm: 0.7,
-          waterbody: "River Feale",
-          hydrometricArea: "Shannon Estuary South"
-        },
-        topObservationSummary: "Ballyduff | 1.42 m | River Feale",
-        topReadingAt: "2026-04-04T11:42:00Z",
-        hasPartialMetadata: true,
-        caveats: [
-          "Partial metadata degrades source-health confidence for this fixture review path."
-        ]
-      }
-    },
+    vigicruesContextSummary: evidenceSummaryVigicruesContextSummary,
+    irelandOpwContextSummary: evidenceSummaryIrelandOpwContextSummary,
     netherlandsRwsWaterinfoContextSummary: waterinfoContextSummary,
     hydrologyContextSummary,
     contextFusionSummary: fusionSummary,
@@ -2371,6 +2974,34 @@ function runRegression() {
   assert(marineMetadata.contextIssueQueue, "Marine evidence summary should export context issue queue metadata.");
   assert(marineMetadata.contextIssueExportBundle, "Marine evidence summary should export context issue-export metadata.");
   assert(marineMetadata.hydrologyContext, "Marine evidence summary should export hydrology metadata.");
+  assert(
+    marineMetadata.sourceHealthExportCoherence,
+    "Marine evidence summary should export source-health export coherence metadata."
+  );
+  assert(
+    marineMetadata.hydrologySourceHealthWorkflow,
+    "Marine evidence summary should export hydrology/source-health workflow metadata."
+  );
+  assert(
+    marineMetadata.hydrologySourceHealthReport,
+    "Marine evidence summary should export hydrology/source-health report metadata."
+  );
+  assert(
+    marineMetadata.corridorReviewPackage,
+    "Marine evidence summary should export corridor review package metadata."
+  );
+  assert(
+    marineMetadata.fusionSnapshotInput,
+    "Marine evidence summary should export fusion snapshot input metadata."
+  );
+  assert(
+    marineMetadata.reportBriefPackage,
+    "Marine evidence summary should export report-brief package metadata."
+  );
+  assert(
+    marineMetadata.corridorSituationPackage,
+    "Marine evidence summary should export corridor-situation package metadata."
+  );
   assert(
     marineMetadata.netherlandsRwsWaterinfoContext,
     "Marine evidence summary should export Netherlands RWS Waterinfo metadata."
@@ -2395,6 +3026,190 @@ function runRegression() {
   assert(
     JSON.stringify(marineMetadata.contextIssueExportBundle) === JSON.stringify(issueExportBundle.metadata),
     "Marine evidence summary should preserve issue-export metadata without drift."
+  );
+  assert(
+    JSON.stringify(marineMetadata.sourceHealthExportCoherence) ===
+      JSON.stringify(evidenceSummarySourceHealthExportCoherenceSummary?.metadata ?? null),
+    "Marine evidence summary should preserve source-health export coherence metadata without drift."
+  );
+  assert(
+    JSON.stringify(marineMetadata.hydrologySourceHealthWorkflow) ===
+      JSON.stringify(evidenceSummaryHydrologySourceHealthWorkflowSummary?.metadata ?? null),
+    "Marine evidence summary should preserve hydrology/source-health workflow metadata without drift."
+  );
+  assert(
+    JSON.stringify(marineMetadata.hydrologySourceHealthReport) ===
+      JSON.stringify(evidenceSummaryHydrologySourceHealthReportSummary?.metadata ?? null),
+    "Marine evidence summary should preserve hydrology/source-health report metadata without drift."
+  );
+  assert(
+    JSON.stringify(marineMetadata.corridorReviewPackage) ===
+      JSON.stringify(
+        buildMarineCorridorReviewPackage({
+          chokepointReviewPackage,
+          chokepointSummary,
+          activeNavigationTarget,
+          focusedEvidenceRows,
+          chokepointReviewContext,
+          contextSourceRegistrySummary: sourceRegistrySummary,
+          environmentalContextSummary,
+          hydrologyContextSummary,
+          hydrologySourceHealthReportSummary: evidenceSummaryHydrologySourceHealthReportSummary
+        })?.metadata ?? null
+      ),
+    "Marine evidence summary should preserve corridor review package metadata without drift."
+  );
+  assert(
+    marineMetadata.fusionSnapshotInput.summaryLine === fusionSnapshotInput?.metadata.summaryLine,
+    "Marine evidence summary should preserve fusion snapshot input summary text."
+  );
+  assert(
+    marineMetadata.fusionSnapshotInput.sourceCount === fusionSnapshotInput?.metadata.sourceCount,
+    "Marine evidence summary should preserve fusion snapshot input source count."
+  );
+  assert(
+    marineMetadata.fusionSnapshotInput.warningCount === fusionSnapshotInput?.metadata.warningCount,
+    "Marine evidence summary should preserve fusion snapshot input warning count."
+  );
+  assert(
+    marineMetadata.fusionSnapshotInput.contextGapCount === fusionSnapshotInput?.metadata.contextGapCount,
+    "Marine evidence summary should preserve fusion snapshot input context-gap count."
+  );
+  assert(
+    /Marine report brief:/i.test(marineMetadata.reportBriefPackage.summaryLine ?? ""),
+    "Marine evidence summary should preserve report-brief summary wording."
+  );
+  assert(
+    marineMetadata.reportBriefPackage.warningCount === reportBriefPackage?.metadata.warningCount,
+    "Marine evidence summary should preserve report-brief warning count."
+  );
+  assert(
+    /vigicrues workflow evidence/i.test(
+      marineMetadata.reportBriefPackage.vigicruesWorkflowEvidenceLine ?? ""
+    ),
+    "Marine evidence summary should preserve the Vigicrues workflow-evidence line."
+  );
+  assert(
+    /waterinfo workflow evidence/i.test(
+      marineMetadata.reportBriefPackage.waterinfoWorkflowEvidenceLine ?? ""
+    ),
+    "Marine evidence summary should preserve the Waterinfo workflow-evidence line."
+  );
+  assert(
+    /Marine corridor situation:/i.test(marineMetadata.corridorSituationPackage.summaryLine ?? ""),
+    "Marine evidence summary should preserve corridor-situation summary wording."
+  );
+  assert(
+    marineMetadata.corridorSituationPackage.posture === corridorSituationPackage?.metadata.posture,
+    "Marine evidence summary should preserve corridor-situation posture."
+  );
+  assert(
+    /vigicrues workflow evidence/i.test(
+      marineMetadata.corridorSituationPackage.vigicruesWorkflowEvidenceLine ?? ""
+    ),
+    "Marine evidence summary should preserve Vigicrues workflow-evidence wording in corridor-situation metadata."
+  );
+  assert(
+    /waterinfo workflow evidence/i.test(
+      marineMetadata.corridorSituationPackage.waterinfoWorkflowEvidenceLine ?? ""
+    ),
+    "Marine evidence summary should preserve Waterinfo workflow-evidence wording in corridor-situation metadata."
+  );
+  assert(
+    marineMetadata.hydrologySourceHealthWorkflow.familyLines.some(
+      (line) => line.family === "hydrology" && line.sourceCount === 3
+    ),
+    "Marine evidence summary should preserve hydrology family counts in the workflow package."
+  );
+  assert(
+    marineMetadata.hydrologySourceHealthReport.posture === "limited",
+    "Marine evidence summary should preserve limited posture in the hydrology/source-health report."
+  );
+  assert(
+    marineMetadata.hydrologySourceHealthReport.rows.some(
+      (row) => row.sourceId === "netherlands-rws-waterinfo" && row.family === "hydrology"
+    ),
+    "Marine evidence summary should preserve Waterinfo row family classification in the hydrology/source-health report."
+  );
+  assert(
+    marineMetadata.hydrologySourceHealthReport.doesNotProveLines.some((line) =>
+      /vessel intent|wrongdoing/i.test(line)
+    ),
+    "Marine evidence summary should preserve no-intent/no-wrongdoing guardrails in the hydrology/source-health report."
+  );
+  assert(
+    marineMetadata.hydrologySourceHealthReport.vigicruesRow?.health === "unavailable",
+    "Marine evidence summary should preserve the Vigicrues row in hydrology/source-health report metadata."
+  );
+  assert(
+    marineMetadata.corridorReviewPackage.posture === "degraded",
+    "Marine evidence summary should preserve degraded posture in the corridor review package."
+  );
+  assert(
+    marineMetadata.corridorReviewPackage.sourceRows.some(
+      (row) => row.sourceId === "scottish-water-overflows" && row.evidenceBasis === "contextual"
+    ),
+    "Marine evidence summary should preserve Scottish Water contextual basis in the corridor review package."
+  );
+  assert(
+    marineMetadata.corridorReviewPackage.doesNotProveLines.some((line) =>
+      /escort|wrongdoing|action need/i.test(line)
+    ),
+    "Marine evidence summary should preserve no-escort/no-wrongdoing/no-action guardrails in the corridor review package."
+  );
+  assert(
+    marineMetadata.corridorReviewPackage.vigicruesRow?.health === "unavailable",
+    "Marine evidence summary should preserve the Vigicrues row in corridor review package metadata."
+  );
+  assert(
+    marineMetadata.fusionSnapshotInput.summaryLine.toLowerCase().includes("marine fusion snapshot input"),
+    "Marine evidence summary should preserve the fusion snapshot input summary line."
+  );
+  assert(
+    marineMetadata.fusionSnapshotInput.sourceRows.some(
+      (row) => row.sourceId === "scottish-water-overflows" && row.evidenceBasis === "contextual"
+    ),
+    "Marine evidence summary should preserve Scottish Water contextual basis in the fusion snapshot input."
+  );
+  assert(
+    marineMetadata.fusionSnapshotInput.hydrologyPosture?.vigicruesStatusLine?.toLowerCase().includes("vigicrues posture"),
+    "Marine evidence summary should preserve the Vigicrues hydrology posture line in fusion snapshot input metadata."
+  );
+  assert(
+    marineMetadata.fusionSnapshotInput.doesNotProveLines.some((line) =>
+      /intent|wrongdoing|action need/i.test(line)
+    ),
+    "Marine evidence summary should preserve no-intent/no-wrongdoing/no-action guardrails in fusion snapshot input metadata."
+  );
+  assert(
+    marineMetadata.reportBriefPackage.observe.lines.some((line) =>
+      /Replay posture:/i.test(line)
+    ),
+    "Marine evidence summary should preserve replay posture inside report-brief observe lines."
+  );
+  assert(
+    marineMetadata.reportBriefPackage.explain.lines.some((line) =>
+      /vigicrues workflow evidence|waterinfo workflow evidence/i.test(line)
+    ),
+    "Marine evidence summary should preserve workflow-evidence lines inside report-brief explain lines."
+  );
+  assert(
+    marineMetadata.reportBriefPackage.doesNotProveLines.some((line) =>
+      /wrongdoing|action need/i.test(line)
+    ),
+    "Marine evidence summary should preserve no-wrongdoing/no-action guardrails in report-brief metadata."
+  );
+  assert(
+    marineMetadata.corridorSituationPackage.observe.some((line) =>
+      /Selected corridor:|Replay posture:/i.test(line)
+    ),
+    "Marine evidence summary should preserve observe lines in corridor-situation metadata."
+  );
+  assert(
+    marineMetadata.corridorSituationPackage.doesNotProveLines.some((line) =>
+      /closure certainty|wrongdoing|action need/i.test(line)
+    ),
+    "Marine evidence summary should preserve no-closure/no-wrongdoing/no-action guardrails in corridor-situation metadata."
   );
   assert(
     JSON.stringify(marineMetadata.netherlandsRwsWaterinfoContext) ===
@@ -2490,8 +3305,8 @@ function runRegression() {
   );
   assert(
     marineMetadata.contextIssueExportBundle.rows.filter((row) => row.category === "hydrology")
-      .length === 2,
-    "Issue export bundle should preserve two hydrology rows."
+      .length === 3,
+    "Issue export bundle should preserve three hydrology rows."
   );
   assert(
     new Set(marineMetadata.contextIssueExportBundle.rows.map((row) => row.category)).size === 4,
@@ -2544,6 +3359,22 @@ function runRegression() {
   assert(
     evidenceSummary.displayLines.some((line) => /Marine source-health export: partial context/i.test(line)),
     "Evidence summary display lines should preserve issue-export partial-context wording."
+  );
+  assert(
+    evidenceSummary.displayLines.some((line) => /Marine hydrology\/source-health report: partial context/i.test(line)),
+    "Evidence summary display lines should preserve hydrology/source-health report wording."
+  );
+  assert(
+    evidenceSummary.displayLines.some((line) => /Marine fusion snapshot input: partial context/i.test(line)),
+    "Evidence summary display lines should preserve fusion snapshot input wording."
+  );
+  assert(
+    evidenceSummary.displayLines.some((line) => /Marine report brief:/i.test(line)),
+    "Evidence summary display lines should preserve report-brief wording."
+  );
+  assert(
+    evidenceSummary.displayLines.some((line) => /Marine corridor situation:/i.test(line)),
+    "Evidence summary display lines should preserve corridor-situation wording."
   );
   assert(
     evidenceSummary.displayLines.some((line) => /Marine chokepoint review: Hormuz-style bounded corridor review/i.test(line)),

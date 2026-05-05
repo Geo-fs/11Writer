@@ -10,6 +10,7 @@ Use this together with:
 - `app/docs/active-agent-worktree.md`
 - `app/docs/commit-groups.current.md`
 - `app/docs/validation-matrix.md`
+- `app/docs/source-fusion-reporting-input-inventory.md`
 
 This is a release-readiness gate, not a commit authorization by itself.
 
@@ -53,9 +54,31 @@ Interpretation:
 
 Latest verified local status on this Windows machine:
 
+- `python -m compileall app/server/src`: passed in the latest `2026-05-05 10:22 America/Chicago` Connect checkpoint
+- `cmd /c npm.cmd run lint`: passed in the latest `2026-05-05 10:22 America/Chicago` Connect checkpoint
+- `cmd /c npm.cmd run build`: passed in the latest `2026-05-05 10:22 America/Chicago` Connect checkpoint
+- `cmd /c npm.cmd run test:reporting-loop-package-contract`: passed in the latest `2026-05-05 10:22 America/Chicago` Connect checkpoint
+- `python -m pytest app/server/tests/test_environmental_fusion_snapshot_input.py -q`: passed in the latest `2026-05-05 10:22 America/Chicago` Connect checkpoint
+- `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`: passed in the latest `2026-05-05 10:22 America/Chicago` Connect checkpoint
+- `python -m compileall app/server/src`: passed in the latest `2026-05-04 23:26 America/Chicago` Connect checkpoint
+- `cmd /c npm.cmd run lint`: passed in the latest `2026-05-04 23:26 America/Chicago` Connect checkpoint
+- `cmd /c npm.cmd run build`: passed in the latest `2026-05-04 23:26 America/Chicago` Connect checkpoint
+- `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`: passed in the latest `2026-05-04 23:26 America/Chicago` Connect checkpoint
+- `python -m compileall app/server/src`: passed in the latest `2026-05-04 22:59 America/Chicago` Connect checkpoint
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`: passed with `76` tests in the latest `2026-05-04 22:59 America/Chicago` Connect checkpoint
+- `cmd /c npm.cmd run lint`: passed in the latest `2026-05-04 22:59 America/Chicago` Connect checkpoint
+- `cmd /c npm.cmd run build`: passed in the latest `2026-05-04 22:59 America/Chicago` Connect checkpoint
+- `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`: passed in the latest `2026-05-04 22:59 America/Chicago` Connect checkpoint
+- `python -m compileall app/server/src`: passed in the latest `2026-05-04 22:01 America/Chicago` Connect checkpoint
+- `cmd /c npm.cmd run lint`: passed in the latest `2026-05-04 22:01 America/Chicago` Connect checkpoint
+- `cmd /c npm.cmd run build`: passed in the latest `2026-05-04 22:01 America/Chicago` Connect checkpoint
+- `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`: passed in the latest `2026-05-04 22:01 America/Chicago` Connect checkpoint
 - `python -m compileall app/server/src`: passed
-- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`: passed with `26` tests and `378` Pydantic warnings
-- `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`: passed with `21` tests and `45` Pydantic warnings and includes the current Wave LLM capability, review, fixture-execution, gated-ollama, forbidden-action boundary checks
+- `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py -q`: passed with `52` tests
+- `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_netherlands_rws_waterinfo.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q`: passed with `71` tests
+- `cmd /c npm.cmd run test:marine-context-helpers`: passed
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`: passed with `28` tests
+- `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`: passed with `26` tests and includes the current Wave LLM capability, review, fixture-execution, mock-provider, gated-live-provider, and forbidden-action boundary checks
 - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q`: passed with `29` tests
 - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`: passed
 - `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q`: passed
@@ -82,6 +105,307 @@ Interpret this correctly:
 Current checkpoint summary:
 
 - the current broad validation surface is green enough to continue Phase 2 acceleration work
+- latest Connect pass for assignment `2026-05-05 09:47 America/Chicago` observed:
+- latest Connect pass for assignment `2026-05-05 10:22 America/Chicago` observed:
+  - the assigned reporting-loop compatibility surface is green, including:
+    - `python -m compileall app/server/src`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `cmd /c npm.cmd run test:reporting-loop-package-contract`
+    - `python -m pytest app/server/tests/test_environmental_fusion_snapshot_input.py -q`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - latest live dirty-tree posture at checkpoint start:
+    - `modified=118`
+    - `untracked=89`
+    - `shared-high-collision: 10`
+    - `unknown: 35`
+  - alerts posture:
+    - `python scripts/alerts_ledger.py --json` reported `5` open low-priority alerts
+    - ownership:
+      - `Atlas AI: 4`
+      - `Manager AI: 1`
+  - reporting-loop package truth:
+    - the neutral contract now distinguishes:
+      - first-class fusion-snapshot inputs and report-brief packages
+      - adjacent reporting/support packages
+    - the focused client regression now validates:
+      - Aerospace fusion snapshot
+      - Aerospace report brief
+      - Aerospace VAAC advisory report package
+      - Data AI fusion snapshot
+      - Data AI report brief
+      - Marine fusion snapshot
+      - Marine report brief
+    - backend environmental fusion snapshot input remains a first-class server-side peer and passed its dedicated route test
+    - backend webcam sandbox/source-ops reporting helpers remain adjacent reporting/support surfaces, not first-class reporting-loop peers
+  - peer/runtime boundary truth:
+    - Atlas media geolocation remains derived-evidence and candidate-location scaffolding only
+    - Wonder Statuspage and Mastodon discovery remain bounded public-discovery/runtime surfaces only
+  - current release-readiness recommendation:
+    - validation is green, but the tree is still not consolidation-ready for blind staging
+    - the top manual consolidation-review files remain:
+      - `app/client/src/features/app-shell/AppShell.tsx`
+      - `app/client/src/features/inspector/InspectorPanel.tsx`
+      - `app/client/src/lib/queries.ts`
+      - `app/server/src/config/settings.py`
+      - `app/server/src/types/api.py`
+- latest Connect pass for assignment `2026-05-05 09:47 America/Chicago` observed:
+  - the assigned reporting-loop compatibility surface is green, including:
+    - `python -m compileall app/server/src`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `cmd /c npm.cmd run test:reporting-loop-package-contract`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - latest live dirty-tree posture at checkpoint start:
+    - `modified=118`
+    - `untracked=79`
+    - `shared-high-collision: 10`
+    - `unknown: 32`
+  - alerts posture:
+    - `python scripts/alerts_ledger.py --json` reported `6` open low-priority alerts
+    - ownership:
+      - `Atlas AI: 4`
+      - `Manager AI: 2`
+  - reporting-loop package truth:
+    - `app/docs/reporting-loop-package-contract.md` now records a neutral compatibility contract for fusion-snapshot inputs and report-brief packages
+    - the focused client regression validates Aerospace, Data AI, and Marine against that minimum contract
+    - backend environmental fusion snapshot input remains covered by `app/server/tests/test_environmental_fusion_snapshot_input.py`
+  - current release-readiness recommendation:
+    - validation is green, but the tree is still not consolidation-ready for blind staging
+    - the top manual consolidation-review files remain:
+      - `app/client/src/features/app-shell/AppShell.tsx`
+      - `app/client/src/features/inspector/InspectorPanel.tsx`
+      - `app/client/src/lib/queries.ts`
+      - `app/server/src/config/settings.py`
+      - `app/server/src/types/api.py`
+- latest Connect pass for assignment `2026-05-04 23:26 America/Chicago` observed:
+  - the assigned fusion/reporting-input validation surface is green, including:
+    - `python -m compileall app/server/src`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - latest live dirty-tree posture at checkpoint start:
+    - `modified=117`
+    - `untracked=50`
+    - `shared-high-collision: 10`
+    - `unknown: 24`
+  - alerts posture:
+    - `python scripts/alerts_ledger.py --json` reported `4` open low-priority alerts
+    - ownership:
+      - `Atlas AI: 2`
+      - `Manager AI: 2`
+    - these are coordination-state alerts, not validation blockers
+  - release dry-run posture:
+    - `python scripts/release_dry_run.py --json` returned advisory red flags and a nonzero exit
+    - current red flags remain heuristic secret-pattern matches in provider/settings/test files, not proof that live secrets were exposed
+    - no junk or generated-artifact red flags were reported
+  - current reporting-input readiness truth:
+    - Aerospace, Data AI, Marine, and Base Earth reference context now all have real bounded reporting/fusion-input surfaces recorded in `app/docs/source-fusion-reporting-input-inventory.md`
+    - the high-collision shared frontend and shared API files remain manual-review debt, not lane-local commit material
+    - Source Discovery, Wave LLM, media evidence, and analyst workbench remain implemented shared runtime/review infrastructure, but still should be described as bounded runtime-boundary surfaces rather than full reporting-desk proof
+  - stale blocker truth:
+    - the stale-vs-real `AppShell.tsx` mismatch pattern reported by Data AI did not reproduce in the live tree for this assignment
+  - stale source-routing truth:
+    - `propublica`, `global-voices`, `geonet-geohazards`, and `hko-open-weather` are not valid fresh next-wave source suggestions where repo truth already shows implementation or superseded routing
+  - current release-readiness recommendation:
+    - validation is green, but the tree is still not consolidation-ready for blind staging
+    - the top manual consolidation-review files remain:
+      - `app/client/src/features/app-shell/AppShell.tsx`
+      - `app/client/src/features/inspector/InspectorPanel.tsx`
+      - `app/client/src/lib/queries.ts`
+      - `app/server/src/config/settings.py`
+      - `app/server/src/types/api.py`
+- latest Connect pass for assignment `2026-05-04 22:59 America/Chicago` observed:
+  - the assigned shared-runtime plus consolidation-readiness validation surface is green, including:
+    - `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+    - `python -m compileall app/server/src`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - latest live dirty-tree posture at checkpoint start:
+    - `modified=116`
+    - `untracked=48`
+    - `shared-high-collision: 10`
+    - `unknown: 27`
+  - alerts posture:
+    - `python scripts/alerts_ledger.py --json` reported `2` open low-priority `Atlas AI` alerts
+    - these are coordination-state alerts, not validation blockers
+  - release dry-run posture:
+    - `python scripts/release_dry_run.py --json` returned advisory red flags and a nonzero exit
+    - current red flags remain heuristic secret-pattern matches in provider/settings/test files, not proof that live secrets were exposed
+    - no junk or generated-artifact red flags were reported
+  - transient runtime-failure truth:
+    - one earlier scheduler-response validation failure appeared once during the same assignment with `publicDiscoveryJobsCompleted` reported missing
+    - direct route and service inspection showed the current tree already returns that field
+    - the full runtime suite then reran cleanly with no source edit
+    - treat that earlier failure as stale or concurrent-tree drift, not as a current release blocker
+  - current shared-runtime readiness truth:
+    - Source Discovery now has real bounded structure-scan, public-discovery, knowledge-backfill, review-claim import/apply, and media fetch/OCR/interpret surfaces
+    - Wave LLM provider configuration and runtime gating are implemented and validated as bounded review infrastructure, not autonomous source truth
+    - reviewed-claim application, provider execution, and media interpretation all remain explicit, gated, and caveated rather than auto-applied
+  - current release-readiness recommendation:
+    - validation is green, but the tree is still not consolidation-ready for blind staging
+    - older packet/history docs that still route `propublica` or `global-voices` as fresh Data AI next-wave work should be treated as superseded planning artifacts
+    - the top manual consolidation-review files remain:
+      - `app/client/src/features/app-shell/AppShell.tsx`
+      - `app/client/src/features/inspector/InspectorPanel.tsx`
+      - `app/client/src/lib/queries.ts`
+      - `app/server/src/config/settings.py`
+      - `app/server/src/types/api.py`
+- latest Connect pass for assignment `2026-05-04 22:11 America/Chicago` observed:
+  - the assigned shared-surface consolidation validation surface is green, including:
+    - `python -m compileall app/server/src`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - latest live dirty-tree posture at checkpoint start:
+    - `modified=105`
+    - `untracked=36`
+    - `shared-high-collision: 10`
+    - `unknown: 21`
+  - alerts posture:
+    - `python scripts/alerts_ledger.py --json` reported `2` open low-priority alerts
+    - these are coordination-state alerts, not validation blockers
+  - release dry-run posture:
+    - `python scripts/release_dry_run.py --json` returned advisory red flags and a nonzero exit
+    - current red flags remain heuristic secret-pattern matches in provider/settings/test files, not proof that live secrets were exposed
+    - no junk or generated-artifact red flags were reported
+  - shared deconfliction truth:
+    - several “future” surfaces are already occupied in shared files and should not be rebuilt as fresh helpers without reconciling the current implementations first:
+      - aerospace evidence timeline, workflow validation snapshot, context review/export bundles, export coherence, issue export bundle, and source readiness bundle
+      - webcam candidate network summary, review queue, review queue export bundle, and source lifecycle summary
+      - environmental source health and Canada/weather review queue packages
+      - Data AI review queue, Source Discovery review queue, Wave LLM review queue, and analyst evidence timeline/source-readiness responses
+  - current release-readiness recommendation:
+    - validation is green, but the tree is still not consolidation-ready for blind staging
+    - the top manual consolidation-review files remain:
+      - `app/client/src/features/app-shell/AppShell.tsx`
+      - `app/client/src/features/inspector/InspectorPanel.tsx`
+      - `app/client/src/lib/queries.ts`
+      - `app/server/src/config/settings.py`
+      - `app/server/src/types/api.py`
+- latest Connect pass for assignment `2026-05-04 22:01 America/Chicago` observed:
+  - the assigned consolidation-readiness validation surface is green on rerun, including:
+    - `python -m compileall app/server/src`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - latest live dirty-tree posture at checkpoint start:
+    - `modified=99`
+    - `untracked=26`
+    - `shared-high-collision: 10`
+    - `unknown: 21`
+  - release dry-run posture:
+    - `python scripts/release_dry_run.py --json` returned advisory red flags and a nonzero exit
+    - current red flags remain heuristic secret-pattern matches in provider/settings/test files, not proof that live secrets were exposed
+    - no junk or generated-artifact red flags were reported
+  - transient blocker truth:
+    - one earlier build attempt reported `AppShell.tsx(1421,9)` with `TS18004` for `vaacSummary`
+    - immediate inspection showed the current tree already used `vaacSummary: vaacContextSummary`
+    - lint and build both passed on rerun without any source edit
+    - treat that error as stale or concurrent-tree drift, not as a current repo-wide blocker
+  - current release-readiness recommendation:
+    - the tree is not consolidation-ready for blind staging
+    - validation is green, but the current mixed-tree posture plus 10 high-collision files still requires manual grouping and hunk review
+    - the top manual consolidation-review files remain:
+      - `app/client/src/features/app-shell/AppShell.tsx`
+      - `app/client/src/features/inspector/InspectorPanel.tsx`
+      - `app/client/src/lib/queries.ts`
+      - `app/server/src/config/settings.py`
+      - `app/server/src/types/api.py`
+- latest Connect pass for assignment `2026-05-04 21:52 America/Chicago` observed:
+  - no repo-wide blocker reproduced
+  - the assigned consolidation-readiness validation surface is green, including:
+    - `python -m compileall app/server/src`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - latest live dirty-tree posture at checkpoint start:
+    - `modified=88`
+    - `untracked=20`
+    - `shared-high-collision: 10`
+    - `unknown: 12`
+  - release dry-run posture:
+    - `python scripts/release_dry_run.py --json` returned advisory red flags and a nonzero exit
+    - current red flags are heuristic secret-pattern matches in provider/settings/test files, not evidence that real secrets were exposed in this sweep
+    - no junk or generated-artifact red flags were reported
+  - current release-readiness recommendation:
+    - the tree is not consolidation-ready for blind staging
+    - the `2026-05-04 21:43` Connect checkpoint now has a clear final report near the top of the progress doc
+    - scanner ambiguity was reduced materially, but the remaining `unknown` group still contains genuinely shared Source Discovery and Wave LLM runtime surfaces
+    - the top manual consolidation-review files remain:
+      - `app/client/src/features/app-shell/AppShell.tsx`
+      - `app/client/src/features/inspector/InspectorPanel.tsx`
+      - `app/client/src/lib/queries.ts`
+      - `app/server/src/config/settings.py`
+      - `app/server/src/types/api.py`
+- latest Connect pass for assignment `2026-05-04 21:43 America/Chicago` observed:
+  - no repo-wide blocker reproduced
+  - the assigned operator-console plus Marine/helper validation surface is green, including:
+    - `python -m compileall app/server/src`
+    - `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py -q`
+    - `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_netherlands_rws_waterinfo.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q`
+    - `cmd /c npm.cmd run test:marine-context-helpers`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - latest live dirty-tree posture at checkpoint start:
+    - `modified=85`
+    - `untracked=17`
+    - `shared-high-collision: 10`
+    - `unknown: 19`
+  - current release-readiness recommendation:
+    - the reported Marine lint blocker did not reproduce
+    - the Atlas runtime operator console slice is partially validated at the shared-boundary level:
+      - runtime path resolver exists
+      - Source Discovery runtime action routes exist
+      - Wave LLM review listing route exists
+      - client operator console imports and builds
+      - no dedicated operator end-to-end test exists in this sweep
+    - the extensionless and `.js` Marine helper artifacts are currently harmless and should not be deleted blindly
+    - the current tree is mixed again, so this is a green integration checkpoint, not commit authorization
+    - the open-alert ledger remains clean with `0` open alerts
+- latest Connect pass for assignment `2026-05-04 21:06 America/Chicago` observed:
+  - no repo-wide blocker reproduced
+  - the assigned Marine/client-helper validation surface is green, including:
+    - `python -m compileall app/server/src`
+    - `python -m pytest app/server/tests/test_marine_contracts.py app/server/tests/test_netherlands_rws_waterinfo.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q`
+    - `cmd /c npm.cmd run test:marine-context-helpers`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - latest live dirty-tree posture at checkpoint start:
+    - `modified=9`
+    - `untracked=0`
+    - `shared-high-collision: 0`
+    - `unknown: 0`
+  - current release-readiness recommendation:
+    - the current Marine helper/export coherence slice is not producing repo-wide build, lint, or type drift
+    - the visible dirty tree is currently low-collision and mostly coordination-doc focused
+    - the tree is still dirty, so this is not commit authorization by itself, but current integration risk is low
+    - the open-alert ledger remains clean with `0` open alerts
+- latest Connect pass for assignment `2026-05-02 15:45 America/Chicago` observed:
+  - no repo-wide blocker reproduced
+  - the assigned runtime-provider validation surface is green, including:
+    - `python -m compileall app/server/src`
+    - `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+    - `python -m pytest app/server/tests/test_wave_monitor.py app/server/tests/test_analyst_workbench.py -q`
+    - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - latest live dirty-tree posture at checkpoint start:
+    - `modified=9`
+    - `untracked=0`
+    - `shared-high-collision: 0`
+    - `unknown: 0`
+  - current release-readiness recommendation:
+    - the new provider/runtime slice is validated as bounded review infrastructure, not autonomous source operations
+    - capability responses disclose configuration presence by key-source name only and do not expose secret values
+    - live OpenAI, OpenRouter, Anthropic, xAI, Google, OpenClaw, and Ollama execution remain gated by provider config, positive request budget, and explicit network permission
+    - mock-model execution paths keep provider tests deterministic and do not require live network calls
+    - provider output remains review metadata and cannot promote sources, validate claims, change source truth, activate connectors, or create direct action guidance
+    - the open-alert ledger remains clean with `0` open alerts
 - latest Connect pass for assignment `2026-05-02 12:27 America/Chicago` observed:
   - no repo-wide blocker reproduced
   - the assigned ten-step runtime-boundary validation surface is green, including:

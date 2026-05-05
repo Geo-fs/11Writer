@@ -9,6 +9,11 @@ class Settings(BaseSettings):
 
     app_env: str = Field(default="development", alias="APP_ENV")
     app_runtime_mode: str = Field(default="desktop-sidecar", alias="APP_RUNTIME_MODE")
+    app_resource_dir: str | None = Field(default=None, alias="APP_RESOURCE_DIR")
+    app_user_data_dir: str | None = Field(default=None, alias="APP_USER_DATA_DIR")
+    app_log_dir: str | None = Field(default=None, alias="APP_LOG_DIR")
+    app_cache_dir: str | None = Field(default=None, alias="APP_CACHE_DIR")
+    app_runtime_service_dir: str | None = Field(default=None, alias="APP_RUNTIME_SERVICE_DIR")
     app_cors_origins: str = Field(default="http://localhost:5173", alias="APP_CORS_ORIGINS")
     google_maps_api_key: str | None = Field(default=None, alias="GOOGLE_MAPS_API_KEY")
     cache_ttl_seconds: int = Field(default=60, alias="CACHE_TTL_SECONDS")
@@ -100,6 +105,30 @@ class Settings(BaseSettings):
     fingal_traffic_cameras_fixture_path: str = Field(
         default="./app/server/data/fingal_traffic_cameras_fixture.json",
         alias="FINGAL_TRAFFIC_CAMERAS_FIXTURE_PATH",
+    )
+    baton_rouge_traffic_cameras_mode: str = Field(
+        default="fixture",
+        alias="BATON_ROUGE_TRAFFIC_CAMERAS_MODE",
+    )
+    baton_rouge_traffic_cameras_fixture_path: str = Field(
+        default="./app/server/data/baton_rouge_traffic_cameras_fixture.json",
+        alias="BATON_ROUGE_TRAFFIC_CAMERAS_FIXTURE_PATH",
+    )
+    vancouver_web_cam_url_links_mode: str = Field(
+        default="fixture",
+        alias="VANCOUVER_WEB_CAM_URL_LINKS_MODE",
+    )
+    vancouver_web_cam_url_links_fixture_path: str = Field(
+        default="./app/server/data/vancouver_web_cam_url_links_fixture.json",
+        alias="VANCOUVER_WEB_CAM_URL_LINKS_FIXTURE_PATH",
+    )
+    caltrans_cctv_cameras_mode: str = Field(
+        default="fixture",
+        alias="CALTRANS_CCTV_CAMERAS_MODE",
+    )
+    caltrans_cctv_cameras_fixture_path: str = Field(
+        default="./app/server/data/caltrans_cctv_cameras_fixture.json",
+        alias="CALTRANS_CCTV_CAMERAS_FIXTURE_PATH",
     )
     finland_digitraffic_source_mode: str = Field(
         default="fixture",
@@ -549,6 +578,30 @@ class Settings(BaseSettings):
         default=20,
         alias="METEOSWISS_OPEN_DATA_HTTP_TIMEOUT_SECONDS",
     )
+    canada_geomet_ogc_source_mode: str = Field(
+        default="fixture",
+        alias="CANADA_GEOMET_OGC_SOURCE_MODE",
+    )
+    canada_geomet_ogc_fixture_path: str = Field(
+        default="./data/canada_geomet_climate_stations_fixture.json",
+        alias="CANADA_GEOMET_OGC_FIXTURE_PATH",
+    )
+    canada_geomet_ogc_documentation_url: str = Field(
+        default="https://eccc-msc.github.io/open-data/msc-geomet/readme_en/",
+        alias="CANADA_GEOMET_OGC_DOCUMENTATION_URL",
+    )
+    canada_geomet_ogc_collection_url: str = Field(
+        default="https://api.weather.gc.ca/collections/climate-stations",
+        alias="CANADA_GEOMET_OGC_COLLECTION_URL",
+    )
+    canada_geomet_ogc_items_url: str = Field(
+        default="https://api.weather.gc.ca/collections/climate-stations/items",
+        alias="CANADA_GEOMET_OGC_ITEMS_URL",
+    )
+    canada_geomet_ogc_http_timeout_seconds: int = Field(
+        default=20,
+        alias="CANADA_GEOMET_OGC_HTTP_TIMEOUT_SECONDS",
+    )
     natural_earth_physical_source_mode: str = Field(
         default="fixture",
         alias="NATURAL_EARTH_PHYSICAL_SOURCE_MODE",
@@ -613,6 +666,26 @@ class Settings(BaseSettings):
         default=20,
         alias="NOAA_GLOBAL_VOLCANO_HTTP_TIMEOUT_SECONDS",
     )
+    rgi_glacier_inventory_source_mode: str = Field(
+        default="fixture",
+        alias="RGI_GLACIER_INVENTORY_SOURCE_MODE",
+    )
+    rgi_glacier_inventory_fixture_path: str = Field(
+        default="./data/rgi_glacier_inventory_fixture.json",
+        alias="RGI_GLACIER_INVENTORY_FIXTURE_PATH",
+    )
+    rgi_glacier_inventory_source_url: str = Field(
+        default="https://nsidc.org/data/nsidc-0770/versions/7",
+        alias="RGI_GLACIER_INVENTORY_SOURCE_URL",
+    )
+    rgi_glacier_inventory_documentation_url: str = Field(
+        default="https://www.glims.org/rgi_user_guide/welcome.html",
+        alias="RGI_GLACIER_INVENTORY_DOCUMENTATION_URL",
+    )
+    rgi_glacier_inventory_http_timeout_seconds: int = Field(
+        default=20,
+        alias="RGI_GLACIER_INVENTORY_HTTP_TIMEOUT_SECONDS",
+    )
     taiwan_cwa_source_mode: str = Field(default="fixture", alias="TAIWAN_CWA_SOURCE_MODE")
     taiwan_cwa_fixture_path: str = Field(
         default="./data/taiwan_cwa_current_weather_fixture.json",
@@ -663,6 +736,24 @@ class Settings(BaseSettings):
         alias="CANADA_CAP_FEED_URL",
     )
     canada_cap_http_timeout_seconds: int = Field(default=20, alias="CANADA_CAP_HTTP_TIMEOUT_SECONDS")
+    dwd_cap_source_mode: str = Field(default="fixture", alias="DWD_CAP_SOURCE_MODE")
+    dwd_cap_fixture_path: str = Field(
+        default="./data/dwd_cap_directory_fixture.html",
+        alias="DWD_CAP_FIXTURE_PATH",
+    )
+    dwd_cap_directory_url: str = Field(
+        default="https://opendata.dwd.de/weather/alerts/cap/",
+        alias="DWD_CAP_DIRECTORY_URL",
+    )
+    dwd_cap_snapshot_family: str = Field(
+        default="DISTRICT_DWD_STAT",
+        alias="DWD_CAP_SNAPSHOT_FAMILY",
+    )
+    dwd_cap_snapshot_family_url: str = Field(
+        default="https://opendata.dwd.de/weather/alerts/cap/DISTRICT_DWD_STAT/",
+        alias="DWD_CAP_SNAPSHOT_FAMILY_URL",
+    )
+    dwd_cap_http_timeout_seconds: int = Field(default=20, alias="DWD_CAP_HTTP_TIMEOUT_SECONDS")
     bmkg_earthquakes_source_mode: str = Field(default="fixture", alias="BMKG_EARTHQUAKES_SOURCE_MODE")
     bmkg_earthquakes_fixture_path: str = Field(
         default="./data/bmkg_earthquakes_fixture.json",
@@ -936,10 +1027,54 @@ class Settings(BaseSettings):
     source_discovery_scheduler_run_on_startup: bool = Field(default=False, alias="SOURCE_DISCOVERY_SCHEDULER_RUN_ON_STARTUP")
     source_discovery_scheduler_poll_seconds: int = Field(default=300, alias="SOURCE_DISCOVERY_SCHEDULER_POLL_SECONDS")
     source_discovery_scheduler_health_check_limit: int = Field(default=2, alias="SOURCE_DISCOVERY_SCHEDULER_HEALTH_CHECK_LIMIT")
+    source_discovery_scheduler_structure_scan_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_STRUCTURE_SCAN_LIMIT")
+    source_discovery_scheduler_public_discovery_job_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_PUBLIC_DISCOVERY_JOB_LIMIT")
+    source_discovery_scheduler_expansion_job_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_EXPANSION_JOB_LIMIT")
+    source_discovery_scheduler_knowledge_backfill_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_KNOWLEDGE_BACKFILL_LIMIT")
     source_discovery_scheduler_record_extract_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_RECORD_EXTRACT_LIMIT")
     source_discovery_scheduler_llm_task_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_LLM_TASK_LIMIT")
     source_discovery_scheduler_request_budget: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_REQUEST_BUDGET")
     source_discovery_scheduler_allow_network: bool = Field(default=False, alias="SOURCE_DISCOVERY_SCHEDULER_ALLOW_NETWORK")
+    source_discovery_media_max_bytes: int = Field(default=5_000_000, alias="SOURCE_DISCOVERY_MEDIA_MAX_BYTES")
+    source_discovery_media_ocr_binary: str = Field(default="tesseract", alias="SOURCE_DISCOVERY_MEDIA_OCR_BINARY")
+    source_discovery_media_ocr_default_engine: str = Field(default="tesseract", alias="SOURCE_DISCOVERY_MEDIA_OCR_DEFAULT_ENGINE")
+    source_discovery_media_ocr_fallback_enabled: bool = Field(default=True, alias="SOURCE_DISCOVERY_MEDIA_OCR_FALLBACK_ENABLED")
+    source_discovery_media_ocr_confidence_threshold: float = Field(default=0.65, alias="SOURCE_DISCOVERY_MEDIA_OCR_CONFIDENCE_THRESHOLD")
+    source_discovery_media_ocr_min_text_length: int = Field(default=24, alias="SOURCE_DISCOVERY_MEDIA_OCR_MIN_TEXT_LENGTH")
+    source_discovery_media_rapidocr_model_dir: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_RAPIDOCR_MODEL_DIR")
+    source_discovery_media_ollama_enabled: bool = Field(default=False, alias="SOURCE_DISCOVERY_MEDIA_OLLAMA_ENABLED")
+    source_discovery_media_ollama_model: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_OLLAMA_MODEL")
+    source_discovery_media_openai_compat_enabled: bool = Field(default=False, alias="SOURCE_DISCOVERY_MEDIA_OPENAI_COMPAT_ENABLED")
+    source_discovery_media_openai_compat_model: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_OPENAI_COMPAT_MODEL")
+    source_discovery_media_openai_compat_base_url: str | None = Field(default="http://localhost:8000/v1", alias="SOURCE_DISCOVERY_MEDIA_OPENAI_COMPAT_BASE_URL")
+    source_discovery_media_geolocation_default_engine: str = Field(default="fusion", alias="SOURCE_DISCOVERY_MEDIA_GEOLOCATION_DEFAULT_ENGINE")
+    source_discovery_media_geolocation_max_candidates: int = Field(default=5, alias="SOURCE_DISCOVERY_MEDIA_GEOLOCATION_MAX_CANDIDATES")
+    source_discovery_media_geolocation_eval_fixture_path: str = Field(
+        default="./app/server/data/media_geolocation_eval_fixtures.json",
+        alias="SOURCE_DISCOVERY_MEDIA_GEOLOCATION_EVAL_FIXTURE_PATH",
+    )
+    source_discovery_media_geoclip_enabled: bool = Field(default=False, alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_ENABLED")
+    source_discovery_media_geoclip_allow_runtime_download: bool = Field(default=False, alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_ALLOW_RUNTIME_DOWNLOAD")
+    source_discovery_media_geoclip_model_cache_dir: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_MODEL_CACHE_DIR")
+    source_discovery_media_geoclip_weights_path: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_WEIGHTS_PATH")
+    source_discovery_media_geoclip_expected_version: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_EXPECTED_VERSION")
+    source_discovery_media_streetclip_enabled: bool = Field(default=False, alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_ENABLED")
+    source_discovery_media_streetclip_model_id: str = Field(default="geolocal/StreetCLIP", alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_MODEL_ID")
+    source_discovery_media_streetclip_allow_runtime_download: bool = Field(default=False, alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_ALLOW_RUNTIME_DOWNLOAD")
+    source_discovery_media_streetclip_model_cache_dir: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_MODEL_CACHE_DIR")
+    source_discovery_media_streetclip_expected_transformers_version: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_EXPECTED_TRANSFORMERS_VERSION")
+    source_discovery_media_streetclip_label_bank_enabled: bool = Field(default=True, alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_LABEL_BANK_ENABLED")
+    source_discovery_media_qwen_vl_local_model: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_QWEN_VL_LOCAL_MODEL")
+    source_discovery_media_internvl_local_model: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_INTERNVL_LOCAL_MODEL")
+    source_discovery_media_llava_local_model: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_LLAVA_LOCAL_MODEL")
+    source_discovery_media_comparison_candidate_cap: int = Field(default=8, alias="SOURCE_DISCOVERY_MEDIA_COMPARISON_CANDIDATE_CAP")
+    source_discovery_media_ssim_duplicate_threshold: float = Field(default=0.95, alias="SOURCE_DISCOVERY_MEDIA_SSIM_DUPLICATE_THRESHOLD")
+    source_discovery_media_ssim_change_threshold: float = Field(default=0.72, alias="SOURCE_DISCOVERY_MEDIA_SSIM_CHANGE_THRESHOLD")
+    source_discovery_media_phash_near_distance: int = Field(default=8, alias="SOURCE_DISCOVERY_MEDIA_PHASH_NEAR_DISTANCE")
+    source_discovery_media_ffmpeg_binary: str = Field(default="ffmpeg", alias="SOURCE_DISCOVERY_MEDIA_FFMPEG_BINARY")
+    source_discovery_media_frame_max_span_seconds: int = Field(default=60, alias="SOURCE_DISCOVERY_MEDIA_FRAME_MAX_SPAN_SECONDS")
+    source_discovery_media_frame_max_frames: int = Field(default=12, alias="SOURCE_DISCOVERY_MEDIA_FRAME_MAX_FRAMES")
+    source_discovery_media_frame_min_interval_seconds: int = Field(default=5, alias="SOURCE_DISCOVERY_MEDIA_FRAME_MIN_INTERVAL_SECONDS")
     wave_monitor_scheduler_enabled: bool = Field(default=False, alias="WAVE_MONITOR_SCHEDULER_ENABLED")
     wave_monitor_scheduler_run_on_startup: bool = Field(default=False, alias="WAVE_MONITOR_SCHEDULER_RUN_ON_STARTUP")
     wave_monitor_scheduler_poll_seconds: int = Field(default=300, alias="WAVE_MONITOR_SCHEDULER_POLL_SECONDS")

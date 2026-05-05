@@ -60,6 +60,7 @@ Required evidence:
 - `candidateEndpointUrl`
 - `machineReadableEndpointUrl`
 - no-auth access or officially documented machine-readable access
+- explicit payload-shape posture such as `machine-shape-with-media-fields`, `machine-shape-location-only`, or `api-family-documented-shape-unpinned`
 
 May be triggered by:
 
@@ -344,6 +345,61 @@ Admissible sandbox-candidate summary evidence:
   - source activation
   - scraping or browser automation
 
+Admissible candidate network coverage evidence:
+
+- the backend source-ops candidate network coverage summary may group registry-tracked candidate sources by:
+  - region
+  - lifecycle state
+  - media evidence posture
+  - direct-image/viewer-link posture
+  - missing evidence count
+  - source-health expectation
+  - next safe review step
+  - review priority
+- it may confirm:
+  - which candidates are sandbox-importable versus endpoint-verified only
+  - which candidates remain metadata-only, viewer-only, or blocked
+  - which candidates are stronger review-next follow-ups versus hold-only entries
+  - which candidate gaps remain before any future promotion discussion
+- it may not by itself justify:
+  - `approved-unvalidated`
+  - `validated`
+  - scheduled refresh enablement
+  - source activation
+  - scraping or browser automation
+  - promotion of held/doc-only candidates that are not yet in inventory
+
+Admissible promotion-readiness comparison evidence:
+
+- the backend source-ops promotion-readiness comparison summary may group current inventory-backed candidates into:
+  - `sandbox-stronger-follow-up`
+  - `sandbox-follow-up`
+  - `sandbox-held`
+  - `endpoint-verified-follow-up`
+  - `endpoint-verified-held`
+  - `endpoint-research-needed`
+  - `blocked-hold`
+- each grouped row may also surface bounded sandbox-feasibility posture such as:
+  - `fixture-backed-direct-image-review`
+  - `fixture-backed-viewer-only-review`
+  - `fixture-backed-metadata-only-review`
+  - `endpoint-family-unpinned`
+  - `media-proof-missing`
+  - `endpoint-pinning-needed`
+  - `blocked-no-sandbox-path`
+- it may confirm:
+  - which sandbox candidates are currently strongest for later manual review
+  - which endpoint-verified candidates still lack enough public media evidence for sandbox work
+  - which candidates remain blocked or still need endpoint research before stronger comparison is meaningful
+  - which missing-evidence families still separate one candidate from another
+- it may not by itself justify:
+  - `approved-unvalidated`
+  - `validated`
+  - scheduled refresh enablement
+  - source activation
+  - sandbox onboarding for endpoint-only candidates
+  - scraping or browser automation
+
 What may not trigger a transition by itself:
 
 - raw HTML page reachability
@@ -354,6 +410,7 @@ What may not trigger a transition by itself:
 - source-ops detail-route availability alone
 - source-ops export/debug summary availability alone
 - source-ops sandbox-candidate summary availability alone
+- source-ops candidate network coverage summary availability alone
 - source-ops artifact timestamp/provenance visibility alone
 - source-ops fleet rollup visibility alone
 - source-ops caveat-frequency or review-hint rollups alone
@@ -451,6 +508,55 @@ What may not trigger a transition by itself:
   - fixture-first sandbox connector exists
   - still not validated and still unscheduled
 
+### `baton-rouge-traffic-cameras`
+
+- current state: `candidate-sandbox-importable`
+- why:
+  - machine-readable rows.json endpoint is documented cleanly
+  - media posture stays conservative viewer-only evidence
+  - fixture-first sandbox connector exists
+  - still not validated and still unscheduled
+
+### `vancouver-web-cam-url-links`
+
+- current state: `candidate-sandbox-importable`
+- why:
+  - machine-readable municipal records API is documented cleanly
+  - media posture stays conservative viewer-only evidence
+  - fixture-first sandbox connector exists
+  - still not validated and still unscheduled
+
+### `nzta-traffic-cameras`
+
+- current state: `candidate-endpoint-verified`
+- why:
+  - official public traffic-and-travel docs say static images from over 100 cameras exist
+  - public traffic camera REST/WADL service listing is documented
+  - payload-shape posture is `api-family-documented-shape-unpinned`
+  - sandbox-feasibility posture is `endpoint-family-unpinned`
+  - bounded camera payload and stable media fields are still not pinned
+  - source stays non-sandbox and unvalidated until that narrower review is complete
+
+### `arlington-traffic-cameras`
+
+- current state: `candidate-endpoint-verified`
+- why:
+  - machine-readable county JSON inventory is documented cleanly
+  - payload-shape posture is `machine-shape-location-only`
+  - sandbox-feasibility posture is `media-proof-missing`
+  - current evidence is still metadata-only because no stable public media fields are exposed
+  - source stays non-sandbox until viewer-only or direct-image posture is documented cleanly
+
+### `caltrans-cctv-cameras`
+
+- current state: `candidate-sandbox-importable`
+- why:
+  - official California Open Data documents the CCTV ArcGIS REST layer and query support
+  - payload-shape posture is `fixture-reviewed-sandbox-shape`
+  - sandbox-feasibility posture is `fixture-backed-direct-image-review`
+  - exact coordinates, direction, `currentImageURL`, and `streamingVideoURL` fields are documented
+  - fixture-first sandbox connector now exists, but source still remains candidate-only, unscheduled, and unvalidated until mapping and source-health review are completed manually
+
 ### `euskadi-traffic-cameras`
 
 - current state: `candidate-needs-review`
@@ -484,6 +590,11 @@ What may not trigger a transition by itself:
 | `quebec-mtmd-traffic-cameras` | `candidate-sandbox-importable` | `approved-unvalidated` | representative GeoJSON/WFS fixtures | exact coordinates, per-camera URL fields, conservative viewer-only posture | conservative cadence and viewer-only honesty | viewer-only and unavailable-frame fixture paths create review items; hostile fixture text remains inert | endpoint report, graduation plan, evidence packet, export-readiness metadata, sandbox validation report |
 | `maryland-chart-traffic-cameras` | `candidate-sandbox-importable` | `approved-unvalidated` | representative JSON dataset fixtures | feed-url posture, exact coordinates, direct-image vs viewer-only proof | conservative cadence and URL-field review | viewer-only and unavailable-frame fixture paths create review items; hostile fixture text remains inert | endpoint report, graduation plan, evidence packet, export-readiness metadata, sandbox validation report |
 | `fingal-traffic-cameras` | `candidate-sandbox-importable` | `approved-unvalidated` | representative GeoJSON fixtures | location metadata, media posture proof, identifier mapping | conservative cadence and metadata-only honesty | metadata-only and unavailable-frame fixture paths create review items; hostile fixture text remains inert | endpoint report, graduation plan, evidence packet, export-readiness metadata, sandbox validation report |
+| `baton-rouge-traffic-cameras` | `candidate-sandbox-importable` | `approved-unvalidated` | representative Socrata rows fixtures | WKT coordinate parsing, viewer-link posture, camera identifier mapping | conservative cadence and viewer-only honesty | viewer-only and unavailable-frame fixture paths create review items; hostile fixture text remains inert | endpoint report, graduation plan, evidence packet, export-readiness metadata, sandbox validation report |
+| `vancouver-web-cam-url-links` | `candidate-sandbox-importable` | `approved-unvalidated` | representative records API fixtures | GeoJSON coordinate parsing, viewer-link posture, municipal map-id mapping | conservative cadence and viewer-only honesty | viewer-only and unavailable-frame fixture paths create review items; hostile fixture text remains inert | endpoint report, graduation plan, evidence packet, export-readiness metadata, sandbox validation report |
+| `nzta-traffic-cameras` | `candidate-endpoint-verified` | `approved-unvalidated` only after bounded camera payload and media fields are pinned | candidate-only metadata fixtures if later justified | traffic-camera identifiers, `api-family-documented-shape-unpinned` review, public media-field proof, and `endpoint-family-unpinned` sandbox-feasibility hold resolution | conservative cadence and metadata-only honesty until stronger evidence exists | no sandbox review queue until a compliant connector path exists | endpoint report, promotion-readiness summary, evidence packet, export-readiness metadata |
+| `arlington-traffic-cameras` | `candidate-endpoint-verified` | `approved-unvalidated` only after stable media evidence exists | candidate-only metadata fixtures if later justified | county site identifiers, coordinates, `machine-shape-location-only` review, media posture proof, and `media-proof-missing` sandbox-feasibility hold resolution | conservative cadence and metadata-only honesty | no sandbox review queue until a compliant connector path exists | endpoint report, graduation plan, evidence packet, export-readiness metadata |
+| `caltrans-cctv-cameras` | `candidate-sandbox-importable` | `approved-unvalidated` | representative ArcGIS REST query fixtures | CCTV identifiers, exact coordinates, direction-derived orientation caveats, documented image/video fields, direct-image mapping review, and `fixture-backed-direct-image-review` sandbox-feasibility comparison baseline | conservative cadence and media-field honesty until stronger evidence exists | orientation-verification and unavailable-frame fixture paths create review items; hostile fixture text remains inert | endpoint report, graduation plan, evidence packet, export-readiness metadata, sandbox validation report |
 
 ## Sandbox-candidate summary policy
 

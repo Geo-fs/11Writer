@@ -25,11 +25,16 @@ from src.services.pb2002_plate_boundaries_service import (
     Pb2002PlateBoundariesService,
     parse_bbox as parse_pb2002_bbox,
 )
+from src.services.rgi_glacier_inventory_service import (
+    RgiGlacierInventoryQuery,
+    RgiGlacierInventoryService,
+)
 from src.types.api import (
     GshhgShorelinesResponse,
     NaturalEarthPhysicalResponse,
     NoaaGlobalVolcanoResponse,
     Pb2002PlateBoundariesResponse,
+    RgiGlacierInventoryResponse,
 )
 
 router = APIRouter(prefix="/api/context/reference", tags=["base-earth-context"])
@@ -115,5 +120,22 @@ async def noaa_global_volcano_locations_context(
             country=country,
             limit=limit,
             sort=cast(NoaaGlobalVolcanoSort, sort),
+        )
+    )
+
+
+@router.get("/rgi-glacier-inventory", response_model=RgiGlacierInventoryResponse)
+async def rgi_glacier_inventory_context(
+    region_code: str | None = Query(default=None),
+    glacier_name: str | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=500),
+    settings: Settings = Depends(get_settings),
+) -> RgiGlacierInventoryResponse:
+    service = RgiGlacierInventoryService(settings)
+    return await service.get_context(
+        RgiGlacierInventoryQuery(
+            region_code=region_code,
+            glacier_name=glacier_name,
+            limit=limit,
         )
     )

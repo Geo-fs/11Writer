@@ -2422,3 +2422,495 @@ export interface DataAiFeedFamilyReviewQueueResponse {
   guardrailLine: string;
   caveats: string[];
 }
+
+export type SourceDiscoveryRuntimeWorkerName = "source_discovery" | "wave_monitor";
+export type SourceDiscoveryRuntimeServicePlatform = "windows" | "macos" | "linux";
+export type SourceDiscoveryRuntimeServiceAction =
+  | "materialize"
+  | "install"
+  | "start"
+  | "stop"
+  | "restart"
+  | "uninstall"
+  | "status";
+export type SourceDiscoveryReviewAction =
+  | "mark_reviewed"
+  | "approve_candidate"
+  | "sandbox_check"
+  | "reject"
+  | "archive"
+  | "assign_owner";
+
+export interface SourceDiscoveryMemory {
+  sourceId: string;
+  title: string;
+  url: string;
+  canonicalUrl: string;
+  parentDomain: string;
+  domainScope: string;
+  ownerLane?: string | null;
+  sourceType: string;
+  sourceClass: string;
+  lifecycleState: string;
+  sourceHealth: string;
+  policyState: string;
+  accessResult: string;
+  machineReadableResult: string;
+  globalReputationScore: number;
+  domainReputationScore: number;
+  sourceHealthScore: number;
+  timelinessScore: number;
+  correctionScore: number;
+  confidenceLevel: string;
+  claimOutcomes: Record<string, number>;
+  caveats: string[];
+  reputationBasis: string[];
+  knownAliases: string[];
+  firstSeenAt: string;
+  lastSeenAt: string;
+  lastReputationEventAt?: string | null;
+  nextCheckAt?: string | null;
+  healthCheckFailCount: number;
+}
+
+export interface SourceDiscoveryWaveFit {
+  sourceId: string;
+  waveId: string;
+  waveTitle: string;
+  fitScore: number;
+  fitState: string;
+  relevanceBasis: string[];
+  lastSeenAt: string;
+}
+
+export interface SourceDiscoveryContentSnapshotSummary {
+  snapshotId: string;
+  sourceId: string;
+  url: string;
+  title?: string | null;
+  contentType?: string | null;
+  extractionMethod: string;
+  textHash: string;
+  textLength: number;
+  author?: string | null;
+  publishedAt?: string | null;
+  fetchedAt: string;
+  requestBudget: number;
+  usedRequests: number;
+  extractionConfidence: number;
+  caveats: string[];
+}
+
+export interface SourceDiscoveryHealthCheckSummary {
+  checkId: string;
+  sourceId: string;
+  url: string;
+  status: string;
+  httpStatus?: number | null;
+  contentType?: string | null;
+  accessResult: string;
+  machineReadableResult: string;
+  sourceHealth: string;
+  sourceHealthScore: number;
+  requestBudget: number;
+  usedRequests: number;
+  checkedAt: string;
+  nextCheckAfter?: string | null;
+  errorSummary?: string | null;
+  caveats: string[];
+}
+
+export interface SourceDiscoveryReviewActionSummary {
+  reviewActionId: number;
+  sourceId: string;
+  action: SourceDiscoveryReviewAction;
+  reviewedBy: string;
+  reason: string;
+  ownerLane?: string | null;
+  previousLifecycleState: string;
+  newLifecycleState: string;
+  previousPolicyState: string;
+  newPolicyState: string;
+  createdAt: string;
+}
+
+export interface SourceDiscoveryReputationEventSummary {
+  eventId: number;
+  sourceId: string;
+  waveId?: string | null;
+  eventType: string;
+  outcome?: string | null;
+  scoreBefore: number;
+  scoreAfter: number;
+  reason: string;
+  createdAt: string;
+  reversedAt?: string | null;
+  reversalReason?: string | null;
+}
+
+export interface SourceDiscoveryClaimOutcomeSummary {
+  outcomeId: number;
+  sourceId: string;
+  waveId?: string | null;
+  claimText: string;
+  claimType: string;
+  outcome: string;
+  evidenceBasis: string;
+  observedAt: string;
+  assessedAt: string;
+  corroboratingSourceIds: string[];
+  contradictionSourceIds: string[];
+  caveats: string[];
+}
+
+export interface SourceDiscoveryMemoryDetailResponse {
+  memory: SourceDiscoveryMemory;
+  waveFits: SourceDiscoveryWaveFit[];
+  snapshots: SourceDiscoveryContentSnapshotSummary[];
+  healthChecks: SourceDiscoveryHealthCheckSummary[];
+  reviewActions: SourceDiscoveryReviewActionSummary[];
+  reputationEvents: SourceDiscoveryReputationEventSummary[];
+  claimOutcomes: SourceDiscoveryClaimOutcomeSummary[];
+  caveats: string[];
+}
+
+export interface SourceDiscoveryReviewQueueItem {
+  sourceId: string;
+  title: string;
+  url: string;
+  sourceClass: string;
+  lifecycleState: string;
+  policyState: string;
+  sourceHealth: string;
+  ownerLane?: string | null;
+  priority: "high" | "medium" | "low";
+  reviewReasons: string[];
+  recommendedActions: string[];
+  globalReputationScore: number;
+  domainReputationScore: number;
+  sourceHealthScore: number;
+  timelinessScore: number;
+  confidenceLevel: string;
+  bestWaveId?: string | null;
+  bestWaveTitle?: string | null;
+  bestWaveFitScore?: number | null;
+  nextCheckAt?: string | null;
+}
+
+export interface SourceDiscoveryReviewQueueResponse {
+  metadata: Record<string, unknown>;
+  items: SourceDiscoveryReviewQueueItem[];
+  caveats: string[];
+}
+
+export interface SourceDiscoveryRuntimeRunSummary {
+  runId: string;
+  workerName: SourceDiscoveryRuntimeWorkerName;
+  triggerKind: string;
+  status: string;
+  requestedBy?: string | null;
+  leaseOwner?: string | null;
+  startedAt: string;
+  finishedAt?: string | null;
+  summary?: string | null;
+  errorSummary?: string | null;
+}
+
+export interface SourceDiscoveryRuntimeWorkerSummary {
+  workerName: SourceDiscoveryRuntimeWorkerName;
+  desiredState: "running" | "paused" | "stopped";
+  enabledByConfig: boolean;
+  pollSeconds: number;
+  loopActiveInProcess: boolean;
+  leaseOwner?: string | null;
+  leaseExpiresAt?: string | null;
+  lastTickRequestedAt?: string | null;
+  lastTickStartedAt?: string | null;
+  lastTickFinishedAt?: string | null;
+  lastStatus?: string | null;
+  lastError?: string | null;
+  lastSummary?: string | null;
+  recentRuns: SourceDiscoveryRuntimeRunSummary[];
+}
+
+export interface SourceDiscoveryRuntimePathSummary {
+  resourceDir: string;
+  userDataDir: string;
+  logDir: string;
+  cacheDir: string;
+  serviceArtifactDir: string;
+}
+
+export interface SourceDiscoveryRuntimeServiceInstallationSummary {
+  installationId: string;
+  workerName: SourceDiscoveryRuntimeWorkerName;
+  platform: SourceDiscoveryRuntimeServicePlatform;
+  serviceManager: string;
+  serviceName: string;
+  artifactFileName: string;
+  artifactPath?: string | null;
+  targetPath?: string | null;
+  installState: string;
+  lastAction?: string | null;
+  lastActionStatus?: string | null;
+  lastActionAt?: string | null;
+  lastSummary?: string | null;
+}
+
+export interface SourceDiscoveryRuntimeServiceSpec {
+  workerName: SourceDiscoveryRuntimeWorkerName;
+  platform: SourceDiscoveryRuntimeServicePlatform;
+  serviceManager: string;
+  serviceName: string;
+  workingDirectory: string;
+  artifactFileName: string;
+  artifactText: string;
+  artifactPath?: string | null;
+  targetPath?: string | null;
+  entryCommand: string[];
+  installCommand: string[];
+  startCommand: string[];
+  stopCommand: string[];
+  statusCommand: string[];
+  uninstallCommand: string[];
+  caveats: string[];
+}
+
+export interface SourceDiscoveryRuntimeStatusResponse {
+  runtimeMode: string;
+  recommendedRuntimeDeployment: string;
+  serviceWorkerEntrypoint: string;
+  runtimePaths: SourceDiscoveryRuntimePathSummary;
+  supportedServiceManagers: string[];
+  sourceDiscoverySchedulerEnabled: boolean;
+  sourceDiscoverySchedulerRunning: boolean;
+  sourceDiscoverySchedulerPollSeconds: number;
+  sourceDiscoverySchedulerLastTickAt?: string | null;
+  sourceDiscoverySchedulerLastError?: string | null;
+  sourceDiscoverySchedulerLastSummary?: string | null;
+  waveMonitorSchedulerEnabled: boolean;
+  waveMonitorSchedulerRunning: boolean;
+  waveMonitorSchedulerPollSeconds: number;
+  waveMonitorSchedulerLastTickAt?: string | null;
+  waveMonitorSchedulerLastError?: string | null;
+  waveMonitorSchedulerLastSummary?: string | null;
+  workers: SourceDiscoveryRuntimeWorkerSummary[];
+  serviceInstallations: SourceDiscoveryRuntimeServiceInstallationSummary[];
+  caveats: string[];
+}
+
+export interface SourceDiscoveryRuntimeServiceBundleResponse {
+  runtimeMode: string;
+  currentPlatform: SourceDiscoveryRuntimeServicePlatform;
+  entrypointModule: string;
+  runtimePaths: SourceDiscoveryRuntimePathSummary;
+  services: SourceDiscoveryRuntimeServiceSpec[];
+  installations: SourceDiscoveryRuntimeServiceInstallationSummary[];
+  caveats: string[];
+}
+
+export interface SourceDiscoveryRuntimeControlResponse {
+  worker: SourceDiscoveryRuntimeWorkerSummary;
+  run?: SourceDiscoveryRuntimeRunSummary | null;
+  caveats: string[];
+}
+
+export interface SourceDiscoveryRuntimeServiceActionResponse {
+  installation: SourceDiscoveryRuntimeServiceInstallationSummary;
+  action: {
+    actionId: number;
+    installationId: string;
+    workerName: SourceDiscoveryRuntimeWorkerName;
+    platform: SourceDiscoveryRuntimeServicePlatform;
+    action: SourceDiscoveryRuntimeServiceAction;
+    requestedBy: string;
+    dryRun: boolean;
+    status: string;
+    command: string[];
+    artifactPath?: string | null;
+    targetPath?: string | null;
+    stdoutExcerpt?: string | null;
+    stderrExcerpt?: string | null;
+    createdAt: string;
+    finishedAt?: string | null;
+  };
+  caveats: string[];
+}
+
+export interface SourceDiscoveryReviewActionResponse {
+  action: SourceDiscoveryReviewActionSummary;
+  memory: SourceDiscoveryMemory;
+  caveats: string[];
+}
+
+export interface SourceDiscoveryReviewClaimApplicationResponse {
+  memory: SourceDiscoveryMemory;
+  applications: Array<{
+    applicationId: number;
+    reviewId: string;
+    taskId: string;
+    sourceId: string;
+    waveId?: string | null;
+    claimIndex: number;
+    claimText: string;
+    outcome: string;
+    appliedBy: string;
+    approvalReason: string;
+    createdAt: string;
+  }>;
+  waveFits: SourceDiscoveryWaveFit[];
+  caveats: string[];
+}
+
+export interface WaveLlmValidatedClaim {
+  claimText: string;
+  claimType: string;
+  evidenceBasis: string;
+  confidence: number;
+  status: "accepted_for_review" | "rejected";
+  rejectionReason?: string | null;
+}
+
+export interface WaveLlmTaskSummary {
+  taskId: string;
+  monitorId: string;
+  taskType: string;
+  provider: string;
+  model: string;
+  status: string;
+  inputSummary: string;
+  sourceIds: string[];
+  recordIds: string[];
+  createdAt: string;
+  completedAt?: string | null;
+  caveats: string[];
+}
+
+export interface WaveLlmReviewSummary {
+  reviewId: string;
+  taskId: string;
+  monitorId: string;
+  provider: string;
+  model: string;
+  validationState: string;
+  claims: WaveLlmValidatedClaim[];
+  proposedActions: string[];
+  riskFlags: string[];
+  acceptedClaimCount: number;
+  rejectedClaimCount: number;
+  requiresHumanReview: boolean;
+  createdAt: string;
+  caveats: string[];
+}
+
+export interface WaveLlmReviewQueueItem {
+  task: WaveLlmTaskSummary;
+  review: WaveLlmReviewSummary;
+  sourceIds: string[];
+  recordIds: string[];
+  primarySourceId?: string | null;
+}
+
+export interface WaveLlmReviewQueueResponse {
+  metadata: Record<string, unknown>;
+  items: WaveLlmReviewQueueItem[];
+  guardrails: string[];
+}
+
+export type WaveLlmProvider =
+  | "fixture"
+  | "openai"
+  | "anthropic"
+  | "xai"
+  | "google"
+  | "openrouter"
+  | "ollama"
+  | "openclaw"
+  | "custom";
+
+export interface WaveLlmDefaultsSummary {
+  defaultProvider: WaveLlmProvider;
+  defaultModel: string;
+  allowNetworkDefault: boolean;
+  requestBudgetDefault: number;
+  maxRetriesDefault: number;
+  timeoutSecondsDefault: number;
+}
+
+export interface WaveLlmProviderConfigSummary {
+  provider: WaveLlmProvider;
+  configured: boolean;
+  keySource: string;
+  local: boolean;
+  adapterMode: string;
+  supportsApiKey: boolean;
+  supportsBaseUrl: boolean;
+  envFallbackConfigured: boolean;
+  maskedSecret?: string | null;
+  baseUrl?: string | null;
+  defaultModel?: string | null;
+  allowNetworkDefault?: boolean | null;
+  requestBudgetDefault?: number | null;
+  maxRetriesDefault?: number | null;
+  timeoutSecondsDefault?: number | null;
+  caveats: string[];
+}
+
+export interface WaveLlmMonitorPreferenceSummary {
+  monitorId: string;
+  monitorTitle: string;
+  provider?: WaveLlmProvider | null;
+  model?: string | null;
+  allowNetwork?: boolean | null;
+  requestBudget?: number | null;
+  maxRetries?: number | null;
+  timeoutSeconds?: number | null;
+  updatedAt: string;
+}
+
+export interface WaveLlmConfigResponse {
+  enabled: boolean;
+  configPath: string;
+  defaults: WaveLlmDefaultsSummary;
+  providers: WaveLlmProviderConfigSummary[];
+  monitorPreferences: WaveLlmMonitorPreferenceSummary[];
+  guardrails: string[];
+  caveats: string[];
+}
+
+export interface WaveLlmExecutionHistoryItem {
+  executionId: string;
+  taskId: string;
+  monitorId: string;
+  taskType: string;
+  provider: string;
+  model: string;
+  status: string;
+  adapterStatus: string;
+  allowNetwork: boolean;
+  requestBudget: number;
+  usedRequests: number;
+  retryCount: number;
+  timeoutSeconds: number;
+  createdAt: string;
+  reviewId?: string | null;
+  reviewValidationState?: string | null;
+  errorSummary?: string | null;
+  inputSummary: string;
+  caveats: string[];
+}
+
+export interface WaveLlmExecutionHistoryResponse {
+  metadata: Record<string, unknown>;
+  items: WaveLlmExecutionHistoryItem[];
+  guardrails: string[];
+}
+
+export interface WaveMonitorOverviewMonitorSummary {
+  monitorId: string;
+  title: string;
+}
+
+export interface WaveMonitorOverviewResponse {
+  monitors: WaveMonitorOverviewMonitorSummary[];
+}

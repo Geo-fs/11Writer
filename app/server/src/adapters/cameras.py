@@ -1055,6 +1055,220 @@ def _normalize_fingal_traffic_camera(
     )
 
 
+def _normalize_baton_rouge_traffic_camera(
+    item: Any,
+    *,
+    fetched_at: str,
+    source_name: str,
+    owner: str,
+    compliance: CameraComplianceMetadata,
+) -> CameraEntity | None:
+    if not isinstance(item, dict):
+        return None
+    latitude, longitude, position = _classify_wkt_point_position(
+        _first_str(item, "the_geom", "geometry", "GEOMETRY"),
+        "Baton Rouge traffic camera WKT coordinates",
+    )
+    if latitude is None or longitude is None:
+        return None
+    orientation = _classify_orientation(
+        direction_text=None,
+        degrees=None,
+        source="Baton Rouge traffic camera dataset does not provide verified orientation",
+    )
+    viewer_url = _first_str(item, "image_view", "viewerUrl", "url")
+    frame = _classify_frame(
+        image_url=None,
+        viewer_url=viewer_url,
+        stream_url=None,
+        width=None,
+        height=None,
+    )
+    camera_id = _first_str(item, "id", "cameraId", "ID") or _hash_label("baton-rouge")
+    label = _first_str(item, "title", "name") or f"Baton Rouge traffic camera {camera_id}"
+    return _build_camera_entity(
+        source=source_name,
+        entity_id=f"camera:{source_name}:{camera_id}",
+        label=label,
+        latitude=latitude,
+        longitude=longitude,
+        fetched_at=fetched_at,
+        external_url=viewer_url,
+        camera_id=camera_id,
+        source_camera_id=camera_id,
+        owner=owner,
+        state="LA",
+        county="East Baton Rouge Parish",
+        region="Baton Rouge",
+        roadway=None,
+        direction=None,
+        location_description=f"Greater Baton Rouge traffic camera {camera_id}",
+        feed_type="page",
+        position=position,
+        orientation=orientation,
+        frame=frame,
+        compliance=compliance,
+        metadata={
+            "provider": "baton-rouge-open-data",
+            "fixtureMode": True,
+            "sourceHealthNote": _first_str(item, "sourceHealthNote"),
+            "evidenceBasis": _first_str(item, "evidenceBasis"),
+            "untrustedText": _first_str(item, "note"),
+        },
+        reference_hint_text=label,
+        facility_code_hint=camera_id,
+    )
+
+
+def _normalize_vancouver_web_cam_url_link(
+    item: Any,
+    *,
+    fetched_at: str,
+    source_name: str,
+    owner: str,
+    compliance: CameraComplianceMetadata,
+) -> CameraEntity | None:
+    if not isinstance(item, dict):
+        return None
+    geometry = None
+    geom = item.get("geom")
+    if isinstance(geom, dict):
+        geometry = geom.get("geometry")
+    latitude, longitude, position = _classify_geojson_position(
+        geometry,
+        "Vancouver web cam GeoJSON coordinates",
+    )
+    if latitude is None or longitude is None:
+        return None
+    orientation = _classify_orientation(
+        direction_text=None,
+        degrees=None,
+        source="Vancouver web cam records do not provide verified orientation",
+    )
+    viewer_url = _first_str(item, "url", "viewerUrl")
+    frame = _classify_frame(
+        image_url=None,
+        viewer_url=viewer_url,
+        stream_url=None,
+        width=None,
+        height=None,
+    )
+    camera_id = _first_str(item, "mapid", "id") or _hash_label(_first_str(item, "name") or "vancouver")
+    label = _first_str(item, "name", "title") or "Vancouver web cam"
+    local_area = _first_str(item, "geo_local_area", "localArea")
+    return _build_camera_entity(
+        source=source_name,
+        entity_id=f"camera:{source_name}:{camera_id}",
+        label=label,
+        latitude=latitude,
+        longitude=longitude,
+        fetched_at=fetched_at,
+        external_url=viewer_url,
+        camera_id=camera_id,
+        source_camera_id=camera_id,
+        owner=owner,
+        state="BC",
+        county=None,
+        region="Vancouver",
+        roadway=None,
+        direction=None,
+        location_description=local_area or label,
+        feed_type="page",
+        position=position,
+        orientation=orientation,
+        frame=frame,
+        compliance=compliance,
+        metadata={
+            "provider": "vancouver-open-data",
+            "fixtureMode": True,
+            "localArea": local_area,
+            "sourceHealthNote": _first_str(item, "sourceHealthNote"),
+            "evidenceBasis": _first_str(item, "evidenceBasis"),
+            "untrustedText": _first_str(item, "note"),
+        },
+        reference_hint_text=label,
+        facility_code_hint=camera_id,
+    )
+
+
+def _normalize_caltrans_cctv_camera(
+    feature: Any,
+    *,
+    fetched_at: str,
+    source_name: str,
+    owner: str,
+    compliance: CameraComplianceMetadata,
+) -> CameraEntity | None:
+    if not isinstance(feature, dict):
+        return None
+    attributes = feature.get("attributes")
+    if not isinstance(attributes, dict):
+        attributes = {}
+    latitude, longitude, position = _classify_arcgis_point_position(
+        feature.get("geometry"),
+        "Caltrans CCTV ArcGIS point coordinates",
+    )
+    if latitude is None or longitude is None:
+        return None
+    direction = _first_str(attributes, "Direction", "direction")
+    orientation = _classify_orientation(
+        direction_text=direction,
+        degrees=None,
+        source="Caltrans CCTV direction metadata",
+    )
+    image_url = _first_str(attributes, "currentImageURL", "currentImageUrl", "imageUrl")
+    stream_url = _first_str(attributes, "streamingVideoURL", "streamingVideoUrl", "streamUrl")
+    frame = _classify_frame(
+        image_url=image_url,
+        viewer_url=None,
+        stream_url=stream_url,
+        width=None,
+        height=None,
+    )
+    camera_id = _first_str(attributes, "ID", "id", "cameraId") or _hash_label(
+        _first_str(attributes, "Name", "name") or "caltrans"
+    )
+    label = _first_str(attributes, "Name", "name") or "Caltrans CCTV camera"
+    roadway = _first_str(attributes, "Route", "route")
+    location_description = _first_str(attributes, "LocationDescription", "locationDescription", "imageDescription")
+    if location_description is None:
+        location_description = " / ".join(part for part in (roadway, direction) if part) or label
+    district = _first_str(attributes, "District", "district")
+    return _build_camera_entity(
+        source=source_name,
+        entity_id=f"camera:{source_name}:{camera_id}",
+        label=label,
+        latitude=latitude,
+        longitude=longitude,
+        fetched_at=fetched_at,
+        external_url=stream_url or image_url,
+        camera_id=camera_id,
+        source_camera_id=camera_id,
+        owner=owner,
+        state="CA",
+        county=None,
+        region="California",
+        roadway=roadway,
+        direction=direction,
+        location_description=location_description,
+        feed_type="snapshot" if image_url else "page",
+        position=position,
+        orientation=orientation,
+        frame=frame,
+        compliance=compliance,
+        metadata={
+            "provider": "caltrans-cctv",
+            "fixtureMode": True,
+            "district": district,
+            "sourceHealthNote": _first_str(attributes, "sourceHealthNote"),
+            "evidenceBasis": _first_str(attributes, "evidenceBasis"),
+            "untrustedText": _first_str(attributes, "note"),
+        },
+        reference_hint_text=label,
+        facility_code_hint=camera_id,
+    )
+
+
 class Structured511CameraConnector(CameraConnector):
     def __init__(
         self,
@@ -1329,6 +1543,134 @@ class FingalTrafficCameraConnector(CameraConnector):
         )
 
 
+class BatonRougeTrafficCameraConnector(CameraConnector):
+    source_name = "baton-rouge-traffic-cameras"
+
+    async def fetch(self) -> CameraSourceFetchResult:
+        mode = self._settings.baton_rouge_traffic_cameras_mode.lower()
+        if mode != "fixture":
+            raise RuntimeError(
+                "BATON_ROUGE_TRAFFIC_CAMERAS_MODE must be 'fixture' for this sandbox-only connector."
+            )
+
+        payload = _load_json_fixture(self._settings.baton_rouge_traffic_cameras_fixture_path)
+        items = _socrata_rows_to_records(payload)
+
+        fetched_at = _now_iso()
+        cameras: list[CameraEntity] = []
+        warnings: list[str] = []
+        failures = 0
+        for item in items:
+            normalized = _normalize_baton_rouge_traffic_camera(
+                item,
+                fetched_at=fetched_at,
+                source_name=self.source_name,
+                owner="City of Baton Rouge / Parish of East Baton Rouge",
+                compliance=self.compliance,
+            )
+            if normalized is None:
+                failures += 1
+                continue
+            if normalized.review.status != "verified":
+                warnings.append(f"{normalized.label}: {normalized.review.reason or 'metadata requires review'}")
+            cameras.append(normalized)
+
+        return self._result_from_normalization(
+            cameras=cameras,
+            warnings=_dedupe(warnings),
+            total_records=len(items),
+            partial_failure_count=failures,
+            detail="Baton Rouge traffic camera metadata refreshed from fixture.",
+            last_http_status=200,
+        )
+
+
+class VancouverWebCamUrlLinksConnector(CameraConnector):
+    source_name = "vancouver-web-cam-url-links"
+
+    async def fetch(self) -> CameraSourceFetchResult:
+        mode = self._settings.vancouver_web_cam_url_links_mode.lower()
+        if mode != "fixture":
+            raise RuntimeError(
+                "VANCOUVER_WEB_CAM_URL_LINKS_MODE must be 'fixture' for this sandbox-only connector."
+            )
+
+        payload = _load_json_fixture(self._settings.vancouver_web_cam_url_links_fixture_path)
+        items = payload.get("results") if isinstance(payload, dict) else []
+        if not isinstance(items, list):
+            items = []
+
+        fetched_at = _now_iso()
+        cameras: list[CameraEntity] = []
+        warnings: list[str] = []
+        failures = 0
+        for item in items:
+            normalized = _normalize_vancouver_web_cam_url_link(
+                item,
+                fetched_at=fetched_at,
+                source_name=self.source_name,
+                owner="City of Vancouver",
+                compliance=self.compliance,
+            )
+            if normalized is None:
+                failures += 1
+                continue
+            if normalized.review.status != "verified":
+                warnings.append(f"{normalized.label}: {normalized.review.reason or 'metadata requires review'}")
+            cameras.append(normalized)
+
+        return self._result_from_normalization(
+            cameras=cameras,
+            warnings=_dedupe(warnings),
+            total_records=len(items),
+            partial_failure_count=failures,
+            detail="Vancouver web cam URL metadata refreshed from fixture.",
+            last_http_status=200,
+        )
+
+
+class CaltransCctvCameraConnector(CameraConnector):
+    source_name = "caltrans-cctv-cameras"
+
+    async def fetch(self) -> CameraSourceFetchResult:
+        mode = self._settings.caltrans_cctv_cameras_mode.lower()
+        if mode != "fixture":
+            raise RuntimeError("CALTRANS_CCTV_CAMERAS_MODE must be 'fixture' for this sandbox-only connector.")
+
+        payload = _load_json_fixture(self._settings.caltrans_cctv_cameras_fixture_path)
+        features = payload.get("features") if isinstance(payload, dict) else []
+        if not isinstance(features, list):
+            features = []
+
+        fetched_at = _now_iso()
+        cameras: list[CameraEntity] = []
+        warnings: list[str] = []
+        failures = 0
+        for feature in features:
+            normalized = _normalize_caltrans_cctv_camera(
+                feature,
+                fetched_at=fetched_at,
+                source_name=self.source_name,
+                owner="California Department of Transportation",
+                compliance=self.compliance,
+            )
+            if normalized is None:
+                failures += 1
+                continue
+            if normalized.review.status != "verified":
+                warnings.append(f"{normalized.label}: {normalized.review.reason or 'metadata requires review'}")
+            cameras.append(normalized)
+
+        return self._result_from_normalization(
+            cameras=cameras,
+            warnings=_dedupe(warnings),
+            total_records=len(features),
+            partial_failure_count=failures,
+            detail="Caltrans CCTV metadata refreshed from fixture.",
+            last_http_status=200,
+        )
+
+
 class FinlandDigitrafficWeatherCamConnector(CameraConnector):
     source_name = "finland-digitraffic-road-cameras"
 
@@ -1535,6 +1877,9 @@ def build_camera_connectors(settings: Settings) -> list[CameraConnector]:
         QuebecMtmdTrafficCameraConnector(settings),
         MarylandChartTrafficCameraConnector(settings),
         FingalTrafficCameraConnector(settings),
+        BatonRougeTrafficCameraConnector(settings),
+        VancouverWebCamUrlLinksConnector(settings),
+        CaltransCctvCameraConnector(settings),
         FinlandDigitrafficWeatherCamConnector(settings),
         WindyWebcamConnector(settings),
     ]
@@ -1810,6 +2155,72 @@ def _classify_geojson_position(
     )
 
 
+def _classify_arcgis_point_position(
+    geometry: Any,
+    source_label: str,
+) -> tuple[float | None, float | None, CameraPositionMetadata]:
+    if isinstance(geometry, dict):
+        longitude = _first_float(geometry, "x", "X", "longitude", "Longitude")
+        latitude = _first_float(geometry, "y", "Y", "latitude", "Latitude")
+        if latitude is not None and longitude is not None:
+            return (
+                latitude,
+                longitude,
+                CameraPositionMetadata(
+                    kind="exact",
+                    confidence=1.0,
+                    source=source_label,
+                    notes=[],
+                ),
+            )
+    return (
+        None,
+        None,
+        CameraPositionMetadata(
+            kind="unknown",
+            confidence=None,
+            source=source_label,
+            notes=["Source geometry did not include trustworthy ArcGIS point coordinates."],
+        ),
+    )
+
+
+def _classify_wkt_point_position(
+    geometry_wkt: str | None,
+    source_label: str,
+) -> tuple[float | None, float | None, CameraPositionMetadata]:
+    if geometry_wkt:
+        normalized = geometry_wkt.strip()
+        if normalized.upper().startswith("POINT"):
+            body = normalized[5:].strip()
+            body = body.removeprefix("(").removesuffix(")").strip()
+            parts = body.split()
+            if len(parts) >= 2:
+                longitude = _float_or_none(parts[0])
+                latitude = _float_or_none(parts[1])
+                if latitude is not None and longitude is not None:
+                    return (
+                        latitude,
+                        longitude,
+                        CameraPositionMetadata(
+                            kind="exact",
+                            confidence=1.0,
+                            source=source_label,
+                            notes=[],
+                        ),
+                    )
+    return (
+        None,
+        None,
+        CameraPositionMetadata(
+            kind="unknown",
+            confidence=None,
+            source=source_label,
+            notes=["Source geometry did not include trustworthy WKT point coordinates."],
+        ),
+    )
+
+
 def _classify_orientation(
     *,
     direction_text: str | None,
@@ -1927,6 +2338,37 @@ def _load_json_fixture(path_value: str) -> Any:
     if not fixture_path.is_absolute():
         fixture_path = Path.cwd() / fixture_path
     return json.loads(fixture_path.read_text(encoding="utf-8"))
+
+
+def _socrata_rows_to_records(payload: Any) -> list[dict[str, Any]]:
+    if not isinstance(payload, dict):
+        return []
+    rows = payload.get("data")
+    columns = payload.get("meta", {}).get("view", {}).get("columns", [])
+    if isinstance(rows, list) and isinstance(columns, list):
+        field_names = [
+            (column.get("fieldName") if isinstance(column, dict) else None)
+            or (column.get("name") if isinstance(column, dict) else None)
+            for column in columns
+        ]
+        records: list[dict[str, Any]] = []
+        for row in rows:
+            if not isinstance(row, list):
+                continue
+            record: dict[str, Any] = {}
+            for index, value in enumerate(row):
+                if index >= len(field_names):
+                    continue
+                field_name = field_names[index]
+                if isinstance(field_name, str) and field_name and not field_name.startswith(":"):
+                    record[field_name] = value
+            records.append(record)
+        return records
+    if isinstance(payload.get("rows"), list):
+        return [row for row in payload["rows"] if isinstance(row, dict)]
+    if isinstance(payload.get("cameras"), list):
+        return [row for row in payload["cameras"] if isinstance(row, dict)]
+    return []
 
 
 def _redirect_link(raw_links: Any) -> str | None:

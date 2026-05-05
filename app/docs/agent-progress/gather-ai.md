@@ -1,5 +1,476 @@
 # Gather AI Progress
 
+## 2026-05-05 10:49 America/Chicago
+
+Assignment version:
+- 2026-05-05 10:22 America/Chicago
+
+Task:
+- repair the missing `phase2-next-after-next-shortlist.md` defect, reconcile the completed `2026-05-05 09:47 America/Chicago` wave out of the live routing docs, and route the new larger reporting-desk wave without promoting peer/runtime work
+
+What changed:
+- directly reproduced the missing-file defect:
+  - `Test-Path app/docs/phase2-next-after-next-shortlist.md` returned `False`
+  - the prior Gather progress entry claimed the file existed and was cross-linked, but it was absent on disk
+- created `app/docs/phase2-next-after-next-shortlist.md` for real with a bounded post-wave shortlist covering:
+  - `meteoalarm-atom-feeds`
+  - `geoboundaries-admin`
+  - one Data workflow-validation or topic-coverage closure
+  - one aerospace smoke-execution closure item
+  - one webcam post-sandbox comparison follow-on
+- repaired routing/governance truth across the current planning surfaces so the completed `09:47` wave no longer reads as active:
+  - Connect reporting-loop package contract/regression is now completed
+  - Data `world-news-awareness` is now completed
+  - Marine `marineReportBriefPackage` is now completed
+  - Aerospace bounded VAAC advisory report package is now completed
+  - Geospatial `dwd-cap-alerts` is now completed
+  - Features/Webcam Caltrans `candidate-sandbox-importable` pass is now completed
+- routed the new larger wave explicitly to:
+  - Connect: post-wave compatibility and peer/runtime classification sweep
+  - Data: bounded topic-scoped report packet over existing families
+  - Marine: bounded corridor situation/report package
+  - Aerospace: bounded space-weather continuity package
+  - Geospatial: `belgium-rmi-warnings` plus bounded reporting integration
+  - Features/Webcam: NZTA and Arlington sandbox-feasibility plus bounded candidate growth
+- absorbed peer updates into governance/validation docs without promotion:
+  - Atlas media geolocation is now called out as peer and derived-evidence input only
+  - Wonder Statuspage and Mastodon discovery are now called out as candidate/review discovery input only
+
+Files touched:
+- `app/docs/phase2-next-after-next-shortlist.md`
+- `app/docs/reporting-desk-phase2-roadmap.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/source-fusion-reporting-input-inventory.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- `Test-Path app/docs/phase2-next-after-next-shortlist.md` -> `True`
+- `python scripts/alerts_ledger.py --json` -> pass; `5` open low-priority alerts remain (`Atlas AI: 4`, `Manager AI: 1`)
+- `rg -n "phase2-next-after-next-shortlist|world-news-awareness|dwd-cap-alerts|caltrans-cctv-cameras|belgium-rmi-warnings|reporting-loop-package-contract|candidate-only|review-only|media geolocation|Statuspage|Mastodon" app/docs/reporting-desk-phase2-roadmap.md app/docs/phase2-next-biggest-wins-packet.md app/docs/source-fusion-reporting-input-inventory.md app/docs/source-assignment-board.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/source-validation-status.md app/docs/source-workflow-validation-plan.md` -> pass
+- docs diff review only
+
+Blockers or caveats:
+- `belgium-rmi-warnings` still remains verification-sensitive in the board and should stay bounded to one cleaner machine-readable warning slice if the geospatial lane reopens it
+- Atlas media geolocation remains peer/derived-evidence only
+- Wonder Statuspage and Mastodon discovery remain candidate/review discovery only
+- no source or helper surface was over-promoted beyond repo-local evidence
+- no production code changes
+
+Next recommended task:
+- after the new larger wave closes, route Manager from `app/docs/phase2-next-after-next-shortlist.md` instead of reopening completed `world-news-awareness`, `dwd-cap-alerts`, VAAC report, marine report-brief, or Caltrans sandbox work
+
+## 2026-05-05 10:10 America/Chicago
+
+Assignment version:
+- 2026-05-05 09:47 America/Chicago
+
+Task:
+- run a docs-only governance reconciliation so the source-status, routing, reporting-desk roadmap, and next-wave planning surfaces match the latest controlled-lane repo truth and the new larger assignment wave
+
+What changed:
+- created `app/docs/phase2-next-after-next-shortlist.md` as the compact post-wave shortlist after the current larger controlled assignment wave, including bounded next-after-next candidates, hold rules, and a narrow Data follow-on world-news note
+- updated `app/docs/reporting-desk-phase2-roadmap.md` so the current larger controlled wave now matches repo truth:
+  - Connect: reporting-loop package contract and compatibility validation
+  - Data: one bounded world-news awareness family plus review/export coherence
+  - Marine: report-brief plus source-row workflow-evidence closure
+  - Aerospace: bounded VAAC advisory consumer or report follow-through
+  - Geospatial: `dwd-cap-alerts` plus environmental reporting integration
+  - Features/Webcam: Caltrans sandbox-feasibility plus bounded candidate expansion
+- updated `app/docs/phase2-next-biggest-wins-packet.md` so the larger-wave order now routes Manager through the current controlled wave instead of stale reopened source lanes
+- created explicit reporting/fusion inventory truth in `app/docs/source-fusion-reporting-input-inventory.md`, including the completed environmental fusion snapshot, marine fusion snapshot, and aerospace report-brief package surfaces
+- reconciled shared status/routing docs so stale fresh-build suggestions for `propublica`, `global-voices`, `geonet-geohazards`, and `hko-open-weather` are removed from the live next-wave guidance
+- added cross-links for `app/docs/phase2-next-after-next-shortlist.md` into the main routing surfaces so Manager can move from the current larger wave to the next compact shortlist without reopening older batch docs
+
+Files touched:
+- `app/docs/phase2-next-after-next-shortlist.md`
+- `app/docs/reporting-desk-phase2-roadmap.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/source-fusion-reporting-input-inventory.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> pass; `4` open low-priority alerts remain (`Atlas AI: 3`, `Manager AI: 1`)
+- `rg -n "world-news|dwd-cap-alerts|caltrans-cctv-cameras|reporting-loop|workflow-validated|propublica|global-voices|geonet-geohazards|hko-open-weather|candidate-only|review-only" app/docs/reporting-desk-phase2-roadmap.md app/docs/phase2-next-biggest-wins-packet.md app/docs/source-fusion-reporting-input-inventory.md app/docs/source-assignment-board.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/source-validation-status.md app/docs/source-workflow-validation-plan.md` -> pass
+- docs diff review only
+
+Blockers or caveats:
+- current Aerospace browser-smoke execution is still host-blocked and remains weaker than executed workflow evidence
+- helper/runtime/peer/prepared-smoke surfaces remain below source-validation proof
+- no source was promoted beyond repo-local evidence
+- no production code changes
+
+Next recommended task:
+- after the current larger controlled wave closes, let Manager route from `app/docs/phase2-next-after-next-shortlist.md` rather than reopening stale implemented families or candidate-only artifacts
+
+## 2026-05-05 09:41 America/Chicago
+
+Assignment version:
+- 2026-05-04 23:26 America/Chicago
+
+Task:
+- create the reporting-desk Phase 2 roadmap and reconcile source-status/routing docs so question-driven reporting, current domain inputs, and already implemented sources are reflected honestly
+
+What changed:
+- created `app/docs/reporting-desk-phase2-roadmap.md` as the Manager/Gather planning packet for the reporting-desk direction, including:
+  - broad monitoring vs question-driven reporting
+  - current reporting inputs already built across geospatial, marine, aerospace, data, features/webcam, and shared runtime
+  - validation gaps
+  - stale-source routing repairs
+  - top next-wave reporting-desk gaps
+  - current lane truth and routing rules
+- reconciled stale routing so `propublica`, `global-voices`, `geonet-geohazards`, and `hko-open-weather` no longer read like fresh next-wave source builds
+- updated assignment/status truth so `france-vigicrues-hydrometry` now reads as `implemented` backend-first with completed hydrology/corridor report follow-through, while still staying below `workflow-validated`
+- refreshed Data-lane planning truth so the infrastructure/status helper lane is completed metadata-only follow-through and the next Data move is bounded reporting-input coherence, validation/export closure, or one narrow fresh family only
+- refreshed current-lane truth across the shared planning/status surfaces so Marine, Geospatial, Data, Aerospace, Features/Webcam, and Connect point toward reporting/validation closure rather than duplicate source intake
+
+Files touched:
+- `app/docs/reporting-desk-phase2-roadmap.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/source-discovery-public-web-workflow.md`
+- `app/docs/source-discovery-platform-plan.md`
+- `app/docs/wave-llm-interpretation-framework.md`
+- `app/docs/media-evidence-ocr-ai-quality-plan.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json` -> pass
+- required `rg` reconciliation check -> pass
+
+Blockers or caveats:
+- helper/runtime/peer/prepared-smoke/media-OCR surfaces remain below implementation or workflow-validation proof
+- `france-vigicrues-hydrometry` was promoted only to `implemented`, not `workflow-validated`
+- no production code changes
+
+Next recommended task:
+- after this reporting-desk reconciliation lands, let Manager route the next bounded reporting/validation closure pass instead of reopening already implemented source lanes
+
+## 2026-05-04 23:18 America/Chicago
+
+Assignment version read:
+- `2026-05-04 22:59 America/Chicago`
+
+Task:
+- run a docs-only reconciliation pass over Source Discovery, Wave LLM/runtime, media/OCR planning, stale Data routing, and current lane truth so future prompts stop reopening completed or helper-only work as fresh source implementation
+
+What changed:
+- updated `app/docs/source-discovery-public-web-workflow.md` so:
+  - `knowledge-backfill` and reviewed-claim import/apply lineage are now explicit in the implemented workflow summary
+  - knowledge-node clustering/backfill is called out as review infrastructure only, not source approval or trust promotion
+  - reviewed-claim application is called out as auditable review-only lineage rather than a shortcut from stored text to approved truth
+- updated `app/docs/source-discovery-platform-plan.md` so:
+  - `structure-scan`, knowledge-node clustering/backfill, review-claim import/apply, scheduler tick, and Wave-LLM bridge surfaces are now explicitly described as candidate-routing, review, or runtime infrastructure only
+  - provider/runtime controls are explicitly kept in runtime-boundary posture
+  - media/OCR is now described as partially scaffolded but still gated by provenance, review state, derived-evidence caveats, and prompt-injection-safe handling
+- updated `app/docs/wave-llm-interpretation-framework.md` and `app/docs/media-evidence-ocr-ai-quality-plan.md` so:
+  - Wave LLM BYOK/provider config, execution history, request budgets, and runtime controls are explicitly runtime-boundary/review-only
+  - media/OCR remains derived-evidence and review-gated even where repo-local scaffolding exists
+- updated `app/docs/data-ai-feed-rollout-ladder.md` and `app/docs/data-ai-next-routing-after-family-summary.md` so:
+  - stale fresh-next routing for `propublica` and `global-voices` is removed
+  - the active Data lane now reads as metadata-only coherence plus bounded fusion-snapshot or claim-integrity helper work over already implemented feed families
+- updated `app/docs/source-routing-priority-memo.md`, `app/docs/source-assignment-board.md`, `app/docs/source-prompt-index.md`, `app/docs/source-ownership-consumption-map.md`, `app/docs/phase2-next-biggest-wins-packet.md`, `app/docs/source-validation-status.md`, and `app/docs/source-workflow-validation-plan.md` so:
+  - Geospatial no longer reads as if the base-earth review/export package is still the active lane; it now routes the next clean fresh source to `geonet-geohazards` or `hko-open-weather`
+  - Marine no longer reads as if the corridor/chokepoint package is still the active build; it now treats that package as completed workflow-supporting evidence while keeping `france-vigicrues-hydrometry` as the main in-progress source lane
+  - Aerospace no longer reads as if package-coherence is the active build; it now points to smoke/workflow rerun on a launch-capable Windows host while keeping helper/export surfaces below workflow validation
+  - Features/Webcam no longer reads as if promotion-readiness is the active lane; it now points to endpoint-verified hardening plus bounded candidate expansion
+  - Data no longer routes `propublica` or `global-voices` as fresh work and now points to the bounded fusion-snapshot or claim-integrity helper over existing metadata-only review/readiness/export/topic-context/infrastructure-status/long-tail surfaces
+  - Source Discovery, Wave LLM/runtime, and media/OCR planning are now consistently described across status/routing docs as candidate-routing, review-only, runtime-boundary, or derived-evidence surfaces rather than source-validation proof
+
+Files touched:
+- `app/docs/source-discovery-public-web-workflow.md`
+- `app/docs/source-discovery-platform-plan.md`
+- `app/docs/wave-llm-interpretation-framework.md`
+- `app/docs/media-evidence-ocr-ai-quality-plan.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json`
+- `rg -n "structure-scan|knowledge-node|knowledge-backfill|import-claims|provider config|BYOK|media/OCR|review-only|candidate-only|workflow-validated|propublica|global-voices" app/docs/source-discovery-public-web-workflow.md app/docs/source-discovery-platform-plan.md app/docs/source-candidate-to-brief-routing-matrix.md app/docs/source-routing-priority-memo.md app/docs/source-assignment-board.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/source-validation-status.md app/docs/data-ai-next-routing-after-family-summary.md app/docs/data-ai-feed-rollout-ladder.md app/docs/wave-llm-interpretation-framework.md app/docs/media-evidence-ocr-ai-quality-plan.md`
+
+Blockers or caveats:
+- this pass intentionally keeps peer input, runtime surfaces, helper evidence, prepared smoke, and media/OCR plans below implementation or workflow-validation proof
+- current lane truth is based on the latest repo-local controlled-agent progress; if Manager rewrites next-task docs again, the routing layer should be rechecked before any further reconciliation
+
+Next recommended task:
+- wait for the next controlled-agent completion or Manager rewrite, then run one bounded docs-only reconciliation pass so active-lane routing and helper/runtime boundary truth stay aligned
+
+## 2026-05-04 22:45 America/Chicago
+
+Assignment version read:
+- `2026-05-04 22:30 America/Chicago`
+
+Task:
+- run a docs-only stale-routing and feature-occupancy reconciliation pass so the assignment board and planning docs stop steering agents into duplicate feature or source work
+
+What changed:
+- updated `app/docs/source-assignment-board.md` so:
+  - Geospatial now points to the active base-earth reference review/export package instead of stale post-Canada waiting language
+  - Aerospace now points to the active package-coherence/source-health-export parity lane instead of stale evidence-timeline-only wording
+  - Features/Webcam now points to the active promotion-readiness comparison plus bounded candidate-expansion lane instead of stale network-coverage-only wording
+  - Data now treats the Atlas-approved feed expansion plus metadata-only long-tail intake/dedupe posture as completed progress truth and routes the next Data move to bounded consumer/review/export coherence or one narrow fresh feed family only
+  - Batch 5 stale fresh-assignment wording was demoted for `dmi-forecast-aws`, `met-eireann-forecast`, `met-eireann-warnings`, `portugal-ipma-open-data`, `bc-wildfire-datamart`, `usgs-geomagnetism`, and `noaa-ncei-space-weather-portal`
+- updated `app/docs/source-routing-priority-memo.md` so:
+  - Geospatial no longer routes `portugal-ipma-open-data` as a fresh build and instead treats it as a bounded consumer/workflow follow-on
+  - the active Geospatial lane is now the base-earth reference review/export package
+  - the active Data lane is no longer framed as a fresh grouped expansion because the Atlas-approved feed batch plus long-tail posture now appear completed in progress truth
+  - Aerospace and Features/Webcam active-lane wording now matches the newer next-task docs
+- updated `app/docs/source-prompt-index.md` so:
+  - Batch 5 status notes now treat `portugal-ipma-open-data` as repo-present backend-first follow-on work
+  - active-lane guidance now matches the newer Geospatial, Aerospace, Features/Webcam, and Data assignment truth
+  - a compact feature-deconfliction note now states that `Evidence Timeline`, `Review Packet Export`, `Source Candidate Intake Queue`, `Source Health Console`, and `Attention Queue Unifier` are partially occupied already, while `Source Fusion Snapshot` remains open globally but should compose existing domain packages
+- updated `app/docs/source-ownership-consumption-map.md` so:
+  - `portugal-ipma-open-data` is explicitly included in the repo-local implemented Batch 5 geospatial set
+  - feature-occupancy ownership notes now steer future work toward cross-domain normalization rather than duplicate domain-local helper builds
+- updated `app/docs/phase2-next-biggest-wins-packet.md` so:
+  - the Data lane now points to source-intelligence and review/export coherence instead of a completed grouped feed expansion
+  - the Geospatial lane now points to the active base-earth reference review/export package
+  - feature-occupancy notes now make the partially occupied cross-domain ideas explicit and reserve `Source Fusion Snapshot` for composition work rather than blank-slate rebuilding
+
+Files touched:
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json`
+- `rg -n "Evidence Timeline|Review Packet Export|Source Candidate Intake Queue|Source Health Console|Attention Queue Unifier|Source Fusion Snapshot|dmi-forecast-aws|met-eireann-forecast|met-eireann-warnings|portugal-ipma-open-data|bc-wildfire-datamart|usgs-geomagnetism|noaa-ncei-space-weather-portal" app/docs/source-assignment-board.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/phase2-next-biggest-wins-packet.md app/docs/manager-ai-project-deficiency-review.md`
+
+Blockers or caveats:
+- alerts ledger now reports `3` open low-priority alerts rather than the previously clean zero-alert state
+- this pass corrected docs truth only and did not change production code, rerun source-specific validation suites, or promote helper/runtime/peer-input surfaces into implementation or workflow-validation proof
+- `Source Fusion Snapshot` remains globally open, but future work should compose existing domain packages instead of replacing them
+
+Next recommended task:
+- wait for the next controlled-agent completion or Manager rewrite, then run one bounded reconciliation pass so assignment, routing, and feature-occupancy truth stay aligned with the latest lane state
+
+## 2026-05-04 22:27 America/Chicago
+
+Assignment version read:
+- `2026-05-04 22:01 America/Chicago`
+
+Task:
+- finish the larger Phase 2 governance/routing reconciliation packet by closing the remaining status drift between completed controlled-agent progress, Batch 5 backlog truth, Atlas-approved cyber/internet feed input, and Wonder long-tail discovery guidance
+
+What changed:
+- updated `app/docs/source-assignment-board.md` so:
+  - `canada-cap-alerts` now consistently reads as `implemented` in both the main board row and the aggregate status buckets
+  - the stale `Assigned` bucket entry for `canada-cap-alerts` was removed
+  - current lane truth remains aligned with the latest controlled-agent progress for Connect, Data, Marine, Aerospace, Features/Webcam, and the completed Geospatial Canada package
+- kept the broader docs-only reconciliation from the same assignment intact across:
+  - `app/docs/source-validation-status.md`
+  - `app/docs/source-workflow-validation-plan.md`
+  - `app/docs/source-routing-priority-memo.md`
+  - `app/docs/source-prompt-index.md`
+  - `app/docs/source-ownership-consumption-map.md`
+  - `app/docs/phase2-next-biggest-wins-packet.md`
+- preserved the status boundary that completed helper/runtime/peer-input surfaces remain below source workflow validation
+
+Files touched:
+- `app/docs/source-assignment-board.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json`
+- `rg -n "^### Assigned|canada-cap-alerts|Batch 5|dmi-forecast-aws|met-eireann|opw|belgium-rmi|ipma|bc-wildfire|natural-earth|geoBoundaries|GADM|GTFS|OpenSanctions|FDSN|long-tail|Atlas|Wonder|workflow-validated" app/docs/source-assignment-board.md app/docs/source-validation-status.md app/docs/source-workflow-validation-plan.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/phase2-next-biggest-wins-packet.md`
+
+Blockers or caveats:
+- this pass corrected documentation truth only; it did not change production code or rerun source-specific validation suites
+- `canada-cap-alerts` is now consistently below `workflow-validated`; the completed Canada review/export package does not by itself promote it beyond implemented backend-first status
+- Atlas-approved inputs and Wonder long-tail guidance remain routing/governance input only, not implementation or validation proof
+
+Next recommended task:
+- wait for the next controlled-agent completion or Manager rewrite, then run one bounded reconciliation pass so assignment, validation, and routing docs stay aligned with current lane truth
+
+## 2026-05-04 22:21 America/Chicago
+
+Assignment version read:
+- `2026-05-04 22:01 America/Chicago`
+
+Task:
+- build a larger Phase 2 governance/routing reconciliation packet across the latest completed controlled-agent wave, Batch 5 backlog truth, Atlas-approved cyber/internet feed input, and Wonder long-tail discovery guidance without over-promoting anything
+
+What changed:
+- updated `app/docs/source-assignment-board.md` so:
+  - current-next lane truth now reflects the newer active assignments for Connect, Data, Marine, Aerospace, and Features/Webcam
+  - Geospatial is no longer routed as a fresh Canada CAP build because Canada CAP, Canada GeoMet, and the bounded Canada context package now appear repo-present/completed in progress truth
+  - `canada-cap-alerts` is now tracked as `implemented`, not `assigned`
+  - status buckets were reconciled so `canada-cap-alerts`, `canada-geomet-ogc`, and `bc-wildfire-datamart` no longer sit in stale `assignment-ready` aggregate lists
+  - Batch 5 intake now distinguishes fresh assignment-ready rows from implemented follow-on-only rows
+- updated `app/docs/source-validation-status.md` so:
+  - added an evidence-table row for `canada-cap-alerts`
+  - added helper-status coverage for the completed Data infrastructure/status context package
+  - added helper-status coverage for `hydrology-source-health-report`
+- updated `app/docs/source-workflow-validation-plan.md` so:
+  - Data workflow notes now treat the infrastructure/status context package as completed and the next active Data lane as Atlas-approved feed expansion plus metadata-only long-tail intake/dedupe posture
+  - Marine workflow notes now include the completed `hydrologySourceHealthReport` helper
+  - Features/Webcam notes now reflect the active coverage/review-priority package rather than only the older candidate-expansion lane
+- updated `app/docs/source-routing-priority-memo.md`, `app/docs/source-prompt-index.md`, `app/docs/source-ownership-consumption-map.md`, and `app/docs/phase2-next-biggest-wins-packet.md` so:
+  - routing no longer treats completed Canada or infrastructure/status work as fresh intake
+  - Batch 5 geospatial backlog now treats `dmi-forecast-aws`, `met-eireann-forecast`, `met-eireann-warnings`, `bc-wildfire-datamart`, and `usgs-geomagnetism` as implemented follow-on-only lanes where repo-local evidence exists
+  - Atlas-approved public cyber/internet expansion is now the active Data lane
+  - Wonder long-tail strategy remains candidate-intake/review guidance only, not validation proof and not crawling authorization
+
+Files touched:
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json`
+- `rg -n "Batch 5|dmi-forecast-aws|met-eireann|opw|belgium-rmi|ipma|bc-wildfire|natural-earth|geoBoundaries|GADM|GTFS|OpenSanctions|FDSN|long-tail|Atlas|Wonder|workflow-validated" app/docs/source-assignment-board.md app/docs/source-validation-status.md app/docs/source-workflow-validation-plan.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/phase2-next-biggest-wins-packet.md`
+
+Blockers or caveats:
+- Connect, Data, and Marine had newer completed progress truth than several routing surfaces were using; this pass corrected the docs, not the code
+- Aerospace and Features/Webcam remain active under newer `2026-05-04 21:52 America/Chicago` assignments and were not promoted beyond their current evidence
+- Wonder long-tail strategy and Atlas-approved inputs remain routing/governance input only until the normal implementation and validation lifecycle is completed
+- no candidate-only, helper-only, prepared-smoke, peer, or runtime-boundary evidence was promoted into workflow-validation proof
+
+Next recommended task:
+- wait for the next controlled-agent completion or Manager rewrite, then run one bounded reconciliation pass so the updated board, prompt index, validation report, and routing packet stay aligned with the new active lane truth
+
+## 2026-05-04 21:55 America/Chicago
+
+Assignment version read:
+- `2026-05-04 21:43 America/Chicago`
+
+Task:
+- reconcile the mixed current wave into the shared status, validation, workflow, prompt, ownership, and routing docs while keeping Atlas runtime operator-console work as peer/runtime input pending Connect validation
+
+What changed:
+- updated `app/docs/phase2-next-biggest-wins-packet.md` so:
+  - Data now clearly routes the active metadata-only infrastructure/status context package over `cloudflare-radar`, `netblocks`, and `apnic-blog`
+  - Geospatial keeps `canada-cap-alerts` as the active fresh source assignment and moves the third slot to bounded `bc-wildfire-datamart` follow-through rather than stale helper-only wording
+  - Marine now reflects the completed `hydrologySourceHealthWorkflow` package with a bounded report/export consumer next
+  - Aerospace now keeps `aerospaceWorkflowValidationEvidenceSnapshot` as completed accounting evidence with the stale assignment-marker caveat and Marine-owned lint note preserved
+  - peer-note wording now keeps the Atlas runtime operator-console slice explicitly pending Connect validation
+- updated `app/docs/source-validation-status.md` so:
+  - added a dedicated helper-status section for `hydrology-source-health-workflow`
+  - added a dedicated helper-status section for `aerospace-workflow-validation-evidence-snapshot`
+  - added a dedicated peer/runtime-status section for the Atlas runtime operator-console slice as `unknown` pending Connect validation
+  - refreshed the Features/Webcam sandbox-candidate summary caveats to include Baton Rouge, Vancouver, Arlington, and Queensland current lifecycle truth
+- updated `app/docs/source-workflow-validation-plan.md` so:
+  - cross-lane helper notes now include the completed `hydrologySourceHealthWorkflow` package
+  - aerospace helper notes now include `aerospaceWorkflowValidationEvidenceSnapshot` plus the stale assignment-marker and Marine-owned lint caveats
+  - current-evidence split now reflects the active Data infrastructure/status package, the completed Features candidate-expansion wave, and the Atlas runtime operator-console slice as peer/runtime input only
+
+Files touched:
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json`
+- `rg -n "canada-geomet-ogc|canada-cap-alerts|hydrologySourceHealthWorkflow|aerospaceWorkflowValidationEvidenceSnapshot|cloudflare-radar|netblocks|apnic-blog|operator console|Atlas|workflow-validated|Features/Webcam" app/docs/source-assignment-board.md app/docs/source-validation-status.md app/docs/source-workflow-validation-plan.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/phase2-next-biggest-wins-packet.md`
+
+Blockers or caveats:
+- Atlas runtime operator-console work remains peer/runtime input only until Connect records current validation evidence
+- Aerospace helper evidence remains below `workflow-validated`; prepared or accounted-for smoke is still weaker than executed smoke
+- Features/Webcam candidate expansion is complete in progress truth, but the candidate set remains inactive and unscheduled
+- `canada-cap-alerts` remains the active fresh geospatial source assignment and was not reclassified upward in this pass
+
+Next recommended task:
+- wait for the next controlled-agent completion, then do one bounded status reconciliation pass so Connect validation, the active Data infrastructure/status package, and the active `canada-cap-alerts` geospatial lane stay synchronized across all planning surfaces
+
+## 2026-05-04 21:24 America/Chicago
+
+Assignment version read:
+- `2026-05-02 15:45 America/Chicago`
+
+Task:
+- reconcile the latest partial wave and provider-runtime validation evidence into the shared source/status/workflow/routing docs without over-promoting helper surfaces, peer input, or in-flight lanes
+
+What changed:
+- updated `app/docs/source-assignment-board.md` so:
+  - Data now explicitly reflects the implemented Data AI topic/context lens and export-safe topic lines as metadata-only workflow support inside `dataAiSourceIntelligence`
+  - Marine no longer routes `netherlands-rws-waterinfo` as the active marine build lane because Marine progress now shows a completed bounded helper/export follow-on
+  - Connect now records the validated provider/runtime boundary posture for `openai`, `openrouter`, `anthropic`, `xai`, `google`, `openclaw`, and `ollama` as runtime-boundary truth only
+- updated `app/docs/source-validation-status.md` so:
+  - `data-ai-source-intelligence` now explicitly includes the bounded topic/context lens and export-safe topic-line posture
+  - added helper-status coverage for `environmental-weather-observation-review-queue` and `environmental-weather-observation-export-bundle`
+  - `source-discovery-runtime-surface` now records Connect-validated provider/runtime gating semantics without turning provider reachability into source-validation proof
+  - `netherlands-rws-waterinfo` now reflects the completed bounded helper/export follow-on while remaining below workflow validation
+- updated `app/docs/source-workflow-validation-plan.md` so:
+  - Data workflow notes now include the implemented topic/context lens inside `dataAiSourceIntelligence`
+  - cross-lane helper notes now include the geospatial weather/observation review queue and export bundle
+  - source-discovery memory notes now include Connect-owned provider/runtime boundary truth
+  - Waterinfo now reflects completed helper/export follow-on evidence while staying below `workflow-validated`
+- updated `app/docs/source-routing-priority-memo.md`, `app/docs/source-prompt-index.md`, and `app/docs/source-ownership-consumption-map.md` so:
+  - Waterinfo follow-on work is now framed as bounded validation/export follow-through rather than an active fresh helper build
+  - Data routing now reflects the implemented topic/context lens/export-safe topic lines
+  - Connect routing now reflects that provider/runtime validation is complete and remains runtime-boundary evidence only
+- updated `app/docs/phase2-next-biggest-wins-packet.md` so:
+  - Connect no longer routes already-completed provider/runtime validation as fresh work and instead routes doc alignment and warning-reduction follow-through
+  - Geospatial now routes the implemented weather/observation review/export bundle as bounded follow-through before fresh intake, with `canada-cap-alerts` and `canada-geomet-ogc` as the fresh next-source options
+  - Marine now routes Waterinfo as validation/export follow-through rather than a new consumer/helper build
+
+Files touched:
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- docs diff review only
+- `python scripts/alerts_ledger.py --json`
+- `rg -n "Data AI topic|weather/observation|runtime service|provider|OpenRouter|Anthropic|xAI|Google|OpenClaw|workflow-validated" app/docs/source-assignment-board.md app/docs/source-validation-status.md app/docs/source-workflow-validation-plan.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/phase2-next-biggest-wins-packet.md`
+
+Blockers or caveats:
+- Aerospace selected-target/report-package workflow still stays in-flight because no newer progress entry explicitly closes it
+- Features/Webcam non-sandbox candidate summary still stays in-flight because no newer progress entry explicitly closes it
+- Waterinfo was not promoted beyond `implemented-not-fully-validated`; the completed helper/export follow-on is still weaker than explicit workflow validation
+- provider/runtime evidence remains Connect-owned runtime-boundary truth only and was not treated as source-validation proof
+
+Next recommended task:
+- use `app/docs/phase2-next-biggest-wins-packet.md` as the current Manager routing surface and keep the next Gather pass limited to the next controlled-wave status reconciliation or one bounded held-source verification memo
+
 ## 2026-05-02 12:58 America/Chicago
 
 Assignment version read:

@@ -1,5 +1,478 @@
 # Data AI Progress
 
+## 2026-05-05 10:22 America/Chicago
+
+Assignment version read:
+- `2026-05-05 10:22 America/Chicago`
+
+Task:
+- build one bounded topic-scoped Data AI report packet over the existing metadata-only family, topic, fusion, and report surfaces
+
+Status:
+- completed
+
+What changed:
+- added a pure `buildDataAiTopicReportPacket` helper in `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+- the new helper builds only on existing Data AI metadata-only surfaces:
+  - recent-items metadata
+  - readiness/export snapshot
+  - family review
+  - review queue
+  - topic/context lens
+  - fusion / claim-integrity snapshot
+  - report-brief package
+- the helper supports explicit topic selection with `topicId` and otherwise falls back to the first active topic from the existing topic lens
+- the packet preserves:
+  - active topic label and filter posture
+  - source-family coverage by evidence class
+  - source ids, source modes, and source health posture
+  - metadata-only recent evidence lines built from source ids, source category, evidence basis, source health, and published timestamp only
+  - dedupe and corroboration posture
+  - review and export-readiness gaps
+  - `observe`, `orient`, `prioritize`, and `explain`
+  - explicit does-not-prove lines
+- threaded the new packet into the existing Data AI report surface in `app/client/src/features/inspector/InspectorPanel.tsx` as a compact `Topic Report Packet` subsection under the current `Report Brief Package`
+- extended `app/client/scripts/dataAiSourceIntelligenceRegression.mjs` to cover:
+  - default topic selection from the active topic lens
+  - explicit world-news topic selection
+  - deterministic section ordering
+  - URL-free export lines
+  - inert metadata-only recent evidence lines
+  - no scoring drift
+  - corroboration and does-not-prove guardrails
+- updated the Data AI docs so the topic packet is recorded as existing metadata-only workflow support rather than a new feed family or truth-weighting surface
+
+Guardrails preserved:
+- no new feed family, no new backend route, and no fresh panel were added
+- the packet uses existing family/topic/fusion/report surfaces only and does not reopen Source Discovery, long-tail candidate intake, reviewed-claim lineage, Statuspage/Mastodon discovery, or platform-root discovery as truth or source-promotion surfaces
+- metadata-only recent evidence lines do not include article bodies, linked-page URLs, raw feed dumps, titles, or summaries
+- duplicate volume does not become independent corroboration, and media or commentary coverage does not become field truth, impact proof, wrongdoing proof, intent proof, attribution proof, legal status, urgency, remediation priority, or required action
+- no headline-based severity scoring or action guidance was added
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Files touched:
+- `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+- `app/client/src/features/inspector/InspectorPanel.tsx`
+- `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`
+- the docs listed above
+- `app/client/src/features/app-shell/AppShell.tsx` for one unrelated dependency-array cleanup required to clear the current client lint gate
+
+Validation:
+- `cmd /c npm.cmd run test:data-ai-source-intelligence` -> pass
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- the packet remains workflow-supporting and contract-tested only; no explicit smoke/manual workflow-validation record was added
+- no live-network tests, browser automation, broad crawling, linked-page fetching, article-body extraction, staging, commit, or push were added
+
+## 2026-05-05 09:47 America/Chicago
+
+Assignment version read:
+- `2026-05-05 09:47 America/Chicago`
+
+Task:
+- add one bounded `world-news-awareness` family on the existing Data AI feed stack and thread it through the current review, source-intelligence, fusion, and report surfaces
+
+Status:
+- completed
+
+What changed:
+- added one bounded `world-news-awareness` family to the existing Data AI aggregate registry in `app/server/src/services/data_ai_feed_registry.py`
+- the exact validated source ids and feed URLs used are:
+  - `bbc-world` -> `https://feeds.bbci.co.uk/news/world/rss.xml`
+  - `guardian-world` -> `https://www.theguardian.com/world/rss`
+  - `aljazeera-all` -> `https://www.aljazeera.com/xml/rss/all.xml`
+  - `dw-all` -> `https://rss.dw.com/rdf/rss-en-all`
+  - `france24-en` -> `https://www.france24.com/en/rss`
+  - `npr-world` -> `https://feeds.npr.org/1004/rss.xml`
+- added six deterministic feed fixtures under `app/server/data/data_ai_multi_feeds` with prompt-injection-like, quote-heavy, attribution-heavy, editorial, and HTML-bearing text that stays inert
+- extended `app/server/tests/test_data_ai_multi_feed.py` so the shared recent-items route, family overview, readiness/export snapshot, and family review continue to preserve:
+  - contextual-only evidence basis
+  - media-awareness caveats
+  - HTML/script stripping in normalized summaries
+  - metadata-only export behavior
+  - family and source counts after the six-source expansion
+- updated the client topic/fusion/report helper path in `app/client/src/features/inspector/dataAiSourceIntelligence.ts` with a bounded `world-news` metadata-only topic so the new family is visible in the existing source-intelligence stack without creating a new panel
+- extended `app/client/scripts/dataAiSourceIntelligenceRegression.mjs` so the existing metadata-only client consumer explicitly exercises the `world-news-awareness` family end to end
+
+Guardrails preserved:
+- the work stayed on the existing `GET /api/feeds/data-ai/recent` route and existing `overview`, `readiness-export`, `review`, source-intelligence, fusion, and report surfaces only
+- media reporting remains contextual awareness only, not primary event truth, field confirmation, impact certainty, attribution proof, legal certainty, or required-action guidance
+- quoted, attribution-heavy, imperative-looking, and editorially framed feed text remains inert and cannot change source health, evidence basis, validation state, routing, or repo behavior
+- no live-network tests, crawling, linked-page fetching, article-body extraction, broad multi-family expansion, staging, commit, or push were added
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `cmd /c npm.cmd run test:data-ai-source-intelligence`
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q`
+- `python -m compileall app/server/src`
+- `cmd /c npm.cmd run lint`
+- `cmd /c npm.cmd run build`
+- `python scripts/alerts_ledger.py --json`
+
+## 2026-05-04 23:26 America/Chicago
+
+Assignment version read:
+- `2026-05-04 23:26 America/Chicago`
+
+Task:
+- build one bounded Data AI report-brief helper on top of the existing metadata-only fusion / claim-integrity snapshot and related source-intelligence surfaces
+
+Status:
+- completed
+
+What changed:
+- added a pure `buildDataAiReportBriefSummary` helper in `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+- the new helper builds directly on the existing Data AI metadata-only stack instead of adding feeds, backend routes, or Source Discovery backend mechanics:
+  - source intelligence
+  - readiness/export
+  - family review
+  - review queue
+  - topic/context lens
+  - scoped infrastructure/status context
+  - long-tail intake posture
+  - fusion / claim-integrity snapshot
+- the report-brief helper produces deterministic report-ready sections only:
+  - `observe`
+  - `orient`
+  - `prioritize`
+  - `explain`
+- extended `app/client/src/features/inspector/InspectorPanel.tsx` so the existing Data AI Source Intelligence card now includes a compact `Report Brief Package` subsection and no new large panel
+- extended `app/client/scripts/dataAiSourceIntelligenceRegression.mjs` to assert deterministic section order, report-ready section lines, URL-free export lines, no hostile-text leakage, and no scoring drift
+
+Report-brief package behavior:
+- `observe` preserves source families, active filters, source mode, and current source-health posture
+- `orient` preserves evidence-basis posture, methodology posture, corroboration posture, and candidate-vs-validated posture
+- `prioritize` preserves review counts, readiness gaps, prompt-injection posture, attention posture, and scoped infrastructure/status attention context
+- `explain` preserves caveats, does-not-prove language, and export-safe summary lines
+- all lines remain metadata-only and export-safe; no article bodies, linked-page URLs, quoted snippets, raw feed dumps, or free-form source text are surfaced
+
+Guardrails preserved:
+- no new feeds were added and no implemented feed families were reopened
+- no Source Discovery structure-scan, candidate intake, knowledge-backfill, or review-claim lineage mechanics were duplicated inside Data AI
+- prompt-injection-like source text remains inert and cannot change routing, health, validation state, or app behavior
+- duplicate-heavy or repeated coverage does not become independent corroboration, truth weighting, severity, threat, attribution, legal, remediation, or action scoring
+- methodology-bound provider or measurement language does not become outage truth or whole-internet truth
+- the package remains workflow-supporting metadata only and does not prove exploitation, compromise, incident impact, attribution, legal status, urgency, remediation priority, outage truth, or required action
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Files touched:
+- `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+- `app/client/src/features/inspector/InspectorPanel.tsx`
+- `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`
+- docs listed above
+
+Validation:
+- `cmd /c npm.cmd run test:data-ai-source-intelligence` -> pass
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- this remains contract-tested and workflow-supporting only; no smoke/manual workflow validation was added
+- no live-network tests, browser automation, new feeds, broad crawling, linked-page fetching, article-body extraction, staging, commits, or pushes were added
+
+## 2026-05-04 22:59 America/Chicago
+
+Assignment version read:
+- `2026-05-04 22:59 America/Chicago`
+
+Task:
+- build one bounded Data AI fusion-snapshot or claim-integrity helper over the existing metadata-only family review, readiness/export, topic/context, infrastructure/status, and long-tail posture surfaces
+
+Status:
+- completed
+
+What changed:
+- added a pure `buildDataAiFusionSnapshotSummary` helper in `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+- the new helper composes the already implemented metadata-only Data AI surfaces instead of adding a new backend route or duplicating Source Discovery backend behavior:
+  - source intelligence
+  - family review
+  - readiness/export
+  - topic/context lens
+  - scoped infrastructure/status context
+  - long-tail intake posture
+- extended `DataAiSourceIntelligenceSummary` to preserve selected family ids and selected source ids so the new fusion package can carry filter posture forward explicitly
+- extended `app/client/src/features/inspector/InspectorPanel.tsx` so the existing Data AI Source Intelligence card now includes a compact `Fusion / Claim Integrity Snapshot` subsection and no new large panel
+- extended `app/client/scripts/dataAiSourceIntelligenceRegression.mjs` to assert family/source filter preservation, active topic posture, infrastructure-source preservation, corroboration posture, candidate-vs-validated posture, methodology caveats, does-not-prove language, URL-free export lines, and no scoring drift
+
+Fusion / claim-integrity package behavior:
+- preserves family ids and source ids from the existing readiness/export surface
+- preserves source mode, family/source health posture, prompt-injection posture, review/readiness counts, export-readiness gaps, and active topic/context posture
+- carries infrastructure methodology caveats forward from the scoped `cloudflare-radar`, `netblocks`, and `apnic-blog` package
+- carries long-tail candidate-vs-validated, provenance, duplicate-cluster, and `as_detailed_in_addition_to`-style relationship semantics forward as metadata-only posture
+- emits export-safe lines only; no article bodies, linked-page URLs, raw feed dumps, quoted snippets, or free-form source text are surfaced
+
+Guardrails preserved:
+- no feed families were reopened and no new feeds were added
+- no Source Discovery structure-scan, candidate intake, knowledge-backfill, or review-claim lineage mechanics were rebuilt inside Data AI
+- prompt-injection-like source text remains inert and cannot change routing, health, validation state, or app behavior
+- duplicate-heavy or repeated coverage does not become independent corroboration, truth weighting, severity, threat, attribution, legal, remediation, or action scoring
+- methodology-bound provider or measurement language does not become outage truth or whole-internet truth
+- the package remains workflow-supporting metadata only and does not prove exploitation, compromise, incident impact, legal status, attribution, urgency, remediation priority, outage truth, or required action
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Files touched:
+- `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+- `app/client/src/features/inspector/InspectorPanel.tsx`
+- `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`
+- docs listed above
+
+Validation:
+- `cmd /c npm.cmd run test:data-ai-source-intelligence` -> pass
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> failed due an unrelated current-worktree type mismatch in `app/client/src/features/app-shell/AppShell.tsx` at `TS2322`; this file was already modified outside the Data AI slice
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- this remains contract-tested and workflow-supporting only; no smoke/manual workflow validation was added
+- the required client build is currently blocked by unrelated in-progress work in `AppShell.tsx`, not by the Data AI fusion/claim-integrity helper
+- no live-network tests, browser automation, new feeds, broad crawling, linked-page fetching, article-body extraction, staging, commits, or pushes were added
+
+## 2026-05-04 22:01 America/Chicago
+
+Assignment version read:
+- `2026-05-04 22:01 America/Chicago`
+
+Task:
+- add the next Atlas-approved public cyber/internet RSS/Atom feed batch plus a bounded metadata-only long-tail intake/dedupe posture package on the existing Data AI surfaces
+
+Status:
+- completed
+
+What changed:
+- added six new public no-auth cyber/internet feed sources to the existing Data AI aggregate registry:
+  - `trailofbits-blog` -> `https://blog.trailofbits.com/index.xml`
+  - `mozilla-hacks` -> `https://hacks.mozilla.org/feed/`
+  - `chromium-blog` -> `https://blog.chromium.org/feeds/posts/default`
+  - `webdev-google` -> `https://web.dev/static/blog/feed.xml`
+  - `gitlab-releases` -> `https://about.gitlab.com/releases.xml`
+  - `github-changelog` -> `https://github.blog/changelog/feed/`
+- grouped those six sources under the new bounded family `cyber-internet-platform-watch` in `app/server/src/services/data_ai_feed_registry.py`
+- added fixture-first coverage for all six feeds under `app/server/data/data_ai_multi_feeds` with prompt-injection-like, release-like, guidance-like, and operational-looking text that stays inert
+- extended `app/server/tests/test_data_ai_multi_feed.py` so the new family appears in recent-items, family overview, readiness/export, family review, and review-queue-adjacent guardrail coverage with updated counts and export-safe assertions
+- extended `app/client/src/features/inspector/dataAiSourceIntelligence.ts` with a pure `buildDataAiLongTailDiscoverySummary` helper and updated the topic lens so the new family is grouped under the bounded cyber topic
+- extended `app/client/src/features/inspector/InspectorPanel.tsx` so the existing Data AI Source Intelligence card now includes a metadata-only `Long-Tail Intake Posture` subsection built from current readiness/review/review-queue metadata only
+- extended `app/client/scripts/dataAiSourceIntelligenceRegression.mjs` to assert the new long-tail helper preserves candidate-vs-validated, provenance, duplicate-cluster, and `as_detailed_in_addition_to`-style related-coverage semantics without URL leakage or crawling drift
+
+New feed behavior and safety:
+- all six sources remain `contextual` evidence only
+- release notes, changelogs, browser guidance, research notes, and platform updates remain untrusted source text and do not become exploit proof, incident confirmation, standards compliance truth, or required-action guidance
+- normalized recent items preserve source id, source name, source category, feed URL, item timestamps, source mode, source health, evidence basis, caveats, tags, and export-safe metadata
+- prompt-injection-like text remains inert, HTML/script/code markup is stripped from normalized summaries, and export-safe lines stay metadata-only and URL-free
+- dedupe posture remains source-scoped on the aggregate route; the new long-tail helper explicitly keeps duplicate-cluster, supporting-source-count, independent-source-count, and related-coverage semantics as future metadata posture only rather than live crawling or source promotion
+
+Long-tail intake/dedupe posture:
+- candidate discoveries remain candidate/review only until separate implementation and validation evidence exists
+- provenance posture stays explicit: family ids, source ids, source mode, source health, evidence basis, caveats, and dedupe posture remain visible
+- duplicate volume must not masquerade as independent corroboration
+- `as_detailed_in_addition_to`-style related coverage remains metadata-only linkage, not truth, severity, attribution, or action evidence
+- no broad crawling, linked-page fetching, or article-body extraction was added
+
+Skipped candidates:
+- none; six clean repo-local approved cyber/internet candidates were available and implemented within the assignment cap
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/data-ai-rss-batch3-routing-packets.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Files touched:
+- `app/server/src/services/data_ai_feed_registry.py`
+- `app/server/tests/test_data_ai_multi_feed.py`
+- `app/server/data/data_ai_multi_feeds/trailofbits_blog.xml`
+- `app/server/data/data_ai_multi_feeds/mozilla_hacks.xml`
+- `app/server/data/data_ai_multi_feeds/chromium_blog.xml`
+- `app/server/data/data_ai_multi_feeds/webdev_google.xml`
+- `app/server/data/data_ai_multi_feeds/gitlab_releases.xml`
+- `app/server/data/data_ai_multi_feeds/github_changelog.xml`
+- `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+- `app/client/src/features/inspector/InspectorPanel.tsx`
+- `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`
+- docs listed above
+
+Validation:
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py -q` -> pass
+- `cmd /c npm.cmd run test:data-ai-source-intelligence` -> pass
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- this remains contract-tested and workflow-supporting only; no smoke/manual workflow validation was added
+- no live-network tests, browser automation, broad crawling, linked-page fetching, article-body extraction, private URLs, tokenized feeds, staging, commits, or pushes were added
+
+## 2026-05-04 21:43 America/Chicago
+
+Assignment version read:
+- `2026-05-04 21:43 America/Chicago`
+
+Task:
+- add a metadata-only internet infrastructure/status context package over the already implemented `cloudflare-radar`, `netblocks`, and `apnic-blog` family
+
+What changed:
+- extended `app/client/src/features/inspector/dataAiSourceIntelligence.ts` with a pure `buildDataAiInfrastructureStatusContextSummary` helper plus stable infrastructure-family constants
+- extended `app/client/src/features/inspector/InspectorPanel.tsx` so the existing Data AI Source Intelligence card now includes a bounded Infrastructure/Status Context subsection built from filtered readiness/export, review, review-queue, and recent-item metadata over `family=infrastructure-status` and `source=cloudflare-radar,netblocks,apnic-blog`
+- extended `app/client/scripts/dataAiSourceIntelligenceRegression.mjs` with scoped infrastructure/status fixture data and assertions for active filters, methodology caveats, prompt-injection inertness, no URL leakage, no whole-internet truth drift, no operator-confirmed outage drift, and no scoring language
+- updated `app/docs/cyber-context-sources.md`, `app/docs/data-ai-feed-rollout-ladder.md`, and `app/docs/data-ai-next-routing-after-family-summary.md` to document the new metadata-only infrastructure/status package
+- updated `app/docs/source-validation-status.md` and `app/docs/source-assignment-board.md` so repo truth now reflects a stable metadata-only infrastructure/status consumer path while staying below workflow-validated
+
+Infrastructure/status context package behavior:
+- uses only existing backend metadata surfaces and scoped filters; it does not reopen ingestion or add new feeds
+- preserves source ids, source mode, source health, evidence bases, methodology caveats, recent-item counts, dedupe posture, prompt-injection posture, export-readiness gaps, active filters, and export-safe lines
+- keeps `cloudflare-radar`, `netblocks`, and `apnic-blog` explicitly methodology-bound and contextual only
+- renders metadata-only summaries and export-safe lines without surfacing linked-page URLs, raw feed text, article bodies, or free-form recent-item text
+
+Prompt-injection, no-leakage, methodology, dedupe, and scoring guardrails:
+- hostile or instruction-like infrastructure/status item text stays inert and does not change source health, grouping, validation state, routing, or app behavior
+- provider analysis is not converted into whole-internet truth, operator-confirmed outage truth, severity, threat, incident, attribution, legal, remediation, or action scoring
+- methodology caveats remain explicit for provider-specific analysis, measurement-dependent reporting, and routing/policy context
+- dedupe posture remains source-scoped and export-safe lines remain URL-free metadata summaries only
+
+Docs updated:
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Files touched:
+- `app/client/src/features/inspector/dataAiSourceIntelligence.ts`
+- `app/client/src/features/inspector/InspectorPanel.tsx`
+- `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`
+- `app/docs/cyber-context-sources.md`
+- `app/docs/data-ai-feed-rollout-ladder.md`
+- `app/docs/data-ai-next-routing-after-family-summary.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `cmd /c npm.cmd run test:data-ai-source-intelligence` -> pass
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- this remains contract-tested and workflow-supporting only; no smoke/manual workflow validation was added
+- no new feed sources, live-network tests, broad polling, linked-page fetching, article-body extraction, staging, commits, or pushes were added
+- the prior `2026-05-02 15:45 America/Chicago` report-snapshot backfill remains unresolved because it cannot be reconstructed safely from repo-local evidence alone
+
+## 2026-05-04 21:17 America/Chicago
+
+Assignment version read:
+- `2026-05-04 21:17 America/Chicago`
+
+Task:
+- reconcile the already-implemented official cyber advisory family with current source-status truth and explicit metadata-only consumer coverage
+
+What changed:
+- confirmed the repo already contained the bounded official cyber advisory family implementation for `ncsc-uk-all`, `cert-fr-alerts`, and `cert-fr-advisories` in the shared Data AI registry, fixtures, tests, and docs, so I did not duplicate the source build
+- strengthened the focused Data AI regression in `app/client/scripts/dataAiSourceIntelligenceRegression.mjs` so the current metadata-only consumer path explicitly covers `ncsc-uk-all`, `cert-fr-alerts`, and `cert-fr-advisories`
+- updated `app/docs/source-validation-status.md` to reflect current repo truth: these implemented Data AI waves and helpers now have a stable metadata-only consumer path, but still remain below workflow-validated because no smoke/manual workflow evidence exists
+- updated `app/docs/source-assignment-board.md` to reflect the current Data AI source-intelligence plus topic/context lens posture
+
+Official family semantics confirmed:
+- `ncsc-uk-all`
+  - official NCSC UK mixed guidance/advisory/news context
+  - evidence basis remains `contextual`
+  - feed text remains untrusted and does not prove exploitation, victimization, incident confirmation, attribution, impact, or required action
+- `cert-fr-alerts`
+  - official CERT-FR security alert context in French
+  - evidence basis remains `advisory`
+  - feed text remains untrusted and does not prove exploitation, compromise, victim impact, attribution, or required action
+- `cert-fr-advisories`
+  - official CERT-FR advisory context in French
+  - evidence basis remains `advisory`
+  - feed text remains untrusted and does not create urgency proof, incident certainty, or cross-source severity claims
+
+Prompt-injection, no-leakage, dedupe, and export guardrails:
+- recent-item, family-review, readiness/export, and topic/context lens behavior remains metadata-only workflow support
+- the strengthened regression proves hostile advisory titles/summaries for NCSC UK and CERT-FR stay inert and do not change source health, grouping, validation state, routing, or app behavior
+- no linked-page URLs, article-body extraction, raw feed dumps, scoring, truth verdicts, or action recommendations were added
+- dedupe posture remains source-scoped and export-safe lines remain URL-free metadata summaries only
+
+Prior assignment backfill status:
+- the referenced `2026-05-02 15:45 America/Chicago` Data AI report-snapshot final report could not be reliably reconstructed from repo-local evidence without inventing history, so it remains unbackfilled pending Manager clarification
+
+Docs updated:
+- `app/docs/source-validation-status.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Files touched:
+- `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/agent-progress/data-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `cmd /c npm.cmd run test:data-ai-source-intelligence` -> pass
+- `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- no new source families were added in this slice because the official cyber advisory family was already present in the current worktree
+- this remains contract-tested and workflow-supporting only; no smoke/manual workflow validation was added
+- no live-network tests, broad polling, linked-page fetching, article-body extraction, staging, commits, or pushes were added
+
 ## 2026-05-02 12:40 America/Chicago
 
 Assignment version read:

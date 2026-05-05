@@ -1,40 +1,59 @@
 # Features/Webcam AI Next Task
 
-You are Features/Webcam AI, working on webcam/source lifecycle, source operations, endpoint evaluation, review queues, and export-ready source governance for 11Writer.
+You are Features/Webcam AI, working on webcam and source lifecycle, source operations, endpoint evaluation, review queues, and export-ready source governance for 11Writer.
 
-Assignment version: 2026-05-02 12:27 America/Chicago
+Assignment version: 2026-05-05 10:22 America/Chicago
 
 Recent Manager/Workflow Updates:
-- You completed the sandbox candidate review-burden/source-health/next-review summary.
-- Sandbox-importable remains candidate-only and must not become validated, active, scheduled, or production-ready by implication.
-- Record `Assignment version read: 2026-05-02 12:27 America/Chicago` in your progress doc before starting.
+- The endpoint hardening pass and Caltrans sandbox-feasibility pass are complete.
+- `caltrans-cctv-cameras` is now `candidate-sandbox-importable`; it remains disabled, unscheduled, unvalidated, and candidate-only.
+- `nzta-traffic-cameras` and `arlington-traffic-cameras` remain the strongest endpoint-verified non-sandbox holds; `euskadi-traffic-cameras` still needs cleaner endpoint pinning.
+- Webcam work remains source-ops evidence, not event truth, and must stay activation-safe.
+
+Current state:
+- You now have one stronger sandbox-importable comparator in Caltrans.
+- The next useful move is a bigger side-by-side sandbox-feasibility pass on the remaining strongest holds plus more global no-auth candidate review, not activation.
 
 Mission:
-- Add a backend-only endpoint-verified non-sandbox candidate review summary and conservative next-step planner for webcam candidates that are not yet sandbox-importable.
+- Take NZTA and Arlington through a bounded fixture-first sandbox-feasibility review and widen the global candidate network only where machine-readable evidence is equally clean.
+
+Do first:
+1. Record `Assignment version read: 2026-05-05 10:22 America/Chicago` in `app/docs/agent-progress/features-webcam-ai.md`.
 
 Tasks:
-1. Build a read-only source-ops helper/route extension that summarizes endpoint-verified or partially verified non-sandbox candidates separately from sandbox-importable sources.
-2. Include Baton Rouge, Euskadi, and other documented non-sandbox candidates only where current registry/docs support them.
-3. Group by endpoint evidence posture, media evidence posture, blocking reason, missing evidence, source-health expectation, and next safe review step.
-4. Add export-safe lines that explicitly say candidate-only, not activated, not validated, not scheduled.
-5. Add tests for no promotion, no activation, no scraping guidance, no token/credential leakage, inert prompt-like metadata, and correct separation from sandbox-importable candidates.
-6. Update webcam docs/lifecycle policy.
-7. Append your final output to `app/docs/agent-progress/features-webcam-ai.md`.
+1. Inspect the current candidate registry, NZTA and Arlington endpoint-report surfaces, promotion-readiness summaries, sandbox-validation surfaces, Caltrans comparator surfaces, and the May global candidate batch doc.
+2. Add bounded fixture-first sandbox connector paths for `nzta-traffic-cameras` and `arlington-traffic-cameras` only if current machine-readable evidence can pin direct media or stable proxy media posture cleanly enough.
+3. Promote each source at most to `candidate-sandbox-importable` if the bounded fixture, mapping, and source-health review support it.
+4. Keep every promoted source:
+   - disabled
+   - unscheduled
+   - unvalidated
+   - export-safe
+   - source-health honest
+5. Extend source-ops detail, candidate-network, export-summary, promotion-readiness, and sandbox-validation surfaces so Caltrans, NZTA, and Arlington posture can be compared conservatively.
+6. Review `euskadi-traffic-cameras` plus at least 6 additional public no-auth camera inventories from the current backlog and add at most 3 new candidate records only if endpoint pinning and media posture are clean enough.
+7. Update webcam docs, lifecycle policy, and candidate batch docs.
+8. Append your final output to `app/docs/agent-progress/features-webcam-ai.md`.
 
 Constraints:
-- No live checks, scraping, browser automation, CAPTCHA/login/API-key bypass, activation, scheduling, validation promotion, or broad frontend work.
+- No live tests unless explicitly documented as manual evidence and not required for CI.
+- No scraping viewer-only apps, browser automation, CAPTCHA or login or API-key bypass, private endpoints, or tokenized URLs.
+- No source activation, scheduled ingestion, validated promotion, orientation claims, or unsafe media overclaiming.
+- If shared build, import, or type failures appear outside your lane, report them to Connect AI instead of fixing unrelated files.
 - Do not stage, commit, or push.
 
 Validation:
+- Focused tests you add.
 - `python -m pytest app/server/tests/test_webcam_module.py -q`
+- `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q`
 - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
-- Run focused tests you add.
+- `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q`
 - `python -m compileall app/server/src`
 - `python scripts/alerts_ledger.py --json`
 
 Final report requirements:
-- Start with `Assignment version read: 2026-05-02 12:27 America/Chicago`.
-- Describe endpoint-verified non-sandbox summary behavior.
-- State lifecycle/no-activation/no-scraping/export guardrails.
+- Start with `Assignment version read: 2026-05-05 10:22 America/Chicago`.
+- Describe the NZTA and Arlington sandbox-feasibility work, any lifecycle posture changes, and any new candidate additions.
+- State lifecycle, no-activation, no-scraping, and export-safety guardrails.
 - Report validation results.
-- State no staging/commit/push.
+- State no staging, commit, or push.

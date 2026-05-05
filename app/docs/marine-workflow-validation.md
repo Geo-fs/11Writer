@@ -75,7 +75,38 @@ Related contract doc:
 
 These marine-local helpers do not define new backend routes. Their workflow validation depends on already-tested marine context-source contracts plus marine export metadata wiring.
 
-#### Marine Context Fusion Summary
+#### Marine Source-Health Export Coherence
+
+- implemented
+- export metadata-covered
+- deterministic helper-regression-covered
+- no dedicated UI card in this slice
+
+#### Marine Hydrology/Source-Health Workflow Package
+
+- implemented
+- export metadata-covered
+- deterministic helper-regression-covered
+- marine smoke-prep metadata-covered
+- no dedicated UI card in this slice
+
+#### Marine Hydrology/Source-Health Report
+
+- implemented
+- export metadata-covered
+- deterministic helper-regression-covered
+- marine smoke metadata-covered
+- no dedicated UI card in this slice
+
+#### Marine Corridor Review Package
+
+- implemented
+- export metadata-covered
+- deterministic helper-regression-covered
+- marine smoke metadata-covered
+- no dedicated UI card in this slice
+
+### Marine Context Fusion Summary
 
 - frontend helper:
   - `app/client/src/features/marine/marineContextFusionSummary.ts`
@@ -166,8 +197,41 @@ These marine-local helpers do not define new backend routes. Their workflow vali
     - `contextIssueQueue`
     - `contextIssueExportBundle`
     - `hydrologyContext`
+    - `sourceHealthExportCoherence`
     - `chokepointReviewPackage`
     - `contextTimeline`
+    - `hydrologySourceHealthWorkflow`
+    - `hydrologySourceHealthReport`
+    - `corridorReviewPackage`
+    - `fusionSnapshotInput`
+    - `reportBriefPackage`
+    - `corridorSituationPackage`
+  - hydrology/source-health report posture coverage for:
+    - broad source posture
+    - limited source posture
+    - empty/stale source posture
+    - missing-source posture
+  - explicit Vigicrues export coherence across:
+    - hydrology/source-health report rows
+    - hydrology/source-health report status line
+    - corridor review package rows
+    - corridor review package status line
+    - fusion snapshot input hydrology posture
+    - report-brief workflow-evidence lines
+    - corridor-situation workflow-evidence lines
+  - corridor/chokepoint review posture coverage for:
+    - normal posture
+    - degraded posture
+    - empty/no-match posture
+    - missing-source posture
+- source-health/export coherence across CO-OPS, NDBC, Vigicrues, Ireland OPW, and Netherlands RWS Waterinfo uses only current exported metadata:
+  - source mode
+  - source health
+  - evidence basis
+  - nearby station counts
+  - exported-observation counts
+  - latest timestamp posture
+  - caveats
 - this keeps no-severity/no-impact/no-intent phrasing from depending only on browser smoke
 
 ### Context Source Visibility
@@ -227,6 +291,10 @@ Marine export metadata should include:
 - `marineAnomalySummary.vigicruesHydrometryContext`
 - `marineAnomalySummary.irelandOpwWaterLevelContext`
 - `marineAnomalySummary.hydrologyContext`
+- `marineAnomalySummary.sourceHealthExportCoherence`
+- `marineAnomalySummary.hydrologySourceHealthWorkflow`
+- `marineAnomalySummary.hydrologySourceHealthReport`
+- `marineAnomalySummary.corridorReviewPackage`
 - `marineAnomalySummary.contextFusionSummary`
 - `marineAnomalySummary.contextReviewReport`
 - `marineAnomalySummary.environmentalContext`
@@ -306,6 +374,30 @@ Marine export metadata should include:
 - export metadata-covered
 - marine smoke-covered
 
+### Marine Hydrology/Source-Health Workflow Package
+
+- implemented
+- export metadata-covered
+- deterministic helper-regression-covered
+- marine smoke metadata-covered
+- no dedicated UI card in this slice
+
+### Marine Hydrology/Source-Health Report
+
+- implemented
+- export metadata-covered
+- deterministic helper-regression-covered
+- marine smoke metadata-covered
+- no dedicated UI card in this slice
+
+### Marine Corridor Review Package
+
+- implemented
+- export metadata-covered
+- deterministic helper-regression-covered
+- marine smoke metadata-covered
+- no dedicated UI card in this slice
+
 ### Marine Context Fusion Summary
 
 - implemented
@@ -361,6 +453,17 @@ Marine export metadata should include:
 - The marine-only smoke path now explicitly confirms the Ireland OPW water-level card, the Ireland OPW row in the marine context source summary, and the `marineAnomalySummary.irelandOpwWaterLevelContext` export metadata block.
 - Netherlands RWS Waterinfo now has a marine-local card and export metadata block, but marine smoke has not yet been extended for it in this slice.
 - The marine-only smoke path now explicitly confirms the composed marine hydrology context card and the `marineAnomalySummary.hydrologyContext` export metadata block.
+- Marine source-health export coherence has no dedicated UI card, but the marine-only smoke path now confirms its snapshot metadata block.
+- The marine-only smoke path now also confirms snapshot metadata for:
+  - `marineAnomalySummary.sourceHealthExportCoherence`
+  - `marineAnomalySummary.hydrologySourceHealthWorkflow`
+  - `marineAnomalySummary.hydrologySourceHealthReport`
+  - `marineAnomalySummary.corridorReviewPackage`
+  - `marineAnomalySummary.fusionSnapshotInput`
+  - explicit Vigicrues rows/status lines inside the hydrology and corridor review packages
+- `marineAnomalySummary.fusionSnapshotInput` is export-only and has no dedicated UI card; smoke/regression confirm its metadata block, source rows, Vigicrues posture carry-through, and does-not-prove guardrails.
+- `marineAnomalySummary.reportBriefPackage` is export-only and has no dedicated UI card; smoke/regression confirm its `observe / orient / prioritize / explain` sections plus explicit Vigicrues and Waterinfo workflow-evidence wording.
+- `marineAnomalySummary.corridorSituationPackage` is export-only and has no dedicated UI card; smoke/regression confirm its corridor posture, `observe / orient / prioritize / explain` sections, Vigicrues/Waterinfo workflow-evidence wording, and explicit no-closure/no-intent/no-action guardrails.
 - The marine-only smoke path now explicitly confirms the composed marine context fusion card and the `marineAnomalySummary.contextFusionSummary` export metadata block.
 - The marine-only smoke path now explicitly confirms the composed marine context review report card and the `marineAnomalySummary.contextReviewReport` export metadata block.
 - The marine-only smoke path now explicitly surfaces:

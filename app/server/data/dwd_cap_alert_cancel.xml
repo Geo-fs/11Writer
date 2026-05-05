@@ -1,0 +1,23 @@
+<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+  <identifier>dwd-cap-003</identifier>
+  <sender>opendata@dwd.de</sender>
+  <sent>2026-05-05T03:00:00+00:00</sent>
+  <status>Actual</status>
+  <msgType>Cancel</msgType>
+  <scope>Public</scope>
+  <info>
+    <language>de-DE</language>
+    <category>Met</category>
+    <event>Entwarnung</event>
+    <urgency>Past</urgency>
+    <severity>Minor</severity>
+    <certainty>Observed</certainty>
+    <effective>2026-05-05T03:00:00+00:00</effective>
+    <expires>2026-05-05T03:30:00+00:00</expires>
+    <headline>Entwarnung</headline>
+    <description>Die Wetterwarnung wurde aufgehoben.</description>
+    <area>
+      <areaDesc>Stadt Leipzig</areaDesc>
+    </area>
+  </info>
+</alert>
