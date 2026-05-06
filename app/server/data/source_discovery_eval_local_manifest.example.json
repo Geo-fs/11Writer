@@ -1,0 +1,9 @@
+{
+  "eventCases": [],
+  "reputationCases": [],
+  "challengeSets": [],
+  "notes": [
+    "Copy this file to a local-only manifest path and add private benchmark cases there.",
+    "Local benchmark output is runtime-quality evidence only and must not be treated as source-truth evidence."
+  ]
+}

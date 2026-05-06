@@ -5,6 +5,11 @@ from typing import cast
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.config.settings import Settings, get_settings
+from src.services.geoboundaries_admin_service import (
+    GeoBoundariesAdminQuery,
+    GeoBoundariesAdminService,
+    parse_bbox as parse_geoboundaries_bbox,
+)
 from src.services.gshhg_shorelines_service import (
     GshhgShorelinesQuery,
     GshhgShorelinesService,
@@ -30,6 +35,7 @@ from src.services.rgi_glacier_inventory_service import (
     RgiGlacierInventoryService,
 )
 from src.types.api import (
+    GeoBoundariesAdminResponse,
     GshhgShorelinesResponse,
     NaturalEarthPhysicalResponse,
     NoaaGlobalVolcanoResponse,
@@ -96,6 +102,28 @@ async def pb2002_plate_boundaries_context(
     return await service.get_context(
         Pb2002PlateBoundariesQuery(
             boundary_type=boundary_type,
+            bbox=parsed_bbox,
+            limit=limit,
+        )
+    )
+
+
+@router.get("/geoboundaries-admin", response_model=GeoBoundariesAdminResponse)
+async def geoboundaries_admin_context(
+    shape_iso: str | None = Query(default=None),
+    bbox: str | None = Query(default=None, description="minLon,minLat,maxLon,maxLat"),
+    limit: int = Query(default=10, ge=1, le=100),
+    settings: Settings = Depends(get_settings),
+) -> GeoBoundariesAdminResponse:
+    try:
+        parsed_bbox = parse_geoboundaries_bbox(bbox)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    service = GeoBoundariesAdminService(settings)
+    return await service.get_context(
+        GeoBoundariesAdminQuery(
+            shape_iso=shape_iso,
             bbox=parsed_bbox,
             limit=limit,
         )

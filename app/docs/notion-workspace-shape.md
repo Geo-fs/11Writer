@@ -9,7 +9,6 @@ Owner note:
 - It is intentionally narrow and should not replace repo-owned technical truth.
 
 Related:
-- `app/docs/connector-adoption-plan.md`
 - `app/docs/connector-capability-map.md`
 - `app/docs/repo-workflow.md`
 

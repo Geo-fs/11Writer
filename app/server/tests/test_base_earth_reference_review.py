@@ -22,6 +22,8 @@ def _settings() -> Settings:
         GSHHG_SHORELINES_FIXTURE_PATH=_fixture("gshhg_shorelines_fixture.json"),
         PB2002_PLATE_BOUNDARIES_SOURCE_MODE="fixture",
         PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=_fixture("pb2002_plate_boundaries_fixture.json"),
+        GEOBOUNDARIES_ADMIN_SOURCE_MODE="fixture",
+        GEOBOUNDARIES_ADMIN_FIXTURE_PATH=_fixture("geoboundaries_admin_bel_adm1_fixture.json"),
         NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
         NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=_fixture("noaa_global_volcano_locations_fixture.json"),
     )
@@ -56,12 +58,13 @@ def test_base_earth_export_package_shape_and_reference_separation() -> None:
     payload = client.get("/api/context/environmental/base-earth-export-package").json()
 
     assert payload["metadata"]["source"] == "environmental-base-earth-export-package"
-    assert payload["sourceCount"] == 5
+    assert payload["sourceCount"] == 6
     source_ids = [source["sourceId"] for source in payload["sources"]]
     assert source_ids == [
         "natural-earth-physical",
         "gshhg-shorelines",
         "pb2002-plate-boundaries",
+        "geoboundaries-admin",
         "rgi-glacier-inventory",
         "noaa-global-volcano-locations",
     ]
@@ -188,6 +191,6 @@ def test_base_earth_review_queue_handles_mixed_empty_states(tmp_path: Path) -> N
     payload = client.get("/api/context/environmental/base-earth-review-queue").json()
     issue_types = [issue["issueType"] for issue in payload["issues"]]
 
-    assert payload["sourceCount"] == 5
+    assert payload["sourceCount"] == 6
     assert "source-health-empty" in issue_types
     assert any(issue["sourceId"] == "natural-earth-physical" for issue in payload["issues"])

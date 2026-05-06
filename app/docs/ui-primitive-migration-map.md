@@ -23,6 +23,17 @@ The goal is to make future migrations decision-complete:
 - `Phase 4`
   CSS cleanup, dead-style removal, and global style decomposition after UI behavior stabilizes.
 
+## Phase 3 Status Vocabulary
+
+Use the canonical status words from [phase3-governance-sequencing-packet.md](/C:/Users/mike/11Writer/app/docs/phase3-governance-sequencing-packet.md):
+
+- `planned`
+- `active`
+- `blocked`
+- `validation-needed`
+- `complete`
+- `deferred`
+
 ## Risk Model
 
 - `low`
@@ -44,6 +55,18 @@ These files should not be broadly refactored until current domain work stabilize
 - `global.css`
 - `store.ts`
 - `queries.ts`
+
+## Shared Control Order
+
+Before broad panel normalization, use this order for the common control language:
+
+| Primitive family | Shared target | First move | Owner agent | Risk level | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Inputs and textareas | `WorkbenchInput` and `WorkbenchTextarea` | stable top-bar and operator forms first | `Systems AI` | `low` | Locks one input language before high-collision panel refactors. |
+| Selects | `WorkbenchSelect` | stable filters and provider pickers | `Systems AI` | `low` | Same visual family as inputs; no select-specific local chrome should survive long term. |
+| Buttons | `WorkbenchButton` | stable toolbars and form actions | `Systems AI` | `low` | Use tone variants instead of local button families. |
+| Icon buttons | `WorkbenchIconButton` | compact action slots after button migration | `Systems AI` | `medium` | Only where the action is truly icon-first. |
+| Semantic field wrappers | `SearchField`, `QueryField`, `FilterField` | after raw base controls are stable | `Systems AI` + `Workspace AI` | `medium` | Wrap the base controls; do not replace them. |
 
 ## Migration Table
 
@@ -78,13 +101,18 @@ These files should not be broadly refactored until current domain work stabilize
 ## Rollout Notes
 
 - Use `Phase 1` only for new isolated helper surfaces or small presentation-only subcomponents extracted from active panels.
+- Use the new token and control files as the default home for shared color and control rules; do not add more shared button or field styling to `global.css`.
 - Use `Phase 2` for domain-owned subsections where the semantic model is already stable and the blast radius is limited.
 - Use `Phase 3` only after current parallel work is merged or otherwise stabilized; this is where shared panel cleanup belongs.
 - Use `Phase 4` last. CSS cleanup before migration completion will create avoidable churn and merge conflicts.
 
-## Gather AI Responsibilities
+## Phase 3 Governance Responsibilities
 
-- Maintain the shared primitive vocabulary.
-- Keep rollout order and risk labels current.
-- Prevent one-off badge/card/caveat patterns from reappearing in new work.
-- Coordinate with domain agents on high-collision migrations rather than unilaterally refactoring their active surfaces.
+- `Gov AI`
+  Maintain rollout order, slice-status truth, acceptance gating, and the deviation log.
+- `Systems AI`
+  Maintain the shared primitive vocabulary and the shared component shape.
+- `Connect AI`
+  Keep high-collision ownership and integration risk visible.
+- All implementation lanes
+  Prevent one-off badge, card, caveat, input, and empty-state patterns from reappearing without a documented approved deviation.

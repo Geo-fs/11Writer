@@ -72,7 +72,8 @@ export function buildMarineContextIssueExportBundle(input: {
       "Source-health export lines do not prove vessel behavior, vessel intent, anomaly cause, or wrongdoing.",
       "Oceanographic and meteorological context do not prove route choice, impact, or anomaly severity.",
       "Infrastructure context does not prove pollution impact, health risk, vessel behavior, or wrongdoing.",
-      "Hydrology context does not prove flooding, damage, contamination, or operational consequence."
+      "Hydrology context does not prove flooding, damage, contamination, or operational consequence.",
+      "NAVTEX and marine warning context do not prove closure certainty, legal status, threat, wrongdoing, or required action."
     ])
   );
   const exportLines = [
@@ -158,6 +159,9 @@ function doesNotProveForCategory(category: MarineContextSourceSummaryRow["catego
   }
   if (category === "hydrology") {
     return "Hydrology context does not prove flooding, contamination, damage, vessel behavior, or anomaly cause.";
+  }
+  if (category === "maritime-warning") {
+    return "NAVTEX and marine warning context do not prove closure certainty, legal status, threat, vessel behavior, vessel intent, or required action.";
   }
   return "Oceanographic and meteorological context do not prove vessel behavior, vessel intent, route choice, impact, or anomaly severity.";
 }

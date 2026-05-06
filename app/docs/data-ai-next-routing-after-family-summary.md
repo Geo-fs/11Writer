@@ -23,6 +23,11 @@ Status note:
 - The client also exposes a bounded fusion/claim-integrity snapshot over the current Data AI metadata surfaces; treat it as workflow-supporting fusion input only, not as Source Discovery replacement, truth weighting, or claim adjudication.
 - The client also exposes a bounded report-brief package over the current Data AI metadata surfaces; treat it as report-ready metadata organization only, not as raw-text reporting, claim proof, or Source Discovery replacement.
 - The client also exposes a bounded topic-scoped report packet over the current Data AI metadata surfaces; treat it as topic-filtered metadata organization only, not as headline corroboration, field-truth inference, or required-action guidance.
+- The client also exposes a bounded workflow-evidence snapshot over the current Data AI reporting path; treat it as lineage/readiness metadata only, not as workflow-validation proof, source trust promotion, or truth weighting.
+- The client also exposes a bounded current-awareness digest over the current Data AI reporting path; treat it as open-ended metadata organization only, not as field-truth synthesis, severity weighting, or action guidance.
+- The client also exposes a bounded review/export coherence summary over the current Data AI reporting path; treat it as alignment metadata only, not as workflow-validation proof, truth weighting, or action guidance.
+- The client also exposes a bounded topic-safe report export packet over the current Data AI reporting path; treat it as export-safe handoff metadata only, not as source laundering, truth weighting, or action guidance.
+- The client also exposes a bounded question briefing packet over the current Data AI reporting path; treat it as question-oriented metadata only, not as article-truth promotion, corroboration scoring, or action guidance.
 - The implemented Data AI waves already cover:
   - starter bundle
   - official cyber advisory wave
@@ -57,6 +62,11 @@ Why:
 - the current fusion/claim-integrity consumer package already composes existing metadata-only surfaces, so the next Data AI follow-on should stay on topic-scoped reporting or validation/export coherence rather than new family creation
 - the current report-brief package already organizes existing metadata-only surfaces into report sections, so the next Data AI follow-on should stay on topic-scoped reporting or validation/export coherence rather than raw-text-heavy reporting behavior
 - the current topic-scoped report packet already answers one active topic from existing metadata-only surfaces, so the next Data AI follow-on should stay on validation/export coherence rather than new feed-family creation
+- the current workflow-evidence snapshot already packages topic/report/review/export lineage over existing metadata-only surfaces, so the next Data AI follow-on should stay on workflow-validation evidence closure rather than new feed-family creation
+- the current-awareness digest already packages the active family/topic/report/workflow chain into one open-ended metadata-only digest, so the next Data AI follow-on should stay on validation/export coherence rather than fresh family creation
+- the review/export coherence summary already checks alignment across review, queue, readiness, topic, report, workflow, and digest surfaces, so the next Data AI follow-on should stay on validation/export closure rather than fresh family creation
+- the topic-safe report export packet already packages the current topic/report/workflow/coherence path into compact export-safe metadata, so the next Data AI follow-on should stay on validation/export closure rather than fresh family creation
+- the question briefing packet already packages the current topic/report/export path into compact question-oriented metadata, so the next Data AI follow-on should stay on validation/export closure rather than fresh family creation
 - the bounded `world-news-awareness` family is now implemented on the shared route and metadata-only consumer surfaces, so it should not be routed again as fresh source-creation work
 - do not route `propublica` or `global-voices` as fresh next-wave work because both are already implemented backend-first within the investigative/civic context family
 - held/deferred groups should stay closed unless Manager explicitly reopens one narrow family

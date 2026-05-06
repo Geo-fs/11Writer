@@ -34,12 +34,17 @@ import { buildAerospaceWorkflowValidationEvidenceSnapshotSummary } from "./aeros
 import { buildAerospaceExportCoherenceSummary } from "./aerospaceExportCoherence";
 import { buildAerospaceIssueExportBundleSummary } from "./aerospaceIssueExportBundle";
 import {
+  buildDataAiCurrentAwarenessDigest,
   buildDataAiFusionSnapshotSummary,
   buildDataAiInfrastructureStatusContextSummary,
   buildDataAiLongTailDiscoverySummary,
+  buildDataAiQuestionBriefingPacket,
+  buildDataAiReviewExportCoherenceSummary,
   buildDataAiReportBriefSummary,
   buildDataAiSourceIntelligenceSummary,
+  buildDataAiTopicSafeReportExportPacket,
   buildDataAiTopicReportPacket,
+  buildDataAiWorkflowEvidenceSnapshot,
   buildDataAiTopicLensSummary,
   DATA_AI_INFRASTRUCTURE_STATUS_FAMILY_ID,
   DATA_AI_INFRASTRUCTURE_STATUS_SOURCE_IDS
@@ -752,6 +757,164 @@ export function InspectorPanel() {
       dataAiTopicLensSummary?.topics
     ]
   );
+  const dataAiWorkflowEvidenceSnapshot = useMemo(
+    () =>
+      buildDataAiWorkflowEvidenceSnapshot({
+        topicId: dataAiTopicReportPacket?.topicId ?? dataAiTopicLensSummary?.topics[0]?.topicId ?? null,
+        recent: dataAiRecentQuery.data,
+        readiness: dataAiReadinessQuery.data,
+        review: dataAiReviewQuery.data,
+        reviewQueue: dataAiReviewQueueQuery.data,
+        infrastructureRecent: dataAiInfrastructureRecentQuery.data,
+        infrastructureReadiness: dataAiInfrastructureReadinessQuery.data,
+        infrastructureReview: dataAiInfrastructureReviewQuery.data,
+        infrastructureReviewQueue: dataAiInfrastructureReviewQueueQuery.data
+      }),
+    [
+      dataAiInfrastructureReadinessQuery.data,
+      dataAiInfrastructureRecentQuery.data,
+      dataAiInfrastructureReviewQuery.data,
+      dataAiInfrastructureReviewQueueQuery.data,
+      dataAiReadinessQuery.data,
+      dataAiRecentQuery.data,
+      dataAiReviewQuery.data,
+      dataAiReviewQueueQuery.data,
+      dataAiTopicLensSummary?.topics,
+      dataAiTopicReportPacket?.topicId
+    ]
+  );
+  const dataAiCurrentAwarenessDigest = useMemo(
+    () =>
+      buildDataAiCurrentAwarenessDigest({
+        topicId: dataAiWorkflowEvidenceSnapshot?.topicId ?? dataAiTopicReportPacket?.topicId ?? dataAiTopicLensSummary?.topics[0]?.topicId ?? null,
+        recent: dataAiRecentQuery.data,
+        readiness: dataAiReadinessQuery.data,
+        review: dataAiReviewQuery.data,
+        reviewQueue: dataAiReviewQueueQuery.data,
+        infrastructureRecent: dataAiInfrastructureRecentQuery.data,
+        infrastructureReadiness: dataAiInfrastructureReadinessQuery.data,
+        infrastructureReview: dataAiInfrastructureReviewQuery.data,
+        infrastructureReviewQueue: dataAiInfrastructureReviewQueueQuery.data
+      }),
+    [
+      dataAiInfrastructureReadinessQuery.data,
+      dataAiInfrastructureRecentQuery.data,
+      dataAiInfrastructureReviewQuery.data,
+      dataAiInfrastructureReviewQueueQuery.data,
+      dataAiReadinessQuery.data,
+      dataAiRecentQuery.data,
+      dataAiReviewQuery.data,
+      dataAiReviewQueueQuery.data,
+      dataAiTopicLensSummary?.topics,
+      dataAiTopicReportPacket?.topicId,
+      dataAiWorkflowEvidenceSnapshot?.topicId
+    ]
+  );
+  const dataAiReviewExportCoherenceSummary = useMemo(
+    () =>
+      buildDataAiReviewExportCoherenceSummary({
+        topicId:
+          dataAiCurrentAwarenessDigest?.topicId ??
+          dataAiWorkflowEvidenceSnapshot?.topicId ??
+          dataAiTopicReportPacket?.topicId ??
+          dataAiTopicLensSummary?.topics[0]?.topicId ??
+          null,
+        recent: dataAiRecentQuery.data,
+        readiness: dataAiReadinessQuery.data,
+        review: dataAiReviewQuery.data,
+        reviewQueue: dataAiReviewQueueQuery.data,
+        infrastructureRecent: dataAiInfrastructureRecentQuery.data,
+        infrastructureReadiness: dataAiInfrastructureReadinessQuery.data,
+        infrastructureReview: dataAiInfrastructureReviewQuery.data,
+        infrastructureReviewQueue: dataAiInfrastructureReviewQueueQuery.data
+      }),
+    [
+      dataAiCurrentAwarenessDigest?.topicId,
+      dataAiInfrastructureReadinessQuery.data,
+      dataAiInfrastructureRecentQuery.data,
+      dataAiInfrastructureReviewQuery.data,
+      dataAiInfrastructureReviewQueueQuery.data,
+      dataAiReadinessQuery.data,
+      dataAiRecentQuery.data,
+      dataAiReviewQuery.data,
+      dataAiReviewQueueQuery.data,
+      dataAiTopicLensSummary?.topics,
+      dataAiTopicReportPacket?.topicId,
+      dataAiWorkflowEvidenceSnapshot?.topicId
+    ]
+  );
+  const dataAiTopicSafeReportExportPacket = useMemo(
+    () =>
+      buildDataAiTopicSafeReportExportPacket({
+        topicId:
+          dataAiReviewExportCoherenceSummary?.topicId ??
+          dataAiCurrentAwarenessDigest?.topicId ??
+          dataAiWorkflowEvidenceSnapshot?.topicId ??
+          dataAiTopicReportPacket?.topicId ??
+          dataAiTopicLensSummary?.topics[0]?.topicId ??
+          null,
+        recent: dataAiRecentQuery.data,
+        readiness: dataAiReadinessQuery.data,
+        review: dataAiReviewQuery.data,
+        reviewQueue: dataAiReviewQueueQuery.data,
+        infrastructureRecent: dataAiInfrastructureRecentQuery.data,
+        infrastructureReadiness: dataAiInfrastructureReadinessQuery.data,
+        infrastructureReview: dataAiInfrastructureReviewQuery.data,
+        infrastructureReviewQueue: dataAiInfrastructureReviewQueueQuery.data
+      }),
+    [
+      dataAiReviewExportCoherenceSummary?.topicId,
+      dataAiCurrentAwarenessDigest?.topicId,
+      dataAiInfrastructureReadinessQuery.data,
+      dataAiInfrastructureRecentQuery.data,
+      dataAiInfrastructureReviewQuery.data,
+      dataAiInfrastructureReviewQueueQuery.data,
+      dataAiReadinessQuery.data,
+      dataAiRecentQuery.data,
+      dataAiReviewQuery.data,
+      dataAiReviewQueueQuery.data,
+      dataAiTopicLensSummary?.topics,
+      dataAiTopicReportPacket?.topicId,
+      dataAiWorkflowEvidenceSnapshot?.topicId
+    ]
+  );
+  const dataAiQuestionBriefingPacket = useMemo(
+    () =>
+      buildDataAiQuestionBriefingPacket({
+        topicId:
+          dataAiTopicSafeReportExportPacket?.topicId ??
+          dataAiReviewExportCoherenceSummary?.topicId ??
+          dataAiCurrentAwarenessDigest?.topicId ??
+          dataAiWorkflowEvidenceSnapshot?.topicId ??
+          dataAiTopicReportPacket?.topicId ??
+          dataAiTopicLensSummary?.topics[0]?.topicId ??
+          null,
+        recent: dataAiRecentQuery.data,
+        readiness: dataAiReadinessQuery.data,
+        review: dataAiReviewQuery.data,
+        reviewQueue: dataAiReviewQueueQuery.data,
+        infrastructureRecent: dataAiInfrastructureRecentQuery.data,
+        infrastructureReadiness: dataAiInfrastructureReadinessQuery.data,
+        infrastructureReview: dataAiInfrastructureReviewQuery.data,
+        infrastructureReviewQueue: dataAiInfrastructureReviewQueueQuery.data
+      }),
+    [
+      dataAiTopicSafeReportExportPacket?.topicId,
+      dataAiReviewExportCoherenceSummary?.topicId,
+      dataAiCurrentAwarenessDigest?.topicId,
+      dataAiInfrastructureReadinessQuery.data,
+      dataAiInfrastructureRecentQuery.data,
+      dataAiInfrastructureReviewQuery.data,
+      dataAiInfrastructureReviewQueueQuery.data,
+      dataAiReadinessQuery.data,
+      dataAiRecentQuery.data,
+      dataAiReviewQuery.data,
+      dataAiReviewQueueQuery.data,
+      dataAiTopicLensSummary?.topics,
+      dataAiTopicReportPacket?.topicId,
+      dataAiWorkflowEvidenceSnapshot?.topicId
+    ]
+  );
   const dataAiInfrastructureStatusSummary = useMemo(
     () =>
       buildDataAiInfrastructureStatusContextSummary({
@@ -1065,6 +1228,140 @@ export function InspectorPanel() {
                       {dataAiTopicReportPacket.exportLines.slice(0, 3).map((line) => (
                         <span key={line}>Topic packet export-safe: {line}</span>
                       ))}
+                      {dataAiWorkflowEvidenceSnapshot ? (
+                        <div className="panel__section" data-testid="data-ai-workflow-evidence-snapshot">
+                          <p className="panel__eyebrow">Workflow Evidence Snapshot</p>
+                          <strong>{dataAiWorkflowEvidenceSnapshot.workflowValidationLine}</strong>
+                          {dataAiWorkflowEvidenceSnapshot.displayLines.map((line) => (
+                            <span key={line}>{line}</span>
+                          ))}
+                          <div className="stack">
+                            <StatusBadge tone="info">{dataAiWorkflowEvidenceSnapshot.sourceMode}</StatusBadge>
+                            <StatusBadge tone="info">{dataAiWorkflowEvidenceSnapshot.topicLabel}</StatusBadge>
+                            <StatusBadge tone="warning">
+                              Workflow issues {dataAiWorkflowEvidenceSnapshot.issueCount}
+                            </StatusBadge>
+                          </div>
+                          {dataAiWorkflowEvidenceSnapshot.exportLines.slice(0, 3).map((line) => (
+                            <span key={line}>Workflow export-safe: {line}</span>
+                          ))}
+                          {dataAiCurrentAwarenessDigest ? (
+                            <div className="panel__section" data-testid="data-ai-current-awareness-digest">
+                              <p className="panel__eyebrow">Current Awareness Digest</p>
+                              <strong>{dataAiCurrentAwarenessDigest.workflowValidationLine}</strong>
+                              {dataAiCurrentAwarenessDigest.displayLines.map((line) => (
+                                <span key={line}>{line}</span>
+                              ))}
+                              <div className="stack">
+                                <StatusBadge tone="info">{dataAiCurrentAwarenessDigest.sourceMode}</StatusBadge>
+                                <StatusBadge tone="info">{dataAiCurrentAwarenessDigest.topicLabel}</StatusBadge>
+                                <StatusBadge tone="warning">
+                                  Digest issues {dataAiCurrentAwarenessDigest.issueCount}
+                                </StatusBadge>
+                              </div>
+                              <div className="stack">
+                                {dataAiCurrentAwarenessDigest.sections.map((section) => (
+                                  <div
+                                    key={section.sectionId}
+                                    className="data-card data-card--compact"
+                                    data-testid={`data-ai-current-awareness-digest-${section.sectionId}`}
+                                  >
+                                    <strong>{section.label}</strong>
+                                    <span>{section.lines[0]}</span>
+                                  </div>
+                                ))}
+                              </div>
+                              {dataAiCurrentAwarenessDigest.exportLines.slice(0, 3).map((line) => (
+                                <span key={line}>Digest export-safe: {line}</span>
+                              ))}
+                              {dataAiReviewExportCoherenceSummary ? (
+                                <div
+                                  className="panel__section"
+                                  data-testid="data-ai-review-export-coherence"
+                                >
+                                  <p className="panel__eyebrow">Review/Export Coherence</p>
+                                  <strong>{dataAiReviewExportCoherenceSummary.workflowValidationLine}</strong>
+                                  {dataAiReviewExportCoherenceSummary.displayLines.map((line) => (
+                                    <span key={line}>{line}</span>
+                                  ))}
+                                  <div className="stack">
+                                    <StatusBadge tone="info">
+                                      {dataAiReviewExportCoherenceSummary.sourceMode}
+                                    </StatusBadge>
+                                    <StatusBadge tone="info">
+                                      {dataAiReviewExportCoherenceSummary.topicLabel}
+                                    </StatusBadge>
+                                    <StatusBadge tone="warning">
+                                      Coherence issues {dataAiReviewExportCoherenceSummary.issueCount}
+                                    </StatusBadge>
+                                  </div>
+                              {dataAiReviewExportCoherenceSummary.exportLines
+                                    .slice(0, 3)
+                                    .map((line) => (
+                                      <span key={line}>Coherence export-safe: {line}</span>
+                                    ))}
+                                  {dataAiTopicSafeReportExportPacket ? (
+                                    <div
+                                      className="panel__section"
+                                      data-testid="data-ai-topic-safe-report-export-packet"
+                                    >
+                                      <p className="panel__eyebrow">Topic-Safe Report Export Packet</p>
+                                      <strong>{dataAiTopicSafeReportExportPacket.workflowValidationLine}</strong>
+                                      {dataAiTopicSafeReportExportPacket.displayLines.map((line) => (
+                                        <span key={line}>{line}</span>
+                                      ))}
+                                      <div className="stack">
+                                        <StatusBadge tone="info">
+                                          {dataAiTopicSafeReportExportPacket.sourceMode}
+                                        </StatusBadge>
+                                        <StatusBadge tone="info">
+                                          {dataAiTopicSafeReportExportPacket.topicLabel}
+                                        </StatusBadge>
+                                        <StatusBadge tone="warning">
+                                          Packet issues {dataAiTopicSafeReportExportPacket.issueCount}
+                                        </StatusBadge>
+                                      </div>
+                                      {dataAiTopicSafeReportExportPacket.exportLines
+                                        .slice(0, 3)
+                                        .map((line) => (
+                                          <span key={line}>Packet export-safe: {line}</span>
+                                        ))}
+                                      {dataAiQuestionBriefingPacket ? (
+                                        <div
+                                          className="panel__section"
+                                          data-testid="data-ai-question-briefing-packet"
+                                        >
+                                          <p className="panel__eyebrow">Question Briefing Packet</p>
+                                          <strong>{dataAiQuestionBriefingPacket.workflowValidationLine}</strong>
+                                          {dataAiQuestionBriefingPacket.displayLines.map((line) => (
+                                            <span key={line}>{line}</span>
+                                          ))}
+                                          <div className="stack">
+                                            <StatusBadge tone="info">
+                                              {dataAiQuestionBriefingPacket.sourceMode}
+                                            </StatusBadge>
+                                            <StatusBadge tone="info">
+                                              {dataAiQuestionBriefingPacket.topicLabel}
+                                            </StatusBadge>
+                                            <StatusBadge tone="warning">
+                                              Briefing issues {dataAiQuestionBriefingPacket.issueCount}
+                                            </StatusBadge>
+                                          </div>
+                                          {dataAiQuestionBriefingPacket.exportLines
+                                            .slice(0, 3)
+                                            .map((line) => (
+                                              <span key={line}>Briefing export-safe: {line}</span>
+                                            ))}
+                                        </div>
+                                      ) : null}
+                                    </div>
+                                  ) : null}
+                                </div>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>

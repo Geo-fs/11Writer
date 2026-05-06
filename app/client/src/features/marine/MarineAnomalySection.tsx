@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import {
+  useMarineGebcoBathymetryContextQuery,
   useMarineChokepointSummaryQuery,
   useMarineIrelandOpwWaterLevelContextQuery,
+  useMarineNavtexContextQuery,
   useMarineNetherlandsRwsWaterinfoContextQuery,
   useMarineNdbcContextQuery,
   useMarineNoaaCoopsContextQuery,
@@ -33,6 +35,7 @@ import { buildMarineContextFusionSummary } from "./marineContextFusionSummary";
 import { buildMarineContextReviewReport } from "./marineContextReviewReport";
 import { buildMarineContextSourceRegistrySummary } from "./marineContextSourceSummary";
 import { buildMarineChokepointReviewPackage } from "./marineChokepointReviewPackage";
+import { buildMarineGebcoBathymetryContextSummary } from "./marineGebcoBathymetryContext";
 import { buildMarineHydrologyContextSummary } from "./marineHydrologyContext";
 import {
   buildMarineContextSnapshot,
@@ -44,6 +47,7 @@ import {
 import { buildMarineNdbcContextSummary } from "./marineNdbcContext";
 import { buildMarineNoaaContextSummary } from "./marineNoaaContext";
 import { buildMarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
+import { buildMarineNavtexContextSummary } from "./marineNavtexContext";
 import { buildMarineNetherlandsRwsWaterinfoContextSummary } from "./marineNetherlandsRwsWaterinfoContext";
 import { buildMarineScottishWaterContextSummary } from "./marineScottishWaterContext";
 import { buildMarineVigicruesContextSummary } from "./marineVigicruesContext";
@@ -256,6 +260,17 @@ export function MarineAnomalySection() {
     radiusKm: contextRadiusKm,
     enabled: effectiveContextState.centerAvailable
   });
+  const navtexContextQuery = useMarineNavtexContextQuery({
+    center: effectiveContextState.center,
+    radiusKm: Math.max(contextRadiusKm, 600),
+    messageType: "all",
+    enabled: effectiveContextState.centerAvailable
+  });
+  const gebcoBathymetryContextQuery = useMarineGebcoBathymetryContextQuery({
+    center: effectiveContextState.center,
+    radiusKm: Math.max(contextRadiusKm, 120),
+    enabled: effectiveContextState.centerAvailable
+  });
 
   const sortedSlices = useMemo(() => {
     const slices = [...(chokepointSummaryQuery.data?.slices ?? [])];
@@ -360,6 +375,14 @@ export function MarineAnomalySection() {
     () => buildMarineNetherlandsRwsWaterinfoContextSummary(netherlandsRwsWaterinfoContextQuery.data ?? null),
     [netherlandsRwsWaterinfoContextQuery.data]
   );
+  const navtexContextSummary = useMemo(
+    () => buildMarineNavtexContextSummary(navtexContextQuery.data ?? null),
+    [navtexContextQuery.data]
+  );
+  const gebcoBathymetryContextSummary = useMemo(
+    () => buildMarineGebcoBathymetryContextSummary(gebcoBathymetryContextQuery.data ?? null),
+    [gebcoBathymetryContextQuery.data]
+  );
   const hydrologyContextSummary = useMemo(
     () =>
       buildMarineHydrologyContextSummary({
@@ -373,6 +396,7 @@ export function MarineAnomalySection() {
     () =>
       buildMarineContextSourceRegistrySummary({
         irelandOpw: irelandOpwContextSummary,
+        navtex: navtexContextSummary,
         netherlandsRwsWaterinfo: netherlandsRwsWaterinfoContextSummary,
         noaaCoops: noaaContextSummary,
         ndbc: ndbcContextSummary,
@@ -381,6 +405,7 @@ export function MarineAnomalySection() {
       }),
     [
       irelandOpwContextSummary,
+      navtexContextSummary,
       netherlandsRwsWaterinfoContextSummary,
       noaaContextSummary,
       ndbcContextSummary,
@@ -433,6 +458,7 @@ export function MarineAnomalySection() {
       buildMarineContextFusionSummary({
         environmentalContextSummary,
         hydrologyContextSummary,
+        navtexContextSummary,
         scottishWaterContextSummary,
         contextSourceRegistrySummary,
         contextIssueQueueSummary
@@ -440,6 +466,7 @@ export function MarineAnomalySection() {
     [
       environmentalContextSummary,
       hydrologyContextSummary,
+      navtexContextSummary,
       scottishWaterContextSummary,
       contextSourceRegistrySummary,
       contextIssueQueueSummary
@@ -554,6 +581,8 @@ export function MarineAnomalySection() {
         vigicruesContextSummary,
         irelandOpwContextSummary,
         netherlandsRwsWaterinfoContextSummary,
+        navtexContextSummary,
+        gebcoBathymetryContextSummary,
         hydrologyContextSummary,
         contextFusionSummary,
         contextReviewReportSummary,
@@ -583,9 +612,11 @@ export function MarineAnomalySection() {
       noaaContextSummary,
       ndbcContextSummary,
       scottishWaterContextSummary,
+      gebcoBathymetryContextSummary,
       vigicruesContextSummary,
       irelandOpwContextSummary,
       netherlandsRwsWaterinfoContextSummary,
+      navtexContextSummary,
       hydrologyContextSummary,
       contextFusionSummary,
       contextReviewReportSummary,
@@ -1072,6 +1103,77 @@ export function MarineAnomalySection() {
         <div className="empty-state compact" data-testid="marine-scottish-water-context-error">
           <p>Scottish Water overflow context unavailable.</p>
           <span>Marine coastal infrastructure context is limited until the source loads.</span>
+        </div>
+      ) : null}
+      {navtexContextQuery.data ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-navtex-context">
+          <strong>USCG NAVTEX Broadcast Notices</strong>
+          <span>{navtexContextSummary?.sourceLine ?? "NAVTEX context loaded."}</span>
+          {navtexContextSummary?.broadcastLines.map((broadcast) => (
+            <div key={broadcast.messageId} className="stack stack--tight">
+              <span>{broadcast.label}</span>
+              <span className="marine-anomaly-muted">{broadcast.warningLine}</span>
+              <span className="marine-anomaly-muted">{broadcast.detailLine}</span>
+              {broadcast.caveat ? <span className="marine-anomaly-muted">Caveat: {broadcast.caveat}</span> : null}
+            </div>
+          ))}
+          {navtexContextQuery.data.count === 0 ? (
+            <span className="marine-anomaly-muted">
+              No nearby NAVTEX broadcast context in this window.
+            </span>
+          ) : null}
+          {navtexContextQuery.data.sourceHealth.caveat ? (
+            <span className="marine-anomaly-muted">{navtexContextQuery.data.sourceHealth.caveat}</span>
+          ) : null}
+        </div>
+      ) : navtexContextQuery.isLoading ? (
+        <div className="empty-state compact" data-testid="marine-navtex-context-loading">
+          <p>Loading NAVTEX context.</p>
+        </div>
+      ) : navtexContextQuery.isError ? (
+        <div className="empty-state compact" data-testid="marine-navtex-context-error">
+          <p>NAVTEX context unavailable.</p>
+          <span>Marine warning context is limited until the source loads.</span>
+        </div>
+      ) : null}
+      {gebcoBathymetryContextQuery.data ? (
+        <div className="data-card data-card--compact marine-anomaly-panel" data-testid="marine-gebco-bathymetry-context">
+          <strong>GEBCO Gridded Bathymetry</strong>
+          <span>{gebcoBathymetryContextSummary?.sourceLine ?? "GEBCO bathymetry context loaded."}</span>
+          {gebcoBathymetryContextSummary?.sampleLines.map((sample) => (
+            <div key={sample.sampleId} className="stack stack--tight">
+              <span>{sample.label}</span>
+              <span className="marine-anomaly-muted">{sample.depthLine}</span>
+              <span className="marine-anomaly-muted">{sample.detailLine}</span>
+              {sample.caveat ? <span className="marine-anomaly-muted">Caveat: {sample.caveat}</span> : null}
+            </div>
+          ))}
+          {gebcoBathymetryContextSummary?.metadata.centerElevationMeters != null ? (
+            <span className="marine-anomaly-muted">
+              Area summary: center {gebcoBathymetryContextSummary.metadata.centerElevationMeters.toFixed(1)} m | min{" "}
+              {gebcoBathymetryContextSummary.metadata.minElevationMeters?.toFixed(1) ?? "n/a"} m | max{" "}
+              {gebcoBathymetryContextSummary.metadata.maxElevationMeters?.toFixed(1) ?? "n/a"} m
+            </span>
+          ) : null}
+          {gebcoBathymetryContextQuery.data.count === 0 ? (
+            <span className="marine-anomaly-muted">
+              No nearby GEBCO bathymetry sample context in this window.
+            </span>
+          ) : null}
+          {gebcoBathymetryContextQuery.data.sourceHealth.caveat ? (
+            <span className="marine-anomaly-muted">
+              {gebcoBathymetryContextQuery.data.sourceHealth.caveat}
+            </span>
+          ) : null}
+        </div>
+      ) : gebcoBathymetryContextQuery.isLoading ? (
+        <div className="empty-state compact" data-testid="marine-gebco-bathymetry-context-loading">
+          <p>Loading GEBCO bathymetry context.</p>
+        </div>
+      ) : gebcoBathymetryContextQuery.isError ? (
+        <div className="empty-state compact" data-testid="marine-gebco-bathymetry-context-error">
+          <p>GEBCO bathymetry context unavailable.</p>
+          <span>Static seafloor context is limited until the source loads.</span>
         </div>
       ) : null}
       {vigicruesContextQuery.data ? (

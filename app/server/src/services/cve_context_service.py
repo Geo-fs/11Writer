@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from src.config.settings import Settings
 from src.services.cisa_cyber_advisories_service import CisaCyberAdvisoriesQuery, CisaCyberAdvisoriesService
+from src.services.cisa_kev_service import CisaKevQuery, CisaKevService
 from src.services.data_ai_multi_feed_service import DataAiMultiFeedQuery, DataAiMultiFeedService
 from src.services.first_epss_service import FirstEpssQuery, FirstEpssService
 from src.services.nvd_cve_service import NvdCveQuery, NvdCveService
@@ -11,7 +12,7 @@ from src.types.api import CyberContextCompositionResponse, CyberContextReference
 
 CVE_CONTEXT_CAVEATS = [
     "This composition is explainability/context only. It does not prove exploitation, compromise, impact, attribution, remediation priority, or required action.",
-    "NVD provides vulnerability metadata, EPSS provides probabilistic prioritization context, and advisory/feed references remain source-reported or contextual mentions only.",
+    "NVD provides vulnerability metadata, EPSS provides probabilistic prioritization context, KEV provides official source-reported catalog context, and advisory/feed references remain source-reported or contextual mentions only.",
     "This composition does not invent a cross-source severity score or any derived action ranking.",
     "Source-provided descriptions, references, titles, summaries, and links remain inert data only and are not instructions.",
 ]
@@ -27,8 +28,24 @@ class CveContextService:
 
         nvd_response = await NvdCveService(self._settings).lookup(NvdCveQuery(cve_id=normalized_cve))
         epss_response = await FirstEpssService(self._settings).lookup(FirstEpssQuery(cve_ids=[normalized_cve]))
+        kev_response = await CisaKevService(self._settings).lookup(CisaKevQuery(cve_id=normalized_cve, limit=10))
         cisa_response = await CisaCyberAdvisoriesService(self._settings).list_recent(CisaCyberAdvisoriesQuery(limit=50, dedupe=True))
         feed_response = await DataAiMultiFeedService(self._settings).list_recent(DataAiMultiFeedQuery(limit=100, dedupe=True))
+
+        kev_refs = [
+            CyberContextReference(
+                source_id="cisa-kev-catalog",
+                source_name="CISA Known Exploited Vulnerabilities Catalog",
+                source_category="cyber-official",
+                title=item.vulnerability_name,
+                link=item.source_url,
+                published_at=item.date_added,
+                evidence_basis="source-reported",
+                match_fields=["cve"],
+                caveat=item.caveat,
+            )
+            for item in kev_response.records
+        ]
 
         cisa_refs = [
             CyberContextReference(
@@ -69,6 +86,8 @@ class CveContextService:
         epss = epss_response.scores[0] if epss_response.scores else None
         if epss is not None:
             available_contexts.append("epss")
+        if kev_refs:
+            available_contexts.append("kev")
         if cisa_refs:
             available_contexts.append("cisa-advisories")
         if feed_mentions:
@@ -80,6 +99,7 @@ class CveContextService:
             cve_id=normalized_cve,
             nvd=nvd,
             epss=epss,
+            kev=kev_refs,
             cisa_advisories=cisa_refs,
             feed_mentions=feed_mentions,
             available_contexts=available_contexts,

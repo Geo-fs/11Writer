@@ -162,6 +162,145 @@ export interface DataAiTopicReportPacketSummary {
   guardrailLine: string;
 }
 
+export interface DataAiWorkflowEvidenceSnapshotSummary {
+  workflowValidationState: "workflow-supporting-evidence-only";
+  workflowValidationLine: string;
+  topicId: DataAiTopicLensTopicId;
+  topicLabel: string;
+  sourceMode: string;
+  selectedFamilyIds: string[];
+  selectedSourceIds: string[];
+  familyCount: number;
+  sourceCount: number;
+  issueCount: number;
+  exportReadinessGapCount: number;
+  promptInjectionTestPosture: string;
+  evidenceBases: string[];
+  sourceHealthCounts: Record<string, number>;
+  filterPostureLine: string;
+  topicPacketLineageLine: string;
+  reportPacketLineageLine: string;
+  readinessLine: string;
+  caveatLine: string;
+  doesNotProveLine: string;
+  displayLines: string[];
+  exportLines: string[];
+  caveats: string[];
+  guardrailLine: string;
+}
+
+export interface DataAiCurrentAwarenessDigestSummary {
+  workflowValidationState: "workflow-supporting-evidence-only";
+  workflowValidationLine: string;
+  topicId: DataAiTopicLensTopicId;
+  topicLabel: string;
+  sourceMode: string;
+  activeTopicIds: DataAiTopicLensTopicId[];
+  selectedFamilyIds: string[];
+  selectedSourceIds: string[];
+  familyCount: number;
+  sourceCount: number;
+  recentItemCount: number;
+  issueCount: number;
+  exportReadinessGapCount: number;
+  promptInjectionTestPosture: string;
+  evidenceBases: string[];
+  sourceHealthCounts: Record<string, number>;
+  familyCoverageLines: string[];
+  workflowLineageLine: string;
+  attentionLine: string;
+  doesNotProveLine: string;
+  sections: DataAiReportBriefSectionSummary[];
+  displayLines: string[];
+  exportLines: string[];
+  caveats: string[];
+  guardrailLine: string;
+}
+
+export interface DataAiReviewExportCoherenceSummary {
+  workflowValidationState: "workflow-supporting-evidence-only";
+  workflowValidationLine: string;
+  topicId: DataAiTopicLensTopicId;
+  topicLabel: string;
+  sourceMode: string;
+  selectedFamilyIds: string[];
+  selectedSourceIds: string[];
+  familyCount: number;
+  sourceCount: number;
+  issueCount: number;
+  exportReadinessGapCount: number;
+  promptInjectionTestPosture: string;
+  sourceModes: string[];
+  sourceHealthCounts: Record<string, number>;
+  familyReviewLine: string;
+  reviewQueueLine: string;
+  readinessExportLine: string;
+  topicReportLineageLine: string;
+  activeSourcePostureLine: string;
+  doesNotProveLine: string;
+  displayLines: string[];
+  exportLines: string[];
+  caveats: string[];
+  guardrailLine: string;
+}
+
+export interface DataAiTopicSafeReportExportPacketSummary {
+  workflowValidationState: "workflow-supporting-evidence-only";
+  workflowValidationLine: string;
+  topicId: DataAiTopicLensTopicId;
+  topicLabel: string;
+  sourceMode: string;
+  selectedFamilyIds: string[];
+  selectedSourceIds: string[];
+  familyCount: number;
+  sourceCount: number;
+  recentItemCount: number;
+  issueCount: number;
+  exportReadinessGapCount: number;
+  promptInjectionTestPosture: string;
+  evidenceBases: string[];
+  sourceModes: string[];
+  sourceHealthCounts: Record<string, number>;
+  familyCoverageLines: string[];
+  lineageLines: string[];
+  reviewReadinessLine: string;
+  activeSourcePostureLine: string;
+  doesNotProveLine: string;
+  displayLines: string[];
+  exportLines: string[];
+  caveats: string[];
+  guardrailLine: string;
+}
+
+export interface DataAiQuestionBriefingPacketSummary {
+  workflowValidationState: "workflow-supporting-evidence-only";
+  workflowValidationLine: string;
+  topicId: DataAiTopicLensTopicId;
+  topicLabel: string;
+  sourceMode: string;
+  selectedFamilyIds: string[];
+  selectedSourceIds: string[];
+  familyCount: number;
+  sourceCount: number;
+  recentItemCount: number;
+  issueCount: number;
+  exportReadinessGapCount: number;
+  promptInjectionTestPosture: string;
+  evidenceBases: string[];
+  sourceModes: string[];
+  sourceHealthCounts: Record<string, number>;
+  timeframeLine: string;
+  familyCoverageLines: string[];
+  lineageLines: string[];
+  unansweredQuestionLines: string[];
+  freshnessLine: string;
+  doesNotProveLine: string;
+  displayLines: string[];
+  exportLines: string[];
+  caveats: string[];
+  guardrailLine: string;
+}
+
 export type DataAiTopicLensTopicId =
   | "cyber"
   | "infrastructure"
@@ -906,6 +1045,547 @@ export function buildDataAiTopicReportPacket(input: {
     caveats,
     guardrailLine:
       "Topic report packet is metadata-only workflow support. It uses existing family, topic, fusion, and report surfaces without article bodies, linked-page URLs, quoted source text, truth scoring, severity scoring, duplicate-headline corroboration, or required-action guidance."
+  };
+}
+
+export function buildDataAiWorkflowEvidenceSnapshot(input: {
+  topicId?: DataAiTopicLensTopicId | null;
+  recent?: DataAiMultiFeedResponse | null;
+  readiness?: DataAiFeedFamilyReadinessSnapshotResponse | null;
+  review?: DataAiFeedFamilyReviewResponse | null;
+  reviewQueue?: DataAiFeedFamilyReviewQueueResponse | null;
+  infrastructureRecent?: DataAiMultiFeedResponse | null;
+  infrastructureReadiness?: DataAiFeedFamilyReadinessSnapshotResponse | null;
+  infrastructureReview?: DataAiFeedFamilyReviewResponse | null;
+  infrastructureReviewQueue?: DataAiFeedFamilyReviewQueueResponse | null;
+}): DataAiWorkflowEvidenceSnapshotSummary | null {
+  const sourceIntelligence = buildDataAiSourceIntelligenceSummary({
+    readiness: input.readiness,
+    review: input.review,
+    reviewQueue: input.reviewQueue
+  });
+  const fusionSnapshot = buildDataAiFusionSnapshotSummary(input);
+  const reportBrief = buildDataAiReportBriefSummary(input);
+  const topicReportPacket = buildDataAiTopicReportPacket(input);
+  const topicLens = buildDataAiTopicLensSummary({
+    recent: input.recent,
+    readiness: input.readiness,
+    review: input.review,
+    reviewQueue: input.reviewQueue
+  });
+
+  if (!sourceIntelligence || !fusionSnapshot || !reportBrief || !topicReportPacket || !topicLens) {
+    return null;
+  }
+
+  const matchedTopic = topicLens.topics.find((topic) => topic.topicId === topicReportPacket.topicId) ?? null;
+  const filterPostureLine = `Workflow filter posture: topic ${topicReportPacket.topicLabel} | families ${formatList(topicReportPacket.selectedFamilyIds)} | sources ${formatList(topicReportPacket.selectedSourceIds.slice(0, 8))}${topicReportPacket.selectedSourceIds.length > 8 ? ", ..." : ""}`;
+  const topicPacketLineageLine = `Topic-packet lineage: ${topicReportPacket.topicLabel} | ${topicReportPacket.familyCount} families | ${topicReportPacket.sourceCount} sources | ${topicReportPacket.recentItemCount} recent items | ${topicReportPacket.issueCount} topic issues.`;
+  const reportPacketLineageLine = `Report-packet lineage: ${reportBrief.familyCount} families | ${reportBrief.sourceCount} sources | ${reportBrief.issueCount} report issues | sections ${reportBrief.sections.map((section) => section.sectionId).join(", ")}.`;
+  const readinessLine = `Workflow readiness: export gaps ${topicReportPacket.exportReadinessGapCount} | prompt injection ${topicReportPacket.promptInjectionTestPosture} | source mode ${topicReportPacket.sourceMode} | loaded ${topicReportPacket.sourceHealthCounts.loaded ?? 0}, empty ${topicReportPacket.sourceHealthCounts.empty ?? 0}, stale ${topicReportPacket.sourceHealthCounts.stale ?? 0}, error ${topicReportPacket.sourceHealthCounts.error ?? 0}.`;
+  const caveatLine = `Workflow caveats: ${topicReportPacket.caveats.slice(0, 2).join(" | ") || sourceIntelligence.caveats.slice(0, 2).join(" | ") || "none"}`;
+  const doesNotProveLine = `Workflow evidence does not prove workflow validation, field truth, impact certainty, wrongdoing, intent, attribution, legal status, urgency, remediation priority, or required action.`;
+  const exportLines = uniqueStrings([
+    `Data AI workflow evidence snapshot: ${topicReportPacket.topicLabel} | ${topicReportPacket.familyCount} families | ${topicReportPacket.sourceCount} sources | ${topicReportPacket.issueCount} issues`,
+    filterPostureLine,
+    topicPacketLineageLine,
+    reportPacketLineageLine,
+    readinessLine,
+    `Workflow evidence bases: ${formatList(topicReportPacket.evidenceBases)} | active topic counts ${matchedTopic ? `${matchedTopic.itemCount} items / ${matchedTopic.issueCount} issues` : "none"}`,
+    doesNotProveLine
+  ])
+    .filter(isSafeMetadataLine)
+    .slice(0, 10);
+  const caveats = uniqueStrings([
+    ...topicReportPacket.caveats,
+    ...reportBrief.caveats,
+    ...fusionSnapshot.caveats,
+    ...sourceIntelligence.caveats,
+    topicLens.workflowValidationLine
+  ]).slice(0, 6);
+
+  return {
+    workflowValidationState: "workflow-supporting-evidence-only",
+    workflowValidationLine:
+      "Workflow-supporting evidence only; this workflow-evidence snapshot packages the current Data AI reporting path into explicit metadata and does not itself validate analyst workflow execution.",
+    topicId: topicReportPacket.topicId,
+    topicLabel: topicReportPacket.topicLabel,
+    sourceMode: topicReportPacket.sourceMode,
+    selectedFamilyIds: topicReportPacket.selectedFamilyIds,
+    selectedSourceIds: topicReportPacket.selectedSourceIds,
+    familyCount: topicReportPacket.familyCount,
+    sourceCount: topicReportPacket.sourceCount,
+    issueCount: topicReportPacket.issueCount,
+    exportReadinessGapCount: topicReportPacket.exportReadinessGapCount,
+    promptInjectionTestPosture: topicReportPacket.promptInjectionTestPosture,
+    evidenceBases: topicReportPacket.evidenceBases,
+    sourceHealthCounts: topicReportPacket.sourceHealthCounts,
+    filterPostureLine,
+    topicPacketLineageLine,
+    reportPacketLineageLine,
+    readinessLine,
+    caveatLine,
+    doesNotProveLine,
+    displayLines: [
+      `Workflow evidence snapshot: ${topicReportPacket.topicLabel} | ${topicReportPacket.familyCount} families | ${topicReportPacket.sourceCount} sources | ${topicReportPacket.issueCount} review issues`,
+      filterPostureLine,
+      topicPacketLineageLine,
+      reportPacketLineageLine,
+      readinessLine,
+      doesNotProveLine
+    ],
+    exportLines,
+    caveats,
+    guardrailLine:
+      "Workflow-evidence snapshot is metadata-only workflow support. It packages existing topic/report/review/export lineage without article bodies, linked-page URLs, truth scoring, severity scoring, duplicate-headline corroboration, or source-promotion behavior."
+  };
+}
+
+export function buildDataAiCurrentAwarenessDigest(input: {
+  topicId?: DataAiTopicLensTopicId | null;
+  recent?: DataAiMultiFeedResponse | null;
+  readiness?: DataAiFeedFamilyReadinessSnapshotResponse | null;
+  review?: DataAiFeedFamilyReviewResponse | null;
+  reviewQueue?: DataAiFeedFamilyReviewQueueResponse | null;
+  infrastructureRecent?: DataAiMultiFeedResponse | null;
+  infrastructureReadiness?: DataAiFeedFamilyReadinessSnapshotResponse | null;
+  infrastructureReview?: DataAiFeedFamilyReviewResponse | null;
+  infrastructureReviewQueue?: DataAiFeedFamilyReviewQueueResponse | null;
+}): DataAiCurrentAwarenessDigestSummary | null {
+  const sourceIntelligence = buildDataAiSourceIntelligenceSummary({
+    readiness: input.readiness,
+    review: input.review,
+    reviewQueue: input.reviewQueue
+  });
+  const fusionSnapshot = buildDataAiFusionSnapshotSummary(input);
+  const reportBrief = buildDataAiReportBriefSummary(input);
+  const topicPacket = buildDataAiTopicReportPacket(input);
+  const workflowEvidence = buildDataAiWorkflowEvidenceSnapshot(input);
+  const topicLens = buildDataAiTopicLensSummary({
+    recent: input.recent,
+    readiness: input.readiness,
+    review: input.review,
+    reviewQueue: input.reviewQueue
+  });
+
+  if (
+    !sourceIntelligence ||
+    !fusionSnapshot ||
+    !reportBrief ||
+    !topicPacket ||
+    !workflowEvidence ||
+    !topicLens
+  ) {
+    return null;
+  }
+
+  const familyCoverageLines = topicPacket.evidenceClassLines.slice(0, 4);
+  const workflowLineageLine = `Workflow lineage: ${workflowEvidence.topicPacketLineageLine} ${workflowEvidence.reportPacketLineageLine}`;
+  const attentionLine = `Current-awareness posture: ${topicPacket.issueCount} topic issues | export gaps ${topicPacket.exportReadinessGapCount} | prompt injection ${workflowEvidence.promptInjectionTestPosture} | source mode ${workflowEvidence.sourceMode}.`;
+  const doesNotProveLine =
+    "Current-awareness digest does not prove field truth, impact certainty, wrongdoing, intent, attribution, legal status, urgency, remediation priority, workflow validation, or required action.";
+  const sectionsBase = [
+    {
+      sectionId: "observe",
+      label: "Observe",
+      lines: [
+        `Current topic ${topicPacket.topicLabel}: ${topicPacket.familyCount} families | ${topicPacket.sourceCount} sources | ${topicPacket.recentItemCount} recent items`,
+        topicPacket.filterPostureLine,
+        `Active topics: ${formatList(topicLens.topics.map((topic) => topic.topicId))} | source health loaded ${topicPacket.sourceHealthCounts.loaded ?? 0}, empty ${topicPacket.sourceHealthCounts.empty ?? 0}, stale ${topicPacket.sourceHealthCounts.stale ?? 0}, error ${topicPacket.sourceHealthCounts.error ?? 0}`
+      ],
+      exportLines: [
+        `Observe | topic ${topicPacket.topicLabel} | ${topicPacket.familyCount} families | ${topicPacket.sourceCount} sources | ${topicPacket.recentItemCount} recent items`,
+        `Observe filters | ${topicPacket.filterPostureLine}`
+      ]
+    },
+    {
+      sectionId: "orient",
+      label: "Orient",
+      lines: [
+        `Evidence classes: ${formatList(topicPacket.evidenceBases)} | family coverage ${formatList(topicPacket.selectedFamilyIds)}`,
+        ...familyCoverageLines,
+        fusionSnapshot.methodologyLine,
+        topicPacket.corroborationPostureLine
+      ],
+      exportLines: [
+        `Orient | evidence ${formatList(topicPacket.evidenceBases)} | active topics ${formatList(topicLens.topics.map((topic) => topic.topicId))}`,
+        ...familyCoverageLines.slice(0, 2)
+      ]
+    },
+    {
+      sectionId: "prioritize",
+      label: "Prioritize",
+      lines: [
+        attentionLine,
+        topicPacket.readinessGapLine,
+        workflowEvidence.readinessLine,
+        workflowLineageLine
+      ],
+      exportLines: [
+        `Prioritize | topic issues ${topicPacket.issueCount} | export gaps ${topicPacket.exportReadinessGapCount} | prompt injection ${workflowEvidence.promptInjectionTestPosture}`,
+        `Prioritize lineage | ${workflowEvidence.topicPacketLineageLine}`
+      ]
+    },
+    {
+      sectionId: "explain",
+      label: "Explain",
+      lines: [
+        `Caveats: ${topicPacket.caveats.slice(0, 2).join(" | ") || sourceIntelligence.caveats.slice(0, 2).join(" | ") || "none"}`,
+        doesNotProveLine,
+        `Export-safe summary: ${topicPacket.exportLines[0] ?? workflowEvidence.exportLines[0] ?? reportBrief.exportLines[0] ?? "none"}`
+      ],
+      exportLines: [
+        `Explain | ${doesNotProveLine}`,
+        `Explain export | ${topicPacket.exportLines[0] ?? workflowEvidence.exportLines[0] ?? reportBrief.exportLines[0] ?? "none"}`
+      ]
+    }
+  ] satisfies DataAiReportBriefSectionSummary[];
+  const sections = sectionsBase.map<DataAiReportBriefSectionSummary>((section) => ({
+    ...section,
+    lines: section.lines.filter(isSafeMetadataLine),
+    exportLines: section.exportLines.filter(isSafeMetadataLine)
+  }));
+  const exportLines = uniqueStrings([
+    `Data AI current-awareness digest: ${topicPacket.topicLabel} | ${topicPacket.familyCount} families | ${topicPacket.sourceCount} sources | ${topicPacket.recentItemCount} recent items | ${topicPacket.issueCount} issues`,
+    workflowLineageLine,
+    attentionLine,
+    ...familyCoverageLines,
+    ...sections.flatMap((section) => section.exportLines),
+    ...topicPacket.exportLines.slice(0, 2),
+    ...workflowEvidence.exportLines.slice(0, 2)
+  ])
+    .filter(isSafeMetadataLine)
+    .slice(0, 12);
+  const caveats = uniqueStrings([
+    ...topicPacket.caveats,
+    ...workflowEvidence.caveats,
+    ...reportBrief.caveats,
+    ...fusionSnapshot.caveats,
+    ...sourceIntelligence.caveats
+  ]).slice(0, 6);
+
+  return {
+    workflowValidationState: "workflow-supporting-evidence-only",
+    workflowValidationLine:
+      "Workflow-supporting evidence only; this current-awareness digest composes the existing Data AI metadata path into one open-ended digest and does not validate analyst workflow execution.",
+    topicId: topicPacket.topicId,
+    topicLabel: topicPacket.topicLabel,
+    sourceMode: topicPacket.sourceMode,
+    activeTopicIds: topicLens.topics.map((topic) => topic.topicId),
+    selectedFamilyIds: topicPacket.selectedFamilyIds,
+    selectedSourceIds: topicPacket.selectedSourceIds,
+    familyCount: topicPacket.familyCount,
+    sourceCount: topicPacket.sourceCount,
+    recentItemCount: topicPacket.recentItemCount,
+    issueCount: topicPacket.issueCount,
+    exportReadinessGapCount: topicPacket.exportReadinessGapCount,
+    promptInjectionTestPosture: workflowEvidence.promptInjectionTestPosture,
+    evidenceBases: topicPacket.evidenceBases,
+    sourceHealthCounts: topicPacket.sourceHealthCounts,
+    familyCoverageLines,
+    workflowLineageLine,
+    attentionLine,
+    doesNotProveLine,
+    sections,
+    displayLines: [
+      `Current-awareness digest: ${topicPacket.topicLabel} | ${topicPacket.familyCount} families | ${topicPacket.sourceCount} sources | ${topicPacket.recentItemCount} recent items | ${topicPacket.issueCount} review issues`,
+      topicPacket.filterPostureLine,
+      `Active topics ${formatList(topicLens.topics.map((topic) => topic.topicId))} | evidence ${formatList(topicPacket.evidenceBases)} | prompt injection ${workflowEvidence.promptInjectionTestPosture}`,
+      attentionLine,
+      doesNotProveLine
+    ],
+    exportLines,
+    caveats,
+    guardrailLine:
+      "Current-awareness digest is metadata-only workflow support. It reuses existing Data AI family, topic, report, and workflow-evidence surfaces without article bodies, linked-page URLs, raw feed dumps, truth weighting, severity scoring, duplicate-headline corroboration, or required-action guidance."
+  };
+}
+
+export function buildDataAiReviewExportCoherenceSummary(input: {
+  topicId?: DataAiTopicLensTopicId | null;
+  recent?: DataAiMultiFeedResponse | null;
+  readiness?: DataAiFeedFamilyReadinessSnapshotResponse | null;
+  review?: DataAiFeedFamilyReviewResponse | null;
+  reviewQueue?: DataAiFeedFamilyReviewQueueResponse | null;
+  infrastructureRecent?: DataAiMultiFeedResponse | null;
+  infrastructureReadiness?: DataAiFeedFamilyReadinessSnapshotResponse | null;
+  infrastructureReview?: DataAiFeedFamilyReviewResponse | null;
+  infrastructureReviewQueue?: DataAiFeedFamilyReviewQueueResponse | null;
+}): DataAiReviewExportCoherenceSummary | null {
+  const sourceIntelligence = buildDataAiSourceIntelligenceSummary({
+    readiness: input.readiness,
+    review: input.review,
+    reviewQueue: input.reviewQueue
+  });
+  const reportBrief = buildDataAiReportBriefSummary(input);
+  const topicPacket = buildDataAiTopicReportPacket(input);
+  const workflowEvidence = buildDataAiWorkflowEvidenceSnapshot(input);
+  const currentAwareness = buildDataAiCurrentAwarenessDigest(input);
+
+  if (!sourceIntelligence || !reportBrief || !topicPacket || !workflowEvidence || !currentAwareness) {
+    return null;
+  }
+
+  const sourceModes = sortStrings(uniqueStrings([topicPacket.sourceMode, ...topicPacket.sourceModes]));
+  const lineageCoherence =
+    topicPacket.topicId === workflowEvidence.topicId &&
+    workflowEvidence.topicId === currentAwareness.topicId;
+  const sectionCoherence =
+    reportBrief.sections.map((section) => section.sectionId).join(",") ===
+      "observe,orient,prioritize,explain" &&
+    topicPacket.sections.map((section) => section.sectionId).join(",") ===
+      "observe,orient,prioritize,explain" &&
+    currentAwareness.sections.map((section) => section.sectionId).join(",") ===
+      "observe,orient,prioritize,explain";
+  const familyReviewLine = `Family-review posture: caveat classes ${formatList(sourceIntelligence.caveatClasses)} | evidence bases ${formatList(sourceIntelligence.evidenceBases)} | queue family ${sourceIntelligence.reviewQueueCounts.family} | queue source ${sourceIntelligence.reviewQueueCounts.source}.`;
+  const reviewQueueLine = `Review-queue posture: ${sourceIntelligence.issueCount} issues | top issue kinds ${sourceIntelligence.topIssueKinds.map((issue) => `${issue.label} ${issue.count}`).join(" | ") || "none"} | prompt injection ${sourceIntelligence.promptInjectionTestPosture}.`;
+  const readinessExportLine = `Readiness/export posture: export gaps ${sourceIntelligence.exportReadinessGapCount} | family health loaded ${sourceIntelligence.familyHealthCounts.loaded ?? 0}, mixed ${sourceIntelligence.familyHealthCounts.mixed ?? 0}, degraded ${sourceIntelligence.familyHealthCounts.degraded ?? 0}, empty ${sourceIntelligence.familyHealthCounts.empty ?? 0}.`;
+  const topicReportLineageLine = `Topic/report coherence: lineage ${lineageCoherence ? "aligned" : "check"} | sections ${sectionCoherence ? "aligned" : "check"} | topic ${topicPacket.topicLabel} | report issues ${reportBrief.issueCount} | topic issues ${topicPacket.issueCount} | digest issues ${currentAwareness.issueCount}.`;
+  const activeSourcePostureLine = `Active source posture: families ${formatList(topicPacket.selectedFamilyIds)} | sources ${formatList(topicPacket.selectedSourceIds.slice(0, 8))}${topicPacket.selectedSourceIds.length > 8 ? ", ..." : ""} | source modes ${formatList(sourceModes)} | loaded ${topicPacket.sourceHealthCounts.loaded ?? 0}, empty ${topicPacket.sourceHealthCounts.empty ?? 0}, stale ${topicPacket.sourceHealthCounts.stale ?? 0}, error ${topicPacket.sourceHealthCounts.error ?? 0}.`;
+  const doesNotProveLine =
+    "Review/export coherence does not prove field truth, workflow validation, impact certainty, wrongdoing, intent, attribution, legal status, urgency, remediation priority, or required action.";
+  const exportLines = uniqueStrings([
+    `Data AI review/export coherence: ${topicPacket.topicLabel} | ${topicPacket.familyCount} families | ${topicPacket.sourceCount} sources | ${sourceIntelligence.issueCount} issues`,
+    familyReviewLine,
+    reviewQueueLine,
+    readinessExportLine,
+    topicReportLineageLine,
+    activeSourcePostureLine,
+    doesNotProveLine
+  ])
+    .filter(isSafeMetadataLine)
+    .slice(0, 10);
+  const caveats = uniqueStrings([
+    ...currentAwareness.caveats,
+    ...workflowEvidence.caveats,
+    ...topicPacket.caveats,
+    ...reportBrief.caveats,
+    ...sourceIntelligence.caveats
+  ]).slice(0, 6);
+
+  return {
+    workflowValidationState: "workflow-supporting-evidence-only",
+    workflowValidationLine:
+      "Workflow-supporting evidence only; this review/export coherence summary checks alignment across the existing Data AI reporting stack and does not validate analyst workflow execution.",
+    topicId: topicPacket.topicId,
+    topicLabel: topicPacket.topicLabel,
+    sourceMode: topicPacket.sourceMode,
+    selectedFamilyIds: topicPacket.selectedFamilyIds,
+    selectedSourceIds: topicPacket.selectedSourceIds,
+    familyCount: topicPacket.familyCount,
+    sourceCount: topicPacket.sourceCount,
+    issueCount: sourceIntelligence.issueCount,
+    exportReadinessGapCount: sourceIntelligence.exportReadinessGapCount,
+    promptInjectionTestPosture: sourceIntelligence.promptInjectionTestPosture,
+    sourceModes,
+    sourceHealthCounts: topicPacket.sourceHealthCounts,
+    familyReviewLine,
+    reviewQueueLine,
+    readinessExportLine,
+    topicReportLineageLine,
+    activeSourcePostureLine,
+    doesNotProveLine,
+    displayLines: [
+      `Review/export coherence: ${topicPacket.topicLabel} | ${topicPacket.familyCount} families | ${topicPacket.sourceCount} sources | ${sourceIntelligence.issueCount} review issues`,
+      familyReviewLine,
+      reviewQueueLine,
+      readinessExportLine,
+      topicReportLineageLine,
+      activeSourcePostureLine,
+      doesNotProveLine
+    ],
+    exportLines,
+    caveats,
+    guardrailLine:
+      "Review/export coherence is metadata-only workflow support. It checks alignment across existing Data AI review, queue, readiness, topic, report, workflow-evidence, and digest surfaces without article bodies, linked-page URLs, raw feed dumps, truth weighting, severity scoring, duplicate-headline corroboration, or source-promotion behavior."
+  };
+}
+
+export function buildDataAiTopicSafeReportExportPacket(input: {
+  topicId?: DataAiTopicLensTopicId | null;
+  recent?: DataAiMultiFeedResponse | null;
+  readiness?: DataAiFeedFamilyReadinessSnapshotResponse | null;
+  review?: DataAiFeedFamilyReviewResponse | null;
+  reviewQueue?: DataAiFeedFamilyReviewQueueResponse | null;
+  infrastructureRecent?: DataAiMultiFeedResponse | null;
+  infrastructureReadiness?: DataAiFeedFamilyReadinessSnapshotResponse | null;
+  infrastructureReview?: DataAiFeedFamilyReviewResponse | null;
+  infrastructureReviewQueue?: DataAiFeedFamilyReviewQueueResponse | null;
+}): DataAiTopicSafeReportExportPacketSummary | null {
+  const topicPacket = buildDataAiTopicReportPacket(input);
+  const workflowEvidence = buildDataAiWorkflowEvidenceSnapshot(input);
+  const currentAwareness = buildDataAiCurrentAwarenessDigest(input);
+  const reviewExportCoherence = buildDataAiReviewExportCoherenceSummary(input);
+
+  if (!topicPacket || !workflowEvidence || !currentAwareness || !reviewExportCoherence) {
+    return null;
+  }
+
+  const lineageLines = [
+    workflowEvidence.topicPacketLineageLine,
+    workflowEvidence.reportPacketLineageLine,
+    currentAwareness.workflowLineageLine,
+    reviewExportCoherence.topicReportLineageLine
+  ].filter(isSafeMetadataLine);
+  const familyCoverageLines = topicPacket.evidenceClassLines.slice(0, 4);
+  const reviewReadinessLine = `Review/export packet posture: topic issues ${topicPacket.issueCount} | review issues ${reviewExportCoherence.issueCount} | export gaps ${reviewExportCoherence.exportReadinessGapCount} | prompt injection ${reviewExportCoherence.promptInjectionTestPosture}.`;
+  const activeSourcePostureLine = `Packet source posture: families ${formatList(topicPacket.selectedFamilyIds)} | sources ${formatList(topicPacket.selectedSourceIds.slice(0, 8))}${topicPacket.selectedSourceIds.length > 8 ? ", ..." : ""} | source modes ${formatList(reviewExportCoherence.sourceModes)} | loaded ${topicPacket.sourceHealthCounts.loaded ?? 0}, empty ${topicPacket.sourceHealthCounts.empty ?? 0}, stale ${topicPacket.sourceHealthCounts.stale ?? 0}, error ${topicPacket.sourceHealthCounts.error ?? 0}.`;
+  const doesNotProveLine =
+    "Topic-safe report export packet does not prove field truth, workflow validation, impact certainty, wrongdoing, intent, attribution, legal status, urgency, remediation priority, or required action.";
+  const exportLines = uniqueStrings([
+    `Data AI topic-safe report export packet: ${topicPacket.topicLabel} | ${topicPacket.familyCount} families | ${topicPacket.sourceCount} sources | ${topicPacket.recentItemCount} recent items | ${reviewExportCoherence.issueCount} review issues`,
+    reviewReadinessLine,
+    activeSourcePostureLine,
+    ...familyCoverageLines,
+    ...lineageLines,
+    doesNotProveLine
+  ])
+    .filter(isSafeMetadataLine)
+    .slice(0, 12);
+  const caveats = uniqueStrings([
+    ...reviewExportCoherence.caveats,
+    ...currentAwareness.caveats,
+    ...workflowEvidence.caveats,
+    ...topicPacket.caveats
+  ]).slice(0, 6);
+
+  return {
+    workflowValidationState: "workflow-supporting-evidence-only",
+    workflowValidationLine:
+      "Workflow-supporting evidence only; this topic-safe report export packet packages the current Data AI topic/report path into compact export-safe metadata and does not validate analyst workflow execution.",
+    topicId: topicPacket.topicId,
+    topicLabel: topicPacket.topicLabel,
+    sourceMode: topicPacket.sourceMode,
+    selectedFamilyIds: topicPacket.selectedFamilyIds,
+    selectedSourceIds: topicPacket.selectedSourceIds,
+    familyCount: topicPacket.familyCount,
+    sourceCount: topicPacket.sourceCount,
+    recentItemCount: topicPacket.recentItemCount,
+    issueCount: reviewExportCoherence.issueCount,
+    exportReadinessGapCount: reviewExportCoherence.exportReadinessGapCount,
+    promptInjectionTestPosture: reviewExportCoherence.promptInjectionTestPosture,
+    evidenceBases: topicPacket.evidenceBases,
+    sourceModes: reviewExportCoherence.sourceModes,
+    sourceHealthCounts: topicPacket.sourceHealthCounts,
+    familyCoverageLines,
+    lineageLines,
+    reviewReadinessLine,
+    activeSourcePostureLine,
+    doesNotProveLine,
+    displayLines: [
+      `Topic-safe report export packet: ${topicPacket.topicLabel} | ${topicPacket.familyCount} families | ${topicPacket.sourceCount} sources | ${topicPacket.recentItemCount} recent items | ${reviewExportCoherence.issueCount} review issues`,
+      topicPacket.filterPostureLine,
+      reviewReadinessLine,
+      activeSourcePostureLine,
+      doesNotProveLine
+    ],
+    exportLines,
+    caveats,
+    guardrailLine:
+      "Topic-safe report export packet is metadata-only workflow support. It reuses existing Data AI topic, workflow-evidence, current-awareness, and review/export coherence surfaces without article bodies, linked-page URLs, raw feed dumps, truth weighting, severity scoring, duplicate-headline corroboration, or required-action guidance."
+  };
+}
+
+export function buildDataAiQuestionBriefingPacket(input: {
+  topicId?: DataAiTopicLensTopicId | null;
+  recent?: DataAiMultiFeedResponse | null;
+  readiness?: DataAiFeedFamilyReadinessSnapshotResponse | null;
+  review?: DataAiFeedFamilyReviewResponse | null;
+  reviewQueue?: DataAiFeedFamilyReviewQueueResponse | null;
+  infrastructureRecent?: DataAiMultiFeedResponse | null;
+  infrastructureReadiness?: DataAiFeedFamilyReadinessSnapshotResponse | null;
+  infrastructureReview?: DataAiFeedFamilyReviewResponse | null;
+  infrastructureReviewQueue?: DataAiFeedFamilyReviewQueueResponse | null;
+}): DataAiQuestionBriefingPacketSummary | null {
+  const topicPacket = buildDataAiTopicReportPacket(input);
+  const workflowEvidence = buildDataAiWorkflowEvidenceSnapshot(input);
+  const currentAwareness = buildDataAiCurrentAwarenessDigest(input);
+  const reviewExportCoherence = buildDataAiReviewExportCoherenceSummary(input);
+  const topicSafeExportPacket = buildDataAiTopicSafeReportExportPacket(input);
+
+  if (
+    !topicPacket ||
+    !workflowEvidence ||
+    !currentAwareness ||
+    !reviewExportCoherence ||
+    !topicSafeExportPacket
+  ) {
+    return null;
+  }
+
+  const timeframeLine = `Briefing timeframe: recent items ${topicPacket.recentItemCount} | published markers ${topicPacket.recentEvidenceLines.slice(0, 2).join(" | ") || "none"} | active filters ${topicPacket.filterPostureLine}.`;
+  const familyCoverageLines = topicPacket.evidenceClassLines.slice(0, 4);
+  const lineageLines = [
+    workflowEvidence.topicPacketLineageLine,
+    workflowEvidence.reportPacketLineageLine,
+    currentAwareness.workflowLineageLine,
+    reviewExportCoherence.topicReportLineageLine,
+    ...topicSafeExportPacket.lineageLines.slice(0, 2)
+  ]
+    .filter(isSafeMetadataLine)
+    .slice(0, 6);
+  const unansweredQuestionLines = [
+    `Open review gaps: review issues ${reviewExportCoherence.issueCount} | export gaps ${reviewExportCoherence.exportReadinessGapCount} | prompt injection ${reviewExportCoherence.promptInjectionTestPosture}.`,
+    `Unanswered-question posture: evidence classes stay ${formatList(topicPacket.evidenceBases)} and do not answer field truth, impact certainty, attribution, or required action by themselves.`,
+    `Freshness question: loaded ${topicPacket.sourceHealthCounts.loaded ?? 0}, empty ${topicPacket.sourceHealthCounts.empty ?? 0}, stale ${topicPacket.sourceHealthCounts.stale ?? 0}, error ${topicPacket.sourceHealthCounts.error ?? 0}; missing freshness proof stays explicit.`
+  ].filter(isSafeMetadataLine);
+  const freshnessLine = `Freshness posture: source modes ${formatList(topicSafeExportPacket.sourceModes)} | loaded ${topicPacket.sourceHealthCounts.loaded ?? 0}, empty ${topicPacket.sourceHealthCounts.empty ?? 0}, stale ${topicPacket.sourceHealthCounts.stale ?? 0}, error ${topicPacket.sourceHealthCounts.error ?? 0}.`;
+  const doesNotProveLine =
+    "Question briefing packet does not prove field truth, impact certainty, wrongdoing, intent, attribution, legal status, urgency, remediation priority, corroboration, workflow validation, or required action.";
+  const exportLines = uniqueStrings([
+    `Data AI question briefing packet: ${topicPacket.topicLabel} | ${topicPacket.familyCount} families | ${topicPacket.sourceCount} sources | ${topicPacket.recentItemCount} recent items | ${reviewExportCoherence.issueCount} review issues`,
+    timeframeLine,
+    freshnessLine,
+    ...familyCoverageLines,
+    ...lineageLines,
+    ...unansweredQuestionLines,
+    doesNotProveLine
+  ])
+    .filter(isSafeMetadataLine)
+    .slice(0, 14);
+  const caveats = uniqueStrings([
+    ...topicSafeExportPacket.caveats,
+    ...reviewExportCoherence.caveats,
+    ...currentAwareness.caveats,
+    ...workflowEvidence.caveats,
+    ...topicPacket.caveats
+  ]).slice(0, 6);
+
+  return {
+    workflowValidationState: "workflow-supporting-evidence-only",
+    workflowValidationLine:
+      "Workflow-supporting evidence only; this question briefing packet packages the current Data AI topic/report path into compact question-oriented metadata and does not validate analyst workflow execution.",
+    topicId: topicPacket.topicId,
+    topicLabel: topicPacket.topicLabel,
+    sourceMode: topicPacket.sourceMode,
+    selectedFamilyIds: topicPacket.selectedFamilyIds,
+    selectedSourceIds: topicPacket.selectedSourceIds,
+    familyCount: topicPacket.familyCount,
+    sourceCount: topicPacket.sourceCount,
+    recentItemCount: topicPacket.recentItemCount,
+    issueCount: reviewExportCoherence.issueCount,
+    exportReadinessGapCount: reviewExportCoherence.exportReadinessGapCount,
+    promptInjectionTestPosture: reviewExportCoherence.promptInjectionTestPosture,
+    evidenceBases: topicPacket.evidenceBases,
+    sourceModes: topicSafeExportPacket.sourceModes,
+    sourceHealthCounts: topicPacket.sourceHealthCounts,
+    timeframeLine,
+    familyCoverageLines,
+    lineageLines,
+    unansweredQuestionLines,
+    freshnessLine,
+    doesNotProveLine,
+    displayLines: [
+      `Question briefing packet: ${topicPacket.topicLabel} | ${topicPacket.familyCount} families | ${topicPacket.sourceCount} sources | ${topicPacket.recentItemCount} recent items | ${reviewExportCoherence.issueCount} review issues`,
+      timeframeLine,
+      freshnessLine,
+      unansweredQuestionLines[0] ?? "none",
+      doesNotProveLine
+    ],
+    exportLines,
+    caveats,
+    guardrailLine:
+      "Question briefing packet is metadata-only workflow support. It reuses existing Data AI topic, workflow-evidence, current-awareness, review/export coherence, and topic-safe export packet surfaces without article bodies, linked-page URLs, raw feed dumps, truth weighting, corroboration scoring, severity scoring, or required-action guidance."
   };
 }
 

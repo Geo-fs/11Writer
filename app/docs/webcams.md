@@ -219,6 +219,243 @@ Interpretation rules:
 - blocked and needs-review candidates stay materially different from endpoint-verified or sandbox-importable candidates
 - no comparison bucket activates, validates, schedules, or promotes a source
 
+### Sandbox-readiness comparison
+
+The backend source-ops index and export-summary responses now also include a bounded `cameraSandboxReadinessComparisonReport` over the current candidate cohort limited to:
+
+- `candidate-sandbox-importable`
+- `candidate-endpoint-verified`
+
+Each row stays export-safe and preserves:
+
+- lifecycle state
+- payload-shape posture
+- media-access posture
+- sandbox-feasibility posture
+- source-health posture
+- missing-evidence count
+- next safe review step
+- compact export lines
+
+Current comparison roles:
+
+- `sandbox-comparator`
+  - current fixture-backed sandbox candidates such as `caltrans-cctv-cameras`
+- `endpoint-only-hold`
+  - endpoint-verified non-sandbox candidates such as `nzta-traffic-cameras` and `arlington-traffic-cameras`
+
+Current comparison posture examples:
+
+- `caltrans-cctv-cameras`
+  - `fixture-backed-direct-image-review`
+- `nzta-traffic-cameras`
+  - `endpoint-family-unpinned`
+- `arlington-traffic-cameras`
+  - `media-proof-missing`
+
+Does-not-prove lines remain explicit:
+
+- this comparison does not activate or schedule any source
+- this comparison does not validate ingest readiness or promote lifecycle state
+- this comparison does not prove orientation certainty, source health, or media rights beyond the bounded recorded posture
+
+### Source-ops portfolio digest
+
+The backend source-ops index and export-summary responses now also include a bounded `cameraSourceOpsPortfolioDigest` across the current candidate cohort.
+
+The digest synthesizes all current candidate rows into one export-safe portfolio view with four bounded roles:
+
+- `sandbox-comparator`
+- `endpoint-only-hold`
+- `research-needed`
+- `blocked-hold`
+
+Each digest row preserves:
+
+- lifecycle state
+- payload-shape posture
+- media-access posture
+- sandbox-feasibility posture
+- source-health posture
+- next safe review step
+- missing-evidence count
+- export-safe lines
+- explicit caveats
+
+Current role examples:
+
+- `caltrans-cctv-cameras`
+  - `sandbox-comparator`
+- `nzta-traffic-cameras`
+  - `endpoint-only-hold`
+- `euskadi-traffic-cameras`
+  - `research-needed`
+- `minnesota-511-public-arcgis`
+  - `blocked-hold`
+
+Does-not-prove lines remain explicit:
+
+- this digest does not activate or schedule any source
+- this digest does not validate ingest readiness or promote lifecycle state
+- this digest does not prove orientation certainty, source health, or media rights beyond the bounded recorded posture
+
+### Source-ops review-priority packet
+
+The backend source-ops index and export-summary responses now also include a bounded `cameraSourceOpsReviewPriorityPacket` across the current candidate cohort.
+
+The packet turns the current cohort into one export-safe next-safe-work view with four priority bands:
+
+- `review-next`
+- `follow-up`
+- `hold`
+- `blocked-review`
+
+Each packet row preserves:
+
+- lifecycle state
+- payload-shape posture
+- media-access posture
+- sandbox-feasibility posture
+- source-health posture
+- missing-evidence count
+- next safe review step
+- priority rationale
+- export-safe lines
+- explicit caveats
+
+Current priority examples:
+
+- `caltrans-cctv-cameras`
+  - `review-next`
+- `nzta-traffic-cameras`
+  - `hold`
+- `euskadi-traffic-cameras`
+  - `follow-up`
+- `minnesota-511-public-arcgis`
+  - `blocked-review`
+
+The packet is still read-only evidence only. It does not:
+
+- activate or schedule any source
+- validate ingest readiness or promote lifecycle state
+- prove orientation certainty, source health, or media rights beyond the bounded recorded posture
+
+### Source-ops regional portfolio packet
+
+The backend source-ops index and export-summary responses now also include a bounded `cameraSourceOpsRegionalPortfolioPacket` across the current candidate cohort.
+
+The packet turns the cohort into one export-safe regional and lifecycle view. Each row preserves:
+
+- lifecycle state
+- country grouping
+- region grouping
+- payload-shape posture
+- media-access posture
+- sandbox-feasibility posture
+- source-health posture
+- missing-evidence count
+- next safe review step
+- review-burden posture
+- export-safe lines
+- explicit caveats
+
+Current regional posture examples:
+
+- `finland-digitraffic-road-cameras`
+  - `country=Finland`
+- `quebec-mtmd-traffic-cameras`
+  - `country=Canada`
+- `caltrans-cctv-cameras`
+  - `country=United States`
+- `nzta-traffic-cameras`
+  - `country=New Zealand`
+- `euskadi-traffic-cameras`
+  - `country=Spain`
+
+Current review-burden examples:
+
+- `caltrans-cctv-cameras`
+  - `low`
+- `nzta-traffic-cameras`
+  - `medium`
+- `minnesota-511-public-arcgis`
+  - `high`
+
+The packet is still read-only evidence only. It does not:
+
+- activate or schedule any source
+- validate ingest readiness or promote lifecycle state
+- prove orientation certainty, source health, or media rights beyond the bounded recorded posture
+
+### OSM-backed lead-discovery packet
+
+The backend source-ops index and export-summary responses now also include a bounded `cameraSourceOpsOsmLeadDiscoveryPacket`.
+
+This packet is lead-discovery support only. It uses:
+
+- [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) as read-only query support for map-based lead review
+- [OpenStreetMap tagging references](https://wiki.openstreetmap.org/wiki/Tag%3Aman_made%3Dsurveillance) as map-only infrastructure lead context
+- [Geofabrik extracts](https://download.geofabrik.de/) as regional offline OSM lead-discovery support
+
+Each row preserves:
+
+- lifecycle state
+- country grouping
+- region grouping
+- lead provenance
+- endpoint-known versus map-only distinction
+- payload-shape posture
+- media-access posture
+- sandbox-feasibility posture
+- source-health posture
+- missing-evidence count
+- next safe review step
+- review-burden posture
+- export-safe lines
+- explicit caveats
+
+Interpretation rules:
+
+- `endpoint-known-plus-map-lead`
+  - a source already has pinned webcam endpoint evidence, and OSM-backed tools are only supplemental discovery support
+- `map-only-lead`
+  - OSM-backed evidence may help find infrastructure or candidate follow-up, but it does not prove a public live camera endpoint exists
+
+This packet is still read-only evidence only. It does not:
+
+- activate or schedule any source
+- validate ingest readiness or promote lifecycle state
+- prove that a mapped camera, surveillance tag, or infrastructure node corresponds to a public live camera feed
+
+### OSM lead-to-review reconciliation packet
+
+The backend source-ops index and export-summary responses now also include a bounded `cameraSourceOpsOsmLeadReviewReconciliationPacket`.
+
+This packet is a follow-on to the OSM lead-discovery packet. It reconciles:
+
+- endpoint-known leads
+- map-only leads
+- review burden
+- missing evidence
+- next safe review step
+
+Reconciliation buckets stay conservative:
+
+- `endpoint-known-review-next`
+  - endpoint evidence is already pinned, so OSM-backed context stays supplemental while human review continues
+- `endpoint-known-hold`
+  - endpoint evidence exists, but missing evidence or review burden still blocks stronger lifecycle discussion
+- `map-only-research`
+  - map-backed lead context can guide later manual review, but it remains below endpoint proof
+- `map-only-blocked`
+  - map-only lead context remains below endpoint proof and the source still requires compliant-alternative review only
+
+This packet is still read-only evidence only. It does not:
+
+- activate or schedule any source
+- validate ingest readiness or promote lifecycle state
+- turn map-only leads into public live camera proof
+
 ## Normalized Schema
 
 The canonical camera object is `CameraEntity`.

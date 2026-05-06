@@ -13,6 +13,7 @@ from src.webcam.repository import WebcamRepository
 def build_source_status(settings: Settings) -> SourceStatusResponse:
     google_enabled = bool(settings.google_maps_api_key)
     aircraft_runtime = get_source_runtime_status("opensky-network")
+    gpsjam_runtime = get_source_runtime_status("gpsjam-gnss-interference")
     opensky_anonymous_runtime = get_source_runtime_status("opensky-anonymous-states")
     ourairports_reference_runtime = get_source_runtime_status("ourairports-reference")
     satellite_runtime = get_source_runtime_status("celestrak-active")
@@ -65,6 +66,13 @@ def build_source_status(settings: Settings) -> SourceStatusResponse:
             default_freshness=15,
             default_stale_after=120,
             detail="OpenSky-backed aircraft endpoint is available for bounded polling and attribution.",
+        ),
+        _runtime_to_status(
+            name="gpsjam-gnss-interference",
+            runtime=gpsjam_runtime,
+            default_freshness=86_400,
+            default_stale_after=172_800,
+            detail="GPSJam daily aircraft-reported low-navigation-accuracy context is available as bounded GNSS-disruption awareness and does not by itself prove outage, attribution, or operational consequence.",
         ),
         _runtime_to_status(
             name="opensky-anonymous-states",

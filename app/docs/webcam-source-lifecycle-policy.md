@@ -400,6 +400,189 @@ Admissible promotion-readiness comparison evidence:
   - sandbox onboarding for endpoint-only candidates
   - scraping or browser automation
 
+Admissible sandbox-readiness comparison evidence:
+
+- the backend source-ops `cameraSandboxReadinessComparisonReport` may compare only:
+  - `candidate-sandbox-importable`
+  - `candidate-endpoint-verified`
+- each row may preserve:
+  - lifecycle state
+  - payload-shape posture
+  - media-access posture
+  - sandbox-feasibility posture
+  - source-health posture
+  - missing-evidence count
+  - next safe review step
+  - export-safe lines
+  - explicit caveats and does-not-prove lines
+- it may confirm:
+  - which sandbox candidates currently serve as stronger bounded comparators
+  - which endpoint-verified candidates remain endpoint-only holds
+  - whether a hold is driven by unpinned payload shape versus missing media proof
+- it may not by itself justify:
+  - `approved-unvalidated`
+  - `validated`
+  - sandbox connector creation
+  - scheduled refresh enablement
+  - source activation
+  - scraping or browser automation
+
+Admissible source-ops portfolio digest evidence:
+
+- the backend source-ops `cameraSourceOpsPortfolioDigest` may synthesize the current candidate cohort into bounded portfolio roles:
+  - `sandbox-comparator`
+  - `endpoint-only-hold`
+  - `research-needed`
+  - `blocked-hold`
+- each row may preserve:
+  - lifecycle state
+  - payload-shape posture
+  - media-access posture
+  - sandbox-feasibility posture
+  - source-health posture
+  - next safe review step
+  - missing-evidence count
+  - export-safe lines
+  - explicit caveats and does-not-prove lines
+- it may confirm:
+  - which current candidates are strongest bounded comparators
+  - which candidates remain endpoint-only holds
+  - which candidates still need endpoint research
+  - which candidates remain blocked/do-not-scrape
+- it may not by itself justify:
+  - `approved-unvalidated`
+  - `validated`
+  - sandbox connector creation
+  - scheduled refresh enablement
+  - source activation
+  - scraping or browser automation
+
+Admissible source-ops review-priority packet evidence:
+
+- the backend source-ops `cameraSourceOpsReviewPriorityPacket` may package the current cohort into bounded next-safe-work bands:
+  - `review-next`
+  - `follow-up`
+  - `hold`
+  - `blocked-review`
+- each row may preserve:
+  - lifecycle state
+  - payload-shape posture
+  - media-access posture
+  - sandbox-feasibility posture
+  - source-health posture
+  - missing-evidence count
+  - next safe review step
+  - priority rationale
+  - export-safe lines
+  - explicit caveats and does-not-prove lines
+- it may confirm:
+  - which current candidates are strongest bounded next-safe-review work
+  - which endpoint-only candidates should stay held
+  - which candidates still require endpoint research
+  - which candidates are blocked and must stay compliant-only
+- it may not by itself justify:
+  - `approved-unvalidated`
+  - `validated`
+  - sandbox connector creation
+  - scheduled refresh enablement
+  - source activation
+  - scraping or browser automation
+
+Admissible source-ops regional portfolio packet evidence:
+
+- the backend source-ops `cameraSourceOpsRegionalPortfolioPacket` may package the current cohort into a bounded regional and lifecycle view
+- each row may preserve:
+  - lifecycle state
+  - country grouping
+  - region grouping
+  - payload-shape posture
+  - media-access posture
+  - sandbox-feasibility posture
+  - source-health posture
+  - missing-evidence count
+  - next safe review step
+  - review-burden posture
+  - export-safe lines
+  - explicit caveats and does-not-prove lines
+- it may confirm:
+  - which candidate work is clustered by country or region
+  - which regions currently have stronger sandbox-backed comparators
+  - which regions remain endpoint-only or blocked
+  - which candidates still carry higher review burden
+- it may not by itself justify:
+  - `approved-unvalidated`
+  - `validated`
+  - sandbox connector creation
+  - scheduled refresh enablement
+  - source activation
+  - scraping or browser automation
+
+Admissible OSM-backed lead-discovery evidence:
+
+- the backend source-ops `cameraSourceOpsOsmLeadDiscoveryPacket` may package candidate lead-discovery support using:
+  - Overpass API
+  - OpenStreetMap tagging references
+  - Geofabrik regional extracts
+- each row may preserve:
+  - lifecycle state
+  - country grouping
+  - region grouping
+  - lead provenance
+  - endpoint-known versus map-only distinction
+  - payload-shape posture
+  - media-access posture
+  - sandbox-feasibility posture
+  - source-health posture
+  - missing-evidence count
+  - next safe review step
+  - review-burden posture
+  - export-safe lines
+  - explicit caveats and does-not-prove lines
+- it may confirm:
+  - where OSM-backed lead-discovery can support regional candidate review
+  - which current sources already have endpoint evidence versus map-only lead support
+  - which regions have offline extract support for later manual review
+- it may not by itself justify:
+  - `approved-unvalidated`
+  - `validated`
+  - sandbox connector creation
+  - scheduled refresh enablement
+  - source activation
+  - treating map presence as live camera proof
+  - scraping or browser automation
+
+Admissible OSM lead-to-review reconciliation evidence:
+
+- the backend source-ops `cameraSourceOpsOsmLeadReviewReconciliationPacket` may reconcile:
+  - endpoint-known leads
+  - map-only leads
+  - review burden
+  - missing evidence
+  - next safe review step
+- each row may preserve:
+  - country grouping
+  - region grouping
+  - lifecycle state
+  - endpoint-known versus map-only posture
+  - review-burden posture
+  - missing-evidence count
+  - next safe review step
+  - reconciliation bucket
+  - export-safe lines
+  - explicit caveats and does-not-prove lines
+- it may confirm:
+  - which endpoint-known leads are ready for bounded review-next work
+  - which endpoint-known leads remain held
+  - which map-only leads remain research-only
+  - which map-only leads remain blocked
+- it may not by itself justify:
+  - `approved-unvalidated`
+  - `validated`
+  - source activation
+  - scheduled refresh enablement
+  - treating map-only leads as live camera proof
+  - scraping or browser automation
+
 What may not trigger a transition by itself:
 
 - raw HTML page reachability
@@ -411,6 +594,10 @@ What may not trigger a transition by itself:
 - source-ops export/debug summary availability alone
 - source-ops sandbox-candidate summary availability alone
 - source-ops candidate network coverage summary availability alone
+- source-ops review-priority packet availability alone
+- source-ops regional portfolio packet availability alone
+- OSM-backed lead-discovery packet availability alone
+- OSM lead-to-review reconciliation packet availability alone
 - source-ops artifact timestamp/provenance visibility alone
 - source-ops fleet rollup visibility alone
 - source-ops caveat-frequency or review-hint rollups alone

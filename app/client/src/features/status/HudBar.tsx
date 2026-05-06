@@ -3,8 +3,9 @@ import { buildActiveImageryContextFromHud } from "../../lib/imageryContext";
 import { useSourceStatusQuery } from "../../lib/queries";
 import { useAppStore } from "../../lib/store";
 import { ImageryContextBadge } from "../imagery/ImageryContextBadge";
+import type { WorkbenchModeId } from "../workbench/workbenchModes";
 
-export function HudBar() {
+export function HudBar({ activeModeId }: { activeModeId: WorkbenchModeId }) {
   const hud = useAppStore((state) => state.hud);
   const selectedEntity = useAppStore((state) => state.selectedEntity);
   const entityHistoryTracks = useAppStore((state) => state.entityHistoryTracks);
@@ -23,6 +24,7 @@ export function HudBar() {
 
   return (
     <footer className="hud">
+      <span>Mode {activeModeId}</span>
       <span>Lat {hud.latitude.toFixed(4)}</span>
       <span>Lon {hud.longitude.toFixed(4)}</span>
       <span>Alt {hud.altitudeMeters.toLocaleString()} m</span>

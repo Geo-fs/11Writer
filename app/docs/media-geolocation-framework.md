@@ -2,7 +2,7 @@
 
 Last updated:
 
-- `2026-05-05 America/Chicago`
+- `2026-05-06 America/Chicago`
 
 Owner:
 
@@ -11,6 +11,7 @@ Owner:
 Related:
 
 - `app/docs/media-evidence-ocr-ai-quality-plan.md`
+- `app/docs/media-geolocation-next-5-tracker.md`
 - `app/docs/source-discovery-platform-plan.md`
 - `app/docs/cross-platform-implementation-playbook.md`
 
@@ -157,6 +158,8 @@ Implemented backend surfaces:
 
 - `POST /api/source-discovery/jobs/media-geolocate`
 - `GET /api/source-discovery/media/geolocations/{geolocation_run_id}`
+- `GET /api/source-discovery/media/geolocation/models`
+- `POST /api/source-discovery/media/geolocation/models/{model_name}/actions`
 
 Implemented data model:
 
@@ -183,13 +186,33 @@ Implemented execution posture:
   - embedded coordinates
   - decimal, DMS, and cardinal OCR/caption coordinate extraction
   - UTM/MGRS-like reference capture when recognized
-  - place-text phrases such as station, airport, port, road, district, park, trail, bridge, campus, and mountain patterns
-  - country/state/transit-operator tokens
+  - place-text phrases such as station, airport, port, road, district, park, trail, bridge, campus, mountain, dam, canyon, bay, coast, cliffs, and crossing patterns
+  - country/state/transit-operator tokens plus stronger route and operator dictionaries
+  - route-style sign extraction such as `US 101`, `I-80`, and similar bounded road references
+  - explicit left-driving or right-driving text phrases when visible in OCR or captions
+  - bounded offline gazetteer landmark/place matching when OCR or captions expose a known local phrase
   - script/language-family hints
-  - bounded environment and time clues from pixel statistics, timestamps, and hemisphere-aware season inference
+  - bounded environment and time clues from pixel statistics, timestamps, hemisphere-aware season inference, and text-derived coast/mountain/bridge/dam context
   - duplicate-cluster and frame-sequence inherited clues with explicit down-weighting
-- optional GeoCLIP adapter behind explicit config gating, pinned-version checks, explicit local cache/weights paths, and no-surprise-download posture by default
-- optional StreetCLIP label-ranking adapter behind explicit config gating, local-files-only packaging posture by default, and explicit coverage/license caveats
+- optional GeoCLIP adapter behind explicit config gating, pinned-version checks, explicit local cache/weights paths, managed local CLIP-backbone snapshots, and no-surprise-download posture by default
+- GeoCLIP runtime controls now expose an explicit performance posture instead of hidden tuning:
+  - default profile: `full_fidelity`
+  - explicit alternatives: `balanced`, `cpu_optimized`
+  - default target device: `cpu`
+  - optional requested devices: `auto`, `cuda`, `mps`
+  - non-CPU GeoCLIP paths remain fail-closed unless experimental acceleration is explicitly enabled
+  - optional max-image-edge override
+  - bounded exact-prediction cache entries
+  - profile-keyed preprocessed artifact reuse
+  - exact artifact-and-profile prediction reuse inside the local process
+- optional StreetCLIP label-ranking adapter behind explicit config gating, managed local snapshot packaging, local-files-only execution posture by default, and explicit coverage/license caveats
+- explicit model-health and model-action surfaces for GeoCLIP and StreetCLIP now expose:
+  - install readiness
+  - runtime readiness
+  - warm or cold state
+  - expected vs installed package version
+  - present vs missing local assets
+  - explicit prewarm attempts instead of guessing from failures
 - localhost-only local clue analysts through:
   - `ollama`
   - `openai_compat_local`
@@ -198,15 +221,63 @@ Implemented execution posture:
   - `llava_local`
 - shared strict-JSON analyst contract across all local VLM clue-analysis adapters
 - scored fusion that preserves evidence-family ranking instead of collapsing everything into one opaque score
+- GeoCLIP runtime compatibility shim for the currently installed `transformers` family so CLIP image features still normalize into GeoCLIP's MLP path without forking the third-party package
 
 Implemented integration:
 
 - artifact detail now exposes geolocation runs
 - source-memory detail/export now carries media geolocation lineage alongside OCR, comparisons, interpretations, and sequences
+- GeoCLIP coordinate candidates now receive bounded offline place-label enrichment from:
+  - `app/server/data/media_geolocation_place_gazetteer.json`
 - repo-safe evaluation harness now exists for deterministic regression, distance-band scoring, clue-family recall, and engine-unavailable reporting:
   - `app/server/data/media_geolocation_eval_fixtures.json`
   - `app/server/data/media_geolocation_eval_local_manifest.example.json`
   - `app/server/tests/run_media_geolocation_eval.py`
+- live local benchmark harness now exists for curated real-image runtime verification:
+  - `app/server/data/media_geolocation_live_benchmark_manifest.json`
+  - `app/server/tests/run_media_geolocation_live_benchmark.py`
+- live benchmark output now carries GeoCLIP profiling metadata through engine-attempt rows and aggregate metrics such as:
+  - `meanProfiledPredictMs`
+  - `meanProfiledPreprocessMs`
+  - `cacheHitRate`
+
+## Live Benchmark Status
+
+As of `2026-05-06 America/Chicago`, Atlas expanded the live local benchmark beyond the original small landmark-only slice and reran it locally with the real GeoCLIP and StreetCLIP runtime:
+
+- benchmark categories now include:
+  - `urban_landmark`
+  - `natural_landscape`
+  - `transport_infrastructure`
+  - `dense_street_scene`
+- per-engine benchmark reporting now includes `categoryMetrics`, not just one global aggregate
+
+- `GeoCLIP`
+  - `top1HitRate25Km: 0.8182`
+  - `top5HitRate25Km: 1.0`
+  - `countryRegionAccuracy: 1.0` after offline place-label enrichment
+  - category split:
+    - `urban_landmark: 1.0`
+    - `dense_street_scene: 1.0`
+    - `natural_landscape: 0.6667`
+    - `transport_infrastructure: 0.5`
+- `StreetCLIP`
+  - `countryRegionAccuracy: 0.9091`
+  - useful as a coarse place-label ranker, not a coordinate engine
+- `fusion`
+  - `top1HitRate25Km: 0.8182`
+  - `top5HitRate25Km: 1.0`
+  - `countryRegionAccuracy: 1.0`
+  - keeps GeoCLIP coordinate candidates above StreetCLIP label-only candidates while still preserving label agreement as supporting evidence
+  - same-process fusion runs now surface GeoCLIP prediction-cache hits when a standalone GeoCLIP pass already computed the same artifact/profile fingerprint earlier in the benchmark
+
+Interpretation limits:
+
+- this remains a curated benchmark, not proof of broad real-world accuracy
+- the current misses were concentrated in harder natural or infrastructure scenes, especially `Bixby Creek Bridge` and `Mount Fuji from Lake Kawaguchi`
+- deterministic-only performance on the same set was `0.0` for coordinate and country-region accuracy
+- GeoCLIP is still CPU-slow in the default `full_fidelity` local path, with the enabled rerun showing roughly `11` to `12` seconds of mean profiled prediction time
+- the new runtime controls do not silently change that posture; they make tradeoffs explicit and reviewable
 
 ## Request Contract
 

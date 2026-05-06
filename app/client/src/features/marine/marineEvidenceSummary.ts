@@ -12,17 +12,23 @@ import type {
   MarineEvidenceInterpretationSummary,
   MarineEvidenceInterpretationCard
 } from "./marineEvidenceInterpretation";
+import { buildMarineCurrentAwarenessDigest } from "./marineCurrentAwarenessDigest";
 import type { MarineEnvironmentalContextSummary } from "./marineEnvironmentalContext";
 import type { MarineContextFusionSummary, MarineContextFusionFamilyLine } from "./marineContextFusionSummary";
 import type { MarineContextIssue, MarineContextIssueQueueSummary } from "./marineContextIssueQueue";
 import type { MarineContextIssueExportBundle, MarineContextIssueExportRow } from "./marineContextIssueExportBundle";
 import type { MarineContextReviewReportSummary } from "./marineContextReviewReport";
+import type { MarineGebcoBathymetryContextSummary } from "./marineGebcoBathymetryContext";
 import type { MarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
 import type { MarineHydrologyContextSummary } from "./marineHydrologyContext";
+import type { MarineNavtexContextSummary } from "./marineNavtexContext";
 import { buildMarineFusionSnapshotInput } from "./marineFusionSnapshotInput";
+import { buildMarineHydrologyRegionalComparisonPackage } from "./marineHydrologyRegionalComparisonPackage";
 import { buildMarineHydrologySourceHealthReportSummary } from "./marineHydrologySourceHealthReport";
 import { buildMarineHydrologySourceHealthWorkflowSummary } from "./marineHydrologySourceHealthWorkflow";
+import { buildMarineQuestionBriefingPacket } from "./marineQuestionBriefingPacket";
 import { buildMarineReportBriefPackage } from "./marineReportBriefPackage";
+import { buildMarineSourceRowWorkflowClosurePacket } from "./marineSourceRowWorkflowClosurePacket";
 import type { MarineNetherlandsRwsWaterinfoContextSummary } from "./marineNetherlandsRwsWaterinfoContext";
 import { buildMarineCorridorReviewPackage } from "./marineCorridorReviewPackage";
 import { buildMarineCorridorSituationPackage } from "./marineCorridorSituationPackage";
@@ -256,6 +262,73 @@ export interface MarineAnomalySnapshotMetadata {
       topObservationSummary: string | null;
       caveats: string[];
     } | null;
+    navtexContext: {
+      sourceId: string;
+      sourceMode: "fixture" | "live" | "unknown";
+      health:
+        | "loaded"
+        | "empty"
+        | "stale"
+        | "degraded"
+        | "unavailable"
+        | "error"
+        | "disabled"
+        | "unknown";
+      messageTypeFilter:
+        | "all"
+        | "navigational-warning"
+        | "meteorological-warning"
+        | "search-and-rescue"
+        | "forecast"
+        | "other";
+      nearbyBroadcastCount: number;
+      topBroadcast:
+        | {
+            messageId: string;
+            stationId: string;
+            stationName: string;
+            subjectIndicator: string;
+            subjectLabel?: string | null;
+            distanceKm: number;
+          }
+        | null;
+      topSummary: string | null;
+      caveats: string[];
+    } | null;
+    gebcoBathymetryContext: {
+      sourceId: string;
+      sourceMode: "fixture" | "live" | "unknown";
+      health:
+        | "loaded"
+        | "empty"
+        | "stale"
+        | "degraded"
+        | "unavailable"
+        | "error"
+        | "disabled"
+        | "unknown";
+      gridVersion: string;
+      gridResolutionArcSeconds: number;
+      nearbySampleCount: number;
+      centerElevationMeters?: number | null;
+      centerDepthMeters?: number | null;
+      minElevationMeters?: number | null;
+      maxElevationMeters?: number | null;
+      underseaSampleCount: number;
+      landSampleCount: number;
+      topSample:
+        | {
+            sampleId: string;
+            latitude: number;
+            longitude: number;
+            distanceKm: number;
+            elevationMeters: number;
+            depthMeters?: number | null;
+          }
+        | null;
+      topSummary: string | null;
+      caveats: string[];
+    } | null;
     hydrologyContext: {
       sourceCount: number;
       loadedSourceCount: number;
@@ -327,7 +400,7 @@ export interface MarineAnomalySnapshotMetadata {
       rows: Array<{
         sourceId: string;
         label: string;
-        category: "oceanographic" | "meteorological" | "hydrology";
+        category: "oceanographic" | "meteorological" | "hydrology" | "maritime-warning";
         sourceMode: "fixture" | "live" | "unknown";
         health:
           | "loaded"
@@ -356,7 +429,7 @@ export interface MarineAnomalySnapshotMetadata {
       rows: Array<{
         sourceId: string;
         label: string;
-        category: "oceanographic" | "meteorological" | "hydrology";
+        category: "oceanographic" | "meteorological" | "hydrology" | "maritime-warning";
         sourceMode: "fixture" | "live" | "unknown";
         health:
           | "loaded"
@@ -408,7 +481,7 @@ export interface MarineAnomalySnapshotMetadata {
       rows: Array<{
         sourceId: string;
         label: string;
-        category: "oceanographic" | "meteorological" | "hydrology";
+        category: "oceanographic" | "meteorological" | "hydrology" | "maritime-warning";
         sourceMode: "fixture" | "live" | "unknown";
         health:
           | "loaded"
@@ -430,7 +503,7 @@ export interface MarineAnomalySnapshotMetadata {
       vigicruesRow: {
         sourceId: string;
         label: string;
-        category: "oceanographic" | "meteorological" | "hydrology";
+        category: "oceanographic" | "meteorological" | "hydrology" | "maritime-warning";
         sourceMode: "fixture" | "live" | "unknown";
         health:
           | "loaded"
@@ -477,7 +550,7 @@ export interface MarineAnomalySnapshotMetadata {
       sourceRows: Array<{
         sourceId: string;
         label: string;
-        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
         sourceMode: "fixture" | "live" | "unknown";
         health:
           | "loaded"
@@ -496,7 +569,7 @@ export interface MarineAnomalySnapshotMetadata {
       vigicruesRow: {
         sourceId: string;
         label: string;
-        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
         sourceMode: "fixture" | "live" | "unknown";
         health:
           | "loaded"
@@ -575,7 +648,7 @@ export interface MarineAnomalySnapshotMetadata {
       sourceRows: Array<{
         sourceId: string;
         label: string;
-        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
         sourceMode: "fixture" | "live" | "unknown";
         health:
           | "loaded"
@@ -668,7 +741,7 @@ export interface MarineAnomalySnapshotMetadata {
       sourceRows: Array<{
         sourceId: string;
         label: string;
-        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
         sourceMode: "fixture" | "live" | "unknown";
         health:
           | "loaded"
@@ -720,7 +793,7 @@ export interface MarineAnomalySnapshotMetadata {
       hydrologyRows: Array<{
         sourceId: string;
         label: string;
-        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
         sourceMode: "fixture" | "live" | "unknown";
         health:
           | "loaded"
@@ -746,7 +819,7 @@ export interface MarineAnomalySnapshotMetadata {
       sourceRows: Array<{
         sourceId: string;
         label: string;
-        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
         sourceMode: "fixture" | "live" | "unknown";
         health:
           | "loaded"
@@ -769,6 +842,263 @@ export interface MarineAnomalySnapshotMetadata {
         latestTimestampPosture: string | null;
         caveat: string;
       }>;
+      observe: string[];
+      orient: string[];
+      prioritize: string[];
+      explain: string[];
+      doesNotProveLines: string[];
+      caveats: string[];
+    } | null;
+    hydrologyRegionalComparisonPackage: {
+      title: string;
+      summaryLine: string;
+      comparisonPostureLine: string;
+      freshnessLine: string;
+      gapLine: string;
+      posture: "broad" | "limited" | "empty-stale" | "missing-source";
+      sourceCount: number;
+      loadedSourceCount: number;
+      limitedSourceCount: number;
+      latestTimestampKnownCount: number;
+      warningCount: number;
+      reviewNeededItemCount: number;
+      hydrologyRows: Array<{
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis:
+          | "observed"
+          | "inferred"
+          | "scored"
+          | "summary"
+          | "contextual"
+          | "advisory";
+        nearbyCount: number;
+        activeCount: number | null;
+        latestTimestampPosture: string | null;
+        caveat: string;
+      }>;
+      vigicruesWorkflowEvidenceLine: string | null;
+      waterinfoWorkflowEvidenceLine: string | null;
+      opwWorkflowEvidenceLine: string | null;
+      observe: string[];
+      orient: string[];
+      prioritize: string[];
+      explain: string[];
+      doesNotProveLines: string[];
+      caveats: string[];
+    } | null;
+    currentAwarenessDigest: {
+      title: string;
+      summaryLine: string;
+      currentPostureLine: string;
+      corridorOrChokepointLine: string;
+      hydrologyComparisonLine: string | null;
+      sourceHealthLine: string;
+      workflowEvidenceLine: string;
+      reviewGapLine: string;
+      posture: "broad" | "limited" | "empty-stale" | "missing-source";
+      corridorPosture: "normal" | "degraded" | "empty-no-match" | "missing-source" | null;
+      hydrologyPosture: "broad" | "limited" | "empty-stale" | "missing-source" | null;
+      sourceCount: number;
+      loadedSourceCount: number;
+      limitedSourceCount: number;
+      attentionItemCount: number;
+      reviewNeededItemCount: number;
+      warningCount: number;
+      contextGapCount: number;
+      sourceIds: string[];
+      sourceModes: Array<"fixture" | "live" | "unknown">;
+      sourceHealth: Array<
+        | "loaded"
+        | "empty"
+        | "stale"
+        | "degraded"
+        | "unavailable"
+        | "error"
+        | "disabled"
+        | "unknown"
+      >;
+      sourceRows: Array<{
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis:
+          | "observed"
+          | "inferred"
+          | "scored"
+          | "summary"
+          | "contextual"
+          | "advisory";
+        nearbyCount: number;
+        activeCount: number | null;
+        latestTimestampPosture: string | null;
+        caveat: string;
+      }>;
+      vigicruesWorkflowEvidenceLine: string | null;
+      waterinfoWorkflowEvidenceLine: string | null;
+      opwWorkflowEvidenceLine: string | null;
+      observe: string[];
+      orient: string[];
+      prioritize: string[];
+      explain: string[];
+      doesNotProveLines: string[];
+      caveats: string[];
+    } | null;
+    sourceRowWorkflowClosurePacket: {
+      title: string;
+      summaryLine: string;
+      sourceRowPostureLine: string;
+      sourceHealthPostureLine: string;
+      corridorOrChokepointLine: string;
+      hydrologyPostureLine: string | null;
+      workflowEvidenceLine: string;
+      reviewGapLine: string;
+      exportCoherenceLine: string;
+      posture: "aligned" | "limited" | "empty-stale" | "missing-source";
+      currentAwarenessPosture: "broad" | "limited" | "empty-stale" | "missing-source" | null;
+      corridorPosture: "normal" | "degraded" | "empty-no-match" | "missing-source" | null;
+      hydrologyPosture: "broad" | "limited" | "empty-stale" | "missing-source" | null;
+      sourceCount: number;
+      loadedSourceCount: number;
+      limitedSourceCount: number;
+      attentionItemCount: number;
+      reviewNeededItemCount: number;
+      warningCount: number;
+      contextGapCount: number;
+      sourceIds: string[];
+      sourceModes: Array<"fixture" | "live" | "unknown">;
+      sourceHealth: Array<
+        | "loaded"
+        | "empty"
+        | "stale"
+        | "degraded"
+        | "unavailable"
+        | "error"
+        | "disabled"
+        | "unknown"
+      >;
+      sourceRows: Array<{
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis:
+          | "observed"
+          | "inferred"
+          | "scored"
+          | "summary"
+          | "contextual"
+          | "advisory";
+        nearbyCount: number;
+        activeCount: number | null;
+        latestTimestampPosture: string | null;
+        caveat: string;
+      }>;
+      vigicruesWorkflowEvidenceLine: string | null;
+      waterinfoWorkflowEvidenceLine: string | null;
+      opwWorkflowEvidenceLine: string | null;
+      observe: string[];
+      orient: string[];
+      prioritize: string[];
+      explain: string[];
+      doesNotProveLines: string[];
+      caveats: string[];
+    } | null;
+    questionBriefingPacket: {
+      title: string;
+      summaryLine: string;
+      questionPostureLine: string;
+      sourceRowPostureLine: string;
+      sourceHealthPostureLine: string;
+      corridorOrChokepointLine: string;
+      hydrologyQuestionLine: string | null;
+      workflowEvidenceLine: string;
+      exportCoherenceLine: string;
+      reviewGapLine: string;
+      posture: "brief-ready" | "limited" | "empty-stale" | "missing-source";
+      questionFamily: "corridor" | "hydrology" | "mixed" | "missing-source";
+      closurePosture: "aligned" | "limited" | "empty-stale" | "missing-source" | null;
+      currentAwarenessPosture: "broad" | "limited" | "empty-stale" | "missing-source" | null;
+      corridorPosture: "normal" | "degraded" | "empty-no-match" | "missing-source" | null;
+      hydrologyPosture: "broad" | "limited" | "empty-stale" | "missing-source" | null;
+      sourceCount: number;
+      loadedSourceCount: number;
+      limitedSourceCount: number;
+      attentionItemCount: number;
+      reviewNeededItemCount: number;
+      warningCount: number;
+      contextGapCount: number;
+      sourceIds: string[];
+      sourceModes: Array<"fixture" | "live" | "unknown">;
+      sourceHealth: Array<
+        | "loaded"
+        | "empty"
+        | "stale"
+        | "degraded"
+        | "unavailable"
+        | "error"
+        | "disabled"
+        | "unknown"
+      >;
+      sourceRows: Array<{
+        sourceId: string;
+        label: string;
+        category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
+        sourceMode: "fixture" | "live" | "unknown";
+        health:
+          | "loaded"
+          | "empty"
+          | "stale"
+          | "degraded"
+          | "unavailable"
+          | "error"
+          | "disabled"
+          | "unknown";
+        evidenceBasis:
+          | "observed"
+          | "inferred"
+          | "scored"
+          | "summary"
+          | "contextual"
+          | "advisory";
+        nearbyCount: number;
+        activeCount: number | null;
+        latestTimestampPosture: string | null;
+        caveat: string;
+      }>;
+      vigicruesWorkflowEvidenceLine: string | null;
+      waterinfoWorkflowEvidenceLine: string | null;
+      opwWorkflowEvidenceLine: string | null;
       observe: string[];
       orient: string[];
       prioritize: string[];
@@ -970,6 +1300,8 @@ export function buildMarineEvidenceSummary(input: {
   vigicruesContextSummary: MarineVigicruesContextSummary | null;
   irelandOpwContextSummary: MarineIrelandOpwContextSummary | null;
   netherlandsRwsWaterinfoContextSummary?: MarineNetherlandsRwsWaterinfoContextSummary | null;
+  navtexContextSummary?: MarineNavtexContextSummary | null;
+  gebcoBathymetryContextSummary?: MarineGebcoBathymetryContextSummary | null;
   hydrologyContextSummary: MarineHydrologyContextSummary | null;
   contextFusionSummary: MarineContextFusionSummary | null;
   contextReviewReportSummary: MarineContextReviewReportSummary | null;
@@ -1090,6 +1422,32 @@ export function buildMarineEvidenceSummary(input: {
     reportBriefPackage,
     chokepointReviewPackage
   });
+  const hydrologyRegionalComparisonPackage = buildMarineHydrologyRegionalComparisonPackage({
+    fusionSnapshotInput,
+    reportBriefPackage,
+    hydrologySourceHealthReportSummary
+  });
+  const currentAwarenessDigest = buildMarineCurrentAwarenessDigest({
+    fusionSnapshotInput,
+    reportBriefPackage,
+    corridorSituationPackage,
+    hydrologyRegionalComparisonPackage
+  });
+  const sourceRowWorkflowClosurePacket = buildMarineSourceRowWorkflowClosurePacket({
+    fusionSnapshotInput,
+    reportBriefPackage,
+    corridorSituationPackage,
+    hydrologyRegionalComparisonPackage,
+    currentAwarenessDigest
+  });
+  const questionBriefingPacket = buildMarineQuestionBriefingPacket({
+    fusionSnapshotInput,
+    reportBriefPackage,
+    corridorSituationPackage,
+    hydrologyRegionalComparisonPackage,
+    currentAwarenessDigest,
+    sourceRowWorkflowClosurePacket
+  });
 
   const displayLines: string[] = [];
   if (selectedVessel) {
@@ -1127,6 +1485,12 @@ export function buildMarineEvidenceSummary(input: {
   }
   if (input.netherlandsRwsWaterinfoContextSummary) {
     displayLines.push(input.netherlandsRwsWaterinfoContextSummary.exportLines[0]);
+  }
+  if (input.navtexContextSummary) {
+    displayLines.push(input.navtexContextSummary.exportLines[0]);
+  }
+  if (input.gebcoBathymetryContextSummary) {
+    displayLines.push(input.gebcoBathymetryContextSummary.exportLines[0]);
   }
   if (input.hydrologyContextSummary) {
     displayLines.push(input.hydrologyContextSummary.exportLines[0]);
@@ -1179,6 +1543,18 @@ export function buildMarineEvidenceSummary(input: {
   }
   if (corridorSituationPackage) {
     displayLines.push(corridorSituationPackage.exportLines[0]);
+  }
+  if (hydrologyRegionalComparisonPackage) {
+    displayLines.push(hydrologyRegionalComparisonPackage.exportLines[0]);
+  }
+  if (currentAwarenessDigest) {
+    displayLines.push(currentAwarenessDigest.exportLines[0]);
+  }
+  if (sourceRowWorkflowClosurePacket) {
+    displayLines.push(sourceRowWorkflowClosurePacket.exportLines[0]);
+  }
+  if (questionBriefingPacket) {
+    displayLines.push(questionBriefingPacket.exportLines[0]);
   }
   if (input.activeNavigationTarget) {
     const t = input.activeNavigationTarget;
@@ -1253,6 +1629,8 @@ export function buildMarineEvidenceSummary(input: {
         vigicruesHydrometryContext: input.vigicruesContextSummary?.metadata ?? null,
         irelandOpwWaterLevelContext: input.irelandOpwContextSummary?.metadata ?? null,
         netherlandsRwsWaterinfoContext: input.netherlandsRwsWaterinfoContextSummary?.metadata ?? null,
+        navtexContext: input.navtexContextSummary?.metadata ?? null,
+        gebcoBathymetryContext: input.gebcoBathymetryContextSummary?.metadata ?? null,
         hydrologyContext: input.hydrologyContextSummary?.metadata ?? null,
         sourceHealthExportCoherence: sourceHealthExportCoherenceSummary?.metadata ?? null,
         hydrologySourceHealthWorkflow: hydrologySourceHealthWorkflowSummary?.metadata ?? null,
@@ -1269,6 +1647,11 @@ export function buildMarineEvidenceSummary(input: {
         fusionSnapshotInput: fusionSnapshotInput?.metadata ?? null,
         reportBriefPackage: reportBriefPackage?.metadata ?? null,
         corridorSituationPackage: corridorSituationPackage?.metadata ?? null,
+        hydrologyRegionalComparisonPackage:
+          hydrologyRegionalComparisonPackage?.metadata ?? null,
+        currentAwarenessDigest: currentAwarenessDigest?.metadata ?? null,
+        sourceRowWorkflowClosurePacket: sourceRowWorkflowClosurePacket?.metadata ?? null,
+        questionBriefingPacket: questionBriefingPacket?.metadata ?? null,
         caveats: [
           "Anomaly ranking is attention prioritization, not proof of intent or wrongdoing.",
           "AIS gaps/signals are observed/inferred/scored indicators, not proof of intentional disabling."
@@ -1297,3 +1680,6 @@ function toChokepointMiniSummary(anomaly: MarineAnomalyScore): ChokepointMiniSum
     priorityRank: anomaly.priorityRank ?? null
   };
 }
+
+
+

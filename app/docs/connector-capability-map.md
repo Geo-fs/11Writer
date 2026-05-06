@@ -9,12 +9,11 @@ Owner note:
 - This is capability guidance, not implementation approval.
 
 Related:
-- `app/docs/connector-adoption-plan.md`
 - `app/docs/repo-workflow.md`
 - `app/docs/runtime-interface-requirements.md`
 - `app/docs/cross-platform-agent-guidelines.md`
 - `app/docs/build-macos-apps-plugin-workflows.md`
-- `app/docs/macos-native-ui-extras.md`
+- `app/docs/README.md`
 
 ## Purpose
 
@@ -285,6 +284,74 @@ Reasoning:
 
 - the first four improve execution, design alignment, docs, and deliverables without forcing architecture changes
 - the last two can be powerful, but they touch production architecture, hosting, data ownership, or security posture and should be treated as explicit project decisions
+
+## Adoption Sequence
+
+Use this order as the default unless the active task clearly points elsewhere.
+
+### Use Now
+
+1. `Linear`
+2. `Notion`
+3. `LaTeX Tectonic`
+
+Why:
+
+- high leverage
+- low architecture risk
+- directly improves execution, planning, and deliverables
+
+### Use On Demand
+
+4. `Figma`
+
+Use it when:
+
+- there is real design source material
+- component mapping or design-to-code alignment is blocking work
+- a frontend or macOS-native UI task actually benefits from it
+
+### Prototype Later
+
+5. `Cloudflare`
+6. `Supabase`
+
+Both are useful only when there is a specific architecture or runtime reason to test them in a bounded way.
+
+## Avoid Unless Architecture Changes
+
+Avoid these defaults unless the project deliberately changes direction:
+
+- `Supabase` as core source-of-truth storage
+- `Cloudflare` as a shortcut to public companion access before auth and pairing are settled
+- `Notion` as a replacement for repo-owned technical truth
+- `Figma` as a reason to redesign stable UI without a real product need
+
+## Recommended First 30 Days
+
+If the goal is immediate value with low risk:
+
+1. Use `Linear` for one active implementation wave.
+2. Use `Notion` for one bounded planning or review workspace.
+3. Use `LaTeX Tectonic` for one formal PDF output.
+4. Use `Figma` only when a real design handoff is active.
+
+Do not start with:
+
+- Supabase migration work
+- Cloudflare write automation
+- remote exposure changes
+
+## Decision Tests
+
+Adopt a connector now only if it passes these tests:
+
+- does it improve execution without moving backend truth?
+- does it preserve local-first and loopback-first assumptions?
+- does it avoid creating a second authoritative runtime or planning system?
+- can it be adopted in a bounded way and rolled back cheaply?
+
+If the answer is no, treat it as prototype-later or avoid-unless-architecture-changes.
 
 ## Good Near-Term Uses
 

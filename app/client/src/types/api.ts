@@ -416,6 +416,171 @@ export interface NceiSpaceWeatherPortalResponse {
   caveats: string[];
 }
 
+export interface GpsJamSourceHealth {
+  sourceName: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "normal" | "degraded" | "unavailable" | "unknown";
+  detail: string;
+  manifestSourceUrl: string;
+  dataSourceUrl: string;
+  lastUpdatedAt?: string | null;
+  state?: SourceStatus["state"] | null;
+  caveats: string[];
+}
+
+export interface GpsJamInterferenceSample {
+  hexId: string;
+  countGoodAircraft: number;
+  countBadAircraft: number;
+  percentBadAircraft: number;
+  interferenceLevel: "low" | "medium" | "high";
+  sourceUrl: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "normal" | "degraded" | "unavailable" | "unknown";
+  caveats: string[];
+  evidenceBasis: "contextual" | "source-reported";
+}
+
+export interface GpsJamContextResponse {
+  fetchedAt: string;
+  source: string;
+  date: string;
+  earliestAvailableDate?: string | null;
+  latestAvailableDate?: string | null;
+  suspect?: boolean | null;
+  dataVersion: number;
+  count: number;
+  totalHexCount?: number | null;
+  badHexCount?: number | null;
+  samples: GpsJamInterferenceSample[];
+  sourceHealth: GpsJamSourceHealth;
+  caveats: string[];
+}
+
+export interface NwsAlertEvent {
+  eventId: string;
+  title: string;
+  alertType: "warning" | "watch" | "advisory" | "statement" | "unknown";
+  event?: string | null;
+  headline?: string | null;
+  severity: "extreme" | "severe" | "moderate" | "minor" | "unknown";
+  urgency?: string | null;
+  certainty?: string | null;
+  status?: string | null;
+  messageType?: string | null;
+  category?: string | null;
+  senderName?: string | null;
+  areaDescription?: string | null;
+  areaCodes: string[];
+  zoneCodes: string[];
+  effectiveAt?: string | null;
+  onsetAt?: string | null;
+  expiresAt?: string | null;
+  sentAt?: string | null;
+  updatedAt?: string | null;
+  instruction?: string | null;
+  description?: string | null;
+  response?: string | null;
+  geometrySummary?: string | null;
+  longitude?: number | null;
+  latitude?: number | null;
+  sourceUrl: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  caveat: string;
+  evidenceBasis: "advisory" | "contextual";
+}
+
+export interface NwsAlertsMetadata {
+  source: string;
+  feedName: string;
+  apiUrl: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  fetchedAt: string;
+  generatedAt?: string | null;
+  count: number;
+  caveat: string;
+  userAgentRequired: boolean;
+  backendLiveModeOnly: boolean;
+}
+
+export interface NwsAlertsSourceHealth {
+  sourceId: string;
+  sourceLabel: string;
+  enabled: boolean;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  loadedCount: number;
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  detail: string;
+  errorSummary?: string | null;
+  caveat?: string | null;
+}
+
+export interface NwsAlertsResponse {
+  metadata: NwsAlertsMetadata;
+  count: number;
+  sourceHealth: NwsAlertsSourceHealth;
+  alerts: NwsAlertEvent[];
+  caveats: string[];
+}
+
+export interface NoaaNowCoastLayerRecord {
+  layerId: string;
+  layerGroup: "hazards" | "imagery" | "observations" | "unknown";
+  serviceName: string;
+  title: string;
+  description?: string | null;
+  serviceUrl: string;
+  mapServerUrl?: string | null;
+  timeEnabled: boolean;
+  updateFrequencyMinutes?: number | null;
+  extentSummary?: string | null;
+  bboxMinLon?: number | null;
+  bboxMinLat?: number | null;
+  bboxMaxLon?: number | null;
+  bboxMaxLat?: number | null;
+  sourceMode: "fixture" | "live" | "unknown";
+  caveat: string;
+  evidenceBasis: "contextual" | "reference";
+}
+
+export interface NoaaNowCoastMetadata {
+  source: string;
+  sourceName: string;
+  documentationUrl: string;
+  warningsServiceUrl: string;
+  watchesServiceUrl: string;
+  radarServiceUrl: string;
+  sourceMode: "fixture" | "live" | "unknown";
+  fetchedAt: string;
+  generatedAt?: string | null;
+  count: number;
+  caveat: string;
+}
+
+export interface NoaaNowCoastSourceHealth {
+  sourceId: string;
+  sourceLabel: string;
+  enabled: boolean;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "loaded" | "empty" | "stale" | "error" | "disabled" | "unknown";
+  loadedCount: number;
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  detail: string;
+  errorSummary?: string | null;
+  caveat?: string | null;
+}
+
+export interface NoaaNowCoastResponse {
+  metadata: NoaaNowCoastMetadata;
+  count: number;
+  sourceHealth: NoaaNowCoastSourceHealth;
+  layers: NoaaNowCoastLayerRecord[];
+  caveats: string[];
+}
+
 export interface WashingtonVaacSourceHealth {
   sourceName: string;
   sourceMode: "fixture" | "live" | "unknown";
@@ -1578,6 +1743,111 @@ export interface MarineNetherlandsRwsWaterinfoContextResponse {
   count: number;
   sourceHealth: MarineNetherlandsRwsWaterinfoSourceHealth;
   stations: MarineNetherlandsRwsWaterinfoStation[];
+  caveats: string[];
+}
+
+export interface MarineNavtexSourceHealth {
+  sourceId: string;
+  sourceLabel: string;
+  enabled: boolean;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "loaded" | "empty" | "stale" | "degraded" | "unavailable" | "error" | "disabled" | "unknown";
+  loadedCount: number;
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  detail: string;
+  errorSummary?: string | null;
+  caveat?: string | null;
+}
+
+export interface MarineNavtexBroadcast {
+  messageId: string;
+  stationId: string;
+  stationName: string;
+  transmitterCharacter: string;
+  latitude: number;
+  longitude: number;
+  distanceKm: number;
+  coverageRadiusKm?: number | null;
+  subjectIndicator: string;
+  subjectLabel?: string | null;
+  issuedAt: string;
+  summary: string;
+  bodyExcerpt: string;
+  sourceUrl?: string | null;
+  sourceDetail: string;
+  evidenceBasis: "advisory" | "source-reported";
+  caveats: string[];
+}
+
+export interface MarineNavtexContextResponse {
+  fetchedAt: string;
+  centerLat: number;
+  centerLon: number;
+  radiusKm: number;
+  messageTypeFilter:
+    | "all"
+    | "navigational-warning"
+    | "meteorological-warning"
+    | "search-and-rescue"
+    | "forecast"
+    | "other";
+  count: number;
+  sourceHealth: MarineNavtexSourceHealth;
+  broadcasts: MarineNavtexBroadcast[];
+  caveats: string[];
+}
+
+export interface MarineGebcoBathymetrySourceHealth {
+  sourceId: string;
+  sourceLabel: string;
+  enabled: boolean;
+  sourceMode: "fixture" | "live" | "unknown";
+  health: "loaded" | "empty" | "stale" | "degraded" | "unavailable" | "error" | "disabled" | "unknown";
+  loadedCount: number;
+  lastFetchedAt?: string | null;
+  sourceGeneratedAt?: string | null;
+  detail: string;
+  errorSummary?: string | null;
+  caveat?: string | null;
+}
+
+export interface MarineGebcoBathymetrySample {
+  sampleId: string;
+  latitude: number;
+  longitude: number;
+  distanceKm: number;
+  elevationMeters: number;
+  depthMeters?: number | null;
+  sourceUrl?: string | null;
+  sourceDetail: string;
+  evidenceBasis: "contextual";
+  caveats: string[];
+}
+
+export interface MarineGebcoBathymetryAreaSummary {
+  centerElevationMeters?: number | null;
+  centerDepthMeters?: number | null;
+  minElevationMeters?: number | null;
+  maxElevationMeters?: number | null;
+  underseaSampleCount: number;
+  landSampleCount: number;
+}
+
+export interface MarineGebcoBathymetryContextResponse {
+  fetchedAt: string;
+  centerLat: number;
+  centerLon: number;
+  radiusKm: number;
+  count: number;
+  gridVersion: string;
+  gridResolutionArcSeconds: number;
+  tidGridAvailable: boolean;
+  docsUrl?: string | null;
+  downloadUrl?: string | null;
+  sourceHealth: MarineGebcoBathymetrySourceHealth;
+  areaSummary: MarineGebcoBathymetryAreaSummary;
+  samples: MarineGebcoBathymetrySample[];
   caveats: string[];
 }
 

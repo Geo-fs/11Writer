@@ -74,8 +74,11 @@ Purpose:
 Current examples:
 
 - Aerospace report brief package
+- Aerospace current-awareness digest
 - Data AI report brief summary
+- Data AI current-awareness digest
 - Marine report brief package
+- Marine current-awareness digest
 
 Minimum required fields:
 
@@ -103,6 +106,53 @@ Current compatibility rule:
 - or preserved by an explicit companion fusion-snapshot package from the same domain
 
 This rule exists because the current package wave is already implemented and not all domains surface lineage in the same exact brief-level keys.
+
+### Reporting handoff / export packet
+
+Purpose:
+
+- bounded reporting-loop compatibility surface for handoff, current-awareness export, or question-briefing packages
+- may preserve reporting-loop posture without pretending to be a single final brief schema
+
+Current examples:
+
+- Aerospace reporting handoff contract
+- Data AI topic-safe report export packet
+- Data AI question briefing packet
+
+Minimum required fields:
+
+- package or contract id and label
+- source ids
+- source modes
+- source health
+- evidence basis
+- caveats
+- explicit does-not-prove posture
+- export-safe lines
+- lineage or handoff posture where applicable
+
+Compatible current shapes:
+
+- direct ids and labels:
+  - `contractId`
+  - `contractLabel`
+  - `packageId`
+  - `packageLabel`
+- lineage metadata:
+  - `lineage`
+  - `workflowLineageLine`
+  - `lineageLines`
+- current-awareness / handoff posture:
+  - `validationPosture`
+  - `exportReadinessLabel`
+  - `reviewReadinessLine`
+  - `attentionLine`
+
+Classification rule:
+
+- handoff and export packets are valid shared reporting-loop peers when they preserve lineage, caveats, does-not-prove posture, and export-safe lines
+- they do not erase domain differences or claim a single normalized final report schema
 
 ### Adjacent reporting/support package
 
@@ -222,8 +272,14 @@ The current compatibility sweep should validate the minimum contract against exi
 Current intended validation coverage:
 
 - Aerospace fusion-snapshot input plus report-brief package
+- Aerospace current-awareness digest
 - Aerospace VAAC advisory report package as an adjacent reporting/support package
+- Aerospace reporting handoff contract
 - Data AI fusion snapshot plus report-brief summary
+- Data AI current-awareness digest
+- Data AI topic-safe report export packet
+- Data AI question briefing packet
 - Marine fusion-snapshot input plus report-brief package
+- Marine current-awareness digest
 - backend environmental fusion snapshot input remains covered by its existing server test surface
 - backend webcam sandbox/source-ops reporting surfaces remain adjacent and are currently documented rather than forced into the focused shared regression

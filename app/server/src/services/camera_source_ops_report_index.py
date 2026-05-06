@@ -17,6 +17,24 @@ from src.services.camera_source_ops_promotion_readiness_summary import (
 from src.services.camera_source_ops_sandbox_candidate_summary import (
     build_camera_source_ops_sandbox_candidate_summary,
 )
+from src.services.camera_source_ops_sandbox_readiness_comparison import (
+    build_camera_source_ops_sandbox_readiness_comparison_report,
+)
+from src.services.camera_source_ops_portfolio_digest import (
+    build_camera_source_ops_portfolio_digest,
+)
+from src.services.camera_source_ops_review_priority_packet import (
+    build_camera_source_ops_review_priority_packet,
+)
+from src.services.camera_source_ops_regional_portfolio_packet import (
+    build_camera_source_ops_regional_portfolio_packet,
+)
+from src.services.camera_source_ops_osm_lead_discovery_packet import (
+    build_camera_source_ops_osm_lead_discovery_packet,
+)
+from src.services.camera_source_ops_osm_lead_review_reconciliation_packet import (
+    build_camera_source_ops_osm_lead_review_reconciliation_packet,
+)
 from src.types.api import (
     CameraSourceInventoryEntry,
     CameraSourceOpsArtifactAvailability,
@@ -33,6 +51,12 @@ def build_camera_source_ops_report_index(settings: Settings) -> CameraSourceOpsI
     sandbox_candidate_summary = build_camera_source_ops_sandbox_candidate_summary(settings)
     candidate_network_summary = build_camera_source_ops_candidate_network_summary(settings)
     promotion_readiness_summary = build_camera_source_ops_promotion_readiness_summary(settings)
+    sandbox_readiness_comparison_report = build_camera_source_ops_sandbox_readiness_comparison_report(settings)
+    portfolio_digest = build_camera_source_ops_portfolio_digest(settings)
+    review_priority_packet = build_camera_source_ops_review_priority_packet(settings)
+    regional_portfolio_packet = build_camera_source_ops_regional_portfolio_packet(settings)
+    osm_lead_discovery_packet = build_camera_source_ops_osm_lead_discovery_packet(settings)
+    osm_lead_review_reconciliation_packet = build_camera_source_ops_osm_lead_review_reconciliation_packet(settings)
     summary = CameraSourceOpsIndexSummary(
         total_sources=len(entries),
         validated_sources=sum(1 for entry in entries if entry.lifecycle_bucket == "validated-active"),
@@ -58,11 +82,23 @@ def build_camera_source_ops_report_index(settings: Settings) -> CameraSourceOpsI
         sandbox_candidate_summary=sandbox_candidate_summary,
         candidate_network_summary=candidate_network_summary,
         promotion_readiness_summary=promotion_readiness_summary,
+        camera_sandbox_readiness_comparison_report=sandbox_readiness_comparison_report,
+        camera_source_ops_portfolio_digest=portfolio_digest,
+        camera_source_ops_review_priority_packet=review_priority_packet,
+        camera_source_ops_regional_portfolio_packet=regional_portfolio_packet,
+        camera_source_ops_osm_lead_discovery_packet=osm_lead_discovery_packet,
+        camera_source_ops_osm_lead_review_reconciliation_packet=osm_lead_review_reconciliation_packet,
         export_lines=_build_export_lines(
             entries,
             summary,
             candidate_network_summary.export_lines,
             promotion_readiness_summary.export_lines,
+            sandbox_readiness_comparison_report.export_lines,
+            portfolio_digest.export_lines,
+            review_priority_packet.export_lines,
+            regional_portfolio_packet.export_lines,
+            osm_lead_discovery_packet.export_lines,
+            osm_lead_review_reconciliation_packet.export_lines,
         ),
         caveat=(
             "This source-operations index is read-only lifecycle evidence. "
@@ -237,6 +273,12 @@ def _build_export_lines(
     summary: CameraSourceOpsIndexSummary,
     candidate_network_lines: list[str],
     promotion_readiness_lines: list[str],
+    sandbox_readiness_lines: list[str],
+    portfolio_digest_lines: list[str],
+    review_priority_packet_lines: list[str],
+    regional_portfolio_packet_lines: list[str],
+    osm_lead_discovery_packet_lines: list[str],
+    osm_lead_review_reconciliation_packet_lines: list[str],
 ) -> list[str]:
     sandbox_sources = [entry.source_id for entry in entries if _artifact_available(entry, "sandbox-validation-report")]
     blocked_sources = [entry.source_id for entry in entries if entry.lifecycle_bucket == "blocked-do-not-scrape"]
@@ -260,6 +302,12 @@ def _build_export_lines(
         lines.append(f"Blocked/do-not-scrape: {', '.join(blocked_sources[:3])}")
     lines.extend(candidate_network_lines[:3])
     lines.extend(promotion_readiness_lines[:2])
+    lines.extend(sandbox_readiness_lines[:2])
+    lines.extend(portfolio_digest_lines[:2])
+    lines.extend(review_priority_packet_lines[:2])
+    lines.extend(regional_portfolio_packet_lines[:2])
+    lines.extend(osm_lead_discovery_packet_lines[:2])
+    lines.extend(osm_lead_review_reconciliation_packet_lines[:2])
     return lines
 
 

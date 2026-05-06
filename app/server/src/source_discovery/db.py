@@ -23,6 +23,8 @@ def _backfill_sqlite_columns(engine) -> None:
     statements = []
     if "source_reputation_events" in table_names:
         existing = {column["name"] for column in inspector.get_columns("source_reputation_events")}
+        if "policy_version" not in existing:
+            statements.append("ALTER TABLE source_reputation_events ADD COLUMN policy_version VARCHAR(64) DEFAULT 'baseline_v2'")
         if "reversed_at" not in existing:
             statements.append("ALTER TABLE source_reputation_events ADD COLUMN reversed_at VARCHAR(64)")
         if "reversal_reason" not in existing:
@@ -71,10 +73,36 @@ def _backfill_sqlite_columns(engine) -> None:
             statements.append("ALTER TABLE source_memories ADD COLUMN source_family_tags_json TEXT DEFAULT '[]'")
         if "scope_hints_json" not in memory_columns:
             statements.append("ALTER TABLE source_memories ADD COLUMN scope_hints_json TEXT DEFAULT '{\"spatial\":[],\"language\":[],\"topic\":[]}'")
+        if "locale_expansion_basis_json" not in memory_columns:
+            statements.append("ALTER TABLE source_memories ADD COLUMN locale_expansion_basis_json TEXT DEFAULT '[]'")
+        if "discovered_from_provider" not in memory_columns:
+            statements.append("ALTER TABLE source_memories ADD COLUMN discovered_from_provider VARCHAR(64)")
+        if "reputation_policy_version" not in memory_columns:
+            statements.append("ALTER TABLE source_memories ADD COLUMN reputation_policy_version VARCHAR(64) DEFAULT 'baseline_v2'")
+        if "last_calibrated_at" not in memory_columns:
+            statements.append("ALTER TABLE source_memories ADD COLUMN last_calibrated_at VARCHAR(64)")
+        if "latest_event_graph_at" not in memory_columns:
+            statements.append("ALTER TABLE source_memories ADD COLUMN latest_event_graph_at VARCHAR(64)")
+        if "adversarial_risk_level" not in memory_columns:
+            statements.append("ALTER TABLE source_memories ADD COLUMN adversarial_risk_level VARCHAR(16) DEFAULT 'none'")
+        if "adversarial_signal_count" not in memory_columns:
+            statements.append("ALTER TABLE source_memories ADD COLUMN adversarial_signal_count INTEGER DEFAULT 0")
+        if "adversarial_signals_json" not in memory_columns:
+            statements.append("ALTER TABLE source_memories ADD COLUMN adversarial_signals_json TEXT DEFAULT '[]'")
+        if "latest_adversarial_scan_at" not in memory_columns:
+            statements.append("ALTER TABLE source_memories ADD COLUMN latest_adversarial_scan_at VARCHAR(64)")
         if "last_discovery_outcome" not in memory_columns:
             statements.append("ALTER TABLE source_memories ADD COLUMN last_discovery_outcome TEXT")
     if "source_content_snapshots" in table_names:
         snapshot_columns = {column["name"] for column in inspector.get_columns("source_content_snapshots")}
+        if "retrieval_origin" not in snapshot_columns:
+            statements.append("ALTER TABLE source_content_snapshots ADD COLUMN retrieval_origin VARCHAR(32) DEFAULT 'live'")
+        if "retrieved_from_url" not in snapshot_columns:
+            statements.append("ALTER TABLE source_content_snapshots ADD COLUMN retrieved_from_url TEXT")
+        if "resolved_original_url" not in snapshot_columns:
+            statements.append("ALTER TABLE source_content_snapshots ADD COLUMN resolved_original_url TEXT")
+        if "detected_language" not in snapshot_columns:
+            statements.append("ALTER TABLE source_content_snapshots ADD COLUMN detected_language VARCHAR(64)")
         if "knowledge_node_id" not in snapshot_columns:
             statements.append("ALTER TABLE source_content_snapshots ADD COLUMN knowledge_node_id VARCHAR(180)")
         if "canonical_snapshot_id" not in snapshot_columns:
@@ -83,12 +111,24 @@ def _backfill_sqlite_columns(engine) -> None:
             statements.append("ALTER TABLE source_content_snapshots ADD COLUMN duplicate_class VARCHAR(64)")
         if "body_storage_mode" not in snapshot_columns:
             statements.append("ALTER TABLE source_content_snapshots ADD COLUMN body_storage_mode VARCHAR(32) DEFAULT 'full_text'")
+        if "adversarial_risk_level" not in snapshot_columns:
+            statements.append("ALTER TABLE source_content_snapshots ADD COLUMN adversarial_risk_level VARCHAR(16) DEFAULT 'none'")
+        if "adversarial_signal_count" not in snapshot_columns:
+            statements.append("ALTER TABLE source_content_snapshots ADD COLUMN adversarial_signal_count INTEGER DEFAULT 0")
+        if "adversarial_signals_json" not in snapshot_columns:
+            statements.append("ALTER TABLE source_content_snapshots ADD COLUMN adversarial_signals_json TEXT DEFAULT '[]'")
+        if "normalization_notes_json" not in snapshot_columns:
+            statements.append("ALTER TABLE source_content_snapshots ADD COLUMN normalization_notes_json TEXT DEFAULT '[]'")
     if "source_scheduler_ticks" in table_names:
         tick_columns = {column["name"] for column in inspector.get_columns("source_scheduler_ticks")}
         if "structure_scans_requested" not in tick_columns:
             statements.append("ALTER TABLE source_scheduler_ticks ADD COLUMN structure_scans_requested INTEGER DEFAULT 0")
         if "structure_scans_completed" not in tick_columns:
             statements.append("ALTER TABLE source_scheduler_ticks ADD COLUMN structure_scans_completed INTEGER DEFAULT 0")
+        if "link_graph_jobs_requested" not in tick_columns:
+            statements.append("ALTER TABLE source_scheduler_ticks ADD COLUMN link_graph_jobs_requested INTEGER DEFAULT 0")
+        if "link_graph_jobs_completed" not in tick_columns:
+            statements.append("ALTER TABLE source_scheduler_ticks ADD COLUMN link_graph_jobs_completed INTEGER DEFAULT 0")
         if "record_extract_jobs_requested" not in tick_columns:
             statements.append("ALTER TABLE source_scheduler_ticks ADD COLUMN record_extract_jobs_requested INTEGER DEFAULT 0")
         if "record_extract_jobs_completed" not in tick_columns:
@@ -153,6 +193,7 @@ def _backfill_sqlite_columns(engine) -> None:
         and "source_content_snapshots" not in table_names
         and "source_scheduler_ticks" not in table_names
         and "source_review_claim_candidates" not in table_names
+        and "source_archive_hits" not in table_names
         and "source_media_artifacts" not in table_names
         and "source_media_ocr_runs" not in table_names
         and "source_media_interpretations" not in table_names

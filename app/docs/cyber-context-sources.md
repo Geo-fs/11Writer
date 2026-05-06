@@ -60,6 +60,183 @@ Data AI owns bounded backend-only public internet-information source slices that
   - EPSS is scored probability context for prioritization
   - it is not exploit proof, incident truth, victim confirmation, targeting proof, attribution, or required action
 
+### CISA Known Exploited Vulnerabilities catalog
+
+- Route: `GET /api/context/cyber/cisa-kev`
+- Query params:
+  - `cve`
+  - `limit`
+- Source mode:
+  - `CISA_KEV_SOURCE_MODE=fixture|live`
+- Fixture path:
+  - `CISA_KEV_FIXTURE_PATH=./app/server/data/cisa_kev_catalog_fixture.json`
+- Official endpoint used for this bounded slice:
+  - `https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json`
+- Normalized fields preserved:
+  - CVE id
+  - vendor/project
+  - product
+  - vulnerability name
+  - date added
+  - short description
+  - required action text as inert source data
+  - due date
+  - known ransomware campaign use field
+  - notes
+  - source URL
+  - source mode
+  - source health
+  - source-reported evidence basis
+  - request/export metadata
+- Caveat boundary:
+  - KEV records are official source-reported prioritization context only
+  - KEV inclusion does not by itself prove exploitation against a specific target, compromise, realized impact, attribution, or required action for a specific environment
+
+### RDAP bootstrap plus delegated lookup
+
+- Route: `GET /api/context/internet/rdap`
+- Query params:
+  - `kind`
+  - `query`
+- Supported query kinds:
+  - `domain`
+  - `ip`
+  - `autnum`
+- Source mode:
+  - `RDAP_SOURCE_MODE=fixture|live`
+- Fixture paths:
+  - `RDAP_BOOTSTRAP_FIXTURE_ROOT=./app/server/data/rdap_bootstrap`
+  - `RDAP_LOOKUP_FIXTURE_PATH=./app/server/data/rdap_lookup_fixture.json`
+- Public machine-readable bootstrap endpoints pinned for this slice:
+  - `https://data.iana.org/rdap/dns.json`
+  - `https://data.iana.org/rdap/ipv4.json`
+  - `https://data.iana.org/rdap/ipv6.json`
+  - `https://data.iana.org/rdap/asn.json`
+- Normalized fields preserved:
+  - query kind and value
+  - resolved bootstrap base URL
+  - request URL
+  - object class name
+  - handle
+  - bounded domain/network/autnum naming fields
+  - status values
+  - entity handles only
+  - entity roles only
+  - nameserver names
+  - event summaries
+  - bounded notice/remark lines
+  - source mode
+  - source health
+  - source-reported evidence basis
+- Caveat boundary:
+  - RDAP responses are registration and allocation context only
+  - this slice intentionally avoids full contact-card exposure and does not create person-tracking workflows
+  - RDAP results do not by themselves prove current control, operational use, ownership certainty, bad intent, attribution, or required action
+
+### crt.sh certificate-transparency lookup
+
+- Route: `GET /api/context/internet/crtsh`
+- Query params:
+  - `query`
+  - `include_subdomains`
+  - `limit`
+- Source mode:
+  - `CRTSH_SOURCE_MODE=fixture|live`
+- Fixture path:
+  - `CRTSH_FIXTURE_PATH=./app/server/data/crtsh_fixture.json`
+- Public query pattern used for this bounded slice:
+  - `https://crt.sh/?q=%25.example.com&output=json`
+- Normalized fields preserved:
+  - certificate record id
+  - issuer CA id
+  - issuer name
+  - common name
+  - logged DNS names
+  - entry timestamp
+  - not-before and not-after timestamps
+  - serial number
+  - source URL
+  - source mode
+  - source health
+  - source-reported evidence basis
+  - request/export metadata
+- Caveat boundary:
+  - crt.sh results are public certificate-log context only
+  - they do not by themselves prove current DNS resolution, current control of a hostname, malicious activity, attribution, or required action
+
+### SEC EDGAR submissions
+
+- Route: `GET /api/context/institutional/sec-edgar/company`
+- Query params:
+  - `cik`
+  - `filing_limit`
+- Source mode:
+  - `SEC_EDGAR_SOURCE_MODE=fixture|live`
+- Fixture path:
+  - `SEC_EDGAR_FIXTURE_PATH=./app/server/data/sec_edgar_submissions_fixture.json`
+- Official endpoint pattern used for this bounded slice:
+  - `https://data.sec.gov/submissions/CIK##########.json`
+- Normalized fields preserved:
+  - family id and label
+  - CIK
+  - entity name
+  - entity type
+  - SIC and SIC description
+  - fiscal year end
+  - state of incorporation and description
+  - tickers
+  - exchanges
+  - former names
+  - bounded recent filing metadata only:
+    - accession number
+    - filing date
+    - report date
+    - acceptance datetime
+    - form
+    - file and film number
+    - items
+    - primary document name
+    - primary document description
+    - XBRL flags
+  - source mode
+  - source health
+  - request/export metadata
+- Caveat boundary:
+  - SEC EDGAR submissions are official source-reported filing history and issuer metadata only
+  - this slice does not extract filing bodies, does not interpret filing text as findings, and does not create wrongdoing verdicts, legal conclusions, urgency claims, or action mandates
+
+### USAspending recipient context
+
+- Route: `GET /api/context/institutional/usaspending/recipient`
+- Query params:
+  - `recipient_hash`
+- Source mode:
+  - `USASPENDING_SOURCE_MODE=fixture|live`
+- Fixture path:
+  - `USASPENDING_FIXTURE_PATH=./app/server/data/usaspending_recipient_fixture.json`
+- Official endpoint pattern used for this bounded slice:
+  - `https://api.usaspending.gov/api/v2/recipient/<HASH_VALUE>/`
+- Normalized fields preserved:
+  - family id and label
+  - recipient hash
+  - recipient name
+  - recipient level
+  - recipient type
+  - bounded business types
+  - UEI
+  - DUNS
+  - city, state, and country
+  - award count
+  - total obligations
+  - total outlay
+  - bounded top-agency summaries
+  - source mode
+  - source health
+  - request/export metadata
+- Caveat boundary:
+  - USAspending recipient data is official source-reported federal spending context only
+  - this slice does not create fraud claims, lobbying conclusions, wrongdoing verdicts, person-tracking dossiers, urgency claims, or action mandates
+
 ### Data AI aggregate feed route
 
 - Route: `GET /api/feeds/data-ai/recent`
@@ -534,6 +711,11 @@ Data AI owns bounded backend-only public internet-information source slices that
   - the inspector now also exposes a bounded fusion/claim-integrity snapshot that composes the existing source-intelligence, topic/context, infrastructure/status, and long-tail posture metadata into one export-safe domain input
   - the inspector now also exposes a bounded report-brief package that organizes the existing metadata-only Data AI surfaces into `observe`, `orient`, `prioritize`, and `explain` sections
   - the inspector now also exposes a bounded topic-scoped report packet that answers "what does the current feed evidence say about this topic?" using existing family, topic, fusion, and report metadata only
+  - the inspector now also exposes a bounded workflow-evidence snapshot that packages topic/report/review/export lineage and readiness posture for the current reporting path using metadata only
+  - the inspector now also exposes a bounded current-awareness digest that packages the existing family/topic/report/workflow chain into one metadata-only open-ended digest
+  - the inspector now also exposes a bounded review/export coherence summary that checks review, queue, readiness, topic, report, workflow, and digest alignment without reopening feeds or promoting source text
+  - the inspector now also exposes a bounded topic-safe report export packet that packages the current topic/report path into compact export-safe metadata without source laundering or action guidance
+  - the inspector now also exposes a bounded question briefing packet that packages the current topic/report/export path into compact question-oriented metadata without article-truth promotion or corroboration scoring
 - Client scope:
   - review queue counts and top issue kinds
   - source mode and family/source health posture
@@ -547,6 +729,11 @@ Data AI owns bounded backend-only public internet-information source slices that
   - bounded fusion/claim-integrity lines for family/source filters, active topics, corroboration posture, methodology caveats, and does-not-prove posture
   - bounded report-brief section lines for source families, filter posture, evidence/methodology/corroboration posture, attention posture, caveats, and export-safe explainability
   - bounded topic-report packet lines for topic filter posture, family/source coverage, metadata-only recent evidence lines, dedupe/corroboration posture, readiness gaps, and does-not-prove posture
+  - bounded workflow-evidence snapshot lines for topic/report lineage, readiness posture, export gaps, prompt-injection posture, and does-not-prove posture
+  - bounded current-awareness digest lines for active topic/filter posture, evidence-class family coverage, workflow lineage, attention posture, and export-safe digest output
+  - bounded review/export coherence lines for family-review posture, review-queue posture, readiness/export posture, topic/report lineage coherence, active source posture, and export-safe coherence output
+  - bounded topic-safe report export packet lines for active topic/filter posture, evidence-class family coverage, lineage across report helpers, review/readiness posture, and export-safe packet output
+  - bounded question briefing packet lines for timeframe/filter posture, evidence-class family coverage, lineage across report helpers, open review gaps, unanswered-question posture, freshness posture, and export-safe briefing output
 - Client guardrails:
   - this remains workflow-supporting evidence only unless explicit smoke or manual workflow validation is recorded
   - the client consumer does not fetch article bodies, linked pages, raw feed dumps, or linked-page URLs
@@ -557,6 +744,11 @@ Data AI owns bounded backend-only public internet-information source slices that
   - the fusion/claim-integrity snapshot composes only existing metadata-safe surfaces and does not rebuild Source Discovery structure-scan, candidate intake, knowledge-backfill, or review-claim lineage mechanics
   - the report-brief package is a metadata-only reporting helper over the existing Data AI surfaces and does not introduce raw-text-heavy behavior, linked-page URLs, or Source Discovery truth weighting
   - the topic-scoped report packet stays metadata-only, uses source ids/categories/evidence bases/health/timestamps rather than raw feed text, and does not turn duplicate headlines or media coverage into corroboration, field truth, or required action
+  - the workflow-evidence snapshot is metadata-only lineage and readiness packaging over the current reporting path and does not create workflow-validation proof, source promotion, headline corroboration, or required-action guidance
+  - the current-awareness digest is metadata-only open-ended reporting support over the current Data AI path and does not create field-truth synthesis, severity weighting, or required-action guidance
+  - the review/export coherence summary is metadata-only alignment packaging over the current Data AI path and does not create workflow-validation proof, source promotion, truth weighting, or required-action guidance
+  - the topic-safe report export packet is metadata-only export packaging over the current Data AI path and does not create source laundering, trust weighting, or required-action guidance
+  - the question briefing packet is metadata-only briefing packaging over the current Data AI path and does not create article-truth promotion, corroboration scoring, or required-action guidance
   - the client consumer does not create credibility, truth, severity, threat, attribution, legal, remediation, policy, or action scores
 
 ### NIST NVD CVE
@@ -601,6 +793,7 @@ Data AI owns bounded backend-only public internet-information source slices that
 - Composition behavior for one CVE id:
   - includes NVD metadata if present
   - includes EPSS score if present
+  - includes CISA KEV catalog references if present
   - includes local CISA advisory references if present
   - includes local recent feed mentions if present
   - includes `available_contexts` so callers can see which bounded local contexts matched
@@ -611,6 +804,9 @@ Data AI owns bounded backend-only public internet-information source slices that
   - newly added NCSC UK or CERT-FR feed items can appear in feed mentions only when the local item text itself contains the queried CVE id
 - Caveat boundary:
   - composition output is explainability/context only
+  - NVD remains vulnerability metadata
+  - EPSS remains scored prioritization context
+  - KEV remains official source-reported catalog context
   - it does not prove exploitation, compromise, impact, attribution, remediation priority, required action, or any cross-source severity score
 
 ## Validation
@@ -621,6 +817,8 @@ Data AI owns bounded backend-only public internet-information source slices that
 - `python -m pytest app/server/tests/test_data_ai_multi_feed.py app/server/tests/test_rss_feed_service.py -q`
 - `python -m pytest app/server/tests/test_cisa_cyber_advisories.py -q`
 - `python -m pytest app/server/tests/test_first_epss.py -q`
+- `python -m pytest app/server/tests/test_sec_edgar.py -q`
+- `python -m pytest app/server/tests/test_usaspending.py -q`
 - `python -m pytest app/server/tests/test_rss_feed_service.py -q`
 - `python -m compileall app/server/src`
 

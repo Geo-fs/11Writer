@@ -13,3 +13,10 @@ export {
   SourceHealthRow,
   StatusBadge
 } from "./primitives";
+export {
+  WorkbenchButton,
+  WorkbenchIconButton,
+  WorkbenchInput,
+  WorkbenchSelect,
+  WorkbenchTextarea
+} from "./controls";

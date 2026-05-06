@@ -1,5 +1,8 @@
 # 11Writer Strategic Roadmap
 
+Last updated:
+- `2026-05-06 America/Chicago`
+
 11Writer is a local-first public-source fusion layer for no-auth, evidence-aware spatial intelligence.
 
 The globe is the interface.
@@ -14,6 +17,8 @@ This document is the strategic reference for project direction. It should be rea
 - [roadmap.md](/C:/Users/mike/11Writer/app/docs/roadmap.md)
 - [runtime-interface-requirements.md](/C:/Users/mike/11Writer/app/docs/runtime-interface-requirements.md)
 - [cross-platform-implementation-playbook.md](/C:/Users/mike/11Writer/app/docs/cross-platform-implementation-playbook.md)
+- [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md)
+- [phase3-code-oss-workbench-spec.md](/C:/Users/mike/11Writer/app/docs/phase3-code-oss-workbench-spec.md)
 
 ## Core Platform Operating Plan
 
@@ -24,6 +29,29 @@ This document is the strategic reference for project direction. It should be rea
 - Backend-only runtime for unattended user-configured collection, source-health tracking, and task execution
 
 The current local browser/API development flow is the foundation for those surfaces. It is not a reason to treat 11Writer as browser-only, Windows-only, or desktop-only.
+
+## Current Repo State
+
+What is currently true in repo:
+
+- the browser client plus FastAPI backend foundation is operational and is still the main implementation surface
+- research-grade Source Discovery backend breadth is implemented as bounded candidate, review, and runtime infrastructure
+- source breadth is ahead of validation maturity, so source-level claims should be checked against [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md)
+- Phase 3 is now active through the persistent controlled roster:
+  - `Connect AI`
+  - `Systems AI`
+  - `Workspace AI`
+  - `Spatial AI`
+  - `Reporting AI`
+  - `Platform AI`
+  - `Gov AI`
+- the Code - OSS workbench spec and derived contracts are now active implementation inputs, but the full workbench is not yet the delivered runtime experience
+
+Interpretation rule:
+
+- implemented backend infrastructure is not the same thing as packaged runtime completeness
+- discovered sources are not the same thing as validated source implementations
+- planning direction is not the same thing as shipped UI behavior
 
 ## 1. Core Direction
 
@@ -461,7 +489,10 @@ Goals:
 
 ### Phase 2: Source and Feature Expansion
 
-Current phase.
+Status:
+
+- no longer the sole operating center
+- still active as supporting domain and workflow input while Phase 3 reshapes the product shell
 
 Goals:
 
@@ -491,6 +522,30 @@ Goals:
 - build the common situation view
 - normalize cards, badges, caveats, and empty states
 - reduce duplicated UI logic
+
+Status:
+
+- active
+
+Phase 3 management note:
+
+- the current controlled Phase 2 domain/source lanes have already handed off their work into repo docs and [phase3-handoffs](/C:/Users/mike/11Writer/app/docs/phase3-handoffs/README.md)
+- `Connect AI` stays active
+- the active persistent Phase 3 roster is:
+  - `Systems AI`
+  - `Workspace AI`
+  - `Spatial AI`
+  - `Reporting AI`
+  - `Platform AI`
+  - `Gov AI`
+- keep `Manager AI`, `Wonder AI`, and `Atlas AI`
+- treat repo docs, tests, and validation artifacts as the durable memory layer rather than long-lived lane chat context
+- use a smaller persistent roster centered on UI/workflow ownership rather than source-family ownership
+- require shared common UI parts so agents do not keep reinventing text boxes, cards, badges, caveats, and empty states
+
+See [phase3-agent-management-plan.md](/C:/Users/mike/11Writer/app/docs/phase3-agent-management-plan.md).
+
+The concrete Phase 3 shell/theme/component target is in [phase3-code-oss-workbench-spec.md](/C:/Users/mike/11Writer/app/docs/phase3-code-oss-workbench-spec.md).
 
 ### Phase 4: Final Polish and Resilient Expansion
 
@@ -575,6 +630,11 @@ Rules:
 - reproduce current failure before fixing
 - ignore stale blocker reports unless they reproduce
 - do not change domain semantics
+
+Phase 3 note:
+
+- the current Connect AI chat should be kept at Phase 3 cutover
+- Connect AI remains the integration and validation guardrail while the new UI-first Phase 3 roster lands
 
 ### Gather AI
 

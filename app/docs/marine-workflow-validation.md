@@ -18,6 +18,8 @@ Related contract doc:
 
 - backend contract tests pass:
   - `python -m pytest app/server/tests/test_marine_contracts.py -q`
+  - `python -m pytest app/server/tests/test_marine_navtex.py -q`
+  - `python -m pytest app/server/tests/test_marine_gebco.py -q`
   - `python -m pytest app/server/tests/test_vigicrues_hydrometry.py -q`
   - `python -m pytest app/server/tests/test_ireland_opw_waterlevel.py -q`
   - `python -m pytest app/server/tests/test_netherlands_rws_waterinfo.py -q`
@@ -36,6 +38,8 @@ Related contract doc:
   - NOAA CO-OPS
   - NOAA NDBC
   - Scottish Water Overflows
+  - USCG NAVTEX Broadcast Notices
+  - GEBCO Gridded Bathymetry
   - France Vigicrues Hydrometry
   - Ireland OPW Water Level
   - Netherlands RWS Waterinfo
@@ -52,6 +56,8 @@ Related contract doc:
   - CO-OPS latest observations stay `observed`
   - NDBC latest observations stay `observed`
   - Scottish Water overflow status stays `source-reported` / contextual
+  - NAVTEX broadcast notices stay `advisory`
+  - GEBCO bounded bathymetry samples stay `contextual`
   - Vigicrues latest hydrometry observations stay `observed`
   - Ireland OPW latest water-level readings stay `observed`
   - Netherlands RWS Waterinfo latest water-level observations stay `observed`
@@ -64,11 +70,12 @@ Related contract doc:
   - current services validate `loaded`, `empty`, `stale`, `disabled`, and `unavailable`
   - current services validate `degraded` for:
     - Scottish Water Overflows
+    - USCG NAVTEX Broadcast Notices
     - France Vigicrues Hydrometry
     - Ireland OPW Water Level
     - Netherlands RWS Waterinfo
-  - CO-OPS and NDBC still do not emit `degraded` because the current slice has no honest partial-ingest/source-quality degradation signal
-  - CO-OPS, NDBC, Scottish Water, Vigicrues, Ireland OPW, and Netherlands RWS Waterinfo all have dedicated regression coverage for these boundaries
+  - CO-OPS, NDBC, and GEBCO still do not emit `degraded` because the current slices have no honest partial-ingest/source-quality degradation signal
+  - CO-OPS, NDBC, Scottish Water, NAVTEX, GEBCO, Vigicrues, Ireland OPW, and Netherlands RWS Waterinfo all have dedicated regression coverage for these boundaries
 - route validation should reject invalid coordinates/radius values with request validation errors
 
 ### Context Fusion / Review Contract Dependencies
@@ -206,6 +213,7 @@ These marine-local helpers do not define new backend routes. Their workflow vali
     - `fusionSnapshotInput`
     - `reportBriefPackage`
     - `corridorSituationPackage`
+    - `hydrologyRegionalComparisonPackage`
   - hydrology/source-health report posture coverage for:
     - broad source posture
     - limited source posture
@@ -219,11 +227,32 @@ These marine-local helpers do not define new backend routes. Their workflow vali
     - fusion snapshot input hydrology posture
     - report-brief workflow-evidence lines
     - corridor-situation workflow-evidence lines
+    - hydrology comparison workflow-evidence lines
+    - current-awareness digest workflow-evidence lines
   - corridor/chokepoint review posture coverage for:
     - normal posture
     - degraded posture
     - empty/no-match posture
     - missing-source posture
+  - current-awareness digest coverage for:
+    - bounded `observe / orient / prioritize / explain` sections
+    - corridor/chokepoint carry-through
+    - hydrology comparison carry-through
+    - source-health/workflow-evidence carry-through
+    - explicit no-impact/no-closure/no-action/no-wrongdoing guardrails
+  - source-row workflow/export closure packet coverage for:
+    - source-row carry-through
+    - export-coherence posture carry-through
+    - corridor/chokepoint carry-through
+    - hydrology posture carry-through
+    - workflow-evidence carry-through
+    - explicit no-impact/no-closure/no-action/no-wrongdoing guardrails
+  - question briefing packet coverage for:
+    - question-family posture carry-through
+    - source-row/source-health posture carry-through
+    - corridor/chokepoint and hydrology posture carry-through
+    - workflow-evidence/export-coherence carry-through
+    - explicit no-impact/no-closure/no-wrongdoing/no-action guardrails
 - source-health/export coherence across CO-OPS, NDBC, Vigicrues, Ireland OPW, and Netherlands RWS Waterinfo uses only current exported metadata:
   - source mode
   - source health
@@ -240,6 +269,7 @@ These marine-local helpers do not define new backend routes. Their workflow vali
   - NOAA CO-OPS
   - NOAA NDBC
   - Scottish Water Overflows
+  - GEBCO Gridded Bathymetry
   - France Vigicrues Hydrometry
   - Ireland OPW Water Level
 - fixture/local mode remains explicit where applicable
@@ -253,6 +283,7 @@ These marine-local helpers do not define new backend routes. Their workflow vali
 - combined marine environmental context renders
 - marine context source registry renders all context sources
 - marine context issue queue renders source-health issues without implying vessel behavior
+- GEBCO gridded bathymetry renders as a separate static-context card and export block rather than being merged into warning or hydrology family summaries
 - marine hydrology context review summary renders Vigicrues, Ireland OPW, and Netherlands RWS Waterinfo together without creating a merged severity signal
 - marine context fusion summary renders ocean/met, hydrology, and infrastructure families without collapsing them into one severity model
 - marine context review report renders degraded/unavailable-dominant phrasing as a review caveat rather than impact or anomaly language
@@ -288,6 +319,8 @@ Marine export metadata should include:
 - `marineAnomalySummary.noaaCoopsContext`
 - `marineAnomalySummary.ndbcContext`
 - `marineAnomalySummary.scottishWaterOverflowContext`
+- `marineAnomalySummary.navtexContext`
+- `marineAnomalySummary.gebcoBathymetryContext`
 - `marineAnomalySummary.vigicruesHydrometryContext`
 - `marineAnomalySummary.irelandOpwWaterLevelContext`
 - `marineAnomalySummary.hydrologyContext`
@@ -309,10 +342,11 @@ Marine export metadata should include:
 
 - no vessel-intent inference wording
 - no pollution-impact or health-risk claim wording for Scottish Water
+- no route-safety, closure-truth, grounding-risk, or incident-truth wording for GEBCO
 - no flood-impact or damage claim wording for Vigicrues hydrometry
 - environmental context remains separate from anomaly evidence
 - Scottish Water remains separate from combined CO-OPS/NDBC environmental context
-- CO-OPS/NDBC/Scottish Water/Vigicrues source-level caveats remain present in backend responses
+- CO-OPS/NDBC/Scottish Water/NAVTEX/GEBCO/Vigicrues source-level caveats remain present in backend responses
 - forbidden claims remain:
   - intentional AIS disablement
   - vessel wrongdoing or route-choice causation from context sources
@@ -342,6 +376,22 @@ Marine export metadata should include:
 - marine smoke-covered
 - export metadata-covered
 
+### USCG NAVTEX Broadcast Notices
+
+- implemented
+- backend contract-covered
+- marine-local frontend card exists
+- export metadata-covered
+- marine smoke-covered
+
+### GEBCO Gridded Bathymetry
+
+- implemented
+- backend contract-covered
+- marine-local frontend card exists
+- export metadata-covered
+- marine smoke-covered
+
 ### France Vigicrues Hydrometry
 
 - implemented
@@ -365,7 +415,7 @@ Marine export metadata should include:
 - marine-local frontend card exists
 - export metadata-covered
 - deterministic helper-regression-covered
-- marine smoke not applicable yet in this slice
+- marine smoke-covered
 
 ### Marine Hydrology Context Review Summary
 
@@ -451,7 +501,9 @@ Marine export metadata should include:
 - Repo-wide frontend build/smoke remains a separate confirmation layer; after Connect AI clears shared blockers, marine smoke should continue confirming cards, export metadata, presets, issue queue, and timeline against the same backend contract guarantees.
 - The marine-only smoke path now explicitly confirms the Vigicrues hydrometry card, the Vigicrues row in the marine context source summary, and the `marineAnomalySummary.vigicruesHydrometryContext` export metadata block.
 - The marine-only smoke path now explicitly confirms the Ireland OPW water-level card, the Ireland OPW row in the marine context source summary, and the `marineAnomalySummary.irelandOpwWaterLevelContext` export metadata block.
-- Netherlands RWS Waterinfo now has a marine-local card and export metadata block, but marine smoke has not yet been extended for it in this slice.
+- The marine-only smoke path now explicitly confirms the Netherlands RWS Waterinfo card, the Waterinfo row in the marine context source summary, and the `marineAnomalySummary.netherlandsRwsWaterinfoContext` export metadata block.
+- The marine-only smoke path now explicitly confirms the USCG NAVTEX Broadcast Notices card, the NAVTEX row in the marine context source summary, and the `marineAnomalySummary.navtexContext` export metadata block.
+- The marine-only smoke path now explicitly confirms the GEBCO Gridded Bathymetry card and the `marineAnomalySummary.gebcoBathymetryContext` export metadata block.
 - The marine-only smoke path now explicitly confirms the composed marine hydrology context card and the `marineAnomalySummary.hydrologyContext` export metadata block.
 - Marine source-health export coherence has no dedicated UI card, but the marine-only smoke path now confirms its snapshot metadata block.
 - The marine-only smoke path now also confirms snapshot metadata for:
@@ -464,11 +516,12 @@ Marine export metadata should include:
 - `marineAnomalySummary.fusionSnapshotInput` is export-only and has no dedicated UI card; smoke/regression confirm its metadata block, source rows, Vigicrues posture carry-through, and does-not-prove guardrails.
 - `marineAnomalySummary.reportBriefPackage` is export-only and has no dedicated UI card; smoke/regression confirm its `observe / orient / prioritize / explain` sections plus explicit Vigicrues and Waterinfo workflow-evidence wording.
 - `marineAnomalySummary.corridorSituationPackage` is export-only and has no dedicated UI card; smoke/regression confirm its corridor posture, `observe / orient / prioritize / explain` sections, Vigicrues/Waterinfo workflow-evidence wording, and explicit no-closure/no-intent/no-action guardrails.
+- `marineAnomalySummary.hydrologyRegionalComparisonPackage` is export-only and has no dedicated UI card; smoke/regression confirm hydrology rows, Vigicrues/Waterinfo/OPW workflow-evidence wording, freshness posture, and explicit no-impact/no-closure/no-action guardrails.
 - The marine-only smoke path now explicitly confirms the composed marine context fusion card and the `marineAnomalySummary.contextFusionSummary` export metadata block.
 - The marine-only smoke path now explicitly confirms the composed marine context review report card and the `marineAnomalySummary.contextReviewReport` export metadata block.
 - The marine-only smoke path now explicitly surfaces:
   - one degraded source-health example via Scottish Water Overflows
   - one unavailable source-health example via France Vigicrues Hydrometry
   - corresponding `contextSourceSummary` counts/rows and `contextIssueQueue` warnings in export metadata
-- A remaining semantics gap stays documented rather than "fixed": `degraded` is still not emitted for CO-OPS or NDBC because the current slice has no honest partial-ingest/source-quality degradation signal to surface at the source-health layer.
+- A remaining semantics gap stays documented rather than "fixed": `degraded` is still not emitted for CO-OPS, NDBC, or GEBCO because the current slices have no honest partial-ingest/source-quality degradation signal to surface at the source-health layer.
 

@@ -1,0 +1,161 @@
+{
+  "eventCases": [
+    {
+      "caseId": "local-first-corroboration",
+      "claims": [
+        {
+          "claimId": "c1",
+          "sourceId": "source:regional-a",
+          "claimText": "Bridge closure reported after a tanker crash.",
+          "claimType": "incident",
+          "outcome": "confirmed",
+          "observedAt": "2026-04-01T12:00:00Z",
+          "scopeHints": {
+            "spatial": ["Houston, TX"],
+            "topic": ["transport"]
+          }
+        },
+        {
+          "claimId": "c2",
+          "sourceId": "source:regional-b",
+          "claimText": "Bridge closure reported after a tanker crash.",
+          "claimType": "incident",
+          "outcome": "confirmed",
+          "observedAt": "2026-04-01T12:20:00Z",
+          "scopeHints": {
+            "spatial": ["Houston, TX"],
+            "topic": ["transport"]
+          }
+        }
+      ],
+      "expected": {
+        "clusterCount": 1,
+        "contestedCount": 0,
+        "openQuestionCount": 0,
+        "clusterLabels": [
+          { "claimId": "c1", "clusterLabel": "event-1" },
+          { "claimId": "c2", "clusterLabel": "event-1" }
+        ]
+      }
+    },
+    {
+      "caseId": "correction-and-open-question",
+      "claims": [
+        {
+          "claimId": "c1",
+          "sourceId": "source:wire",
+          "claimText": "Officials confirmed the outage is citywide.",
+          "claimType": "state",
+          "outcome": "confirmed",
+          "observedAt": "2026-04-02T10:00:00Z"
+        },
+        {
+          "claimId": "c2",
+          "sourceId": "source:corrective",
+          "claimText": "Officials confirmed the outage is citywide.",
+          "claimType": "state",
+          "outcome": "corrected",
+          "observedAt": "2026-04-02T11:00:00Z"
+        },
+        {
+          "claimId": "c3",
+          "sourceId": "source:single",
+          "claimText": "Power is still out at the airport.",
+          "claimType": "state",
+          "outcome": "unresolved",
+          "observedAt": "2026-04-02T11:00:00Z"
+        }
+      ],
+      "expected": {
+        "clusterCount": 2,
+        "contestedCount": 1,
+        "openQuestionCount": 1,
+        "clusterLabels": [
+          { "claimId": "c1", "clusterLabel": "event-1" },
+          { "claimId": "c2", "clusterLabel": "event-1" },
+          { "claimId": "c3", "clusterLabel": "event-2" }
+        ]
+      }
+    }
+  ],
+  "reputationCases": [
+    {
+      "caseId": "official-but-late-or-wrong",
+      "sourceClass": "official",
+      "sourceHealth": "healthy",
+      "outcomes": [
+        { "outcome": "confirmed", "evidenceBasis": "primary", "corroboratingSourceIds": ["s1"] },
+        { "outcome": "contradicted", "evidenceBasis": "primary", "contradictionSourceIds": ["s2"] }
+      ],
+      "expected": {
+        "direction": "decrease",
+        "scoreBand": "medium"
+      }
+    },
+    {
+      "caseId": "local-first-independent-corroboration",
+      "sourceClass": "news",
+      "sourceHealth": "healthy",
+      "outcomes": [
+        { "outcome": "confirmed", "evidenceBasis": "observed", "corroboratingSourceIds": ["s1", "s2"] }
+      ],
+      "expected": {
+        "direction": "increase",
+        "scoreBand": "medium"
+      }
+    },
+    {
+      "caseId": "wire-syndication-inflation-check",
+      "sourceClass": "community",
+      "sourceHealth": "healthy",
+      "outcomes": [
+        { "outcome": "unresolved", "evidenceBasis": "contextual" }
+      ],
+      "expected": {
+        "direction": "unchanged",
+        "scoreBand": "medium"
+      }
+    }
+  ],
+  "challengeSets": [
+    {
+      "caseId": "correction-after-initial-report",
+      "challengeType": "correction_after_initial_report",
+      "sourceClass": "news",
+      "sourceHealth": "healthy",
+      "outcomes": [
+        { "outcome": "confirmed", "evidenceBasis": "observed" },
+        { "outcome": "corrected", "evidenceBasis": "observed" }
+      ],
+      "claims": [
+        {
+          "claimId": "c1",
+          "sourceId": "source:news-initial",
+          "claimText": "Factory fire contained.",
+          "claimType": "state",
+          "outcome": "confirmed",
+          "observedAt": "2026-04-03T10:00:00Z"
+        },
+        {
+          "claimId": "c2",
+          "sourceId": "source:news-correction",
+          "claimText": "Factory fire contained.",
+          "claimType": "state",
+          "outcome": "corrected",
+          "observedAt": "2026-04-03T11:00:00Z"
+        }
+      ],
+      "expected": {
+        "direction": "increase",
+        "scoreBand": "medium",
+        "clusterCount": 1,
+        "contestedCount": 1,
+        "openQuestionCount": 0,
+        "clusterLabels": [
+          { "claimId": "c1", "clusterLabel": "event-1" },
+          { "claimId": "c2", "clusterLabel": "event-1" }
+        ]
+      }
+    }
+  ]
+}

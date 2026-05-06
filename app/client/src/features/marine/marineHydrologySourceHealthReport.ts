@@ -6,7 +6,7 @@ import type {
 export interface MarineHydrologySourceHealthReportRow {
   sourceId: string;
   label: string;
-  category: "oceanographic" | "meteorological" | "hydrology";
+  category: "oceanographic" | "meteorological" | "hydrology" | "maritime-warning";
   sourceMode: "fixture" | "live" | "unknown";
   health:
     | "loaded"
@@ -184,3 +184,4 @@ function toFamily(category: MarineHydrologySourceHealthReportRow["category"]) {
   }
   return "other" as const;
 }
+

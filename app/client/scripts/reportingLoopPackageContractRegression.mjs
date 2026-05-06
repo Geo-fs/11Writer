@@ -1,10 +1,16 @@
+import { buildAerospaceCurrentAwarenessDigestSummary } from "../src/features/inspector/aerospaceCurrentAwarenessDigest.ts";
+import { buildAerospaceReportingHandoffContractSummary } from "../src/features/inspector/aerospaceReportingHandoffContract.ts";
 import { buildAerospaceReportBriefPackageSummary } from "../src/features/inspector/aerospaceReportBriefPackage.ts";
 import { buildAerospaceVaacAdvisoryReportPackageSummary } from "../src/features/inspector/aerospaceVaacAdvisoryReportPackage.ts";
 import {
+  buildDataAiCurrentAwarenessDigest,
   buildDataAiFusionSnapshotSummary,
+  buildDataAiQuestionBriefingPacket,
   buildDataAiReportBriefSummary,
+  buildDataAiTopicSafeReportExportPacket,
   DATA_AI_INFRASTRUCTURE_STATUS_FAMILY_ID
 } from "../src/features/inspector/dataAiSourceIntelligence.ts";
+import { buildMarineCurrentAwarenessDigest } from "../src/features/marine/marineCurrentAwarenessDigest.ts";
 import { buildMarineReportBriefPackage } from "../src/features/marine/marineReportBriefPackage.ts";
 
 function assert(condition, message) {
@@ -636,30 +642,72 @@ function run() {
   const aerospaceReport = buildAerospaceReportBriefPackageSummary({
     fusionSnapshotInputSummary: aerospaceFusion,
   });
+  const aerospaceCurrentAwareness = buildAerospaceCurrentAwarenessDigestSummary({
+    selectedTargetSummary: {
+      type: "aircraft",
+      label: "TEST123",
+      sourceLabel: "Observed session history",
+      caveat: "Observed aircraft history is session-local.",
+      displayLines: ["Movement source: Observed session history"],
+    },
+    reportBriefPackageSummary: aerospaceReport,
+  });
   const aerospaceVaacReport = buildAerospaceVaacAdvisoryReportPackageSummary({
     vaacContextSummary: buildAerospaceVaacFixture(),
     reportBriefPackageSummary: aerospaceReport,
   });
+  const aerospaceReportingHandoff = buildAerospaceReportingHandoffContractSummary({
+    selectedTargetSummary: {
+      type: "aircraft",
+      label: "TEST123",
+      sourceLabel: "Observed session history",
+      caveat: "Observed aircraft history is session-local.",
+      displayLines: ["Movement source: Observed session history"],
+    },
+    reportBriefPackageSummary: aerospaceReport,
+    currentAwarenessDigestSummary: aerospaceCurrentAwareness,
+  });
   assert(aerospaceReport, "Expected aerospace report brief package.");
+  assert(aerospaceCurrentAwareness, "Expected aerospace current-awareness digest.");
   assert(aerospaceVaacReport, "Expected aerospace VAAC advisory report package.");
+  assert(aerospaceReportingHandoff, "Expected aerospace reporting handoff contract.");
   assertFusionContract("Aerospace fusion snapshot input", aerospaceFusion);
   assertReportBriefContract("Aerospace report brief package", aerospaceReport, aerospaceFusion);
+  assertReportBriefContract("Aerospace current-awareness digest", aerospaceCurrentAwareness, aerospaceFusion);
   assertAdjacentPackageContract("Aerospace VAAC advisory report package", aerospaceVaacReport);
+  assertAdjacentPackageContract("Aerospace reporting handoff contract", aerospaceReportingHandoff);
 
   const dataAiFixtures = buildDataAiFixtures();
   const dataAiFusion = buildDataAiFusionSnapshotSummary(dataAiFixtures);
   const dataAiReport = buildDataAiReportBriefSummary(dataAiFixtures);
+  const dataAiCurrentAwareness = buildDataAiCurrentAwarenessDigest(dataAiFixtures);
+  const dataAiTopicSafeExport = buildDataAiTopicSafeReportExportPacket(dataAiFixtures);
+  const dataAiQuestionBriefing = buildDataAiQuestionBriefingPacket(dataAiFixtures);
   assert(dataAiFusion, "Expected Data AI fusion snapshot summary.");
   assert(dataAiReport, "Expected Data AI report brief summary.");
+  assert(dataAiCurrentAwareness, "Expected Data AI current-awareness digest.");
+  assert(dataAiTopicSafeExport, "Expected Data AI topic-safe report export packet.");
+  assert(dataAiQuestionBriefing, "Expected Data AI question briefing packet.");
   assertFusionContract("Data AI fusion snapshot", dataAiFusion);
   assertReportBriefContract("Data AI report brief", dataAiReport, dataAiFusion);
+  assertReportBriefContract("Data AI current-awareness digest", dataAiCurrentAwareness, dataAiFusion);
+  assertAdjacentPackageContract("Data AI topic-safe report export packet", dataAiTopicSafeExport);
+  assertAdjacentPackageContract("Data AI question briefing packet", dataAiQuestionBriefing);
 
   const marineFusion = buildMarineFusionFixture();
   marineFusion.metadata.sourceRows = marineFusion.sourceRows;
   const marineReport = buildMarineReportBriefPackage(marineFusion);
+  const marineCurrentAwareness = buildMarineCurrentAwarenessDigest({
+    fusionSnapshotInput: marineFusion,
+    reportBriefPackage: marineReport,
+    corridorSituationPackage: null,
+    hydrologyRegionalComparisonPackage: null,
+  });
   assert(marineReport, "Expected marine report brief package.");
+  assert(marineCurrentAwareness, "Expected marine current-awareness digest.");
   assertFusionContract("Marine fusion snapshot input", marineFusion);
   assertReportBriefContract("Marine report brief package", marineReport, marineFusion);
+  assertReportBriefContract("Marine current-awareness digest", marineCurrentAwareness, marineFusion);
 
   console.log(
     JSON.stringify(
@@ -667,11 +715,17 @@ function run() {
         validated: [
           "aerospace-fusion-snapshot-input",
           "aerospace-report-brief-package",
+          "aerospace-current-awareness-digest",
           "aerospace-vaac-advisory-report-package",
+          "aerospace-reporting-handoff-contract",
           "data-ai-fusion-snapshot",
           "data-ai-report-brief",
+          "data-ai-current-awareness-digest",
+          "data-ai-topic-safe-report-export-packet",
+          "data-ai-question-briefing-packet",
           "marine-fusion-snapshot-input",
           "marine-report-brief-package",
+          "marine-current-awareness-digest",
         ],
         sectionsRequired: ["observe", "orient", "prioritize", "explain"],
       },

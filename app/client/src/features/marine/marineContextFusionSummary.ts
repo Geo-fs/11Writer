@@ -2,13 +2,14 @@ import type { MarineEnvironmentalContextSummary } from "./marineEnvironmentalCon
 import type { MarineContextIssueQueueSummary } from "./marineContextIssueQueue";
 import type { MarineContextSourceRegistrySummary } from "./marineContextSourceSummary";
 import type { MarineHydrologyContextSummary } from "./marineHydrologyContext";
+import type { MarineNavtexContextSummary } from "./marineNavtexContext";
 import type { MarineScottishWaterContextSummary } from "./marineScottishWaterContext";
 
 type FamilyAvailability = "available" | "empty" | "limited" | "unavailable";
 type ExportReadiness = "ready-with-caveats" | "limited-context" | "unavailable";
 
 export interface MarineContextFusionFamilyLine {
-  family: "ocean-met" | "hydrology" | "infrastructure";
+  family: "ocean-met" | "hydrology" | "warning" | "infrastructure";
   label: string;
   availability: FamilyAvailability;
   detail: string;
@@ -46,6 +47,7 @@ export interface MarineContextFusionSummary {
 export function buildMarineContextFusionSummary(input: {
   environmentalContextSummary: MarineEnvironmentalContextSummary | null;
   hydrologyContextSummary: MarineHydrologyContextSummary | null;
+  navtexContextSummary?: MarineNavtexContextSummary | null;
   scottishWaterContextSummary: MarineScottishWaterContextSummary | null;
   contextSourceRegistrySummary: MarineContextSourceRegistrySummary | null;
   contextIssueQueueSummary: MarineContextIssueQueueSummary | null;
@@ -53,6 +55,7 @@ export function buildMarineContextFusionSummary(input: {
   const familyLines = [
     buildOceanMetFamilyLine(input.environmentalContextSummary),
     buildHydrologyFamilyLine(input.hydrologyContextSummary),
+    buildWarningFamilyLine(input.navtexContextSummary ?? null),
     buildInfrastructureFamilyLine(input.scottishWaterContextSummary)
   ].filter((line): line is MarineContextFusionFamilyLine => line != null);
 
@@ -253,6 +256,40 @@ function buildInfrastructureFamilyLine(
   };
 }
 
+function buildWarningFamilyLine(
+  summary: MarineNavtexContextSummary | null
+): MarineContextFusionFamilyLine | null {
+  if (!summary) {
+    return {
+      family: "warning",
+      label: "Warning context",
+      availability: "unavailable",
+      detail: "NAVTEX warning context unavailable in current marine view.",
+      caveat: "Warning/advisory context is unavailable for this review window."
+    };
+  }
+
+  const availability =
+    summary.metadata.health === "loaded"
+      ? "available"
+      : summary.metadata.health === "empty"
+        ? "empty"
+        : summary.metadata.health === "stale" ||
+            summary.metadata.health === "degraded" ||
+            summary.metadata.health === "error"
+          ? "limited"
+          : "unavailable";
+
+  return {
+    family: "warning",
+    label: "Warning context",
+    availability,
+    detail: `${summary.metadata.health} | ${summary.metadata.nearbyBroadcastCount} nearby broadcast${summary.metadata.nearbyBroadcastCount === 1 ? "" : "s"} | ${summary.metadata.messageTypeFilter}`,
+    topSummary: summary.metadata.topSummary,
+    caveat: summary.metadata.caveats[0] ?? null
+  };
+}
+
 function classifyExportReadiness(input: {
   familyCount: number;
   availableFamilyCount: number;
@@ -290,6 +327,7 @@ function buildExportReadinessLine(
 function countFixtureFamilies(input: {
   environmentalContextSummary: MarineEnvironmentalContextSummary | null;
   hydrologyContextSummary: MarineHydrologyContextSummary | null;
+  navtexContextSummary?: MarineNavtexContextSummary | null;
   scottishWaterContextSummary: MarineScottishWaterContextSummary | null;
 }) {
   let count = 0;
@@ -308,6 +346,9 @@ function countFixtureFamilies(input: {
   if (input.scottishWaterContextSummary?.metadata.sourceMode === "fixture") {
     count += 1;
   }
+  if (input.navtexContextSummary?.metadata.sourceMode === "fixture") {
+    count += 1;
+  }
   return count;
 }
 
@@ -315,6 +356,7 @@ function collectPriorityCaveats(
   input: {
     environmentalContextSummary: MarineEnvironmentalContextSummary | null;
     hydrologyContextSummary: MarineHydrologyContextSummary | null;
+    navtexContextSummary?: MarineNavtexContextSummary | null;
     scottishWaterContextSummary: MarineScottishWaterContextSummary | null;
     contextSourceRegistrySummary: MarineContextSourceRegistrySummary | null;
     contextIssueQueueSummary: MarineContextIssueQueueSummary | null;

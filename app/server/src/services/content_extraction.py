@@ -273,11 +273,11 @@ def extract_article_snapshot_from_html(html: str, *, base_url: str | None = None
     )
     author = (
         _jsonld_person_name(json_ld, "author")
-        or _meta_value(parser, "author", "article:author", "byline")
+        or _meta_value(parser, "author", "article:author", "article:author:name", "byline", "parsely-author", "dc.creator")
     )
     published_at = (
         _jsonld_text(json_ld, "datePublished")
-        or _meta_value(parser, "article:published_time", "datepublished", "pubdate", "date")
+        or _meta_value(parser, "article:published_time", "datepublished", "pubdate", "publish-date", "parsely-pub-date", "sailthru.date", "dc.date", "date")
         or (parser.time_values[0] if parser.time_values else None)
     )
     canonical_url = (
@@ -403,12 +403,16 @@ def _best_block(blocks: list[_BlockCandidate]) -> _BlockCandidate | None:
         negative_hits = sum(1 for hint in NEGATIVE_HINTS if hint in attrs_blob)
         sentence_count = len(re.findall(r"[.!?]", text))
         link_density = block.link_chars / max(len(text), 1)
+        semantic_bonus = 220 if block.tag in {"article", "main"} else 0
+        low_link_bonus = max(0, int((1.0 - min(link_density, 1.0)) * 120))
         score = (
             len(text)
             + (block.paragraph_count * 180)
             + (block.heading_count * 70)
             + (sentence_count * 18)
             + (positive_hits * 140)
+            + semantic_bonus
+            + low_link_bonus
             + (len(block.captions) * 30)
             - (negative_hits * 180)
             - int(link_density * 500)

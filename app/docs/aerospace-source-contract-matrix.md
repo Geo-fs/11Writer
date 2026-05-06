@@ -292,6 +292,53 @@ It does not change source semantics.
   do not replace the primary aircraft source,
   do not infer flight intent from OpenSky comparison results
 
+## GPSJam GNSS Context
+
+- Route:
+  `/api/aerospace/aircraft/gpsjam-context`
+- Source category:
+  contextual GNSS-disruption awareness from aircraft-reported low navigation accuracy
+- Evidence basis:
+  source-reported / contextual
+- Source health fields:
+  `sourceHealth.sourceName`
+  `sourceHealth.sourceMode`
+  `sourceHealth.health`
+  `sourceHealth.detail`
+  `sourceHealth.manifestSourceUrl`
+  `sourceHealth.dataSourceUrl`
+  `sourceHealth.lastUpdatedAt`
+  `sourceHealth.state`
+  `sourceHealth.caveats`
+- Source mode fields:
+  per-sample `sourceMode`
+  `sourceHealth.sourceMode`
+- Empty behavior:
+  empty `samples` is valid and explicit, not a route failure
+- Primary observations/events:
+  daily flagged hex summaries and top per-hex aircraft-reported low-accuracy counts
+- Export metadata key:
+  `gpsjamContext`
+- UI card currently exists:
+  no new large panel;
+  GPSJam is integrated into existing aerospace export, digest, and selected-target question/reporting surfaces only
+- Smoke coverage status:
+  metadata assertions added;
+  latest local aerospace smoke attempt was blocked before assertions by a Windows Playwright `spawn EPERM` launcher failure
+- Caveats:
+  one UTC day aggregate only,
+  aircraft-reported low navigation accuracy only,
+  optional/contextual only,
+  not complete coverage,
+  not target-specific proof,
+  separate from SWPC, geomagnetism, OpenSky comparison, airport status, and selected-target evidence
+- Do-not-infer rules:
+  do not infer local GPS outage certainty,
+  do not infer jamming attribution or intent,
+  do not infer target-specific effect,
+  do not infer route impact, safety consequence, or action need,
+  do not collapse GPSJam into operational airport, space-weather, or selected-target truth
+
 ## USGS Geomagnetism
 
 - Route:

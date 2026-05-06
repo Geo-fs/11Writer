@@ -1,0 +1,34 @@
+{
+  "date": "2026-05-05",
+  "earliest_available_date": "2022-02-14",
+  "latest_available_date": "2026-05-05",
+  "suspect": false,
+  "data_version": 4,
+  "total_hex_count": null,
+  "bad_hex_count": 602,
+  "manifest_source_url": "https://gpsjam.org/data/manifest.csv",
+  "data_source_url": "https://gpsjam.org/data/2026-05-05-h3_4.csv",
+  "last_updated_at": "2026-05-05",
+  "samples": [
+    {
+      "hex_id": "84754a9ffffffff",
+      "count_good_aircraft": 7,
+      "count_bad_aircraft": 5
+    },
+    {
+      "hex_id": "84754e1ffffffff",
+      "count_good_aircraft": 21,
+      "count_bad_aircraft": 4
+    },
+    {
+      "hex_id": "8475413ffffffff",
+      "count_good_aircraft": 64,
+      "count_bad_aircraft": 3
+    },
+    {
+      "hex_id": "84756a7ffffffff",
+      "count_good_aircraft": 45,
+      "count_bad_aircraft": 2
+    }
+  ]
+}

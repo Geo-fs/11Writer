@@ -7,10 +7,17 @@ from typing import Literal
 from src.config.settings import Settings
 from src.marine.repository import haversine_meters
 from src.types.api import (
+    MarineGebcoBathymetryAreaSummary,
+    MarineGebcoBathymetryContextResponse,
+    MarineGebcoBathymetrySample,
+    MarineGebcoBathymetrySourceHealth,
     MarineIrelandOpwWaterLevelContextResponse,
     MarineIrelandOpwWaterLevelReading,
     MarineIrelandOpwWaterLevelSourceHealth,
     MarineIrelandOpwWaterLevelStation,
+    MarineNavtexBroadcast,
+    MarineNavtexContextResponse,
+    MarineNavtexSourceHealth,
     MarineNetherlandsRwsWaterinfoContextResponse,
     MarineNetherlandsRwsWaterinfoObservation,
     MarineNetherlandsRwsWaterinfoSourceHealth,
@@ -41,6 +48,8 @@ _SCOTTISH_WATER_STALE_AFTER = timedelta(hours=2)
 _VIGICRUES_STALE_AFTER = timedelta(hours=1)
 _IRELAND_OPW_STALE_AFTER = timedelta(hours=1)
 _NETHERLANDS_RWS_WATERINFO_STALE_AFTER = timedelta(hours=1)
+_NAVTEX_STALE_AFTER = timedelta(hours=12)
+_GEBCO_STALE_AFTER = timedelta(days=540)
 
 
 @dataclass(frozen=True)
@@ -123,6 +132,36 @@ class _FixtureNetherlandsRwsWaterinfoStation:
     water_body: str | None
     station_source_url: str
     latest_observation: MarineNetherlandsRwsWaterinfoObservation | None
+    caveats: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class _FixtureNavtexBroadcast:
+    message_id: str
+    station_id: str
+    station_name: str
+    transmitter_character: str
+    latitude: float
+    longitude: float
+    coverage_radius_km: float
+    subject_indicator: str
+    subject_label: str | None
+    issued_at: str
+    summary: str
+    body_excerpt: str
+    source_url: str
+    source_detail: str
+    caveats: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class _FixtureGebcoBathymetrySample:
+    sample_id: str
+    latitude: float
+    longitude: float
+    elevation_meters: float
+    source_url: str
+    source_detail: str
     caveats: tuple[str, ...] = ()
 
 
@@ -1243,6 +1282,470 @@ class MarineIrelandOpwWaterLevelService:
         ]
 
 
+class MarineNavtexService:
+    def __init__(self, settings: Settings) -> None:
+        self._settings = settings
+
+    async def context(
+        self,
+        *,
+        center_lat: float,
+        center_lon: float,
+        radius_km: float,
+        message_type_filter: Literal[
+            "all", "navigational-warning", "meteorological-warning", "search-and-rescue", "forecast", "other"
+        ],
+        limit: int,
+    ) -> MarineNavtexContextResponse:
+        now = datetime.now(tz=timezone.utc)
+        fetched_at = now.isoformat()
+        mode = (self._settings.marine_navtex_mode or "fixture").strip().lower()
+        if mode != "fixture":
+            return MarineNavtexContextResponse(
+                fetched_at=fetched_at,
+                center_lat=center_lat,
+                center_lon=center_lon,
+                radius_km=radius_km,
+                message_type_filter=message_type_filter,
+                count=0,
+                source_health=MarineNavtexSourceHealth(
+                    source_id="uscg-navtex-broadcast-notices",
+                    source_label="USCG NAVTEX Broadcast Notices",
+                    enabled=False,
+                    source_mode="unknown" if mode not in {"live", "fixture"} else "live",
+                    health="disabled",
+                    loaded_count=0,
+                    last_fetched_at=fetched_at,
+                    source_generated_at=None,
+                    detail="USCG NAVTEX live mode is not implemented in this bounded marine slice.",
+                    error_summary=None,
+                    caveat=(
+                        "Fixture-first slice. Do not assume live NAVTEX or broadcast-notice coverage unless the "
+                        "bounded official RSS feed path is implemented."
+                    ),
+                ),
+                broadcasts=[],
+                caveats=[
+                    "USCG NAVTEX context is disabled outside fixture mode in this bounded marine slice.",
+                    "NAVTEX and broadcast-notice text is advisory/contextual only and does not prove threat, closure certainty, or vessel behavior.",
+                ],
+            )
+
+        generated_at = (now - timedelta(minutes=12)).isoformat()
+        try:
+            fixture_broadcasts = self._fixture_broadcasts(now)
+        except Exception as exc:
+            error_summary = _error_summary(exc)
+            return MarineNavtexContextResponse(
+                fetched_at=fetched_at,
+                center_lat=center_lat,
+                center_lon=center_lon,
+                radius_km=radius_km,
+                message_type_filter=message_type_filter,
+                count=0,
+                source_health=MarineNavtexSourceHealth(
+                    source_id="uscg-navtex-broadcast-notices",
+                    source_label="USCG NAVTEX Broadcast Notices",
+                    enabled=True,
+                    source_mode="fixture",
+                    health="unavailable",
+                    loaded_count=0,
+                    last_fetched_at=fetched_at,
+                    source_generated_at=None,
+                    detail="Fixture NAVTEX broadcast context is unavailable because bounded source retrieval failed.",
+                    error_summary=error_summary,
+                    caveat=(
+                        "Fixture/local mode. NAVTEX broadcast retrieval failed, so current warning context is "
+                        "unavailable and should be treated as missing advisory context, not negative vessel evidence."
+                    ),
+                ),
+                broadcasts=[],
+                caveats=[
+                    "NAVTEX warning context is currently unavailable because source retrieval failed in fixture mode.",
+                    "Missing warning context is not evidence of closure certainty, threat, vessel intent, or anomaly cause.",
+                ],
+            )
+
+        broadcasts: list[MarineNavtexBroadcast] = []
+        for broadcast in fixture_broadcasts:
+            message_type = _navtex_message_type(broadcast.subject_indicator)
+            if message_type_filter != "all" and message_type != message_type_filter:
+                continue
+            distance_km = haversine_meters(center_lat, center_lon, broadcast.latitude, broadcast.longitude) / 1000.0
+            if distance_km > radius_km:
+                continue
+            broadcasts.append(
+                MarineNavtexBroadcast(
+                    message_id=broadcast.message_id,
+                    station_id=broadcast.station_id,
+                    station_name=broadcast.station_name,
+                    transmitter_character=broadcast.transmitter_character,
+                    latitude=broadcast.latitude,
+                    longitude=broadcast.longitude,
+                    distance_km=round(distance_km, 1),
+                    coverage_radius_km=broadcast.coverage_radius_km,
+                    subject_indicator=broadcast.subject_indicator,
+                    subject_label=broadcast.subject_label,
+                    issued_at=broadcast.issued_at,
+                    summary=broadcast.summary,
+                    body_excerpt=broadcast.body_excerpt,
+                    source_url=broadcast.source_url,
+                    source_detail=broadcast.source_detail,
+                    evidence_basis="advisory",
+                    caveats=list(broadcast.caveats),
+                )
+            )
+        broadcasts.sort(key=lambda item: (item.distance_km, item.issued_at), reverse=False)
+        broadcasts = broadcasts[:limit]
+        health = _classify_context_health(
+            now=now,
+            loaded_count=len(broadcasts),
+            source_generated_at=generated_at,
+            evidence_timestamps=[broadcast.issued_at for broadcast in broadcasts],
+            stale_after=_NAVTEX_STALE_AFTER,
+            degraded=any(
+                broadcast.subject_label is None or broadcast.subject_indicator not in {"A", "B", "D", "E"}
+                for broadcast in broadcasts
+            ),
+        )
+        detail, caveat = _with_health_note(
+            detail=(
+                "Fixture USCG NAVTEX context using bounded NAVCEN broadcast-notice feed families and transmitter "
+                "metadata only."
+            ),
+            caveat=(
+                "Fixture/local mode. NAVTEX and related broadcast-notice text is advisory context only; it does "
+                "not prove closure certainty, legal status, threat, or required action."
+            ),
+            health=health,
+            stale_after=_NAVTEX_STALE_AFTER,
+            degraded_note=(
+                "Returned NAVTEX rows include partial subject classification, so source health is degraded for "
+                "this review."
+            ),
+        )
+        return MarineNavtexContextResponse(
+            fetched_at=fetched_at,
+            center_lat=center_lat,
+            center_lon=center_lon,
+            radius_km=radius_km,
+            message_type_filter=message_type_filter,
+            count=len(broadcasts),
+            source_health=MarineNavtexSourceHealth(
+                source_id="uscg-navtex-broadcast-notices",
+                source_label="USCG NAVTEX Broadcast Notices",
+                enabled=True,
+                source_mode="fixture",
+                health=health,
+                loaded_count=len(broadcasts),
+                last_fetched_at=fetched_at,
+                source_generated_at=generated_at,
+                detail=detail,
+                error_summary=None,
+                caveat=caveat,
+            ),
+            broadcasts=broadcasts,
+            caveats=[
+                "NAVTEX rows preserve station-centered broadcast/advisory context only; they do not geolocate or confirm the subject area of a warning.",
+                "Broadcast text may describe navigational, meteorological, SAR, or other marine safety topics and must not be promoted into closure certainty, threat, or vessel-behavior claims.",
+                "This bounded slice uses official NAVCEN/NAVTEX reference and broadcast-notice feed families only, not broad viewer or private maritime-warning services.",
+            ],
+        )
+
+    def _fixture_broadcasts(self, now: datetime) -> list[_FixtureNavtexBroadcast]:
+        return [
+            _FixtureNavtexBroadcast(
+                message_id="navtex-miami-b-001",
+                station_id="MIAMI-A",
+                station_name="Miami, FL",
+                transmitter_character="A",
+                latitude=25.7617,
+                longitude=-80.1918,
+                coverage_radius_km=740.8,
+                subject_indicator="B",
+                subject_label="Meteorological Warnings",
+                issued_at=(now - timedelta(minutes=28)).isoformat(),
+                summary="Gale warning relay for Straits of Florida broadcast cycle.",
+                body_excerpt="Source-reported NAVTEX meteorological warning relay for coastal review context.",
+                source_url="https://public.govdelivery.com/topics/USDHSCG_425/feed.rss",
+                source_detail=(
+                    "Fixture NAVTEX-style meteorological warning row derived from the official USCG Navigation "
+                    "Center broadcast-notice RSS family for Sector Miami."
+                ),
+                caveats=(
+                    "Station proximity reflects the transmitter location, not the exact warned marine area.",
+                ),
+            ),
+            _FixtureNavtexBroadcast(
+                message_id="navtex-virginia-a-014",
+                station_id="PORTSMOUTH-N",
+                station_name="Portsmouth, VA",
+                transmitter_character="N",
+                latitude=36.8354,
+                longitude=-76.2983,
+                coverage_radius_km=740.8,
+                subject_indicator="A",
+                subject_label="Navigational Warnings",
+                issued_at=(now - timedelta(minutes=42)).isoformat(),
+                summary="Navigational warning relay for approaches to Chesapeake Bay.",
+                body_excerpt="Source-reported broadcast notice to mariners for navigational review context only.",
+                source_url="https://public.govdelivery.com/topics/USDHSCG_247/feed.rss",
+                source_detail=(
+                    "Fixture NAVTEX-style navigational warning row derived from the official USCG Navigation "
+                    "Center broadcast-notice RSS family for Sector Virginia."
+                ),
+                caveats=(
+                    "Broadcast notice text is advisory/source-reported context only and does not prove closure certainty or legal status.",
+                ),
+            ),
+            _FixtureNavtexBroadcast(
+                message_id="navtex-honolulu-y-051",
+                station_id="HONOLULU-O",
+                station_name="Honolulu, HI",
+                transmitter_character="O",
+                latitude=21.3069,
+                longitude=-157.8583,
+                coverage_radius_km=740.8,
+                subject_indicator="Y",
+                subject_label=None,
+                issued_at=(now - timedelta(minutes=51)).isoformat(),
+                summary="Special-service style broadcast preserved with incomplete subject classification.",
+                body_excerpt="Fixture NAVTEX row with intentionally partial subject metadata for degraded-health coverage.",
+                source_url="https://public.govdelivery.com/topics/USDHSCG_441/feed.rss",
+                source_detail=(
+                    "Fixture NAVTEX-style broadcast row derived from the official USCG Navigation Center "
+                    "broadcast-notice RSS family for Sector Honolulu with intentionally partial subject "
+                    "classification."
+                ),
+                caveats=(
+                    "Subject classification is intentionally partial in this fixture and should be treated as degraded advisory context only.",
+                ),
+            ),
+        ]
+
+
+class MarineGebcoBathymetryService:
+    def __init__(self, settings: Settings) -> None:
+        self._settings = settings
+
+    async def context(
+        self,
+        *,
+        center_lat: float,
+        center_lon: float,
+        radius_km: float,
+        limit: int,
+    ) -> MarineGebcoBathymetryContextResponse:
+        now = datetime.now(tz=timezone.utc)
+        fetched_at = now.isoformat()
+        grid_version = self._grid_version()
+        mode = (self._settings.marine_gebco_bathymetry_mode or "fixture").strip().lower()
+        if mode != "fixture":
+            return MarineGebcoBathymetryContextResponse(
+                fetched_at=fetched_at,
+                center_lat=center_lat,
+                center_lon=center_lon,
+                radius_km=radius_km,
+                count=0,
+                grid_version=grid_version,
+                grid_resolution_arc_seconds=15,
+                tid_grid_available=True,
+                docs_url=self._settings.marine_gebco_bathymetry_docs_url,
+                download_url=self._settings.marine_gebco_bathymetry_download_url,
+                source_health=MarineGebcoBathymetrySourceHealth(
+                    source_id="gebco-gridded-bathymetry",
+                    source_label="GEBCO Gridded Bathymetry",
+                    enabled=False,
+                    source_mode="unknown" if mode not in {"live", "fixture"} else "live",
+                    health="disabled",
+                    loaded_count=0,
+                    last_fetched_at=fetched_at,
+                    source_generated_at=None,
+                    detail="GEBCO live mode is not implemented in this bounded static marine slice.",
+                    error_summary=None,
+                    caveat=(
+                        "Fixture-first slice. Do not assume live GEBCO point or AOI lookup coverage unless a bounded "
+                        "official query path is implemented."
+                    ),
+                ),
+                area_summary=MarineGebcoBathymetryAreaSummary(),
+                samples=[],
+                caveats=[
+                    "GEBCO bathymetry context is disabled outside fixture mode in this bounded static marine slice.",
+                    "Bathymetry values are static seafloor context only and do not prove route safety, closure, impact, or vessel behavior.",
+                ],
+            )
+
+        generated_at = self._source_generated_at()
+        try:
+            fixture_samples = self._fixture_samples()
+        except Exception as exc:
+            error_summary = _error_summary(exc)
+            return MarineGebcoBathymetryContextResponse(
+                fetched_at=fetched_at,
+                center_lat=center_lat,
+                center_lon=center_lon,
+                radius_km=radius_km,
+                count=0,
+                grid_version=grid_version,
+                grid_resolution_arc_seconds=15,
+                tid_grid_available=True,
+                docs_url=self._settings.marine_gebco_bathymetry_docs_url,
+                download_url=self._settings.marine_gebco_bathymetry_download_url,
+                source_health=MarineGebcoBathymetrySourceHealth(
+                    source_id="gebco-gridded-bathymetry",
+                    source_label="GEBCO Gridded Bathymetry",
+                    enabled=True,
+                    source_mode="fixture",
+                    health="unavailable",
+                    loaded_count=0,
+                    last_fetched_at=fetched_at,
+                    source_generated_at=None,
+                    detail="Fixture GEBCO bathymetry context is unavailable because bounded source retrieval failed.",
+                    error_summary=error_summary,
+                    caveat=(
+                        "Fixture/local mode. GEBCO retrieval failed, so current static bathymetry context is unavailable "
+                        "and should be treated as missing seafloor context only."
+                    ),
+                ),
+                area_summary=MarineGebcoBathymetryAreaSummary(),
+                samples=[],
+                caveats=[
+                    "GEBCO bathymetry context is currently unavailable because source retrieval failed in fixture mode.",
+                    "Missing static seafloor context is not evidence of closure, route safety, anomaly cause, or vessel intent.",
+                ],
+            )
+
+        samples: list[MarineGebcoBathymetrySample] = []
+        for sample in fixture_samples:
+            distance_km = haversine_meters(center_lat, center_lon, sample.latitude, sample.longitude) / 1000.0
+            if distance_km > radius_km:
+                continue
+            samples.append(
+                MarineGebcoBathymetrySample(
+                    sample_id=sample.sample_id,
+                    latitude=sample.latitude,
+                    longitude=sample.longitude,
+                    distance_km=round(distance_km, 1),
+                    elevation_meters=sample.elevation_meters,
+                    depth_meters=round(abs(sample.elevation_meters), 1) if sample.elevation_meters < 0 else None,
+                    source_url=sample.source_url,
+                    source_detail=sample.source_detail,
+                    evidence_basis="contextual",
+                    caveats=list(sample.caveats),
+                )
+            )
+        samples.sort(key=lambda item: item.distance_km)
+        samples = samples[:limit]
+
+        health = _classify_context_health(
+            now=now,
+            loaded_count=len(samples),
+            source_generated_at=generated_at,
+            evidence_timestamps=[],
+            stale_after=_GEBCO_STALE_AFTER,
+            degraded=False,
+        )
+        detail, caveat = _with_health_note(
+            detail=(
+                "Fixture GEBCO bathymetry context using one pinned GEBCO_2026 static grid posture with bounded "
+                "sample-point lookup only."
+            ),
+            caveat=(
+                "Fixture/local mode. GEBCO bathymetry is static seafloor context only and does not prove route safety, "
+                "closure, impact, or vessel behavior."
+            ),
+            health=health,
+            stale_after=_GEBCO_STALE_AFTER,
+            degraded_note=None,
+        )
+        area_summary = _gebco_area_summary(samples)
+        return MarineGebcoBathymetryContextResponse(
+            fetched_at=fetched_at,
+            center_lat=center_lat,
+            center_lon=center_lon,
+            radius_km=radius_km,
+            count=len(samples),
+            grid_version=grid_version,
+            grid_resolution_arc_seconds=15,
+            tid_grid_available=True,
+            docs_url=self._settings.marine_gebco_bathymetry_docs_url,
+            download_url=self._settings.marine_gebco_bathymetry_download_url,
+            source_health=MarineGebcoBathymetrySourceHealth(
+                source_id="gebco-gridded-bathymetry",
+                source_label="GEBCO Gridded Bathymetry",
+                enabled=True,
+                source_mode="fixture",
+                health=health,
+                loaded_count=len(samples),
+                last_fetched_at=fetched_at,
+                source_generated_at=generated_at,
+                detail=detail,
+                error_summary=None,
+                caveat=caveat,
+            ),
+            area_summary=area_summary,
+            samples=samples,
+            caveats=[
+                "GEBCO values are static terrain/bathymetry context only; they do not prove safe passage, closure, grounding risk, or vessel behavior.",
+                "Sample-point proximity is a bounded grid-context lookup only and should not be promoted into route recommendation or incident truth.",
+                "This bounded slice preserves official GEBCO docs/download provenance only and does not bulk-ingest global rasters or viewer products.",
+            ],
+        )
+
+    def _fixture_samples(self) -> list[_FixtureGebcoBathymetrySample]:
+        return [
+            _FixtureGebcoBathymetrySample(
+                sample_id="gebco-galveston-shelf-001",
+                latitude=29.2850,
+                longitude=-94.7600,
+                elevation_meters=-14.0,
+                source_url=self._settings.marine_gebco_bathymetry_docs_url,
+                source_detail=(
+                    "Fixture static shelf-depth sample anchored to the official GEBCO_2026 gridded bathymetry product "
+                    "for bounded Gulf Coast context review."
+                ),
+                caveats=(
+                    "Static bathymetry context is not a navigation-safety verdict and should not be treated as grounding or route-proof evidence.",
+                ),
+            ),
+            _FixtureGebcoBathymetrySample(
+                sample_id="gebco-galveston-shelf-002",
+                latitude=29.1800,
+                longitude=-94.6200,
+                elevation_meters=-28.0,
+                source_url=self._settings.marine_gebco_bathymetry_docs_url,
+                source_detail=(
+                    "Fixture bounded seafloor sample anchored to the official GEBCO_2026 grid for shallow offshore "
+                    "context near Galveston approaches."
+                ),
+                caveats=(
+                    "Single-cell bathymetry values should not be generalized into channel condition or vessel-behavior claims.",
+                ),
+            ),
+            _FixtureGebcoBathymetrySample(
+                sample_id="gebco-galveston-shelf-003",
+                latitude=29.0200,
+                longitude=-94.4700,
+                elevation_meters=-41.0,
+                source_url=self._settings.marine_gebco_bathymetry_download_url,
+                source_detail=(
+                    "Fixture bounded offshore bathymetry sample pinned to the official GEBCO download/application "
+                    "provenance for static marine context only."
+                ),
+                caveats=(
+                    "Static bathymetry differences do not prove hazard, closure, anomaly cause, or required action.",
+                ),
+            ),
+        ]
+
+    def _grid_version(self) -> str:
+        return "GEBCO_2026"
+
+    def _source_generated_at(self) -> str:
+        return "2026-04-23T00:00:00+00:00"
+
+
 class MarineNetherlandsRwsWaterinfoService:
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
@@ -1533,6 +2036,36 @@ def _netherlands_rws_waterinfo_status_line(station: _FixtureNetherlandsRwsWateri
         return "No latest observation"
     unit = observation.unit_code or observation.unit_label or "unit"
     return f"{observation.parameter_label} {observation.water_level_value:.1f} {unit}"
+
+
+def _gebco_area_summary(samples: list[MarineGebcoBathymetrySample]) -> MarineGebcoBathymetryAreaSummary:
+    if not samples:
+        return MarineGebcoBathymetryAreaSummary()
+    elevations = [sample.elevation_meters for sample in samples]
+    center_sample = samples[0]
+    return MarineGebcoBathymetryAreaSummary(
+        center_elevation_meters=center_sample.elevation_meters,
+        center_depth_meters=center_sample.depth_meters,
+        min_elevation_meters=min(elevations),
+        max_elevation_meters=max(elevations),
+        undersea_sample_count=sum(1 for elevation in elevations if elevation < 0),
+        land_sample_count=sum(1 for elevation in elevations if elevation >= 0),
+    )
+
+
+def _navtex_message_type(
+    subject_indicator: str,
+) -> Literal["navigational-warning", "meteorological-warning", "search-and-rescue", "forecast", "other"]:
+    normalized = subject_indicator.strip().upper()
+    if normalized in {"A", "L"}:
+        return "navigational-warning"
+    if normalized == "B":
+        return "meteorological-warning"
+    if normalized == "D":
+        return "search-and-rescue"
+    if normalized == "E":
+        return "forecast"
+    return "other"
 
 
 def _classify_context_health(

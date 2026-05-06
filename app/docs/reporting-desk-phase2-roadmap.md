@@ -10,7 +10,9 @@ Status note:
 
 - [source-assignment-board.md](/C:/Users/mike/11Writer/app/docs/source-assignment-board.md) remains source-status truth.
 - [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md) remains validation-traceability truth.
+- [source-onboarding-contract.md](/C:/Users/mike/11Writer/app/docs/source-onboarding-contract.md) remains the shared intake/onboarding contract for auth posture, machine usability, fixture-first expectations, and prompt-injection-safe source text handling.
 - [phase2-next-after-next-shortlist.md](/C:/Users/mike/11Writer/app/docs/phase2-next-after-next-shortlist.md) is the compact post-wave shortlist after the current larger controlled assignment wave.
+- [source-user-priority-follow-on-shortlist.md](/C:/Users/mike/11Writer/app/docs/source-user-priority-follow-on-shortlist.md) is the compact next handoff surface after the landed user-priority source wave.
 - Peer input, runtime surfaces, helper evidence, prepared smoke, and media/OCR plans remain below implementation or workflow-validation proof unless controlled evidence explicitly supports promotion.
 
 ## Reporting Shift
@@ -23,6 +25,7 @@ That means:
 - the main product value is question-driven, source-backed reporting
 - current work should favor report inputs, export-safe synthesis, validation closure, and real missing coverage
 - current work should not reopen already implemented sources as if they were fresh intake
+- the completed reporting-helper wave now exists to support a fresh bounded source-expansion wave, not to justify more helper renames
 
 ## Broad Monitoring Vs Reporting
 
@@ -133,6 +136,7 @@ That means:
   - Wave LLM runtime/provider management
   - media/OCR scaffolding
   - validation matrices, release-readiness, and ownership scans
+  - the shared source-onboarding contract for auth posture, machine usability, fixture-first expectations, and free-text safety posture
 - these remain runtime/review inputs only and must not be treated as source-validation proof
 
 ## Validation Gaps
@@ -166,47 +170,57 @@ Reason:
 
 ## Top Next-Wave Reporting-Desk Gaps
 
-1. `connect post-wave compatibility and peer/runtime classification sweep`
-   - keep the completed reporting-loop contract work stable and absorb Atlas/Wonder peer surfaces without promoting them
-2. `data topic-scoped report packet`
-   - build one bounded topic-scoped report packet over the already implemented Data family stack
-3. `marine corridor situation/report package`
-   - build one bounded corridor situation/report package on top of the completed marine fusion and report-brief stack
-4. `aerospace space-weather continuity package`
-   - build one bounded space-weather continuity package on top of the completed aerospace reporting stack
-5. `geospatial Belgium RMI plus reporting integration`
-   - open the next missing geospatial warning wave with `belgium-rmi-warnings` plus bounded reporting integration
-6. `features NZTA and Arlington feasibility`
-   - keep the webcam lane on bounded NZTA and Arlington sandbox-feasibility plus candidate growth, not activation
+1. `connect reporting-loop contract closure`
+   - the active `19:15` shared reporting-loop contract wave still needs to close honestly while the domain lanes shift to real source work
+2. `data follow-on wave`
+   - the `CISA KEV`, `RDAP`, and `crt.sh` wave is landed, and the bounded `SEC EDGAR` / `USAspending` institutional follow-on is landed too, so the next honest Data move is workflow/export closure or reassignment
+3. `marine post-source follow-through`
+   - the `Navtex` wave is landed, so the next Marine move is follow-through or reassignment, not another fresh warning-source claim
+4. `aerospace post-source follow-through`
+   - the `GPSJam` wave is landed, so the next Aerospace move is workflow closure or report-safe follow-through, not another renamed helper pass
+5. `geospatial follow-on wave`
+   - the `NOAA nowCOAST` plus `National Weather Service Alerts API` wave is landed, so `GeoNames` is the cleanest remaining user-priority geospatial follow-on
+6. `features source-ops follow-through`
+   - the `OpenStreetMap` / `Overpass` / `Geofabrik` lead-support pass is completed source-ops evidence and should stay candidate-only
 
 ## Current Lane Truth
 
 - `connect`
-  - reporting-loop package contract and focused regression are now completed
-  - next useful move is a post-wave compatibility and peer/runtime classification sweep
+  - the `18:49` Source Discovery/runtime consolidation checkpoint is completed in Connect progress
+  - the active Connect lane is now the `19:15` shared reporting-loop contract wave and should stay in progress until Connect replaces its stub entry
 - `data`
-  - fusion-snapshot / claim-integrity helper, report-brief package, and bounded world-news awareness family are completed
-  - next useful move is one bounded topic-scoped report packet plus review/export coherence, not `propublica`, `global-voices`, or a reopened world-news wave
+  - fusion-snapshot / claim-integrity helper, report-brief package, bounded world-news awareness family, current-awareness digest, review/export coherence follow-on, topic-safe report export packet, and question-briefing packet all now appear completed in Data progress
+  - the `2026-05-05 19:41 America/Chicago` lane over `CISA KEV`, `RDAP`, and `crt.sh` is now landed backend-first, and the bounded `SEC EDGAR` / `USAspending` follow-on is landed too; next Data move is workflow/export closure or reassignment
 - `marine`
-  - Vigicrues follow-through, fusion-snapshot input, report-brief package, and corridor/hydrology helper packages are completed in progress truth
-  - next useful move is a bounded corridor situation/report package rather than a fresh source wave
+  - Vigicrues follow-through, fusion-snapshot input, report-brief package, corridor/hydrology helper packages, current-awareness digest, and source-row workflow closure packet now all appear completed in Marine progress
+  - the `2026-05-05 19:41 America/Chicago` `Navtex` lane is now landed backend-first; next move is one bounded static-context follow-on only if explicitly preferred
 - `aerospace`
-  - fusion-snapshot input, bounded report-brief package, and bounded VAAC advisory report package are completed
-  - next useful move is a bounded space-weather continuity package while smoke remains a host-specific gap
+  - the selected-target operational question packet, current-awareness digest, and reporting-handoff contract are completed
+  - the `2026-05-05 19:41 America/Chicago` `GPSJam` lane is now landed backend-first and remains contextual GNSS-disruption awareness only
+  - do not reopen older packet, digest, or handoff helpers as fake fresh source work
 - `geospatial`
   - base-earth review/export, RGI slice, environmental fusion-snapshot input, and bounded `dwd-cap-alerts` integration are completed
   - `geonet-geohazards` and `hko-open-weather` are already implemented and should not be routed as fresh
-  - next useful move is `belgium-rmi-warnings` plus bounded reporting integration
+  - `belgium-rmi-warnings` stopped at the correct verification boundary because no clean official machine-readable warning feed is pinned
+  - the bounded `geoboundaries-admin` slice is completed and should stay follow-on-only
+  - `meteoalarm-atom-feeds` is now implemented bounded warning context and should no longer be routed as the next fresh source build
+  - the bounded `19:15` environmental question-briefing packet is now completed and should be treated as follow-through evidence rather than an unread assignment gap
+  - the `2026-05-05 19:41 America/Chicago` lane over `NOAA nowCOAST` plus `National Weather Service Alerts API` is now landed backend-first; next clean follow-on is `GeoNames`
 - `features-webcam`
-  - Caltrans bounded sandbox-feasibility is completed and remains candidate-only
-  - next useful move is NZTA and Arlington sandbox-feasibility plus bounded candidate growth, not activation
+  - Caltrans bounded sandbox-feasibility, the source-ops portfolio digest, the review-priority packet, and earlier candidate review work are stable completed source-ops evidence
+  - the bounded `19:15` regional portfolio packet is now completed source-ops evidence
+  - the `2026-05-05 19:41 America/Chicago` `OpenStreetMap` / `Overpass` / `Geofabrik` lead-discovery/support pass is now completed source-ops evidence and should stay candidate-only
 
 ## Peer Input Classification
 
-- Atlas media geolocation remains peer and derived-evidence input only.
+- Atlas media geolocation hardening remains peer and derived-evidence input only.
 - Wonder Statuspage discovery remains candidate/review discovery input only.
 - Wonder Mastodon discovery remains candidate/review discovery input only.
-- None of the three are source truth, source approval, implementation proof, or workflow-validation proof.
+- Wonder Stack Exchange and seed-packet discovery remain candidate/review discovery input only.
+- Wonder archive-index scan, mailing-list archive adapters, and curated directory or regional-portal scan remain candidate/review/runtime discovery input only.
+- Wonder Source Discovery breadth and seed-packet lineage remain candidate/review/runtime or explainability-only input.
+- media/OCR and geolocation runtime helpers remain peer, runtime, or derived-evidence input only.
+- None of these peer slices are source truth, source approval, implementation proof, or workflow-validation proof.
 
 ## Routing Rules
 

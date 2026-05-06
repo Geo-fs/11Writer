@@ -15,6 +15,7 @@ from src.routes.base_earth_context import router as base_earth_context_router
 from src.routes.cameras import router as cameras_router
 from src.routes.catchments_context import router as catchments_context_router
 from src.routes.cisa_cyber_advisories import router as cisa_cyber_advisories_router
+from src.routes.cisa_kev import router as cisa_kev_router
 from src.routes.cneos import router as cneos_router
 from src.routes.config import router as config_router
 from src.routes.data_ai_feeds import router as data_ai_feeds_router
@@ -25,7 +26,10 @@ from src.routes.fire_weather_context import router as fire_weather_context_route
 from src.routes.feeds import router as feeds_router
 from src.routes.features import router as features_router
 from src.routes.geomagnetism import router as geomagnetism_router
+from src.routes.gpsjam import router as gpsjam_router
 from src.routes.health import router as health_router
+from src.routes.internet_context import router as internet_context_router
+from src.routes.institutional_context import router as institutional_context_router
 from src.routes.marine import router as marine_router
 from src.routes.ncei_space_weather_portal import router as ncei_space_weather_portal_router
 from src.routes.nvd_cve import router as nvd_cve_router
@@ -123,6 +127,7 @@ def create_application() -> FastAPI:
     application.include_router(base_earth_context_router)
     application.include_router(catchments_context_router)
     application.include_router(cisa_cyber_advisories_router)
+    application.include_router(cisa_kev_router)
     application.include_router(data_ai_feeds_router)
     application.include_router(environmental_context_router)
     application.include_router(events_router)
@@ -138,6 +143,7 @@ def create_application() -> FastAPI:
     application.include_router(seismic_context_router)
     application.include_router(analyst_router)
     application.include_router(aircraft_router)
+    application.include_router(gpsjam_router)
     application.include_router(opensky_states_router)
     application.include_router(ourairports_reference_router)
     application.include_router(aviation_weather_router)
@@ -150,6 +156,8 @@ def create_application() -> FastAPI:
     application.include_router(washington_vaac_router)
     application.include_router(water_quality_context_router)
     application.include_router(weather_context_router)
+    application.include_router(internet_context_router)
+    application.include_router(institutional_context_router)
     application.include_router(satellite_router)
     application.include_router(marine_router)
     application.include_router(nvd_cve_router)

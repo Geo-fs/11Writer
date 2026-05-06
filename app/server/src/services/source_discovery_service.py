@@ -5,6 +5,7 @@ import base64
 import hashlib
 import json
 import re
+import unicodedata
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -33,11 +34,16 @@ from src.services.wave_llm_provider_config_service import WaveLlmProviderConfigS
 from src.services.wave_llm_service import WaveLlmService
 from src.source_discovery.db import session_scope
 from src.source_discovery.models import (
+    SourceAdversarialFindingORM,
     SourceClaimOutcomeORM,
     SourceContentSnapshotORM,
     SourceKnowledgeNodeORM,
     RuntimeSchedulerRunORM,
     RuntimeSchedulerWorkerORM,
+    SourceArchiveHitORM,
+    SourceEventClusterORM,
+    SourceEventMemberORM,
+    SourceEventOpenQuestionORM,
     SourceReviewClaimApplicationORM,
     SourceReviewClaimCandidateORM,
     SourceDiscoveryJobORM,
@@ -53,9 +59,19 @@ from src.source_discovery.models import (
     SourceReputationEventORM,
     SourceReviewActionORM,
     SourceSchedulerTickORM,
+    SourceRuntimeBudgetWindowORM,
+    SourceRuntimeWorkAttemptORM,
+    SourceRuntimeWorkItemORM,
     SourceWaveFitORM,
 )
 from src.types.source_discovery import (
+    SourceDiscoveryAdversarialFindingSummary,
+    SourceDiscoveryAdversarialFindingsResponse,
+    SourceDiscoveryAdversarialOverviewResponse,
+    SourceDiscoveryAdversarialRiskLevel,
+    SourceDiscoveryArchiveIndexScanRequest,
+    SourceDiscoveryArchiveIndexScanResponse,
+    SourceDiscoveryArchiveHitSummary,
     SourceDiscoveryCandidateSeed,
     SourceDiscoveryCatalogScanRequest,
     SourceDiscoveryCatalogScanResponse,
@@ -72,6 +88,15 @@ from src.types.source_discovery import (
     SourceDiscoveryDiscoveryQueueResponse,
     SourceDiscoveryDiscoveryRunSummary,
     SourceDiscoveryDiscoveryRunsResponse,
+    SourceDiscoveryDirectoryScanRequest,
+    SourceDiscoveryDirectoryScanResponse,
+    SourceDiscoveryEventClusterDetailResponse,
+    SourceDiscoveryEventClusterSummary,
+    SourceDiscoveryEventGraphRefreshRequest,
+    SourceDiscoveryEventGraphRefreshResponse,
+    SourceDiscoveryEventMemberSummary,
+    SourceDiscoveryEventOpenQuestionSummary,
+    SourceDiscoveryEventOverviewResponse,
     SourceDiscoveryFeedLinkScanRequest,
     SourceDiscoveryFeedLinkScanResponse,
     SourceDiscoveryExpansionJobRequest,
@@ -89,6 +114,11 @@ from src.types.source_discovery import (
     SourceDiscoveryKnowledgeNodeDetailResponse,
     SourceDiscoveryKnowledgeBackfillRequest,
     SourceDiscoveryKnowledgeBackfillResponse,
+    SourceDiscoveryLinkGraphScanRequest,
+    SourceDiscoveryLinkGraphScanResponse,
+    SourceDiscoveryLocaleExpansionProviderRunSummary,
+    SourceDiscoveryLocaleSeedExpandRequest,
+    SourceDiscoveryLocaleSeedExpandResponse,
     SourceDiscoveryMediaArtifactDetailResponse,
     SourceDiscoveryMediaArtifactFetchRequest,
     SourceDiscoveryMediaArtifactFetchResponse,
@@ -121,6 +151,10 @@ from src.types.source_discovery import (
     SourceDiscoveryRecordSourceExtractRequest,
     SourceDiscoveryRecordSourceExtractResponse,
     SourceDiscoveryReputationEventSummary,
+    SourceDiscoveryReputationProfileSummary,
+    SourceDiscoveryReputationProfilesResponse,
+    SourceDiscoveryReputationRecomputeRequest,
+    SourceDiscoveryReputationRecomputeResponse,
     SourceDiscoveryReputationReversalRequest,
     SourceDiscoveryReputationReversalResponse,
     SourceDiscoveryReviewActionRequest,
@@ -134,6 +168,13 @@ from src.types.source_discovery import (
     SourceDiscoveryReviewClaimImportResponse,
     SourceDiscoveryReviewQueueItem,
     SourceDiscoveryReviewQueueResponse,
+    SourceDiscoveryRuntimeFailureSummary,
+    SourceDiscoveryRuntimeFailuresResponse,
+    SourceDiscoveryRuntimeRunDetailResponse,
+    SourceDiscoveryRuntimeRunSummary,
+    SourceDiscoveryRuntimeWorkItemSummary,
+    SourceDiscoveryRuntimeWorkQueueResponse,
+    SourceDiscoveryRuntimeRunsResponse,
     SourceDiscoverySocialMetadataJobRequest,
     SourceDiscoverySocialMetadataJobResponse,
     SourceDiscoverySocialMetadataSummary,
@@ -170,6 +211,13 @@ PUBLIC_DISCOVERY_CADENCE_HOURS = {
     "feed_link_scan": 6,
     "sitemap_scan": 12,
     "catalog_scan": 24,
+    "link_graph_scan": 24,
+}
+
+ALLOWED_ARCHIVE_FETCH_HOSTS = {
+    "webcache.archive-it.org",
+    "wayback.archive-it.org",
+    "web.archive.org",
 }
 
 OUTCOME_SCORE_DELTAS = {
@@ -181,12 +229,151 @@ OUTCOME_SCORE_DELTAS = {
     "not_applicable": 0.0,
 }
 
+DEFAULT_REPUTATION_PROFILE = "baseline_v2"
+REPUTATION_PROFILES: dict[str, dict[str, object]] = {
+    "baseline_v2": {
+        "outcome_deltas": dict(OUTCOME_SCORE_DELTAS),
+        "source_class_bias": {
+            "official": 0.0,
+            "records": 0.0,
+            "news": 0.0,
+            "community": 0.0,
+            "social": 0.0,
+            "unknown": 0.0,
+        },
+        "evidence_basis_bias": {
+            "primary": 0.0,
+            "observed": 0.0,
+            "documented": 0.0,
+            "contextual": 0.0,
+            "reported": 0.0,
+        },
+        "corroboration_bonus": 0.0,
+        "contradiction_penalty": 0.0,
+        "correction_penalty": 0.0,
+        "health_penalty": {
+            "degraded": 0.0,
+            "offline": 0.0,
+            "blocked": 0.0,
+        },
+        "timeliness_penalty": 0.0,
+    },
+    "calibrated_v1": {
+        "outcome_deltas": dict(OUTCOME_SCORE_DELTAS),
+        "source_class_bias": {
+            "official": 0.01,
+            "records": 0.01,
+            "news": 0.0,
+            "community": 0.0,
+            "social": -0.005,
+            "unknown": 0.0,
+        },
+        "evidence_basis_bias": {
+            "primary": 0.015,
+            "observed": 0.01,
+            "documented": 0.005,
+            "contextual": 0.0,
+            "reported": 0.0,
+        },
+        "corroboration_bonus": 0.01,
+        "contradiction_penalty": -0.012,
+        "correction_penalty": -0.008,
+        "health_penalty": {
+            "degraded": -0.01,
+            "offline": -0.015,
+            "blocked": -0.02,
+        },
+        "timeliness_penalty": -0.01,
+    },
+}
+ADVERSARIAL_RISK_ORDER = {"none": 0, "low": 1, "medium": 2, "high": 3}
+ADVERSARIAL_FINDING_RULES: list[dict[str, object]] = [
+    {
+        "signal_type": "instruction_override",
+        "risk_level": "medium",
+        "summary": "Page text attempts to override or ignore agent instructions.",
+        "patterns": [
+            r"ignore (?:all )?(?:previous|prior) instructions",
+            r"disregard .*instructions",
+            r"override (?:your|system) instructions",
+            r"forget (?:the )?(?:rules|policy|previous instructions)",
+        ],
+    },
+    {
+        "signal_type": "secret_request",
+        "risk_level": "high",
+        "summary": "Page text asks for secrets, system prompts, tokens, or credentials.",
+        "patterns": [
+            r"reveal (?:your )?(?:system prompt|hidden prompt|api key|token|credentials|password)",
+            r"show (?:your )?(?:system prompt|api key|token|credentials|password)",
+            r"print (?:your )?(?:system prompt|api key|token|credentials|password)",
+            r"paste (?:your )?(?:token|api key|password|credentials)",
+        ],
+    },
+    {
+        "signal_type": "download_or_execute_request",
+        "risk_level": "high",
+        "summary": "Page text asks the agent or user to download, run, or execute code.",
+        "patterns": [
+            r"download .* and run",
+            r"run (?:this|the following) (?:script|command|code)",
+            r"execute (?:this|the following) (?:script|command|code)",
+            r"(?:powershell|bash|cmd|curl|wget)\b.{0,80}",
+        ],
+    },
+    {
+        "signal_type": "developer_tools_request",
+        "risk_level": "high",
+        "summary": "Page text asks the agent or user to use DevTools, console commands, or local shell steps.",
+        "patterns": [
+            r"open devtools",
+            r"open the console",
+            r"paste .* into (?:devtools|the console)",
+            r"run this in (?:your )?(?:terminal|shell|powershell)",
+        ],
+    },
+    {
+        "signal_type": "credential_or_login_request",
+        "risk_level": "high",
+        "summary": "Page text asks for login, credentials, or file/clipboard access outside approved workflow.",
+        "patterns": [
+            r"enter (?:your )?(?:login|credentials|password)",
+            r"sign in to continue",
+            r"upload (?:a|your) file",
+            r"paste from (?:the )?clipboard",
+            r"share (?:your )?(?:history|local files|browser history)",
+        ],
+    },
+    {
+        "signal_type": "validation_bypass_request",
+        "risk_level": "medium",
+        "summary": "Page text attempts to bypass review or promote trust or validation directly.",
+        "patterns": [
+            r"mark (?:this|the source) as (?:validated|trusted|approved)",
+            r"bypass (?:review|validation|safety)",
+            r"skip (?:review|validation|approval)",
+            r"approve this source immediately",
+        ],
+    },
+]
+RUNTIME_BUDGET_WINDOW_MINUTES = 60
+RETRYABLE_FAILURE_KINDS = {"rate_limited", "timeout", "dns_error", "tls_error", "unexpected_status", "parse_error", "unsupported_shape"}
+BLOCKING_FAILURE_KINDS = {"blocked_auth", "blocked_captcha", "operator_hold"}
+
 
 @dataclass
 class _DiscoveryPriorityContext:
     best_fit_by_source_id: dict[str, SourceWaveFitORM | None] = field(default_factory=dict)
     root_domain_counts: dict[str, int] = field(default_factory=dict)
     root_tag_counts: dict[str, int] = field(default_factory=dict)
+
+
+@dataclass
+class _ArchiveDiscoveryRecord:
+    provider: str
+    original_url: str | None
+    archive_url: str | None
+    timestamp: str | None = None
 
 
 class SourceDiscoveryService:
@@ -288,6 +475,7 @@ class SourceDiscoveryService:
                     memory=detail.memory,
                     wave_fits=detail.wave_fits,
                     snapshots=detail.snapshots,
+                    archive_hits=detail.archive_hits,
                     knowledge_nodes=detail.knowledge_nodes,
                     media_artifacts=detail.media_artifacts,
                     media_clusters=detail.media_clusters,
@@ -302,8 +490,12 @@ class SourceDiscoveryService:
                     reputation_events=detail.reputation_events,
                     claim_outcomes=detail.claim_outcomes,
                     pending_review_claims=detail.pending_review_claims,
+                    adversarial_findings=detail.adversarial_findings,
                     pending_claim_count=detail.pending_claim_count,
                     latest_review_claim_at=detail.latest_review_claim_at,
+                    event_clusters=detail.event_clusters,
+                    contested_event_count=detail.contested_event_count,
+                    open_question_count=detail.open_question_count,
                     caveats=detail.caveats + [
                         "Export packet is a source-review handoff artifact, not proof that the source is true or production-ready.",
                     ],
@@ -353,8 +545,314 @@ class SourceDiscoveryService:
                 members=_knowledge_node_members(session, node.node_id),
                 pending_claim_count=len(pending_claims),
                 latest_review_claim_at=pending_claims[0].created_at if pending_claims else None,
+                linked_events=_event_clusters_for_knowledge_node(session, node.node_id, limit=25),
                 caveats=SOURCE_DISCOVERY_CAVEATS + [
                     "Duplicate classes are heuristic workflow aids and should be reviewed before they affect downstream interpretation.",
+                ],
+            )
+
+    def event_overview(
+        self,
+        *,
+        limit: int = 100,
+        source_id: str | None = None,
+        wave_id: str | None = None,
+        knowledge_node_id: str | None = None,
+    ) -> SourceDiscoveryEventOverviewResponse:
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            stmt = select(SourceEventClusterORM).order_by(SourceEventClusterORM.last_seen_at.desc(), SourceEventClusterORM.event_id)
+            if wave_id:
+                stmt = stmt.where(SourceEventClusterORM.wave_id == wave_id)
+            events = list(session.scalars(stmt))
+            if source_id:
+                source_event_ids = {
+                    row.event_id
+                    for row in session.scalars(
+                        select(SourceEventMemberORM).where(SourceEventMemberORM.source_id == source_id)
+                    )
+                }
+                events = [event for event in events if event.event_id in source_event_ids]
+            if knowledge_node_id:
+                events = [event for event in events if knowledge_node_id in _loads_list(event.knowledge_node_ids_json)]
+            counts_by_status: dict[str, int] = {}
+            contested_count = 0
+            open_question_count = 0
+            for event in events:
+                counts_by_status[event.status] = counts_by_status.get(event.status, 0) + 1
+                if event.status in {"contested", "corrected"}:
+                    contested_count += 1
+                if event.status == "open_question":
+                    open_question_count += 1
+            return SourceDiscoveryEventOverviewResponse(
+                metadata={
+                    "source": "source-discovery-event-overview",
+                    "count": len(events[: max(0, limit)]),
+                    "sourceId": source_id,
+                    "waveId": wave_id,
+                    "knowledgeNodeId": knowledge_node_id,
+                },
+                total_event_count=len(events),
+                contested_event_count=contested_count,
+                open_question_count=open_question_count,
+                counts_by_status=counts_by_status,
+                events=[_serialize_event_cluster(event) for event in events[: max(0, limit)]],
+                caveats=SOURCE_DISCOVERY_CAVEATS + [
+                    "Event clusters are deterministic review artifacts and do not adjudicate event truth.",
+                ],
+            )
+
+    def event_detail(self, event_id: str) -> SourceDiscoveryEventClusterDetailResponse:
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            event = session.get(SourceEventClusterORM, event_id)
+            if event is None:
+                raise ValueError(f"Unknown event_id: {event_id}")
+            members = list(
+                session.scalars(
+                    select(SourceEventMemberORM)
+                    .where(SourceEventMemberORM.event_id == event_id)
+                    .order_by(SourceEventMemberORM.created_at.asc(), SourceEventMemberORM.member_id.asc())
+                )
+            )
+            open_questions = list(
+                session.scalars(
+                    select(SourceEventOpenQuestionORM)
+                    .where(SourceEventOpenQuestionORM.event_id == event_id)
+                    .order_by(SourceEventOpenQuestionORM.created_at.asc(), SourceEventOpenQuestionORM.question_id.asc())
+                )
+            )
+            return SourceDiscoveryEventClusterDetailResponse(
+                event=_serialize_event_cluster(event),
+                members=[_serialize_event_member(row) for row in members],
+                open_questions=[_serialize_event_open_question(row) for row in open_questions],
+                caveats=SOURCE_DISCOVERY_CAVEATS + [
+                    "Contradiction and correction posture are evidence-graph states, not automated truth resolution.",
+                ],
+            )
+
+    def run_event_graph_refresh_job(
+        self,
+        request: SourceDiscoveryEventGraphRefreshRequest,
+    ) -> SourceDiscoveryEventGraphRefreshResponse:
+        now = _utc_now()
+        job_id = f"source-discovery-job:event-graph-refresh:{_compact_timestamp(now)}"
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            summary = _refresh_event_graph(
+                session,
+                source_ids=request.source_ids,
+                wave_ids=request.wave_ids,
+                knowledge_node_ids=request.knowledge_node_ids,
+                include_pending_claims=request.include_pending_claims,
+                mode=request.mode,
+                max_events=max(0, request.max_events),
+                now=now,
+            )
+            job = SourceDiscoveryJobORM(
+                job_id=job_id,
+                job_type="event_graph_refresh",
+                status="completed",
+                seed_url=None,
+                wave_id=request.wave_ids[0] if request.wave_ids else None,
+                wave_title=None,
+                discovered_source_ids_json=json.dumps(sorted(summary["source_ids"])),
+                rejected_reason=None,
+                request_budget=0,
+                used_requests=0,
+                started_at=now,
+                finished_at=now,
+                outcome_summary=f"Refreshed {summary['created_event_count'] + summary['updated_event_count']} event clusters from {summary['processed_claim_count']} reviewable claims.",
+                caveats_json=json.dumps(list(request.caveats) + [
+                    "Event graph refresh is deterministic and local-only; no network access was performed.",
+                ]),
+            )
+            session.add(job)
+            session.flush()
+            events = [
+                event
+                for event in (
+                    session.get(SourceEventClusterORM, event_id)
+                    for event_id in summary["event_ids"][: max(0, request.max_events)]
+                )
+                if event is not None
+            ]
+            return SourceDiscoveryEventGraphRefreshResponse(
+                job=_serialize_job(job),
+                processed_claim_count=summary["processed_claim_count"],
+                created_event_count=summary["created_event_count"],
+                updated_event_count=summary["updated_event_count"],
+                contested_event_count=summary["contested_event_count"],
+                open_question_count=summary["open_question_count"],
+                events=[_serialize_event_cluster(event) for event in events],
+                caveats=SOURCE_DISCOVERY_CAVEATS + [
+                    "Event clusters remain review-oriented even when multiple supporting sources converge.",
+                ],
+            )
+
+    def list_reputation_profiles(self) -> SourceDiscoveryReputationProfilesResponse:
+        profiles: list[SourceDiscoveryReputationProfileSummary] = []
+        for name, profile in REPUTATION_PROFILES.items():
+            outcome_deltas = profile.get("outcome_deltas", {})
+            profiles.append(
+                SourceDiscoveryReputationProfileSummary(
+                    profile_name=name,
+                    version=name,
+                    description="Deterministic claim-outcome calibration profile for research-grade source evaluation.",
+                    claim_outcome_deltas={str(key): float(value) for key, value in dict(outcome_deltas).items()},
+                    source_class_modifiers={str(key): float(value) for key, value in dict(profile.get("source_class_bias", {})).items()},
+                    corroboration_bonus=float(profile.get("corroboration_bonus", 0.0)),
+                    contradiction_penalty=float(profile.get("contradiction_penalty", 0.0)),
+                    correction_penalty=float(profile.get("correction_penalty", 0.0)),
+                    timeliness_penalty=float(profile.get("timeliness_penalty", 0.0)),
+                    caveats=[
+                        "Default profile." if name == DEFAULT_REPUTATION_PROFILE else "Alternate profile.",
+                        "Profiles are deterministic calibration presets and do not auto-switch source reputation policy.",
+                    ],
+                )
+            )
+        return SourceDiscoveryReputationProfilesResponse(
+            metadata={"source": "source-discovery-reputation-profiles", "count": len(profiles)},
+            profiles=profiles,
+            caveats=SOURCE_DISCOVERY_CAVEATS + [
+                "Profile inspection is advisory; active scoring stays fixed until an explicit recompute apply run.",
+            ],
+        )
+
+    def recompute_reputation(
+        self,
+        request: SourceDiscoveryReputationRecomputeRequest,
+    ) -> SourceDiscoveryReputationRecomputeResponse:
+        now = _utc_now()
+        profile_name = request.profile_name if request.profile_name in REPUTATION_PROFILES else DEFAULT_REPUTATION_PROFILE
+        job_id = f"source-discovery-job:reputation-recompute:{_compact_timestamp(now)}"
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            target_memories = _select_reputation_recompute_targets(
+                session,
+                source_ids=request.source_ids,
+                wave_ids=request.wave_ids,
+                max_sources=max(0, request.max_sources),
+            )
+            changed_count = 0
+            score_delta_summary = {"increased": 0, "decreased": 0, "unchanged": 0}
+            serialized_memories: list[SourceDiscoveryMemory] = []
+            for memory in target_memories:
+                baseline = _recompute_memory_reputation(session, memory, profile_name=profile_name, apply=request.mode == "apply", now=now)
+                if baseline["changed"]:
+                    changed_count += 1
+                score_delta_summary[baseline["direction"]] = score_delta_summary.get(baseline["direction"], 0) + 1
+                serialized_memories.append(_serialize_memory(session, memory))
+            job = SourceDiscoveryJobORM(
+                job_id=job_id,
+                job_type="reputation_recompute",
+                status="completed",
+                seed_url=None,
+                wave_id=request.wave_ids[0] if request.wave_ids else None,
+                wave_title=None,
+                discovered_source_ids_json=json.dumps([memory.source_id for memory in target_memories]),
+                rejected_reason=None,
+                request_budget=0,
+                used_requests=0,
+                started_at=now,
+                finished_at=now,
+                outcome_summary=f"Recomputed {len(target_memories)} source reputations under {profile_name} ({request.mode}).",
+                caveats_json=json.dumps(list(request.caveats) + [
+                    "Reputation recompute replays audited outcomes deterministically; it does not infer new claim truth.",
+                ]),
+            )
+            session.add(job)
+            session.flush()
+            return SourceDiscoveryReputationRecomputeResponse(
+                job=_serialize_job(job),
+                profile_name=profile_name,
+                affected_source_count=len(target_memories),
+                changed_source_count=changed_count,
+                score_delta_summary=score_delta_summary,
+                memories=serialized_memories,
+                caveats=SOURCE_DISCOVERY_CAVEATS + [
+                    "Dry-run recompute reports projected drift only; apply mode persists the selected policy version.",
+                ],
+            )
+
+    def runtime_work_queue(self, *, limit: int = 100, status: str | None = None) -> SourceDiscoveryRuntimeWorkQueueResponse:
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            stmt = select(SourceRuntimeWorkItemORM).order_by(SourceRuntimeWorkItemORM.next_run_at.asc(), SourceRuntimeWorkItemORM.priority_score.desc())
+            if status:
+                stmt = stmt.where(SourceRuntimeWorkItemORM.status == status)
+            items = list(session.scalars(stmt.limit(max(0, limit))))
+            return SourceDiscoveryRuntimeWorkQueueResponse(
+                metadata={
+                    "source": "source-discovery-runtime-work-queue",
+                    "count": len(items),
+                    "status": status,
+                },
+                items=[_serialize_runtime_work_item(row) for row in items],
+                caveats=SOURCE_DISCOVERY_CAVEATS + [
+                    "Runtime work queue is operational state only; queued work does not approve any source.",
+                ],
+            )
+
+    def runtime_failures(self, *, limit: int = 100, failure_kind: str | None = None) -> SourceDiscoveryRuntimeFailuresResponse:
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            stmt = (
+                select(SourceRuntimeWorkAttemptORM)
+                .where(SourceRuntimeWorkAttemptORM.failure_kind.is_not(None))
+                .order_by(SourceRuntimeWorkAttemptORM.started_at.desc(), SourceRuntimeWorkAttemptORM.attempt_id.desc())
+            )
+            if failure_kind:
+                stmt = stmt.where(SourceRuntimeWorkAttemptORM.failure_kind == failure_kind)
+            failures = list(session.scalars(stmt.limit(max(0, limit))))
+            return SourceDiscoveryRuntimeFailuresResponse(
+                metadata={
+                    "source": "source-discovery-runtime-failures",
+                    "count": len(failures),
+                    "failureKind": failure_kind,
+                },
+                failures=[_serialize_runtime_failure(row) for row in failures],
+                caveats=SOURCE_DISCOVERY_CAVEATS + [
+                    "Failure history is runtime diagnostics only and should not be interpreted as source falsity.",
+                ],
+            )
+
+    def runtime_runs(self, *, limit: int = 50) -> SourceDiscoveryRuntimeRunsResponse:
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            runs = list(
+                session.scalars(
+                    select(RuntimeSchedulerRunORM)
+                    .where(RuntimeSchedulerRunORM.worker_name == "source_discovery")
+                    .order_by(RuntimeSchedulerRunORM.started_at.desc())
+                    .limit(max(0, limit))
+                )
+            )
+            return SourceDiscoveryRuntimeRunsResponse(
+                metadata={"source": "source-discovery-runtime-runs", "count": len(runs)},
+                runs=[_serialize_runtime_run(row) for row in runs],
+                caveats=SOURCE_DISCOVERY_CAVEATS + [
+                    "Runtime run summaries describe queue execution decisions; they do not re-execute work.",
+                ],
+            )
+
+    def runtime_run_detail(self, run_id: str) -> SourceDiscoveryRuntimeRunDetailResponse:
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            run = session.get(RuntimeSchedulerRunORM, run_id)
+            if run is None:
+                raise ValueError(f"Unknown run_id: {run_id}")
+            attempts = list(
+                session.scalars(
+                    select(SourceRuntimeWorkAttemptORM)
+                    .where(SourceRuntimeWorkAttemptORM.run_id == run_id)
+                    .order_by(SourceRuntimeWorkAttemptORM.started_at.asc(), SourceRuntimeWorkAttemptORM.attempt_id.asc())
+                )
+            )
+            work_item_ids = [row.work_item_id for row in attempts]
+            work_items = [
+                item
+                for item in (session.get(SourceRuntimeWorkItemORM, work_item_id) for work_item_id in work_item_ids)
+                if item is not None
+            ]
+            return SourceDiscoveryRuntimeRunDetailResponse(
+                run=_serialize_runtime_run(run),
+                work_items=[_serialize_runtime_work_item(row) for row in work_items],
+                failures=[_serialize_runtime_failure(row) for row in attempts if row.failure_kind],
+                caveats=SOURCE_DISCOVERY_CAVEATS + [
+                    "Run detail is replay-safe metadata only; it does not retry or re-fetch network resources.",
                 ],
             )
 
@@ -399,6 +897,9 @@ class SourceDiscoveryService:
                 seed = raw_seed.model_copy(
                     update={
                         "caveats": sorted(set(raw_seed.caveats + list(request.caveats) + packet_caveats)),
+                        "seed_family": raw_seed.seed_family or request.default_seed_family,
+                        "source_family_tags": sorted(set(raw_seed.source_family_tags + list(request.default_source_family_tags))),
+                        "scope_hints": _merge_scope_hints(raw_seed.scope_hints, request.default_scope_hints),
                         "seed_packet_id": raw_seed.seed_packet_id or request.packet_id,
                         "seed_packet_title": raw_seed.seed_packet_title or request.packet_title,
                     }
@@ -429,7 +930,7 @@ class SourceDiscoveryService:
             jobs = list(
                 session.scalars(
                     select(SourceDiscoveryJobORM)
-                    .where(SourceDiscoveryJobORM.job_type.in_(["structure_scan", "feed_link_scan", "sitemap_scan", "catalog_scan"]))
+                    .where(SourceDiscoveryJobORM.job_type.in_(["structure_scan", "feed_link_scan", "sitemap_scan", "catalog_scan", "archive_index_scan", "directory_scan", "locale_seed_expand", "link_graph_scan"]))
                     .order_by(SourceDiscoveryJobORM.started_at.desc())
                     .limit(20)
                 )
@@ -466,6 +967,9 @@ class SourceDiscoveryService:
                 elif _is_scheduler_public_discovery_candidate(memory, now):
                     eligible_public_followup_count += 1
                     due_root_count += 1
+                elif _is_scheduler_link_graph_candidate(memory, now):
+                    eligible_public_followup_count += 1
+                    due_root_count += 1
 
             return SourceDiscoveryDiscoveryOverviewResponse(
                 metadata={
@@ -486,6 +990,81 @@ class SourceDiscoveryService:
                 recent_runs=[_serialize_discovery_run(session, job) for job in jobs],
                 caveats=SOURCE_DISCOVERY_CAVEATS + [
                     "Discovery overview counts bounded public-web roots only; it is not a crawler status board.",
+                ],
+            )
+
+    def adversarial_overview(self, *, limit: int = 100) -> SourceDiscoveryAdversarialOverviewResponse:
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            all_findings = list(
+                session.scalars(
+                    select(SourceAdversarialFindingORM)
+                    .order_by(SourceAdversarialFindingORM.detected_at.desc(), SourceAdversarialFindingORM.finding_id.desc())
+                )
+            )
+            open_findings = [row for row in all_findings if row.status == "open"]
+            counts_by_risk_level: dict[str, int] = {}
+            counts_by_signal_type: dict[str, int] = {}
+            for row in open_findings:
+                counts_by_risk_level[row.risk_level] = counts_by_risk_level.get(row.risk_level, 0) + 1
+                counts_by_signal_type[row.signal_type] = counts_by_signal_type.get(row.signal_type, 0) + 1
+            flagged_source_count = sum(
+                1
+                for _ in session.scalars(
+                    select(SourceMemoryORM.source_id).where(SourceMemoryORM.adversarial_signal_count > 0)
+                )
+            )
+            high_risk_source_count = sum(
+                1
+                for _ in session.scalars(
+                    select(SourceMemoryORM.source_id).where(SourceMemoryORM.adversarial_risk_level == "high")
+                )
+            )
+            recent_findings = all_findings[: max(0, limit)]
+            return SourceDiscoveryAdversarialOverviewResponse(
+                metadata={"source": "source-discovery-adversarial-overview", "count": len(recent_findings)},
+                total_finding_count=len(all_findings),
+                open_finding_count=len(open_findings),
+                flagged_source_count=flagged_source_count,
+                high_risk_source_count=high_risk_source_count,
+                counts_by_risk_level=counts_by_risk_level,
+                counts_by_signal_type=counts_by_signal_type,
+                recent_findings=[_serialize_adversarial_finding(row) for row in recent_findings],
+                caveats=SOURCE_DISCOVERY_CAVEATS + [
+                    "Adversarial findings are untrusted-content safety metadata only; they do not prove malicious ownership or claim falsity.",
+                ],
+            )
+
+    def adversarial_findings(
+        self,
+        *,
+        limit: int = 100,
+        source_id: str | None = None,
+        risk_level: str | None = None,
+        status: str | None = "open",
+    ) -> SourceDiscoveryAdversarialFindingsResponse:
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            stmt = select(SourceAdversarialFindingORM).order_by(
+                SourceAdversarialFindingORM.detected_at.desc(),
+                SourceAdversarialFindingORM.finding_id.desc(),
+            )
+            if source_id:
+                stmt = stmt.where(SourceAdversarialFindingORM.source_id == source_id)
+            if risk_level:
+                stmt = stmt.where(SourceAdversarialFindingORM.risk_level == risk_level)
+            if status:
+                stmt = stmt.where(SourceAdversarialFindingORM.status == status)
+            findings = list(session.scalars(stmt.limit(max(0, limit))))
+            return SourceDiscoveryAdversarialFindingsResponse(
+                metadata={
+                    "source": "source-discovery-adversarial-findings",
+                    "count": len(findings),
+                    "sourceId": source_id,
+                    "riskLevel": risk_level,
+                    "status": status,
+                },
+                findings=[_serialize_adversarial_finding(row) for row in findings],
+                caveats=SOURCE_DISCOVERY_CAVEATS + [
+                    "Adversarial finding feeds are review surfaces, not source-validation proof.",
                 ],
             )
 
@@ -525,7 +1104,11 @@ class SourceDiscoveryService:
             for memory in memories:
                 suggested_action = _suggest_discovery_action(memory)
                 blocked_reasons = _discovery_blocked_reasons(memory, now)
-                is_eligible = _is_scheduler_structure_scan_candidate(memory) or _is_scheduler_public_discovery_candidate(memory, now)
+                is_eligible = (
+                    _is_scheduler_structure_scan_candidate(memory)
+                    or _is_scheduler_public_discovery_candidate(memory, now)
+                    or _is_scheduler_link_graph_candidate(memory, now)
+                )
                 if eligible_only and not is_eligible:
                     continue
                 score, priority_label, basis = _compute_discovery_priority(session, memory, now=now, context=context)
@@ -554,6 +1137,8 @@ class SourceDiscoveryService:
                     platform_family=memory.platform_family,  # type: ignore[arg-type]
                     source_family_tags=_loads_list(memory.source_family_tags_json),
                     scope_hints=_loads_scope_hints(memory.scope_hints_json),
+                    locale_expansion_basis=_loads_list(memory.locale_expansion_basis_json),
+                    discovered_from_provider=memory.discovered_from_provider,
                     structure_hints=_loads_list(memory.structure_hints_json),
                     source_health=memory.source_health,
                     source_health_score=memory.source_health_score,
@@ -573,6 +1158,9 @@ class SourceDiscoveryService:
                     last_discovery_scan_at=memory.last_discovery_scan_at,
                     next_discovery_scan_at=memory.next_discovery_scan_at,
                     discovery_scan_fail_count=memory.discovery_scan_fail_count,
+                    adversarial_risk_level=memory.adversarial_risk_level,  # type: ignore[arg-type]
+                    adversarial_signal_count=int(memory.adversarial_signal_count or 0),
+                    adversarial_signals=_loads_list(memory.adversarial_signals_json),
                 )
                 items.append(item)
             items = sorted(
@@ -603,7 +1191,7 @@ class SourceDiscoveryService:
             jobs = list(
                 session.scalars(
                     select(SourceDiscoveryJobORM)
-                    .where(SourceDiscoveryJobORM.job_type.in_(["structure_scan", "feed_link_scan", "sitemap_scan", "catalog_scan"]))
+                    .where(SourceDiscoveryJobORM.job_type.in_(["structure_scan", "feed_link_scan", "sitemap_scan", "catalog_scan", "archive_index_scan", "directory_scan", "locale_seed_expand", "link_graph_scan"]))
                     .order_by(SourceDiscoveryJobORM.started_at.desc())
                     .limit(max(0, limit))
                 )
@@ -660,6 +1248,17 @@ class SourceDiscoveryService:
                 )
             )
             _apply_claim_outcome(session, memory, request, now)
+            session.flush()
+            _refresh_event_graph(
+                session,
+                source_ids=[request.source_id],
+                wave_ids=[request.wave_id] if request.wave_id else [],
+                knowledge_node_ids=[],
+                include_pending_claims=False,
+                mode="recompute_selected",
+                max_events=50,
+                now=now,
+            )
             fits = _fits_for_source(session, request.source_id)
             session.flush()
             return SourceDiscoveryClaimOutcomeResponse(
@@ -1360,6 +1959,622 @@ class SourceDiscoveryService:
                 caveats=SOURCE_DISCOVERY_CAVEATS,
             )
 
+    def run_archive_index_scan_job(
+        self,
+        request: SourceDiscoveryArchiveIndexScanRequest,
+    ) -> SourceDiscoveryArchiveIndexScanResponse:
+        now = _utc_now()
+        normalized_host = _normalize_archive_target_host(request.target_host)
+        seed_url = _archive_seed_url(normalized_host, request.url_prefix)
+        job_id = f"source-archive-index-scan:{request.provider}:{_safe_id(seed_url or request.target_host)}:{_compact_timestamp(now)}"
+        caveats = list(request.caveats)
+        if normalized_host is None:
+            job = SourceDiscoveryJobORM(
+                job_id=job_id,
+                job_type="archive_index_scan",
+                status="rejected",
+                seed_url=seed_url or request.target_host,
+                wave_id=request.wave_id,
+                wave_title=request.wave_title,
+                discovered_source_ids_json=json.dumps([]),
+                rejected_reason="Archive index targetHost must resolve to a public host name.",
+                request_budget=max(0, request.request_budget),
+                used_requests=0,
+                started_at=now,
+                finished_at=now,
+                outcome_summary="Rejected archive-index scan before any provider lookup ran.",
+                caveats_json=json.dumps(["Rejected before archive provider parsing or candidate creation."]),
+            )
+            with session_scope(self._settings.source_discovery_database_url) as session:
+                session.add(job)
+                session.flush()
+                return SourceDiscoveryArchiveIndexScanResponse(
+                    job=_serialize_job(job),
+                    provider=request.provider,
+                    discovered_capture_count=0,
+                    discovered_candidate_count=0,
+                    memories=[],
+                    caveats=SOURCE_DISCOVERY_CAVEATS,
+                )
+
+        used_requests = 0
+        try:
+            if request.fixture_text is not None:
+                document = request.fixture_text
+            elif request.request_budget > 0:
+                document, used_requests = _fetch_archive_index_document(request, normalized_host)
+            else:
+                raise ValueError("Archive index scan requires fixture_text or request_budget > 0.")
+            records = _parse_archive_index_records(
+                provider=request.provider,
+                text=document,
+                target_host=normalized_host,
+                url_prefix=request.url_prefix,
+                max_results=max(0, request.max_results),
+            )
+        except Exception as exc:  # noqa: BLE001
+            job = SourceDiscoveryJobORM(
+                job_id=job_id,
+                job_type="archive_index_scan",
+                status="failed",
+                seed_url=seed_url or request.target_host,
+                wave_id=request.wave_id,
+                wave_title=request.wave_title,
+                discovered_source_ids_json=json.dumps([]),
+                rejected_reason=str(exc)[:300],
+                request_budget=max(0, request.request_budget),
+                used_requests=used_requests,
+                started_at=now,
+                finished_at=now,
+                outcome_summary=f"Archive index parsing failed: {str(exc)[:160]}",
+                caveats_json=json.dumps(caveats + [
+                    "Archive index parsing failed; no candidates were created.",
+                ]),
+            )
+            with session_scope(self._settings.source_discovery_database_url) as session:
+                session.add(job)
+                session.flush()
+                return SourceDiscoveryArchiveIndexScanResponse(
+                    job=_serialize_job(job),
+                    provider=request.provider,
+                    discovered_capture_count=0,
+                    discovered_candidate_count=0,
+                    memories=[],
+                    caveats=SOURCE_DISCOVERY_CAVEATS,
+                )
+
+        seed_records: list[tuple[SourceDiscoveryCandidateSeed, _ArchiveDiscoveryRecord]] = []
+        for record in records:
+            target_url = record.original_url or record.archive_url
+            if not target_url or _discovery_target_requires_auth_or_captcha(target_url):
+                continue
+            canonical_url = _canonical_source_url(target_url)
+            seed = _candidate_seed_from_extracted_url(
+                url=canonical_url,
+                source_id=_generated_source_id_for_url(canonical_url),
+                title=urlparse(canonical_url).netloc or normalized_host,
+                wave_id=request.wave_id,
+                wave_title=request.wave_title,
+                discovery_reason=f"archive index scan via {request.provider}",
+                caveats=[
+                    "Archive index discovery is candidate/review infrastructure only and does not fetch archived page bodies in this slice.",
+                    "Archive captures are provenance signals, not trust or validation proof.",
+                    _archive_record_caveat(record),
+                ] + caveats,
+                discovery_methods=["archive_index_scan"],
+                structure_hints=["archive_index_result"],
+            )
+            if seed is not None:
+                seed_records.append((seed, record))
+
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            novel_candidate_count = _count_novel_candidate_seeds(session, [seed for seed, _ in seed_records])
+            memories: list[SourceMemoryORM] = []
+            for seed, record in seed_records:
+                memory = _upsert_candidate_row(session, seed, now=now)
+                _upsert_archive_hit_row(
+                    session,
+                    source_id=memory.source_id,
+                    record=record,
+                    now=now,
+                    caveats=[
+                        "Archive hit provenance is source-discovery context only and does not validate article truth.",
+                    ] + caveats,
+                )
+                memories.append(memory)
+            outcome_summary = (
+                f"Archive index scan parsed {len(records)} captures and produced {novel_candidate_count} novel candidates."
+            )
+            job = SourceDiscoveryJobORM(
+                job_id=job_id,
+                job_type="archive_index_scan",
+                status="completed",
+                seed_url=seed_url or request.target_host,
+                wave_id=request.wave_id,
+                wave_title=request.wave_title,
+                discovered_source_ids_json=json.dumps([memory.source_id for memory in memories]),
+                rejected_reason=None,
+                request_budget=max(0, request.request_budget),
+                used_requests=used_requests,
+                started_at=now,
+                finished_at=now,
+                outcome_summary=outcome_summary,
+                caveats_json=json.dumps(caveats + [
+                    "Archive index scan is bounded and candidate-only; it records archive provenance without fetching archived page bodies.",
+                ]),
+            )
+            session.add(job)
+            session.flush()
+            context = _build_discovery_priority_context(session)
+            return SourceDiscoveryArchiveIndexScanResponse(
+                job=_serialize_job(job),
+                provider=request.provider,
+                discovered_capture_count=len(records),
+                discovered_candidate_count=len(memories),
+                memories=[_serialize_memory(session, memory, context=context) for memory in memories],
+                caveats=SOURCE_DISCOVERY_CAVEATS,
+            )
+
+    def run_directory_scan_job(
+        self,
+        request: SourceDiscoveryDirectoryScanRequest,
+    ) -> SourceDiscoveryDirectoryScanResponse:
+        now = _utc_now()
+        parsed = urlparse(request.directory_url)
+        job_id = f"source-directory-scan:{_safe_id(request.directory_url)}:{_compact_timestamp(now)}"
+        caveats = list(request.caveats)
+        packet_caveats = list(request.packet_caveats)
+        if request.packet_provenance:
+            packet_caveats.append(f"Seed packet provenance: {request.packet_provenance}")
+        if request.imported_by:
+            packet_caveats.append(f"Seed packet imported by: {request.imported_by}")
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            job = SourceDiscoveryJobORM(
+                job_id=job_id,
+                job_type="directory_scan",
+                status="rejected",
+                seed_url=request.directory_url,
+                wave_id=request.wave_id,
+                wave_title=request.wave_title,
+                discovered_source_ids_json=json.dumps([]),
+                rejected_reason="Directory URL must be an absolute http(s) URL.",
+                request_budget=max(0, request.request_budget),
+                used_requests=0,
+                started_at=now,
+                finished_at=now,
+                outcome_summary="Rejected invalid directory URL before any discovery work ran.",
+                caveats_json=json.dumps(["Rejected before directory parsing or candidate creation."]),
+            )
+            with session_scope(self._settings.source_discovery_database_url) as session:
+                session.add(job)
+                session.flush()
+                return SourceDiscoveryDirectoryScanResponse(
+                    job=_serialize_job(job),
+                    directory_type=request.directory_type,
+                    extracted_url_count=0,
+                    discovered_domain_count=0,
+                    memories=[],
+                    caveats=SOURCE_DISCOVERY_CAVEATS,
+                )
+
+        used_requests = 0
+        try:
+            if request.fixture_text is not None:
+                document = request.fixture_text
+            elif request.request_budget > 0:
+                fetched = _fetch_url(request.directory_url, method="GET", max_bytes=MAX_FETCH_BYTES)
+                document = str(fetched["body"])
+                used_requests = 1
+            else:
+                raise ValueError("Directory scan requires fixture_text or request_budget > 0.")
+            directory_urls, resolved_directory_type, discovered_domain_count = _extract_directory_candidate_urls(
+                request.directory_url,
+                document,
+                directory_type=request.directory_type,
+                max_external_domains=max(0, request.max_external_domains),
+                max_discovered=max(0, request.max_discovered),
+            )
+        except Exception as exc:  # noqa: BLE001
+            job = SourceDiscoveryJobORM(
+                job_id=job_id,
+                job_type="directory_scan",
+                status="failed",
+                seed_url=request.directory_url,
+                wave_id=request.wave_id,
+                wave_title=request.wave_title,
+                discovered_source_ids_json=json.dumps([]),
+                rejected_reason=str(exc)[:300],
+                request_budget=max(0, request.request_budget),
+                used_requests=used_requests,
+                started_at=now,
+                finished_at=now,
+                outcome_summary=f"Directory parsing failed: {str(exc)[:160]}",
+                caveats_json=json.dumps(caveats + [
+                    "Directory parsing failed; no candidates were created.",
+                ]),
+            )
+            with session_scope(self._settings.source_discovery_database_url) as session:
+                session.add(job)
+                session.flush()
+                return SourceDiscoveryDirectoryScanResponse(
+                    job=_serialize_job(job),
+                    directory_type=request.directory_type,
+                    extracted_url_count=0,
+                    discovered_domain_count=0,
+                    memories=[],
+                    caveats=SOURCE_DISCOVERY_CAVEATS,
+                )
+
+        seeds: list[SourceDiscoveryCandidateSeed] = []
+        for url in directory_urls:
+            normalized_url = _normalize_directory_seed_target(url)
+            seed = _candidate_seed_from_extracted_url(
+                url=normalized_url,
+                source_id=_generated_source_id_for_url(normalized_url),
+                title=urlparse(normalized_url).netloc or parsed.netloc,
+                wave_id=request.wave_id,
+                wave_title=request.wave_title,
+                discovery_reason=request.discovery_reason,
+                caveats=[
+                    "Directory scan is bounded to one visible public directory page and creates review-only roots or candidates.",
+                    "Curated directory membership is explainability metadata only and does not validate a source.",
+                ] + caveats + packet_caveats,
+                discovery_methods=["directory_scan"],
+                structure_hints=["directory_link"],
+            )
+            if seed is None:
+                continue
+            merged_tags = sorted(set(seed.source_family_tags + list(request.source_family_tags)))
+            merged_scope_hints = _merge_scope_hints(seed.scope_hints, request.scope_hints)
+            derived_seed_family = request.seed_family
+            if derived_seed_family is None and set(merged_tags).intersection({"regional", "local_news"}):
+                derived_seed_family = "regional_outlet"
+            elif derived_seed_family is None and "official" in merged_tags:
+                derived_seed_family = "official_bulletin"
+            seeds.append(
+                seed.model_copy(
+                    update={
+                        "seed_family": derived_seed_family,
+                        "source_family_tags": merged_tags,
+                        "scope_hints": merged_scope_hints,
+                        "seed_packet_id": request.packet_id,
+                        "seed_packet_title": request.packet_title,
+                        "discovery_role": "root",
+                    }
+                )
+            )
+
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            novel_candidate_count = _count_novel_candidate_seeds(session, seeds)
+            memories = [_upsert_candidate_row(session, seed, now=now) for seed in seeds]
+            outcome_summary = (
+                f"Directory scan extracted {len(directory_urls)} public links across {discovered_domain_count} domains and produced {novel_candidate_count} novel candidates."
+            )
+            job = SourceDiscoveryJobORM(
+                job_id=job_id,
+                job_type="directory_scan",
+                status="completed",
+                seed_url=request.directory_url,
+                wave_id=request.wave_id,
+                wave_title=request.wave_title,
+                discovered_source_ids_json=json.dumps([memory.source_id for memory in memories]),
+                rejected_reason=None,
+                request_budget=max(0, request.request_budget),
+                used_requests=used_requests,
+                started_at=now,
+                finished_at=now,
+                outcome_summary=outcome_summary,
+                caveats_json=json.dumps(caveats + packet_caveats + [
+                    "Directory scan is bounded to visible outbound public links and does not crawl discovered domains.",
+                ]),
+            )
+            session.add(job)
+            session.flush()
+            context = _build_discovery_priority_context(session)
+            return SourceDiscoveryDirectoryScanResponse(
+                job=_serialize_job(job),
+                directory_type=resolved_directory_type,  # type: ignore[arg-type]
+                extracted_url_count=len(directory_urls),
+                discovered_domain_count=discovered_domain_count,
+                memories=[_serialize_memory(session, memory, context=context) for memory in memories],
+                caveats=SOURCE_DISCOVERY_CAVEATS,
+            )
+
+    def run_locale_seed_expand_job(
+        self,
+        request: SourceDiscoveryLocaleSeedExpandRequest,
+    ) -> SourceDiscoveryLocaleSeedExpandResponse:
+        now = _utc_now()
+        job_id = f"source-locale-seed-expand:{_compact_timestamp(now)}"
+        caveats = list(request.caveats)
+        packet_caveats = list(caveats)
+        if request.packet_provenance:
+            packet_caveats.append(f"Seed packet provenance: {request.packet_provenance}")
+        if request.imported_by:
+            packet_caveats.append(f"Seed packet imported by: {request.imported_by}")
+        raw_terms = [term for term in [*request.seed_terms, *request.aliases] if str(term).strip()]
+        if not raw_terms:
+            job = SourceDiscoveryJobORM(
+                job_id=job_id,
+                job_type="locale_seed_expand",
+                status="rejected",
+                seed_url=None,
+                wave_id=request.wave_id,
+                wave_title=request.wave_title,
+                discovered_source_ids_json=json.dumps([]),
+                rejected_reason="Locale seed expansion requires at least one seed term or alias.",
+                request_budget=max(0, request.request_budget),
+                used_requests=0,
+                started_at=now,
+                finished_at=now,
+                outcome_summary="Rejected locale seed expansion before any provider lookup ran.",
+                caveats_json=json.dumps(caveats),
+            )
+            with session_scope(self._settings.source_discovery_database_url) as session:
+                session.add(job)
+                session.flush()
+                return SourceDiscoveryLocaleSeedExpandResponse(
+                    job=_serialize_job(job),
+                    caveats=SOURCE_DISCOVERY_CAVEATS,
+                )
+
+        scope_hints = _merge_scope_hints(
+            request.scope_hints,
+            SourceDiscoveryScopeHints(
+                spatial=sorted({label.strip() for label in request.place_labels if label.strip()}),
+                language=sorted({code.strip().casefold() for code in request.language_codes if code.strip()}),
+            ),
+        )
+        generated_aliases = _generate_locale_aliases(raw_terms)
+        generated_queries = _build_locale_queries(
+            generated_aliases,
+            country_codes=request.country_codes,
+            language_codes=request.language_codes,
+            max_queries=max(0, request.max_queries),
+        )
+        provider_runs: list[SourceDiscoveryLocaleExpansionProviderRunSummary] = []
+        seed_records: list[SourceDiscoveryCandidateSeed] = []
+        used_requests = 0
+        locale_basis = _locale_basis_lines(
+            generated_aliases=generated_aliases,
+            country_codes=request.country_codes,
+            language_codes=request.language_codes,
+            place_labels=request.place_labels,
+        )
+
+        if "deterministic" in request.providers:
+            provider_runs.append(
+                SourceDiscoveryLocaleExpansionProviderRunSummary(
+                    provider="deterministic",
+                    query_count=len(generated_queries),
+                    raw_result_count=0,
+                    discovered_count=0,
+                    status="completed",
+                    caveats=["Deterministic locale expansion generated bounded aliases and queries only."],
+                )
+            )
+
+        if "gdelt_doc" in request.providers:
+            gdelt_queries = generated_queries[: max(0, request.max_queries)]
+            gdelt_candidates: list[dict[str, str]] = []
+            provider_caveats: list[str] = []
+            attempted_queries = 0
+            fixture_payload = request.fixture_provider_payloads.get("gdelt_doc")
+            if fixture_payload is not None:
+                attempted_queries = 1 if gdelt_queries else 0
+                gdelt_candidates = _parse_gdelt_doc_candidates(fixture_payload, max_hits=max(0, request.max_provider_hits))
+            elif request.request_budget > 0 and gdelt_queries:
+                for query in gdelt_queries:
+                    if len(gdelt_candidates) >= max(0, request.max_provider_hits):
+                        break
+                    if used_requests >= max(0, request.request_budget):
+                        provider_caveats.append("GDELT DOC query budget was exhausted before all locale queries ran.")
+                        break
+                    attempted_queries += 1
+                    payload = _fetch_gdelt_doc_payload(query, max_records=max(1, min(request.max_provider_hits, 50)))
+                    used_requests += 1
+                    gdelt_candidates.extend(
+                        _parse_gdelt_doc_candidates(
+                            payload,
+                            max_hits=max(0, request.max_provider_hits),
+                        )
+                    )
+            else:
+                provider_caveats.append("GDELT DOC provider was skipped because no fixture payload or live request budget was provided.")
+
+            seed_records = _locale_candidate_seeds_from_provider_results(
+                gdelt_candidates,
+                wave_id=request.wave_id,
+                wave_title=request.wave_title,
+                packet_id=request.packet_id,
+                packet_title=request.packet_title,
+                source_family_tags=request.source_family_tags,
+                scope_hints=scope_hints,
+                locale_basis=locale_basis,
+                max_domains=max(0, request.max_domains),
+                max_discovered=max(0, request.max_discovered),
+                base_caveats=packet_caveats + [
+                    "Locale/provider expansion is bounded discovery only and does not validate matched articles or outlets.",
+                ],
+            )
+            provider_runs.append(
+                SourceDiscoveryLocaleExpansionProviderRunSummary(
+                    provider="gdelt_doc",
+                    query_count=attempted_queries,
+                    raw_result_count=len(gdelt_candidates),
+                    discovered_count=len(seed_records),
+                    status="completed" if fixture_payload is not None or attempted_queries > 0 else "skipped",
+                    caveats=provider_caveats,
+                )
+            )
+
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            memories = [_upsert_candidate_row(session, seed, now=now) for seed in seed_records]
+            discovered_domain_count = len({memory.parent_domain for memory in memories if memory.parent_domain})
+            outcome_summary = (
+                f"Locale seed expansion generated {len(generated_aliases)} aliases, ran {sum(run.query_count for run in provider_runs)} queries, and created {len(memories)} discovery roots."
+            )
+            job = SourceDiscoveryJobORM(
+                job_id=job_id,
+                job_type="locale_seed_expand",
+                status="completed",
+                seed_url=None,
+                wave_id=request.wave_id,
+                wave_title=request.wave_title,
+                discovered_source_ids_json=json.dumps([memory.source_id for memory in memories]),
+                rejected_reason=None,
+                request_budget=max(0, request.request_budget),
+                used_requests=used_requests,
+                started_at=now,
+                finished_at=now,
+                outcome_summary=outcome_summary,
+                caveats_json=json.dumps(packet_caveats + [
+                    "Locale expansion stays bounded to explicit user-provided terms, locales, and public provider results.",
+                    "No open-ended machine translation or generic search scraping is used in this slice.",
+                ]),
+            )
+            session.add(job)
+            session.flush()
+            context = _build_discovery_priority_context(session)
+            return SourceDiscoveryLocaleSeedExpandResponse(
+                job=_serialize_job(job),
+                generated_aliases=generated_aliases,
+                generated_queries=generated_queries,
+                provider_runs=provider_runs,
+                discovered_domain_count=discovered_domain_count,
+                memories=[_serialize_memory(session, memory, context=context) for memory in memories],
+                caveats=SOURCE_DISCOVERY_CAVEATS,
+            )
+
+    def run_link_graph_scan_job(
+        self,
+        request: SourceDiscoveryLinkGraphScanRequest,
+    ) -> SourceDiscoveryLinkGraphScanResponse:
+        now = _utc_now()
+        job_id = f"source-link-graph-scan:{_safe_id(request.source_id)}:{_compact_timestamp(now)}"
+        caveats = list(request.caveats)
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            memory = session.get(SourceMemoryORM, request.source_id)
+            if memory is None:
+                raise ValueError(f"Unknown source_id: {request.source_id}")
+            if not _is_link_graph_scan_allowed(memory):
+                job = SourceDiscoveryJobORM(
+                    job_id=job_id,
+                    job_type="link_graph_scan",
+                    status="rejected",
+                    seed_url=memory.url,
+                    wave_id=None,
+                    wave_title=None,
+                    discovered_source_ids_json=json.dumps([memory.source_id]),
+                    rejected_reason="Link-graph scan requires a reviewed or approved public no-auth root.",
+                    request_budget=max(0, request.request_budget),
+                    used_requests=0,
+                    started_at=now,
+                    finished_at=now,
+                    outcome_summary="Rejected link-graph scan before any fetch or extraction ran.",
+                    caveats_json=json.dumps(caveats),
+                )
+                session.add(job)
+                session.flush()
+                return SourceDiscoveryLinkGraphScanResponse(
+                    job=_serialize_job(job),
+                    caveats=SOURCE_DISCOVERY_CAVEATS,
+                )
+            best_fit = _best_wave_fit(_fits_for_source(session, memory.source_id))
+            seed_url = memory.url
+            source_scope_hints = _loads_scope_hints(memory.scope_hints_json)
+
+        used_requests = 0
+        if request.fixture_text is not None:
+            document = request.fixture_text
+        elif request.request_budget > 0:
+            fetched = _fetch_url(seed_url, method="GET", max_bytes=MAX_FETCH_BYTES)
+            document = str(fetched["body"])
+            used_requests = 1
+        else:
+            raise ValueError("Link-graph scan requires fixture_text or request_budget > 0.")
+
+        candidate_urls, extracted_url_count, discovered_domain_count, page_hints = _extract_link_graph_candidate_urls(
+            seed_url,
+            document,
+            max_same_domain=max(0, request.max_same_domain),
+            max_external_domains=max(0, request.max_external_domains),
+            max_discovered=max(0, request.max_discovered),
+        )
+
+        seeds: list[SourceDiscoveryCandidateSeed] = []
+        for target_url in candidate_urls:
+            seed = _candidate_seed_from_extracted_url(
+                url=target_url,
+                source_id=_generated_source_id_for_url(target_url),
+                title=urlparse(target_url).netloc or target_url,
+                wave_id=best_fit.wave_id if best_fit else None,
+                wave_title=best_fit.wave_title if best_fit else None,
+                discovery_reason="trusted public root link-graph expansion",
+                caveats=caveats + [
+                    "Link-graph expansion is bounded to one reviewed public root page and root-like outbound links only.",
+                    f"Discovered via trusted root {seed_url}.",
+                ],
+                discovery_methods=["link_graph_scan"],
+                structure_hints=sorted(set(["linked_root_candidate", "trusted_root_link_graph", *page_hints])),
+            )
+            if seed is None:
+                continue
+            seeds.append(
+                seed.model_copy(
+                    update={
+                        "discovery_role": "root",
+                        "scope_hints": source_scope_hints,
+                    }
+                )
+            )
+
+        with session_scope(self._settings.source_discovery_database_url) as session:
+            root_memory = session.get(SourceMemoryORM, request.source_id)
+            if root_memory is None:
+                raise ValueError(f"Unknown source_id: {request.source_id}")
+            novel_candidate_count = _count_novel_candidate_seeds(session, seeds)
+            memories = [_upsert_candidate_row(session, seed, now=now) for seed in seeds]
+            outcome_summary = (
+                f"Link-graph scan extracted {extracted_url_count} outbound links and produced {novel_candidate_count} novel root candidates."
+            )
+            _apply_public_discovery_scan_success_for_url(
+                session,
+                root_memory.url,
+                now=now,
+                scan_kind="link_graph_scan",
+                outcome_summary=outcome_summary,
+                novel_candidate_count=novel_candidate_count,
+            )
+            job = SourceDiscoveryJobORM(
+                job_id=job_id,
+                job_type="link_graph_scan",
+                status="completed",
+                seed_url=root_memory.url,
+                wave_id=best_fit.wave_id if best_fit else None,
+                wave_title=best_fit.wave_title if best_fit else None,
+                discovered_source_ids_json=json.dumps([memory.source_id for memory in memories]),
+                rejected_reason=None,
+                request_budget=max(0, request.request_budget),
+                used_requests=used_requests,
+                started_at=now,
+                finished_at=now,
+                outcome_summary=outcome_summary,
+                caveats_json=json.dumps(caveats + [
+                    "Link-graph scan does not recurse and does not fetch discovered children in this slice.",
+                ]),
+            )
+            session.add(job)
+            session.flush()
+            context = _build_discovery_priority_context(session)
+            return SourceDiscoveryLinkGraphScanResponse(
+                job=_serialize_job(job),
+                discovered_domain_count=discovered_domain_count,
+                extracted_url_count=extracted_url_count,
+                memories=[_serialize_memory(session, memory, context=context) for memory in memories],
+                caveats=SOURCE_DISCOVERY_CAVEATS,
+            )
+
     def run_catalog_scan_job(
         self,
         request: SourceDiscoveryCatalogScanRequest,
@@ -1596,6 +2811,7 @@ class SourceDiscoveryService:
             robots_text=robots_text or "",
             max_discovered=max(0, request.max_discovered),
         )
+        adversarial_findings = _detect_adversarial_findings(html_text or "", url=request.target_url)
 
         root_seed = SourceDiscoveryCandidateSeed(
             source_id=_generated_source_id_for_url(request.target_url),
@@ -1636,10 +2852,25 @@ class SourceDiscoveryService:
         with session_scope(self._settings.source_discovery_database_url) as session:
             novel_candidate_count = _count_novel_candidate_seeds(session, child_seeds)
             root_memory = _upsert_candidate_row(session, root_seed, now=now)
+            if adversarial_findings:
+                _record_adversarial_findings(
+                    session,
+                    source_id=root_memory.source_id,
+                    snapshot_id=None,
+                    job_id=job_id,
+                    surface_type="structure_scan",
+                    findings=adversarial_findings,
+                    now=now,
+                )
+                _apply_adversarial_hold_review(root_memory, adversarial_findings)
+            else:
+                _refresh_adversarial_posture(session, source_id=root_memory.source_id, snapshot_id=None, now=now)
             child_memories = [_upsert_candidate_row(session, seed, now=now) for seed in child_seeds]
             outcome_summary = (
                 f"Structure scan found {len(child_memories)} candidate surfaces and {novel_candidate_count} novel root or child candidates."
             )
+            if adversarial_findings:
+                outcome_summary += f" Flagged {len(adversarial_findings)} adversarial or prompt-injection signals for review."
             _apply_structure_scan_outcome(
                 root_memory,
                 now=now,
@@ -1895,6 +3126,12 @@ class SourceDiscoveryService:
             title = request.title
             author = request.author
             published_at = request.published_at
+            retrieval_origin = request.retrieval_origin
+            retrieved_from_url = request.retrieved_from_url
+            resolved_original_url = request.resolved_original_url
+            detected_language = request.detected_language
+            normalization_notes = list(request.normalization_notes)
+            detection_document = request.raw_text or request.html_text or ""
             if request.raw_text is not None:
                 full_text = request.raw_text
             elif request.html_text is not None:
@@ -1906,10 +3143,17 @@ class SourceDiscoveryService:
                 title = title or article_snapshot.title
                 author = author or article_snapshot.author
                 published_at = published_at or article_snapshot.published_at
+                resolved_original_url = resolved_original_url or article_snapshot.canonical_url or url
+                detected_language = detected_language or _detect_language_hint(
+                    request.html_text,
+                    candidate_url=resolved_original_url or url,
+                )
             elif request.request_budget > 0:
                 fetched = _fetch_url(url, method="GET", max_bytes=MAX_FETCH_BYTES)
                 used_requests = 1
                 content_type = fetched["content_type"]
+                retrieved_from_url = retrieved_from_url or url
+                detection_document = str(fetched["body"])
                 if "html" in (content_type or "").lower():
                     article_snapshot = extract_article_snapshot_from_html(str(fetched["body"]), base_url=url)
                     full_text = article_snapshot.text
@@ -1918,15 +3162,27 @@ class SourceDiscoveryService:
                     title = title or article_snapshot.title
                     author = author or article_snapshot.author
                     published_at = published_at or article_snapshot.published_at
+                    resolved_original_url = resolved_original_url or article_snapshot.canonical_url or url
+                    detected_language = detected_language or _detect_language_hint(
+                        str(fetched["body"]),
+                        candidate_url=resolved_original_url or url,
+                    )
                 else:
                     full_text = str(fetched["body"])
                     extraction_method = "live_fetch"
+                    detected_language = detected_language or _language_hint_from_url(url)
             else:
                 full_text = ""
                 extraction_method = "metadata_only"
                 caveats.append("No raw/html text supplied and request budget was zero.")
 
             normalized_text = _normalize_text(full_text)
+            adversarial_findings = _detect_adversarial_findings(
+                detection_document or normalized_text,
+                url=resolved_original_url or url,
+            )
+            if adversarial_findings:
+                caveats.append("Captured content contains adversarial or prompt-injection signals and requires review-only handling.")
             text_hash = hashlib.sha256(normalized_text.encode("utf-8")).hexdigest()
             snapshot = SourceContentSnapshotORM(
                 snapshot_id=f"source-snapshot:{_safe_id(request.source_id)}:{text_hash[:16]}",
@@ -1944,9 +3200,17 @@ class SourceDiscoveryService:
                 request_budget=max(0, request.request_budget),
                 used_requests=used_requests,
                 extraction_confidence=_extraction_confidence(normalized_text, extraction_method),
+                retrieval_origin=retrieval_origin,
+                retrieved_from_url=retrieved_from_url,
+                resolved_original_url=resolved_original_url or url,
+                detected_language=detected_language,
+                adversarial_risk_level=_highest_adversarial_risk([finding["risk_level"] for finding in adversarial_findings]),
+                adversarial_signal_count=len(adversarial_findings),
+                adversarial_signals_json=json.dumps(sorted({finding["signal_type"] for finding in adversarial_findings})),
                 caveats_json=json.dumps(caveats + [
                     "Full text is stored as source evidence input; it does not prove claims without assessment.",
                 ]),
+                normalization_notes_json=json.dumps(normalization_notes),
             )
             _assign_snapshot_to_knowledge_node(
                 session,
@@ -1956,9 +3220,28 @@ class SourceDiscoveryService:
                 now=now,
             )
             memory.last_seen_at = now
+            if detected_language:
+                memory.scope_hints_json = json.dumps(
+                    _merge_scope_hints(
+                        _loads_scope_hints(memory.scope_hints_json),
+                        SourceDiscoveryScopeHints(language=[detected_language]),
+                    ).model_dump()
+                )
             memory.caveats_json = json.dumps(sorted(set(_loads_list(memory.caveats_json) + caveats)))
             session.merge(snapshot)
             session.flush()
+            if adversarial_findings:
+                _record_adversarial_findings(
+                    session,
+                    source_id=request.source_id,
+                    snapshot_id=snapshot.snapshot_id,
+                    job_id=None,
+                    surface_type="content_snapshot",
+                    findings=adversarial_findings,
+                    now=now,
+                )
+            else:
+                _refresh_adversarial_posture(session, source_id=request.source_id, snapshot_id=snapshot.snapshot_id, now=now)
             return SourceDiscoveryContentSnapshotResponse(
                 snapshot=_serialize_snapshot(session, snapshot),
                 memory=_serialize_memory(memory),
@@ -1972,6 +3255,12 @@ class SourceDiscoveryService:
         now = _utc_now()
         job_id = f"source-article-fetch:{_safe_id(request.source_id)}:{_compact_timestamp(now)}"
         caveats = list(request.caveats)
+        fetch_mode = request.fetch_mode
+        if fetch_mode == "auto":
+            if request.archive_hit_id or request.archive_url or request.fixture_archive_html is not None:
+                fetch_mode = "archive"
+            else:
+                fetch_mode = "live"
         with session_scope(self._settings.source_discovery_database_url) as session:
             memory = session.get(SourceMemoryORM, request.source_id)
             if memory is None:
@@ -2000,7 +3289,14 @@ class SourceDiscoveryService:
                     memory=_serialize_memory(memory),
                     caveats=SOURCE_DISCOVERY_CAVEATS,
                 )
-            if memory.lifecycle_state not in {"approved-unvalidated", "sandboxed", "validated"} or memory.policy_state == "blocked":
+            if (
+                memory.policy_state == "blocked"
+                or memory.lifecycle_state in {"rejected", "archived"}
+                or (
+                    memory.policy_state != "reviewed"
+                    and memory.lifecycle_state not in {"approved-unvalidated", "sandboxed", "validated"}
+                )
+            ):
                 job = SourceDiscoveryJobORM(
                     job_id=job_id,
                     job_type="article_fetch",
@@ -2024,25 +3320,123 @@ class SourceDiscoveryService:
                     memory=_serialize_memory(memory),
                     caveats=SOURCE_DISCOVERY_CAVEATS,
                 )
+            archive_hit = session.get(SourceArchiveHitORM, request.archive_hit_id) if request.archive_hit_id else None
+            if request.archive_hit_id and archive_hit is None:
+                raise ValueError(f"Unknown archive_hit_id: {request.archive_hit_id}")
+            source_url = memory.url
+            archive_url = request.archive_url or (archive_hit.archive_url if archive_hit is not None else None)
+            archive_original_url = archive_hit.original_url if archive_hit is not None else None
 
-        snapshot_response = self.store_content_snapshot(
-            SourceDiscoveryContentSnapshotRequest(
+        snapshot_request: SourceDiscoveryContentSnapshotRequest
+        prefetch_used_requests = 0
+        if fetch_mode == "archive":
+            if not request.fixture_archive_html and not archive_url:
+                with session_scope(self._settings.source_discovery_database_url) as session:
+                    memory = session.get(SourceMemoryORM, request.source_id)
+                    if memory is None:
+                        raise ValueError(f"Unknown source_id: {request.source_id}")
+                    job = SourceDiscoveryJobORM(
+                        job_id=job_id,
+                        job_type="article_fetch",
+                        status="rejected",
+                        seed_url=memory.url,
+                        wave_id=None,
+                        wave_title=None,
+                        discovered_source_ids_json=json.dumps([memory.source_id]),
+                        rejected_reason="Archive fetch requires an explicit archiveHitId, archiveUrl, or fixtureArchiveHtml.",
+                        request_budget=max(0, request.request_budget),
+                        used_requests=0,
+                        started_at=now,
+                        finished_at=now,
+                        caveats_json=json.dumps(caveats),
+                    )
+                    session.add(job)
+                    session.flush()
+                    return SourceDiscoveryArticleFetchResponse(
+                        job=_serialize_job(job),
+                        snapshot=None,
+                        memory=_serialize_memory(memory),
+                        caveats=SOURCE_DISCOVERY_CAVEATS,
+                    )
+            if archive_url and not _is_allowed_archive_fetch_url(archive_url):
+                with session_scope(self._settings.source_discovery_database_url) as session:
+                    memory = session.get(SourceMemoryORM, request.source_id)
+                    if memory is None:
+                        raise ValueError(f"Unknown source_id: {request.source_id}")
+                    job = SourceDiscoveryJobORM(
+                        job_id=job_id,
+                        job_type="article_fetch",
+                        status="rejected",
+                        seed_url=archive_url,
+                        wave_id=None,
+                        wave_title=None,
+                        discovered_source_ids_json=json.dumps([memory.source_id]),
+                        rejected_reason="Archive fetch requires an explicit public capture URL from an allowed archive host.",
+                        request_budget=max(0, request.request_budget),
+                        used_requests=0,
+                        started_at=now,
+                        finished_at=now,
+                        caveats_json=json.dumps(caveats),
+                    )
+                    session.add(job)
+                    session.flush()
+                    return SourceDiscoveryArticleFetchResponse(
+                        job=_serialize_job(job),
+                        snapshot=None,
+                        memory=_serialize_memory(memory),
+                        caveats=SOURCE_DISCOVERY_CAVEATS,
+                    )
+            if request.fixture_archive_html is not None:
+                archive_html = request.fixture_archive_html
+            elif request.request_budget > 0 and archive_url:
+                fetched = _fetch_url(archive_url, method="GET", max_bytes=MAX_FETCH_BYTES)
+                archive_html = str(fetched["body"])
+                prefetch_used_requests = 1
+            else:
+                raise ValueError("Archive fetch requires fixtureArchiveHtml or request_budget > 0 with an explicit archive URL.")
+            normalized_html, inferred_original_url, normalization_notes = _normalize_archive_capture_html(
+                archive_html,
+                archive_url or source_url,
+            )
+            resolved_original_url = archive_original_url or inferred_original_url or source_url
+            snapshot_request = SourceDiscoveryContentSnapshotRequest(
+                source_id=request.source_id,
+                url=resolved_original_url,
+                html_text=normalized_html,
+                retrieval_origin="archive",
+                retrieved_from_url=archive_url or source_url,
+                resolved_original_url=resolved_original_url,
+                detected_language=_detect_language_hint(normalized_html, candidate_url=resolved_original_url),
+                normalization_notes=normalization_notes,
+                request_budget=0,
+                caveats=caveats + [
+                    "Archive fetch is bounded to one explicit public capture and does not browse or follow archived links.",
+                ],
+            )
+        else:
+            snapshot_request = SourceDiscoveryContentSnapshotRequest(
                 source_id=request.source_id,
                 raw_text=request.fixture_text,
                 html_text=request.fixture_html,
+                retrieval_origin="live",
+                retrieved_from_url=source_url,
+                resolved_original_url=source_url,
                 request_budget=request.request_budget if request.fixture_text is None and request.fixture_html is None else 0,
                 caveats=caveats + [
                     "Article fetch is bounded to one approved or sandboxed source and stores evidence text only.",
                 ],
             )
+
+        snapshot_response = self.store_content_snapshot(
+            snapshot_request
         )
-        used_requests = snapshot_response.snapshot.used_requests
+        used_requests = prefetch_used_requests + snapshot_response.snapshot.used_requests
         with session_scope(self._settings.source_discovery_database_url) as session:
             job = SourceDiscoveryJobORM(
                 job_id=job_id,
                 job_type="article_fetch",
                 status="completed",
-                seed_url=snapshot_response.snapshot.url,
+                seed_url=snapshot_response.snapshot.retrieved_from_url or snapshot_response.snapshot.url,
                 wave_id=None,
                 wave_title=None,
                 discovered_source_ids_json=json.dumps([request.source_id]),
@@ -2984,6 +4378,8 @@ class SourceDiscoveryService:
                 pending_claims = _pending_review_claim_candidates_for_source(session, memory.source_id)
                 corrective_cluster = _source_has_corrective_cluster(session, memory.source_id)
                 unscanned_public_root = _is_unscanned_public_candidate_root(memory)
+                contested_event_count = _count_events_for_source_by_status(session, memory.source_id, {"contested", "corrected"})
+                open_question_count = _count_events_for_source_by_status(session, memory.source_id, {"open_question"})
                 reasons = _review_reasons(
                     memory,
                     best_fit=best_fit,
@@ -2991,6 +4387,8 @@ class SourceDiscoveryService:
                     pending_claim_count=len(pending_claims),
                     corrective_cluster=corrective_cluster,
                     unscanned_public_root=unscanned_public_root,
+                    contested_event_count=contested_event_count,
+                    open_question_count=open_question_count,
                 )
                 if not reasons:
                     continue
@@ -3001,6 +4399,8 @@ class SourceDiscoveryService:
                     pending_claim_count=len(pending_claims),
                     corrective_cluster=corrective_cluster,
                     unscanned_public_root=unscanned_public_root,
+                    contested_event_count=contested_event_count,
+                    open_question_count=open_question_count,
                 )
                 discovery_priority_score, discovery_priority, discovery_priority_basis = _compute_discovery_priority(
                     session,
@@ -3034,6 +4434,8 @@ class SourceDiscoveryService:
                             platform_family=memory.platform_family,  # type: ignore[arg-type]
                             source_family_tags=_loads_list(memory.source_family_tags_json),
                             scope_hints=_loads_scope_hints(memory.scope_hints_json),
+                            locale_expansion_basis=_loads_list(memory.locale_expansion_basis_json),
+                            discovered_from_provider=memory.discovered_from_provider,
                             global_reputation_score=memory.global_reputation_score,
                             domain_reputation_score=memory.domain_reputation_score,
                             source_health_score=memory.source_health_score,
@@ -3044,6 +4446,11 @@ class SourceDiscoveryService:
                             best_wave_fit_score=best_fit.fit_score if best_fit else None,
                             next_check_at=memory.next_check_at,
                             pending_claim_count=len(pending_claims),
+                            contested_event_count=contested_event_count,
+                            open_question_count=open_question_count,
+                            adversarial_risk_level=memory.adversarial_risk_level,  # type: ignore[arg-type]
+                            adversarial_signal_count=int(memory.adversarial_signal_count or 0),
+                            adversarial_signals=_loads_list(memory.adversarial_signals_json),
                             next_discovery_action=_suggest_discovery_action(memory),  # type: ignore[arg-type]
                             discovery_priority_score=discovery_priority_score,
                             discovery_priority=discovery_priority,  # type: ignore[arg-type]
@@ -3278,6 +4685,17 @@ class SourceDiscoveryService:
             memory.policy_state = "reviewed"
             memory.last_seen_at = now
             session.flush()
+            _refresh_event_graph(
+                session,
+                source_ids=[source_id],
+                wave_ids=[wave_id for wave_id in {candidate.wave_id for candidate in candidates if candidate.wave_id}],
+                knowledge_node_ids=[candidate.knowledge_node_id for candidate in candidates if candidate.knowledge_node_id],
+                include_pending_claims=False,
+                mode="recompute_selected",
+                max_events=100,
+                now=now,
+            )
+            session.flush()
             fits = _fits_for_source(session, source_id)
             return SourceDiscoveryReviewClaimApplicationResponse(
                 memory=_serialize_memory(memory),
@@ -3330,6 +4748,8 @@ class SourceDiscoveryService:
             )
 
     def run_scheduler_tick(self, request: SourceDiscoverySchedulerTickRequest) -> SourceDiscoverySchedulerTickResponse:
+        if self._settings.source_discovery_queue_enabled:
+            return _run_scheduler_tick_queue(self, request)
         now = _utc_now()
         tick_id = f"source-scheduler:{_compact_timestamp(now)}"
         remaining_budget = max(0, request.request_budget)
@@ -3338,6 +4758,7 @@ class SourceDiscoveryService:
         llm_executions: list[WaveLlmExecutionSummary] = []
         structure_scans_completed = 0
         public_discovery_jobs_completed = 0
+        link_graph_jobs_completed = 0
         expansion_jobs_completed = 0
         knowledge_backfill_jobs_completed = 0
         duplicate_snapshots_skipped = 0
@@ -3409,6 +4830,20 @@ class SourceDiscoveryService:
                     ),
                 )
             ][: max(0, request.public_discovery_job_limit)]
+            eligible_link_graph_memories = [memory for memory in memories if _is_scheduler_link_graph_candidate(memory, now)]
+            link_graph_memories = [
+                {
+                    "source_id": memory.source_id,
+                }
+                for memory in sorted(
+                    eligible_link_graph_memories,
+                    key=lambda item: (
+                        -_compute_discovery_priority(session, item, now=now, context=discovery_context)[0],
+                        -((discovery_context.best_fit_by_source_id.get(item.source_id).fit_score) if discovery_context.best_fit_by_source_id.get(item.source_id) else 0.0),
+                        item.title.casefold(),
+                    ),
+                )
+            ][: max(0, request.link_graph_job_limit)]
 
         for source_id in source_ids:
             per_check_budget = 1 if remaining_budget > 0 else 0
@@ -3480,6 +4915,21 @@ class SourceDiscoveryService:
                 jobs.append(response.job)
                 public_discovery_jobs_completed += 1
 
+        for memory in link_graph_memories:
+            per_job_budget = 1 if remaining_budget > 0 else 0
+            if per_job_budget <= 0 and request.request_budget > 0:
+                break
+            remaining_budget = max(0, remaining_budget - per_job_budget)
+            response = self.run_link_graph_scan_job(
+                SourceDiscoveryLinkGraphScanRequest(
+                    source_id=str(memory["source_id"]),
+                    request_budget=per_job_budget,
+                    caveats=["Scheduler-triggered bounded trusted-root link-graph expansion."],
+                )
+            )
+            jobs.append(response.job)
+            link_graph_jobs_completed += 1
+
         for memory in expansion_memories:
             per_job_budget = 1 if remaining_budget > 0 else 0
             remaining_budget = max(0, remaining_budget - per_job_budget)
@@ -3544,6 +4994,8 @@ class SourceDiscoveryService:
                 structure_scans_completed=structure_scans_completed,
                 public_discovery_jobs_requested=max(0, request.public_discovery_job_limit),
                 public_discovery_jobs_completed=public_discovery_jobs_completed,
+                link_graph_jobs_requested=max(0, request.link_graph_job_limit),
+                link_graph_jobs_completed=link_graph_jobs_completed,
                 expansion_jobs_requested=max(0, request.expansion_job_limit),
                 expansion_jobs_completed=expansion_jobs_completed,
                 knowledge_backfill_jobs_requested=max(0, request.knowledge_backfill_limit),
@@ -3567,6 +5019,7 @@ class SourceDiscoveryService:
             health_checks_completed=len(checks),
             structure_scans_completed=structure_scans_completed,
             public_discovery_jobs_completed=public_discovery_jobs_completed,
+            link_graph_jobs_completed=link_graph_jobs_completed,
             expansion_jobs_completed=expansion_jobs_completed,
             knowledge_backfill_jobs_completed=knowledge_backfill_jobs_completed,
             record_extract_jobs_completed=record_extract_jobs_completed,
@@ -3715,6 +5168,682 @@ class SourceDiscoveryService:
         return executions, duplicate_snapshots_skipped
 
 
+def _run_scheduler_tick_queue(
+    service: SourceDiscoveryService,
+    request: SourceDiscoverySchedulerTickRequest,
+) -> SourceDiscoverySchedulerTickResponse:
+    now = _utc_now()
+    tick_id = f"source-scheduler-queue:{_compact_timestamp(now)}"
+    active_shard_id = f"{service._settings.source_discovery_shard_index}/{max(1, service._settings.source_discovery_shard_count)}"
+    caveats = list(request.caveats) + [
+        "Queue-backed scheduler tick is bounded and review-only.",
+        "Queue replay surfaces expose recorded decisions only; they do not re-execute network work.",
+    ]
+    queued_work_items = 0
+    executed_work_items = 0
+    retry_scheduled_items = 0
+    budget_blocked_items = 0
+    dead_lettered_items = 0
+    checks: list[SourceDiscoveryHealthCheckSummary] = []
+    jobs: list[SourceDiscoveryJobSummary] = []
+    llm_executions: list[WaveLlmExecutionSummary] = []
+    structure_scans_completed = 0
+    public_discovery_jobs_completed = 0
+    link_graph_jobs_completed = 0
+    expansion_jobs_completed = 0
+    knowledge_backfill_jobs_completed = 0
+    record_extract_jobs_completed = 0
+    duplicate_snapshots_skipped = 0
+
+    with session_scope(service._settings.source_discovery_database_url) as session:
+        run = RuntimeSchedulerRunORM(
+            run_id=tick_id,
+            worker_name="source_discovery",
+            trigger_kind="api_tick",
+            status="running",
+            requested_by="scheduler/tick",
+            lease_owner=tick_id,
+            started_at=now,
+            finished_at=None,
+            summary=None,
+            error_summary=None,
+        )
+        session.add(run)
+        queue_specs = _build_queue_specs(session, request, now=now)
+        for spec in queue_specs:
+            item, created = _queue_runtime_work_item(session, service._settings, spec=spec, now=now)
+            if created:
+                queued_work_items += 1
+        session.flush()
+
+    remaining_budget = max(0, request.request_budget)
+    execute_limit = min(
+        max(0, service._settings.source_discovery_per_tick_execute_limit),
+        max(0, request.health_check_limit + request.structure_scan_limit + request.public_discovery_job_limit + request.link_graph_job_limit + request.expansion_job_limit + request.knowledge_backfill_limit + request.record_source_extract_limit),
+    )
+    if execute_limit <= 0:
+        execute_limit = max(0, service._settings.source_discovery_per_tick_execute_limit)
+    work_items_to_run: list[str] = []
+    with session_scope(service._settings.source_discovery_database_url) as session:
+        items = list(
+            session.scalars(
+                select(SourceRuntimeWorkItemORM)
+                .where(
+                    SourceRuntimeWorkItemORM.worker_name == "source_discovery",
+                    SourceRuntimeWorkItemORM.status.in_(["queued", "retry_scheduled", "skipped_budget"]),
+                )
+                .order_by(SourceRuntimeWorkItemORM.priority_score.desc(), SourceRuntimeWorkItemORM.next_run_at.asc(), SourceRuntimeWorkItemORM.created_at.asc())
+                .limit(max(0, execute_limit or service._settings.source_discovery_per_tick_execute_limit or 50) * 4)
+            )
+        )
+        for item in items:
+            if _parse_utc_like(item.next_run_at) and _parse_utc_like(item.next_run_at) > _parse_utc_like(now):
+                continue
+            if item.shard_index != service._settings.source_discovery_shard_index:
+                continue
+            work_items_to_run.append(item.work_item_id)
+            if len(work_items_to_run) >= max(0, execute_limit or service._settings.source_discovery_per_tick_execute_limit or 50):
+                break
+
+    for work_item_id in work_items_to_run:
+        with session_scope(service._settings.source_discovery_database_url) as session:
+            item = session.get(SourceRuntimeWorkItemORM, work_item_id)
+            if item is None:
+                continue
+            if item.status not in {"queued", "retry_scheduled", "skipped_budget"}:
+                continue
+            domain_limit = service._settings.source_discovery_per_domain_request_budget
+            provider_limit = service._settings.source_discovery_per_provider_request_budget
+            if remaining_budget <= 0 and request.request_budget > 0:
+                item.status = "skipped_budget"
+                item.next_run_at = _isoformat_utc(_parse_utc_like(now) + timedelta(minutes=15))
+                item.updated_at = now
+                budget_blocked_items += 1
+                continue
+            if item.domain_key and not _runtime_budget_has_capacity(session, scope="domain", key=item.domain_key, request_limit=domain_limit, needed=max(1, item.request_budget), now=now):
+                item.status = "skipped_budget"
+                item.last_failure_kind = "budget_exhausted"
+                item.next_run_at = _isoformat_utc(_parse_utc_like(now) + timedelta(minutes=15))
+                item.updated_at = now
+                budget_blocked_items += 1
+                continue
+            if item.provider_key and not _runtime_budget_has_capacity(session, scope="provider", key=item.provider_key, request_limit=provider_limit, needed=max(1, item.request_budget), now=now):
+                item.status = "skipped_budget"
+                item.last_failure_kind = "budget_exhausted"
+                item.next_run_at = _isoformat_utc(_parse_utc_like(now) + timedelta(minutes=15))
+                item.updated_at = now
+                budget_blocked_items += 1
+                continue
+            attempt = SourceRuntimeWorkAttemptORM(
+                work_item_id=item.work_item_id,
+                run_id=tick_id,
+                job_type=item.job_type,
+                status="running",
+                failure_kind=None,
+                source_id=item.source_id,
+                domain_key=item.domain_key,
+                provider_key=item.provider_key,
+                attempt_index=item.attempt_count + 1,
+                started_at=now,
+                finished_at=None,
+                used_requests=0,
+                summary=None,
+                error_summary=None,
+                caveats_json=item.caveats_json,
+            )
+            session.add(attempt)
+            item.status = "running"
+            item.lease_owner = tick_id
+            item.lease_expires_at = _isoformat_utc(_parse_utc_like(now) + timedelta(seconds=max(30, service._settings.source_discovery_work_item_lease_seconds)))
+            item.updated_at = now
+            item.attempt_count += 1
+            session.flush()
+
+        try:
+            result = _execute_runtime_work_item(service, work_item_id, tick_id=tick_id)
+            executed_work_items += 1
+            remaining_budget = max(0, remaining_budget - result["used_requests"])
+            if result["health_check"] is not None:
+                checks.append(result["health_check"])  # type: ignore[arg-type]
+            if result["job"] is not None:
+                jobs.append(result["job"])  # type: ignore[arg-type]
+                if result["job_type"] == "structure_scan":
+                    structure_scans_completed += 1
+                elif result["job_type"] in {"feed_link_scan", "sitemap_scan", "catalog_scan"}:
+                    public_discovery_jobs_completed += 1
+                elif result["job_type"] == "link_graph_scan":
+                    link_graph_jobs_completed += 1
+                elif result["job_type"] == "expand":
+                    expansion_jobs_completed += 1
+                elif result["job_type"] == "knowledge_backfill":
+                    knowledge_backfill_jobs_completed += 1
+                elif result["job_type"] == "record_source_extract":
+                    record_extract_jobs_completed += 1
+        except Exception as exc:  # noqa: BLE001
+            failure_kind = _classify_runtime_failure(exc)
+            with session_scope(service._settings.source_discovery_database_url) as session:
+                item = session.get(SourceRuntimeWorkItemORM, work_item_id)
+                attempt = session.scalar(
+                    select(SourceRuntimeWorkAttemptORM)
+                    .where(
+                        SourceRuntimeWorkAttemptORM.work_item_id == work_item_id,
+                        SourceRuntimeWorkAttemptORM.run_id == tick_id,
+                    )
+                    .order_by(SourceRuntimeWorkAttemptORM.attempt_id.desc())
+                    .limit(1)
+                )
+                if item is None or attempt is None:
+                    continue
+                attempt.failure_kind = failure_kind
+                attempt.status = "blocked" if failure_kind in BLOCKING_FAILURE_KINDS else "retry_scheduled"
+                attempt.finished_at = _utc_now()
+                attempt.summary = f"{item.job_type} failed"
+                attempt.error_summary = str(exc)[:800]
+                item.last_failure_kind = failure_kind
+                item.last_error = str(exc)[:800]
+                item.lease_owner = None
+                item.lease_expires_at = None
+                item.updated_at = _utc_now()
+                if failure_kind in BLOCKING_FAILURE_KINDS:
+                    item.status = "blocked"
+                elif item.attempt_count >= max(1, item.max_attempts):
+                    item.status = "dead_lettered"
+                    dead_lettered_items += 1
+                else:
+                    item.status = "retry_scheduled"
+                    retry_scheduled_items += 1
+                    item.next_run_at = _isoformat_utc(
+                        _parse_utc_like(now)
+                        + timedelta(seconds=_retry_backoff_seconds(service._settings, item.attempt_count))
+                    )
+                session.flush()
+
+        with session_scope(service._settings.source_discovery_database_url) as session:
+            item = session.get(SourceRuntimeWorkItemORM, work_item_id)
+            attempt = session.scalar(
+                select(SourceRuntimeWorkAttemptORM)
+                .where(
+                    SourceRuntimeWorkAttemptORM.work_item_id == work_item_id,
+                    SourceRuntimeWorkAttemptORM.run_id == tick_id,
+                )
+                .order_by(SourceRuntimeWorkAttemptORM.attempt_id.desc())
+                .limit(1)
+            )
+            if item is None or attempt is None:
+                continue
+            if item.status == "running":
+                if item.domain_key:
+                    _consume_runtime_budget(session, scope="domain", key=item.domain_key, request_limit=service._settings.source_discovery_per_domain_request_budget, used=max(1, item.request_budget), now=_utc_now())
+                if item.provider_key:
+                    _consume_runtime_budget(session, scope="provider", key=item.provider_key, request_limit=service._settings.source_discovery_per_provider_request_budget, used=max(1, item.request_budget), now=_utc_now())
+                attempt.status = "completed"
+                attempt.finished_at = _utc_now()
+                attempt.summary = f"{item.job_type} completed"
+                attempt.used_requests = max(0, item.request_budget)
+                item.status = "completed"
+                item.lease_owner = None
+                item.lease_expires_at = None
+                item.updated_at = _utc_now()
+                item.next_run_at = _isoformat_utc(_parse_utc_like(now) + timedelta(hours=1))
+                session.flush()
+
+    finished_at = _utc_now()
+    used_requests = (
+        sum(check.used_requests for check in checks)
+        + sum(job.used_requests for job in jobs)
+        + sum(execution.used_requests for execution in llm_executions)
+    )
+    with session_scope(service._settings.source_discovery_database_url) as session:
+        tick = SourceSchedulerTickORM(
+            tick_id=tick_id,
+            status="completed",
+            requested_at=now,
+            finished_at=finished_at,
+            health_checks_requested=max(0, request.health_check_limit),
+            health_checks_completed=len(checks),
+            structure_scans_requested=max(0, request.structure_scan_limit),
+            structure_scans_completed=structure_scans_completed,
+            public_discovery_jobs_requested=max(0, request.public_discovery_job_limit),
+            public_discovery_jobs_completed=public_discovery_jobs_completed,
+            link_graph_jobs_requested=max(0, request.link_graph_job_limit),
+            link_graph_jobs_completed=link_graph_jobs_completed,
+            expansion_jobs_requested=max(0, request.expansion_job_limit),
+            expansion_jobs_completed=expansion_jobs_completed,
+            knowledge_backfill_jobs_requested=max(0, request.knowledge_backfill_limit),
+            knowledge_backfill_jobs_completed=knowledge_backfill_jobs_completed,
+            record_extract_jobs_requested=max(0, request.record_source_extract_limit),
+            record_extract_jobs_completed=record_extract_jobs_completed,
+            llm_tasks_requested=0,
+            llm_tasks_completed=0,
+            duplicate_snapshots_skipped=duplicate_snapshots_skipped,
+            request_budget=max(0, request.request_budget),
+            used_requests=used_requests,
+            caveats_json=json.dumps(caveats),
+        )
+        session.add(tick)
+        run = session.get(RuntimeSchedulerRunORM, tick_id)
+        if run is not None:
+            run.status = "completed"
+            run.finished_at = finished_at
+            run.summary = (
+                f"queued={queued_work_items} executed={executed_work_items} "
+                f"retry={retry_scheduled_items} budget_blocked={budget_blocked_items} dead_lettered={dead_lettered_items}"
+            )
+        queue_job = SourceDiscoveryJobORM(
+            job_id=f"source-discovery-job:scheduler-queue-run:{_compact_timestamp(now)}",
+            job_type="scheduler_queue_run",
+            status="completed",
+            seed_url=None,
+            wave_id=None,
+            wave_title=None,
+            discovered_source_ids_json=json.dumps([]),
+            rejected_reason=None,
+            request_budget=max(0, request.request_budget),
+            used_requests=used_requests,
+            started_at=now,
+            finished_at=finished_at,
+            outcome_summary=run.summary if run is not None else None,
+            caveats_json=json.dumps(caveats),
+        )
+        session.add(queue_job)
+        session.flush()
+
+    return SourceDiscoverySchedulerTickResponse(
+        tick_id=tick_id,
+        status="completed",
+        requested_at=now,
+        finished_at=finished_at,
+        health_checks_completed=len(checks),
+        structure_scans_completed=structure_scans_completed,
+        public_discovery_jobs_completed=public_discovery_jobs_completed,
+        link_graph_jobs_completed=link_graph_jobs_completed,
+        expansion_jobs_completed=expansion_jobs_completed,
+        knowledge_backfill_jobs_completed=knowledge_backfill_jobs_completed,
+        record_extract_jobs_completed=record_extract_jobs_completed,
+        llm_tasks_completed=0,
+        duplicate_snapshots_skipped=duplicate_snapshots_skipped,
+        request_budget=max(0, request.request_budget),
+        used_requests=used_requests,
+        queued_work_items=queued_work_items,
+        executed_work_items=executed_work_items,
+        retry_scheduled_items=retry_scheduled_items,
+        budget_blocked_items=budget_blocked_items,
+        dead_lettered_items=dead_lettered_items,
+        active_shard_id=active_shard_id,
+        health_checks=checks,
+        jobs=jobs,
+        llm_executions=llm_executions,
+        caveats=SOURCE_DISCOVERY_CAVEATS + caveats,
+    )
+
+
+def _build_queue_specs(
+    session: Session,
+    request: SourceDiscoverySchedulerTickRequest,
+    *,
+    now: str,
+) -> list[dict[str, object]]:
+    memories = list(
+        session.scalars(
+            select(SourceMemoryORM)
+            .where(SourceMemoryORM.lifecycle_state != "rejected")
+            .order_by(SourceMemoryORM.next_check_at, SourceMemoryORM.last_seen_at)
+        )
+    )
+    best_fit_by_source_id: dict[str, tuple[str | None, str | None]] = {}
+    for memory in memories:
+        best_fit = _best_wave_fit(_fits_for_source(session, memory.source_id))
+        best_fit_by_source_id[memory.source_id] = (
+            best_fit.wave_id if best_fit else None,
+            best_fit.wave_title if best_fit else None,
+        )
+    discovery_context = _build_discovery_priority_context(session)
+    specs: list[dict[str, object]] = []
+    for memory in memories:
+        wave_id, wave_title = best_fit_by_source_id[memory.source_id]
+        if _is_due_for_health_check(memory.next_check_at, now) and len([spec for spec in specs if spec["job_type"] == "health_check"]) < max(0, request.health_check_limit):
+            specs.append(_work_spec_for_memory("health_check", memory, wave_id=wave_id, wave_title=wave_title, priority_score=70))
+        if _is_scheduler_structure_scan_candidate(memory) and len([spec for spec in specs if spec["job_type"] == "structure_scan"]) < max(0, request.structure_scan_limit):
+            score = _compute_discovery_priority(session, memory, now=now, context=discovery_context)[0]
+            specs.append(_work_spec_for_memory("structure_scan", memory, wave_id=wave_id, wave_title=wave_title, priority_score=score))
+        if _is_scheduler_public_discovery_candidate(memory, now) and len([spec for spec in specs if spec["job_type"] in {"feed_link_scan", "sitemap_scan", "catalog_scan"}]) < max(0, request.public_discovery_job_limit):
+            job_type = _public_discovery_followup_kind(memory)
+            score = _compute_discovery_priority(session, memory, now=now, context=discovery_context)[0]
+            specs.append(_work_spec_for_memory(job_type, memory, wave_id=wave_id, wave_title=wave_title, priority_score=score))
+        if _is_scheduler_link_graph_candidate(memory, now) and len([spec for spec in specs if spec["job_type"] == "link_graph_scan"]) < max(0, request.link_graph_job_limit):
+            score = _compute_discovery_priority(session, memory, now=now, context=discovery_context)[0]
+            specs.append(_work_spec_for_memory("link_graph_scan", memory, wave_id=wave_id, wave_title=wave_title, priority_score=score))
+        if _is_scheduler_expansion_candidate(memory) and len([spec for spec in specs if spec["job_type"] == "expand"]) < max(0, request.expansion_job_limit):
+            specs.append(_work_spec_for_memory("expand", memory, wave_id=wave_id, wave_title=wave_title, priority_score=50))
+    if request.knowledge_backfill_limit > 0:
+        specs.append(
+            {
+                "job_type": "knowledge_backfill",
+                "source_id": None,
+                "seed_url": None,
+                "domain_key": "internal",
+                "provider_key": "knowledge_backfill",
+                "wave_id": None,
+                "wave_title": None,
+                "payload": {"max_snapshots": max(0, request.knowledge_backfill_limit)},
+                "priority_score": 40,
+                "request_budget": 0,
+                "caveats": ["Queue-triggered knowledge-node backfill."],
+            }
+        )
+    if request.record_source_extract_limit > 0:
+        specs.append(
+            {
+                "job_type": "record_source_extract",
+                "source_id": None,
+                "seed_url": None,
+                "domain_key": "internal",
+                "provider_key": "record_extract",
+                "wave_id": None,
+                "wave_title": None,
+                "payload": {"wave_monitor_limit": max(0, request.record_source_extract_limit)},
+                "priority_score": 35,
+                "request_budget": 0,
+                "caveats": ["Queue-triggered record-source extraction."],
+            }
+        )
+    return specs
+
+
+def _work_spec_for_memory(
+    job_type: str,
+    memory: SourceMemoryORM,
+    *,
+    wave_id: str | None,
+    wave_title: str | None,
+    priority_score: int,
+) -> dict[str, object]:
+    return {
+        "job_type": job_type,
+        "source_id": memory.source_id,
+        "seed_url": memory.url,
+        "domain_key": memory.parent_domain or _domain_from_url(memory.url),
+        "provider_key": job_type,
+        "wave_id": wave_id,
+        "wave_title": wave_title,
+        "payload": {},
+        "priority_score": int(priority_score),
+        "request_budget": 1 if job_type != "knowledge_backfill" else 0,
+        "caveats": [f"Queue-triggered {job_type.replace('_', ' ')}."],
+    }
+
+
+def _queue_runtime_work_item(
+    session: Session,
+    settings: Settings,
+    *,
+    spec: dict[str, object],
+    now: str,
+) -> tuple[SourceRuntimeWorkItemORM, bool]:
+    domain_key = str(spec.get("domain_key") or "")
+    source_id = str(spec.get("source_id")) if spec.get("source_id") else None
+    seed_url = str(spec.get("seed_url")) if spec.get("seed_url") else None
+    dedupe_key = "|".join([
+        str(spec["job_type"]),
+        source_id or "-",
+        seed_url or "-",
+        domain_key or "-",
+    ])
+    existing = session.scalar(
+        select(SourceRuntimeWorkItemORM)
+        .where(
+            SourceRuntimeWorkItemORM.worker_name == "source_discovery",
+            SourceRuntimeWorkItemORM.dedupe_key == dedupe_key,
+        )
+        .order_by(SourceRuntimeWorkItemORM.updated_at.desc())
+        .limit(1)
+    )
+    shard_count = max(1, settings.source_discovery_shard_count)
+    shard_index = _stable_shard_index(domain_key or source_id or dedupe_key, shard_count)
+    if existing is not None:
+        existing.next_run_at = min(existing.next_run_at, now) if existing.next_run_at else now
+        existing.priority_score = max(existing.priority_score, int(spec.get("priority_score", 0)))
+        existing.request_budget = max(existing.request_budget, int(spec.get("request_budget", 0)))
+        existing.payload_json = json.dumps(spec.get("payload", {}))
+        existing.caveats_json = json.dumps(list(spec.get("caveats") or []))
+        existing.domain_key = domain_key or existing.domain_key
+        existing.provider_key = str(spec.get("provider_key") or existing.provider_key or "")
+        existing.shard_index = shard_index
+        existing.shard_count = shard_count
+        existing.updated_at = now
+        if existing.status in {"completed", "dead_lettered", "blocked"}:
+            existing.status = "queued"
+            existing.next_run_at = now
+        return existing, False
+    item = SourceRuntimeWorkItemORM(
+        work_item_id=f"source-runtime-work:{_safe_id(dedupe_key)}:{_compact_timestamp(now)}",
+        worker_name="source_discovery",
+        job_type=str(spec["job_type"]),
+        status="queued",
+        source_id=source_id,
+        seed_url=seed_url,
+        domain_key=domain_key or None,
+        provider_key=str(spec.get("provider_key") or spec["job_type"]),
+        shard_index=shard_index,
+        shard_count=shard_count,
+        dedupe_key=dedupe_key,
+        priority_score=int(spec.get("priority_score", 0)),
+        next_run_at=now,
+        lease_owner=None,
+        lease_expires_at=None,
+        attempt_count=0,
+        max_attempts=max(1, settings.source_discovery_work_item_max_attempts),
+        request_budget=int(spec.get("request_budget", 0)),
+        last_failure_kind=None,
+        last_error=None,
+        payload_json=json.dumps(spec.get("payload", {})),
+        caveats_json=json.dumps(list(spec.get("caveats") or [])),
+        created_at=now,
+        updated_at=now,
+    )
+    session.add(item)
+    session.flush()
+    return item, True
+
+
+def _stable_shard_index(key: str, shard_count: int) -> int:
+    if shard_count <= 1:
+        return 0
+    digest = hashlib.sha256(key.encode("utf-8")).hexdigest()
+    return int(digest[:8], 16) % shard_count
+
+
+def _runtime_budget_window_bounds(now: str) -> tuple[str, str]:
+    dt = _parse_utc_like(now)
+    start = dt.replace(minute=0, second=0, microsecond=0)
+    end = start + timedelta(minutes=RUNTIME_BUDGET_WINDOW_MINUTES)
+    return _isoformat_utc(start), _isoformat_utc(end)
+
+
+def _runtime_budget_has_capacity(session: Session, *, scope: str, key: str, request_limit: int, needed: int, now: str) -> bool:
+    if request_limit <= 0:
+        return True
+    window = _get_or_create_runtime_budget_window(session, scope=scope, key=key, request_limit=request_limit, now=now)
+    return window.used_requests + needed <= request_limit
+
+
+def _consume_runtime_budget(session: Session, *, scope: str, key: str, request_limit: int, used: int, now: str) -> None:
+    if request_limit <= 0:
+        return
+    window = _get_or_create_runtime_budget_window(session, scope=scope, key=key, request_limit=request_limit, now=now)
+    window.used_requests += used
+    window.updated_at = now
+
+
+def _get_or_create_runtime_budget_window(session: Session, *, scope: str, key: str, request_limit: int, now: str) -> SourceRuntimeBudgetWindowORM:
+    window_start, window_end = _runtime_budget_window_bounds(now)
+    row = session.scalar(
+        select(SourceRuntimeBudgetWindowORM).where(
+            SourceRuntimeBudgetWindowORM.budget_scope == scope,
+            SourceRuntimeBudgetWindowORM.budget_key == key,
+            SourceRuntimeBudgetWindowORM.window_start == window_start,
+        ).limit(1)
+    )
+    if row is not None:
+        return row
+    row = SourceRuntimeBudgetWindowORM(
+        budget_scope=scope,
+        budget_key=key,
+        window_start=window_start,
+        window_end=window_end,
+        request_limit=request_limit,
+        used_requests=0,
+        created_at=now,
+        updated_at=now,
+    )
+    session.add(row)
+    session.flush()
+    return row
+
+
+def _retry_backoff_seconds(settings: Settings, attempt_count: int) -> int:
+    exponent = max(0, attempt_count - 1)
+    value = settings.source_discovery_retry_backoff_base_seconds * (2 ** exponent)
+    return min(settings.source_discovery_retry_backoff_max_seconds, value)
+
+
+def _classify_runtime_failure(exc: Exception) -> str:
+    text = str(exc).casefold()
+    if "captcha" in text:
+        return "blocked_captcha"
+    if "login" in text or "auth" in text:
+        return "blocked_auth"
+    if "rate limit" in text or "429" in text:
+        return "rate_limited"
+    if "timeout" in text:
+        return "timeout"
+    if "dns" in text or "name resolution" in text:
+        return "dns_error"
+    if "tls" in text or "ssl" in text:
+        return "tls_error"
+    if "parse" in text:
+        return "parse_error"
+    if "unsupported" in text:
+        return "unsupported_shape"
+    if "budget" in text:
+        return "budget_exhausted"
+    return "unexpected_status"
+
+
+def _execute_runtime_work_item(
+    service: SourceDiscoveryService,
+    work_item_id: str,
+    *,
+    tick_id: str,
+) -> dict[str, object]:
+    with session_scope(service._settings.source_discovery_database_url) as session:
+        item = session.get(SourceRuntimeWorkItemORM, work_item_id)
+        if item is None:
+            raise ValueError(f"Unknown work_item_id: {work_item_id}")
+        payload = _loads_dict(item.payload_json)
+        wave_id = payload.get("wave_id")
+        wave_title = payload.get("wave_title")
+        job_type = item.job_type
+        if job_type == "health_check":
+            response = service.check_source_health(
+                SourceDiscoveryHealthCheckRequest(
+                    source_id=item.source_id or "",
+                    request_budget=item.request_budget,
+                    caveats=_loads_list(item.caveats_json),
+                )
+            )
+            return {"job_type": job_type, "health_check": response.health_check, "job": None, "used_requests": response.health_check.used_requests}
+        if job_type == "structure_scan":
+            response = service.run_structure_scan_job(
+                SourceDiscoveryStructureScanRequest(
+                    target_url=item.seed_url or "",
+                    wave_id=wave_id if isinstance(wave_id, str) else None,
+                    wave_title=wave_title if isinstance(wave_title, str) else None,
+                    request_budget=item.request_budget,
+                    caveats=_loads_list(item.caveats_json),
+                )
+            )
+            job = _coerce_job_summary(response.job)
+            return {"job_type": job_type, "health_check": None, "job": job, "used_requests": job.used_requests}
+        if job_type == "feed_link_scan":
+            response = service.run_feed_link_scan_job(
+                SourceDiscoveryFeedLinkScanRequest(
+                    feed_url=item.seed_url or "",
+                    wave_id=wave_id if isinstance(wave_id, str) else None,
+                    wave_title=wave_title if isinstance(wave_title, str) else None,
+                    request_budget=item.request_budget,
+                    caveats=_loads_list(item.caveats_json),
+                )
+            )
+            job = _coerce_job_summary(response.job)
+            return {"job_type": job_type, "health_check": None, "job": job, "used_requests": job.used_requests}
+        if job_type == "sitemap_scan":
+            response = service.run_sitemap_scan_job(
+                SourceDiscoverySitemapScanRequest(
+                    sitemap_url=item.seed_url or "",
+                    wave_id=wave_id if isinstance(wave_id, str) else None,
+                    wave_title=wave_title if isinstance(wave_title, str) else None,
+                    request_budget=item.request_budget,
+                    caveats=_loads_list(item.caveats_json),
+                )
+            )
+            job = _coerce_job_summary(response.job)
+            return {"job_type": job_type, "health_check": None, "job": job, "used_requests": job.used_requests}
+        if job_type == "catalog_scan":
+            response = service.run_catalog_scan_job(
+                SourceDiscoveryCatalogScanRequest(
+                    catalog_url=item.seed_url or "",
+                    wave_id=wave_id if isinstance(wave_id, str) else None,
+                    wave_title=wave_title if isinstance(wave_title, str) else None,
+                    request_budget=item.request_budget,
+                    caveats=_loads_list(item.caveats_json),
+                )
+            )
+            job = _coerce_job_summary(response.job)
+            return {"job_type": job_type, "health_check": None, "job": job, "used_requests": job.used_requests}
+        if job_type == "link_graph_scan":
+            response = service.run_link_graph_scan_job(
+                SourceDiscoveryLinkGraphScanRequest(
+                    source_id=item.source_id or "",
+                    request_budget=item.request_budget,
+                    caveats=_loads_list(item.caveats_json),
+                )
+            )
+            job = _coerce_job_summary(response.job)
+            return {"job_type": job_type, "health_check": None, "job": job, "used_requests": job.used_requests}
+        if job_type == "expand":
+            response = service.run_expansion_job(
+                SourceDiscoveryExpansionJobRequest(
+                    seed_url=item.seed_url or "",
+                    wave_id=wave_id if isinstance(wave_id, str) else None,
+                    wave_title=wave_title if isinstance(wave_title, str) else None,
+                    request_budget=item.request_budget,
+                    caveats=_loads_list(item.caveats_json),
+                )
+            )
+            job = _coerce_job_summary(response.job)
+            return {"job_type": job_type, "health_check": None, "job": job, "used_requests": job.used_requests}
+        if job_type == "knowledge_backfill":
+            response = service.run_knowledge_backfill_job(
+                SourceDiscoveryKnowledgeBackfillRequest(
+                    max_snapshots=int(payload.get("max_snapshots", 0)),
+                    mode="missing_only",
+                    caveats=_loads_list(item.caveats_json),
+                )
+            )
+            job = _coerce_job_summary(response.job)
+            return {"job_type": job_type, "health_check": None, "job": job, "used_requests": job.used_requests}
+        if job_type == "record_source_extract":
+            response = service.run_record_source_extract_job(
+                SourceDiscoveryRecordSourceExtractRequest(
+                    wave_monitor_limit=int(payload.get("wave_monitor_limit", 0)),
+                    request_budget=item.request_budget,
+                    caveats=_loads_list(item.caveats_json),
+                )
+            )
+            job = _coerce_job_summary(response.job)
+            return {"job_type": job_type, "health_check": None, "job": job, "used_requests": job.used_requests}
+        raise ValueError(f"Unsupported runtime work item job_type: {job_type}")
 def _upsert_candidate_row(
     session: Session,
     seed: SourceDiscoveryCandidateSeed,
@@ -3775,6 +5904,8 @@ def _upsert_candidate_row(
             platform_family=str(seed.platform_family or "unknown"),
             source_family_tags_json=json.dumps(sorted(set(seed.source_family_tags))),
             scope_hints_json=scope_hints_json,
+            locale_expansion_basis_json=json.dumps(sorted(set(seed.locale_expansion_basis))),
+            discovered_from_provider=seed.discovered_from_provider,
             last_discovery_outcome=None,
         )
         session.add(memory)
@@ -3824,6 +5955,11 @@ def _upsert_candidate_row(
         memory.scope_hints_json = json.dumps(
             _merge_scope_hints(_loads_scope_hints(memory.scope_hints_json), scope_hints).model_dump()
         )
+        memory.locale_expansion_basis_json = json.dumps(
+            sorted(set(_loads_list(memory.locale_expansion_basis_json) + seed.locale_expansion_basis))
+        )
+        if seed.discovered_from_provider:
+            memory.discovered_from_provider = _merge_optional_text(memory.discovered_from_provider, seed.discovered_from_provider)
         if memory.next_discovery_scan_at is None:
             memory.next_discovery_scan_at = _initial_next_discovery_scan_at(
                 memory.source_type or seed.source_type,
@@ -4279,8 +6415,23 @@ def _apply_claim_outcome(
     request: SourceDiscoveryClaimOutcomeRequest,
     now: str,
 ) -> None:
+    memory.confirmed_claim_count = int(memory.confirmed_claim_count or 0)
+    memory.contradicted_claim_count = int(memory.contradicted_claim_count or 0)
+    memory.corrected_claim_count = int(memory.corrected_claim_count or 0)
+    memory.outdated_claim_count = int(memory.outdated_claim_count or 0)
+    memory.unresolved_claim_count = int(memory.unresolved_claim_count or 0)
+    memory.not_applicable_claim_count = int(memory.not_applicable_claim_count or 0)
+    memory.global_reputation_score = float(memory.global_reputation_score if memory.global_reputation_score is not None else 0.5)
+    memory.domain_reputation_score = float(memory.domain_reputation_score if memory.domain_reputation_score is not None else memory.global_reputation_score)
+    memory.correction_score = float(memory.correction_score if memory.correction_score is not None else 0.5)
+    memory.timeliness_score = float(memory.timeliness_score if memory.timeliness_score is not None else 0.5)
     before = memory.global_reputation_score
-    delta = _outcome_delta(memory.source_class, request.outcome)
+    profile_name = memory.reputation_policy_version or DEFAULT_REPUTATION_PROFILE
+    delta = _profile_outcome_delta(
+        memory,
+        request,
+        profile_name=profile_name,
+    )
     if request.outcome == "confirmed":
         memory.confirmed_claim_count += 1
     elif request.outcome == "contradicted":
@@ -4303,6 +6454,8 @@ def _apply_claim_outcome(
     memory.domain_reputation_score = _clamp(memory.domain_reputation_score + delta)
     memory.confidence_level = _confidence_level(memory)
     memory.last_reputation_event_at = now
+    memory.last_calibrated_at = now
+    memory.reputation_policy_version = profile_name
     basis = _loads_list(memory.reputation_basis_json)
     basis.append(f"{request.outcome}: {request.claim_text[:140]}")
     memory.reputation_basis_json = json.dumps(basis[-20:])
@@ -4316,8 +6469,516 @@ def _apply_claim_outcome(
             score_after=memory.global_reputation_score,
             reason=request.claim_text[:500],
             created_at=now,
+            policy_version=profile_name,
         )
     )
+
+
+def _reputation_profile(name: str | None) -> dict[str, object]:
+    if name and name in REPUTATION_PROFILES:
+        return REPUTATION_PROFILES[name]
+    return REPUTATION_PROFILES[DEFAULT_REPUTATION_PROFILE]
+
+
+def _profile_outcome_delta(
+    memory: SourceMemoryORM,
+    request: SourceDiscoveryClaimOutcomeRequest,
+    *,
+    profile_name: str | None,
+) -> float:
+    profile = _reputation_profile(profile_name)
+    outcome_deltas = dict(profile.get("outcome_deltas", {}))
+    base_delta = _outcome_delta(memory.source_class, request.outcome)
+    delta = float(outcome_deltas.get(request.outcome, base_delta))
+    if request.outcome == "outdated" and memory.source_class == "static":
+        delta = 0.0
+    source_bias = dict(profile.get("source_class_bias", {}))
+    evidence_bias = dict(profile.get("evidence_basis_bias", {}))
+    delta += float(source_bias.get(memory.source_class, 0.0))
+    delta += float(evidence_bias.get(request.evidence_basis, 0.0))
+    if request.corroborating_source_ids:
+        delta += min(len(request.corroborating_source_ids), 3) * float(profile.get("corroboration_bonus", 0.0))
+    if request.contradiction_source_ids:
+        delta += min(len(request.contradiction_source_ids), 3) * float(profile.get("contradiction_penalty", 0.0))
+    if request.outcome == "corrected":
+        delta += float(profile.get("correction_penalty", 0.0))
+    health_penalty = dict(profile.get("health_penalty", {}))
+    delta += float(health_penalty.get(memory.source_health, 0.0))
+    if request.outcome == "outdated" and memory.source_class != "static":
+        delta += float(profile.get("timeliness_penalty", 0.0))
+    return delta
+
+
+def _event_role_for_outcome(outcome: str | None) -> str:
+    if outcome == "contradicted":
+        return "contradicting"
+    if outcome == "corrected":
+        return "corrective"
+    if outcome == "unresolved":
+        return "open_question"
+    return "supporting"
+
+
+def _event_day(value: str | None) -> str | None:
+    if not value:
+        return None
+    return value[:10]
+
+
+def _event_scope_for_source(session: Session, source_id: str) -> SourceDiscoveryScopeHints:
+    memory = session.get(SourceMemoryORM, source_id)
+    if memory is None:
+        return SourceDiscoveryScopeHints()
+    return _loads_scope_hints(memory.scope_hints_json)
+
+
+def _event_media_cluster_ids_for_source(session: Session, source_id: str) -> list[str]:
+    return sorted({
+        cluster_id
+        for cluster_id in session.scalars(
+            select(SourceMediaArtifactORM.duplicate_cluster_id).where(
+                SourceMediaArtifactORM.source_id == source_id,
+                SourceMediaArtifactORM.duplicate_cluster_id.is_not(None),
+            )
+        )
+        if cluster_id
+    })
+
+
+def _event_signature(
+    *,
+    claim_text: str,
+    claim_type: str,
+    observed_at: str | None,
+    knowledge_node_id: str | None,
+    scope_hints: SourceDiscoveryScopeHints,
+) -> tuple[str, str]:
+    normalized_claim = _normalize_text(claim_text)
+    canonical_parts = [
+        claim_type.strip().casefold(),
+        normalized_claim,
+        (knowledge_node_id or "").strip().casefold(),
+        (_event_day(observed_at) or "").strip().casefold(),
+        "|".join(sorted(item.casefold() for item in scope_hints.spatial[:3])),
+        "|".join(sorted(item.casefold() for item in scope_hints.topic[:3])),
+    ]
+    signature = hashlib.sha256("||".join(canonical_parts).encode("utf-8")).hexdigest()
+    return signature, normalized_claim
+
+
+def _claim_candidate_observed_at(session: Session, candidate: SourceReviewClaimCandidateORM) -> str | None:
+    if candidate.snapshot_id:
+        snapshot = session.get(SourceContentSnapshotORM, candidate.snapshot_id)
+        if snapshot is not None:
+            return snapshot.published_at or snapshot.fetched_at
+    return candidate.created_at
+
+
+def _refresh_event_graph(
+    session: Session,
+    *,
+    source_ids: list[str],
+    wave_ids: list[str],
+    knowledge_node_ids: list[str],
+    include_pending_claims: bool,
+    mode: str,
+    max_events: int,
+    now: str,
+) -> dict[str, object]:
+    source_ids = [value for value in source_ids if value]
+    wave_ids = [value for value in wave_ids if value]
+    knowledge_node_ids = [value for value in knowledge_node_ids if value]
+    allowed_snapshots = {
+        snapshot.snapshot_id
+        for snapshot in session.scalars(
+            select(SourceContentSnapshotORM).where(SourceContentSnapshotORM.knowledge_node_id.in_(knowledge_node_ids))
+        )
+    } if knowledge_node_ids else set()
+    all_claim_rows = list(session.scalars(select(SourceClaimOutcomeORM).order_by(SourceClaimOutcomeORM.assessed_at.desc(), SourceClaimOutcomeORM.outcome_id.desc())))
+    all_candidate_rows = list(
+        session.scalars(
+            select(SourceReviewClaimCandidateORM)
+            .where(SourceReviewClaimCandidateORM.status == "pending")
+            .order_by(SourceReviewClaimCandidateORM.created_at.desc(), SourceReviewClaimCandidateORM.claim_candidate_id.desc())
+        )
+    ) if include_pending_claims else []
+
+    def _claim_targeted(row: SourceClaimOutcomeORM) -> bool:
+        if source_ids and row.source_id in source_ids:
+            return True
+        if wave_ids and row.wave_id in wave_ids:
+            return True
+        if knowledge_node_ids:
+            linked = session.scalar(
+                select(SourceContentSnapshotORM.snapshot_id)
+                .where(
+                    SourceContentSnapshotORM.source_id == row.source_id,
+                    SourceContentSnapshotORM.knowledge_node_id.in_(knowledge_node_ids),
+                )
+                .limit(1)
+            )
+            if linked is not None:
+                return True
+        return not source_ids and not wave_ids and not knowledge_node_ids
+
+    def _candidate_targeted(row: SourceReviewClaimCandidateORM) -> bool:
+        if source_ids and row.source_id in source_ids:
+            return True
+        if wave_ids and row.wave_id in wave_ids:
+            return True
+        if knowledge_node_ids and row.knowledge_node_id in knowledge_node_ids:
+            return True
+        return not source_ids and not wave_ids and not knowledge_node_ids
+
+    def _claim_payload(row: SourceClaimOutcomeORM) -> dict[str, object]:
+        if knowledge_node_ids and allowed_snapshots:
+            linked_snapshot = session.scalar(
+                select(SourceContentSnapshotORM)
+                .where(
+                    SourceContentSnapshotORM.source_id == row.source_id,
+                    SourceContentSnapshotORM.knowledge_node_id.in_(knowledge_node_ids),
+                )
+                .order_by(SourceContentSnapshotORM.fetched_at.desc(), SourceContentSnapshotORM.snapshot_id.desc())
+                .limit(1)
+            )
+        else:
+            linked_snapshot = session.scalar(
+                select(SourceContentSnapshotORM)
+                .where(SourceContentSnapshotORM.source_id == row.source_id)
+                .order_by(SourceContentSnapshotORM.fetched_at.desc(), SourceContentSnapshotORM.snapshot_id.desc())
+                .limit(1)
+            )
+        knowledge_node_id = linked_snapshot.knowledge_node_id if linked_snapshot is not None else None
+        snapshot_id = linked_snapshot.snapshot_id if linked_snapshot is not None else None
+        scope_hints = _event_scope_for_source(session, row.source_id)
+        signature, normalized_claim = _event_signature(
+            claim_text=row.claim_text,
+            claim_type=row.claim_type,
+            observed_at=row.observed_at,
+            knowledge_node_id=knowledge_node_id,
+            scope_hints=scope_hints,
+        )
+        memory = session.get(SourceMemoryORM, row.source_id)
+        return {
+            "kind": "outcome",
+            "signature": signature,
+            "normalized_claim": normalized_claim,
+            "source_id": row.source_id,
+            "wave_id": row.wave_id,
+            "role": _event_role_for_outcome(row.outcome),
+            "claim_text": row.claim_text,
+            "claim_type": row.claim_type,
+            "evidence_basis": row.evidence_basis,
+            "outcome": row.outcome,
+            "observed_at": row.observed_at,
+            "snapshot_id": snapshot_id,
+            "knowledge_node_id": knowledge_node_id,
+            "media_cluster_ids": _event_media_cluster_ids_for_source(session, row.source_id),
+            "claim_outcome_id": row.outcome_id,
+            "claim_candidate_id": None,
+            "source_class": memory.source_class if memory is not None else "unknown",
+            "scope_hints": scope_hints,
+            "created_at": row.assessed_at,
+            "caveats": _loads_list(row.caveats_json),
+        }
+
+    def _candidate_payload(row: SourceReviewClaimCandidateORM) -> dict[str, object]:
+        observed_at = _claim_candidate_observed_at(session, row)
+        scope_hints = _event_scope_for_source(session, row.source_id)
+        signature, normalized_claim = _event_signature(
+            claim_text=row.claim_text,
+            claim_type=row.claim_type,
+            observed_at=observed_at,
+            knowledge_node_id=row.knowledge_node_id,
+            scope_hints=scope_hints,
+        )
+        memory = session.get(SourceMemoryORM, row.source_id)
+        return {
+            "kind": "candidate",
+            "signature": signature,
+            "normalized_claim": normalized_claim,
+            "source_id": row.source_id,
+            "wave_id": row.wave_id,
+            "role": "provisional",
+            "claim_text": row.claim_text,
+            "claim_type": row.claim_type,
+            "evidence_basis": row.evidence_basis,
+            "outcome": None,
+            "observed_at": observed_at,
+            "snapshot_id": row.snapshot_id,
+            "knowledge_node_id": row.knowledge_node_id,
+            "media_cluster_ids": _event_media_cluster_ids_for_source(session, row.source_id),
+            "claim_outcome_id": None,
+            "claim_candidate_id": row.claim_candidate_id,
+            "source_class": memory.source_class if memory is not None else "unknown",
+            "scope_hints": scope_hints,
+            "created_at": row.created_at,
+            "caveats": _loads_list(row.caveats_json),
+        }
+
+    targeted_payloads = [_claim_payload(row) for row in all_claim_rows if _claim_targeted(row)]
+    if include_pending_claims:
+        targeted_payloads.extend(_candidate_payload(row) for row in all_candidate_rows if _candidate_targeted(row))
+    target_signatures = {str(payload["signature"]) for payload in targeted_payloads}
+    payloads: list[dict[str, object]] = []
+    if not target_signatures and not source_ids and not wave_ids and not knowledge_node_ids:
+        target_signatures = {str(_claim_payload(row)["signature"]) for row in all_claim_rows}
+        if include_pending_claims:
+            target_signatures.update(str(_candidate_payload(row)["signature"]) for row in all_candidate_rows)
+    if target_signatures:
+        for row in all_claim_rows:
+            payload = _claim_payload(row)
+            if str(payload["signature"]) in target_signatures:
+                payloads.append(payload)
+        for row in all_candidate_rows:
+            payload = _candidate_payload(row)
+            if str(payload["signature"]) in target_signatures:
+                payloads.append(payload)
+
+    grouped: dict[str, list[dict[str, object]]] = {}
+    for payload in payloads:
+        grouped.setdefault(str(payload["signature"]), []).append(payload)
+    signatures = list(grouped.keys())
+    if mode == "missing_only":
+        existing_signatures = {
+            signature
+            for signature in session.scalars(
+                select(SourceEventClusterORM.signature).where(SourceEventClusterORM.signature.in_(signatures))
+            )
+        }
+        signatures = [signature for signature in signatures if signature not in existing_signatures]
+    signatures = signatures[: max(0, max_events)]
+
+    created_event_count = 0
+    updated_event_count = 0
+    contested_event_count = 0
+    open_question_count = 0
+    affected_event_ids: list[str] = []
+    affected_source_ids: set[str] = set()
+    for signature in signatures:
+        rows = grouped[signature]
+        existing = session.scalar(select(SourceEventClusterORM).where(SourceEventClusterORM.signature == signature).limit(1))
+        if existing is not None and mode == "recompute_selected":
+            session.query(SourceEventMemberORM).where(SourceEventMemberORM.event_id == existing.event_id).delete()
+            session.query(SourceEventOpenQuestionORM).where(SourceEventOpenQuestionORM.event_id == existing.event_id).delete()
+            event = existing
+            updated_event_count += 1
+        elif existing is None:
+            event = SourceEventClusterORM(
+                event_id=f"source-event:{signature[:20]}",
+                signature=signature,
+                first_seen_at=now,
+                last_seen_at=now,
+                last_graph_refresh_at=now,
+            )
+            session.add(event)
+            created_event_count += 1
+        else:
+            event = existing
+            updated_event_count += 1
+            session.query(SourceEventMemberORM).where(SourceEventMemberORM.event_id == existing.event_id).delete()
+            session.query(SourceEventOpenQuestionORM).where(SourceEventOpenQuestionORM.event_id == existing.event_id).delete()
+
+        source_ids_in_event = sorted({str(row["source_id"]) for row in rows})
+        knowledge_ids = sorted({str(row["knowledge_node_id"]) for row in rows if row.get("knowledge_node_id")})
+        media_cluster_ids = sorted({cluster_id for row in rows for cluster_id in list(row.get("media_cluster_ids") or []) if cluster_id})
+        supporting_sources = {str(row["source_id"]) for row in rows if row["role"] in {"supporting", "provisional"}}
+        contradiction_sources = {str(row["source_id"]) for row in rows if row["role"] == "contradicting"}
+        corrective_sources = {str(row["source_id"]) for row in rows if row["role"] == "corrective"}
+        open_question_sources = {str(row["source_id"]) for row in rows if row["role"] == "open_question"}
+        if corrective_sources:
+            status = "corrected"
+        elif contradiction_sources:
+            status = "contested"
+        elif open_question_sources and not supporting_sources:
+            status = "open_question"
+        elif len(supporting_sources) > 1:
+            status = "corroborated"
+        else:
+            status = "single_source"
+        if status in {"contested", "corrected"}:
+            contested_event_count += 1
+        if status == "open_question":
+            open_question_count += 1
+        first_payload = rows[0]
+        merged_scope = SourceDiscoveryScopeHints()
+        for row in rows:
+            merged_scope = _merge_scope_hints(merged_scope, row["scope_hints"])  # type: ignore[arg-type]
+        event.status = status
+        event.claim_type = str(first_payload["claim_type"])
+        event.canonical_claim_text = str(first_payload["claim_text"])[:1000]
+        event.normalized_claim_text = str(first_payload["normalized_claim"])
+        event.observed_day = _event_day(first_payload.get("observed_at"))  # type: ignore[arg-type]
+        event.wave_id = str(first_payload["wave_id"]) if first_payload.get("wave_id") else None
+        event.supporting_source_count = len(supporting_sources)
+        event.contradiction_source_count = len(contradiction_sources)
+        event.corrective_source_count = len(corrective_sources)
+        event.open_question_count = len(open_question_sources)
+        event.last_seen_at = max(str(row["created_at"]) for row in rows)
+        event.last_graph_refresh_at = now
+        event.member_source_ids_json = json.dumps(source_ids_in_event)
+        event.knowledge_node_ids_json = json.dumps(knowledge_ids)
+        event.media_cluster_ids_json = json.dumps(media_cluster_ids)
+        event.scope_hints_json = _dumps_scope_hints(merged_scope)
+        event.caveats_json = json.dumps([
+            "Event clusters are deterministic evidence groupings and do not adjudicate truth on their own.",
+        ])
+        session.flush()
+        affected_event_ids.append(event.event_id)
+        affected_source_ids.update(source_ids_in_event)
+        for row in rows:
+            session.add(
+                SourceEventMemberORM(
+                    event_id=event.event_id,
+                    source_id=str(row["source_id"]),
+                    wave_id=str(row["wave_id"]) if row.get("wave_id") else None,
+                    role=str(row["role"]),
+                    claim_text=str(row["claim_text"])[:1000],
+                    claim_type=str(row["claim_type"]),
+                    evidence_basis=str(row["evidence_basis"]),
+                    outcome=str(row["outcome"]) if row.get("outcome") else None,
+                    observed_at=str(row["observed_at"]) if row.get("observed_at") else None,
+                    snapshot_id=str(row["snapshot_id"]) if row.get("snapshot_id") else None,
+                    knowledge_node_id=str(row["knowledge_node_id"]) if row.get("knowledge_node_id") else None,
+                    media_cluster_id=(list(row.get("media_cluster_ids") or [None])[0] if list(row.get("media_cluster_ids") or []) else None),
+                    claim_outcome_id=row.get("claim_outcome_id"),  # type: ignore[arg-type]
+                    claim_candidate_id=row.get("claim_candidate_id"),  # type: ignore[arg-type]
+                    source_class=str(row["source_class"]),
+                    created_at=str(row["created_at"]),
+                    caveats_json=json.dumps(list(row.get("caveats") or [])),
+                )
+            )
+            if str(row["role"]) == "open_question":
+                session.add(
+                    SourceEventOpenQuestionORM(
+                        event_id=event.event_id,
+                        source_id=str(row["source_id"]),
+                        question_text=str(row["claim_text"])[:1000],
+                        created_at=str(row["created_at"]),
+                        status="open",
+                        caveats_json=json.dumps([
+                            "Open question was derived from an unresolved claim outcome.",
+                        ]),
+                    )
+                )
+        for source_id in source_ids_in_event:
+            memory = session.get(SourceMemoryORM, source_id)
+            if memory is not None:
+                memory.latest_event_graph_at = now
+
+    session.flush()
+    return {
+        "processed_claim_count": len(payloads),
+        "created_event_count": created_event_count,
+        "updated_event_count": updated_event_count,
+        "contested_event_count": contested_event_count,
+        "open_question_count": open_question_count,
+        "event_ids": affected_event_ids,
+        "source_ids": sorted(affected_source_ids),
+    }
+
+
+def _select_reputation_recompute_targets(
+    session: Session,
+    *,
+    source_ids: list[str],
+    wave_ids: list[str],
+    max_sources: int,
+) -> list[SourceMemoryORM]:
+    if source_ids:
+        return [
+            memory
+            for memory in (session.get(SourceMemoryORM, source_id) for source_id in source_ids[: max(0, max_sources)])
+            if memory is not None
+        ]
+    if wave_ids:
+        candidate_source_ids = sorted({
+            fit.source_id
+            for fit in session.scalars(select(SourceWaveFitORM).where(SourceWaveFitORM.wave_id.in_(wave_ids)))
+        })
+        return [
+            memory
+            for memory in (session.get(SourceMemoryORM, source_id) for source_id in candidate_source_ids[: max(0, max_sources)])
+            if memory is not None
+        ]
+    return list(
+        session.scalars(
+            select(SourceMemoryORM)
+            .order_by(SourceMemoryORM.last_reputation_event_at.desc(), SourceMemoryORM.source_id.asc())
+            .limit(max(0, max_sources))
+        )
+    )
+
+
+def _recompute_memory_reputation(
+    session: Session,
+    memory: SourceMemoryORM,
+    *,
+    profile_name: str,
+    apply: bool,
+    now: str,
+) -> dict[str, object]:
+    outcomes = list(
+        session.scalars(
+            select(SourceClaimOutcomeORM)
+            .where(SourceClaimOutcomeORM.source_id == memory.source_id)
+            .order_by(SourceClaimOutcomeORM.assessed_at.asc(), SourceClaimOutcomeORM.outcome_id.asc())
+        )
+    )
+    projected_score = 0.5
+    projected_domain_score = 0.5
+    counts = {
+        "confirmed": 0,
+        "contradicted": 0,
+        "corrected": 0,
+        "outdated": 0,
+        "unresolved": 0,
+        "not_applicable": 0,
+    }
+    correction_score = 0.5
+    timeliness_score = 0.5
+    for outcome in outcomes:
+        request = SourceDiscoveryClaimOutcomeRequest(
+            source_id=memory.source_id,
+            wave_id=outcome.wave_id,
+            claim_text=outcome.claim_text,
+            claim_type=outcome.claim_type,
+            outcome=outcome.outcome,  # type: ignore[arg-type]
+            evidence_basis=outcome.evidence_basis,
+            observed_at=outcome.observed_at,
+            corroborating_source_ids=_loads_list(outcome.corroborating_source_ids_json),
+            contradiction_source_ids=_loads_list(outcome.contradiction_source_ids_json),
+            caveats=_loads_list(outcome.caveats_json),
+        )
+        delta = _profile_outcome_delta(memory, request, profile_name=profile_name)
+        projected_score = _clamp(projected_score + delta)
+        projected_domain_score = _clamp(projected_domain_score + delta)
+        counts[outcome.outcome] = counts.get(outcome.outcome, 0) + 1
+        if outcome.outcome == "corrected":
+            correction_score = _clamp(correction_score + 0.04)
+        elif outcome.outcome == "outdated" and memory.source_class != "static":
+            timeliness_score = _clamp(timeliness_score - 0.03)
+    changed = abs(projected_score - memory.global_reputation_score) > 1e-9 or profile_name != (memory.reputation_policy_version or DEFAULT_REPUTATION_PROFILE)
+    direction = "unchanged"
+    if projected_score > memory.global_reputation_score + 1e-9:
+        direction = "increased"
+    elif projected_score < memory.global_reputation_score - 1e-9:
+        direction = "decreased"
+    if apply:
+        memory.global_reputation_score = projected_score
+        memory.domain_reputation_score = projected_domain_score
+        memory.confirmed_claim_count = counts["confirmed"]
+        memory.contradicted_claim_count = counts["contradicted"]
+        memory.corrected_claim_count = counts["corrected"]
+        memory.outdated_claim_count = counts["outdated"]
+        memory.unresolved_claim_count = counts["unresolved"]
+        memory.not_applicable_claim_count = counts["not_applicable"]
+        memory.correction_score = correction_score
+        memory.timeliness_score = timeliness_score
+        memory.confidence_level = _confidence_level(memory)
+        memory.reputation_policy_version = profile_name
+        memory.last_calibrated_at = now
+    return {"changed": changed, "direction": direction}
 
 
 def _lower_wave_fit_for_not_applicable(session: Session, source_id: str, wave_id: str, now: str) -> None:
@@ -4357,6 +7018,14 @@ def _build_memory_detail_response(
             select(SourceContentSnapshotORM)
             .where(SourceContentSnapshotORM.source_id == memory.source_id)
             .order_by(SourceContentSnapshotORM.fetched_at.desc())
+            .limit(max(0, limit))
+        )
+    )
+    archive_hits = list(
+        session.scalars(
+            select(SourceArchiveHitORM)
+            .where(SourceArchiveHitORM.source_id == memory.source_id)
+            .order_by(SourceArchiveHitORM.discovered_at.desc(), SourceArchiveHitORM.archive_hit_id.desc())
             .limit(max(0, limit))
         )
     )
@@ -4441,10 +7110,15 @@ def _build_memory_detail_response(
         )
     )
     pending_review_claims = _pending_review_claim_candidates_for_source(session, memory.source_id, limit=max(0, limit))
+    adversarial_findings = _adversarial_findings_for_source(session, memory.source_id, limit=max(0, limit))
+    event_clusters = _event_clusters_for_source(session, memory.source_id, limit=max(0, limit))
+    contested_event_count = _count_events_for_source_by_status(session, memory.source_id, {"contested", "corrected"})
+    open_question_count = _count_events_for_source_by_status(session, memory.source_id, {"open_question"})
     return SourceDiscoveryMemoryDetailResponse(
         memory=_serialize_memory(session, memory, context=context),
         wave_fits=[_serialize_wave_fit(fit) for fit in _fits_for_source(session, memory.source_id)],
         snapshots=[_serialize_snapshot(session, snapshot) for snapshot in snapshots],
+        archive_hits=[_serialize_archive_hit(row) for row in archive_hits],
         knowledge_nodes=[_serialize_knowledge_node(session, node) for node in nodes],
         media_artifacts=[_serialize_media_artifact(artifact) for artifact in media_artifacts],
         media_clusters=[_serialize_media_cluster(cluster) for cluster in media_clusters],
@@ -4491,8 +7165,12 @@ def _build_memory_detail_response(
             )
         ],
         pending_review_claims=[_serialize_review_claim_candidate(row) for row in pending_review_claims],
+        adversarial_findings=[_serialize_adversarial_finding(row) for row in adversarial_findings],
         pending_claim_count=len(_pending_review_claim_candidates_for_source(session, memory.source_id)),
         latest_review_claim_at=pending_review_claims[0].created_at if pending_review_claims else None,
+        event_clusters=event_clusters,
+        contested_event_count=contested_event_count,
+        open_question_count=open_question_count,
         caveats=SOURCE_DISCOVERY_CAVEATS,
     )
 
@@ -4545,6 +7223,7 @@ def _serialize_memory(
         timeliness_score=memory.timeliness_score,
         correction_score=memory.correction_score,
         confidence_level=memory.confidence_level,
+        reputation_policy_version=memory.reputation_policy_version,
         claim_outcomes={
             "confirmed": memory.confirmed_claim_count,
             "contradicted": memory.contradicted_claim_count,
@@ -4565,9 +7244,17 @@ def _serialize_memory(
         platform_family=memory.platform_family,  # type: ignore[arg-type]
         source_family_tags=_loads_list(memory.source_family_tags_json),
         scope_hints=_loads_scope_hints(memory.scope_hints_json),
+        locale_expansion_basis=_loads_list(memory.locale_expansion_basis_json),
+        discovered_from_provider=memory.discovered_from_provider,
         first_seen_at=memory.first_seen_at,
         last_seen_at=memory.last_seen_at,
         last_reputation_event_at=memory.last_reputation_event_at,
+        last_calibrated_at=memory.last_calibrated_at,
+        latest_event_graph_at=memory.latest_event_graph_at,
+        adversarial_risk_level=memory.adversarial_risk_level,  # type: ignore[arg-type]
+        adversarial_signal_count=int(memory.adversarial_signal_count or 0),
+        adversarial_signals=_loads_list(memory.adversarial_signals_json),
+        latest_adversarial_scan_at=memory.latest_adversarial_scan_at,
         next_check_at=memory.next_check_at,
         last_discovery_scan_at=memory.last_discovery_scan_at,
         next_discovery_scan_at=memory.next_discovery_scan_at,
@@ -4635,6 +7322,92 @@ def _serialize_discovery_run(session: Session, job: SourceDiscoveryJobORM) -> So
     )
 
 
+def _serialize_runtime_run(row: RuntimeSchedulerRunORM) -> SourceDiscoveryRuntimeRunSummary:
+    return SourceDiscoveryRuntimeRunSummary(
+        run_id=row.run_id,
+        worker_name=row.worker_name,  # type: ignore[arg-type]
+        trigger_kind=row.trigger_kind,
+        status=row.status,
+        requested_by=row.requested_by,
+        lease_owner=row.lease_owner,
+        started_at=row.started_at,
+        finished_at=row.finished_at,
+        summary=row.summary,
+        error_summary=row.error_summary,
+    )
+
+
+def _serialize_runtime_work_item(row: SourceRuntimeWorkItemORM) -> SourceDiscoveryRuntimeWorkItemSummary:
+    return SourceDiscoveryRuntimeWorkItemSummary(
+        work_item_id=row.work_item_id,
+        worker_name=row.worker_name,  # type: ignore[arg-type]
+        job_type=row.job_type,
+        status=row.status,  # type: ignore[arg-type]
+        source_id=row.source_id,
+        seed_url=row.seed_url,
+        domain_key=row.domain_key,
+        provider_key=row.provider_key,
+        shard_index=row.shard_index,
+        shard_count=row.shard_count,
+        dedupe_key=row.dedupe_key,
+        priority_score=row.priority_score,
+        next_run_at=row.next_run_at,
+        lease_owner=row.lease_owner,
+        lease_expires_at=row.lease_expires_at,
+        attempt_count=row.attempt_count,
+        max_attempts=row.max_attempts,
+        request_budget=row.request_budget,
+        last_failure_kind=row.last_failure_kind,  # type: ignore[arg-type]
+        last_error=row.last_error,
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+        caveats=_loads_list(row.caveats_json),
+    )
+
+
+def _serialize_runtime_failure(row: SourceRuntimeWorkAttemptORM) -> SourceDiscoveryRuntimeFailureSummary:
+    return SourceDiscoveryRuntimeFailureSummary(
+        attempt_id=row.attempt_id,
+        work_item_id=row.work_item_id,
+        run_id=row.run_id,
+        job_type=row.job_type,
+        status=row.status,  # type: ignore[arg-type]
+        failure_kind=row.failure_kind,  # type: ignore[arg-type]
+        source_id=row.source_id,
+        domain_key=row.domain_key,
+        provider_key=row.provider_key,
+        attempt_index=row.attempt_index,
+        started_at=row.started_at,
+        finished_at=row.finished_at,
+        used_requests=row.used_requests,
+        summary=row.summary,
+        error_summary=row.error_summary,
+    )
+
+
+def _coerce_job_summary(value: object) -> SourceDiscoveryJobSummary:
+    if isinstance(value, SourceDiscoveryJobSummary):
+        return value
+    if isinstance(value, dict):
+        return SourceDiscoveryJobSummary.model_validate(value)
+    data = {
+        "job_id": getattr(value, "job_id"),
+        "job_type": getattr(value, "job_type"),
+        "status": getattr(value, "status"),
+        "seed_url": getattr(value, "seed_url", None),
+        "wave_id": getattr(value, "wave_id", None),
+        "wave_title": getattr(value, "wave_title", None),
+        "discovered_source_ids": list(getattr(value, "discovered_source_ids", []) or []),
+        "rejected_reason": getattr(value, "rejected_reason", None),
+        "request_budget": int(getattr(value, "request_budget", 0) or 0),
+        "used_requests": int(getattr(value, "used_requests", 0) or 0),
+        "started_at": getattr(value, "started_at"),
+        "finished_at": getattr(value, "finished_at", None),
+        "caveats": list(getattr(value, "caveats", []) or []),
+    }
+    return SourceDiscoveryJobSummary.model_validate(data)
+
+
 def _serialize_health_check(check: SourceHealthCheckORM) -> SourceDiscoveryHealthCheckSummary:
     return SourceDiscoveryHealthCheckSummary(
         check_id=check.check_id,
@@ -4656,6 +7429,22 @@ def _serialize_health_check(check: SourceHealthCheckORM) -> SourceDiscoveryHealt
     )
 
 
+def _serialize_adversarial_finding(row: SourceAdversarialFindingORM) -> SourceDiscoveryAdversarialFindingSummary:
+    return SourceDiscoveryAdversarialFindingSummary(
+        finding_id=row.finding_id,
+        source_id=row.source_id,
+        snapshot_id=row.snapshot_id,
+        job_id=row.job_id,
+        surface_type=row.surface_type,
+        signal_type=row.signal_type,
+        risk_level=row.risk_level,  # type: ignore[arg-type]
+        summary=row.summary,
+        matched_text=row.matched_text,
+        detected_at=row.detected_at,
+        status=row.status,  # type: ignore[arg-type]
+    )
+
+
 def _serialize_snapshot(session: Session, snapshot: SourceContentSnapshotORM) -> SourceDiscoveryContentSnapshotSummary:
     node = session.get(SourceKnowledgeNodeORM, snapshot.knowledge_node_id) if snapshot.knowledge_node_id else None
     return SourceDiscoveryContentSnapshotSummary(
@@ -4673,6 +7462,11 @@ def _serialize_snapshot(session: Session, snapshot: SourceContentSnapshotORM) ->
         request_budget=snapshot.request_budget,
         used_requests=snapshot.used_requests,
         extraction_confidence=snapshot.extraction_confidence,
+        retrieval_origin=snapshot.retrieval_origin,  # type: ignore[arg-type]
+        retrieved_from_url=snapshot.retrieved_from_url,
+        resolved_original_url=snapshot.resolved_original_url,
+        detected_language=snapshot.detected_language,
+        normalization_notes=_loads_list(snapshot.normalization_notes_json),
         knowledge_node_id=snapshot.knowledge_node_id,
         canonical_snapshot_id=snapshot.canonical_snapshot_id,
         duplicate_class=snapshot.duplicate_class,  # type: ignore[arg-type]
@@ -4680,7 +7474,23 @@ def _serialize_snapshot(session: Session, snapshot: SourceContentSnapshotORM) ->
         supporting_source_count=node.supporting_source_count if node is not None else 1,
         independent_source_count=node.independent_source_count if node is not None else 1,
         as_detailed_in_addition_to=_loads_list(node.as_detailed_in_addition_to_json) if node is not None else [],
+        adversarial_risk_level=snapshot.adversarial_risk_level,  # type: ignore[arg-type]
+        adversarial_signal_count=int(snapshot.adversarial_signal_count or 0),
+        adversarial_signals=_loads_list(snapshot.adversarial_signals_json),
         caveats=_loads_list(snapshot.caveats_json),
+    )
+
+
+def _serialize_archive_hit(row: SourceArchiveHitORM) -> SourceDiscoveryArchiveHitSummary:
+    return SourceDiscoveryArchiveHitSummary(
+        archive_hit_id=row.archive_hit_id,
+        source_id=row.source_id,
+        provider=row.provider,
+        original_url=row.original_url,
+        archive_url=row.archive_url,
+        captured_at=row.captured_at,
+        discovered_at=row.discovered_at,
+        caveats=_loads_list(row.caveats_json),
     )
 
 
@@ -5107,6 +7917,17 @@ def _serialize_media_sequence(row: SourceMediaSequenceORM) -> SourceDiscoveryMed
     )
 
 
+def _adversarial_findings_for_source(session: Session, source_id: str, *, limit: int) -> list[SourceAdversarialFindingORM]:
+    return list(
+        session.scalars(
+            select(SourceAdversarialFindingORM)
+            .where(SourceAdversarialFindingORM.source_id == source_id)
+            .order_by(SourceAdversarialFindingORM.detected_at.desc(), SourceAdversarialFindingORM.finding_id.desc())
+            .limit(max(0, limit))
+        )
+    )
+
+
 def _serialize_reputation_event(event: SourceReputationEventORM) -> SourceDiscoveryReputationEventSummary:
     return SourceDiscoveryReputationEventSummary(
         event_id=event.event_id,
@@ -5118,6 +7939,7 @@ def _serialize_reputation_event(event: SourceReputationEventORM) -> SourceDiscov
         score_after=event.score_after,
         reason=event.reason,
         created_at=event.created_at,
+        policy_version=event.policy_version,
         reversed_at=event.reversed_at,
         reversal_reason=event.reversal_reason,
     )
@@ -5195,6 +8017,124 @@ def _serialize_review_claim_candidate(
         created_at=row.created_at,
         applied_at=row.applied_at,
         caveats=_loads_list(row.caveats_json),
+    )
+
+
+def _serialize_event_cluster(row: SourceEventClusterORM) -> SourceDiscoveryEventClusterSummary:
+    return SourceDiscoveryEventClusterSummary(
+        event_id=row.event_id,
+        signature=row.signature,
+        status=row.status,  # type: ignore[arg-type]
+        claim_type=row.claim_type,
+        canonical_claim_text=row.canonical_claim_text,
+        observed_day=row.observed_day,
+        wave_id=row.wave_id,
+        knowledge_node_ids=_loads_list(row.knowledge_node_ids_json),
+        media_cluster_ids=_loads_list(row.media_cluster_ids_json),
+        member_source_ids=_loads_list(row.member_source_ids_json),
+        supporting_source_count=row.supporting_source_count,
+        contradiction_source_count=row.contradiction_source_count,
+        corrective_source_count=row.corrective_source_count,
+        open_question_count=row.open_question_count,
+        first_seen_at=row.first_seen_at,
+        last_seen_at=row.last_seen_at,
+        caveats=_loads_list(row.caveats_json),
+    )
+
+
+def _serialize_event_member(row: SourceEventMemberORM) -> SourceDiscoveryEventMemberSummary:
+    return SourceDiscoveryEventMemberSummary(
+        member_id=row.member_id,
+        event_id=row.event_id,
+        source_id=row.source_id,
+        wave_id=row.wave_id,
+        role=row.role,  # type: ignore[arg-type]
+        claim_text=row.claim_text,
+        claim_type=row.claim_type,
+        evidence_basis=row.evidence_basis,
+        outcome=row.outcome,  # type: ignore[arg-type]
+        observed_at=row.observed_at,
+        snapshot_id=row.snapshot_id,
+        knowledge_node_id=row.knowledge_node_id,
+        media_cluster_id=row.media_cluster_id,
+        claim_outcome_id=row.claim_outcome_id,
+        claim_candidate_id=row.claim_candidate_id,
+        source_class=row.source_class,  # type: ignore[arg-type]
+        created_at=row.created_at,
+        caveats=_loads_list(row.caveats_json),
+    )
+
+
+def _serialize_event_open_question(row: SourceEventOpenQuestionORM) -> SourceDiscoveryEventOpenQuestionSummary:
+    return SourceDiscoveryEventOpenQuestionSummary(
+        question_id=row.question_id,
+        event_id=row.event_id,
+        source_id=row.source_id,
+        question_text=row.question_text,
+        created_at=row.created_at,
+        status=row.status,
+        caveats=_loads_list(row.caveats_json),
+    )
+
+
+def _event_clusters_for_source(session: Session, source_id: str, *, limit: int | None = None) -> list[SourceDiscoveryEventClusterSummary]:
+    event_ids = [
+        row.event_id
+        for row in session.scalars(
+            select(SourceEventMemberORM)
+            .where(SourceEventMemberORM.source_id == source_id)
+            .order_by(SourceEventMemberORM.created_at.desc(), SourceEventMemberORM.member_id.desc())
+        )
+    ]
+    unique_event_ids: list[str] = []
+    seen: set[str] = set()
+    for event_id in event_ids:
+        if event_id not in seen:
+            unique_event_ids.append(event_id)
+            seen.add(event_id)
+    if limit is not None:
+        unique_event_ids = unique_event_ids[: max(0, limit)]
+    events = [
+        event
+        for event in (session.get(SourceEventClusterORM, event_id) for event_id in unique_event_ids)
+        if event is not None
+    ]
+    return [_serialize_event_cluster(event) for event in events]
+
+
+def _event_clusters_for_knowledge_node(session: Session, node_id: str, *, limit: int | None = None) -> list[SourceDiscoveryEventClusterSummary]:
+    events = list(
+        session.scalars(
+            select(SourceEventClusterORM)
+            .order_by(SourceEventClusterORM.last_seen_at.desc(), SourceEventClusterORM.event_id.asc())
+        )
+    )
+    filtered = [event for event in events if node_id in _loads_list(event.knowledge_node_ids_json)]
+    if limit is not None:
+        filtered = filtered[: max(0, limit)]
+    return [_serialize_event_cluster(event) for event in filtered]
+
+
+def _count_events_for_source_by_status(session: Session, source_id: str, statuses: set[str]) -> int:
+    if not statuses:
+        return 0
+    event_ids = {
+        row.event_id
+        for row in session.scalars(
+            select(SourceEventMemberORM).where(SourceEventMemberORM.source_id == source_id)
+        )
+    }
+    if not event_ids:
+        return 0
+    return len(
+        list(
+            session.scalars(
+                select(SourceEventClusterORM.event_id).where(
+                    SourceEventClusterORM.event_id.in_(event_ids),
+                    SourceEventClusterORM.status.in_(sorted(statuses)),
+                )
+            )
+        )
     )
 
 
@@ -5882,6 +8822,88 @@ def _normalize_scope_hints(scope_hints: SourceDiscoveryScopeHints | dict[str, An
     return SourceDiscoveryScopeHints(**payload)
 
 
+def _dumps_scope_hints(scope_hints: SourceDiscoveryScopeHints | dict[str, Any] | None) -> str:
+    return json.dumps(_normalize_scope_hints(scope_hints).model_dump())
+
+
+def _adversarial_risk_value(level: str | None) -> int:
+    return ADVERSARIAL_RISK_ORDER.get((level or "none").casefold(), 0)
+
+
+def _highest_adversarial_risk(levels: list[str]) -> str:
+    if not levels:
+        return "none"
+    return max(levels, key=_adversarial_risk_value)
+
+
+def _truncate_match_excerpt(text: str | None, *, max_length: int = 220) -> str | None:
+    if not text:
+        return None
+    compact = re.sub(r"\s+", " ", text).strip()
+    if len(compact) <= max_length:
+        return compact
+    return compact[: max_length - 3].rstrip() + "..."
+
+
+def _detect_adversarial_findings(
+    text: str | None,
+    *,
+    url: str,
+) -> list[dict[str, str]]:
+    document = text or ""
+    if not document.strip():
+        return []
+    findings: list[dict[str, str]] = []
+    seen_signals: set[str] = set()
+    for rule in ADVERSARIAL_FINDING_RULES:
+        signal_type = str(rule["signal_type"])
+        for pattern in list(rule["patterns"]):
+            match = re.search(str(pattern), document, flags=re.IGNORECASE)
+            if match is None:
+                continue
+            if signal_type in seen_signals:
+                break
+            seen_signals.add(signal_type)
+            findings.append(
+                {
+                    "signal_type": signal_type,
+                    "risk_level": str(rule["risk_level"]),
+                    "summary": str(rule["summary"]),
+                    "matched_text": _truncate_match_excerpt(document[max(0, match.start() - 60): min(len(document), match.end() + 120)]),
+                }
+            )
+            break
+    lowered = document.casefold()
+    if (
+        any(marker in lowered for marker in ("display:none", "display: none", "opacity:0", "font-size:0", "aria-hidden"))
+        and any(finding["signal_type"] in {"instruction_override", "secret_request", "validation_bypass_request"} for finding in findings)
+        and "hidden_instruction_text" not in seen_signals
+    ):
+        findings.append(
+            {
+                "signal_type": "hidden_instruction_text",
+                "risk_level": "high",
+                "summary": "Page appears to hide instruction-like text in markup or styling.",
+                "matched_text": _truncate_match_excerpt(url),
+            }
+        )
+    return findings
+
+
+def _source_adversarial_review_reasons(memory: SourceMemoryORM) -> list[str]:
+    signals = _loads_list(memory.adversarial_signals_json)
+    if not signals:
+        return []
+    reasons = ["Prompt-injection or adversarial page behavior detected during source discovery or content capture."]
+    if "secret_request" in signals:
+        reasons.append("Suspicious text requested secrets, credentials, or hidden prompt material.")
+    if "download_or_execute_request" in signals or "developer_tools_request" in signals:
+        reasons.append("Suspicious text requested code execution, DevTools interaction, or shell steps.")
+    if "validation_bypass_request" in signals:
+        reasons.append("Suspicious text attempted to bypass review or promote trust directly.")
+    return reasons
+
+
 def _normalize_platform_family(
     platform_family: str | None,
     url: str,
@@ -5906,6 +8928,76 @@ def _merge_scope_hints(
         language=sorted(set(left.language + right.language)),
         topic=sorted(set(left.topic + right.topic)),
     )
+
+
+def _refresh_adversarial_posture(session: Session, *, source_id: str, snapshot_id: str | None, now: str) -> None:
+    memory = session.get(SourceMemoryORM, source_id)
+    source_rows = list(
+        session.scalars(
+            select(SourceAdversarialFindingORM)
+            .where(
+                SourceAdversarialFindingORM.source_id == source_id,
+                SourceAdversarialFindingORM.status == "open",
+            )
+            .order_by(SourceAdversarialFindingORM.detected_at.desc(), SourceAdversarialFindingORM.finding_id.desc())
+        )
+    )
+    if memory is not None:
+        memory.latest_adversarial_scan_at = now
+        memory.adversarial_signal_count = len(source_rows)
+        memory.adversarial_signals_json = json.dumps(sorted({row.signal_type for row in source_rows}))
+        memory.adversarial_risk_level = _highest_adversarial_risk([row.risk_level for row in source_rows])
+    if snapshot_id:
+        snapshot = session.get(SourceContentSnapshotORM, snapshot_id)
+        if snapshot is not None:
+            snapshot_rows = [row for row in source_rows if row.snapshot_id == snapshot_id]
+            snapshot.adversarial_signal_count = len(snapshot_rows)
+            snapshot.adversarial_signals_json = json.dumps(sorted({row.signal_type for row in snapshot_rows}))
+            snapshot.adversarial_risk_level = _highest_adversarial_risk([row.risk_level for row in snapshot_rows])
+
+
+def _record_adversarial_findings(
+    session: Session,
+    *,
+    source_id: str,
+    snapshot_id: str | None,
+    job_id: str | None,
+    surface_type: str,
+    findings: list[dict[str, str]],
+    now: str,
+) -> list[SourceAdversarialFindingORM]:
+    rows: list[SourceAdversarialFindingORM] = []
+    for finding in findings:
+        row = SourceAdversarialFindingORM(
+            source_id=source_id,
+            snapshot_id=snapshot_id,
+            job_id=job_id,
+            surface_type=surface_type,
+            signal_type=finding["signal_type"],
+            risk_level=finding["risk_level"],
+            summary=finding["summary"],
+            matched_text=finding.get("matched_text"),
+            detected_at=now,
+            status="open",
+        )
+        session.add(row)
+        rows.append(row)
+    session.flush()
+    _refresh_adversarial_posture(session, source_id=source_id, snapshot_id=snapshot_id, now=now)
+    memory = session.get(SourceMemoryORM, source_id)
+    if memory is not None and findings:
+        caveats = _loads_list(memory.caveats_json)
+        caveats.append(f"Adversarial or prompt-injection signals detected during {surface_type}.")
+        memory.caveats_json = json.dumps(sorted(set(caveats)))
+    return rows
+
+
+def _apply_adversarial_hold_review(memory: SourceMemoryORM, findings: list[dict[str, str]]) -> None:
+    if not findings:
+        return
+    risk = _highest_adversarial_risk([finding["risk_level"] for finding in findings])
+    if _adversarial_risk_value(risk) >= _adversarial_risk_value("medium") and memory.intake_disposition != "blocked":
+        memory.intake_disposition = "hold_review"
 
 
 def _merge_discovery_role(current: str, incoming: str) -> str:
@@ -5948,10 +9040,14 @@ def _normalized_source_family_tags(seed: SourceDiscoveryCandidateSeed) -> list[s
         tags.add("wiki")
     if seed.seed_family == "status_root":
         tags.add("status_page")
+    if seed.seed_family == "mailing_list_root":
+        tags.update({"forum", "archive"})
     if seed.seed_family in {"archive_root", "archive_index"}:
         tags.add("archive")
-    if seed.platform_family in {"discourse", "stack_exchange"}:
+    if seed.platform_family in {"discourse", "stack_exchange", "mailing_list"}:
         tags.add("forum")
+    if seed.platform_family == "mailing_list":
+        tags.add("archive")
     if seed.platform_family == "mediawiki":
         tags.add("wiki")
     if seed.platform_family == "mastodon":
@@ -5978,6 +9074,8 @@ def _derived_seed_family(seed: SourceDiscoveryCandidateSeed) -> str:
     domain = (seed.parent_domain or _domain_from_url(seed.url)).casefold()
     if seed.platform_family in {"discourse", "stack_exchange"}:
         return "forum_root"
+    if seed.platform_family == "mailing_list":
+        return "mailing_list_root"
     if seed.platform_family == "mediawiki":
         return "wiki_root"
     if seed.platform_family == "statuspage":
@@ -6024,6 +9122,7 @@ def _derived_discovery_role(seed: SourceDiscoveryCandidateSeed) -> str:
         "regional_outlet",
         "official_bulletin",
         "forum_root",
+        "mailing_list_root",
         "wiki_root",
         "status_root",
         "archive_index",
@@ -6072,6 +9171,8 @@ def _suggest_discovery_action(memory: SourceMemoryORM) -> SourceDiscoveryNextAct
     followup = _public_discovery_followup_kind(memory)
     if followup is not None:
         return followup  # type: ignore[return-value]
+    if _is_scheduler_link_graph_candidate(memory, _utc_now()):
+        return "link_graph_scan"
     return "none"
 
 
@@ -6121,6 +9222,9 @@ def _compute_discovery_priority(
     elif _is_scheduler_public_discovery_candidate(memory, now):
         score += 3
         basis.append(f"due for public {_suggest_discovery_action(memory).replace('_', ' ')} follow-up")
+    elif _is_scheduler_link_graph_candidate(memory, now):
+        score += 2
+        basis.append("reviewed public root eligible for bounded link-graph expansion")
     if memory.source_type in {"rss", "sitemap", "dataset"}:
         score += 2
         basis.append("machine-readable discovery surface")
@@ -6128,13 +9232,23 @@ def _compute_discovery_priority(
     if structure_hints.intersection({"archive_or_latest_navigation", "category_navigation", "tag_navigation", "catalog_link"}):
         score += 2
         basis.append("structured archive or catalog navigation")
+    if structure_hints.intersection({"association_link_page", "blogroll_navigation", "partner_links_navigation"}):
+        score += 1
+        basis.append("association or blogroll style root")
     scope_hints = _loads_scope_hints(memory.scope_hints_json)
     if scope_hints.spatial:
         score += 1
-        basis.append("explicit spatial scope hints are present")
+        basis.append("matches requested locality")
+    if scope_hints.language:
+        score += 1
+        basis.append("matches requested source language")
     if scope_hints.topic:
         score += 1
         basis.append("explicit topic scope hints are present")
+    locale_basis = _loads_list(memory.locale_expansion_basis_json)
+    if locale_basis:
+        score += 1
+        basis.append("locale-expanded root")
     tags = set(_loads_list(memory.source_family_tags_json))
     if tags.intersection({"local_news", "regional", "official"}):
         score += 2
@@ -6148,11 +9262,20 @@ def _compute_discovery_priority(
     elif memory.platform_family == "stack_exchange":
         score += 1
         basis.append("technical Q&A long-tail root")
+    elif memory.platform_family == "mailing_list":
+        score += 1
+        basis.append("public mailing-list archive root")
     elif tags.intersection({"forum", "wiki", "status_page", "federated"}):
         score += 1
         basis.append("platform-specific long-tail root")
     if memory.seed_packet_id and tags.intersection({"regional", "local_news"}):
         basis.append("curated regional/local packet root")
+    if "directory_scan" in _loads_list(memory.discovery_methods_json):
+        score += 1
+        basis.append("curated directory or regional portal root")
+    if "link_graph_scan" in _loads_list(memory.discovery_methods_json):
+        score += 1
+        basis.append("trusted-root link-graph derived root")
     domain_count = active_context.root_domain_counts.get(memory.domain_scope or "unknown", 0)
     if domain_count <= 1:
         score += 1
@@ -6183,6 +9306,9 @@ def _compute_discovery_priority(
     if memory.discovery_low_yield_count > 0:
         score -= min(3, memory.discovery_low_yield_count)
         basis.append("root has repeated low-yield discovery outcomes")
+    if int(memory.adversarial_signal_count or 0) > 0:
+        score -= 3 if _adversarial_risk_value(memory.adversarial_risk_level) >= _adversarial_risk_value("high") else 2
+        basis.append("root has adversarial or prompt-injection findings")
     if score >= 7:
         return score, "high", basis
     if score >= 3:
@@ -6197,6 +9323,8 @@ def _discovery_eligibility_reasons(memory: SourceMemoryORM, now: str) -> list[st
         reasons.append("eligible for bounded structure scan")
     elif action != "none" and _is_scheduler_public_discovery_candidate(memory, now):
         reasons.append(f"eligible for due public {action.replace('_', ' ')} follow-up")
+    elif action == "link_graph_scan" and _is_scheduler_link_graph_candidate(memory, now):
+        reasons.append("eligible for bounded trusted-root link-graph expansion")
     return reasons
 
 
@@ -6216,6 +9344,8 @@ def _discovery_blocked_reasons(memory: SourceMemoryORM, now: str) -> list[str]:
         reasons.append("root is blocked by auth requirement")
     if memory.captcha_requirement == "captcha_required":
         reasons.append("root is blocked by CAPTCHA requirement")
+    if int(memory.adversarial_signal_count or 0) > 0:
+        reasons.append("root has adversarial or prompt-injection findings")
     if action == "structure_scan" and "structure_scan" in _loads_list(memory.discovery_methods_json):
         reasons.append("structure scan already ran on this root")
     if action != "none" and action != "structure_scan" and not _is_due_for_public_discovery(memory.next_discovery_scan_at, now):
@@ -6233,6 +9363,8 @@ def _review_reasons(
     pending_claim_count: int,
     corrective_cluster: bool,
     unscanned_public_root: bool,
+    contested_event_count: int,
+    open_question_count: int,
 ) -> list[str]:
     reasons: list[str] = []
     if memory.policy_state == "manual_review":
@@ -6261,8 +9393,19 @@ def _review_reasons(
         reasons.append("corrective knowledge-node cluster is present")
     if pending_claim_count > 0 and memory.policy_state == "reviewed":
         reasons.append("reviewed source has pending review claims")
+    if contested_event_count > 0:
+        reasons.append("source participates in contested or corrected event clusters")
+    if open_question_count > 0:
+        reasons.append("source participates in open-question event clusters")
+    reasons.extend(_source_adversarial_review_reasons(memory))
     if memory.discovery_role == "root":
         tags = set(_loads_list(memory.source_family_tags_json))
+        if _loads_list(memory.locale_expansion_basis_json):
+            reasons.append("locale-expanded root")
+        if _loads_scope_hints(memory.scope_hints_json).language:
+            reasons.append("matches requested source language")
+        if _loads_scope_hints(memory.scope_hints_json).spatial:
+            reasons.append("matches requested locality")
         if tags.intersection({"regional", "local_news"}):
             reasons.append("regional or local long-tail root")
         if memory.platform_family == "statuspage":
@@ -6271,10 +9414,18 @@ def _review_reasons(
             reasons.append("federated/public-social discovery root")
         elif memory.platform_family == "stack_exchange":
             reasons.append("technical Q&A long-tail root")
+        elif memory.platform_family == "mailing_list":
+            reasons.append("public mailing-list archive root")
         elif tags.intersection({"forum", "wiki", "status_page", "federated"}):
             reasons.append("platform-specific long-tail root")
         if memory.seed_packet_id and tags.intersection({"regional", "local_news"}):
             reasons.append("curated regional/local packet root")
+        if "directory_scan" in _loads_list(memory.discovery_methods_json):
+            reasons.append("curated directory or regional portal root")
+        if _is_scheduler_link_graph_candidate(memory, _utc_now()):
+            reasons.append("reviewed public root eligible for bounded link-graph expansion")
+        if set(_loads_list(memory.structure_hints_json)).intersection({"association_link_page", "blogroll_navigation", "partner_links_navigation"}):
+            reasons.append("association or blogroll style root")
         if _is_scheduler_public_discovery_candidate(memory, _utc_now()):
             reasons.append(f"due for public {_suggest_discovery_action(memory).replace('_', '/')} follow-up")
         if memory.auth_requirement == "login_required" or memory.captcha_requirement == "captcha_required":
@@ -6294,6 +9445,8 @@ def _review_priority(
     pending_claim_count: int,
     corrective_cluster: bool,
     unscanned_public_root: bool,
+    contested_event_count: int,
+    open_question_count: int,
 ) -> tuple[int, str]:
     score = 0
     if memory.policy_state == "manual_review":
@@ -6326,8 +9479,16 @@ def _review_priority(
         score += 2
     if pending_claim_count > 0 and memory.policy_state == "reviewed":
         score += 3
+    if contested_event_count > 0:
+        score += 2
+    if open_question_count > 0:
+        score += 1
+    if int(memory.adversarial_signal_count or 0) > 0:
+        score += 3 if _adversarial_risk_value(memory.adversarial_risk_level) >= _adversarial_risk_value("high") else 2
     if memory.discovery_role == "root":
         tags = set(_loads_list(memory.source_family_tags_json))
+        if _loads_list(memory.locale_expansion_basis_json):
+            score += 1
         if tags.intersection({"regional", "local_news"}):
             score += 1
         if tags.intersection({"forum", "wiki", "status_page", "federated"}):
@@ -6337,6 +9498,8 @@ def _review_priority(
         if memory.auth_requirement == "login_required" or memory.captcha_requirement == "captcha_required":
             score += 2
         if memory.discovery_low_yield_count > 0:
+            score += 1
+        if _is_scheduler_link_graph_candidate(memory, _utc_now()):
             score += 1
     if score >= 7:
         return score, "high"
@@ -6394,6 +9557,25 @@ def _is_scheduler_structure_scan_candidate(memory: SourceMemoryORM) -> bool:
     )
 
 
+def _is_link_graph_scan_allowed(memory: SourceMemoryORM) -> bool:
+    return (
+        memory.discovery_role == "root"
+        and (memory.policy_state in {"reviewed", "approved"} or memory.lifecycle_state in {"approved-unvalidated", "sandboxed", "validated"})
+        and memory.intake_disposition == "public_no_auth"
+        and memory.auth_requirement == "no_auth"
+        and memory.captcha_requirement == "no_captcha"
+        and memory.lifecycle_state not in {"rejected", "archived"}
+    )
+
+
+def _is_scheduler_link_graph_candidate(memory: SourceMemoryORM, now: str) -> bool:
+    return (
+        _is_link_graph_scan_allowed(memory)
+        and _public_discovery_followup_kind(memory) is None
+        and _is_due_for_public_discovery(memory.next_discovery_scan_at, now)
+    )
+
+
 def _is_scheduler_expansion_candidate(memory: SourceMemoryORM) -> bool:
     structure_hints = set(_loads_list(memory.structure_hints_json))
     return (
@@ -6428,6 +9610,9 @@ def _public_discovery_followup_kind(memory: SourceMemoryORM) -> str | None:
         "mastodon_instance_api",
         "mastodon_tag_navigation",
         "mastodon_account_navigation",
+        "mailing_list_archive",
+        "month_index_navigation",
+        "thread_navigation",
     }
     if memory.source_type == "dataset" and (
         memory.machine_readable_result in {"yes", "partial"}
@@ -6435,7 +9620,18 @@ def _public_discovery_followup_kind(memory: SourceMemoryORM) -> str | None:
     ):
         return "catalog_scan"
     if memory.source_type in {"web", "unknown"} and bool(
-        structure_hints.intersection({"catalog_link", "status_history_navigation", "mastodon_instance_api", "mastodon_tag_navigation", "mastodon_account_navigation"})
+        structure_hints.intersection(
+            {
+                "catalog_link",
+                "status_history_navigation",
+                "mastodon_instance_api",
+                "mastodon_tag_navigation",
+                "mastodon_account_navigation",
+                "mailing_list_archive",
+                "month_index_navigation",
+                "thread_navigation",
+            }
+        )
     ):
         return "catalog_scan"
     return None
@@ -6470,6 +9666,9 @@ def _initial_next_discovery_scan_at(source_type: str, structure_hints: list[str]
             "mastodon_instance_api",
             "mastodon_tag_navigation",
             "mastodon_account_navigation",
+            "mailing_list_archive",
+            "month_index_navigation",
+            "thread_navigation",
         }
     ):
         return now
@@ -6967,6 +10166,20 @@ def _classify_seed_url(url: str) -> dict[str, object]:
                 "Technical Q&A platform root remains candidate-only until structure scan confirms bounded public discovery surfaces.",
             ],
         }
+    if _detect_platform_family_from_url(url) == "mailing_list":
+        return {
+            "source_type": "web",
+            "source_class": "community",
+            "access_result": "unknown",
+            "machine_readable_result": "unknown",
+            "auth_requirement": "unknown",
+            "captcha_requirement": "unknown",
+            "intake_disposition": "hold_review",
+            "policy_state": "manual_review",
+            "caveats": caveats + [
+                "Public mailing-list archive root remains candidate-only until bounded archive structure is confirmed.",
+            ],
+        }
     return {
         "source_type": "web",
         "source_class": "article",
@@ -7009,6 +10222,844 @@ def _robots_url_for_target(target_url: str) -> str:
     return urlunparse((parsed.scheme, parsed.netloc, "/robots.txt", "", "", ""))
 
 
+def _normalize_archive_target_host(target_host: str) -> str | None:
+    value = (target_host or "").strip()
+    if not value:
+        return None
+    parsed = urlparse(value if "://" in value else f"https://{value}")
+    host = (parsed.netloc or parsed.path or "").strip().casefold()
+    if host.startswith("www."):
+        host = host[4:]
+    if not host or any(char.isspace() for char in host) or "." not in host:
+        return None
+    if "/" in host:
+        host = host.split("/", 1)[0]
+    return host or None
+
+
+def _archive_seed_url(normalized_host: str | None, url_prefix: str | None) -> str | None:
+    if url_prefix and url_prefix.strip():
+        value = url_prefix.strip()
+        if value.startswith("http://") or value.startswith("https://"):
+            return _canonical_source_url(value)
+        if normalized_host:
+            if not value.startswith("/"):
+                value = f"/{value}"
+            return _canonical_source_url(f"https://{normalized_host}{value}")
+    if normalized_host:
+        return _canonical_source_url(f"https://{normalized_host}/")
+    return None
+
+
+def _archive_query_target(normalized_host: str, url_prefix: str | None) -> str:
+    prefix = (url_prefix or "").strip()
+    if prefix.startswith("http://") or prefix.startswith("https://"):
+        return prefix
+    if prefix:
+        clean_prefix = prefix.lstrip("/")
+        return f"{normalized_host}/{clean_prefix}*"
+    return f"{normalized_host}/*"
+
+
+def _fetch_archive_index_document(
+    request: SourceDiscoveryArchiveIndexScanRequest,
+    normalized_host: str,
+) -> tuple[str, int]:
+    provider = request.provider
+    query_target = _archive_query_target(normalized_host, request.url_prefix)
+    if provider == "wayback_cdx":
+        params = {
+            "url": query_target,
+            "output": "json",
+            "fl": "timestamp,original,statuscode,digest",
+            "limit": str(max(1, request.max_results)),
+        }
+        if request.from_date:
+            params["from"] = request.from_date
+        if request.to_date:
+            params["to"] = request.to_date
+        url = f"https://web.archive.org/cdx/search/cdx?{urlencode(params)}"
+        fetched = _fetch_url(url, method="GET", max_bytes=MAX_FETCH_BYTES)
+        return str(fetched["body"]), 1
+    if provider == "archive_it_cdx":
+        params = {
+            "url": query_target,
+            "output": "json",
+            "fl": "timestamp,original,statuscode,digest",
+            "limit": str(max(1, request.max_results)),
+        }
+        if request.from_date:
+            params["from"] = request.from_date
+        if request.to_date:
+            params["to"] = request.to_date
+        url = f"https://wayback.archive-it.org/all/timemap/cdx?{urlencode(params)}"
+        fetched = _fetch_url(url, method="GET", max_bytes=MAX_FETCH_BYTES)
+        return str(fetched["body"]), 1
+    if provider == "common_crawl_cdxj":
+        meta = _fetch_url("https://index.commoncrawl.org/collinfo.json", method="GET", max_bytes=MAX_FETCH_BYTES)
+        try:
+            collections = json.loads(str(meta["body"]))
+        except json.JSONDecodeError as exc:
+            raise ValueError("Unable to parse Common Crawl collection metadata.") from exc
+        latest_id = None
+        if isinstance(collections, list):
+            for item in collections:
+                if not isinstance(item, dict):
+                    continue
+                latest_id = str(item.get("id") or "").strip()
+                if latest_id:
+                    break
+        if not latest_id:
+            raise ValueError("Common Crawl collection metadata did not expose a crawl id.")
+        params = {
+            "url": query_target,
+            "output": "json",
+            "limit": str(max(1, request.max_results)),
+        }
+        url = f"https://index.commoncrawl.org/{latest_id}-index?{urlencode(params)}"
+        fetched = _fetch_url(url, method="GET", max_bytes=MAX_FETCH_BYTES)
+        return str(fetched["body"]), 2
+    if provider == "common_crawl_host_index":
+        raise ValueError("common_crawl_host_index currently requires fixture_text in this slice.")
+    raise ValueError(f"Unsupported archive index provider: {provider}")
+
+
+def _archive_row_to_record(
+    provider: str,
+    payload: Any,
+    *,
+    target_host: str,
+    url_prefix: str | None,
+) -> _ArchiveDiscoveryRecord | None:
+    prefix = (url_prefix or "").strip().casefold()
+    original_url: str | None = None
+    archive_url: str | None = None
+    timestamp: str | None = None
+    if isinstance(payload, dict):
+        timestamp = _normalize_text(str(payload.get("timestamp") or payload.get("capture_ts") or payload.get("time") or ""))
+        for key in ("original", "url", "original_url", "target_url", "homepage", "example_url"):
+            value = payload.get(key)
+            if isinstance(value, str) and value.strip():
+                candidate = value.strip()
+                if candidate.startswith("http://") or candidate.startswith("https://"):
+                    original_url = candidate
+                    break
+        for key in ("archive_url", "archive", "capture_url", "wayback_url"):
+            value = payload.get(key)
+            if isinstance(value, str) and value.strip():
+                archive_url = value.strip()
+                break
+        if original_url is None:
+            host = str(payload.get("host") or payload.get("domain") or "").strip().casefold()
+            if host and "." in host:
+                original_url = f"https://{host}/"
+    elif isinstance(payload, list):
+        if payload and isinstance(payload[0], str) and any(token in payload[0].casefold() for token in ("timestamp", "original", "url")):
+            return None
+        values = [str(item).strip() for item in payload if str(item).strip()]
+        if len(values) >= 2 and values[0].isdigit():
+            timestamp = values[0]
+            original_url = values[1]
+        elif len(values) >= 2 and values[1].isdigit():
+            original_url = values[0]
+            timestamp = values[1]
+        elif values:
+            original_url = values[0]
+    elif isinstance(payload, str):
+        stripped = payload.strip()
+        if not stripped:
+            return None
+        if stripped.startswith("http://") or stripped.startswith("https://"):
+            original_url = stripped
+        else:
+            parts = stripped.split()
+            if len(parts) >= 2 and parts[0].isdigit():
+                timestamp = parts[0]
+                original_url = parts[1]
+            elif len(parts) >= 2 and parts[1].isdigit():
+                original_url = parts[0]
+                timestamp = parts[1]
+            elif parts and "." in parts[0]:
+                original_url = parts[0]
+    if original_url:
+        if not original_url.startswith(("http://", "https://")) and "." in original_url:
+            original_url = f"https://{original_url.lstrip('/')}"
+        original_url = _canonical_source_url(original_url)
+    if archive_url:
+        archive_url = _canonical_source_url(archive_url)
+    candidate_url = original_url or archive_url
+    if not candidate_url:
+        return None
+    parsed = urlparse(candidate_url)
+    host = parsed.netloc.casefold()
+    if host.startswith("www."):
+        host = host[4:]
+    if host and target_host and host != target_host and not host.endswith(f".{target_host}") and target_host not in host:
+        return None
+    if prefix and prefix not in candidate_url.casefold():
+        return None
+    return _ArchiveDiscoveryRecord(
+        provider=provider,
+        original_url=original_url,
+        archive_url=archive_url,
+        timestamp=timestamp or None,
+    )
+
+
+def _parse_archive_index_records(
+    *,
+    provider: str,
+    text: str,
+    target_host: str,
+    url_prefix: str | None,
+    max_results: int,
+) -> list[_ArchiveDiscoveryRecord]:
+    payload: Any = None
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        payload = None
+    raw_rows: list[Any] = []
+    if isinstance(payload, list):
+        raw_rows = payload
+    elif isinstance(payload, dict):
+        for key in ("items", "captures", "records", "results"):
+            value = payload.get(key)
+            if isinstance(value, list):
+                raw_rows = value
+                break
+        if not raw_rows:
+            raw_rows = [payload]
+    else:
+        for line in text.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                continue
+            if stripped.startswith("{") and stripped.endswith("}"):
+                try:
+                    raw_rows.append(json.loads(stripped))
+                    continue
+                except json.JSONDecodeError:
+                    pass
+            raw_rows.append(stripped)
+    records: list[_ArchiveDiscoveryRecord] = []
+    seen_urls: set[str] = set()
+    for row in raw_rows:
+        record = _archive_row_to_record(
+            provider,
+            row,
+            target_host=target_host,
+            url_prefix=url_prefix,
+        )
+        if record is None:
+            continue
+        unique_url = record.original_url or record.archive_url or ""
+        if unique_url in seen_urls:
+            continue
+        seen_urls.add(unique_url)
+        records.append(record)
+        if len(records) >= max(0, max_results):
+            break
+    return records
+
+
+def _archive_record_caveat(record: _ArchiveDiscoveryRecord) -> str:
+    if record.timestamp:
+        return f"Archive provenance recorded from {record.provider} capture at {record.timestamp}."
+    return f"Archive provenance recorded from {record.provider}."
+
+
+def _upsert_archive_hit_row(
+    session: Session,
+    *,
+    source_id: str,
+    record: _ArchiveDiscoveryRecord,
+    now: str,
+    caveats: list[str],
+) -> SourceArchiveHitORM:
+    existing = session.scalar(
+        select(SourceArchiveHitORM).where(
+            SourceArchiveHitORM.source_id == source_id,
+            SourceArchiveHitORM.provider == record.provider,
+            SourceArchiveHitORM.original_url == (record.original_url or record.archive_url or ""),
+            SourceArchiveHitORM.archive_url == record.archive_url,
+            SourceArchiveHitORM.captured_at == record.timestamp,
+        )
+    )
+    row = existing or SourceArchiveHitORM(
+        archive_hit_id=f"source-archive-hit:{_safe_id(source_id)}:{hashlib.sha1(json.dumps([record.provider, record.original_url, record.archive_url, record.timestamp]).encode('utf-8')).hexdigest()[:16]}",
+        source_id=source_id,
+        provider=record.provider,
+        original_url=record.original_url or record.archive_url or "",
+        archive_url=record.archive_url,
+        captured_at=record.timestamp,
+        discovered_at=now,
+        caveats_json=json.dumps(caveats),
+    )
+    row.provider = record.provider
+    row.original_url = record.original_url or record.archive_url or ""
+    row.archive_url = record.archive_url
+    row.captured_at = record.timestamp
+    row.discovered_at = now
+    row.caveats_json = json.dumps(sorted(set(_loads_list(row.caveats_json) + caveats)))
+    session.add(row)
+    return row
+
+
+def _accent_fold(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value or "")
+    return "".join(char for char in normalized if not unicodedata.combining(char))
+
+
+def _generate_locale_aliases(raw_terms: list[str]) -> list[str]:
+    aliases: list[str] = []
+    seen: set[str] = set()
+    for raw in raw_terms:
+        term = _normalize_text(raw)
+        if not term:
+            continue
+        candidates = {
+            term,
+            _accent_fold(term),
+            term.replace("-", " "),
+            term.replace(" ", "-"),
+        }
+        for candidate in candidates:
+            normalized = _normalize_text(candidate)
+            if not normalized:
+                continue
+            key = normalized.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            aliases.append(normalized)
+    return aliases
+
+
+def _build_locale_queries(
+    aliases: list[str],
+    *,
+    country_codes: list[str],
+    language_codes: list[str],
+    max_queries: int,
+) -> list[str]:
+    if max_queries <= 0:
+        return []
+    countries = [code.strip().casefold() for code in country_codes if code.strip()]
+    languages = [code.strip().casefold() for code in language_codes if code.strip()]
+    queries: list[str] = []
+    for alias in aliases:
+        base = f"\"{alias}\""
+        variants = [base]
+        if countries and languages:
+            variants.extend(f"{base} sourcecountry:{country} sourcelang:{language}" for country in countries for language in languages)
+        elif countries:
+            variants.extend(f"{base} sourcecountry:{country}" for country in countries)
+        elif languages:
+            variants.extend(f"{base} sourcelang:{language}" for language in languages)
+        for variant in variants:
+            if variant not in queries:
+                queries.append(variant)
+            if len(queries) >= max_queries:
+                return queries
+    return queries[:max_queries]
+
+
+def _locale_basis_lines(
+    *,
+    generated_aliases: list[str],
+    country_codes: list[str],
+    language_codes: list[str],
+    place_labels: list[str],
+) -> list[str]:
+    basis: list[str] = []
+    for alias in generated_aliases[:8]:
+        basis.append(f"locale-alias:{alias}")
+    for country in sorted({code.strip().casefold() for code in country_codes if code.strip()}):
+        basis.append(f"source-country:{country}")
+    for language in sorted({code.strip().casefold() for code in language_codes if code.strip()}):
+        basis.append(f"source-language:{language}")
+    for place in sorted({label.strip() for label in place_labels if label.strip()}):
+        basis.append(f"place-label:{place}")
+    return basis
+
+
+def _fetch_gdelt_doc_payload(query: str, *, max_records: int) -> str:
+    api_url = (
+        "https://api.gdeltproject.org/api/v2/doc/doc?"
+        + urlencode(
+            {
+                "query": query,
+                "mode": "artlist",
+                "format": "json",
+                "sort": "datedesc",
+                "maxrecords": max(1, min(max_records, 50)),
+                "timespan": "1week",
+            }
+        )
+    )
+    fetched = _fetch_url(api_url, method="GET", max_bytes=MAX_FETCH_BYTES)
+    return str(fetched["body"])
+
+
+def _parse_gdelt_doc_candidates(text: str, *, max_hits: int) -> list[dict[str, str]]:
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return []
+    if isinstance(payload, dict):
+        raw_items = payload.get("articles") or payload.get("items") or payload.get("results") or []
+    elif isinstance(payload, list):
+        raw_items = payload
+    else:
+        raw_items = []
+    candidates: list[dict[str, str]] = []
+    for item in raw_items:
+        if not isinstance(item, dict):
+            continue
+        url = (
+            item.get("url")
+            or item.get("sourceurl")
+            or item.get("url_mobile")
+            or item.get("urlmobile")
+            or item.get("socialimage")
+        )
+        domain = str(item.get("domain") or "").strip()
+        if not isinstance(url, str) or not url.strip():
+            if domain:
+                url = f"https://{domain}/"
+            else:
+                continue
+        candidates.append(
+            {
+                "url": _canonical_source_url(url),
+                "language": str(item.get("language") or item.get("source_lang") or "").strip().casefold(),
+                "sourcecountry": str(item.get("sourcecountry") or item.get("source_country") or "").strip().casefold(),
+            }
+        )
+        if len(candidates) >= max(0, max_hits):
+            break
+    return candidates
+
+
+def _looks_like_discovery_surface_url(url: str) -> bool:
+    lowered = url.casefold()
+    path = urlparse(url).path.casefold()
+    return (
+        _looks_like_feed_or_data(lowered)
+        or any(
+            token in lowered
+            for token in ("/sitemap", "/feed", "/rss", "/atom", "/api/", "/catalog", "/archive", "/latest", "/tag/", "/category/")
+        )
+        or path in {"/", "/news", "/latest", "/archive", "/feed", "/rss", "/sitemap.xml"}
+    )
+
+
+def _normalized_site_root(url: str) -> str:
+    parsed = urlparse(url)
+    return urlunparse((parsed.scheme, parsed.netloc, "/", "", "", ""))
+
+
+def _locale_candidate_seeds_from_provider_results(
+    candidates: list[dict[str, str]],
+    *,
+    wave_id: str | None,
+    wave_title: str | None,
+    packet_id: str | None,
+    packet_title: str | None,
+    source_family_tags: list[str],
+    scope_hints: SourceDiscoveryScopeHints,
+    locale_basis: list[str],
+    max_domains: int,
+    max_discovered: int,
+    base_caveats: list[str],
+) -> list[SourceDiscoveryCandidateSeed]:
+    if max_discovered <= 0 or max_domains <= 0:
+        return []
+    seeds: list[SourceDiscoveryCandidateSeed] = []
+    seen_urls: set[str] = set()
+    seen_domains: set[str] = set()
+    for candidate in candidates:
+        raw_url = str(candidate.get("url") or "").strip()
+        if not raw_url or _discovery_target_requires_auth_or_captcha(raw_url):
+            continue
+        target_url = raw_url if _looks_like_discovery_surface_url(raw_url) else _normalized_site_root(raw_url)
+        canonical_url = _canonical_source_url(target_url)
+        host = urlparse(canonical_url).netloc.casefold()
+        if canonical_url in seen_urls:
+            continue
+        if host not in seen_domains and len(seen_domains) >= max_domains:
+            continue
+        seed = _candidate_seed_from_extracted_url(
+            url=canonical_url,
+            source_id=_generated_source_id_for_url(canonical_url),
+            title=host or canonical_url,
+            wave_id=wave_id,
+            wave_title=wave_title,
+            discovery_reason="locale/provider expansion",
+            caveats=base_caveats + [f"Matched locale-provider article URL: {raw_url}"],
+            discovery_methods=["locale_seed_expand"],
+            structure_hints=["locale_expanded_root"],
+        )
+        if seed is None:
+            continue
+        seen_urls.add(canonical_url)
+        seen_domains.add(host)
+        language = str(candidate.get("language") or "").strip().casefold()
+        merged_scope_hints = _merge_scope_hints(
+            scope_hints,
+            SourceDiscoveryScopeHints(language=[language] if language else []),
+        )
+        seeds.append(
+            seed.model_copy(
+                update={
+                    "discovery_role": "root",
+                    "seed_packet_id": packet_id,
+                    "seed_packet_title": packet_title,
+                    "source_family_tags": sorted(set(seed.source_family_tags + list(source_family_tags))),
+                    "scope_hints": merged_scope_hints,
+                    "locale_expansion_basis": locale_basis,
+                    "discovered_from_provider": "gdelt_doc",
+                }
+            )
+        )
+        if len(seeds) >= max_discovered:
+            break
+    return seeds
+
+
+def _archive_original_url_from_capture_url(url: str) -> str | None:
+    value = (url or "").strip()
+    if not value:
+        return None
+    match = re.search(r"/web/\d+(?:[a-z_]+)?/(https?://.+)$", value, flags=re.IGNORECASE)
+    if match is not None:
+        return _canonical_source_url(match.group(1))
+    match = re.search(r"/all/\d+/https?://.+$", value, flags=re.IGNORECASE)
+    if match is not None:
+        http_index = value.casefold().find("http://")
+        https_index = value.casefold().find("https://")
+        start = min(index for index in [http_index, https_index] if index >= 0)
+        return _canonical_source_url(value[start:])
+    return None
+
+
+def _strip_archive_chrome(html: str) -> str:
+    cleaned = re.sub(r"(?is)<(?:script|style)[^>]*>.*?</(?:script|style)>", " ", html)
+    cleaned = re.sub(
+        r"(?is)<[^>]+(?:id|class)=[\"'][^\"']*(?:wm-ipp|wayback-toolbar|playback|donato)[^\"']*[\"'][^>]*>.*?</[^>]+>",
+        " ",
+        cleaned,
+    )
+    return cleaned
+
+
+def _normalize_archive_capture_html(html: str, archive_url: str) -> tuple[str, str | None, list[str]]:
+    notes: list[str] = []
+    original_url = _archive_original_url_from_capture_url(archive_url)
+    normalized_html = _strip_archive_chrome(html)
+    if original_url:
+        normalized_html = re.sub(
+            r"https?://web\.archive\.org/web/\d+(?:[a-z_]+)?/(https?://[^\s\"'>]+)",
+            lambda match: match.group(1),
+            normalized_html,
+            flags=re.IGNORECASE,
+        )
+        normalized_html = re.sub(
+            r"https?://wayback\.archive-it\.org/\d+/https?://[^\s\"'>]+",
+            original_url,
+            normalized_html,
+            flags=re.IGNORECASE,
+        )
+        notes.append("Archive wrapper URLs were normalized back to their original target URLs before extraction.")
+    notes.append("Archive capture chrome was suppressed before article extraction.")
+    return normalized_html, original_url, notes
+
+
+def _is_allowed_archive_fetch_url(url: str) -> bool:
+    host = urlparse(url).netloc.casefold()
+    if host.startswith("www."):
+        host = host[4:]
+    return host in ALLOWED_ARCHIVE_FETCH_HOSTS
+
+
+def _language_hint_from_url(url: str) -> str | None:
+    host = urlparse(url).netloc.casefold()
+    if host.endswith(".fr"):
+        return "fr"
+    if host.endswith(".de"):
+        return "de"
+    if host.endswith(".es"):
+        return "es"
+    if host.endswith(".pt"):
+        return "pt"
+    if host.endswith(".it"):
+        return "it"
+    if host.endswith(".jp"):
+        return "ja"
+    if host.endswith(".ru"):
+        return "ru"
+    if host.endswith(".ua"):
+        return "uk"
+    return None
+
+
+def _detect_language_hint(html: str, *, candidate_url: str) -> str | None:
+    lowered = html.casefold()
+    match = re.search(r"""<html[^>]*\blang=["']([a-z]{2,12}(?:-[a-z]{2,12})?)["']""", lowered, flags=re.IGNORECASE)
+    if match is not None:
+        return match.group(1).split("-", 1)[0].casefold()
+    match = re.search(r"""(?:property|name)=["']og:locale["'][^>]*content=["']([a-z]{2,12}(?:[_-][a-z]{2,12})?)["']""", lowered, flags=re.IGNORECASE)
+    if match is not None:
+        return match.group(1).split("_", 1)[0].split("-", 1)[0].casefold()
+    json_ld_language = re.search(r'''"inLanguage"\s*:\s*"([a-z]{2,12}(?:-[a-z]{2,12})?)"''', html, flags=re.IGNORECASE)
+    if json_ld_language is not None:
+        return json_ld_language.group(1).split("-", 1)[0].casefold()
+    return _language_hint_from_url(candidate_url)
+
+
+def _discovery_target_requires_auth_or_captcha(url: str) -> bool:
+    lowered = f"{urlparse(url).path}?{urlparse(url).query}".casefold()
+    return any(
+        token in lowered
+        for token in (
+            "login",
+            "signin",
+            "sign-in",
+            "auth",
+            "oauth",
+            "captcha",
+            "recaptcha",
+            "hcaptcha",
+            "cf-chl",
+            "register",
+            "subscribe",
+            "private",
+        )
+    )
+
+
+def _directory_scan_excluded_url(url: str) -> bool:
+    lowered = f"{urlparse(url).path}?{urlparse(url).query}".casefold()
+    return any(
+        token in lowered
+        for token in (
+            "login",
+            "signin",
+            "sign-in",
+            "register",
+            "auth",
+            "oauth",
+            "captcha",
+            "/search",
+            "search?",
+            "remote_interaction",
+            "share",
+            "sharer",
+            "intent/tweet",
+            "mailto:",
+            "javascript:",
+        )
+    )
+
+
+def _extract_visible_directory_links(base_url: str, text: str) -> list[str]:
+    targets = re.findall(r"""href=["']([^"']+)["']""", text or "", flags=re.IGNORECASE)
+    urls: list[str] = []
+    for target in targets:
+        absolute = urljoin(base_url, target.strip()).split("#", 1)[0]
+        if absolute and absolute not in urls:
+            urls.append(absolute)
+    return urls
+
+
+def _normalize_directory_seed_target(url: str) -> str:
+    parsed = urlparse(url)
+    lowered = url.casefold()
+    if _looks_like_feed_or_data(lowered) or parsed.path.casefold().startswith("/api/"):
+        return _canonical_source_url(url)
+    return urlunparse((parsed.scheme, parsed.netloc, "/", "", "", ""))
+
+
+def _auto_directory_type(base_url: str, text: str) -> str:
+    lowered = f"{base_url}\n{text}".casefold()
+    if any(token in lowered for token in ("regional", "local news", "county", "city", "town")):
+        return "regional_portal"
+    if any(token in lowered for token in ("association", "member organizations", "partners", "institutions")):
+        return "association_links"
+    return "curated_directory"
+
+
+def _extract_directory_candidate_urls(
+    base_url: str,
+    text: str,
+    *,
+    directory_type: str,
+    max_external_domains: int,
+    max_discovered: int,
+) -> tuple[list[str], str, int]:
+    resolved_directory_type = directory_type if directory_type != "auto" else _auto_directory_type(base_url, text)
+    base_host = urlparse(base_url).netloc.casefold()
+    discovered: list[str] = []
+    seen_domains: set[str] = set()
+    seen_urls: set[str] = set()
+    for absolute in _extract_visible_directory_links(base_url, text):
+        parsed = urlparse(absolute)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            continue
+        host = parsed.netloc.casefold()
+        if host == base_host or _directory_scan_excluded_url(absolute):
+            continue
+        normalized = _normalize_directory_seed_target(absolute)
+        normalized_host = urlparse(normalized).netloc.casefold()
+        if normalized in seen_urls:
+            continue
+        if normalized_host not in seen_domains and len(seen_domains) >= max(1, max_external_domains):
+            continue
+        seen_urls.add(normalized)
+        seen_domains.add(normalized_host)
+        discovered.append(normalized)
+        if len(discovered) >= max(1, max_discovered):
+            break
+    return discovered, resolved_directory_type, len(seen_domains)
+
+
+def _link_graph_excluded_url(url: str) -> bool:
+    parsed = urlparse(url)
+    lowered = f"{parsed.path}?{parsed.query}".casefold()
+    if any(
+        token in lowered
+        for token in (
+            "login",
+            "signin",
+            "sign-in",
+            "register",
+            "auth",
+            "oauth",
+            "share",
+            "intent/",
+            "remote_interaction",
+            "/search",
+            "search?",
+            "captcha",
+            "mailto:",
+            "javascript:",
+        )
+    ):
+        return True
+    return any(parsed.path.casefold().endswith(ext) for ext in (".pdf", ".zip", ".gz", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"))
+
+
+def _is_article_like_path(path: str) -> bool:
+    lowered = path.casefold()
+    if re.search(r"/\d{4}/\d{1,2}/", lowered):
+        return True
+    if any(token in lowered for token in ("/article", "/articles/", "/story", "/stories/", "/post", "/posts/", "/news/")):
+        return True
+    if _is_stack_exchange_question_path(lowered) or _is_mastodon_status_path(lowered) or _is_mailing_list_message_path(lowered):
+        return True
+    return False
+
+
+def _is_root_like_navigation_path(path: str) -> bool:
+    lowered = path.casefold().rstrip("/") or "/"
+    return any(
+        token in lowered
+        for token in (
+            "/feed",
+            "/rss",
+            "/atom",
+            "/sitemap",
+            "/api/",
+            "/catalog",
+            "/archive",
+            "/latest",
+            "/category/",
+            "/tag/",
+            "/tags/",
+            "/forum",
+            "/forums",
+            "/community",
+            "/wiki",
+            "/status",
+            "/resources",
+            "/links",
+            "/partners",
+            "/members",
+            "/sources",
+            "/directory",
+            "/blogroll",
+        )
+    )
+
+
+def _normalize_link_graph_target(url: str) -> str | None:
+    parsed = urlparse(url)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return None
+    if _link_graph_excluded_url(url) or _discovery_target_requires_auth_or_captcha(url):
+        return None
+    path = parsed.path or "/"
+    normalized = _canonical_source_url(url)
+    if _looks_like_discovery_surface_url(url) or _is_root_like_navigation_path(path) or _detect_platform_family_from_url(url) != "unknown":
+        return normalized
+    if _is_article_like_path(path):
+        return None
+    segments = [segment for segment in path.split("/") if segment]
+    if len(segments) <= 2:
+        return _normalized_site_root(normalized)
+    return None
+
+
+def _link_graph_page_hints(base_url: str, text: str) -> list[str]:
+    lowered = f"{base_url}\n{text}".casefold()
+    hints = ["linked_root_candidate", "trusted_root_link_graph"]
+    if any(token in lowered for token in ("association", "member organizations", "member sites", "member institutions")):
+        hints.append("association_link_page")
+    if any(token in lowered for token in ("blogroll", "recommended blogs", "source links", "links page")):
+        hints.append("blogroll_navigation")
+    if any(token in lowered for token in ("partners", "partner organizations", "resources", "resource links")):
+        hints.append("partner_links_navigation")
+    return sorted(set(hints))
+
+
+def _extract_link_graph_candidate_urls(
+    base_url: str,
+    text: str,
+    *,
+    max_same_domain: int,
+    max_external_domains: int,
+    max_discovered: int,
+) -> tuple[list[str], int, int, list[str]]:
+    if max_discovered <= 0:
+        return [], 0, 0, _link_graph_page_hints(base_url, text)
+    raw_links = _extract_visible_directory_links(base_url, text)
+    base_domain = urlparse(base_url).netloc.casefold()
+    discovered: list[str] = []
+    seen_urls: set[str] = set()
+    seen_external_domains: set[str] = set()
+    same_domain_count = 0
+    for raw_link in raw_links:
+        normalized = _normalize_link_graph_target(raw_link)
+        if not normalized or normalized in seen_urls:
+            continue
+        host = urlparse(normalized).netloc.casefold()
+        if host == base_domain:
+            if same_domain_count >= max(0, max_same_domain):
+                continue
+            same_domain_count += 1
+        else:
+            if host not in seen_external_domains and len(seen_external_domains) >= max(0, max_external_domains):
+                continue
+            seen_external_domains.add(host)
+        seen_urls.add(normalized)
+        discovered.append(normalized)
+        if len(discovered) >= max_discovered:
+            break
+    discovered_domain_count = len({urlparse(url).netloc.casefold() for url in discovered})
+    return discovered, len(raw_links), discovered_domain_count, _link_graph_page_hints(base_url, text)
+
+
 def _detect_platform_family_from_url(url: str) -> str:
     parsed = urlparse(url or "")
     lowered = (url or "").casefold()
@@ -7028,6 +11079,18 @@ def _detect_platform_family_from_url(url: str) -> str:
         return "mastodon"
     if "/@" in lowered or "/web/@" in lowered or "mastodon" in lowered:
         return "mastodon"
+    if any(token in host for token in ("lists.", "mailman.", "hyperkitty.")) or any(
+        token in path
+        for token in (
+            "/hyperkitty/",
+            "/pipermail/",
+            "/mailman/",
+            "/archives/list/",
+            "/archives/public/",
+            "/mailman3/",
+        )
+    ):
+        return "mailing_list"
     return "unknown"
 
 
@@ -7065,6 +11128,14 @@ def _detect_platform_family(target_url: str, html_text: str) -> str:
         or "application/activity+json" in lowered_html and ("/@" in lowered_html or "/users/" in lowered_html)
     ):
         return "mastodon"
+    if (
+        "hyperkitty" in lowered_html
+        or "pipermail" in lowered_html
+        or "mailman 3" in lowered_html
+        or "mailman archive" in lowered_html
+        or "list-id" in lowered_html and "archives" in lowered_html
+    ):
+        return "mailing_list"
     detected_from_url = _detect_platform_family_from_url(lowered_url)
     if detected_from_url != "unknown":
         return detected_from_url
@@ -7079,7 +11150,7 @@ def _detect_platform_family(target_url: str, html_text: str) -> str:
 
 
 def _structure_scan_root_source_class(platform_family: str) -> str:
-    if platform_family in {"discourse", "mediawiki", "mastodon", "stack_exchange"}:
+    if platform_family in {"discourse", "mediawiki", "mastodon", "stack_exchange", "mailing_list"}:
         return "community"
     if platform_family == "statuspage":
         return "official"
@@ -7224,6 +11295,86 @@ def _extract_mastodon_root_urls(base_url: str, html_text: str) -> list[str]:
             tag_name = segments[-1] if segments else ""
             if tag_name:
                 urls.append(urljoin(origin, f"/api/v1/tags/{tag_name}"))
+    return _dedupe_urls(urls)
+
+
+def _mailing_list_excluded_url(url: str) -> bool:
+    lowered = f"{urlparse(url).path}?{urlparse(url).query}".casefold()
+    return any(
+        token in lowered
+        for token in (
+            "subscribe",
+            "unsubscribe",
+            "login",
+            "auth",
+            "private",
+            "attachment",
+            "reply",
+            "post",
+            "admin",
+            "options",
+        )
+    )
+
+
+def _is_mailing_list_list_home_path(path: str) -> bool:
+    return re.search(r"^/(?:archives/list/[^/?#]+|hyperkitty/list/[^/?#]+)(?:/)?$", path, flags=re.IGNORECASE) is not None
+
+
+def _is_mailing_list_month_path(path: str) -> bool:
+    return re.search(
+        r"^/(?:archives/list/[^/?#]+|hyperkitty/list/[^/?#]+)/(?:\d{4}/\d{1,2}|latest|recent|thread|month|bythread|date\.html)(?:/)?$",
+        path,
+        flags=re.IGNORECASE,
+    ) is not None or re.search(
+        r"^/pipermail/[^/?#]+/\d{4}-(?:[A-Za-z]+|\d{1,2})/?$",
+        path,
+        flags=re.IGNORECASE,
+    ) is not None
+
+
+def _is_mailing_list_thread_path(path: str) -> bool:
+    return re.search(
+        r"^/(?:archives/list/[^/?#]+|hyperkitty/list/[^/?#]+)/(?:thread|message)/",
+        path,
+        flags=re.IGNORECASE,
+    ) is not None or re.search(
+        r"^/pipermail/[^/?#]+/\d{4}-(?:[A-Za-z]+|\d{1,2})/thread\.html$",
+        path,
+        flags=re.IGNORECASE,
+    ) is not None
+
+
+def _is_mailing_list_message_path(path: str) -> bool:
+    return re.search(
+        r"^/(?:archives/list/[^/?#]+/message|hyperkitty/list/[^/?#]+/message)/[^/?#]+/?$",
+        path,
+        flags=re.IGNORECASE,
+    ) is not None or re.search(
+        r"^/pipermail/[^/?#]+/\d{4}-(?:[A-Za-z]+|\d{1,2})/\d+\.html$",
+        path,
+        flags=re.IGNORECASE,
+    ) is not None
+
+
+def _mailing_list_archive_key(path: str) -> str | None:
+    match = re.search(r"^/(?:archives/list|hyperkitty/list)/([^/?#]+)/", path, flags=re.IGNORECASE)
+    if match is not None:
+        return match.group(1).casefold()
+    match = re.search(r"^/pipermail/([^/?#]+)/", path, flags=re.IGNORECASE)
+    if match is not None:
+        return match.group(1).casefold()
+    return None
+
+
+def _extract_mailing_list_root_urls(base_url: str, html_text: str) -> list[str]:
+    urls: list[str] = []
+    for absolute in _same_origin_links(base_url, html_text):
+        if _mailing_list_excluded_url(absolute):
+            continue
+        path = urlparse(absolute).path
+        if _is_mailing_list_list_home_path(path) or _is_mailing_list_month_path(path) or _is_mailing_list_thread_path(path):
+            urls.append(_canonical_source_url(absolute))
     return _dedupe_urls(urls)
 
 
@@ -7414,6 +11565,14 @@ def _structure_seed_hints_for_url(url: str, analysis: dict[str, object]) -> list
             hints.update({"catalog_link", "tag_navigation", "stack_exchange_tag_index"})
         if _is_stack_exchange_question_path(path):
             hints.add("stack_exchange_question_navigation")
+        if _is_mailing_list_list_home_path(path):
+            hints.update({"catalog_link", "mailing_list_archive"})
+        if _is_mailing_list_month_path(path):
+            hints.update({"catalog_link", "mailing_list_archive", "month_index_navigation"})
+        if _is_mailing_list_thread_path(path):
+            hints.update({"catalog_link", "thread_navigation"})
+        if _is_mailing_list_message_path(path):
+            hints.add("message_navigation")
     return sorted(hints)
 
 
@@ -7424,7 +11583,7 @@ def _apply_platform_seed_overrides(
     platform_family: str,
     discovery_method: str,
 ) -> SourceDiscoveryCandidateSeed:
-    if platform_family not in {"mastodon", "statuspage", "stack_exchange"}:
+    if platform_family not in {"mastodon", "statuspage", "stack_exchange", "mailing_list"}:
         return seed
     path = urlparse(url).path.casefold()
     hints = set(seed.structure_hints)
@@ -7523,6 +11682,22 @@ def _apply_platform_seed_overrides(
         elif _is_stack_exchange_question_path(path):
             hints.add("stack_exchange_question_navigation")
             updates.update({"source_class": "community", "discovery_role": "candidate"})
+    elif platform_family == "mailing_list":
+        tags.update({"forum", "archive"})
+        hints.update({"platform_mailing_list", "mailing_list_archive"})
+        updates["source_class"] = "community"
+        if _is_mailing_list_list_home_path(path):
+            hints.update({"catalog_link", "mailing_list_archive"})
+            updates["discovery_role"] = "root"
+        elif _is_mailing_list_month_path(path):
+            hints.update({"catalog_link", "mailing_list_archive", "month_index_navigation"})
+            updates["discovery_role"] = "root"
+        elif _is_mailing_list_thread_path(path):
+            hints.update({"catalog_link", "thread_navigation"})
+            updates["discovery_role"] = "candidate"
+        elif _is_mailing_list_message_path(path):
+            hints.add("message_navigation")
+            updates["discovery_role"] = "candidate"
     updates["structure_hints"] = sorted(hints)
     updates["source_family_tags"] = sorted(tags)
     return seed.model_copy(update=updates)
@@ -7545,6 +11720,8 @@ def _platform_discovery_surfaces(target_url: str, html_text: str, platform_famil
         return [], _extract_stack_exchange_root_urls(target_url, html_text), ["forum_platform", "platform_stack_exchange"]
     if platform_family == "statuspage":
         return [], _extract_statuspage_root_urls(target_url, html_text), ["status_platform", "platform_statuspage"]
+    if platform_family == "mailing_list":
+        return [], _extract_mailing_list_root_urls(target_url, html_text), ["forum_platform", "platform_mailing_list", "mailing_list_archive"]
     return [], [], []
 
 
@@ -7684,7 +11861,13 @@ def _extract_navigation_urls(base_url: str, html_text: str) -> list[str]:
         html_text or "",
         flags=re.IGNORECASE,
     )
-    return _dedupe_urls([urljoin(base_url, value.strip()) for value in urls])
+    discovered: list[str] = []
+    for value in urls:
+        absolute = urljoin(base_url, value.strip())
+        if _discovery_target_requires_auth_or_captcha(absolute):
+            continue
+        discovered.append(absolute)
+    return _dedupe_urls(discovered)
 
 
 def _extract_sitemap_candidate_urls(base_url: str, text: str, *, max_discovered: int) -> tuple[list[str], str, int]:
@@ -7789,6 +11972,14 @@ def _structure_hints_from_scan(
         hints.append("mastodon_tag_navigation")
     if any(_is_mastodon_account_path(urlparse(url).path) for url in navigation_urls):
         hints.append("mastodon_account_navigation")
+    if any(_is_mailing_list_list_home_path(urlparse(url).path) for url in navigation_urls):
+        hints.append("mailing_list_archive")
+    if any(_is_mailing_list_month_path(urlparse(url).path) for url in navigation_urls):
+        hints.append("month_index_navigation")
+    if any(_is_mailing_list_thread_path(urlparse(url).path) for url in navigation_urls):
+        hints.append("thread_navigation")
+    if any(_is_mailing_list_message_path(urlparse(url).path) for url in navigation_urls):
+        hints.append("message_navigation")
     if auth_signals:
         hints.append("login_markers_detected")
     if captcha_signals:
@@ -7831,6 +12022,9 @@ def _extract_catalog_candidate_urls(
     if active_platform_family == "stack_exchange":
         urls = _collect_urls_from_object(payload) if payload is not None else _extract_candidate_links(base_url, text)
         return _bounded_stack_exchange_candidate_urls(base_url, urls, max_discovered=max_discovered), "json" if payload is not None else "html"
+    if active_platform_family == "mailing_list":
+        urls = _collect_urls_from_object(payload) if payload is not None else _extract_candidate_links(base_url, text)
+        return _bounded_mailing_list_candidate_urls(base_url, urls, max_discovered=max_discovered), "json" if payload is not None else "html"
     if payload is not None:
         urls = _collect_urls_from_object(payload)
         return _bounded_candidate_urls(base_url, urls, max_discovered=max_discovered), "json"
@@ -7928,6 +12122,45 @@ def _bounded_stack_exchange_candidate_urls(base_url: str, urls: list[str], *, ma
             if not (_is_stack_exchange_tag_info_api_path(path) or _is_stack_exchange_tag_related_api_path(path)):
                 continue
         else:
+            continue
+        discovered.append(normalized)
+        if len(discovered) >= max_discovered:
+            break
+    return discovered
+
+
+def _bounded_mailing_list_candidate_urls(base_url: str, urls: list[str], *, max_discovered: int) -> list[str]:
+    discovered: list[str] = []
+    parsed_base = urlparse(base_url)
+    base_domain = parsed_base.netloc.casefold()
+    base_path = parsed_base.path.casefold()
+    base_archive_key = _mailing_list_archive_key(base_path)
+    for url in urls:
+        parsed = urlparse(url)
+        if parsed.scheme not in {"http", "https"} or parsed.netloc.casefold() != base_domain:
+            continue
+        normalized = _canonical_source_url(url)
+        if normalized in discovered or _mailing_list_excluded_url(normalized):
+            continue
+        path = parsed.path.casefold()
+        candidate_archive_key = _mailing_list_archive_key(path)
+        if base_archive_key and candidate_archive_key and base_archive_key != candidate_archive_key:
+            continue
+        same_archive_tree = (
+            base_path.rstrip("/") == ""
+            or path.startswith(base_path.rstrip("/") + "/")
+            or base_path.startswith(path.rstrip("/") + "/")
+            or (_is_mailing_list_list_home_path(base_path) and (_is_mailing_list_month_path(path) or _is_mailing_list_thread_path(path) or _is_mailing_list_message_path(path)))
+            or (_is_mailing_list_month_path(base_path) and (_is_mailing_list_thread_path(path) or _is_mailing_list_message_path(path)))
+        )
+        if not same_archive_tree:
+            continue
+        if not (
+            _is_mailing_list_list_home_path(path)
+            or _is_mailing_list_month_path(path)
+            or _is_mailing_list_thread_path(path)
+            or _is_mailing_list_message_path(path)
+        ):
             continue
         discovered.append(normalized)
         if len(discovered) >= max_discovered:
@@ -8136,6 +12369,10 @@ def _parse_utc_like(value: str | None) -> datetime | None:
 
 def _utc_now() -> str:
     return datetime.now(tz=timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _isoformat_utc(value: datetime) -> str:
+    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _compact_timestamp(value: str) -> str:

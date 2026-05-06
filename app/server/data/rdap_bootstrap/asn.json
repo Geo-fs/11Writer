@@ -1,0 +1,14 @@
+{
+  "description": "Fixture RDAP bootstrap for ASN",
+  "publication": "2026-05-01T00:00:00Z",
+  "services": [
+    [
+      [
+        "0-4294967295"
+      ],
+      [
+        "https://rdap.arin.net/registry/"
+      ]
+    ]
+  ]
+}

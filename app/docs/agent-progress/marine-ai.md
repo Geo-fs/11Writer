@@ -1,3 +1,508 @@
+## 2026-05-05 23:58 America/Chicago
+
+Assignment version:
+- 2026-05-05 23:58 America/Chicago
+
+Task:
+- finish the current marine slice at the smallest coherent checkpoint and write the Phase 3 Marine AI handoff packet
+
+What changed:
+- confirmed the active bounded checkpoint was already complete:
+  - GEBCO static bathymetry slice is implemented
+  - NAVTEX, hydrology, infrastructure, and export/reporting surfaces are already coherent enough to hand off
+- wrote the Phase 3 Marine AI handoff packet at:
+  - [marine-ai.md](/C:/Users/mike/11Writer/app/docs/phase3-handoffs/marine-ai.md)
+- documented for incoming Phase 3 work:
+  - scope completed
+  - current marine state
+  - files and surfaces to know
+  - validation already run
+  - known blockers and caveats
+  - what the next AI should do first
+  - what not to break
+  - Phase 3 relevance for Reporting AI, Platform AI, and Connect AI
+- made the handoff explicit about:
+  - replay evidence versus contextual layers
+  - static bathymetry versus warning/hydrology context
+  - no-inference and no-intent guardrails
+
+Files touched:
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/phase3-handoffs/marine-ai.md)
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/marine-ai.md)
+
+Validation:
+- no new code-path validation rerun
+- reason:
+  - this checkpoint was docs-only
+  - the active GEBCO slice and marine stack were already validated in the prior completed checkpoint
+
+Blockers or caveats:
+- no fresh source expansion was started
+- no new validation claims were added beyond already completed checkpoints
+- shared frontend lint still has the previously documented non-marine blocker in `AppShell.tsx`
+
+Next recommended task:
+- let the incoming Phase 3 AI start from the handoff packet and existing marine docs rather than reconstructing the lane from old chat history
+
+## 2026-05-05 22:17 America/Chicago
+
+Assignment version:
+- 2026-05-05 22:17 America/Chicago
+
+Task:
+- implement one bounded static-context marine follow-on centered on GEBCO Gridded Bathymetry
+
+What changed:
+- added a bounded fixture-first GEBCO static-context backend slice at:
+  - `GET /api/marine/context/gebco-bathymetry`
+- added marine-only backend settings, typed contracts, service wiring, and route wiring for GEBCO bathymetry
+- preserved strict static-context boundaries:
+  - pinned `GEBCO_2026` grid version
+  - `15` arc-second grid-resolution posture
+  - bounded sample-point and compact area-summary lookup only
+  - source provenance through official GEBCO docs/download URLs
+  - explicit source health, source mode, caveats, and no-inference wording
+- added focused backend coverage for:
+  - loaded contract behavior
+  - empty/no-match behavior
+  - disabled non-fixture behavior
+  - honest stale classification from an old pinned grid-release timestamp
+  - honest unavailable classification from fixture retrieval failure
+  - request validation for coordinates and radius
+- added marine-local client/query/helper/card/export integration for GEBCO:
+  - query hook
+  - static-context helper
+  - compact GEBCO card
+  - `marineAnomalySummary.gebcoBathymetryContext`
+- kept GEBCO intentionally separate from:
+  - NAVTEX advisory warning context
+  - hydrology context family rollups
+  - live incident truth
+  - closure, route-safety, vessel-behavior, vessel-intent, or action-need claims
+- extended deterministic helper regression and marine smoke to cover the GEBCO card plus export metadata block
+- updated marine docs to record the exact GEBCO contract, fixture coverage, smoke/export status, and static-context guardrails
+
+Files touched:
+- [settings.py](/C:/Users/mike/11Writer/app/server/src/config/settings.py)
+- [api.py](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+- [marine_context_service.py](/C:/Users/mike/11Writer/app/server/src/services/marine_context_service.py)
+- [marine_service.py](/C:/Users/mike/11Writer/app/server/src/services/marine_service.py)
+- [marine.py](/C:/Users/mike/11Writer/app/server/src/routes/marine.py)
+- [test_marine_gebco.py](/C:/Users/mike/11Writer/app/server/tests/test_marine_gebco.py)
+- [smoke_fixture_app.py](/C:/Users/mike/11Writer/app/server/tests/smoke_fixture_app.py)
+- [api.ts](/C:/Users/mike/11Writer/app/client/src/types/api.ts)
+- [queries.ts](/C:/Users/mike/11Writer/app/client/src/lib/queries.ts)
+- [marineGebcoBathymetryContext.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineGebcoBathymetryContext.ts)
+- [MarineAnomalySection.tsx](/C:/Users/mike/11Writer/app/client/src/features/marine/MarineAnomalySection.tsx)
+- [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts)
+- [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs)
+- [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+- [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+- [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+- [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+- [marine-context-fixture-reference.md](/C:/Users/mike/11Writer/app/docs/marine-context-fixture-reference.md)
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/marine-ai.md)
+
+Validation:
+- passed:
+  - `python -m pytest app/server/tests/test_marine_gebco.py -q`
+  - `python -m pytest app/server/tests/test_netherlands_rws_waterinfo.py app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py app/server/tests/test_marine_navtex.py app/server/tests/test_marine_gebco.py -q`
+  - `python -m compileall app/server/src`
+  - from `app/client`: `cmd /c npm.cmd run test:marine-context-helpers`
+  - from `app/client`: `cmd /c npm.cmd run build`
+  - `python app/server/tests/run_playwright_smoke.py marine`
+  - `python scripts/alerts_ledger.py --json`
+- blocked outside marine:
+  - from `app/client`: `cmd /c npm.cmd run lint`
+  - current repo-wide blocker:
+    - [AppShell.tsx](/C:/Users/mike/11Writer/app/client/src/features/app-shell/AppShell.tsx:2686)
+    - `react-hooks/exhaustive-deps` missing dependencies `noaaNowCoastLayerCatalogQuery.data` and `nwsAlertsRecentQuery.data`
+
+Blockers or caveats:
+- GEBCO remains bounded static seafloor context only.
+- No broad raster ingest, live-network behavior, warning-family merge, hydrology-family merge, or viewer scraping was added.
+- GEBCO intentionally does not emit `degraded` in the current slice because there is no honest partial-metadata/source-quality degradation path.
+- The remaining lint blocker is outside marine in shared `AppShell.tsx`.
+- No anomaly scoring changed.
+- No route-safety, closure-truth, grounding-risk, incident-truth, vessel-behavior, vessel-intent, or action-guidance inference was added.
+
+Next recommended task:
+- wait for Manager AI to assign the next bounded marine source or reporting follow-on now that GEBCO static context is contract-covered, export-covered, and marine-smoke-covered
+
+## 2026-05-05 19:41 America/Chicago
+
+Assignment version:
+- 2026-05-05 19:41 America/Chicago
+
+Task:
+- implement a bounded marine source wave centered on Navtex
+
+What changed:
+- added a bounded fixture-first NAVTEX source slice centered on official NAVCEN-published GovDelivery RSS feeds
+- added backend settings, typed contracts, service wiring, route wiring, and focused fixture-first backend tests for:
+  - `GET /api/marine/context/navtex`
+- preserved advisory warning semantics:
+  - source family/category remains distinct from hydrology, ocean/met, and infrastructure context
+  - message-family filtering separates navigational warnings, meteorological warnings, SAR, forecast, and other subjects
+  - source health/freshness remains explicit through `loaded`, `empty`, `stale`, `degraded`, `disabled`, and `unavailable`
+  - caveats explicitly forbid closure certainty, legal-status, required-action, threat, vessel-behavior, and vessel-intent claims
+- added marine-local client/query/helper/card/export integration for NAVTEX:
+  - query hook
+  - context helper
+  - marine card
+  - context source summary row
+  - context fusion warning-family row
+  - `marineAnomalySummary.navtexContext`
+- extended deterministic helper regression and marine smoke to cover the new NAVTEX card, source-summary row, fusion family, and export metadata block
+- updated marine docs to reflect the actual seven-source marine context stack and corrected the outdated Waterinfo smoke note
+- no bounded GEBCO/static follow-on was added in this assignment; the wave stayed centered on NAVTEX only
+
+Files touched:
+- [settings.py](/C:/Users/mike/11Writer/app/server/src/config/settings.py)
+- [api.py](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+- [marine_context_service.py](/C:/Users/mike/11Writer/app/server/src/services/marine_context_service.py)
+- [marine_service.py](/C:/Users/mike/11Writer/app/server/src/services/marine_service.py)
+- [marine.py](/C:/Users/mike/11Writer/app/server/src/routes/marine.py)
+- [test_marine_navtex.py](/C:/Users/mike/11Writer/app/server/tests/test_marine_navtex.py)
+- [smoke_fixture_app.py](/C:/Users/mike/11Writer/app/server/tests/smoke_fixture_app.py)
+- [api.ts](/C:/Users/mike/11Writer/app/client/src/types/api.ts)
+- [queries.ts](/C:/Users/mike/11Writer/app/client/src/lib/queries.ts)
+- [marineNavtexContext.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineNavtexContext.ts)
+- [MarineAnomalySection.tsx](/C:/Users/mike/11Writer/app/client/src/features/marine/MarineAnomalySection.tsx)
+- [marineContextSourceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineContextSourceSummary.ts)
+- [marineContextFusionSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineContextFusionSummary.ts)
+- [marineContextIssueExportBundle.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineContextIssueExportBundle.ts)
+- [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts)
+- [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs)
+- [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+- [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+- [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+- [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+- [marine-context-fixture-reference.md](/C:/Users/mike/11Writer/app/docs/marine-context-fixture-reference.md)
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/marine-ai.md)
+
+Validation:
+- passed:
+  - `python -m pytest app/server/tests/test_netherlands_rws_waterinfo.py app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py app/server/tests/test_marine_navtex.py -q`
+  - `python -m compileall app/server/src`
+  - from `app/client`: `cmd /c npm.cmd run test:marine-context-helpers`
+  - from `app/client`: `cmd /c npm.cmd run lint`
+  - from `app/client`: `cmd /c npm.cmd run build`
+  - `python app/server/tests/run_playwright_smoke.py marine`
+  - `python scripts/alerts_ledger.py --json`
+
+Blockers or caveats:
+- NAVTEX remains bounded to advisory warning context only.
+- No broad viewer ingestion, no live-network tests, and no GEBCO/static follow-on were added in this slice.
+- Official live URL family is documented as NAVCEN-published GovDelivery RSS feeds, but the implementation remains fixture-first in this phase.
+
+Next recommended task:
+- if Manager AI wants a follow-on from the same user-priority lane, add one small static bathymetry/context helper only if it stays officially sourced, inert, export-safe, and semantically separate from warning context
+
+## 2026-05-05 19:35 America/Chicago
+
+Assignment version:
+- 2026-05-05 19:35 America/Chicago
+
+Task:
+- build a bounded marineQuestionBriefingPacket on top of the current marine reporting stack
+
+What changed:
+- added [marineQuestionBriefingPacket.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineQuestionBriefingPacket.ts) as a pure bounded export/reporting helper over the existing marine reporting stack
+- the new packet builds on:
+  - `marineFusionSnapshotInput`
+  - `marineReportBriefPackage`
+  - `marineCorridorSituationPackage`
+  - `marineHydrologyRegionalComparisonPackage`
+  - `marineCurrentAwarenessDigest`
+  - `marineSourceRowWorkflowClosurePacket`
+- it preserves, in one export-only artifact:
+  - active area, corridor, or hydrology question posture
+  - source-row posture and source-health posture
+  - corridor or chokepoint posture where present
+  - hydrology posture where present
+  - workflow-evidence and export-coherence posture
+  - review or readiness gaps
+  - export-safe briefing lines
+  - `observe`, `orient`, `prioritize`, and `explain`
+  - explicit does-not-prove lines
+- added Node-resolution shims for the new helper:
+  - [marineQuestionBriefingPacket](/C:/Users/mike/11Writer/app/client/src/features/marine/marineQuestionBriefingPacket)
+  - [marineQuestionBriefingPacket.js](/C:/Users/mike/11Writer/app/client/src/features/marine/marineQuestionBriefingPacket.js)
+- extended [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts) so `marineAnomalySummary.questionBriefingPacket` is exported and one compact question-briefing line is appended to the existing marine display/export lines
+- extended [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs) so the real marine export path now regression-checks:
+  - question-family posture
+  - source-row/source-health carry-through
+  - corridor/chokepoint and hydrology posture carry-through
+  - workflow-evidence/export-coherence carry-through
+  - no-impact/no-closure/no-wrongdoing/no-action guardrails
+  - carry-through through `buildMarineEvidenceSummary(...)`
+- extended [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so marine smoke now checks the `marineAnomalySummary.questionBriefingPacket` metadata block, including question posture, source rows, workflow-evidence wording, and explicit no-closure guardrails
+- updated marine docs and validation notes so the new packet is documented as export-covered, regression-covered, and smoke metadata-covered without promoting any source beyond its evidence:
+  - [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+  - [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+  - [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+
+Files touched:
+- [marineQuestionBriefingPacket.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineQuestionBriefingPacket.ts)
+- [marineQuestionBriefingPacket](/C:/Users/mike/11Writer/app/client/src/features/marine/marineQuestionBriefingPacket)
+- [marineQuestionBriefingPacket.js](/C:/Users/mike/11Writer/app/client/src/features/marine/marineQuestionBriefingPacket.js)
+- [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts)
+- [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs)
+- [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+- [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+- [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+- [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/marine-ai.md)
+
+Validation:
+- `python -m pytest app/server/tests/test_netherlands_rws_waterinfo.py app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run test:marine-context-helpers` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python app/server/tests/run_playwright_smoke.py marine` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- `marineQuestionBriefingPacket` is export-only and intentionally does not add a new large marine UI panel
+- it packages question posture, source-row/source-health posture, corridor/chokepoint posture, hydrology posture, workflow-evidence posture, and export-coherence posture only
+- it does not imply impact, closure certainty, causation, wrongdoing, threat, action need, vessel intent, escort/payment, or evasion
+- one intermediate marine smoke run briefly reported the new key missing, but the rerun after the completed integration/build path was green and no launcher-permission issue occurred
+- no live-network tests
+- no broad portal or viewer ingestion
+- no real-time crisis or geopolitical claims
+
+Next recommended task:
+- wait for Manager AI to assign the next bounded marine reporting/briefing follow-through task
+
+
+## 2026-05-05 19:01 America/Chicago
+
+Assignment version:
+- 2026-05-05 19:01 America/Chicago
+
+Task:
+- build a bounded marineSourceRowWorkflowClosurePacket on top of the current marine reporting stack
+
+What changed:
+- added [marineSourceRowWorkflowClosurePacket.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineSourceRowWorkflowClosurePacket.ts) as a pure bounded export/reporting helper over the existing marine reporting stack
+- the new packet builds on:
+  - `marineFusionSnapshotInput`
+  - `marineReportBriefPackage`
+  - `marineCorridorSituationPackage`
+  - `marineHydrologyRegionalComparisonPackage`
+  - `marineCurrentAwarenessDigest`
+- it preserves, in one export-only artifact:
+  - source-row posture and source-health posture
+  - corridor or chokepoint posture where present
+  - hydrology posture where present
+  - workflow-evidence posture
+  - review/readiness gaps
+  - export coherence posture
+  - export-safe lines
+  - `observe`, `orient`, `prioritize`, and `explain`
+  - explicit does-not-prove lines
+- added Node-resolution shims for the new helper:
+  - [marineSourceRowWorkflowClosurePacket](/C:/Users/mike/11Writer/app/client/src/features/marine/marineSourceRowWorkflowClosurePacket)
+  - [marineSourceRowWorkflowClosurePacket.js](/C:/Users/mike/11Writer/app/client/src/features/marine/marineSourceRowWorkflowClosurePacket.js)
+- extended [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts) so `marineAnomalySummary.sourceRowWorkflowClosurePacket` is exported and one compact source-row workflow/export closure line is appended to the existing marine display/export lines
+- extended [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs) so the real marine export path now regression-checks:
+  - source-row closure posture
+  - source-row carry-through
+  - export-coherence posture carry-through
+  - corridor/chokepoint carry-through
+  - hydrology posture carry-through
+  - workflow-evidence carry-through
+  - no-impact/no-closure/no-action/no-wrongdoing guardrails
+  - carry-through through `buildMarineEvidenceSummary(...)`
+- extended [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so marine smoke now checks the `marineAnomalySummary.sourceRowWorkflowClosurePacket` metadata block, including source rows, posture, export-coherence wording, workflow-evidence wording, and explicit no-closure guardrails
+- updated marine docs and validation notes so the new packet is documented as export-covered, regression-covered, and smoke metadata-covered without promoting any source beyond its evidence:
+  - [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+  - [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+  - [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+
+Files touched:
+- [marineSourceRowWorkflowClosurePacket.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineSourceRowWorkflowClosurePacket.ts)
+- [marineSourceRowWorkflowClosurePacket](/C:/Users/mike/11Writer/app/client/src/features/marine/marineSourceRowWorkflowClosurePacket)
+- [marineSourceRowWorkflowClosurePacket.js](/C:/Users/mike/11Writer/app/client/src/features/marine/marineSourceRowWorkflowClosurePacket.js)
+- [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts)
+- [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs)
+- [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+- [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+- [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+- [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/marine-ai.md)
+
+Validation:
+- `python -m pytest app/server/tests/test_netherlands_rws_waterinfo.py app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run test:marine-context-helpers` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python app/server/tests/run_playwright_smoke.py marine` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- `marineSourceRowWorkflowClosurePacket` is export-only and intentionally does not add a new large marine UI panel
+- it packages source-row, corridor/chokepoint, hydrology, workflow-evidence, and export-coherence posture only
+- it does not imply impact, closure certainty, causation, threat, action need, vessel intent, wrongdoing, escort/payment, or evasion
+- one intermediate marine smoke run briefly reported the new key missing, but the rerun after the completed integration/build path was green and no launcher-permission issue occurred
+- no live-network tests
+- no broad portal or viewer ingestion
+- no real-time crisis or geopolitical claims
+
+Next recommended task:
+- wait for Manager AI to assign the next bounded marine reporting/export coherence follow-through task
+
+
+## 2026-05-05 18:33 America/Chicago
+
+Assignment version:
+- 2026-05-05 18:33 America/Chicago
+
+Task:
+- build a bounded marineCurrentAwarenessDigest on top of the current marine reporting stack
+
+What changed:
+- added [marineCurrentAwarenessDigest.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineCurrentAwarenessDigest.ts) as a pure bounded export/reporting helper over the existing marine reporting stack
+- the new digest builds on:
+  - `marineFusionSnapshotInput`
+  - `marineReportBriefPackage`
+  - `marineCorridorSituationPackage`
+  - `marineHydrologyRegionalComparisonPackage`
+- it preserves, in one export-only artifact:
+  - current posture and source-health posture
+  - corridor or chokepoint posture where present
+  - hydrology comparison posture where present
+  - source ids, source modes, and source health posture
+  - workflow-evidence posture
+  - review/readiness gaps
+  - export-safe lines
+  - `observe`, `orient`, `prioritize`, and `explain`
+  - explicit does-not-prove lines
+- added Node-resolution shims for the new helper:
+  - [marineCurrentAwarenessDigest](/C:/Users/mike/11Writer/app/client/src/features/marine/marineCurrentAwarenessDigest)
+  - [marineCurrentAwarenessDigest.js](/C:/Users/mike/11Writer/app/client/src/features/marine/marineCurrentAwarenessDigest.js)
+- extended [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts) so `marineAnomalySummary.currentAwarenessDigest` is exported and one compact current-awareness line is appended to the existing marine display/export lines
+- extended [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs) so the real marine export path now regression-checks:
+  - current-awareness posture
+  - corridor/chokepoint carry-through
+  - hydrology comparison carry-through
+  - workflow-evidence carry-through
+  - no-impact/no-closure/no-action/no-wrongdoing guardrails
+  - carry-through through `buildMarineEvidenceSummary(...)`
+- extended [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so marine smoke now checks the `marineAnomalySummary.currentAwarenessDigest` metadata block, including source rows, posture, observe lines, workflow-evidence wording, and explicit no-closure guardrails
+- updated marine docs and validation notes so the new digest is documented as export-covered, regression-covered, and smoke metadata-covered without promoting any source beyond its evidence:
+  - [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+  - [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+  - [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+
+Files touched:
+- [marineCurrentAwarenessDigest.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineCurrentAwarenessDigest.ts)
+- [marineCurrentAwarenessDigest](/C:/Users/mike/11Writer/app/client/src/features/marine/marineCurrentAwarenessDigest)
+- [marineCurrentAwarenessDigest.js](/C:/Users/mike/11Writer/app/client/src/features/marine/marineCurrentAwarenessDigest.js)
+- [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts)
+- [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs)
+- [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+- [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+- [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+- [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/marine-ai.md)
+
+Validation:
+- `python -m pytest app/server/tests/test_netherlands_rws_waterinfo.py app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run test:marine-context-helpers` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python app/server/tests/run_playwright_smoke.py marine` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- `marineCurrentAwarenessDigest` is export-only and intentionally does not add a new large marine UI panel
+- it provides one bounded answer to open-ended current-context questions using source-health, corridor/chokepoint, hydrology, and workflow-evidence posture only
+- it does not imply impact, closure certainty, causation, threat, action need, vessel intent, wrongdoing, escort/payment, or evasion
+- no live-network tests
+- no broad portal or viewer ingestion
+- no real-time crisis or geopolitical claims
+
+Next recommended task:
+- wait for Manager AI to assign the next bounded marine reporting/export follow-through task
+
+
+## 2026-05-05 18:15 America/Chicago
+
+Assignment version:
+- 2026-05-05 18:15 America/Chicago
+
+Task:
+- build a bounded marineHydrologyRegionalComparisonPackage on top of the current marine reporting stack
+
+What changed:
+- added [marineHydrologyRegionalComparisonPackage.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineHydrologyRegionalComparisonPackage.ts) as a pure bounded hydrology comparison helper over the existing marine reporting stack
+- the new package builds on:
+  - `marineFusionSnapshotInput`
+  - `marineReportBriefPackage`
+  - `marineHydrologySourceHealthReport`
+- it preserves, in one export-only hydrology artifact:
+  - source ids, source modes, and source health posture
+  - evidence basis and workflow-evidence posture
+  - latest timestamp or freshness posture
+  - regional/source-row comparison posture
+  - review/readiness gaps
+  - export-safe lines
+  - `observe`, `orient`, `prioritize`, and `explain`
+  - explicit does-not-prove lines
+- added Node-resolution shims for the new helper:
+  - [marineHydrologyRegionalComparisonPackage](/C:/Users/mike/11Writer/app/client/src/features/marine/marineHydrologyRegionalComparisonPackage)
+  - [marineHydrologyRegionalComparisonPackage.js](/C:/Users/mike/11Writer/app/client/src/features/marine/marineHydrologyRegionalComparisonPackage.js)
+- extended [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts) so `marineAnomalySummary.hydrologyRegionalComparisonPackage` is exported and one compact hydrology-comparison line is appended to the existing marine display/export lines
+- extended [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs) so the real marine export path now regression-checks:
+  - hydrology comparison posture
+  - hydrology row count
+  - Vigicrues workflow-evidence wording
+  - Waterinfo workflow-evidence wording
+  - OPW workflow-evidence wording
+  - no-impact/no-closure/no-action guardrails
+  - carry-through through `buildMarineEvidenceSummary(...)`
+- extended [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs) so marine smoke now checks the `marineAnomalySummary.hydrologyRegionalComparisonPackage` metadata block, including hydrology rows, workflow-evidence wording, and the explicit no-impact guardrail
+- updated marine docs and validation notes so the hydrology comparison artifact is documented as export-covered, regression-covered, and smoke metadata-covered without promoting any source beyond its evidence:
+  - [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+  - [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+  - [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+
+Files touched:
+- [marineHydrologyRegionalComparisonPackage.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineHydrologyRegionalComparisonPackage.ts)
+- [marineHydrologyRegionalComparisonPackage](/C:/Users/mike/11Writer/app/client/src/features/marine/marineHydrologyRegionalComparisonPackage)
+- [marineHydrologyRegionalComparisonPackage.js](/C:/Users/mike/11Writer/app/client/src/features/marine/marineHydrologyRegionalComparisonPackage.js)
+- [marineEvidenceSummary.ts](/C:/Users/mike/11Writer/app/client/src/features/marine/marineEvidenceSummary.ts)
+- [marineContextHelperRegression.mjs](/C:/Users/mike/11Writer/app/client/scripts/marineContextHelperRegression.mjs)
+- [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs)
+- [marine-module.md](/C:/Users/mike/11Writer/app/docs/marine-module.md)
+- [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md)
+- [marine-context-source-contract-matrix.md](/C:/Users/mike/11Writer/app/docs/marine-context-source-contract-matrix.md)
+- [marine-ai.md](/C:/Users/mike/11Writer/app/docs/agent-progress/marine-ai.md)
+
+Validation:
+- `python -m pytest app/server/tests/test_netherlands_rws_waterinfo.py app/server/tests/test_marine_contracts.py app/server/tests/test_vigicrues_hydrometry.py app/server/tests/test_ireland_opw_waterlevel.py -q` -> pass
+- `python -m compileall app/server/src` -> pass
+- `cmd /c npm.cmd run test:marine-context-helpers` -> pass
+- `cmd /c npm.cmd run lint` -> pass
+- `cmd /c npm.cmd run build` -> pass
+- `python app/server/tests/run_playwright_smoke.py marine` -> pass
+- `python scripts/alerts_ledger.py --json` -> pass
+
+Blockers or caveats:
+- `marineHydrologyRegionalComparisonPackage` is export-only and intentionally does not add a new large marine UI panel
+- it compares source-health/workflow-evidence/freshness posture only and does not imply impact, closure certainty, causation, threat, or action need
+- no live-network tests
+- no broad portal or viewer ingestion
+- no real-time crisis or geopolitical claims
+
+Next recommended task:
+- wait for Manager AI to assign the next marine hydrology/reporting follow-through task
+
 ## 2026-05-05 10:22 America/Chicago
 
 Assignment version:
@@ -5429,6 +5934,12 @@ Next recommended task:
 
 
 - extend marine source-health validation for stale or unavailable source behavior without broadening semantics or touching shared frontend files
+
+
+
+
+
+
 
 
 

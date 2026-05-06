@@ -1,4 +1,5 @@
 import type { MarineIrelandOpwContextSummary } from "./marineIrelandOpwContext";
+import type { MarineNavtexContextSummary } from "./marineNavtexContext";
 import type { MarineNetherlandsRwsWaterinfoContextSummary } from "./marineNetherlandsRwsWaterinfoContext";
 import type { MarineNdbcContextSummary } from "./marineNdbcContext";
 import type { MarineNoaaContextSummary } from "./marineNoaaContext";
@@ -20,7 +21,7 @@ type SourceAvailability = "loaded" | "empty" | "disabled" | "unavailable" | "deg
 export interface MarineContextSourceSummaryRow {
   sourceId: string;
   label: string;
-  category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+  category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
   sourceMode: SourceMode;
   health: SourceHealth;
   availability: SourceAvailability;
@@ -56,6 +57,7 @@ export interface MarineContextSourceRegistrySummary {
 export function buildMarineContextSourceRegistrySummary(input: {
   irelandOpw: MarineIrelandOpwContextSummary | null;
   netherlandsRwsWaterinfo?: MarineNetherlandsRwsWaterinfoContextSummary | null;
+  navtex?: MarineNavtexContextSummary | null;
   noaaCoops: MarineNoaaContextSummary | null;
   ndbc: MarineNdbcContextSummary | null;
   scottishWater: MarineScottishWaterContextSummary | null;
@@ -67,6 +69,9 @@ export function buildMarineContextSourceRegistrySummary(input: {
     input.scottishWater
       ? fromScottishWater(input.scottishWater)
       : unavailableRow("scottish-water-overflows", "Scottish Water Overflows", "coastal-infrastructure"),
+    input.navtex
+      ? fromNavtex(input.navtex)
+      : unavailableRow("uscg-navtex-broadcast-notices", "USCG NAVTEX Broadcast Notices", "maritime-warning"),
     input.vigicrues
       ? fromVigicrues(input.vigicrues)
       : unavailableRow("france-vigicrues-hydrometry", "France Vigicrues Hydrometry", "hydrology")
@@ -223,6 +228,22 @@ function fromWaterinfo(summary: MarineNetherlandsRwsWaterinfoContextSummary): Ma
   };
 }
 
+function fromNavtex(summary: MarineNavtexContextSummary): MarineContextSourceSummaryRow {
+  return {
+    sourceId: summary.metadata.sourceId,
+    label: "USCG NAVTEX Broadcast Notices",
+    category: "maritime-warning",
+    sourceMode: summary.metadata.sourceMode,
+    health: summary.metadata.health,
+    availability: availabilityFromHealth(summary.metadata.health),
+    nearbyCount: summary.metadata.nearbyBroadcastCount,
+    activeCount: null,
+    topSummary: summary.metadata.topSummary,
+    caveats: summary.metadata.caveats,
+    evidenceBasis: "advisory"
+  };
+}
+
 function unavailableRow(
   sourceId: string,
   label: string,
@@ -251,3 +272,5 @@ function availabilityFromHealth(health: SourceHealth): SourceAvailability {
   if (health === "stale" || health === "degraded" || health === "error") return "degraded";
   return "unknown";
 }
+
+

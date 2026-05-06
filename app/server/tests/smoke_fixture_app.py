@@ -1688,6 +1688,328 @@ def _ourairports_reference_context(
     }
 
 
+def _gpsjam_context(
+    date: str | None = None,
+    limit: int = 5,
+) -> dict[str, Any]:
+    requested_date = (date or "2026-05-05").strip() or "2026-05-05"
+    all_samples = [
+        {
+            "hexId": "84754a9ffffffff",
+            "countGoodAircraft": 7,
+            "countBadAircraft": 5,
+            "percentBadAircraft": 33.33,
+            "interferenceLevel": "high",
+            "sourceUrl": "https://gpsjam.org/data/2026-05-05-h3_4.csv",
+            "sourceMode": "fixture",
+            "health": "normal",
+            "caveats": [
+                "GPSJam hex rows summarize one UTC day of aircraft-reported low navigation accuracy and are not target-specific proofs.",
+                "A highlighted hex does not by itself prove local ground GPS outage, jamming attribution, or operational consequence.",
+            ],
+            "evidenceBasis": "source-reported",
+        },
+        {
+            "hexId": "84754e1ffffffff",
+            "countGoodAircraft": 21,
+            "countBadAircraft": 4,
+            "percentBadAircraft": 12.0,
+            "interferenceLevel": "high",
+            "sourceUrl": "https://gpsjam.org/data/2026-05-05-h3_4.csv",
+            "sourceMode": "fixture",
+            "health": "normal",
+            "caveats": ["GPSJam daily hex rows remain contextual GNSS-disruption awareness only."],
+            "evidenceBasis": "source-reported",
+        },
+        {
+            "hexId": "8475413ffffffff",
+            "countGoodAircraft": 64,
+            "countBadAircraft": 3,
+            "percentBadAircraft": 2.99,
+            "interferenceLevel": "medium",
+            "sourceUrl": "https://gpsjam.org/data/2026-05-05-h3_4.csv",
+            "sourceMode": "fixture",
+            "health": "normal",
+            "caveats": ["GPSJam daily hex rows remain contextual GNSS-disruption awareness only."],
+            "evidenceBasis": "source-reported",
+        },
+        {
+            "hexId": "84756a7ffffffff",
+            "countGoodAircraft": 45,
+            "countBadAircraft": 2,
+            "percentBadAircraft": 2.13,
+            "interferenceLevel": "medium",
+            "sourceUrl": "https://gpsjam.org/data/2026-05-05-h3_4.csv",
+            "sourceMode": "fixture",
+            "health": "normal",
+            "caveats": ["GPSJam daily hex rows remain contextual GNSS-disruption awareness only."],
+            "evidenceBasis": "source-reported",
+        },
+    ]
+    selected_samples = all_samples[: max(1, min(limit, 10))]
+    caveats = [
+        "GPSJam is contextual GNSS-disruption awareness derived from aircraft-reported low navigation accuracy and remains separate from SWPC, geomagnetism, operational airport status, and selected-target evidence.",
+        "GPSJam does not by itself prove GPS outage, interference intent, attribution, target-specific impact, safety consequence, or action need.",
+        "GPSJam aggregates aircraft-reported low navigation accuracy over one 24 hour UTC day and does not claim complete coverage.",
+    ]
+    return {
+        "fetchedAt": _iso(NOW),
+        "source": "gpsjam-gnss-interference",
+        "date": requested_date,
+        "earliestAvailableDate": "2022-02-14",
+        "latestAvailableDate": "2026-05-05",
+        "suspect": False,
+        "dataVersion": 4,
+        "count": len(selected_samples),
+        "totalHexCount": None,
+        "badHexCount": 602,
+        "samples": selected_samples,
+        "sourceHealth": {
+            "sourceName": "gpsjam-gnss-interference",
+            "sourceMode": "fixture",
+            "health": "normal",
+            "detail": "GPSJam fixture daily aircraft-reported low-navigation-accuracy context loaded as bounded GNSS-disruption awareness.",
+            "manifestSourceUrl": "https://gpsjam.org/data/manifest.csv",
+            "dataSourceUrl": "https://gpsjam.org/data/2026-05-05-h3_4.csv",
+            "lastUpdatedAt": "2026-05-05",
+            "state": "healthy",
+            "caveats": caveats,
+        },
+        "caveats": caveats,
+    }
+
+
+def _nws_alerts_recent(
+    limit: int = 3,
+    severity: str | None = None,
+    alert_type: str | None = None,
+    sort: str = "severity",
+) -> dict[str, Any]:
+    alerts = [
+        {
+            "eventId": "nws-alert-heat-kxan-001",
+            "title": "Heat Advisory",
+            "alertType": "advisory",
+            "event": "Heat Advisory",
+            "headline": "Heat Advisory issued May 5 at 2:15 PM CDT by NWS Austin/San Antonio TX",
+            "severity": "moderate",
+            "urgency": "expected",
+            "certainty": "likely",
+            "status": "actual",
+            "messageType": "alert",
+            "category": "met",
+            "senderName": "NWS Austin/San Antonio TX",
+            "areaDescription": "Travis County",
+            "areaCodes": ["TX"],
+            "zoneCodes": ["TXZ192"],
+            "effectiveAt": "2026-05-05T19:15:00Z",
+            "onsetAt": "2026-05-05T20:00:00Z",
+            "expiresAt": "2026-05-06T01:00:00Z",
+            "sentAt": "2026-05-05T19:15:00Z",
+            "updatedAt": "2026-05-05T19:15:00Z",
+            "instruction": "Hydrate and reduce prolonged outdoor exposure; source text remains inert workflow context only.",
+            "description": "Public heat advisory context only; do not treat this as aviation operational status or route-impact guidance.",
+            "response": "prepare",
+            "geometrySummary": "polygon centroid near Austin, Texas",
+            "longitude": -97.7431,
+            "latitude": 30.2672,
+            "sourceUrl": "https://api.weather.gov/alerts/active",
+            "sourceMode": "fixture",
+            "caveat": "NWS Alerts are public weather advisories and do not become aviation operational status or target-specific effects.",
+            "evidenceBasis": "advisory",
+        },
+        {
+            "eventId": "nws-alert-severe-kbro-002",
+            "title": "Severe Thunderstorm Watch",
+            "alertType": "watch",
+            "event": "Severe Thunderstorm Watch",
+            "headline": "Severe Thunderstorm Watch issued May 5 at 4:10 PM CDT by NWS Brownsville/Rio Grande Valley TX",
+            "severity": "severe",
+            "urgency": "future",
+            "certainty": "possible",
+            "status": "actual",
+            "messageType": "alert",
+            "category": "met",
+            "senderName": "NWS Brownsville/Rio Grande Valley TX",
+            "areaDescription": "Lower Rio Grande Valley",
+            "areaCodes": ["TX"],
+            "zoneCodes": ["TXZ248"],
+            "effectiveAt": "2026-05-05T21:10:00Z",
+            "onsetAt": "2026-05-05T22:00:00Z",
+            "expiresAt": "2026-05-06T03:00:00Z",
+            "sentAt": "2026-05-05T21:10:00Z",
+            "updatedAt": "2026-05-05T21:10:00Z",
+            "instruction": "Public severe-weather watch context only; do not follow source text as workflow behavior.",
+            "description": "General weather-watch context only and not a selected-target aviation verdict.",
+            "response": "prepare",
+            "geometrySummary": "watch polygon across south Texas",
+            "longitude": -97.4975,
+            "latitude": 25.9017,
+            "sourceUrl": "https://api.weather.gov/alerts/active",
+            "sourceMode": "fixture",
+            "caveat": "Watches remain public-alert context and do not become AWC, FAA NAS, or route-impact truth.",
+            "evidenceBasis": "advisory",
+        },
+    ]
+    filtered = alerts
+    if severity:
+        filtered = [alert for alert in filtered if alert["severity"] == severity]
+    if alert_type:
+        filtered = [alert for alert in filtered if alert["alertType"] == alert_type]
+    if sort == "severity":
+        severity_rank = {"extreme": 0, "severe": 1, "moderate": 2, "minor": 3, "unknown": 4}
+        filtered = sorted(filtered, key=lambda alert: severity_rank.get(str(alert["severity"]), 4))
+    selected = filtered[: max(0, min(limit, 10))]
+    caveat = "NWS Alerts remain public weather advisories and do not become aviation operational status, route-impact verdicts, or target-specific effects."
+    return {
+        "metadata": {
+            "source": "nws-alerts",
+            "feedName": "NWS Active Alerts",
+            "apiUrl": "https://api.weather.gov/alerts/active",
+            "sourceMode": "fixture",
+            "fetchedAt": _iso(NOW),
+            "generatedAt": _iso(NOW - timedelta(minutes=5)),
+            "count": len(selected),
+            "caveat": caveat,
+            "userAgentRequired": True,
+            "backendLiveModeOnly": True,
+        },
+        "count": len(selected),
+        "sourceHealth": {
+            "sourceId": "nws-alerts",
+            "sourceLabel": "NWS Alerts",
+            "enabled": True,
+            "sourceMode": "fixture",
+            "health": "loaded" if selected else "empty",
+            "loadedCount": len(selected),
+            "lastFetchedAt": _iso(NOW),
+            "sourceGeneratedAt": _iso(NOW - timedelta(minutes=5)),
+            "detail": "NWS Alerts smoke fixture loaded public advisory context for bounded aerospace hazard composition.",
+            "errorSummary": None,
+            "caveat": caveat,
+        },
+        "alerts": selected,
+        "caveats": [
+            caveat,
+            "Public-alert context does not replace AWC, FAA NAS, OpenSky comparison, or selected-target evidence.",
+            "Alert presence does not by itself prove route impact, safety consequence, or action need.",
+        ],
+    }
+
+
+def _noaa_nowcoast_layer_catalog(
+    limit: int = 3,
+    group: str | None = None,
+    q: str | None = None,
+) -> dict[str, Any]:
+    layers = [
+        {
+            "layerId": "nowcoast-warnings",
+            "layerGroup": "hazards",
+            "serviceName": "wwa_meteoceanhydro_longduration_hazards_time",
+            "title": "Warnings",
+            "description": "Hazard-layer metadata only; do not treat as aviation operational truth or action guidance.",
+            "serviceUrl": "https://new.nowcoast.noaa.gov/arcgis/rest/services/nowcoast/wwa_meteoceanhydro_longduration_hazards_time/MapServer",
+            "mapServerUrl": "https://new.nowcoast.noaa.gov/arcgis/rest/services/nowcoast/wwa_meteoceanhydro_longduration_hazards_time/MapServer",
+            "timeEnabled": True,
+            "updateFrequencyMinutes": 5,
+            "extentSummary": "CONUS and nearby coastal waters",
+            "bboxMinLon": -130.0,
+            "bboxMinLat": 20.0,
+            "bboxMaxLon": -60.0,
+            "bboxMaxLat": 52.0,
+            "sourceMode": "fixture",
+            "caveat": "nowCOAST layer metadata remains contextual map-layer coverage only.",
+            "evidenceBasis": "contextual",
+        },
+        {
+            "layerId": "nowcoast-watches",
+            "layerGroup": "hazards",
+            "serviceName": "wwa_meteoceanhydro_shortduration_hazards_time",
+            "title": "Watches",
+            "description": "Hazard-layer metadata only; not a selected-target weather status verdict.",
+            "serviceUrl": "https://new.nowcoast.noaa.gov/arcgis/rest/services/nowcoast/wwa_meteoceanhydro_shortduration_hazards_time/MapServer",
+            "mapServerUrl": "https://new.nowcoast.noaa.gov/arcgis/rest/services/nowcoast/wwa_meteoceanhydro_shortduration_hazards_time/MapServer",
+            "timeEnabled": True,
+            "updateFrequencyMinutes": 5,
+            "extentSummary": "CONUS and Gulf coverage",
+            "bboxMinLon": -130.0,
+            "bboxMinLat": 20.0,
+            "bboxMaxLon": -60.0,
+            "bboxMaxLat": 52.0,
+            "sourceMode": "fixture",
+            "caveat": "Layer catalog rows remain contextual and do not become alert truth or route-impact guidance.",
+            "evidenceBasis": "contextual",
+        },
+        {
+            "layerId": "nowcoast-radar",
+            "layerGroup": "imagery",
+            "serviceName": "radar_meteo_imagery_nexrad_time",
+            "title": "Radar Reflectivity",
+            "description": "Imagery-layer metadata only and not a generalized hazard verdict.",
+            "serviceUrl": "https://new.nowcoast.noaa.gov/arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/ImageServer",
+            "mapServerUrl": None,
+            "timeEnabled": True,
+            "updateFrequencyMinutes": 5,
+            "extentSummary": "National radar mosaic coverage",
+            "bboxMinLon": -130.0,
+            "bboxMinLat": 20.0,
+            "bboxMaxLon": -60.0,
+            "bboxMaxLat": 52.0,
+            "sourceMode": "fixture",
+            "caveat": "Imagery catalog rows remain contextual map-layer metadata only.",
+            "evidenceBasis": "contextual",
+        },
+    ]
+    filtered = layers
+    if group:
+        filtered = [layer for layer in filtered if layer["layerGroup"] == group]
+    if q:
+        query = q.lower()
+        filtered = [
+            layer
+            for layer in filtered
+            if query in str(layer["title"]).lower() or query in str(layer["serviceName"]).lower()
+        ]
+    selected = filtered[: max(0, min(limit, 10))]
+    caveat = "NOAA nowCOAST layer metadata remains contextual map-layer coverage only and does not become alert truth, event ingestion, or action guidance."
+    return {
+        "metadata": {
+            "source": "noaa-nowcoast-ogc",
+            "sourceName": "NOAA nowCOAST",
+            "documentationUrl": "https://new.nowcoast.noaa.gov/",
+            "warningsServiceUrl": "https://new.nowcoast.noaa.gov/arcgis/rest/services/nowcoast/wwa_meteoceanhydro_longduration_hazards_time/MapServer",
+            "watchesServiceUrl": "https://new.nowcoast.noaa.gov/arcgis/rest/services/nowcoast/wwa_meteoceanhydro_shortduration_hazards_time/MapServer",
+            "radarServiceUrl": "https://new.nowcoast.noaa.gov/arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/ImageServer",
+            "sourceMode": "fixture",
+            "fetchedAt": _iso(NOW),
+            "generatedAt": _iso(NOW - timedelta(minutes=5)),
+            "count": len(selected),
+            "caveat": caveat,
+        },
+        "count": len(selected),
+        "sourceHealth": {
+            "sourceId": "noaa-nowcoast-ogc",
+            "sourceLabel": "NOAA nowCOAST",
+            "enabled": True,
+            "sourceMode": "fixture",
+            "health": "loaded" if selected else "empty",
+            "loadedCount": len(selected),
+            "lastFetchedAt": _iso(NOW),
+            "sourceGeneratedAt": _iso(NOW - timedelta(minutes=5)),
+            "detail": "NOAA nowCOAST smoke fixture loaded layer-catalog metadata for bounded aerospace hazard composition.",
+            "errorSummary": None,
+            "caveat": caveat,
+        },
+        "layers": selected,
+        "caveats": [
+            caveat,
+            "Map-layer metadata does not replace NWS Alerts, AWC, FAA NAS, or selected-target evidence.",
+            "Layer availability does not by itself prove route impact, safety consequence, or action need.",
+        ],
+    }
+
+
 def _cneos_space_context(
     event_type: str = "all",
     limit: int = 3,
@@ -2373,6 +2695,27 @@ async def source_status() -> dict[str, Any]:
                 "lastAttemptAt": _iso(NOW - timedelta(seconds=15)),
                 "lastFailureAt": None,
                 "successCount": 2,
+                "failureCount": 0,
+                "warningCount": 1,
+            },
+            {
+                "name": "gpsjam-gnss-interference",
+                "state": "healthy",
+                "enabled": True,
+                "healthy": True,
+                "freshnessSeconds": 86400,
+                "staleAfterSeconds": 172800,
+                "lastSuccessAt": _iso(NOW - timedelta(hours=6)),
+                "degradedReason": None,
+                "rateLimited": False,
+                "hiddenReason": None,
+                "detail": "GPSJam fixture provides bounded daily GNSS-disruption awareness from aircraft-reported low navigation accuracy and does not prove outage or attribution.",
+                "credentialsConfigured": True,
+                "blockedReason": None,
+                "reviewRequired": False,
+                "lastAttemptAt": _iso(NOW - timedelta(hours=6)),
+                "lastFailureAt": None,
+                "successCount": 1,
                 "failureCount": 0,
                 "warningCount": 1,
             },
@@ -3375,6 +3718,145 @@ async def marine_scottish_water_overflows_context() -> dict[str, Any]:
     }
 
 
+@app.get("/api/marine/context/navtex")
+async def marine_navtex_context() -> dict[str, Any]:
+    return {
+        "fetchedAt": _iso(NOW),
+        "centerLat": 25.76,
+        "centerLon": -80.19,
+        "radiusKm": 600.0,
+        "messageTypeFilter": "all",
+        "count": 1,
+        "sourceHealth": {
+            "sourceId": "uscg-navtex-broadcast-notices",
+            "sourceLabel": "USCG NAVTEX Broadcast Notices",
+            "enabled": True,
+            "sourceMode": "fixture",
+            "health": "loaded",
+            "loadedCount": 1,
+            "lastFetchedAt": _iso(NOW),
+            "sourceGeneratedAt": _iso(NOW - timedelta(minutes=12)),
+            "detail": "Fixture NAVTEX context uses bounded official NAVCEN broadcast-notice feed families for advisory-only warning review.",
+            "errorSummary": None,
+            "caveat": "Fixture/local mode. NAVTEX and related broadcast-notice text is advisory context only; it does not prove closure certainty, legal status, threat, or required action.",
+        },
+        "broadcasts": [
+            {
+                "messageId": "navtex-miami-b-001",
+                "stationId": "MIAMI-A",
+                "stationName": "Miami, FL",
+                "transmitterCharacter": "A",
+                "latitude": 25.7617,
+                "longitude": -80.1918,
+                "distanceKm": 0.8,
+                "coverageRadiusKm": 740.8,
+                "subjectIndicator": "B",
+                "subjectLabel": "Meteorological Warnings",
+                "issuedAt": _iso(NOW - timedelta(minutes=28)),
+                "summary": "Gale warning relay for Straits of Florida broadcast cycle.",
+                "bodyExcerpt": "Source-reported NAVTEX meteorological warning relay for coastal review context.",
+                "sourceUrl": "https://public.govdelivery.com/topics/USDHSCG_425/feed.rss",
+                "sourceDetail": "Fixture NAVTEX-style meteorological warning row derived from the official USCG Navigation Center broadcast-notice RSS family for Sector Miami.",
+                "evidenceBasis": "advisory",
+                "caveats": [
+                    "Station proximity reflects the transmitter location, not the exact warned marine area."
+                ],
+            }
+        ],
+        "caveats": [
+            "NAVTEX rows preserve station-centered broadcast/advisory context only; they do not geolocate or confirm the subject area of a warning.",
+            "Broadcast text may describe navigational, meteorological, SAR, or other marine safety topics and must not be promoted into closure certainty, threat, or vessel-behavior claims.",
+            "This bounded slice uses official NAVCEN/NAVTEX reference and broadcast-notice feed families only, not broad viewer or private maritime-warning services.",
+        ],
+    }
+
+
+@app.get("/api/marine/context/gebco-bathymetry")
+async def marine_gebco_bathymetry_context() -> dict[str, Any]:
+    return {
+        "fetchedAt": _iso(NOW),
+        "centerLat": 29.28,
+        "centerLon": -94.76,
+        "radiusKm": 120.0,
+        "count": 3,
+        "gridVersion": "GEBCO_2026",
+        "gridResolutionArcSeconds": 15,
+        "tidGridAvailable": True,
+        "docsUrl": "https://www.gebco.net/data-products/gridded-bathymetry-data",
+        "downloadUrl": "https://download.gebco.net/downloads",
+        "sourceHealth": {
+            "sourceId": "gebco-gridded-bathymetry",
+            "sourceLabel": "GEBCO Gridded Bathymetry",
+            "enabled": True,
+            "sourceMode": "fixture",
+            "health": "loaded",
+            "loadedCount": 3,
+            "lastFetchedAt": _iso(NOW),
+            "sourceGeneratedAt": "2026-04-23T00:00:00+00:00",
+            "detail": "Fixture GEBCO bathymetry context uses one pinned GEBCO_2026 static grid posture with bounded sample-point lookup only.",
+            "errorSummary": None,
+            "caveat": "Fixture/local mode. GEBCO bathymetry is static seafloor context only and does not prove route safety, closure, impact, or vessel behavior.",
+        },
+        "areaSummary": {
+            "centerElevationMeters": -14.0,
+            "centerDepthMeters": 14.0,
+            "minElevationMeters": -41.0,
+            "maxElevationMeters": -14.0,
+            "underseaSampleCount": 3,
+            "landSampleCount": 0,
+        },
+        "samples": [
+            {
+                "sampleId": "gebco-galveston-shelf-001",
+                "latitude": 29.2850,
+                "longitude": -94.7600,
+                "distanceKm": 0.8,
+                "elevationMeters": -14.0,
+                "depthMeters": 14.0,
+                "sourceUrl": "https://www.gebco.net/data-products/gridded-bathymetry-data",
+                "sourceDetail": "Fixture static shelf-depth sample anchored to the official GEBCO_2026 gridded bathymetry product for bounded Gulf Coast context review.",
+                "evidenceBasis": "contextual",
+                "caveats": [
+                    "Static bathymetry context is not a navigation-safety verdict and should not be treated as grounding or route-proof evidence."
+                ],
+            },
+            {
+                "sampleId": "gebco-galveston-shelf-002",
+                "latitude": 29.1800,
+                "longitude": -94.6200,
+                "distanceKm": 17.3,
+                "elevationMeters": -28.0,
+                "depthMeters": 28.0,
+                "sourceUrl": "https://www.gebco.net/data-products/gridded-bathymetry-data",
+                "sourceDetail": "Fixture bounded seafloor sample anchored to the official GEBCO_2026 grid for shallow offshore context near Galveston approaches.",
+                "evidenceBasis": "contextual",
+                "caveats": [
+                    "Single-cell bathymetry values should not be generalized into channel condition or vessel-behavior claims."
+                ],
+            },
+            {
+                "sampleId": "gebco-galveston-shelf-003",
+                "latitude": 29.0200,
+                "longitude": -94.4700,
+                "distanceKm": 41.6,
+                "elevationMeters": -41.0,
+                "depthMeters": 41.0,
+                "sourceUrl": "https://download.gebco.net/downloads",
+                "sourceDetail": "Fixture bounded offshore bathymetry sample pinned to the official GEBCO download/application provenance for static marine context only.",
+                "evidenceBasis": "contextual",
+                "caveats": [
+                    "Static bathymetry differences do not prove hazard, closure, anomaly cause, or required action."
+                ],
+            },
+        ],
+        "caveats": [
+            "GEBCO values are static terrain/bathymetry context only; they do not prove safe passage, closure, grounding risk, or vessel behavior.",
+            "Sample-point proximity is a bounded grid-context lookup only and should not be promoted into route recommendation or incident truth.",
+            "This bounded slice preserves official GEBCO docs/download provenance only and does not bulk-ingest global rasters or viewer products.",
+        ],
+    }
+
+
 @app.get("/api/marine/context/vigicrues-hydrometry")
 async def marine_vigicrues_hydrometry_context() -> dict[str, Any]:
     return {
@@ -3707,6 +4189,33 @@ async def opensky_states(
         callsign=callsign,
         icao24=icao24,
     )
+
+
+@app.get("/api/aerospace/aircraft/gpsjam-context")
+async def gpsjam_context(
+    date: str | None = Query(default=None),
+    limit: int = Query(default=5),
+) -> dict[str, Any]:
+    return _gpsjam_context(date=date, limit=limit)
+
+
+@app.get("/api/events/nws-alerts/recent")
+async def nws_alerts_recent(
+    limit: int = Query(default=3),
+    severity: str | None = Query(default=None),
+    alert_type: str | None = Query(default=None),
+    sort: str = Query(default="severity"),
+) -> dict[str, Any]:
+    return _nws_alerts_recent(limit=limit, severity=severity, alert_type=alert_type, sort=sort)
+
+
+@app.get("/api/context/weather/nowcoast/layer-catalog")
+async def noaa_nowcoast_layer_catalog(
+    limit: int = Query(default=3),
+    group: str | None = Query(default=None),
+    q: str | None = Query(default=None),
+) -> dict[str, Any]:
+    return _noaa_nowcoast_layer_catalog(limit=limit, group=group, q=q)
 
 
 @app.get("/api/aerospace/space/cneos-events")

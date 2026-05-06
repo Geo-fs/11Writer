@@ -1,6 +1,6 @@
 # Manager AI Project Deficiency Review
 
-Last updated: 2026-05-05 10:22 America/Chicago
+Last updated: 2026-05-05 18:44 America/Chicago
 
 Purpose:
 - preserve Manager AI's current project-level memory about deficiencies, improvement areas, and feature opportunities
@@ -16,16 +16,28 @@ Product-direction memory:
 - the end-state should feel more like an evidence-aware world-event reporting desk than a raw globe or dashboard
 - broad monitoring coverage is desired, but reporting quality still depends on explicit source health, evidence basis, caveats, provenance, and freshness
 - cross-source fusion should improve explanation and prioritization, not silently convert uncertainty into proof of intent, wrongdoing, threat, impact, causation, or action need
+- planned Phase 3 cutover rule:
+  - archive the current controlled Phase 2 chats when Phase 3 formally starts, except `Connect AI`
+  - keep `Connect AI`, `Manager AI`, `Wonder AI`, and `Atlas AI`
+  - replace the current domain-persistent controlled lanes with a smaller fresh UI-first roster named:
+    - `Systems AI`
+    - `Workspace AI`
+    - `Spatial AI`
+    - `Reporting AI`
+    - `Platform AI`
+    - `Gov AI`
+  - do not use temporary fresh workers in Phase 3
+  - Phase 3 memory should live in repo docs, code, tests, and validation artifacts rather than in long-lived lane chat context
 
 ## Current Check-In Snapshot
 
-- Alerts ledger now shows `4` open alerts and `40` completed alerts.
+- Alerts ledger now shows `5` open alerts and `42` completed alerts.
 - All remaining open alerts are Atlas-owned peer notices; Manager-owned peer alerts were closed into the current Connect and Gather assignment wave.
 - Current worktree is large and mixed:
-  - `modified=118`
-  - `untracked=84`
-  - `shared-high-collision=10`
-  - `unknown=37`
+  - `modified=75`
+  - `untracked=13`
+  - `shared-high-collision=5`
+  - `unknown=8`
 - Current known validation posture from coordination docs:
   - backend compile passes
   - frontend lint passes
@@ -33,9 +45,9 @@ Product-direction memory:
   - marine and webcam smoke pass
   - aerospace smoke is blocked before app assertions by local Windows Chromium launch permission
 - Current active risk:
-  - source and workflow expansion are moving faster than consolidation and workflow-validation evidence
-  - stale task/routing docs can now reassign already implemented work unless Manager cross-checks progress truth first
-  - progress docs can still claim docs or status artifacts that are missing on disk, which breaks routing truth just as effectively as stale assignments
+  - source and workflow expansion can still outrun consolidation and workflow-validation evidence even after the current tree tightened up
+  - stale task/routing docs can still reassign already implemented work unless Manager cross-checks progress truth first
+  - verification-gated sources can look assignment-ready in planning docs longer than they deserve, as shown by `belgium-rmi-warnings`
 
 ## Main Deficiencies
 
@@ -60,6 +72,7 @@ Manager memory:
 Problem:
 - Several agents have completed useful work under stale assignment markers or left missing prior final reports.
 - Some coordination docs know more than the agent progress docs, which breaks the check-in workflow.
+- The progress docs are newest-first, so tailing them produces false status reads and stale reassignment risk.
 
 Impact:
 - Manager check-ins can misclassify agents as idle, in-progress, or complete.
@@ -70,6 +83,8 @@ Manager memory:
 - If an agent finishes under a stale marker, the next task must include progress truth repair before new work.
 - Gather should periodically reconcile progress docs against source-status docs.
 - Manager should treat "claimed file created" as untrusted until the file is actually present on disk.
+- Manager should treat "verified source" language as untrusted until a machine-readable endpoint is actually pinned and consistent with the no-scraping rule.
+- Manager should read the top of progress docs first, not the tail.
 
 ### 3. Workflow Validation Lag
 
@@ -101,6 +116,13 @@ Manager memory:
 - Domain agents may add minimal operational UI, but should prefer pure helpers, metadata, and compact existing panels.
 - Save broad layout/design changes for UI Integration in Phase 3.
 - Future UI Integration task should define shared primitives for source-health rows, evidence cards, caveats, review queues, and export readiness.
+- Phase 3 should reduce persistent controlled lanes and shift ownership from source families to UI/workflow slices.
+- Recommended persistent Phase 3 controlled roster is documented in [phase3-agent-management-plan.md](/C:/Users/mike/11Writer/app/docs/phase3-agent-management-plan.md).
+- The concrete Code - OSS reference-backed Phase 3 shell/theme/component target is documented in [phase3-code-oss-workbench-spec.md](/C:/Users/mike/11Writer/app/docs/phase3-code-oss-workbench-spec.md).
+- shared UI parts should be mandatory in Phase 3:
+  - same text-box needs should use the same textbox component
+  - same card/badge/caveat/empty-state needs should use the same shared parts
+  - agents should not reinvent local UI primitives unless a documented product reason exists
 
 ### 5. Runtime Operator Surface Is Under-Validated
 

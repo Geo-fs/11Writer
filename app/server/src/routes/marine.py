@@ -6,8 +6,10 @@ from src.config.settings import Settings, get_settings
 from src.services.marine_service import MarineService
 from src.types.api import (
     MarineChokepointAnalyticalSummaryResponse,
+    MarineGebcoBathymetryContextResponse,
     MarineGapEventsResponse,
     MarineIrelandOpwWaterLevelContextResponse,
+    MarineNavtexContextResponse,
     MarineNetherlandsRwsWaterinfoContextResponse,
     MarineNdbcContextResponse,
     MarineNoaaCoopsContextResponse,
@@ -328,6 +330,48 @@ async def marine_ireland_opw_waterlevel_context(
 ) -> MarineIrelandOpwWaterLevelContextResponse:
     service = MarineService(settings)
     return await service.ireland_opw_waterlevel_context(
+        center_lat=lat,
+        center_lon=lon,
+        radius_km=radius_km,
+        limit=limit,
+    )
+
+
+@router.get(
+    "/context/navtex",
+    response_model=MarineNavtexContextResponse,
+)
+async def marine_navtex_context(
+    lat: float = Query(..., ge=-90.0, le=90.0),
+    lon: float = Query(..., ge=-180.0, le=180.0),
+    radius_km: float = Query(default=600.0, gt=1.0, le=2500.0),
+    message_type: Literal["all", "navigational-warning", "meteorological-warning", "search-and-rescue", "forecast", "other"] = Query(default="all"),
+    limit: int = Query(default=5, ge=1, le=50),
+    settings: Settings = Depends(get_settings),
+) -> MarineNavtexContextResponse:
+    service = MarineService(settings)
+    return await service.navtex_context(
+        center_lat=lat,
+        center_lon=lon,
+        radius_km=radius_km,
+        message_type_filter=message_type,
+        limit=limit,
+    )
+
+
+@router.get(
+    "/context/gebco-bathymetry",
+    response_model=MarineGebcoBathymetryContextResponse,
+)
+async def marine_gebco_bathymetry_context(
+    lat: float = Query(..., ge=-90.0, le=90.0),
+    lon: float = Query(..., ge=-180.0, le=180.0),
+    radius_km: float = Query(default=120.0, gt=1.0, le=1000.0),
+    limit: int = Query(default=5, ge=1, le=50),
+    settings: Settings = Depends(get_settings),
+) -> MarineGebcoBathymetryContextResponse:
+    service = MarineService(settings)
+    return await service.gebco_bathymetry_context(
         center_lat=lat,
         center_lon=lon,
         radius_km=radius_km,

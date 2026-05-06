@@ -48,6 +48,7 @@ The ledger is where aerospace distinguishes prepared smoke from executed workflo
   and `aerospaceContextReport`
   and `aerospaceReviewQueue`
   and `aerospaceCurrentArchiveContext`
+  and `gpsjamContext`
   and `nceiSpaceWeatherArchiveContext`
   and `ourairportsReferenceContext`
   and `vaacContext`
@@ -59,6 +60,10 @@ The ledger is where aerospace distinguishes prepared smoke from executed workflo
   and `aerospaceEvidenceTimelinePackage`
   and `aerospaceFusionSnapshotInput`
   and `aerospaceReportBriefPackage`
+  and `aerospaceSelectedTargetOperationalQuestionPacket`
+  and `aerospaceCurrentAwarenessDigest`
+  and `aerospaceReportingHandoffContract`
+  and `aerospaceQuestionBriefingPacket`
   and `aerospaceSpaceWeatherContinuityPackage`
   and `aerospaceVaacAdvisoryReportPackage`
   and `aerospacePackageCoherence`
@@ -247,6 +252,29 @@ The ledger is where aerospace distinguishes prepared smoke from executed workflo
   and `explain`.
   It preserves selected-target label, active profile, validation posture, export-readiness posture, attention counts, distinct context-class coverage, does-not-prove lines, and compact report-safe lines.
   It remains metadata/accounting only and does not replace the underlying aerospace review/export/timeline packages or turn those lines into action guidance.
+- Aerospace selected-target operational question packet helper:
+  snapshot/export metadata now also preserves an `aerospaceSelectedTargetOperationalQuestionPacket` package that answers
+  "what context exists for this target right now?"
+  using the existing selected-target evidence summary,
+  operational context,
+  report brief,
+  OpenSky comparison,
+  current/archive space-weather continuity,
+  and VAAC advisory package.
+  It preserves selected-target posture, distinct context entries for AWC, FAA NAS, OpenSky comparison, current SWPC, NCEI archive, observed geomagnetism, and VAAC, plus source ids, source modes, source health states, evidence bases, observe/orient/prioritize/explain sections, caveats, and does-not-prove lines.
+  It remains metadata/accounting only and does not imply intent, route impact, failure, threat, causation, safety conclusion, or action recommendation.
+- Aerospace current-awareness digest helper:
+  snapshot/export metadata now also preserves an `aerospaceCurrentAwarenessDigest` package that turns the existing selected-target packet, report brief, space-weather continuity package, VAAC package, operational context, and workflow-validation posture into one bounded broad-context digest.
+  It preserves current target-or-area posture, active context profile, validation posture, continuity posture, source ids, source modes, source health states, evidence bases, current/archive/advisory/observed distinction lines, observe/orient/prioritize/explain sections, caveats, and explicit does-not-prove lines.
+  It remains context/accounting only and does not imply route impact, threat, failure, causation, safety conclusion, or action recommendation.
+- Aerospace reporting handoff contract helper:
+  snapshot/export metadata now also preserves an `aerospaceReportingHandoffContract` artifact that packages the existing selected-target packet, report brief, current-awareness digest, space-weather continuity package, VAAC advisory package, and workflow-validation posture into one stable handoff surface.
+  It preserves selected target or area posture, active context profile, validation and readiness posture, source ids, source modes, source health states, evidence bases, current/advisory/archive/observed distinction lines, lineage across packet/brief/digest surfaces, handoff-safe export lines, caveats, and explicit does-not-prove lines.
+  It remains a bounded export/reporting handoff artifact only and does not imply route impact, threat, failure, causation, safety conclusion, or action recommendation.
+- Aerospace question briefing packet helper:
+  snapshot/export metadata now also preserves an `aerospaceQuestionBriefingPacket` artifact that packages the existing selected-target packet, report brief, current-awareness digest, reporting handoff contract, space-weather continuity package, VAAC advisory package, and workflow-validation posture into one bounded question-driven reporting surface.
+  It preserves selected target or area posture, active question posture, active context profile, validation and readiness posture, source ids, source modes, source health states, freshness posture, current/advisory/archive/observed distinction lines, lineage across packet/brief/digest/handoff surfaces, briefing-safe export lines, caveats, and explicit does-not-prove lines.
+  It remains a bounded reporting artifact only and does not imply route impact, threat, failure, causation, safety conclusion, or action recommendation.
 - Aerospace space-weather continuity package helper:
   snapshot/export metadata now also preserves an `aerospaceSpaceWeatherContinuityPackage` package that composes
   `aerospaceCurrentArchiveContext`,
@@ -318,6 +346,24 @@ The ledger is where aerospace distinguishes prepared smoke from executed workflo
   Anonymous OpenSky access is treated as optional, rate-limited, source-reported context only.
   Coverage is not guaranteed to be complete or authoritative.
   The provider is tracked separately in source status as `opensky-anonymous-states`.
+- GPSJam GNSS-disruption context:
+  selected aircraft and satellites can now consume bounded contextual GNSS-disruption awareness through
+  `/api/aerospace/aircraft/gpsjam-context`.
+  This slice is fixture-first, source-health-aware, export-aware, and integrated into existing aerospace export/digest/question surfaces only.
+  It preserves source id, source mode, source health, source day/date, flagged-hex counts, top-sample summary, and explicit does-not-prove lines under `gpsjamContext`.
+  GPSJam remains separate from AWC, FAA NAS, OpenSky comparison, SWPC, geomagnetism, VAAC, and selected-target evidence.
+  It must not be used to claim GPS outage certainty, interference attribution, target-specific effect, route impact, safety consequence, or action need.
+  The provider is tracked separately in source status as `gpsjam-gnss-interference`.
+- Hazard-context consumer packet:
+  aerospace now also preserves `aerospaceHazardContextConsumerPacket` as a bounded export/snapshot composition over
+  `gpsjamContext`,
+  geospatial `NWS Alerts`,
+  and geospatial `NOAA nowCOAST` layer metadata.
+  Prepared smoke assertions check that the packet exists, carries rows, and keeps explicit distinction wording for:
+  GNSS-disruption context,
+  public weather advisories,
+  and contextual map-layer metadata.
+  The packet must not collapse those feeds into aviation operational status, route-impact verdicts, outage claims, target-specific effects, safety consequences, or action recommendations.
 - USGS geomagnetism contextual consumer:
   selected aircraft and satellites can now consume optional read-only observatory geomagnetism context through
   `/api/context/geomagnetism/usgs`.

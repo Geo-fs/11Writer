@@ -135,6 +135,134 @@ Additional bounded review completed in the NZTA and Arlington sandbox-feasibilit
 
 No new candidate records were added in this comparison pass. None of the extra backlog sources cleared the same endpoint-pinning plus media-posture bar already met by the current sandbox-importable set.
 
+The same pass now also has a backend-only sandbox-readiness comparison package over the current candidate cohort:
+
+- sandbox comparators remain the current `candidate-sandbox-importable` sources
+- endpoint-only holds remain the current `candidate-endpoint-verified` non-sandbox sources
+- Caltrans is the stronger direct-image comparator
+- NZTA remains held on `endpoint-family-unpinned`
+- Arlington remains held on `media-proof-missing`
+
+That comparison package is export-safe lifecycle evidence only. It does not activate, schedule, validate, or justify adding a weaker new candidate record from the backlog.
+
+The same source-ops lane now also has a backend-only portfolio digest over the current candidate cohort:
+
+- sandbox comparators stay the current fixture-backed sandbox candidates
+- endpoint-only holds stay the current endpoint-verified non-sandbox candidates
+- research-needed candidates stay the remaining review-gated endpoint leads
+- blocked holds stay the current do-not-scrape candidates
+
+Current digest examples:
+
+- `caltrans-cctv-cameras`
+  - `sandbox-comparator`
+- `nzta-traffic-cameras`
+  - `endpoint-only-hold`
+- `euskadi-traffic-cameras`
+  - `research-needed`
+- `minnesota-511-public-arcgis`
+  - `blocked-hold`
+
+No new candidate record was added in this portfolio-digest pass. The current backlog still does not clear the same endpoint-pinning plus media-posture bar already met by the stronger cohort.
+
+Additional bounded review completed in the review-priority packet pass:
+
+- `qldtraffic-web-cameras`
+  - re-reviewed against the official developers/data page and the official Queensland open-data dataset
+  - the developers page still documents webcam GeoJSON feeds, but the current public no-auth API posture is still not clean enough for safe registry onboarding, and the separate open-data dataset remains location-centric rather than a pinned public camera payload with stable media fields
+- `seattle-traffic-cameras`
+  - re-reviewed against the official Seattle traffic camera pages
+  - the public evidence remains viewer-page centric and still does not pin a machine-readable inventory or export-safe endpoint family cleanly enough for registry onboarding
+- `npra-datex-webcams`
+  - re-reviewed against the official DATEX access pages
+  - registration is still required, so the source remains credential-blocked rather than a public no-auth candidate
+
+No new candidate record was added in this review-priority packet pass. The current backlog still does not clear the same endpoint-pinning plus media-posture bar already met by the stronger cohort.
+
+The same pass now also has a backend-only review-priority packet over the current candidate cohort:
+
+- `review-next`
+  - strongest bounded next-safe-review candidates such as `caltrans-cctv-cameras`
+- `follow-up`
+  - candidates that still need endpoint or mapping follow-up such as `euskadi-traffic-cameras`
+- `hold`
+  - endpoint-only or metadata-limited candidates such as `nzta-traffic-cameras`
+- `blocked-review`
+  - compliant-alternative-only sources such as `minnesota-511-public-arcgis`
+
+This packet is export-safe lifecycle evidence only. It does not activate, schedule, validate, or promote any source.
+
+Additional bounded review completed in the regional portfolio pass:
+
+- `qldtraffic-web-cameras`
+  - re-reviewed again against the official developers/data page
+  - the public page still documents webcam GeoJSON feeds in general, but it still does not pin a clean enough public camera payload and media posture to clear the current inventory bar
+- `seattle-traffic-cameras`
+  - re-reviewed again against the official Seattle traffic camera pages
+  - the public evidence remains viewer-page centric and still does not pin a machine-readable inventory or export-safe endpoint family cleanly enough for registry onboarding
+- `npra-datex-webcams`
+  - re-reviewed again against the official DATEX access page
+  - registration is still required, so the source remains credential-blocked and outside the public no-auth candidate bar
+
+No new candidate records were added in this regional portfolio pass. The current official backlog still does not clear the same endpoint-pinning, machine-readability, and media-posture bar already met by the stronger cohort.
+
+The same pass now also has a backend-only regional portfolio packet over the current candidate cohort:
+
+- it groups candidate evidence by country and region
+- it preserves lifecycle state, payload-shape posture, media-access posture, sandbox-feasibility posture, source-health posture, missing-evidence count, next safe review step, and review-burden posture
+- it keeps stronger sandbox-backed candidates, endpoint-only holds, research-needed candidates, and blocked candidates visible in one regional view without changing lifecycle state
+
+This packet is export-safe lifecycle evidence only. It does not activate, schedule, validate, or promote any source.
+
+Additional bounded review completed in the OSM-backed lead-discovery pass:
+
+- `Overpass API`
+  - treated as read-only query support for map-backed lead discovery only
+  - not treated as camera endpoint proof
+- `OpenStreetMap`
+  - treated as map/tag lead context only
+  - not treated as proof that mapped surveillance or infrastructure objects correspond to public live camera feeds
+- `Geofabrik OpenStreetMap Downloads`
+  - treated as offline regional extract support for later manual lead review only
+  - not treated as endpoint or media proof
+- `qldtraffic-web-cameras`
+  - re-reviewed again and still held because the official docs do not yet pin a clean enough public no-auth camera payload/media posture
+- `seattle-traffic-cameras`
+  - re-reviewed again and still held because the public evidence remains viewer-page centric
+- `npra-datex-webcams`
+  - re-reviewed again and still remains credential-blocked because registration is required
+
+No new candidate records were added in this OSM-backed lead-discovery pass. The current official backlog still does not clear the same machine-readable endpoint and media-posture bar already met by the stronger cohort.
+
+The same pass now also has a backend-only OSM-backed lead-discovery packet:
+
+- it groups the current cohort by country and region
+- it records lead provenance from Overpass, OpenStreetMap tags, and Geofabrik extracts
+- it keeps `endpoint-known-plus-map-lead` distinct from `map-only-lead`
+- it keeps map-only lead support below endpoint proof and below activation readiness
+
+This packet is export-safe lifecycle evidence only. It does not activate, schedule, validate, or promote any source.
+
+Additional bounded review completed in the OSM lead-to-review reconciliation pass:
+
+- endpoint-known leads remain separated from map-only leads
+- map-only lead posture is still below pinned endpoint proof
+- no current OSM-backed lead was allowed to escalate into activation, scheduling, or validated posture
+- no new candidate record was added in this pass because the current official backlog still does not clear the same pinned endpoint and media-posture bar already met by the stronger cohort
+
+The same pass now also has a backend-only OSM lead-to-review reconciliation packet:
+
+- `endpoint-known-review-next`
+  - for stronger endpoint-known candidates that can proceed to bounded review work without lifecycle promotion
+- `endpoint-known-hold`
+  - for endpoint-known candidates still missing enough evidence for stronger lifecycle discussion
+- `map-only-research`
+  - for map-only leads that remain research-only
+- `map-only-blocked`
+  - for map-only leads that remain blocked and require compliant-alternative review only
+
+This packet is export-safe lifecycle evidence only. It does not activate, schedule, validate, or promote any source.
+
 ## Evidence and lifecycle interpretation
 
 - `candidate-endpoint-verified`

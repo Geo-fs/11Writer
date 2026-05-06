@@ -4,14 +4,21 @@ The geospatial subsystem now summarizes multiple environmental event sources thr
 
 There is now also a backend fusion helper for source-family review:
 - [environmental-source-family-overview.md](C:/Users/mike/11Writer/app/docs/environmental-source-family-overview.md)
+- [environmental-current-awareness-digest.md](C:/Users/mike/11Writer/app/docs/environmental-current-awareness-digest.md)
+- [environmental-question-briefing-packet.md](C:/Users/mike/11Writer/app/docs/environmental-question-briefing-packet.md)
 - this backend helper summarizes source families, source health, evidence basis, caveats, and export-safe review lines across existing environmental/geospatial slices
+- the current-awareness digest adds a bounded `observe`, `orient`, `prioritize`, and `explain` artifact over the existing geospatial reporting stack without flattening observed, advisory, forecast/model, contextual, and static-reference meaning
+- the question briefing packet adds bounded place, timeframe, and family-filter posture over that same stack without turning briefing labels into incident truth
 - current backend family coverage includes seismic, volcano/reference, tsunami, weather alert/advisory, weather and hydrology context, infrastructure-event context, geomagnetic context, risk/reference, and water-quality context
+- weather alert/advisory backend family coverage now also includes bounded NWS active alert records
+- weather alert/advisory backend family coverage now also includes bounded NOAA NHC GIS Atlantic advisory/product context
+- weather and hydrology backend family coverage now also includes bounded NOAA nowCOAST layer-catalog context
 - weather and hydrology backend family coverage now also includes bounded BC Wildfire Service Datamart fire-weather station and danger-summary context
 - weather and hydrology backend family coverage also includes bounded MeteoSwiss SwissMetNet station metadata plus one observed `t_now` asset family
 - weather and hydrology backend family coverage also includes one bounded Canada GeoMet OGC `climate-stations` collection slice with source-provided station-feature coordinates only
 - backend weather/observation review/export follow-on surfaces now provide compact source review and export lines across MeteoSwiss, BCWS, Taiwan CWA, DMI, Met Eireann forecast, and NASA POWER without turning them into hazard or action truth
 - backend Canada context follow-on surfaces now provide compact review/export bundles across Canada CAP alerts and Canada GeoMet climate-station metadata while keeping advisory and reference meaning separate
-- backend base-earth follow-on surfaces now provide compact review/export bundles across Natural Earth, GSHHG shorelines, PB2002 plate boundaries, and NOAA global volcano reference metadata without treating them as live hazard feeds
+- backend base-earth follow-on surfaces now provide compact review/export bundles across Natural Earth, GSHHG shorelines, PB2002 plate boundaries, geoBoundaries admin, and NOAA global volcano reference metadata without treating them as live hazard feeds
 - backend fusion snapshot input now provides one bounded geospatial domain package that keeps dynamic environmental context, Canada regional context, base-earth reference context, and direct RGI glacier snapshot context separate for later question-driven reporting
 - it is not a final UI and does not replace source-specific meaning
 
@@ -26,13 +33,18 @@ There is now also a backend fusion helper for source-family review:
 - Hong Kong Observatory Open Weather
 - MET Norway MetAlerts
 - Canada CAP Alerts
+- NWS Alerts API
+- NOAA NHC GIS Atlantic
+- Meteoalarm Atom Feed
 - DWD CAP Alerts
 - BC Wildfire Datamart
 - MeteoSwiss Open Data
 - Canada GeoMet OGC
+- NOAA nowCOAST
 - RGI Glacier Inventory
 - GSHHG Shorelines
 - PB2002 Plate Boundaries
+- geoBoundaries Admin
 
 ## Overview Behavior
 
@@ -48,6 +60,7 @@ There is now also a backend fusion helper for source-family review:
   - HKO weather warning / cyclone context counts when present
   - MET Norway alert counts when present
 - Canada CAP alert counts when present
+- NWS active alert counts when present
   - DWD CAP alert counts when present
   - active earthquake and EONET filter summary
   - a shared caveat line
@@ -123,10 +136,15 @@ There is now also a backend fusion helper for source-family review:
 - HKO weather warnings remain advisory/context, while HKO tropical cyclone text remains forecast/context rather than impact confirmation.
 - MET Norway alerts remain advisory/contextual warning records and use backend-only live fetch handling because the source requires a proper custom User-Agent.
 - Canada CAP alerts remain advisory/contextual warning records and are not impact confirmation.
+- NWS Alerts API rows remain advisory/contextual warning records only and preserve the NWS API User-Agent requirement in backend live mode.
+- NOAA NHC GIS Atlantic rows remain bounded Atlantic-basin advisory/product-distribution records only and preserve source-provided storm-summary metadata separately from impact or incident truth.
+- Meteoalarm Atom feed entries remain advisory/contextual warning-distribution records only and do not override the underlying national warning provider as the authoritative origin.
 - DWD CAP alerts remain advisory/contextual warning records from one bounded snapshot family only and are not impact confirmation.
 - Canada GeoMet climate-station rows remain reference metadata only and are not hazard or impact confirmation.
+- NOAA nowCOAST rows remain bounded map-layer/context metadata only and are not normalized event or alert truth by themselves.
 - The Canada environmental context package preserves these two source meanings separately and does not turn them into a common severity or hazard score.
 - The base-earth reference package preserves cartographic land, generalized shoreline, static tectonic-boundary, and static volcano-location reference semantics separately and does not turn them into live event truth.
+- geoBoundaries admin rows remain static administrative boundary reference only and are not legal-jurisdiction truth, operational-control truth, or live incident truth.
 - RGI glacier inventory remains static snapshot/reference inventory context only and is not current glacier extent or glacier-change evidence.
 - The fusion snapshot input preserves these same separations and adds explicit does-not-prove lines rather than flattening them into one common environmental truth model.
 - The overview coordinates the sources without flattening their meaning into a generic hazard score.
@@ -178,6 +196,7 @@ There is now also a backend fusion helper for source-family review:
 - The overview now includes compact source-health rows for Earthquakes and NASA EONET.
 - Tsunami and UK flood sources also participate when enabled.
 - HKO, MET Norway, and Canada CAP also participate when enabled.
+- Meteoalarm Atom also participates when enabled.
 - Health states are distinct:
   - `disabled`
   - `loading`
@@ -219,10 +238,8 @@ UK flood integration also establishes an evidence-basis split future sources can
 
 Possible future candidates:
 
-- NOAA Weather Alerts
 - GDACS
 - NIFC / WFIGS
-- NHC
 - GDELT
 
 Not implemented in this pass.

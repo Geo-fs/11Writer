@@ -10,6 +10,8 @@ Use this together with:
 - `app/docs/repo-workflow.md`
 - `app/docs/validation-matrix.md`
 - `app/docs/source-fusion-reporting-input-inventory.md`
+- `app/docs/source-onboarding-contract.md`
+- `app/docs/phase3-handoffs/connect-ai.md`
 
 This file is planning only. Do not treat it as staging authorization.
 
@@ -17,6 +19,196 @@ This file is planning only. Do not treat it as staging authorization.
 
 - Branch: `main`
 - Worktree: mixed and dirty across multiple active agent lanes
+- Before any Phase 3 shared-surface consolidation attempt, read `app/docs/phase3-handoffs/connect-ai.md` so live mixed-tree counts are not confused with the last green validation checkpoint.
+- Latest Connect consolidation-readiness snapshot for assignment `2026-05-05 19:15 America/Chicago`:
+  - the repo is still mixed but validation-green on the assigned shared reporting-loop surface
+  - one current shared blocker reproduced and was fixed:
+    - `app/server/src/services/source_discovery_service.py` had an indentation error that broke `compileall`
+    - the fix was syntax-only and did not change runtime semantics
+  - current live snapshot during the final validation rerun:
+    - `modified=87`
+    - `untracked=39`
+    - `shared-high-collision: 5`
+    - `unknown: 16`
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the repo is not clean and heuristic token-pattern checks still match `settings.py` plus `test_source_discovery_memory.py`
+  - `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, `cmd /c npm.cmd run build`, and `cmd /c npm.cmd run test:reporting-loop-package-contract` are green
+  - `python scripts/alerts_ledger.py --json` currently reports `6` open low-priority alerts:
+    - `Atlas AI: 6`
+  - the shared reporting-loop compatibility surface now covers:
+    - Aerospace fusion snapshot, report brief, current-awareness digest, VAAC advisory report package, and reporting handoff contract
+    - Data AI fusion snapshot, report brief, current-awareness digest, topic-safe report export packet, and question briefing packet
+    - Marine fusion snapshot, report brief, and current-awareness digest
+  - ownership ambiguity removed in this pass:
+    - `app/client/scripts/aerospaceReportingHandoffContractRegression.mjs` now sits under `aerospace`
+    - `app/docs/environmental-question-briefing-packet.md` and `app/server/tests/test_environmental_question_briefing_packet.py` now sit under `geospatial-environmental`
+    - `app/server/src/services/camera_source_ops_regional_portfolio_packet.py` now sits under `features-webcam`
+  - remaining `unknown` files are still genuinely broad/shared:
+    - `app/client/package.json`
+    - `app/docs/phase2-next-after-next-shortlist.md`
+    - `app/docs/phase2-next-biggest-wins-packet.md`
+    - `app/docs/reporting-desk-phase2-roadmap.md`
+    - `app/docs/source-discovery-public-web-workflow.md`
+    - `app/server/src/routes/source_discovery.py`
+    - `app/server/src/services/content_extraction.py`
+    - `app/server/src/services/media_evidence_service.py`
+    - `app/server/src/services/runtime_scheduler_service.py`
+    - `app/server/src/services/source_discovery_service.py`
+    - `app/server/src/source_discovery/db.py`
+    - `app/server/src/source_discovery/models.py`
+    - `app/server/src/types/source_discovery.py`
+    - `app/server/tests/test_source_discovery_memory.py`
+    - local runtime artifacts under `app/server/data/model-cache/` and `app/server/data/runtime-user/`
+  - current peer/runtime truth remains:
+    - Source Discovery public-web workflow and media/runtime surfaces remain shared/runtime infrastructure rather than source-validation proof
+    - Wonder archive-index, mailing-list archive, directory-root, Stack Exchange, Statuspage, and Mastodon discovery remain candidate/review/runtime only
+    - Wonder seed-packet lineage remains explainability metadata only
+    - Atlas media-geolocation hardening remains derived-evidence and runtime-quality scaffolding only
+- Latest Connect consolidation-readiness snapshot for assignment `2026-05-05 19:41 America/Chicago`:
+  - the repo remains mixed but validation-green on the assigned onboarding-contract surface
+  - current live snapshot after the current refresh:
+    - `modified=92`
+    - `untracked=50`
+    - `shared-high-collision: 5`
+    - `unknown: 25`
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the repo is not clean and heuristic token-pattern checks still match `settings.py`, `status_service.py`, and `test_source_discovery_memory.py`
+  - `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, and `cmd /c npm.cmd run build` are green
+  - `python scripts/alerts_ledger.py --json` currently reports `7` open low-priority alerts:
+    - `Atlas AI: 7`
+  - new bounded shared support surface in this pass:
+    - `app/docs/source-onboarding-contract.md`
+  - current peer/runtime truth remains:
+    - browser-only, discovery-only, and runtime-only surfaces remain below implementation proof
+    - Wonder archive-index, mailing-list archive, directory-root, Stack Exchange, Statuspage, and Mastodon discovery remain candidate/review/runtime only
+    - Wonder seed-packet lineage remains explainability metadata only
+    - Atlas media-geolocation hardening remains derived-evidence and runtime-quality scaffolding only
+- Latest Connect consolidation-readiness snapshot for assignment `2026-05-05 20:22 America/Chicago`:
+  - the repo remains mixed but validation-green on the assigned shared integration checkpoint
+  - current live snapshot after the scanner cleanup:
+    - `modified=110`
+    - `untracked=82`
+    - `shared-high-collision: 8`
+    - `unknown: 27`
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the repo is not clean and heuristic token-pattern checks still match `settings.py`, `status_service.py`, and `test_source_discovery_memory.py`
+  - `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, and `cmd /c npm.cmd run build` are green
+  - `python scripts/alerts_ledger.py --json` currently reports `9` open low-priority alerts:
+    - `Atlas AI: 8`
+    - `Manager AI: 1`
+  - no shared compile, type, import, lint, or build blocker reproduced
+  - the useful Connect cleanup in this pass was ownership/readiness reduction only:
+    - `unknown` dropped from `54` to `27`
+    - Data AI now clearly owns `cisa-kev`, `rdap`, `crtsh`, and the bounded `internet_context` route family
+    - Geospatial now clearly owns `nws-alerts` and `noaa-nowcoast-ogc`
+    - Aerospace now clearly owns `gpsjam`
+    - Features/Webcam now clearly owns the OSM lead packet surfaces
+    - Gather now clearly owns `source-user-priority-routing-governance-packet.md`
+  - remaining `unknown` files are still genuinely broad/shared:
+    - Source Discovery runtime and eval surfaces
+    - media/runtime surfaces
+    - broad planning docs
+    - `app/client/package.json`
+  - current peer/runtime truth remains:
+    - discovery, browser-only, and runtime-only surfaces remain below implementation proof
+    - Source Discovery runtime and eval surfaces remain shared/runtime infrastructure rather than lane-local validation proof
+    - Atlas media-geolocation hardening remains derived-evidence and runtime-quality scaffolding only
+- Latest Connect consolidation-readiness snapshot for assignment `2026-05-05 19:01 America/Chicago`:
+  - the repo is still mixed but validation-green on the assigned breadth/current-awareness surface
+  - current live snapshot after the latest ownership cleanup:
+    - `modified=80`
+    - `untracked=31`
+    - `shared-high-collision: 5`
+    - `unknown: 9`
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the repo is not clean and heuristic token-pattern checks still match `settings.py` plus `test_source_discovery_memory.py`
+  - `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, `cmd /c npm.cmd run build`, and `cmd /c npm.cmd run test:reporting-loop-package-contract` are green
+  - `python scripts/alerts_ledger.py --json` currently reports `6` open low-priority alerts:
+    - `Atlas AI: 6`
+  - ownership ambiguity removed in this pass:
+    - `app/client/scripts/aerospaceCurrentAwarenessDigestRegression.mjs` now sits under `aerospace`
+    - `app/docs/environmental-current-awareness-digest.md` now sits under `geospatial-environmental`
+    - `app/server/tests/test_environmental_current_awareness_digest.py` now sits under `geospatial-environmental`
+  - remaining `unknown` files are still genuinely broad/shared:
+    - `app/client/package.json`
+    - `app/docs/phase2-next-after-next-shortlist.md`
+    - `app/docs/phase2-next-biggest-wins-packet.md`
+    - `app/docs/reporting-desk-phase2-roadmap.md`
+    - `app/docs/source-discovery-public-web-workflow.md`
+    - `app/server/src/routes/source_discovery.py`
+    - `app/server/src/services/source_discovery_service.py`
+    - `app/server/src/types/source_discovery.py`
+    - `app/server/tests/test_source_discovery_memory.py`
+  - current peer/runtime truth remains:
+    - Source Discovery public-web workflow and runtime surfaces remain shared/runtime infrastructure rather than source-validation proof
+    - Wonder archive-index, mailing-list archive, directory-root, Stack Exchange, Statuspage, and Mastodon discovery remain candidate/review/runtime only
+    - Wonder seed-packet lineage remains explainability metadata only
+    - Atlas media-geolocation hardening remains derived-evidence and runtime-quality scaffolding only
+- Latest Connect consolidation-readiness snapshot for assignment `2026-05-05 18:15 America/Chicago`:
+  - the repo is not fully clean, but the earlier `118 modified / 89 untracked` style counts are historical mixed-wave snapshots, not current repo truth
+  - live tree movement during the same checkpoint:
+    - first scan: `modified=17`, `untracked=3`, `shared-high-collision: 1`, `unknown: 6`
+    - refreshed scan after concurrent lane movement plus scanner cleanup: `modified=38`, `untracked=8`, `shared-high-collision: 4`, `unknown: 0`
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the repo is not clean and `settings.py` still trips heuristic token-pattern checks
+  - `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, `cmd /c npm.cmd run build`, and `cmd /c npm.cmd run test:reporting-loop-package-contract` are green
+  - `python scripts/alerts_ledger.py --json` currently reports `5` open low-priority alerts:
+    - `Atlas AI: 5`
+  - current peer/runtime truth:
+    - Wonder Stack Exchange and seed-packet discovery remain candidate/review discovery infrastructure only
+    - Atlas media-geolocation hardening remains derived-evidence and runtime-quality scaffolding only
+    - Wonder Statuspage and Mastodon discovery remain bounded public-discovery/runtime surfaces only
+  - current local runtime noise:
+    - `app/server/.venv-win/` is local runtime artifact noise, not implementation proof or commit material
+- Latest Connect consolidation-readiness snapshot for assignment `2026-05-05 18:33 America/Chicago`:
+  - the repo is still mixed, but much smaller than the earlier `118 modified / 89 untracked` historical snapshot
+  - current live snapshot after ownership cleanup:
+    - `modified=75`
+    - `untracked=14`
+    - `shared-high-collision: 5`
+    - `unknown: 8`
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the repo is not clean and heuristic token-pattern checks still match `settings.py` plus one Source Discovery test fixture path
+  - `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, `cmd /c npm.cmd run build`, and `cmd /c npm.cmd run test:reporting-loop-package-contract` are green
+  - `python scripts/alerts_ledger.py --json` currently reports `5` open low-priority alerts:
+    - `Atlas AI: 5`
+  - ownership ambiguity removed in this pass:
+    - `geoboundaries-admin` service, fixture, and test now sit under `geospatial-environmental`
+    - the aerospace selected-target operational-question packet regression harness now sits under `aerospace`
+  - remaining `unknown` files are still genuinely broad/shared:
+    - `app/client/package.json`
+    - `app/docs/phase2-next-after-next-shortlist.md`
+    - `app/docs/phase2-next-biggest-wins-packet.md`
+    - `app/docs/reporting-desk-phase2-roadmap.md`
+    - `app/server/src/routes/source_discovery.py`
+    - `app/server/src/services/source_discovery_service.py`
+    - `app/server/src/types/source_discovery.py`
+    - `app/server/tests/test_source_discovery_memory.py`
+  - current peer/runtime truth remains:
+    - Wonder Stack Exchange and seed-packet discovery remain candidate/review discovery infrastructure only
+    - Atlas media-geolocation hardening remains derived-evidence and runtime-quality scaffolding only
+    - Wonder Statuspage and Mastodon discovery remain bounded public-discovery/runtime surfaces only
+- Latest Connect consolidation-readiness snapshot for assignment `2026-05-05 18:49 America/Chicago`:
+  - the repo is still mixed but validation-green on the assigned surface
+  - current live snapshot after the bounded unknown-set cleanup:
+    - `modified=76`
+    - `untracked=24`
+    - `shared-high-collision: 5`
+    - `unknown: 8`
+  - `python scripts/release_dry_run.py --json` remains advisory-red because the repo is not clean and heuristic token-pattern checks still match `settings.py` plus `test_source_discovery_memory.py`
+  - `python -m compileall app/server/src`, `cmd /c npm.cmd run lint`, `cmd /c npm.cmd run build`, and `cmd /c npm.cmd run test:reporting-loop-package-contract` are green
+  - `python scripts/alerts_ledger.py --json` currently reports `5` open low-priority alerts:
+    - `Atlas AI: 5`
+  - ownership ambiguity removed in this pass:
+    - `meteoalarm-atom` service, tests, and fixtures now sit under `geospatial-environmental`
+  - remaining `unknown` files are still genuinely broad/shared:
+    - `app/client/package.json`
+    - `app/docs/phase2-next-after-next-shortlist.md`
+    - `app/docs/phase2-next-biggest-wins-packet.md`
+    - `app/docs/reporting-desk-phase2-roadmap.md`
+    - `app/server/src/routes/source_discovery.py`
+    - `app/server/src/services/source_discovery_service.py`
+    - `app/server/src/types/source_discovery.py`
+    - `app/server/tests/test_source_discovery_memory.py`
+  - current peer/runtime truth remains:
+    - Source Discovery runtime surfaces remain shared/runtime infrastructure rather than lane-local validation proof
+    - Wonder Stack Exchange and seed-packet discovery remain candidate/review discovery infrastructure only
+    - Atlas media-geolocation hardening remains derived-evidence and runtime-quality scaffolding only
+    - Wonder Statuspage and Mastodon discovery remain bounded public-discovery/runtime surfaces only
 - Latest Connect consolidation-readiness snapshot for assignment `2026-05-05 10:22 America/Chicago`:
   - `modified=118`
   - `untracked=89`

@@ -1,7 +1,7 @@
 # Long-Tail Information Discovery Strategy
 
 Last updated:
-- `2026-05-04 America/Chicago`
+- `2026-05-05 America/Chicago`
 
 Owner note:
 - Prepared by Wonder AI as a user-directed research note.
@@ -14,9 +14,8 @@ Related:
 - `app/docs/source-discovery-public-web-workflow.md`
 - `app/docs/prompt-injection-defense.md`
 - `app/docs/browser-use-agent-guidelines.md`
-- `app/docs/browser-use-security-verification.md`
 - `app/docs/source-validation-status.md`
-- `app/docs/connector-adoption-plan.md`
+- `app/docs/connector-capability-map.md`
 
 ## Purpose
 
@@ -32,6 +31,42 @@ Related:
 - archived or partially hidden pages
 
 The goal is not to replace major outlets. The goal is to prevent the system from mistaking the head of the web for the whole web.
+
+## Research-Grade Roadmap Gate
+
+For future Source Discovery work on this topic:
+
+- re-check this checklist before starting the next slice
+- pick the highest incomplete item unless a direct user instruction overrides it
+- keep breadth work inside 11Writer's public no-auth or no-CAPTCHA candidate-only boundaries
+
+Current research-grade checklist status:
+
+1. `implemented` - archive and open-web index discovery
+2. `implemented` - public mailing-list archive adapters
+3. `implemented` - curated directory and regional-portal discovery
+4. `implemented` - cross-language and locality-aware seed expansion
+5. `implemented` - link-graph root expansion from trusted public roots
+6. `implemented` - better article/archive extraction and normalization
+7. `implemented` - event-level corroboration and contradiction graphing
+8. `implemented` - reputation calibration and benchmark-grade evaluation corpora
+9. `implemented` - runtime scale: backpressure, budgets, sharding, replay, failure handling
+10. `implemented` - research-grade observability, adversarial validation, and prompt-injection stress tests
+
+Current implemented backend breadth for items `1-10`:
+
+- `archive-index-scan` supports bounded public `wayback_cdx`, `archive_it_cdx`, `common_crawl_cdxj`, and fixture-backed `common_crawl_host_index` intake without fetching archived page bodies
+- `structure-scan` plus `catalog-scan` now understand public mailing-list archive shapes such as HyperKitty, Pipermail, and Mailman-style public archives
+- `directory-scan` can ingest curated public directory or regional-portal pages and emit capped cross-domain public roots with packet lineage, scope hints, and normalized regional/local tags
+- `locale-seed-expand` can generate bounded locale aliases and locality-aware discovery queries, then lift public multilingual provider hits into candidate roots while preserving locale basis and provider provenance
+- `link-graph-scan` can expand one reviewed public root into bounded root-like outbound public links without turning the system into a recursive crawler
+- `article-fetch` now supports explicit public archive-capture fetches, persisted archive-hit provenance, archive-wrapper normalization, stronger article-body extraction preference, and language hints merged back into source memory scope
+- `event-graph-refresh` can cluster reviewed claim outcomes into deterministic corroborated, contested, corrected, single-source, or open-question event groups without turning the graph into claim truth
+- reputation is now profile-backed, with `baseline_v2` preserving legacy route behavior, `calibrated_v1` available for alternate recompute and evaluation, and fixture-safe evaluation harnesses for event and reputation metrics
+- runtime scheduling can now run in an optional queue-backed mode with shard-aware work items, per-domain and per-provider budgets, retry and dead-letter behavior, and replayable run or failure history surfaces
+- source memory and content snapshots now preserve adversarial risk summaries, prompt-injection signals, and latest safety-scan timestamps without treating those findings as proof of malicious intent
+- `structure-scan` and bounded content capture now detect high-risk prompt-injection patterns such as instruction overrides, secret requests, execution prompts, developer-tools prompts, and validation-bypass language
+- dedicated adversarial observability and fixture-backed stress-test harnesses now exist so Source Discovery can expose flagged sources, signal families, runtime counts, and regression-safe prompt-injection detection metrics
 
 ## Core Principle
 

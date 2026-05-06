@@ -413,6 +413,147 @@ What this fixture protects against:
 - accidental removal of honest degraded handling for partial metadata
 - accidental removal of honest retrieval-failure `unavailable` handling
 
+## USCG NAVTEX Broadcast Notices
+
+Route:
+- `GET /api/marine/context/navtex`
+
+Pinned official endpoint family for this first slice:
+- `https://www.navcen.uscg.gov/subscribe-email-rss-feeds`
+- NAVCEN-published GovDelivery RSS family such as:
+  - `https://public.govdelivery.com/topics/USDHSCG_425/feed.rss`
+
+Fixture mode behavior:
+- `sourceHealth.sourceMode=fixture`
+- `sourceHealth.enabled=true`
+- `sourceHealth.health=loaded` when at least one broadcast matches radius/message-family filter
+- `sourceHealth.health=empty` when no broadcast matches radius/message-family filter
+- `sourceHealth.health=stale` when returned issue timestamps age beyond the 12-hour freshness threshold
+- `sourceHealth.health=degraded` when returned broadcast records carry partial metadata such as missing `subjectLabel`
+- `sourceHealth.health=unavailable` when fixture source retrieval fails inside the backend service path
+
+Representative fixture records:
+- meteorological-warning broadcast
+  - example: Miami / subject `B`
+- navigational-warning broadcast
+  - example: Portsmouth / subject `A`
+- partial-metadata broadcast
+  - example: Honolulu / subject `Y`
+  - missing `subjectLabel`
+
+Evidence basis expectations:
+- `broadcasts[*].evidenceBasis=advisory`
+
+Expected caveats:
+- source-level caveat describing fixture/local mode and advisory-warning-only usage
+- response-level caveats warning against closure-certainty, legal-status, threat, required-action, or vessel-intent inference
+- broadcast-level caveats warning that transmitter proximity does not geolocate the warned area exactly
+
+Empty/no-match behavior:
+- no nearby broadcast match returns:
+  - `count=0`
+  - `broadcasts=[]`
+  - `sourceHealth.health=empty`
+
+Missing optional field / partial metadata cases:
+- `subjectLabel` may be missing
+- `coverageRadiusKm` may be missing
+- `sourceUrl` may differ by station/feed family while still remaining official GovDelivery metadata
+
+Disabled mode behavior:
+- non-fixture mode returns:
+  - `count=0`
+  - `broadcasts=[]`
+  - `sourceHealth.health=disabled`
+  - `sourceHealth.enabled=false`
+  - explicit fixture-first caveat
+
+What this fixture protects against:
+- regression from `empty` to error semantics on no nearby broadcast
+- accidental conflation of navigational and meteorological warning families
+- accidental removal of the partial-metadata case
+- accidental removal of caveats
+- accidental change from advisory evidence basis
+- accidental fabrication of live behavior in non-fixture mode
+- accidental loss of timestamp-based stale classification
+- accidental removal of honest degraded handling for partial metadata
+- accidental removal of honest retrieval-failure `unavailable` handling
+- accidental introduction of closure certainty, required action, threat, vessel-behavior, or vessel-intent claims
+
+## GEBCO Gridded Bathymetry
+
+Route:
+- `GET /api/marine/context/gebco-bathymetry`
+
+Pinned official reference URLs for this first slice:
+- `https://www.gebco.net/data-products/gridded-bathymetry-data`
+- `https://download.gebco.net/downloads`
+
+Fixture mode behavior:
+- `sourceHealth.sourceMode=fixture`
+- `sourceHealth.enabled=true`
+- `sourceHealth.health=loaded` when at least one bounded sample matches radius
+- `sourceHealth.health=empty` when no sample matches radius
+- `sourceHealth.health=stale` when the pinned source-generated timestamp ages beyond the 540-day freshness threshold
+- `sourceHealth.health=unavailable` when fixture source retrieval fails inside the backend service path
+
+Representative fixture records:
+- bounded shelf sample
+  - example: `gebco-galveston-shelf-001`
+  - `elevationMeters=-14.0`
+- deeper shelf sample
+  - example: `gebco-galveston-shelf-002`
+  - `elevationMeters=-28.0`
+- deeper offshore sample
+  - example: `gebco-galveston-shelf-003`
+  - `elevationMeters=-41.0`
+
+Evidence basis expectations:
+- `samples[*].evidenceBasis=contextual`
+
+Expected caveats:
+- source-level caveat describing fixture/local mode and static bathymetry-only usage
+- response-level caveats warning against route-safety, closure-truth, incident-truth, grounding-risk, or vessel-intent inference
+- sample-level caveats warning that bounded grid samples are review context only and not live marine incident truth
+
+Empty/no-match behavior:
+- no nearby sample match returns:
+  - `count=0`
+  - `samples=[]`
+  - `sourceHealth.health=empty`
+
+Area summary behavior:
+- response preserves:
+  - `centerElevationMeters`
+  - `centerDepthMeters`
+  - `minElevationMeters`
+  - `maxElevationMeters`
+  - `underseaSampleCount`
+  - `landSampleCount`
+- these remain static bounded-summary fields, not route or hazard verdicts
+
+Missing optional field / partial metadata cases:
+- this first slice does not currently use a degraded partial-metadata fixture path
+- `degraded` is intentionally not fabricated for GEBCO in this phase
+
+Disabled mode behavior:
+- non-fixture mode returns:
+  - `count=0`
+  - `samples=[]`
+  - `sourceHealth.health=disabled`
+  - `sourceHealth.enabled=false`
+  - explicit fixture-first caveat
+
+What this fixture protects against:
+- regression from `empty` to error semantics on no nearby sample
+- accidental widening into broad raster ingest or live-network behavior
+- accidental removal of pinned GEBCO provenance URLs
+- accidental change from contextual evidence basis
+- accidental fabrication of live behavior in non-fixture mode
+- accidental loss of honest stale classification from old pinned grid-release timestamps
+- accidental removal of honest retrieval-failure `unavailable` handling
+- accidental introduction of route-safety, closure, incident, or vessel-behavior claims
+
 ## Fixture Regression Checklist
 
 Do not remove:
@@ -422,11 +563,15 @@ Do not remove:
 - empty result case for Vigicrues hydrometry
 - empty result case for Ireland OPW water level
 - empty result case for Netherlands RWS Waterinfo
+- empty result case for USCG NAVTEX Broadcast Notices
+- empty result case for GEBCO Gridded Bathymetry
 - Scottish Water partial-metadata record
 - Vigicrues partial-metadata record
 - Ireland OPW partial-metadata record
 - Netherlands RWS Waterinfo partial-metadata record
 - Netherlands RWS Waterinfo prompt-like inert-metadata record
+- USCG NAVTEX partial-metadata record
+- GEBCO bounded shelf/offshore sample set
 - source-level caveat fields
 - event/station-level caveat fields where currently present
 
@@ -437,12 +582,16 @@ Do not change casually:
 - Vigicrues hydrometry `observed` evidence basis
 - Ireland OPW water level `observed` evidence basis
 - Netherlands RWS Waterinfo `observed` evidence basis
+- USCG NAVTEX `advisory` evidence basis
+- GEBCO Gridded Bathymetry `contextual` evidence basis
 - disabled/non-fixture behavior
 - fixture/local source-mode explicitness
 - water-height vs flow separation
 - current timestamp-based stale thresholds
 - current no-fabrication boundary for `unavailable` source-health states
 - current no-fabrication boundary for `degraded` source-health states on CO-OPS and NDBC
+- current no-fabrication boundary for `degraded` source-health on GEBCO
+- message-family separation for NAVTEX warning subjects
 
 ## Fusion / Review Fixture Expectations
 
@@ -458,7 +607,7 @@ What this guide does not claim:
 - no dedicated backend fixture exists for `contextFusionSummary`
 - no dedicated backend fixture exists for `contextReviewReport`
 - smoke/build confirmation for those frontend-local summaries remains a separate layer from backend fixture guarantees
-- Netherlands RWS Waterinfo is backend-only in the current slice, so consumer/smoke coverage remains future work rather than part of the current fixture contract
+- Netherlands RWS Waterinfo, USCG NAVTEX, and GEBCO now all have marine-local consumer and smoke metadata coverage in addition to backend fixture guarantees
 
 If a fixture behavior changes:
 - update backend contract tests first
@@ -474,5 +623,6 @@ python -m pytest app/server/tests/test_marine_contracts.py -q
 python -m pytest app/server/tests/test_vigicrues_hydrometry.py -q
 python -m pytest app/server/tests/test_ireland_opw_waterlevel.py -q
 python -m pytest app/server/tests/test_netherlands_rws_waterinfo.py -q
+python -m pytest app/server/tests/test_marine_gebco.py -q
 python -m compileall app/server/src
 ```

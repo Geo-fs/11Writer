@@ -16,6 +16,7 @@ from src.services.earthquake_service import EarthquakeQuery, EarthquakeService
 from src.services.eonet_service import EonetQuery, EonetService
 from src.services.france_georisques_service import FranceGeorisquesQuery, FranceGeorisquesService
 from src.services.ga_recent_earthquakes_service import GaRecentEarthquakesQuery, GaRecentEarthquakesService
+from src.services.geoboundaries_admin_service import GeoBoundariesAdminQuery, GeoBoundariesAdminService
 from src.services.gshhg_shorelines_service import GshhgShorelinesQuery, GshhgShorelinesService
 from src.services.geosphere_austria_warnings_service import (
     GeosphereWarningLevel,
@@ -34,10 +35,13 @@ from src.services.met_eireann_warnings_service import (
 )
 from src.services.meteoswiss_open_data_service import MeteoSwissOpenDataQuery, MeteoSwissOpenDataService
 from src.services.metno_metalerts_service import MetNoMetAlertsQuery, MetNoMetAlertsService
+from src.services.noaa_nowcoast_service import NoaaNowCoastQuery, NoaaNowCoastService
 from src.services.nasa_power_meteorology_solar_service import (
     NasaPowerMeteorologySolarQuery,
     NasaPowerMeteorologySolarService,
 )
+from src.services.nws_alerts_service import NwsAlertsQuery, NwsAlertsService
+from src.services.nhc_gis_service import NhcGisQuery, NhcGisService
 from src.services.natural_earth_physical_service import NaturalEarthPhysicalQuery, NaturalEarthPhysicalService
 from src.services.noaa_global_volcano_service import NoaaGlobalVolcanoQuery, NoaaGlobalVolcanoService
 from src.services.nrc_event_notifications_service import NrcEventNotificationsQuery, NrcEventNotificationsService, NrcSort
@@ -51,6 +55,7 @@ from src.services.source_registry import SourceRuntimeStatus, get_source_runtime
 from src.services.taiwan_cwa_weather_service import TaiwanCwaWeatherQuery, TaiwanCwaWeatherService
 from src.services.tsunami_service import TsunamiQuery, TsunamiService
 from src.services.canada_cap_service import CanadaCapQuery, CanadaCapService
+from src.services.meteoalarm_atom_service import MeteoalarmAtomQuery, MeteoalarmAtomService
 from src.services.dwd_cap_alerts_service import DwdCapAlertsService, DwdCapQuery
 from src.services.canada_geomet_ogc_service import CanadaGeoMetOgcQuery, CanadaGeoMetOgcService
 from src.services.uk_ea_flood_service import UkEaFloodQuery, UkEaFloodService
@@ -58,6 +63,11 @@ from src.services.uk_ea_water_quality_service import UkEaWaterQualityQuery, UkEa
 from src.services.usgs_geomagnetism_service import UsgsGeomagnetismQuery, UsgsGeomagnetismService
 from src.services.volcano_service import VolcanoQuery, VolcanoService
 from src.types.api import (
+    EnvironmentalCurrentAwarenessDigest,
+    EnvironmentalCurrentAwarenessDigestMetadata,
+    EnvironmentalCurrentAwarenessSourceSummary,
+    EnvironmentalQuestionBriefingPacket,
+    EnvironmentalQuestionBriefingPacketMetadata,
     EnvironmentalBaseEarthExportMetadata,
     EnvironmentalBaseEarthExportPackage,
     EnvironmentalBaseEarthReviewItem,
@@ -140,6 +150,14 @@ _ENVIRONMENTAL_FUSION_SNAPSHOT_INPUT_CAVEAT = (
     "This environmental fusion snapshot input is a bounded backend geospatial domain package for later cross-domain reporting and fusion work. "
     "It preserves live and advisory environmental context separately from static and snapshot reference context without creating a common hazard, impact, damage, certainty, or action model."
 )
+_ENVIRONMENTAL_CURRENT_AWARENESS_DIGEST_CAVEAT = (
+    "This environmental current-awareness digest is a bounded backend reporting artifact over the existing geospatial reporting stack. "
+    "It preserves source health, evidence basis, advisory/contextual limits, forecast/model limits, and static-reference limits without creating hazard, impact, damage, certainty, responsibility, legal, or action truth."
+)
+_ENVIRONMENTAL_QUESTION_BRIEFING_PACKET_CAVEAT = (
+    "This environmental question briefing packet is a bounded backend reporting artifact for place-, timeframe-, or filter-scoped environmental questions. "
+    "It preserves evidence class, source health, advisory/contextual limits, forecast/model limits, and static-reference limits without creating incident truth, hazard scoring, damage claims, certainty claims, legal meaning, or action guidance."
+)
 
 _FAMILY_ORDER: tuple[str, ...] = (
     "seismic",
@@ -162,6 +180,7 @@ _FREE_TEXT_INERT_SOURCE_IDS: frozenset[str] = frozenset(
         "nasa-eonet",
         "hong-kong-observatory-open-weather",
         "environment-canada-cap-alerts",
+        "meteoalarm-atom-feeds",
         "met-norway-metalerts",
         "met-eireann-warnings",
         "meteoswiss-open-data",
@@ -902,6 +921,277 @@ class EnvironmentalSourceFamiliesOverviewService:
             caveats=caveats,
         )
 
+    async def get_environmental_current_awareness_digest(self) -> EnvironmentalCurrentAwarenessDigest:
+        overview = await self.get_overview()
+        fusion = await self.get_environmental_fusion_snapshot_input()
+
+        source_summaries: list[EnvironmentalCurrentAwarenessSourceSummary] = []
+        for family in overview.families:
+            for source in family.sources:
+                context_class: Literal["dynamic-environmental", "regional-context", "static-reference", "glacier-reference"] = "dynamic-environmental"
+                if source.source_id in set(fusion.canada_source_ids):
+                    context_class = "regional-context"
+                elif source.source_id in set(fusion.static_reference_source_ids):
+                    context_class = "static-reference"
+                source_summaries.append(
+                    EnvironmentalCurrentAwarenessSourceSummary(
+                        source_id=source.source_id,
+                        source_label=source.source_label,
+                        family_id=family.family_id,
+                        family_label=family.family_label,
+                        context_class=context_class,
+                        source_mode=source.source_mode,
+                        source_health=source.health,
+                        evidence_basis=source.evidence_basis,
+                        loaded_count=source.loaded_count,
+                        summary_line=source.summary_line,
+                        caveats=[source.caveat, *source.review_lines[:1]],
+                    )
+                )
+
+        source_summaries.append(
+            EnvironmentalCurrentAwarenessSourceSummary(
+                source_id=fusion.glacier_reference.source_id,
+                source_label=fusion.glacier_reference.source_label,
+                family_id="base-earth-reference",
+                family_label="Base-Earth Reference",
+                context_class="glacier-reference",
+                source_mode=fusion.glacier_reference.source_mode,
+                source_health=fusion.glacier_reference.source_health,
+                evidence_basis=fusion.glacier_reference.evidence_basis,
+                loaded_count=fusion.glacier_reference.loaded_count,
+                summary_line=fusion.glacier_reference.summary_line,
+                caveats=fusion.glacier_reference.caveats[:2],
+            )
+        )
+
+        source_ids = [summary.source_id for summary in source_summaries]
+        family_ids = sorted(
+            {
+                *fusion.dynamic_family_ids,
+                "canada-context",
+                "base-earth-reference",
+            }
+        )
+        observe = [
+            (
+                f"Dynamic environmental posture: {fusion.dynamic_environmental_context.family_count} families, "
+                f"{fusion.dynamic_environmental_context.source_count} sources, and {fusion.dynamic_environmental_context.issue_count} dynamic review issues."
+            ),
+            (
+                f"Regional/context overlay: {fusion.canada_context.source_count} Canada sources with "
+                f"{fusion.canada_review.issue_count} review issues."
+            ),
+            (
+                f"Static/reference posture: {fusion.base_earth_reference.source_count} base-earth sources plus "
+                f"RGI glacier reference, with {fusion.base_earth_review.issue_count} static review issues."
+            ),
+            *fusion.dynamic_environmental_context.review_lines[:2],
+        ]
+        orient = [
+            "Observed, advisory, forecast/model, contextual, and static-reference meanings stay distinct in this digest.",
+            (
+                f"Warning-distribution rows such as Meteoalarm and DWD stay advisory/contextual only; "
+                f"static rows such as geoBoundaries and RGI stay reference-only."
+            ),
+            (
+                f"Source-health posture remains visible through {fusion.review_issue_count} total review issues across "
+                f"dynamic, regional, and static/reference packages."
+            ),
+            *fusion.dynamic_environmental_context.health_mode_summary[:2],
+        ]
+        prioritize = [
+            "Review fixture-only and source-health-limited rows before treating the digest as broad current-awareness coverage.",
+            "Keep advisory feeds and forecast/model context below observed-event truth when answering open-ended questions.",
+            "Preserve regional overlay and static-reference caveats instead of flattening them into a common environmental status.",
+            *[issue.summary_line for issue in fusion.canada_review.issues[:1]],
+            *[issue.summary_line for issue in fusion.base_earth_review.issues[:1]],
+        ]
+        explain = [
+            "This digest is composed from the existing environmental family overview, fusion snapshot input, Canada context package, and base-earth package.",
+            "It is export-safe and review-oriented rather than a common hazard, impact, damage, certainty, responsibility, legal, or action model.",
+            "Underlying national providers remain the authoritative origin for warning content where distribution layers such as Meteoalarm are present.",
+            "Static reference layers remain bounded context inputs only and do not become live incident or legal-jurisdiction truth.",
+        ]
+        does_not_prove_lines = [
+            *fusion.does_not_prove_lines,
+            "Meteoalarm and other warning-distribution records do not by themselves prove national-provider finality, impact realization, or required action.",
+            "Forecast/model rows do not by themselves prove observed local weather or realized conditions.",
+        ]
+        review_lines = [
+            (
+                f"Environmental current-awareness digest: {fusion.dynamic_environmental_context.family_count} dynamic families, "
+                f"{fusion.canada_context.source_count} regional sources, {fusion.base_earth_reference.source_count + 1} static/reference sources, "
+                f"and {fusion.review_issue_count} total review issues."
+            ),
+            *observe[:2],
+            *orient[:2],
+            *prioritize[:2],
+            *explain[:2],
+        ]
+        export_lines = [
+            (
+                f"Environmental current-awareness digest: dynamic {fusion.dynamic_environmental_context.source_count} sources, "
+                f"regional {fusion.canada_context.source_count}, static/reference {fusion.base_earth_reference.source_count + 1}, "
+                f"issues {fusion.review_issue_count}"
+            ),
+            f"Dynamic source ids: {', '.join(fusion.dynamic_source_ids)}",
+            f"Regional source ids: {', '.join(fusion.canada_source_ids)}",
+            f"Static/reference source ids: {', '.join([*fusion.static_reference_source_ids, fusion.glacier_reference.source_id])}",
+            "Evidence classes preserved: observed, advisory, forecast, modeled, contextual, reference",
+        ]
+        caveats = [
+            _ENVIRONMENTAL_CURRENT_AWARENESS_DIGEST_CAVEAT,
+            *does_not_prove_lines,
+            *fusion.caveats[:4],
+        ]
+        return EnvironmentalCurrentAwarenessDigest(
+            metadata=EnvironmentalCurrentAwarenessDigestMetadata(
+                source="environmental-current-awareness-digest",
+                source_name="Environmental Current Awareness Digest",
+                profile="bounded-current-awareness-digest",
+                source_mode=fusion.metadata.source_mode,
+                fetched_at=_utc_now_iso(),
+                family_count=len(family_ids),
+                source_count=len(source_summaries),
+                dynamic_source_count=len(fusion.dynamic_source_ids),
+                regional_source_count=len(fusion.canada_source_ids),
+                static_reference_source_count=len(fusion.static_reference_source_ids) + 1,
+                review_issue_count=fusion.review_issue_count,
+                evidence_bases=fusion.metadata.evidence_bases,
+                caveat=_ENVIRONMENTAL_CURRENT_AWARENESS_DIGEST_CAVEAT,
+            ),
+            family_ids=family_ids,
+            source_ids=source_ids,
+            source_summaries=source_summaries,
+            observe=observe,
+            orient=orient,
+            prioritize=prioritize,
+            explain=explain,
+            does_not_prove_lines=does_not_prove_lines,
+            review_lines=review_lines,
+            export_lines=export_lines,
+            caveats=caveats,
+        )
+
+    async def get_environmental_question_briefing_packet(
+        self,
+        *,
+        place_label: str | None = None,
+        timeframe_label: str | None = None,
+        family_ids: list[str] | None = None,
+    ) -> EnvironmentalQuestionBriefingPacket:
+        digest = await self.get_environmental_current_awareness_digest()
+        fusion = await self.get_environmental_fusion_snapshot_input()
+        requested_family_ids = _normalize_family_ids(family_ids)
+        available_family_ids = set(digest.family_ids)
+        included_family_ids = [family_id for family_id in requested_family_ids if family_id in available_family_ids]
+        missing_family_ids = [family_id for family_id in requested_family_ids if family_id not in available_family_ids]
+        if not included_family_ids:
+            included_family_ids = digest.family_ids
+
+        selected_source_summaries = [
+            summary
+            for summary in digest.source_summaries
+            if (
+                summary.family_id in included_family_ids
+                or (summary.context_class == "regional-context" and "canada-context" in included_family_ids)
+                or (summary.context_class in {"static-reference", "glacier-reference"} and "base-earth-reference" in included_family_ids)
+            )
+        ]
+        source_ids = [summary.source_id for summary in selected_source_summaries]
+        evidence_class_counts: dict[str, int] = {}
+        for summary in selected_source_summaries:
+            evidence_class_counts[summary.evidence_basis] = evidence_class_counts.get(summary.evidence_basis, 0) + 1
+
+        posture_line = "Question posture: bounded environmental briefing over existing geospatial reporting inputs only."
+        if place_label and timeframe_label:
+            posture_line = f"Question posture: place `{place_label}` with timeframe `{timeframe_label}` over bounded environmental reporting inputs only."
+        elif place_label:
+            posture_line = f"Question posture: place `{place_label}` over bounded environmental reporting inputs only."
+        elif timeframe_label:
+            posture_line = f"Question posture: timeframe `{timeframe_label}` over bounded environmental reporting inputs only."
+
+        observe = [
+            posture_line,
+            f"Included family ids: {', '.join(included_family_ids)}",
+            f"Selected source count: {len(source_ids)} with {fusion.review_issue_count} total review issues carried through the current stack.",
+            *digest.observe[:2],
+        ]
+        orient = [
+            "Evidence classes remain distinct inside this briefing packet: observed, advisory, forecast/model, contextual, and static-reference.",
+            "Static-reference and regional-context rows can orient a question, but they do not become live incident truth.",
+            f"Evidence class counts: {', '.join(f'{key}={value}' for key, value in sorted(evidence_class_counts.items()))}",
+            *digest.orient[:2],
+        ]
+        prioritize = [
+            "Prioritize source-health and evidence-limit review before treating the packet as complete current-state truth.",
+            "Keep warning-distribution and advisory rows below observed-event truth when briefing a place- or situation-specific question.",
+            "Use static-reference and geoboundary labels for orientation only, not as incident, legal, or operational truth.",
+            *digest.prioritize[:2],
+        ]
+        explain = [
+            "This packet is built on the existing environmental current-awareness digest and fusion snapshot input.",
+            "It frames place, timeframe, and family-filter posture explicitly without adding new source fetchers or reopening existing sources.",
+            "Where Meteoalarm or DWD appear, they remain advisory/contextual warning inputs rather than stronger national-source authority or impact truth.",
+            *digest.explain[:1],
+        ]
+        does_not_prove_lines = [
+            "Place and timeframe labels in this packet are briefing posture only and do not prove local incident footprint, exposure, or impact.",
+            "Family filters in this packet are reporting-selection controls only and do not elevate omitted families into evidence against an incident.",
+            *digest.does_not_prove_lines,
+        ]
+        review_lines = [
+            (
+                f"Environmental question briefing packet: {len(source_ids)} sources across {len(included_family_ids)} included families "
+                f"with {fusion.review_issue_count} carried review issues."
+            ),
+            *observe[:2],
+            *orient[:2],
+            *prioritize[:2],
+            *explain[:2],
+        ]
+        export_lines = [
+            f"Environmental question briefing packet: {len(source_ids)} sources across {len(included_family_ids)} families",
+            f"Requested family ids: {', '.join(requested_family_ids) if requested_family_ids else 'none'}",
+            f"Included family ids: {', '.join(included_family_ids)}",
+            f"Place label: {place_label or 'none'}",
+            f"Timeframe label: {timeframe_label or 'none'}",
+        ]
+        caveats = [
+            _ENVIRONMENTAL_QUESTION_BRIEFING_PACKET_CAVEAT,
+            *does_not_prove_lines[:4],
+            *digest.caveats[:3],
+        ]
+        return EnvironmentalQuestionBriefingPacket(
+            metadata=EnvironmentalQuestionBriefingPacketMetadata(
+                source="environmental-question-briefing-packet",
+                source_name="Environmental Question Briefing Packet",
+                profile="bounded-environmental-question-briefing",
+                source_mode=digest.metadata.source_mode,
+                fetched_at=_utc_now_iso(),
+                place_label=place_label,
+                timeframe_label=timeframe_label,
+                requested_family_ids=requested_family_ids,
+                included_family_ids=included_family_ids,
+                missing_family_ids=missing_family_ids,
+                source_count=len(source_ids),
+                review_issue_count=fusion.review_issue_count,
+                evidence_class_counts=evidence_class_counts,
+                caveat=_ENVIRONMENTAL_QUESTION_BRIEFING_PACKET_CAVEAT,
+            ),
+            source_ids=source_ids,
+            source_summaries=selected_source_summaries,
+            observe=observe,
+            orient=orient,
+            prioritize=prioritize,
+            explain=explain,
+            does_not_prove_lines=does_not_prove_lines,
+            review_lines=review_lines,
+            export_lines=export_lines,
+            caveats=caveats,
+        )
+
     async def _load_rows(self) -> list[_SourceOverviewRow]:
         return [
             await self._usgs_earthquakes(),
@@ -916,7 +1206,10 @@ class EnvironmentalSourceFamiliesOverviewService:
             await self._noaa_global_volcanoes(),
             await self._tsunami(),
             await self._hko_weather(),
+            await self._nws_alerts(),
+            await self._nhc_gis(),
             await self._canada_cap(),
+            await self._meteoalarm_atom(),
             await self._dwd_cap(),
             await self._metno_alerts(),
             await self._ipma_warnings(),
@@ -926,6 +1219,7 @@ class EnvironmentalSourceFamiliesOverviewService:
             await self._bc_wildfire_datamart(),
             await self._meteoswiss_open_data(),
             await self._canada_geomet_ogc(),
+            await self._noaa_nowcoast(),
             await self._taiwan_cwa(),
             await self._dmi_forecast(),
             await self._met_eireann_forecast(),
@@ -935,6 +1229,7 @@ class EnvironmentalSourceFamiliesOverviewService:
             await self._natural_earth(),
             await self._gshhg_shorelines(),
             await self._pb2002_plate_boundaries(),
+            await self._geoboundaries_admin(),
             await self._rgi_glacier_inventory(),
             await self._france_georisques(),
             await self._ireland_wfd(),
@@ -1101,6 +1396,45 @@ class EnvironmentalSourceFamiliesOverviewService:
             summary_subject="warning/context records",
         )
 
+    async def _nws_alerts(self) -> _SourceOverviewRow:
+        response = await NwsAlertsService(self._settings).list_recent(
+            NwsAlertsQuery(
+                alert_type="all",
+                severity="all",
+                area=None,
+                zone=None,
+                event=None,
+                limit=10,
+                sort="newest",
+            )
+        )
+        return _row_from_response(
+            family_id="weather-alert-advisory",
+            family_label="Weather Alert Advisory",
+            source_label="NWS Alerts API",
+            response=response,
+            evidence_basis="advisory",
+            summary_subject="alerts",
+        )
+
+    async def _nhc_gis(self) -> _SourceOverviewRow:
+        response = await NhcGisService(self._settings).list_recent(
+            NhcGisQuery(
+                product_type="all",
+                storm_name=None,
+                limit=10,
+                sort="newest",
+            )
+        )
+        return _row_from_response(
+            family_id="weather-alert-advisory",
+            family_label="Weather Alert Advisory",
+            source_label="NOAA NHC GIS Atlantic",
+            response=response,
+            evidence_basis="advisory",
+            summary_subject="tropical advisory records",
+        )
+
     async def _canada_cap(self) -> _SourceOverviewRow:
         response = await CanadaCapService(self._settings).list_recent(
             CanadaCapQuery(
@@ -1118,6 +1452,23 @@ class EnvironmentalSourceFamiliesOverviewService:
             response=response,
             evidence_basis="advisory",
             summary_subject="alerts",
+        )
+
+    async def _meteoalarm_atom(self) -> _SourceOverviewRow:
+        response = await MeteoalarmAtomService(self._settings).list_recent(
+            MeteoalarmAtomQuery(
+                q=None,
+                limit=10,
+                sort="newest",
+            )
+        )
+        return _row_from_response(
+            family_id="weather-alert-advisory",
+            family_label="Weather Alert Advisory",
+            source_label="Meteoalarm Atom Feed",
+            response=response,
+            evidence_basis="advisory",
+            summary_subject="warning entries",
         )
 
     async def _dwd_cap(self) -> _SourceOverviewRow:
@@ -1276,6 +1627,19 @@ class EnvironmentalSourceFamiliesOverviewService:
             summary_subject="station features",
         )
 
+    async def _noaa_nowcoast(self) -> _SourceOverviewRow:
+        response = await NoaaNowCoastService(self._settings).get_context(
+            NoaaNowCoastQuery(group="all", q=None, limit=10)
+        )
+        return _row_from_response(
+            family_id="weather-flood-hydrology",
+            family_label="Weather, Flood, and Hydrology",
+            source_label="NOAA nowCOAST",
+            response=response,
+            evidence_basis="contextual",
+            summary_subject="layer records",
+        )
+
     async def _dmi_forecast(self) -> _SourceOverviewRow:
         response = await DmiForecastService(self._settings).get_context(
             DmiForecastQuery(latitude=55.715, longitude=12.561, limit=12)
@@ -1380,6 +1744,19 @@ class EnvironmentalSourceFamiliesOverviewService:
             summary_subject="boundary records",
         )
 
+    async def _geoboundaries_admin(self) -> _SourceOverviewRow:
+        response = await GeoBoundariesAdminService(self._settings).get_context(
+            GeoBoundariesAdminQuery(shape_iso=None, bbox=None, limit=5)
+        )
+        return _row_from_response(
+            family_id="base-earth-reference",
+            family_label="Base Earth Reference",
+            source_label="geoBoundaries Admin",
+            response=response,
+            evidence_basis="reference",
+            summary_subject="admin boundary records",
+        )
+
     async def _rgi_glacier_inventory(self) -> _SourceOverviewRow:
         response = await RgiGlacierInventoryService(self._settings).get_context(
             RgiGlacierInventoryQuery(region_code="01", glacier_name=None, limit=5)
@@ -1458,6 +1835,7 @@ class EnvironmentalSourceFamiliesOverviewService:
             await self._base_earth_natural_earth(),
             await self._base_earth_gshhg(),
             await self._base_earth_pb2002(),
+            await self._base_earth_geoboundaries(),
             await self._base_earth_rgi(),
             await self._base_earth_noaa_volcanoes(),
         ]
@@ -1840,6 +2218,61 @@ class EnvironmentalSourceFamiliesOverviewService:
             geometry_count=geometry_count,
             missing_geometry_count=missing_geometry_count,
             geometry_posture="generalized boundary bbox summary only from static scientific model records",
+            export_ready=export_ready,
+            caveats=response.caveats,
+            review_lines=review_lines,
+            export_lines=export_lines,
+            summary_line=summary_line,
+        )
+
+    async def _base_earth_geoboundaries(self) -> _BaseEarthRow:
+        response = await GeoBoundariesAdminService(self._settings).get_context(
+            GeoBoundariesAdminQuery(shape_iso=None, bbox=None, limit=10)
+        )
+        geometry_count = sum(
+            1
+            for record in response.records
+            if None not in {record.bbox_min_lon, record.bbox_min_lat, record.bbox_max_lon, record.bbox_max_lat}
+        )
+        missing_geometry_count = max(len(response.records) - geometry_count, 0)
+        summary_line = (
+            f"geoBoundaries Admin: {response.source_health.health} - {response.count} records - mode {response.source_health.source_mode} - reference"
+        )
+        review_lines = [
+            "geoBoundaries remains static administrative boundary reference only and does not establish legal-jurisdiction truth, operational control, live incident status, or action guidance.",
+            "geoBoundaries in this slice stays pinned to one gbOpen BEL ADM1 release only and preserves license and release-family context.",
+        ]
+        export_ready = response.count > 0 and geometry_count == response.count
+        if missing_geometry_count > 0:
+            review_lines.append(
+                f"geoBoundaries: {missing_geometry_count} admin-boundary rows lack representative bbox geometry in the current bounded slice."
+            )
+        if not export_ready:
+            review_lines.append(
+                "geoBoundaries export readiness is limited when representative bbox geometry is missing or source health is not loaded."
+            )
+        review_lines.extend(
+            _build_review_lines(
+                source_id=response.metadata.source,
+                source_label="geoBoundaries Admin",
+                source_mode=response.source_health.source_mode,
+                health=response.source_health.health,
+                runtime_status=get_source_runtime_status(response.metadata.source),
+            )
+        )
+        export_lines = [summary_line, *review_lines[:3]]
+        return _BaseEarthRow(
+            source_id=response.metadata.source,
+            source_label="geoBoundaries Admin",
+            source_mode=response.source_health.source_mode,
+            source_health=response.source_health.health,
+            evidence_basis="reference",
+            loaded_count=response.count,
+            last_fetched_at=response.source_health.last_fetched_at,
+            source_generated_at=response.source_health.source_generated_at,
+            geometry_count=geometry_count,
+            missing_geometry_count=missing_geometry_count,
+            geometry_posture="representative bbox and center summaries only from one static gbOpen BEL ADM1 release",
             export_ready=export_ready,
             caveats=response.caveats,
             review_lines=review_lines,

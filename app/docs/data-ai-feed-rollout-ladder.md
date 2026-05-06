@@ -140,6 +140,11 @@ Current repo-local implementation truth for those waves:
 - The client inspector now also has a bounded fusion/claim-integrity snapshot that composes the existing metadata-only Data AI surfaces into one export-safe domain input for future cross-domain fusion follow-on.
 - The client inspector now also has a bounded report-brief package that organizes the existing metadata-only Data AI surfaces into report-ready `observe`, `orient`, `prioritize`, and `explain` sections.
 - The client inspector now also has a bounded topic-scoped report packet that answers one active topic at a time using existing family/topic/fusion/report metadata rather than raw feed text or new feed expansion.
+- The client inspector now also has a bounded workflow-evidence snapshot that packages topic/report/review/export lineage and readiness posture for the current reporting path using existing metadata only.
+- The client inspector now also has a bounded current-awareness digest that packages the existing family/topic/report/workflow chain into one metadata-only open-ended digest for non-specific current-situation asks.
+- The client inspector now also has a bounded review/export coherence summary that checks review, queue, readiness, topic, report, workflow, and digest alignment over the current metadata-only stack.
+- The client inspector now also has a bounded topic-safe report export packet that packages the current topic/report path into compact export-safe metadata for reporting handoff.
+- The client inspector now also has a bounded question briefing packet that packages the current topic/report/export path into compact question-oriented metadata for reporting use.
 - They should be treated as workflow-supporting and contract-tested, not workflow-validated.
 - They should not be treated as workflow-validated until export confirmation plus explicit smoke or manual workflow evidence are recorded.
 
@@ -159,6 +164,10 @@ Why:
 - `propublica` and `global-voices` are now implemented backend-first on the shared aggregate route, family overview, readiness/export snapshot, and family review surface
 - the fusion/claim-integrity snapshot is now implemented as a client-light metadata-only helper and should be treated as workflow-supporting consumer evidence only
 - the report-brief package is now implemented as a client-light metadata-only helper and should be treated as workflow-supporting consumer evidence only
+- the current-awareness digest is now implemented as a client-light metadata-only helper and should be treated as workflow-supporting consumer evidence only
+- the review/export coherence summary is now implemented as a client-light metadata-only helper and should be treated as workflow-supporting consumer evidence only
+- the topic-safe report export packet is now implemented as a client-light metadata-only helper and should be treated as workflow-supporting consumer evidence only
+- the question briefing packet is now implemented as a client-light metadata-only helper and should be treated as workflow-supporting consumer evidence only
 - the active Data lane is now metadata-only coherence and bounded helper work over already implemented feed families, not a fresh `propublica`, `global-voices`, or second world-news family build
 
 ## Prompt-Injection Guardrail

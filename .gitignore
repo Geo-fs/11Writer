@@ -14,6 +14,7 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .venv/
+.venv-win/
 venv/
 env/
 *.egg-info/
@@ -40,6 +41,9 @@ tmp/
 temp/
 *.tmp
 *.bak
+app/server/data/model-cache/
+app/server/data/runtime-user/
+app/server/data/tmp_*.json
 
 .DS_Store
 Thumbs.db

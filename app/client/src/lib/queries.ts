@@ -12,6 +12,9 @@ import type {
   EonetEventsResponse,
   FaaNasAirportStatusResponse,
   NceiSpaceWeatherPortalResponse,
+  GpsJamContextResponse,
+  NoaaNowCoastResponse,
+  NwsAlertsResponse,
   OpenSkyStatesResponse,
   OurAirportsReferenceResponse,
   GeoNetHazardsResponse,
@@ -36,7 +39,9 @@ import type {
   WaveLlmReviewQueueResponse,
   ReviewQueueResponse,
   MarineChokepointAnalyticalSummaryResponse,
+  MarineGebcoBathymetryContextResponse,
   MarineIrelandOpwWaterLevelContextResponse,
+  MarineNavtexContextResponse,
   MarineNetherlandsRwsWaterinfoContextResponse,
   MarineNdbcContextResponse,
   MarineNoaaCoopsContextResponse,
@@ -393,6 +398,89 @@ export function useNceiSpaceWeatherArchiveQuery(input?: {
       fetchJson<NceiSpaceWeatherPortalResponse>("/api/aerospace/space/ncei-space-weather-archive"),
     enabled,
     staleTime: 300_000
+  });
+}
+
+export function useGpsJamContextQuery(input?: {
+  enabled?: boolean;
+  date?: string | null;
+  limit?: number;
+}) {
+  const enabled = input?.enabled ?? true;
+  const date = input?.date ?? null;
+  const limit = input?.limit ?? 5;
+  return useQuery({
+    queryKey: ["gpsjam-context", date, limit],
+    queryFn: () => {
+      const params = new URLSearchParams({
+        limit: String(limit)
+      });
+      if (date) {
+        params.set("date", date);
+      }
+      return fetchJson<GpsJamContextResponse>(
+        `/api/aerospace/aircraft/gpsjam-context?${params.toString()}`
+      );
+    },
+    enabled,
+    staleTime: 300_000
+  });
+}
+
+export function useNwsAlertsRecentQuery(input?: {
+  enabled?: boolean;
+  alertType?: "all" | "warning" | "watch" | "advisory" | "statement" | "unknown";
+  severity?: "all" | "extreme" | "severe" | "moderate" | "minor" | "unknown";
+  limit?: number;
+  sort?: "newest" | "severity";
+}) {
+  const enabled = input?.enabled ?? true;
+  const alertType = input?.alertType ?? "all";
+  const severity = input?.severity ?? "all";
+  const limit = input?.limit ?? 3;
+  const sort = input?.sort ?? "severity";
+  return useQuery({
+    queryKey: ["nws-alerts-recent", alertType, severity, limit, sort],
+    queryFn: () => {
+      const params = new URLSearchParams({
+        alert_type: alertType,
+        severity,
+        limit: String(limit),
+        sort,
+      });
+      return fetchJson<NwsAlertsResponse>(`/api/events/nws-alerts/recent?${params.toString()}`);
+    },
+    enabled,
+    staleTime: 300_000,
+  });
+}
+
+export function useNoaaNowCoastLayerCatalogQuery(input?: {
+  enabled?: boolean;
+  group?: "all" | "hazards" | "imagery" | "observations";
+  q?: string | null;
+  limit?: number;
+}) {
+  const enabled = input?.enabled ?? true;
+  const group = input?.group ?? "all";
+  const q = input?.q?.trim() ?? "";
+  const limit = input?.limit ?? 3;
+  return useQuery({
+    queryKey: ["noaa-nowcoast-layer-catalog", group, q, limit],
+    queryFn: () => {
+      const params = new URLSearchParams({
+        group,
+        limit: String(limit),
+      });
+      if (q) {
+        params.set("q", q);
+      }
+      return fetchJson<NoaaNowCoastResponse>(
+        `/api/context/weather/nowcoast/layer-catalog?${params.toString()}`
+      );
+    },
+    enabled,
+    staleTime: 300_000,
   });
 }
 
@@ -774,6 +862,41 @@ export function useMarineIrelandOpwWaterLevelContextQuery(input: {
   });
 }
 
+export function useMarineGebcoBathymetryContextQuery(input: {
+  center: { lat: number; lon: number } | null;
+  radiusKm?: number;
+  enabled?: boolean;
+}) {
+  const radiusKm = input.radiusKm ?? 120;
+  const enabled = input.enabled ?? true;
+  return useQuery({
+    queryKey: [
+      "marine-gebco-bathymetry",
+      input.center?.lat ?? null,
+      input.center?.lon ?? null,
+      radiusKm,
+      enabled
+    ],
+    queryFn: () => {
+      if (!input.center) {
+        throw new Error("Marine GEBCO bathymetry context requires center coordinates.");
+      }
+      const params = new URLSearchParams({
+        lat: String(input.center.lat),
+        lon: String(input.center.lon),
+        radius_km: String(radiusKm),
+        limit: "5"
+      });
+      return fetchJson<MarineGebcoBathymetryContextResponse>(
+        `/api/marine/context/gebco-bathymetry?${params.toString()}`
+      );
+    },
+    enabled: enabled && input.center != null,
+    staleTime: 60_000,
+    refetchInterval: 120_000
+  });
+}
+
 export function useMarineNetherlandsRwsWaterinfoContextQuery(input: {
   center: { lat: number; lon: number } | null;
   radiusKm?: number;
@@ -802,6 +925,43 @@ export function useMarineNetherlandsRwsWaterinfoContextQuery(input: {
       return fetchJson<MarineNetherlandsRwsWaterinfoContextResponse>(
         `/api/marine/context/netherlands-rws-waterinfo?${params.toString()}`
       );
+    },
+    enabled: enabled && input.center != null,
+    staleTime: 60_000,
+    refetchInterval: 120_000
+  });
+}
+
+export function useMarineNavtexContextQuery(input: {
+  center: { lat: number; lon: number } | null;
+  radiusKm?: number;
+  messageType?: "all" | "navigational-warning" | "meteorological-warning" | "search-and-rescue" | "forecast" | "other";
+  enabled?: boolean;
+}) {
+  const radiusKm = input.radiusKm ?? 600;
+  const messageType = input.messageType ?? "all";
+  const enabled = input.enabled ?? true;
+  return useQuery({
+    queryKey: [
+      "marine-navtex",
+      input.center?.lat ?? null,
+      input.center?.lon ?? null,
+      radiusKm,
+      messageType,
+      enabled
+    ],
+    queryFn: () => {
+      if (!input.center) {
+        throw new Error("Marine NAVTEX context requires center coordinates.");
+      }
+      const params = new URLSearchParams({
+        lat: String(input.center.lat),
+        lon: String(input.center.lon),
+        radius_km: String(radiusKm),
+        message_type: messageType,
+        limit: "5"
+      });
+      return fetchJson<MarineNavtexContextResponse>(`/api/marine/context/navtex?${params.toString()}`);
     },
     enabled: enabled && input.center != null,
     staleTime: 60_000,

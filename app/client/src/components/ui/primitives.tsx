@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
-import "../../styles/ui-primitives.css";
 
 type CoreStatusTone = "neutral" | "info" | "success" | "warning" | "danger";
 type StatusTone =

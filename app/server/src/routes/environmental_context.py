@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, Query
 from src.config.settings import Settings, get_settings
 from src.services.environmental_source_families_overview_service import EnvironmentalSourceFamiliesOverviewService
 from src.types.api import (
+    EnvironmentalCurrentAwarenessDigest,
+    EnvironmentalQuestionBriefingPacket,
     EnvironmentalBaseEarthExportPackage,
     EnvironmentalBaseEarthReviewQueuePackage,
     EnvironmentalCanadaContextExportPackage,
@@ -132,3 +134,26 @@ async def environmental_fusion_snapshot_input(
 ) -> EnvironmentalFusionSnapshotInput:
     service = EnvironmentalSourceFamiliesOverviewService(settings)
     return await service.get_environmental_fusion_snapshot_input()
+
+
+@router.get("/current-awareness-digest", response_model=EnvironmentalCurrentAwarenessDigest)
+async def environmental_current_awareness_digest(
+    settings: Settings = Depends(get_settings),
+) -> EnvironmentalCurrentAwarenessDigest:
+    service = EnvironmentalSourceFamiliesOverviewService(settings)
+    return await service.get_environmental_current_awareness_digest()
+
+
+@router.get("/question-briefing-packet", response_model=EnvironmentalQuestionBriefingPacket)
+async def environmental_question_briefing_packet(
+    place: str | None = Query(default=None),
+    timeframe: str | None = Query(default=None),
+    family: list[str] | None = Query(default=None, description="Optional repeated family filter, e.g. ?family=seismic&family=weather-alert-advisory"),
+    settings: Settings = Depends(get_settings),
+) -> EnvironmentalQuestionBriefingPacket:
+    service = EnvironmentalSourceFamiliesOverviewService(settings)
+    return await service.get_environmental_question_briefing_packet(
+        place_label=place,
+        timeframe_label=timeframe,
+        family_ids=family,
+    )

@@ -1,8 +1,17 @@
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.config.settings import Settings, get_settings
+from src.services.media_evidence_service import (
+    MediaGeolocationEngineAttempt,
+    MediaGeolocationModelHealth,
+    inspect_media_geolocation_model,
+    inspect_media_geolocation_models,
+    prewarm_media_geolocation_model,
+)
 from src.services.source_discovery_service import SourceDiscoveryService
 from src.services.runtime_scheduler_service import (
     build_runtime_service_bundle,
@@ -11,6 +20,10 @@ from src.services.runtime_scheduler_service import (
     manage_runtime_service,
 )
 from src.types.source_discovery import (
+    SourceDiscoveryAdversarialFindingsResponse,
+    SourceDiscoveryAdversarialOverviewResponse,
+    SourceDiscoveryArchiveIndexScanRequest,
+    SourceDiscoveryArchiveIndexScanResponse,
     SourceDiscoveryArticleFetchRequest,
     SourceDiscoveryArticleFetchResponse,
     SourceDiscoveryCatalogScanRequest,
@@ -23,6 +36,12 @@ from src.types.source_discovery import (
     SourceDiscoveryDiscoveryOverviewResponse,
     SourceDiscoveryDiscoveryQueueResponse,
     SourceDiscoveryDiscoveryRunsResponse,
+    SourceDiscoveryDirectoryScanRequest,
+    SourceDiscoveryDirectoryScanResponse,
+    SourceDiscoveryEventClusterDetailResponse,
+    SourceDiscoveryEventGraphRefreshRequest,
+    SourceDiscoveryEventGraphRefreshResponse,
+    SourceDiscoveryEventOverviewResponse,
     SourceDiscoveryFeedLinkScanRequest,
     SourceDiscoveryFeedLinkScanResponse,
     SourceDiscoveryExpansionJobRequest,
@@ -38,6 +57,10 @@ from src.types.source_discovery import (
     SourceDiscoveryKnowledgeNodeListResponse,
     SourceDiscoveryKnowledgeBackfillRequest,
     SourceDiscoveryKnowledgeBackfillResponse,
+    SourceDiscoveryLinkGraphScanRequest,
+    SourceDiscoveryLinkGraphScanResponse,
+    SourceDiscoveryLocaleSeedExpandRequest,
+    SourceDiscoveryLocaleSeedExpandResponse,
     SourceDiscoveryMediaArtifactDetailResponse,
     SourceDiscoveryMediaArtifactFetchRequest,
     SourceDiscoveryMediaArtifactFetchResponse,
@@ -50,6 +73,10 @@ from src.types.source_discovery import (
     SourceDiscoveryMediaGeolocateJobRequest,
     SourceDiscoveryMediaGeolocateJobResponse,
     SourceDiscoveryMediaGeolocationDetailResponse,
+    SourceDiscoveryMediaGeolocationModelActionRequest,
+    SourceDiscoveryMediaGeolocationModelActionResponse,
+    SourceDiscoveryMediaGeolocationModelHealthSummary,
+    SourceDiscoveryMediaGeolocationModelStatusResponse,
     SourceDiscoveryMediaInterpretationJobRequest,
     SourceDiscoveryMediaInterpretationJobResponse,
     SourceDiscoveryMediaOcrJobRequest,
@@ -59,6 +86,9 @@ from src.types.source_discovery import (
     SourceDiscoveryRecordSourceExtractResponse,
     SourceDiscoveryReputationReversalRequest,
     SourceDiscoveryReputationReversalResponse,
+    SourceDiscoveryReputationProfilesResponse,
+    SourceDiscoveryReputationRecomputeRequest,
+    SourceDiscoveryReputationRecomputeResponse,
     SourceDiscoverySitemapScanRequest,
     SourceDiscoverySitemapScanResponse,
     SourceDiscoveryReviewActionRequest,
@@ -70,10 +100,14 @@ from src.types.source_discovery import (
     SourceDiscoveryReviewQueueResponse,
     SourceDiscoveryRuntimeControlRequest,
     SourceDiscoveryRuntimeControlResponse,
+    SourceDiscoveryRuntimeFailuresResponse,
+    SourceDiscoveryRuntimeRunDetailResponse,
+    SourceDiscoveryRuntimeRunsResponse,
     SourceDiscoveryRuntimeServiceActionRequest,
     SourceDiscoveryRuntimeServiceActionResponse,
     SourceDiscoveryRuntimeServiceBundleResponse,
     SourceDiscoveryRuntimeStatusResponse,
+    SourceDiscoveryRuntimeWorkQueueResponse,
     SourceDiscoverySchedulerTickRequest,
     SourceDiscoverySchedulerTickResponse,
     SourceDiscoverySeedBatchRequest,
@@ -87,6 +121,49 @@ from src.types.source_discovery import (
 )
 
 router = APIRouter(prefix="/api/source-discovery", tags=["source-discovery"])
+
+
+def _media_geolocation_model_health_summary(
+    health: MediaGeolocationModelHealth,
+) -> SourceDiscoveryMediaGeolocationModelHealthSummary:
+    return SourceDiscoveryMediaGeolocationModelHealthSummary(
+        model_name=health.model_name,
+        role=health.role,
+        enabled=health.enabled,
+        status=health.status,
+        install_ready=health.install_ready,
+        runtime_ready=health.runtime_ready,
+        warm_state=health.warm_state,
+        summary=health.summary,
+        installed_version=health.installed_version,
+        expected_version=health.expected_version,
+        model_id=health.model_id,
+        download_allowed=health.download_allowed,
+        cache_dir=health.cache_dir,
+        local_dir=health.local_dir,
+        weights_path=health.weights_path,
+        clip_backbone_dir=health.clip_backbone_dir,
+        missing_components=list(health.missing_components),
+        present_components=list(health.present_components),
+        metadata=dict(health.metadata),
+        caveats=list(health.caveats),
+    )
+
+
+def _media_geolocation_engine_attempt_summary(
+    attempt: MediaGeolocationEngineAttempt,
+) -> dict[str, Any]:
+    return {
+        "engine": attempt.engine,
+        "role": attempt.role,
+        "status": attempt.status,
+        "model_name": attempt.model_name,
+        "warm_state": attempt.warm_state,
+        "availability_reason": attempt.availability_reason,
+        "produced_candidate_count": attempt.produced_candidate_count,
+        "metadata": dict(attempt.metadata),
+        "caveats": list(attempt.caveats),
+    }
 
 
 @router.get("/memory/overview", response_model=SourceDiscoveryMemoryOverviewResponse)
@@ -229,6 +306,33 @@ def source_discovery_run_catalog_scan_job(
     return service.run_catalog_scan_job(request)
 
 
+@router.post("/jobs/archive-index-scan", response_model=SourceDiscoveryArchiveIndexScanResponse)
+def source_discovery_run_archive_index_scan_job(
+    request: SourceDiscoveryArchiveIndexScanRequest,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryArchiveIndexScanResponse:
+    service = SourceDiscoveryService(settings)
+    return service.run_archive_index_scan_job(request)
+
+
+@router.post("/jobs/directory-scan", response_model=SourceDiscoveryDirectoryScanResponse)
+def source_discovery_run_directory_scan_job(
+    request: SourceDiscoveryDirectoryScanRequest,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryDirectoryScanResponse:
+    service = SourceDiscoveryService(settings)
+    return service.run_directory_scan_job(request)
+
+
+@router.post("/jobs/locale-seed-expand", response_model=SourceDiscoveryLocaleSeedExpandResponse)
+def source_discovery_run_locale_seed_expand_job(
+    request: SourceDiscoveryLocaleSeedExpandRequest,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryLocaleSeedExpandResponse:
+    service = SourceDiscoveryService(settings)
+    return service.run_locale_seed_expand_job(request)
+
+
 @router.post("/jobs/structure-scan", response_model=SourceDiscoveryStructureScanResponse)
 def source_discovery_run_structure_scan_job(
     request: SourceDiscoveryStructureScanRequest,
@@ -236,6 +340,15 @@ def source_discovery_run_structure_scan_job(
 ) -> SourceDiscoveryStructureScanResponse:
     service = SourceDiscoveryService(settings)
     return service.run_structure_scan_job(request)
+
+
+@router.post("/jobs/link-graph-scan", response_model=SourceDiscoveryLinkGraphScanResponse)
+def source_discovery_run_link_graph_scan_job(
+    request: SourceDiscoveryLinkGraphScanRequest,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryLinkGraphScanResponse:
+    service = SourceDiscoveryService(settings)
+    return service.run_link_graph_scan_job(request)
 
 
 @router.post("/jobs/knowledge-backfill", response_model=SourceDiscoveryKnowledgeBackfillResponse)
@@ -298,6 +411,15 @@ def source_discovery_run_article_fetch_job(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
+@router.post("/jobs/event-graph-refresh", response_model=SourceDiscoveryEventGraphRefreshResponse)
+def source_discovery_run_event_graph_refresh_job(
+    request: SourceDiscoveryEventGraphRefreshRequest,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryEventGraphRefreshResponse:
+    service = SourceDiscoveryService(settings)
+    return service.run_event_graph_refresh_job(request)
+
+
 @router.post("/jobs/social-metadata", response_model=SourceDiscoverySocialMetadataJobResponse)
 def source_discovery_run_social_metadata_job(
     request: SourceDiscoverySocialMetadataJobRequest,
@@ -358,6 +480,43 @@ def source_discovery_media_geolocation_detail(
         return service.media_geolocation_detail(geolocation_run_id)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/media/geolocation/models", response_model=SourceDiscoveryMediaGeolocationModelStatusResponse)
+def source_discovery_media_geolocation_model_status(
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryMediaGeolocationModelStatusResponse:
+    models = inspect_media_geolocation_models(settings)
+    return SourceDiscoveryMediaGeolocationModelStatusResponse(
+        models=[_media_geolocation_model_health_summary(model) for model in models],
+    )
+
+
+@router.post("/media/geolocation/models/{model_name}/actions", response_model=SourceDiscoveryMediaGeolocationModelActionResponse)
+def source_discovery_media_geolocation_model_action(
+    model_name: str,
+    request: SourceDiscoveryMediaGeolocationModelActionRequest,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryMediaGeolocationModelActionResponse:
+    try:
+        if request.action == "verify":
+            model = inspect_media_geolocation_model(settings, model_name)
+            attempt = None
+            caveats = list(request.caveats)
+        elif request.action == "prewarm":
+            model, attempt = prewarm_media_geolocation_model(settings, model_name)
+            caveats = [*request.caveats, *attempt.caveats]
+        else:
+            raise ValueError(f"Unsupported media geolocation model action: {request.action}")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return SourceDiscoveryMediaGeolocationModelActionResponse(
+        model=_media_geolocation_model_health_summary(model),
+        action=request.action,
+        requested_by=request.requested_by,
+        attempt=_media_geolocation_engine_attempt_summary(attempt) if attempt is not None else None,
+        caveats=caveats,
+    )
 
 
 @router.get("/media/sequences/{sequence_id}", response_model=SourceDiscoveryMediaSequenceDetailResponse)
@@ -457,6 +616,23 @@ def source_discovery_reverse_reputation_event(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
+@router.get("/reputation/profiles", response_model=SourceDiscoveryReputationProfilesResponse)
+def source_discovery_reputation_profiles(
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryReputationProfilesResponse:
+    service = SourceDiscoveryService(settings)
+    return service.list_reputation_profiles()
+
+
+@router.post("/jobs/reputation-recompute", response_model=SourceDiscoveryReputationRecomputeResponse)
+def source_discovery_reputation_recompute(
+    request: SourceDiscoveryReputationRecomputeRequest,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryReputationRecomputeResponse:
+    service = SourceDiscoveryService(settings)
+    return service.recompute_reputation(request)
+
+
 @router.post("/scheduler/tick", response_model=SourceDiscoverySchedulerTickResponse)
 def source_discovery_scheduler_tick(
     request: SourceDiscoverySchedulerTickRequest,
@@ -474,6 +650,30 @@ def source_discovery_review_queue(
 ) -> SourceDiscoveryReviewQueueResponse:
     service = SourceDiscoveryService(settings)
     return service.review_queue(limit=limit, owner_lane=owner_lane)
+
+
+@router.get("/events/overview", response_model=SourceDiscoveryEventOverviewResponse)
+def source_discovery_event_overview(
+    limit: int = 100,
+    source_id: str | None = None,
+    wave_id: str | None = None,
+    knowledge_node_id: str | None = None,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryEventOverviewResponse:
+    service = SourceDiscoveryService(settings)
+    return service.event_overview(limit=limit, source_id=source_id, wave_id=wave_id, knowledge_node_id=knowledge_node_id)
+
+
+@router.get("/events/{event_id}", response_model=SourceDiscoveryEventClusterDetailResponse)
+def source_discovery_event_detail(
+    event_id: str,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryEventClusterDetailResponse:
+    service = SourceDiscoveryService(settings)
+    try:
+        return service.event_detail(event_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.get("/discovery/overview", response_model=SourceDiscoveryDiscoveryOverviewResponse)
@@ -521,6 +721,32 @@ def source_discovery_discovery_runs(
     return service.discovery_runs(limit=limit)
 
 
+@router.get("/adversarial/overview", response_model=SourceDiscoveryAdversarialOverviewResponse)
+def source_discovery_adversarial_overview(
+    limit: int = 100,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryAdversarialOverviewResponse:
+    service = SourceDiscoveryService(settings)
+    return service.adversarial_overview(limit=limit)
+
+
+@router.get("/adversarial/findings", response_model=SourceDiscoveryAdversarialFindingsResponse)
+def source_discovery_adversarial_findings(
+    limit: int = 100,
+    source_id: str | None = None,
+    risk_level: str | None = None,
+    status: str | None = "open",
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryAdversarialFindingsResponse:
+    service = SourceDiscoveryService(settings)
+    return service.adversarial_findings(
+        limit=limit,
+        source_id=source_id,
+        risk_level=risk_level,
+        status=status,
+    )
+
+
 @router.post("/review/actions", response_model=SourceDiscoveryReviewActionResponse)
 def source_discovery_apply_review_action(
     request: SourceDiscoveryReviewActionRequest,
@@ -562,6 +788,47 @@ def source_discovery_runtime_status(
     settings: Settings = Depends(get_settings),
 ) -> SourceDiscoveryRuntimeStatusResponse:
     return build_runtime_status(settings)
+
+
+@router.get("/runtime/work-queue", response_model=SourceDiscoveryRuntimeWorkQueueResponse)
+def source_discovery_runtime_work_queue(
+    limit: int = 100,
+    status: str | None = None,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryRuntimeWorkQueueResponse:
+    service = SourceDiscoveryService(settings)
+    return service.runtime_work_queue(limit=limit, status=status)
+
+
+@router.get("/runtime/failures", response_model=SourceDiscoveryRuntimeFailuresResponse)
+def source_discovery_runtime_failures(
+    limit: int = 100,
+    failure_kind: str | None = None,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryRuntimeFailuresResponse:
+    service = SourceDiscoveryService(settings)
+    return service.runtime_failures(limit=limit, failure_kind=failure_kind)
+
+
+@router.get("/runtime/runs", response_model=SourceDiscoveryRuntimeRunsResponse)
+def source_discovery_runtime_runs(
+    limit: int = 50,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryRuntimeRunsResponse:
+    service = SourceDiscoveryService(settings)
+    return service.runtime_runs(limit=limit)
+
+
+@router.get("/runtime/runs/{run_id}", response_model=SourceDiscoveryRuntimeRunDetailResponse)
+def source_discovery_runtime_run_detail(
+    run_id: str,
+    settings: Settings = Depends(get_settings),
+) -> SourceDiscoveryRuntimeRunDetailResponse:
+    service = SourceDiscoveryService(settings)
+    try:
+        return service.runtime_run_detail(run_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.get("/runtime/services", response_model=SourceDiscoveryRuntimeServiceBundleResponse)

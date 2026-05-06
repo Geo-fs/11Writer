@@ -45,6 +45,24 @@ def test_source_ops_export_summary_composes_index_and_detail_lines() -> None:
     assert summary.candidate_network_summary.export_lines
     assert summary.promotion_readiness_summary.total_candidates >= 11
     assert summary.promotion_readiness_summary.export_lines
+    assert summary.camera_sandbox_readiness_comparison_report.total_sources_in_scope >= 9
+    assert summary.camera_sandbox_readiness_comparison_report.export_lines
+    assert summary.camera_sandbox_readiness_comparison_report.does_not_prove_lines
+    assert summary.camera_source_ops_portfolio_digest.total_candidates >= 11
+    assert summary.camera_source_ops_portfolio_digest.export_lines
+    assert summary.camera_source_ops_portfolio_digest.does_not_prove_lines
+    assert summary.camera_source_ops_review_priority_packet.total_candidates >= 11
+    assert summary.camera_source_ops_review_priority_packet.export_lines
+    assert summary.camera_source_ops_review_priority_packet.does_not_prove_lines
+    assert summary.camera_source_ops_regional_portfolio_packet.total_candidates >= 11
+    assert summary.camera_source_ops_regional_portfolio_packet.export_lines
+    assert summary.camera_source_ops_regional_portfolio_packet.does_not_prove_lines
+    assert summary.camera_source_ops_osm_lead_discovery_packet.total_candidates >= 11
+    assert summary.camera_source_ops_osm_lead_discovery_packet.export_lines
+    assert summary.camera_source_ops_osm_lead_discovery_packet.does_not_prove_lines
+    assert summary.camera_source_ops_osm_lead_review_reconciliation_packet.total_candidates >= 11
+    assert summary.camera_source_ops_osm_lead_review_reconciliation_packet.export_lines
+    assert summary.camera_source_ops_osm_lead_review_reconciliation_packet.does_not_prove_lines
     assert summary.requested_source_ids == [
         "finland-digitraffic-road-cameras",
         "minnesota-511-public-arcgis",
@@ -325,6 +343,18 @@ def test_source_ops_export_summary_route_is_compact_and_read_only() -> None:
     assert payload["candidateNetworkSummary"]["exportLines"]
     assert payload["promotionReadinessSummary"]["totalCandidates"] >= 11
     assert payload["promotionReadinessSummary"]["exportLines"]
+    assert payload["cameraSandboxReadinessComparisonReport"]["totalSourcesInScope"] >= 9
+    assert payload["cameraSandboxReadinessComparisonReport"]["exportLines"]
+    assert payload["cameraSourceOpsPortfolioDigest"]["totalCandidates"] >= 11
+    assert payload["cameraSourceOpsPortfolioDigest"]["exportLines"]
+    assert payload["cameraSourceOpsReviewPriorityPacket"]["totalCandidates"] >= 11
+    assert payload["cameraSourceOpsReviewPriorityPacket"]["exportLines"]
+    assert payload["cameraSourceOpsRegionalPortfolioPacket"]["totalCandidates"] >= 11
+    assert payload["cameraSourceOpsRegionalPortfolioPacket"]["exportLines"]
+    assert payload["cameraSourceOpsOsmLeadDiscoveryPacket"]["totalCandidates"] >= 11
+    assert payload["cameraSourceOpsOsmLeadDiscoveryPacket"]["exportLines"]
+    assert payload["cameraSourceOpsOsmLeadReviewReconciliationPacket"]["totalCandidates"] >= 11
+    assert payload["cameraSourceOpsOsmLeadReviewReconciliationPacket"]["exportLines"]
     assert len(payload["detailLines"]) == 1
     assert payload["detailLines"][0]["sourceId"] == "finland-digitraffic-road-cameras"
     assert payload["artifactTimestamps"][0]["artifactKey"] == "export-debug-summary"
@@ -333,6 +363,40 @@ def test_source_ops_export_summary_route_is_compact_and_read_only() -> None:
     assert payload["reviewHintSummary"]["hints"]
     assert payload["reviewQueue"]["items"]
     assert payload["reviewQueueExportSelection"]["included"] is False
+    assert any(
+        row["sourceId"] == "caltrans-cctv-cameras"
+        and row["comparisonRole"] == "sandbox-comparator"
+        for row in payload["cameraSandboxReadinessComparisonReport"]["rows"]
+    )
+    assert any(
+        "does not activate or schedule any source" in line.lower()
+        for line in payload["cameraSandboxReadinessComparisonReport"]["doesNotProveLines"]
+    )
+    assert any(
+        row["sourceId"] == "euskadi-traffic-cameras"
+        and row["portfolioRole"] == "research-needed"
+        for row in payload["cameraSourceOpsPortfolioDigest"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "caltrans-cctv-cameras"
+        and row["priorityBand"] == "review-next"
+        for row in payload["cameraSourceOpsReviewPriorityPacket"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "finland-digitraffic-road-cameras"
+        and row["countryGroup"] == "Finland"
+        for row in payload["cameraSourceOpsRegionalPortfolioPacket"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "euskadi-traffic-cameras"
+        and row["endpointKnownPosture"] == "map-only-lead"
+        for row in payload["cameraSourceOpsOsmLeadDiscoveryPacket"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "minnesota-511-public-arcgis"
+        and row["reconciliationBucket"] == "map-only-blocked"
+        for row in payload["cameraSourceOpsOsmLeadReviewReconciliationPacket"]["rows"]
+    )
     assert any("does not run live endpoint checks" in caveat.lower() for caveat in payload["lifecycleCaveats"])
 
 
@@ -350,6 +414,24 @@ def test_source_ops_export_summary_candidate_network_summary_groups_review_prior
     summary = build_camera_source_ops_export_summary(Settings())
     rows = {row.source_id: row for row in summary.candidate_network_summary.rows}
     promotion_rows = {row.source_id: row for row in summary.promotion_readiness_summary.rows}
+    comparison_rows = {
+        row.source_id: row for row in summary.camera_sandbox_readiness_comparison_report.rows
+    }
+    portfolio_rows = {
+        row.source_id: row for row in summary.camera_source_ops_portfolio_digest.rows
+    }
+    review_priority_rows = {
+        row.source_id: row for row in summary.camera_source_ops_review_priority_packet.rows
+    }
+    regional_rows = {
+        row.source_id: row for row in summary.camera_source_ops_regional_portfolio_packet.rows
+    }
+    osm_rows = {
+        row.source_id: row for row in summary.camera_source_ops_osm_lead_discovery_packet.rows
+    }
+    reconciliation_rows = {
+        row.source_id: row for row in summary.camera_source_ops_osm_lead_review_reconciliation_packet.rows
+    }
 
     assert any(
         group.key == "review-next"
@@ -375,6 +457,34 @@ def test_source_ops_export_summary_candidate_network_summary_groups_review_prior
         group.key == "api-family-documented-shape-unpinned"
         for group in summary.candidate_network_summary.by_payload_shape_posture
     )
+    assert any(
+        group.key == "review-next"
+        for group in summary.camera_source_ops_review_priority_packet.by_priority_band
+    )
+    assert any(
+        group.key == "document compliant alternative"
+        for group in summary.camera_source_ops_review_priority_packet.by_next_safe_review_step
+    )
+    assert any(
+        group.key == "Canada"
+        for group in summary.camera_source_ops_regional_portfolio_packet.by_country_group
+    )
+    assert any(
+        group.key == "low"
+        for group in summary.camera_source_ops_regional_portfolio_packet.by_review_burden_posture
+    )
+    assert any(
+        group.key == "map-only-lead"
+        for group in summary.camera_source_ops_osm_lead_discovery_packet.by_endpoint_known_posture
+    )
+    assert any(
+        group.key == "openstreetmap-tag-reference"
+        for group in summary.camera_source_ops_osm_lead_discovery_packet.by_lead_provenance
+    )
+    assert any(
+        group.key == "endpoint-known-hold"
+        for group in summary.camera_source_ops_osm_lead_review_reconciliation_packet.by_reconciliation_bucket
+    )
     assert rows["nsw-live-traffic-cameras"].review_priority == "review-next"
     assert rows["arlington-traffic-cameras"].review_priority == "hold"
     assert rows["nzta-traffic-cameras"].review_priority == "hold"
@@ -392,10 +502,66 @@ def test_source_ops_export_summary_candidate_network_summary_groups_review_prior
     assert promotion_rows["nzta-traffic-cameras"].next_safe_review_step == "pin bounded camera payload"
     assert promotion_rows["nzta-traffic-cameras"].payload_shape_posture == "api-family-documented-shape-unpinned"
     assert promotion_rows["caltrans-cctv-cameras"].promotion_readiness_bucket == "sandbox-stronger-follow-up"
+    assert comparison_rows["nzta-traffic-cameras"].comparison_role == "endpoint-only-hold"
+    assert comparison_rows["nzta-traffic-cameras"].sandbox_feasibility_posture == "endpoint-family-unpinned"
+    assert comparison_rows["arlington-traffic-cameras"].comparison_role == "endpoint-only-hold"
+    assert comparison_rows["arlington-traffic-cameras"].sandbox_feasibility_posture == "media-proof-missing"
+    assert comparison_rows["caltrans-cctv-cameras"].comparison_role == "sandbox-comparator"
+    assert comparison_rows["caltrans-cctv-cameras"].sandbox_feasibility_posture == "fixture-backed-direct-image-review"
+    assert portfolio_rows["caltrans-cctv-cameras"].portfolio_role == "sandbox-comparator"
+    assert portfolio_rows["nzta-traffic-cameras"].portfolio_role == "endpoint-only-hold"
+    assert portfolio_rows["euskadi-traffic-cameras"].portfolio_role == "research-needed"
+    assert portfolio_rows["minnesota-511-public-arcgis"].portfolio_role == "blocked-hold"
+    assert review_priority_rows["caltrans-cctv-cameras"].priority_band == "review-next"
+    assert "mapping and source-health review can proceed" in review_priority_rows["caltrans-cctv-cameras"].priority_rationale.lower()
+    assert review_priority_rows["nzta-traffic-cameras"].priority_band == "hold"
+    assert "bounded camera payload" in review_priority_rows["nzta-traffic-cameras"].priority_rationale.lower()
+    assert review_priority_rows["minnesota-511-public-arcgis"].priority_band == "blocked-review"
+    assert "must not drift into scraping" in review_priority_rows["minnesota-511-public-arcgis"].priority_rationale.lower()
+    assert regional_rows["caltrans-cctv-cameras"].country_group == "United States"
+    assert regional_rows["quebec-mtmd-traffic-cameras"].country_group == "Canada"
+    assert regional_rows["minnesota-511-public-arcgis"].review_burden_posture == "high"
+    assert osm_rows["quebec-mtmd-traffic-cameras"].endpoint_known_posture == "endpoint-known-plus-map-lead"
+    assert osm_rows["euskadi-traffic-cameras"].endpoint_known_posture == "map-only-lead"
+    assert "overpass-api-read-only-query" in osm_rows["finland-digitraffic-road-cameras"].lead_provenance
+    assert reconciliation_rows["caltrans-cctv-cameras"].reconciliation_bucket == "endpoint-known-review-next"
+    assert reconciliation_rows["nzta-traffic-cameras"].reconciliation_bucket == "endpoint-known-hold"
+    assert reconciliation_rows["euskadi-traffic-cameras"].reconciliation_bucket == "map-only-research"
+    assert reconciliation_rows["minnesota-511-public-arcgis"].reconciliation_bucket == "map-only-blocked"
+    assert any(
+        "does not validate ingest readiness" in line.lower()
+        for line in summary.camera_sandbox_readiness_comparison_report.does_not_prove_lines
+    )
+    assert any(
+        "does not activate or schedule any source" in line.lower()
+        for line in summary.camera_source_ops_portfolio_digest.does_not_prove_lines
+    )
+    assert any(
+        "does not validate ingest readiness" in line.lower()
+        for line in summary.camera_source_ops_review_priority_packet.does_not_prove_lines
+    )
+    assert any(
+        "does not validate ingest readiness" in line.lower()
+        for line in summary.camera_source_ops_regional_portfolio_packet.does_not_prove_lines
+    )
+    assert any(
+        "does not prove that map presence" in line.lower()
+        for line in summary.camera_source_ops_osm_lead_discovery_packet.does_not_prove_lines
+    )
+    assert any(
+        "does not turn map-only leads" in line.lower()
+        for line in summary.camera_source_ops_osm_lead_review_reconciliation_packet.does_not_prove_lines
+    )
     assert all("token" not in line.lower() for line in summary.candidate_network_summary.export_lines)
     assert not any("ignore previous instructions" in line.lower() for line in summary.candidate_network_summary.export_lines)
     assert not any("candidateendpointurl" in line.lower() for line in summary.candidate_network_summary.export_lines)
     assert not any("candidateendpointurl" in line.lower() for line in summary.promotion_readiness_summary.export_lines)
+    assert not any("candidateendpointurl" in line.lower() for line in summary.camera_sandbox_readiness_comparison_report.export_lines)
+    assert not any("candidateendpointurl" in line.lower() for line in summary.camera_source_ops_portfolio_digest.export_lines)
+    assert not any("candidateendpointurl" in line.lower() for line in summary.camera_source_ops_review_priority_packet.export_lines)
+    assert not any("candidateendpointurl" in line.lower() for line in summary.camera_source_ops_regional_portfolio_packet.export_lines)
+    assert not any("candidateendpointurl" in line.lower() for line in summary.camera_source_ops_osm_lead_discovery_packet.export_lines)
+    assert not any("candidateendpointurl" in line.lower() for line in summary.camera_source_ops_osm_lead_review_reconciliation_packet.export_lines)
     assert not any("trafficnz.info" in line.lower() for line in summary.promotion_readiness_summary.export_lines)
 
 

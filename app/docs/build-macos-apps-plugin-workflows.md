@@ -12,7 +12,6 @@ Related:
 - `app/docs/cross-platform-desktop-app-plan.md`
 - `app/docs/cross-platform-implementation-playbook.md`
 - `app/docs/cross-platform-agent-guidelines.md`
-- `app/docs/macos-native-ui-extras.md`
 - `app/docs/runtime-interface-requirements.md`
 - `app/docs/repo-workflow.md`
 
@@ -83,6 +82,38 @@ The plugin is most helpful when the goal is one of these:
 
 5. Prototype a native macOS-only companion or workstation surface on purpose.
    If the team explicitly chooses a native macOS interface, the plugin gives a strong workflow for scenes, windowing, testing, and shipping.
+
+## Optional Native UI Extras
+
+If the team wants macOS-native convenience surfaces without replacing the main cross-platform workstation, the best extras are:
+
+- runtime-control shell
+- menu bar extra
+- settings or admin utility
+- diagnostics or log viewer
+- compact backend status window
+
+Best first extras:
+
+1. Runtime-control shell
+   Scope:
+   - start or attach to the backend
+   - show runtime mode, health, and degraded state
+   - expose limited start, stop, restart, and open actions
+
+2. Menu bar extra
+   Scope:
+   - backend health indicator
+   - active task count
+   - open main window, logs, or settings
+
+3. Settings or admin utility
+   Scope:
+   - storage and log paths
+   - pairing or local-access state
+   - safe runtime-control and diagnostics views
+
+These are all valid uses of the plugin because they keep the shared backend as the authority and do not require a full native rewrite of the workstation.
 
 ## Poor-Fit Uses
 

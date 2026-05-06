@@ -1,0 +1,14 @@
+{
+  "description": "Fixture RDAP bootstrap for IPv6",
+  "publication": "2026-05-01T00:00:00Z",
+  "services": [
+    [
+      [
+        "::/0"
+      ],
+      [
+        "https://rdap.arin.net/registry/"
+      ]
+    ]
+  ]
+}

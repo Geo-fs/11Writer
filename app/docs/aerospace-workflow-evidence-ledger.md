@@ -45,6 +45,7 @@ It is not a source-certification, severity, readiness-for-action, or operational
 - Status:
   `executed`
 - Scope:
+  `aerospaceGpsJamContext`
   `aerospaceSourceReadiness`
   `aerospaceSourceReadinessBundle`
   `aerospaceContextGapQueue`
@@ -53,6 +54,11 @@ It is not a source-certification, severity, readiness-for-action, or operational
   `aerospaceEvidenceTimelinePackage`
   `aerospaceFusionSnapshotInput`
   `aerospaceReportBriefPackage`
+  `aerospaceSelectedTargetOperationalQuestionPacket`
+  `aerospaceCurrentAwarenessDigest`
+  `aerospaceReportingHandoffContract`
+  `aerospaceQuestionBriefingPacket`
+  `aerospaceHazardContextConsumerPacket`
   `aerospaceSpaceWeatherContinuityPackage`
   `aerospaceVaacAdvisoryReportPackage`
   `aerospacePackageCoherence`
@@ -72,6 +78,7 @@ It is not a source-certification, severity, readiness-for-action, or operational
 - Status:
   `executed`
 - Scope:
+  `gpsjamContext`
   `aerospaceSourceReadiness`
   `aerospaceSourceReadinessBundle`
   `aerospaceContextGapQueue`
@@ -80,6 +87,11 @@ It is not a source-certification, severity, readiness-for-action, or operational
   `aerospaceEvidenceTimelinePackage`
   `aerospaceFusionSnapshotInput`
   `aerospaceReportBriefPackage`
+  `aerospaceSelectedTargetOperationalQuestionPacket`
+  `aerospaceCurrentAwarenessDigest`
+  `aerospaceReportingHandoffContract`
+  `aerospaceQuestionBriefingPacket`
+  `aerospaceHazardContextConsumerPacket`
   `aerospaceSpaceWeatherContinuityPackage`
   `aerospaceVaacAdvisoryReportPackage`
   `aerospacePackageCoherence`
@@ -99,6 +111,7 @@ It is not a source-certification, severity, readiness-for-action, or operational
 - Status:
   `executed`
 - Scope:
+  `test_gpsjam_contracts.py`
   `test_aviation_weather_contracts.py`
   `test_faa_nas_status_contracts.py`
   `test_cneos_contracts.py`
@@ -128,6 +141,7 @@ It is not a source-certification, severity, readiness-for-action, or operational
   `prepared`
 - Scope:
   the metadata-level aerospace smoke assertions in [playwright_smoke.mjs](/C:/Users/mike/11Writer/app/client/scripts/playwright_smoke.mjs), including:
+  `gpsjamContext`
   `aerospaceSourceReadiness`
   `aerospaceSourceReadinessBundle`
   `aerospaceContextGapQueue`
@@ -136,6 +150,11 @@ It is not a source-certification, severity, readiness-for-action, or operational
   `aerospaceEvidenceTimelinePackage`
   `aerospaceFusionSnapshotInput`
   `aerospaceReportBriefPackage`
+  `aerospaceSelectedTargetOperationalQuestionPacket`
+  `aerospaceCurrentAwarenessDigest`
+  `aerospaceReportingHandoffContract`
+  `aerospaceQuestionBriefingPacket`
+  `aerospaceHazardContextConsumerPacket`
   `aerospaceSpaceWeatherContinuityPackage`
   `aerospaceVaacAdvisoryReportPackage`
   `aerospacePackageCoherence`

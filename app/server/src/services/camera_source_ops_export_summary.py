@@ -11,6 +11,24 @@ from src.services.camera_source_ops_review_queue import (
     build_camera_source_ops_review_queue,
     build_filtered_camera_source_ops_review_queue,
 )
+from src.services.camera_source_ops_sandbox_readiness_comparison import (
+    build_camera_source_ops_sandbox_readiness_comparison_report,
+)
+from src.services.camera_source_ops_portfolio_digest import (
+    build_camera_source_ops_portfolio_digest,
+)
+from src.services.camera_source_ops_review_priority_packet import (
+    build_camera_source_ops_review_priority_packet,
+)
+from src.services.camera_source_ops_regional_portfolio_packet import (
+    build_camera_source_ops_regional_portfolio_packet,
+)
+from src.services.camera_source_ops_osm_lead_discovery_packet import (
+    build_camera_source_ops_osm_lead_discovery_packet,
+)
+from src.services.camera_source_ops_osm_lead_review_reconciliation_packet import (
+    build_camera_source_ops_osm_lead_review_reconciliation_packet,
+)
 from src.types.api import (
     CameraSourceOpsCaveatRollupEntry,
     CameraSourceOpsArtifactStatusCount,
@@ -69,6 +87,12 @@ def build_camera_source_ops_export_summary(
     caveat_frequency_rollup = _build_caveat_frequency_rollup(index.sources, per_source_details)
     review_hint_summary = _build_review_hint_summary(index.sources, per_source_details)
     review_queue = build_camera_source_ops_review_queue(per_source_details)
+    sandbox_readiness_comparison_report = build_camera_source_ops_sandbox_readiness_comparison_report(settings)
+    portfolio_digest = build_camera_source_ops_portfolio_digest(settings)
+    review_priority_packet = build_camera_source_ops_review_priority_packet(settings)
+    regional_portfolio_packet = build_camera_source_ops_regional_portfolio_packet(settings)
+    osm_lead_discovery_packet = build_camera_source_ops_osm_lead_discovery_packet(settings)
+    osm_lead_review_reconciliation_packet = build_camera_source_ops_osm_lead_review_reconciliation_packet(settings)
     review_queue_export_selection = _build_review_queue_export_selection(
         settings,
         include_review_queue_aggregate_lines=include_review_queue_aggregate_lines,
@@ -87,6 +111,12 @@ def build_camera_source_ops_export_summary(
         sandbox_candidate_summary=index.sandbox_candidate_summary,
         candidate_network_summary=index.candidate_network_summary,
         promotion_readiness_summary=index.promotion_readiness_summary,
+        camera_sandbox_readiness_comparison_report=sandbox_readiness_comparison_report,
+        camera_source_ops_portfolio_digest=portfolio_digest,
+        camera_source_ops_review_priority_packet=review_priority_packet,
+        camera_source_ops_regional_portfolio_packet=regional_portfolio_packet,
+        camera_source_ops_osm_lead_discovery_packet=osm_lead_discovery_packet,
+        camera_source_ops_osm_lead_review_reconciliation_packet=osm_lead_review_reconciliation_packet,
         detail_lines=detail_lines,
         artifact_timestamps=[build_export_summary_timestamp(generated_at)],
         artifact_status_rollup=artifact_status_rollup,

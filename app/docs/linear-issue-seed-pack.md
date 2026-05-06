@@ -8,7 +8,7 @@ Owner note:
 - This exists because the current Linear workspace in this session did not expose an obvious 11Writer project or team structure for safe direct issue creation.
 
 Related:
-- `app/docs/connector-adoption-plan.md`
+- `app/docs/connector-capability-map.md`
 - `app/docs/cross-platform-desktop-app-plan.md`
 - `app/docs/runtime-interface-requirements.md`
 - `app/docs/cross-platform-implementation-playbook.md`
@@ -109,7 +109,6 @@ Scope:
 
 Primary references:
 
-- `app/docs/connector-adoption-plan.md`
 - `app/docs/connector-capability-map.md`
 
 ## Notes

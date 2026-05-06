@@ -13,6 +13,8 @@ Route:
 - `GET /api/context/environmental/base-earth-export-package`
 - `GET /api/context/environmental/base-earth-review-queue`
 - `GET /api/context/environmental/fusion-snapshot-input`
+- `GET /api/context/environmental/current-awareness-digest`
+- `GET /api/context/environmental/question-briefing-packet`
 
 Purpose:
 - provide fusion-ready backend review context across implemented environmental source families
@@ -22,6 +24,8 @@ Purpose:
 - provide one downstream backend snapshot/report consumer that packages compact family export output into an environmental context export package
 - provide a review-oriented backend source-health issue queue that future snapshot/report workflows can consume without inferring impact, damage, threat, or target status
 - provide a compact backend environmental situation snapshot/report package that composes the existing overview, context export package, and source-health issue queue
+- provide a bounded backend environmental current-awareness digest that composes the existing overview and fusion/reporting packages into explicit `observe`, `orient`, `prioritize`, and `explain` sections
+- provide a bounded backend environmental question briefing packet that adds place, timeframe, and family-filter posture over the current-awareness and fusion stack without implying local incident truth
 
 Current family coverage:
 - `seismic`
@@ -48,6 +52,7 @@ Current `base-earth-reference` members:
 - `natural-earth-physical`
 - `gshhg-shorelines`
 - `pb2002-plate-boundaries`
+- `geoboundaries-admin`
 - `rgi-glacier-inventory`
 
 Behavior:
@@ -217,8 +222,8 @@ Environmental situation snapshot package:
   - future export/report builders can consume one compact package instead of reassembling overview, export bundle, and issue queue manually
 
 Widened second-pass coverage:
-- `weather-alert-advisory` now includes HKO Open Weather, Canada CAP Alerts, DWD CAP Alerts, MET Norway MetAlerts, IPMA warnings, Met Eireann warnings, and GeoSphere Austria warnings
-- `weather-flood-hydrology` now also includes Met Eireann forecast alongside DMI forecast, NASA POWER, Taiwan CWA weather, and UK EA flood monitoring
+- `weather-alert-advisory` now includes HKO Open Weather, NWS Alerts API, bounded NOAA NHC GIS Atlantic advisory/product context, Canada CAP Alerts, Meteoalarm Atom Feed, DWD CAP Alerts, MET Norway MetAlerts, IPMA warnings, Met Eireann warnings, and GeoSphere Austria warnings
+- `weather-flood-hydrology` now also includes NOAA nowCOAST layer-catalog context plus Met Eireann forecast alongside DMI forecast, NASA POWER, Taiwan CWA weather, and UK EA flood monitoring
 - `infrastructure-event-context` now includes NRC event notifications as source-reported infrastructure-event context
 
 Current `weather-flood-hydrology` members:
@@ -226,6 +231,7 @@ Current `weather-flood-hydrology` members:
 - `bc-wildfire-datamart`
 - `meteoswiss-open-data`
 - `canada-geomet-ogc`
+- `noaa-nowcoast-ogc`
 - `taiwan-cwa-aws-opendata`
 - `dmi-forecast-aws`
 - `met-eireann-forecast`
@@ -267,6 +273,7 @@ Base-earth reference follow-on surfaces:
   - `natural-earth-physical`
   - `gshhg-shorelines`
   - `pb2002-plate-boundaries`
+  - `geoboundaries-admin`
   - `rgi-glacier-inventory`
   - `noaa-global-volcano-locations`
 - intended role:

@@ -12,6 +12,7 @@ For a larger pre-commit advisory scan, use:
 - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed --smoke marine=passed --smoke aerospace=known-local-caveat:windows-browser-launch-permission --smoke webcam=passed`
 - `python scripts/alerts_ledger.py`
 - `app/docs/source-fusion-reporting-input-inventory.md`
+- `app/docs/phase3-handoffs/connect-ai.md`
 
 Commands are written for the current Windows environment and prefer explicit working directories plus `cmd /c npm.cmd ...` for client commands.
 
@@ -53,6 +54,51 @@ The product target is cross-platform: full desktop app, companion web app, and b
   - the current `2026-05-04 21:43 America/Chicago` run passed with `52` backend tests plus a clean client lint/build pass
   - treat this as shared-boundary validation only, not full operator workflow proof
 - Current verified consolidation-readiness checkpoint is also green at the validation level:
+  - the current `2026-05-05 20:22 America/Chicago` bounded source-wave integration pass also stayed green for:
+    - `python -m compileall app/server/src`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `python scripts/list_changed_files_by_owner.py --summary`
+    - `python scripts/release_dry_run.py --json`
+    - `python scripts/alerts_ledger.py --json`
+  - this pass did not reproduce a shared type or route-contract break
+  - it did reduce ownership ambiguity for the new user-priority source wave:
+    - Data AI: `cisa-kev`, `rdap`, `crtsh`, and the bounded `internet_context` route family
+    - Geospatial: `nws-alerts` and `noaa-nowcoast-ogc`
+    - Aerospace: `gpsjam`
+    - Features/Webcam: OSM lead-discovery and lead-review-reconciliation packets
+    - Gather: `source-user-priority-routing-governance-packet.md`
+  - keep the remaining Source Discovery runtime/eval slice explicitly broad/shared rather than forcing it into a lane-local commit group
+  - the current `2026-05-05 19:15 America/Chicago` shared reporting-loop contract pass stayed green after one syntax-only compile fix for `source_discovery_service.py`:
+    - `python -m compileall app/server/src`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `cmd /c npm.cmd run test:reporting-loop-package-contract`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - the focused shared compatibility surface now validates:
+    - Aerospace fusion snapshot, report brief, current-awareness digest, VAAC advisory report package, and reporting handoff contract
+    - Data AI fusion snapshot, report brief, current-awareness digest, topic-safe report export packet, and question briefing packet
+    - Marine fusion snapshot, report brief, and current-awareness digest
+  - keep this as compatibility validation only:
+    - no domain semantics rewrites
+    - no fake normalization that erases differences between advisory, digest, handoff, and export packet shapes
+  - keep Source Discovery public-web workflow, archive scans, mailing-list adapters, regional-portal scans, Stack Exchange, seed packets, Statuspage, Mastodon, and media geolocation explicitly below source-validation proof anywhere they appear in shared compatibility notes
+  - the current `2026-05-05 19:01 America/Chicago` breadth/current-awareness checkpoint stayed green for:
+    - `python -m compileall app/server/src`
+    - `cmd /c npm.cmd run lint`
+    - `cmd /c npm.cmd run build`
+    - `cmd /c npm.cmd run test:reporting-loop-package-contract`
+    - `python scripts/validation_snapshot.py --compile passed --lint passed --build passed`
+  - the remaining broad/shared files in that pass were:
+    - `app/docs/source-discovery-public-web-workflow.md`
+    - `app/server/src/routes/source_discovery.py`
+    - `app/server/src/services/source_discovery_service.py`
+    - `app/server/src/types/source_discovery.py`
+    - `app/server/tests/test_source_discovery_memory.py`
+  - keep those Source Discovery public-web and runtime surfaces explicitly below source-validation proof
+  - keep Wonder archive-index, mailing-list archive, directory-root, Stack Exchange, Statuspage, and Mastodon discovery in candidate/review/runtime posture only
+  - keep Wonder seed-packet lineage as explainability metadata only
+  - keep Atlas media geolocation in derived-evidence/runtime-quality posture only
   - the current `2026-05-05 09:47 America/Chicago` reporting-loop package-contract pass also stayed green for:
     - `python -m compileall app/server/src`
     - `cmd /c npm.cmd run lint`
@@ -113,6 +159,7 @@ git diff --stat
 Notes:
 
 - If the staged scope is docs-only, stop at diff review.
+- If the staged scope is a Phase 2 to Phase 3 handoff-only pass, use `app/docs/phase3-handoffs/connect-ai.md` plus current `git status`, ownership summary, and alerts truth instead of rerunning compile/lint/build unless executable/shared runtime files changed.
 - Do not run Playwright unless Connect is explicitly assigned to smoke execution.
 - If the staged scope includes runtime operator-console surfaces, also validate:
   - `python -m pytest app/server/tests/test_source_discovery_memory.py app/server/tests/test_wave_monitor.py -q`
@@ -122,14 +169,29 @@ Notes:
   - `python scripts/list_changed_files_by_owner.py --summary`
   - `python scripts/release_dry_run.py --json`
   - `python scripts/alerts_ledger.py --json`
+  - if current counts are much smaller than older checkpoint docs, treat the older `100+ changed file` snapshots as historical mixed-wave truth unless the scanner itself is currently broken
+  - rerun the ownership summary if active lane edits land during the same sweep; repo-truth can move materially while the branch still stays validation-green
   - if one build or lint failure appears but the current file state immediately contradicts it, rerun the failing command before editing to avoid stale-fix churn in a moving mixed tree
   - inspect the current shared occupancy in `AppShell.tsx`, `InspectorPanel.tsx`, `queries.ts`, `api.ts`, `api.py`, `settings.py`, and `smoke_fixture_app.py` before authoring new queue/export/timeline helpers
   - if the staged scope touches the reporting-desk / fusion-input wave, inspect `app/docs/source-fusion-reporting-input-inventory.md` first so you extend existing bounded packages instead of minting duplicate helpers with overlapping semantics
+  - if the staged scope touches incoming source-wave intake, inspect `app/docs/source-onboarding-contract.md` first so auth posture, machine-usability posture, fixture-first expectations, cache/request-budget posture, and prompt-injection-safe free-text handling stay consistent
   - if the staged scope touches shared reporting-loop packages, also inspect `app/docs/reporting-loop-package-contract.md` and run:
     - `cmd /c npm.cmd run test:reporting-loop-package-contract`
     - keep backend environmental fusion snapshot coverage on `python -m pytest app/server/tests/test_environmental_fusion_snapshot_input.py -q`
     - treat backend webcam sandbox/source-ops reporting helpers as adjacent reporting/support surfaces unless they explicitly grow stable reporting-loop semantics
+    - keep Wonder Stack Exchange and seed-packet discovery in candidate/review discovery posture only
     - keep Atlas media geolocation and Wonder Statuspage or Mastodon discovery in candidate/review/derived-evidence/runtime posture unless separate controlled validation promotes them
+  - if the staged scope includes `geoboundaries-admin`, validate it as bounded geospatial reference context only:
+    - `python -m pytest app/server/tests/test_geoboundaries_admin.py -q`
+    - keep `geoboundaries-admin` below legal-jurisdiction truth, operational-control truth, and live-incident proof
+  - if the staged scope includes `meteoalarm-atom-feeds`, validate it as bounded advisory/contextual warning-distribution context only:
+    - `python -m pytest app/server/tests/test_meteoalarm_atom_feed.py -q`
+    - keep one bounded country feed at a time
+    - keep Meteoalarm below national-provider authority, impact proof, and action guidance
+  - if the staged scope includes the Aerospace selected-target operational-question packet regression, treat it as aerospace export/reporting compatibility only:
+    - `cmd /c npm.cmd run test:reporting-loop-package-contract`
+    - do not let the packet language imply intent, route consequence, threat, or action recommendation
+  - if the staged scope touches `source_discovery.py`, `source_discovery_service.py`, `types/source_discovery.py`, or `test_source_discovery_memory.py`, keep them explicitly shared/runtime-scoped unless Manager AI or the user has provided a narrower durable owner
   - if Data AI routing docs are part of the staged scope, prefer the newer routing truth in `app/docs/source-prompt-index.md`, `app/docs/data-ai-next-routing-after-family-summary.md`, `app/docs/source-ownership-consumption-map.md`, and `app/docs/source-routing-priority-memo.md`; older packet/history docs may still contain superseded `propublica` / `global-voices` suggestions
 
 ## Shared reporting-loop package contract
@@ -169,6 +231,31 @@ Notes:
   - it also checks the Aerospace VAAC advisory report package as an adjacent reporting/support package that preserves lineage without pretending to be a full report-brief section bundle
   - it does not rewrite package semantics into one exact schema
   - backend webcam sandbox/source-ops reporting helpers remain documented as adjacent reporting/support surfaces, not first-class reporting-loop peers
+
+## Shared source onboarding contract
+
+Purpose:
+
+- shared intake/onboarding contract for incoming no-auth source waves
+
+Working directory:
+
+- repo root: `C:\Users\mike\11Writer`
+
+Commands:
+
+```bash
+git diff -- app/docs/source-onboarding-contract.md app/docs/source-ownership-consumption-map.md app/docs/source-validation-status.md app/docs/source-fusion-reporting-input-inventory.md app/docs/reporting-desk-phase2-roadmap.md
+python scripts/list_changed_files_by_owner.py --summary
+python scripts/release_dry_run.py --json
+python scripts/alerts_ledger.py --json
+```
+
+Notes:
+
+- use this block when staged changes only tighten shared onboarding, intake, or validation-support rules
+- this block is docs-only unless Connect explicitly changes a shared scanner or validator script
+- keep browser-only, discovery-only, runtime-only, and derived-evidence surfaces below implementation proof in any onboarding edits
 
 ## Gather / source registry
 

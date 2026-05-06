@@ -1,5 +1,422 @@
 # Gather AI Progress
 
+## 2026-05-05 23:58 America/Chicago
+
+Assignment version:
+- 2026-05-05 23:58 America/Chicago
+
+Task:
+- finish the current governance/truth-reconciliation slice at the smallest coherent checkpoint and write the Gather Phase 3 handoff packet
+
+What changed:
+- finished the current checkpoint cleanly without opening a new source-intake wave
+- wrote the Gather Phase 3 handoff packet at [gather-ai.md](/C:/Users/mike/11Writer/app/docs/phase3-handoffs/gather-ai.md:1)
+- documented the most important outgoing governance truth for incoming Phase 3 chats:
+  - the authoritative status stack is:
+    - [source-assignment-board.md](/C:/Users/mike/11Writer/app/docs/source-assignment-board.md:1)
+    - [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md:1)
+    - [source-workflow-validation-plan.md](/C:/Users/mike/11Writer/app/docs/source-workflow-validation-plan.md:1)
+  - the landed user-priority wave now includes:
+    - `CISA KEV`
+    - `RDAP`
+    - `crt.sh`
+    - `SEC EDGAR`
+    - `USAspending`
+    - `NOAA nowCOAST`
+    - `National Weather Service Alerts API`
+    - `GPSJam`
+    - `Navtex`
+    - `OpenStreetMap` / `Overpass` / `Geofabrik` lead-support
+  - the remaining clean user-priority frontier is:
+    - `GeoNames`
+    - `HDX`
+    - `UNOSAT on HDX`
+    - `ReliefWeb` verification
+- made the handoff explicit about:
+  - duplicate-assignment traps
+  - stale-routing traps
+  - authoritative docs versus drifting historical packet surfaces
+  - what Gov AI, Connect AI, and Platform AI should do first
+  - what not to break in source-status and validation discipline
+
+Files touched:
+- `app/docs/phase3-handoffs/gather-ai.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- `Test-Path app/docs/phase3-handoffs/gather-ai.md` -> `True`
+- `rg -n "Scope completed|Current state|Files and surfaces to know|Validation already run|Known blockers or caveats|What the next AI should do first|What not to break|Phase 3 relevance|source-assignment-board|source-validation-status|source-workflow-validation-plan|GeoNames|HDX|UNOSAT|ReliefWeb|browser-only|safety-sensitive" app/docs/phase3-handoffs/gather-ai.md` -> pass
+- docs diff review only
+
+Blockers or caveats:
+- this was a coherent finish-up and handoff checkpoint, not a fresh classification wave
+- `ReliefWeb`, `HDX`, and `UNOSAT on HDX` remain below assignment-ready proof
+- browser-only, discovery-only, peer/runtime, and safety-sensitive identity-enumeration surfaces remain below implementation proof
+- older packet/history docs may still contain superseded wave language; incoming agents should reconcile toward the authoritative status stack, not toward stale packet wording
+
+Next recommended task:
+- for the next governance pass, recheck the authoritative status stack first, then only reconcile if a newer domain progress entry materially changes the landed/follow-on boundary for `GeoNames`, `HDX`, `UNOSAT on HDX`, or `ReliefWeb`
+
+## 2026-05-05 20:34 America/Chicago
+
+Assignment version:
+- 2026-05-05 20:22 America/Chicago
+
+Task:
+- reconcile the live `19:41` source-wave truth, update routing/status docs for newly landed user-priority sources, and prepare the next deconflicted follow-on shortlist
+
+What changed:
+- reconciled the newest controlled-agent progress docs and closed the source-wave truth gap:
+  - `data`: `CISA KEV`, `RDAP`, and `crt.sh` are landed backend-first, and the newer `2026-05-05 20:22 America/Chicago` bounded `SEC EDGAR` plus `USAspending` institutional follow-on is landed too
+  - `geospatial`: `NOAA nowCOAST` and `National Weather Service Alerts API` are landed backend-first
+  - `marine`: `Navtex` is landed backend-first
+  - `aerospace`: `GPSJam` is landed backend-first
+  - `features-webcam`: `OpenStreetMap` / `Overpass` / `Geofabrik` lead-support is completed source-ops evidence
+- no `19:41` source-wave lane remains in progress; the remaining active work is outside that source wave, including the Connect shared reporting-loop contract lane and narrower follow-through or workflow-closure lanes in other domains
+- created a new compact next-step packet at [source-user-priority-follow-on-shortlist.md](/C:/Users/mike/11Writer/app/docs/source-user-priority-follow-on-shortlist.md:1)
+  - remaining clean next frontier is now:
+    - `GeoNames`
+    - `HDX`
+    - `UNOSAT on HDX`
+    - `ReliefWeb` verification
+- updated routing/planning/governance docs so the user-priority wave now reads as landed instead of still-active fresh intake
+- added explicit status/validation traceability for:
+  - `gpsjam-context`
+  - `navtex-context`
+- kept `ReliefWeb`, `HDX`, and `UNOSAT on HDX` below assignment-ready proof where verification posture is still the real work
+- preserved all duplicate-risk, browser-only, discovery-only, and safety-sensitive bucketing boundaries
+
+Files touched:
+- `app/docs/source-user-priority-follow-on-shortlist.md`
+- `app/docs/source-user-priority-routing-governance-packet.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/phase2-next-after-next-shortlist.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/reporting-desk-phase2-roadmap.md`
+- `app/docs/source-fusion-reporting-input-inventory.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> pass; `9` open low-priority alerts remain (`Atlas AI: 8`, `Manager AI: 1`)
+- `rg -n "CISA KEV|RDAP|crt.sh|NWS Alerts|nowCOAST|Overpass|Geofabrik|OpenStreetMap|SEC EDGAR|USAspending|GeoNames|HDX|UNOSAT|ReliefWeb|browser-only|safety-sensitive|discovery only" app/docs/reporting-desk-phase2-roadmap.md app/docs/phase2-next-biggest-wins-packet.md app/docs/phase2-next-after-next-shortlist.md app/docs/source-fusion-reporting-input-inventory.md app/docs/source-assignment-board.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/source-validation-status.md app/docs/source-workflow-validation-plan.md app/docs/source-user-priority-routing-governance-packet.md` -> pass
+- docs diff review only
+
+Blockers or caveats:
+- `ReliefWeb` still remains verification-only because the older `appname` / approval-signup conflict has not been cleared
+- `HDX` and `UNOSAT on HDX` remain verification-first public-resource lanes, not clean connector-ready assignments
+- browser-only, discovery-only, peer/runtime, and safety-sensitive utilities remain below implementation proof and were not promoted
+- `gpsjam-context` and `navtex-context` are documented as implemented/contract-tested, not workflow-validated
+
+Next recommended task:
+- after the next implementation or validation close-out, run another short reconciliation pass so `GeoNames`, `HDX`, `UNOSAT on HDX`, and `ReliefWeb` routing stays aligned with live repo truth and no newly landed source is rerouted as fake fresh intake
+
+## 2026-05-05 19:56 America/Chicago
+
+Assignment version:
+- 2026-05-05 19:41 America/Chicago
+
+Task:
+- turn the new user-supplied source list into a clean routing and governance packet, update the planning surfaces, and keep duplicates, browser-only tools, discovery helpers, and safety-sensitive person-search tooling out of fake implementation lanes
+
+What changed:
+- created a new user-priority routing/governance packet that buckets the new source list into:
+  - assign now
+  - follow-on after current phase-2 wave
+  - already implemented / duplicate / substantially covered
+  - needs verification before routing
+  - discovery only / directory only
+  - browser-only / analyst-reference only
+  - safety-sensitive / do-not-route-directly
+- aligned the active source-expansion wave to the latest `2026-05-05 19:41 America/Chicago` repo-local next-task truth instead of the older reporting-helper frontier:
+  - Geospatial -> `NOAA nowCOAST` + `National Weather Service Alerts API`
+  - Data -> `CISA KEV` + `RDAP` + `crt.sh`, with `SEC EDGAR` or `USAspending` only as compact follow-on options
+  - Marine -> `Navtex`
+  - Aerospace -> `GPSJam`
+  - Features/Webcam -> `OpenStreetMap` / `Overpass` / `Geofabrik` lead-support only
+- kept the bucket outcome explicit and honest:
+  - assign now:
+    - `NOAA nowCOAST`
+    - `National Weather Service Alerts API`
+    - `RDAP`
+    - `crt.sh`
+    - `GPSJam`
+    - `Navtex`
+  - follow-on after the current wave:
+    - `SEC EDGAR`
+    - `USAspending`
+    - `GeoNames`
+    - `HDX`
+    - `UNOSAT on HDX`
+  - already implemented / duplicate / substantially covered:
+    - `NASA GIBS`
+    - `NASA Worldview`
+    - `CelesTrak`
+    - `Natural Earth`
+    - `NOAA NDBC`
+    - `USGS earthquakes`
+  - needs verification:
+    - `ReliefWeb`
+    - bounded public `HDX` subsets
+    - bounded public `UNOSAT on HDX` subsets
+  - discovery only / directory only:
+    - open directories
+    - map-root discovery surfaces
+    - Bellingcat workflow helpers
+    - reverse-image sites
+  - browser-only / analyst-reference only:
+    - `NASA Worldview`
+    - viewer-first map UIs
+    - browser-only reverse-image or exploration tools
+  - safety-sensitive / do-not-route-directly:
+    - `Sherlock`
+    - `Maigret`
+    - `WhatsMyName`
+    - `Blackbird`
+- repaired stale planning surfaces so completed reporting artifacts stop reading like the main Phase 2 frontier and the new source wave reads as the actual next implementation block
+- kept Wonder and Atlas breadth, archive, directory, mailing-list, Source Discovery, media/OCR, and runtime/provider inputs in peer, candidate, review, derived-evidence, or runtime-only posture without promotion
+- ran one bounded duplicate-risk cleanup pass so already-covered items like `NASA GIBS`, `NASA Worldview`, `CelesTrak`, `Natural Earth`, `NOAA NDBC`, and `USGS earthquakes` are not rerouted as fake fresh wins under shinier names
+
+Files touched:
+- `app/docs/source-user-priority-routing-governance-packet.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/reporting-desk-phase2-roadmap.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/phase2-next-after-next-shortlist.md`
+- `app/docs/source-fusion-reporting-input-inventory.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> pass; `7` open low-priority alerts remain, all owned by `Atlas AI`
+- `rg -n "ReliefWeb|nowCOAST|NWS Alerts|EDGAR|USAspending|RDAP|crt.sh|GeoNames|UNOSAT|HDX|GPSJam|Navtex|GIBS|Worldview|CelesTrak|Natural Earth|NDBC|USGS earthquakes|Sherlock|Maigret|WhatsMyName|Blackbird|browser-only|discovery only|safety-sensitive|peer|runtime|derived-evidence" app/docs/reporting-desk-phase2-roadmap.md app/docs/phase2-next-biggest-wins-packet.md app/docs/phase2-next-after-next-shortlist.md app/docs/source-fusion-reporting-input-inventory.md app/docs/source-assignment-board.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/source-validation-status.md app/docs/source-workflow-validation-plan.md app/docs/source-discovery-public-web-workflow.md` -> pass
+- docs diff review only
+
+Blockers or caveats:
+- `ReliefWeb` still stays below assign-now because the older repo-local `appname` requirement conflict was not silently overturned in this docs pass
+- `HDX` and `UNOSAT on HDX` remain bounded public-resource verification/follow-on material, not auto-approved implementation lanes
+- the current Connect `19:15` shared reporting-loop contract wave remains in progress and still must not be described as complete
+- Wonder and Atlas breadth/runtime/media-geolocation inputs remain peer, candidate, review, derived-evidence, or runtime-only and must not drift into source approval or workflow-validation proof
+
+Next recommended task:
+- after the current domain source waves report back, run another short status-reconciliation pass so the board, routing memo, and reporting roadmap reflect the actual implemented outcomes without reopening duplicates or browser-only/discovery-only leads
+
+## 2026-05-05 19:44 America/Chicago
+
+Assignment version:
+- 2026-05-05 19:35 America/Chicago
+
+Task:
+- run the next status-reconciliation and deconfliction pass so routing docs match the actual finished and in-progress lanes, while peer/runtime breadth stays bounded and the next larger wave stays honest
+
+What changed:
+- reconciled the current controlled-lane truth to the latest repo-local progress instead of carrying forward the stale mixed-wave summary from the next-task doc
+- kept these lanes explicitly still in progress:
+  - Connect `19:15` shared reporting-loop contract wave
+  - Marine `19:35` question-briefing packet
+  - Aerospace `19:15` question-briefing packet
+- recorded these lanes as completed and no longer active:
+  - Data `19:15` question-briefing packet
+  - Geospatial `19:15` environmental question-briefing packet
+  - Features/Webcam `19:15` source-ops regional portfolio packet
+  - Marine `19:01` source-row workflow closure packet
+  - Aerospace `19:14` reporting-handoff contract
+- kept `meteoalarm-atom-feeds` honest as implemented bounded warning context rather than the next fresh geospatial source build
+- kept `geoboundaries-admin` honest as implemented bounded reference context and follow-on-only rather than fresh intake
+- repaired stale routing so completed question-briefing, reporting-handoff, source-row closure, and regional-portfolio work no longer reads like the active lane across the main planning surfaces
+- rerouted Features/Webcam to one bounded post-portfolio comparison/report follow-through rather than reusing the same packet as an in-progress assignment
+- preserved Atlas and Wonder breadth/runtime/media-geolocation inputs as candidate, review, peer, runtime, or derived-evidence input only rather than implementation, approval, or workflow-validation proof
+
+Files touched:
+- `app/docs/reporting-desk-phase2-roadmap.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/phase2-next-after-next-shortlist.md`
+- `app/docs/source-fusion-reporting-input-inventory.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> pass; `6` open low-priority alerts remain, all owned by `Atlas AI`
+- `rg -n "meteoalarm-atom-feeds|geoboundaries-admin|current-awareness digest|question briefing|reporting handoff|topic-safe report export packet|source-row workflow closure|regional portfolio|archive|mailing-list|directory|peer|runtime|review-only|derived-evidence" app/docs/reporting-desk-phase2-roadmap.md app/docs/phase2-next-biggest-wins-packet.md app/docs/phase2-next-after-next-shortlist.md app/docs/source-fusion-reporting-input-inventory.md app/docs/source-assignment-board.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/source-validation-status.md app/docs/source-workflow-validation-plan.md app/docs/source-discovery-public-web-workflow.md` -> pass
+- docs diff review only
+
+Blockers or caveats:
+- Connect still has the active `19:15` shared reporting-loop contract wave open and should stay in-progress until Connect replaces its stub entry
+- Marine still has the active `19:35` question-briefing packet open and should stay in-progress until Marine replaces its stub entry
+- Aerospace still has the active `19:15` question-briefing packet open and should stay in-progress until Aerospace replaces its stub entry
+- Atlas and Wonder breadth/runtime/media-geolocation inputs remain peer, candidate/review, runtime, or derived-evidence input only and must not drift into source approval, implementation proof, or workflow-validation proof
+
+Next recommended task:
+- after the current Connect, Marine, and Aerospace in-progress waves close, run another short status-reconciliation pass so only genuinely active lanes remain marked in progress across the planning and validation surfaces
+
+## 2026-05-05 19:12 America/Chicago
+
+Assignment version:
+- 2026-05-05 19:01 America/Chicago
+
+Task:
+- run the next status-reconciliation and breadth-governance pass so routing docs match the actual finished and in-progress lanes, completed current-awareness/reporting follow-ons stop reading as active, and Wonder breadth inputs stay candidate/review/runtime only
+
+What changed:
+- reconciled the current controlled-lane truth to the latest repo-local progress instead of carrying forward the older mixed-wave summary
+- recorded these lanes as completed:
+  - Connect `18:49` Source Discovery/runtime consolidation checkpoint
+  - Data current-awareness digest and review/export coherence follow-on
+  - Marine current-awareness digest
+  - Aerospace current-awareness digest
+  - Geospatial bounded `meteoalarm-atom-feeds` warning-context slice
+- kept these lanes explicitly still in progress:
+  - Features/Webcam `18:49` source-ops review-priority packet
+  - Aerospace bounded reporting-handoff contract follow-on
+- repaired stale routing/reporting docs so they no longer treat completed digest/coherence lanes as still active
+- kept `meteoalarm-atom-feeds` honest as implemented bounded warning context rather than the next fresh geospatial source build
+- kept `geoboundaries-admin` honest as implemented bounded reference context and follow-on-only rather than fresh intake
+- absorbed Wonder breadth inputs into governance/status docs without promotion:
+  - archive-index scan
+  - mailing-list archive adapters
+  - curated directory or regional-portal scan
+- ran one bounded duplicate-risk cleanup pass so current-awareness, review/export coherence, reporting follow-through, and source-ops review-priority/helper lanes do not get routed twice under different names
+- preserved Atlas and Wonder breadth surfaces as peer, candidate/review, runtime, or derived-evidence input only
+
+Files touched:
+- `app/docs/reporting-desk-phase2-roadmap.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/phase2-next-after-next-shortlist.md`
+- `app/docs/source-fusion-reporting-input-inventory.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/source-discovery-public-web-workflow.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> pass; `6` open low-priority alerts remain, all owned by `Atlas AI`
+- `rg -n "meteoalarm-atom-feeds|geoboundaries-admin|current-awareness digest|review-export coherence|source-ops review-priority|archive|mailing-list|directory|regional-portal|peer|runtime|review-only|derived-evidence" app/docs/reporting-desk-phase2-roadmap.md app/docs/phase2-next-biggest-wins-packet.md app/docs/phase2-next-after-next-shortlist.md app/docs/source-fusion-reporting-input-inventory.md app/docs/source-assignment-board.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/source-validation-status.md app/docs/source-workflow-validation-plan.md app/docs/source-discovery-public-web-workflow.md` -> pass
+- docs diff review only
+
+Blockers or caveats:
+- Features/Webcam remains actively in progress on the `18:49` review-priority packet and must not be over-closed
+- Aerospace has a newer bounded reporting-handoff contract still in progress even though the current-awareness digest is completed
+- Wonder breadth inputs remain discovery/governance/runtime input only and must not drift into source approval, implementation proof, or workflow-validation proof
+
+Next recommended task:
+- after the current Features/Webcam and Aerospace follow-ons close, run another short status-reconciliation pass so only the genuinely finished lanes advance in the planning surfaces
+
+## 2026-05-05 19:00 America/Chicago
+
+Assignment version:
+- 2026-05-05 18:44 America/Chicago
+
+Task:
+- run the post-wave truth-reconciliation pass so the mixed completion wave stays honest, `meteoalarm-atom-feeds` remains the clean geospatial handoff, `geoboundaries-admin` stays implemented follow-on work, and in-progress Connect/Data/Marine/Features lanes are not over-closed in planning docs
+
+What changed:
+- reconciled current controlled-lane truth to the active Gather assignment instead of carrying forward the prior over-completed wave summary
+- kept these lanes explicitly complete:
+  - Gather held-source verification and rerouting pass
+  - Aerospace selected-target operational question packet
+  - Geospatial bounded `geoboundaries-admin` slice
+- kept these lanes explicitly in progress:
+  - Connect `18:33` integration checkpoint
+  - Data `18:33` current-awareness digest
+  - Marine `18:33` current-awareness digest
+  - Features/Webcam `18:33` source-ops portfolio digest
+- repaired stale routing/reporting docs that had been treating the whole `18:33` wave as already closed
+- preserved the geospatial reroute:
+  - `meteoalarm-atom-feeds` remains the clear next geospatial source-build handoff
+  - `geoboundaries-admin` remains implemented bounded reference context and follow-on-only
+  - `belgium-rmi-warnings` remains verification-gated
+- ran one bounded duplicate-risk cleanup pass so current-awareness, report-brief, review/export, and source-ops helper lanes do not get routed twice under different names
+- kept Atlas and Wonder surfaces classified as peer, runtime, review, or derived-evidence input only
+
+Files touched:
+- `app/docs/reporting-desk-phase2-roadmap.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/phase2-next-after-next-shortlist.md`
+- `app/docs/source-fusion-reporting-input-inventory.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> pass; `5` open low-priority alerts remain, all owned by `Atlas AI`
+- `rg -n "meteoalarm-atom-feeds|geoboundaries-admin|selected-target operational question packet|current-awareness digest|source-ops portfolio digest|peer|runtime|review-only|derived-evidence|Belgium" app/docs/reporting-desk-phase2-roadmap.md app/docs/phase2-next-biggest-wins-packet.md app/docs/phase2-next-after-next-shortlist.md app/docs/source-fusion-reporting-input-inventory.md app/docs/source-assignment-board.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/source-validation-status.md app/docs/source-workflow-validation-plan.md` -> pass
+- docs diff review only
+
+Blockers or caveats:
+- Data and Features progress logs contain fresh implementation evidence, but this Gather assignment explicitly requires conservative mid-wave treatment for the broader `18:33` lanes
+- `belgium-rmi-warnings` still lacks a clean official machine-readable warning endpoint in repo-local truth
+- peer/runtime/derived-evidence surfaces remain below implementation and validation proof
+
+Next recommended task:
+- after the active `18:33` wave finishes, run another short status-reconciliation pass to promote only the lanes whose progress docs replace their in-progress entries with final reports
+
+## 2026-05-05 18:34 America/Chicago
+
+Assignment version:
+- 2026-05-05 18:15 America/Chicago
+
+Task:
+- run the held-source verification and rerouting pass so Belgium stops reading as a clean geospatial move, Meteoalarm becomes the clean replacement handoff, geoBoundaries is positioned honestly, and the newest Wonder/Atlas peer alerts are absorbed without promotion
+
+What changed:
+- verified the current repo-local outcome for the three geospatial candidates:
+  - `belgium-rmi-warnings` remains `needs-verification` because current repo truth still only pins public warning pages, not a clean official machine-readable warning feed
+  - `meteoalarm-atom-feeds` stays the clean assignment-ready replacement for the next bounded geospatial warning lane
+  - `geoboundaries-admin` already has repo-local backend-first static/reference evidence, so it should stay follow-on-only rather than being routed as a fresh source build
+- reconciled stale lane-truth wording across the main routing/reporting docs so the completed larger wave no longer reads as active:
+  - Connect post-wave compatibility sweep is now treated as completed and followed by a repo-wide validation checkpoint plus narrow peer/runtime warning cleanup
+  - Data topic-scoped report packet is now treated as completed and followed by review/export coherence or one small topic-coverage closure
+  - Marine corridor situation/report package is now treated as completed and followed by source-row workflow closure
+  - Aerospace space-weather continuity package is now treated as completed and followed by smoke/workflow closure
+  - Features/Webcam NZTA/Arlington feasibility comparison is now treated as completed and followed by bounded post-sandbox comparison/report work
+- rerouted the geospatial planning surfaces from Belgium to Meteoalarm:
+  - `meteoalarm-atom-feeds` is now the top clean warning handoff in the biggest-wins packet, routing memo, and assignment board
+  - `geoboundaries-admin` now leads the next-after-next shortlist as the clean reference-context follow-on
+  - Belgium is kept explicitly verification-gated instead of lingering as fake assignment-ready work
+- absorbed the latest peer alerts into governance/status docs without promotion:
+  - Wonder Stack Exchange and seed-packet discovery are classified as candidate/review discovery input only
+  - Atlas media-geolocation hardening is classified as peer and derived-evidence input only
+
+Files touched:
+- `app/docs/reporting-desk-phase2-roadmap.md`
+- `app/docs/phase2-next-biggest-wins-packet.md`
+- `app/docs/phase2-next-after-next-shortlist.md`
+- `app/docs/source-fusion-reporting-input-inventory.md`
+- `app/docs/source-assignment-board.md`
+- `app/docs/source-routing-priority-memo.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/source-ownership-consumption-map.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-workflow-validation-plan.md`
+- `app/docs/agent-progress/gather-ai.md`
+
+Validation:
+- `python scripts/alerts_ledger.py --json` -> pass; `5` open low-priority alerts remain, all owned by `Atlas AI`
+- `rg -n "belgium-rmi-warnings|meteoalarm-atom-feeds|geoboundaries-admin|Stack Exchange|seed-packet|media geolocation|topic-scoped report packet|space-weather continuity|corridor situation" app/docs/reporting-desk-phase2-roadmap.md app/docs/phase2-next-biggest-wins-packet.md app/docs/phase2-next-after-next-shortlist.md app/docs/source-fusion-reporting-input-inventory.md app/docs/source-assignment-board.md app/docs/source-routing-priority-memo.md app/docs/source-prompt-index.md app/docs/source-ownership-consumption-map.md app/docs/source-validation-status.md app/docs/source-workflow-validation-plan.md app/docs/source-acceleration-phase2-batch5-briefs.md` -> pass
+- docs diff review only
+
+Blockers or caveats:
+- `belgium-rmi-warnings` still has no clean official machine-readable warning endpoint pinned in repo-local truth, so it must remain verification-gated
+- `meteoalarm-atom-feeds` stays advisory/contextual only and must not be treated as final national-source truth
+- Wonder/Atlas peer alerts remain governance input only and do not create source approval, implementation proof, or workflow-validation proof
+
+Next recommended task:
+- after Manager closes the Meteoalarm reroute, keep Gather on the next bounded held-source verification or the next post-wave status reconciliation pass
+
 ## 2026-05-05 10:49 America/Chicago
 
 Assignment version:

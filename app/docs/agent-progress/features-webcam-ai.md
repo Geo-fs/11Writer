@@ -1,5 +1,466 @@
 # Features/Webcam AI Progress
 
+## 2026-05-05 23:09:01 -05:00
+
+- Task: Finish the current webcam/source-operations slice at the smallest coherent checkpoint and write the Features/Webcam AI handoff packet for Phase 3.
+- Assignment version read: `2026-05-05 23:58 America/Chicago`
+- What changed:
+  - stopped at the current coherent checkpoint after the bounded OSM lead-to-review reconciliation pass rather than opening another source-candidate expansion wave
+  - wrote the Phase 3 handoff packet at [`app/docs/phase3-handoffs/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/phase3-handoffs/features-webcam-ai.md)
+  - documented:
+    - scope completed
+    - current state
+    - files and surfaces to know
+    - validation already run
+    - known blockers or caveats
+    - what the next AI should do first
+    - what not to break
+    - Phase 3 relevance
+  - made the handoff explicit for:
+    - Workspace AI
+    - Reporting AI
+    - Platform AI
+    - Connect AI
+  - made candidate versus validated, direct-image versus viewer-only versus metadata-only, provenance/terms/compliance, and operational-versus-interim surface caveats explicit for the incoming Phase 3 chats
+- Files touched:
+  - [`app/docs/phase3-handoffs/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/phase3-handoffs/features-webcam-ai.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - no new code-path validation was run in this handoff-only step
+  - relied on the already completed backend validation set recorded in the current lane progress and restated in the handoff doc
+- Blockers or caveats:
+  - this was a finish-up and handoff pass, not a new candidate-growth pass
+  - no new source was added
+  - no runtime behavior changed
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - incoming Phase 3 AI should read [`app/docs/phase3-handoffs/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/phase3-handoffs/features-webcam-ai.md) first, then inspect the candidate/source-ops services and API contracts before changing UI or platform behavior
+
+## 2026-05-05 23:13:34 -05:00
+
+- Task: Build one bounded OSM lead-to-review reconciliation artifact on top of the newly landed OSM/Overpass/Geofabrik support pass.
+- Assignment version read: `2026-05-05 20:22 America/Chicago`
+- What changed:
+  - added the backend-only reconciliation artifact in [`app/server/src/services/camera_source_ops_osm_lead_review_reconciliation_packet.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_osm_lead_review_reconciliation_packet.py) and exposed it on the existing source-ops index and export-summary responses as `cameraSourceOpsOsmLeadReviewReconciliationPacket`
+  - kept the reconciliation packet derived from the existing OSM lead-discovery packet so endpoint-known posture, map-only posture, review burden, missing evidence, and next-safe-review-step interpretation remain sourced from the same bounded source-ops evidence path rather than introducing a parallel lifecycle engine
+  - reconciled the current cohort into four bounded buckets:
+    - `endpoint-known-review-next`
+    - `endpoint-known-hold`
+    - `map-only-research`
+    - `map-only-blocked`
+  - preserved the required conservative contract:
+    - endpoint-known versus map-only distinction
+    - review burden
+    - missing evidence
+    - next safe review step
+    - reconciliation rationale
+    - export-safe lines
+    - explicit caveats
+    - explicit does-not-prove lines
+  - kept map-only leads explicitly below endpoint proof, activation readiness, scheduling, and validation posture
+  - updated the source-ops contracts in [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py), the summary surfaces in [`app/server/src/services/camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_report_index.py) and [`app/server/src/services/camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_summary.py), plus focused assertions in [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py) and [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - documented the reconciliation artifact and the conservative no-growth result in:
+    - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+    - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+    - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - did not add a new candidate record because the current official backlog still does not clear the same pinned endpoint and media-posture bar already met by the stronger cohort
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_osm_lead_review_reconciliation_packet.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_osm_lead_review_reconciliation_packet.py)
+  - [`app/server/src/services/camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_report_index.py)
+  - [`app/server/src/services/camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_summary.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q`
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - no new candidate record was added in this pass because the current official backlog still does not clear the same pinned endpoint and media-posture bar already met by the stronger cohort
+  - map-only OSM leads remain below endpoint proof and below activation readiness
+  - endpoint-known leads were only moved into bounded review posture, not lifecycle promotion
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - wait for the next Manager assignment, or continue only with another bounded backend-only source-ops artifact that keeps map-only OSM leads explicitly below endpoint proof and lifecycle authority
+
+## 2026-05-05 23:09:01 -05:00
+
+- Task: Record the new OSM lead-to-review reconciliation assignment version before implementation.
+- Assignment version read: `2026-05-05 20:22 America/Chicago`
+- What changed:
+  - re-read the repo-local next-task doc and confirmed a newer Manager assignment supersedes the completed OSM lead-discovery pass
+  - started the bounded OSM lead-to-review reconciliation assignment under the updated version
+- Files touched:
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - repo-local next-task doc re-read before work
+- Blockers or caveats:
+  - implementation is still in progress for this assignment
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred in this checkpoint
+- Next recommended task:
+  - inspect the new OSM lead-discovery packet and the current candidate/source-ops surfaces before adding one bounded OSM lead-to-review reconciliation artifact
+
+## 2026-05-05 20:04:16 -05:00
+
+- Task: Build one bounded OSM-backed camera lead-discovery and source-ops support pass using the new user-priority source list, while keeping lifecycle posture conservative.
+- Assignment version read: `2026-05-05 19:41 America/Chicago`
+- What changed:
+  - added the backend-only OSM-backed lead-discovery artifact in [`app/server/src/services/camera_source_ops_osm_lead_discovery_packet.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_osm_lead_discovery_packet.py) and exposed it on the existing source-ops index and export-summary responses as `cameraSourceOpsOsmLeadDiscoveryPacket`
+  - kept the packet derived from the existing candidate-network summary so lifecycle state, payload-shape posture, media-access posture, sandbox-feasibility posture, source-health posture, missing-evidence count, and next-safe-review-step interpretation still come from the same bounded source-ops evidence path rather than introducing a parallel lifecycle engine
+  - centered the packet on OSM-backed lead support only:
+    - `overpass-api-read-only-query`
+    - `openstreetmap-tag-reference`
+    - `geofabrik-regional-extract`
+  - preserved the required conservative packet contract:
+    - country grouping
+    - region grouping
+    - lead provenance
+    - endpoint-known versus map-only distinction
+    - review-burden posture
+    - next safe review step
+    - export-safe lines
+    - explicit caveats
+    - explicit does-not-prove lines
+  - kept `endpoint-known-plus-map-lead` distinct from `map-only-lead` so OSM presence never becomes activation or public live-camera proof
+  - updated the source-ops index/export-summary contracts in [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py), plus focused assertions in [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py) and [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - documented the artifact and the conservative no-growth result in:
+    - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+    - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+    - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - re-reviewed the current official backlog and did not add a new candidate record because none cleared the same machine-readable endpoint and media-posture bar already met by the stronger cohort
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_osm_lead_discovery_packet.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_osm_lead_discovery_packet.py)
+  - [`app/server/src/services/camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_report_index.py)
+  - [`app/server/src/services/camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_summary.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q`
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - no new candidate record was added in this pass because the current official backlog still does not clear the same machine-readable endpoint and media-posture bar already met by the stronger cohort
+  - Overpass was treated as read-only query support only
+  - OpenStreetMap tags were treated as map-only lead context only
+  - Geofabrik extracts were treated as offline regional lead support only
+  - OSM presence was explicitly kept below endpoint proof and below activation readiness
+  - QLDTraffic still does not pin a clean enough public camera payload/media posture for safe registry widening
+  - Seattle still remains viewer-page centric rather than a pinned machine-readable inventory
+  - Statens vegvesen DATEX still requires registration, so it remains credential-blocked
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - wait for the next Manager assignment, or continue only with another bounded backend-only source-ops artifact or conservative candidate pass that keeps OSM/map leads explicitly below endpoint proof and lifecycle authority
+
+## 2026-05-05 19:59:23 -05:00
+
+- Task: Record the new OSM-backed lead-discovery assignment version before implementation.
+- Assignment version read: `2026-05-05 19:41 America/Chicago`
+- What changed:
+  - re-read the repo-local next-task doc and confirmed a newer Manager assignment supersedes the completed regional portfolio packet pass
+  - started the bounded OSM-backed camera lead-discovery and source-ops support assignment under the updated version
+- Files touched:
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - repo-local next-task doc re-read before work
+- Blockers or caveats:
+  - implementation is still in progress for this assignment
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred in this checkpoint
+- Next recommended task:
+  - inspect the current candidate registry, endpoint reports, graduation plans, source-ops detail/index/export surfaces, sandbox-validation surfaces, and portfolio docs before adding one bounded OSM-backed lead-discovery artifact
+
+## 2026-05-05 19:27:19 -05:00
+
+- Task: Build one bounded camera source-ops regional portfolio packet over the current cohort and run a conservative global candidate expansion pass that adds up to 2 new candidates only if they clear the existing endpoint/media bar.
+- Assignment version read: `2026-05-05 19:15 America/Chicago`
+- What changed:
+  - added the backend-only regional artifact in [`app/server/src/services/camera_source_ops_regional_portfolio_packet.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_regional_portfolio_packet.py) and surfaced it on the existing source-ops index and export-summary responses as `cameraSourceOpsRegionalPortfolioPacket`
+  - kept the packet derived from the existing candidate-network summary so lifecycle state, payload-shape posture, media-access posture, sandbox-feasibility posture, source-health posture, missing-evidence count, and next-safe-review-step interpretation still come from the same bounded source-ops evidence path rather than creating a parallel lifecycle engine
+  - preserved the required conservative packet contract:
+    - lifecycle state
+    - country grouping
+    - region grouping
+    - payload-shape posture
+    - media-access posture
+    - sandbox-feasibility posture
+    - source-health posture
+    - missing-evidence count
+    - next safe review step
+    - review-burden posture
+    - export-safe lines
+    - explicit caveats
+    - explicit does-not-prove lines
+  - updated the source-ops index and export-summary contracts in [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py) and added focused assertions in [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py) and [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - documented the new regional packet and the conservative candidate-expansion outcome in:
+    - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+    - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+    - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - re-reviewed the current official backlog again and did not add a new registry record because none cleared the same endpoint-pinning, machine-readability, and media-posture bar already met by the stronger cohort
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_regional_portfolio_packet.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_regional_portfolio_packet.py)
+  - [`app/server/src/services/camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_report_index.py)
+  - [`app/server/src/services/camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_summary.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q`
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - no new candidate record was added in this pass because the current official backlog still does not clear the same endpoint-pinning, machine-readability, and media-posture bar already met by the stronger cohort
+  - QLDTraffic still documents webcam GeoJSON feeds at a high level but not a clean enough public camera payload/media posture for safe registry widening
+  - Seattle still remains viewer-page centric rather than a pinned machine-readable inventory
+  - Statens vegvesen DATEX still requires registration, so it remains credential-blocked
+  - the regional portfolio packet is read-only source-ops evidence only and does not activate, schedule, validate, or promote any source
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - wait for the next Manager assignment, or continue only with another bounded backend-only source-ops artifact or conservative candidate pass that stays derived from the existing candidate-network, sandbox-readiness comparison, portfolio digest, review-priority packet, and regional portfolio packet surfaces
+
+## 2026-05-05 19:22:39 -05:00
+
+- Task: Record the new regional portfolio packet assignment version before implementation.
+- Assignment version read: `2026-05-05 19:15 America/Chicago`
+- What changed:
+  - re-read the repo-local next-task doc and confirmed a newer Manager assignment supersedes the completed review-priority packet pass
+  - started the bounded source-ops regional portfolio packet and conservative candidate-expansion assignment under the updated version
+- Files touched:
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - repo-local next-task doc re-read before work
+- Blockers or caveats:
+  - implementation is still in progress for this assignment
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred in this checkpoint
+- Next recommended task:
+  - inspect the current candidate registry, endpoint reports, graduation plans, source-ops detail/index/export surfaces, sandbox-validation surfaces, sandbox-readiness comparison package, portfolio digest, review-priority packet, and May candidate batch doc before adding one bounded regional portfolio packet artifact
+
+## 2026-05-05 19:02:36 -05:00
+
+- Task: Build one bounded camera source-ops review-priority packet over the current cohort and run one more conservative global candidate pass without widening the registry unless a source clears the existing endpoint/media bar.
+- Assignment version read: `2026-05-05 18:49 America/Chicago`
+- What changed:
+  - hardened the backend-only [`cameraSourceOpsReviewPriorityPacket`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_review_priority_packet.py) so it now groups current candidate rows not just by priority band and posture, but also by missing-evidence count and next safe review step
+  - kept the packet derived from the existing candidate-network summary rather than inventing a second lifecycle engine, so lifecycle state, payload-shape posture, media-access posture, sandbox-feasibility posture, and source-health posture still come from the same bounded source-ops evidence path
+  - preserved the required conservative row contract:
+    - lifecycle state
+    - payload-shape posture
+    - media-access posture
+    - sandbox-feasibility posture
+    - source-health posture
+    - missing-evidence count
+    - next safe review step
+    - priority rationale
+    - export-safe lines
+    - explicit caveats
+    - explicit does-not-prove lines
+  - extended the source-ops index and export-summary test coverage so the packet is now asserted alongside the sandbox-readiness comparison and portfolio digest, including priority examples for:
+    - [`caltrans-cctv-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) as `review-next`
+    - [`nzta-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) as `hold`
+    - [`euskadi-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) as `follow-up`
+    - [`minnesota-511-public-arcgis`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) as `blocked-review`
+  - updated the webcam docs, lifecycle policy, and May candidate-batch notes so the new review-priority packet is documented as export-safe next-safe-work evidence only
+  - re-reviewed the current backlog conservatively using the official Queensland, Seattle, and Statens vegvesen pages and did not add a new registry record because none cleared the same endpoint-pinning plus media-posture bar already met by the stronger cohort
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_review_priority_packet.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_review_priority_packet.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q`
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - no new candidate record was added in this pass because the current official backlog still does not clear the same endpoint-pinning plus media-posture bar already met by the current sandbox-importable and stronger endpoint-verified cohort
+  - Queensland still has documented webcam GeoJSON feed claims but not a clean enough public no-auth pinned camera payload for safe registry widening
+  - Seattle still remains viewer-page centric rather than a pinned machine-readable inventory
+  - Statens vegvesen DATEX access still requires registration, so it remains credential-blocked
+  - the review-priority packet is read-only source-ops evidence only and does not activate, schedule, validate, or promote any source
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - wait for the next Manager assignment, or continue with another bounded backend-only export-safe source-ops artifact only if it stays derived from the existing candidate-network, sandbox-readiness comparison, portfolio digest, and review-priority packet surfaces
+
+## 2026-05-05 18:50:00 -05:00
+
+- Task: Record the new source-ops review-priority packet assignment version before implementation.
+- Assignment version read: `2026-05-05 18:49 America/Chicago`
+- What changed:
+  - re-read the repo-local next-task doc and confirmed a newer Manager assignment supersedes the completed source-ops portfolio digest pass
+  - started the bounded source-ops review-priority packet assignment under the updated version
+- Files touched:
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - repo-local next-task doc re-read before work
+- Blockers or caveats:
+  - implementation is still in progress for this assignment
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred in this checkpoint
+- Next recommended task:
+  - inspect the current candidate registry, endpoint reports, graduation plans, source-ops detail/index/export surfaces, sandbox-validation surfaces, sandbox-readiness comparison package, portfolio digest, and May candidate batch doc before adding one bounded review-priority packet artifact
+
+## 2026-05-05 18:46:10 -05:00
+
+- Task: Build one bounded camera source-ops portfolio digest over the current candidate cohort and widen the registry only if one new public no-auth candidate clears the existing endpoint/media bar.
+- Assignment version read: `2026-05-05 18:33 America/Chicago`
+- What changed:
+  - added the backend-only portfolio digest artifact in [`app/server/src/services/camera_source_ops_portfolio_digest.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_portfolio_digest.py) and exposed it on the existing source-ops index and export-summary surfaces as `cameraSourceOpsPortfolioDigest`
+  - kept the digest derived from the existing candidate-network rows so lifecycle, payload-shape, media-access, sandbox-feasibility, and source-health interpretation still come from the same bounded source-ops evidence path rather than inventing another lifecycle engine
+  - preserved explicit export-safe fields for the current candidate cohort:
+    - lifecycle state
+    - payload-shape posture
+    - media-access posture
+    - sandbox-feasibility posture
+    - source-health posture
+    - next safe review step
+    - missing-evidence count
+    - export lines
+    - caveats
+    - does-not-prove lines
+  - synthesized the current cohort into four bounded portfolio roles without changing lifecycle state:
+    - [`caltrans-cctv-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) remains a `sandbox-comparator`
+    - [`nzta-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) remains an `endpoint-only-hold`
+    - [`euskadi-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) remains `research-needed`
+    - [`minnesota-511-public-arcgis`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) remains a `blocked-hold`
+  - re-reviewed the current official backlog and did not add a new candidate record because none cleared the same endpoint-pinning plus media-posture bar already met by the stronger cohort
+  - updated the webcam subsystem, lifecycle policy, and May candidate batch docs so the new portfolio digest and the no-new-candidate outcome are recorded explicitly
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_portfolio_digest.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_portfolio_digest.py)
+  - [`app/server/src/services/camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_report_index.py)
+  - [`app/server/src/services/camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_summary.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q`
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - the portfolio digest is export-safe evidence only and does not create activation, scheduling, or promotion authority
+  - the current official backlog still does not justify one new endpoint-verified candidate addition
+  - NZTA remains endpoint-only because the public REST/WADL family still does not pin a bounded camera payload or stable public media fields cleanly enough
+  - Arlington remains endpoint-only because the county JSON inventory is still metadata-only and does not expose stable public viewer or direct-image fields
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - use the new portfolio digest to guide the next bounded candidate review pass, but only widen the registry when a public no-auth source clears the same endpoint-pinning plus media-posture bar now encoded across the candidate-network, sandbox-readiness comparison, and portfolio digest surfaces
+
+## 2026-05-05 18:35:00 -05:00
+
+- Task: Record the new source-ops portfolio digest assignment version before implementation.
+- Assignment version read: `2026-05-05 18:33 America/Chicago`
+- What changed:
+  - re-read the repo-local next-task doc and confirmed a newer Manager assignment supersedes the completed sandbox-readiness comparison package pass
+  - started the bounded source-ops portfolio digest assignment under the updated version
+- Files touched:
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - repo-local next-task doc re-read before work
+- Blockers or caveats:
+  - implementation is still in progress for this assignment
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred in this checkpoint
+- Next recommended task:
+  - inspect the current candidate registry, source-ops detail/index/export surfaces, sandbox-validation surfaces, sandbox-readiness comparison package, and May candidate batch doc before adding one bounded portfolio digest artifact
+
+## 2026-05-05 18:29:39 -05:00
+
+- Task: Build one bounded sandbox-readiness comparison package over the current candidate cohort and widen the registry only if a new public no-auth candidate clears the existing endpoint/media bar.
+- Assignment version read: `2026-05-05 18:15 America/Chicago`
+- What changed:
+  - added the backend-only sandbox-readiness comparison artifact in [`app/server/src/services/camera_source_ops_sandbox_readiness_comparison.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_sandbox_readiness_comparison.py) and exposed it on the existing source-ops index and export-summary surfaces as `cameraSandboxReadinessComparisonReport`
+  - kept the artifact derived from the existing candidate-network rows so lifecycle, payload-shape, media-access, sandbox-feasibility, and source-health interpretation still come from the same bounded source-ops evidence path instead of creating a second lifecycle engine
+  - preserved explicit export-safe fields for the current sandbox-importable and endpoint-only cohort:
+    - lifecycle state
+    - payload-shape posture
+    - media-access posture
+    - sandbox-feasibility posture
+    - source-health posture
+    - missing-evidence count
+    - next safe review step
+    - export lines
+    - caveats
+    - does-not-prove lines
+  - kept the conservative comparison outcome unchanged:
+    - [`caltrans-cctv-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) remains the stronger `sandbox-comparator`
+    - [`nzta-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) remains an `endpoint-only-hold` with `endpoint-family-unpinned`
+    - [`arlington-traffic-cameras`](/C:/Users/mike/11Writer/app/server/src/services/camera_registry.py) remains an `endpoint-only-hold` with `media-proof-missing`
+  - re-reviewed the current documented backlog and did not add a new candidate record because none cleared the same endpoint-pinning plus media-posture bar already met by the current cohort
+  - updated the webcam subsystem, lifecycle policy, and May candidate batch docs so the new comparison package and the no-new-candidate outcome are recorded explicitly
+- Files touched:
+  - [`app/server/src/services/camera_source_ops_sandbox_readiness_comparison.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_sandbox_readiness_comparison.py)
+  - [`app/server/src/services/camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_report_index.py)
+  - [`app/server/src/services/camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/src/services/camera_source_ops_export_summary.py)
+  - [`app/server/src/types/api.py`](/C:/Users/mike/11Writer/app/server/src/types/api.py)
+  - [`app/server/tests/test_camera_source_ops_report_index.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_report_index.py)
+  - [`app/server/tests/test_camera_source_ops_export_summary.py`](/C:/Users/mike/11Writer/app/server/tests/test_camera_source_ops_export_summary.py)
+  - [`app/docs/webcams.md`](/C:/Users/mike/11Writer/app/docs/webcams.md)
+  - [`app/docs/webcam-source-lifecycle-policy.md`](/C:/Users/mike/11Writer/app/docs/webcam-source-lifecycle-policy.md)
+  - [`app/docs/webcam-global-camera-candidate-batch-2026-05.md`](/C:/Users/mike/11Writer/app/docs/webcam-global-camera-candidate-batch-2026-05.md)
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - `python -m pytest app/server/tests/test_webcam_module.py -q`
+  - `python -m pytest app/server/tests/test_camera_candidate_endpoint_report.py app/server/tests/test_camera_candidate_graduation_plan.py -q`
+  - `python -m pytest app/server/tests/test_camera_source_ops_report_index.py app/server/tests/test_camera_source_ops_detail.py app/server/tests/test_camera_source_ops_export_summary.py -q`
+  - `python -m pytest app/server/tests/test_camera_sandbox_validation_report.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - the comparison artifact is export-safe evidence only and does not create sandbox connectors, activation authority, or lifecycle promotion authority
+  - NZTA remains endpoint-only because the public REST/WADL family still does not pin a bounded camera payload or stable public media fields cleanly enough
+  - Arlington remains endpoint-only because the county JSON inventory is still metadata-only and does not expose stable public viewer or direct-image fields
+  - the current backlog re-review still does not justify one new endpoint-verified candidate addition
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred
+- Next recommended task:
+  - use the new comparison package to guide the next bounded candidate pass, but only widen the registry when a public no-auth source clears the same endpoint-pinning plus media-posture bar now encoded across the candidate-network and sandbox-readiness comparison surfaces
+
+## 2026-05-05 18:16:00 -05:00
+
+- Task: Record the new sandbox-readiness comparison assignment version before implementation.
+- Assignment version read: `2026-05-05 18:15 America/Chicago`
+- What changed:
+  - re-read the repo-local next-task doc and confirmed a newer Manager assignment supersedes the completed NZTA/Arlington feasibility comparison pass
+  - started the bounded sandbox-readiness comparison/reporting assignment under the updated version
+- Files touched:
+  - [`app/docs/agent-progress/features-webcam-ai.md`](/C:/Users/mike/11Writer/app/docs/agent-progress/features-webcam-ai.md)
+- Validation:
+  - repo-local next-task doc re-read before work
+- Blockers or caveats:
+  - implementation is still in progress for this assignment
+  - no source activation, validation promotion, scheduled ingestion, scraping, browser automation, staging, commit, or push occurred in this checkpoint
+- Next recommended task:
+  - inspect the current candidate registry, source-ops detail/index/export surfaces, sandbox validation surfaces, and May candidate batch doc before adding one bounded sandbox-readiness comparison artifact
+
 ## 2026-05-05 10:44:43 -05:00
 
 - Task: Compare NZTA and Arlington against the Caltrans sandbox comparator, harden backend sandbox-feasibility evidence, and re-review the backlog without widening the registry unless the same endpoint/media bar is met.

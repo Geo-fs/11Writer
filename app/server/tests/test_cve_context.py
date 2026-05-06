@@ -14,6 +14,8 @@ def _settings() -> Settings:
         NVD_CVE_FIXTURE_PATH=str(Path(__file__).resolve().parents[1] / "data" / "nvd_cve_fixture.json"),
         FIRST_EPSS_SOURCE_MODE="fixture",
         FIRST_EPSS_FIXTURE_PATH=str(Path(__file__).resolve().parents[1] / "data" / "first_epss_fixture.json"),
+        CISA_KEV_SOURCE_MODE="fixture",
+        CISA_KEV_FIXTURE_PATH=str(Path(__file__).resolve().parents[1] / "data" / "cisa_kev_catalog_fixture.json"),
         CISA_CYBER_ADVISORIES_SOURCE_MODE="fixture",
         CISA_CYBER_ADVISORIES_FIXTURE_PATH=str(
             Path(__file__).resolve().parents[1] / "data" / "cisa_cybersecurity_advisories_fixture.xml"
@@ -41,8 +43,10 @@ def test_cve_context_composition_joins_available_local_contexts_without_severity
     assert payload["epss"]["cveId"] == "CVE-2021-40438"
     assert "nvd" in payload["availableContexts"]
     assert "epss" in payload["availableContexts"]
+    assert "kev" in payload["availableContexts"]
     assert "cisa-advisories" in payload["availableContexts"]
     assert "feed-mentions" in payload["availableContexts"]
+    assert any(ref["sourceId"] == "cisa-kev-catalog" for ref in payload["kev"])
     assert any(ref["sourceId"] == "cisa-cyber-advisories" for ref in payload["cisaAdvisories"])
     assert any(ref["sourceId"] == "sans-isc-diary" for ref in payload["feedMentions"])
     assert any(ref["sourceId"] == "cert-fr-alerts" for ref in payload["feedMentions"])

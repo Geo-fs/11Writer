@@ -1,10 +1,15 @@
 import {
+  buildDataAiCurrentAwarenessDigest,
   buildDataAiFusionSnapshotSummary,
   buildDataAiInfrastructureStatusContextSummary,
   buildDataAiLongTailDiscoverySummary,
+  buildDataAiQuestionBriefingPacket,
+  buildDataAiReviewExportCoherenceSummary,
   buildDataAiReportBriefSummary,
   buildDataAiSourceIntelligenceSummary,
+  buildDataAiTopicSafeReportExportPacket,
   buildDataAiTopicReportPacket,
+  buildDataAiWorkflowEvidenceSnapshot,
   buildDataAiTopicLensSummary,
   DATA_AI_INFRASTRUCTURE_STATUS_FAMILY_ID,
   DATA_AI_INFRASTRUCTURE_STATUS_SOURCE_IDS
@@ -1348,6 +1353,111 @@ function runRegression() {
     infrastructureReview,
     infrastructureReviewQueue
   });
+  const workflowEvidenceSnapshot = buildDataAiWorkflowEvidenceSnapshot({
+    recent,
+    readiness,
+    review,
+    reviewQueue,
+    infrastructureRecent,
+    infrastructureReadiness,
+    infrastructureReview,
+    infrastructureReviewQueue
+  });
+  const worldNewsWorkflowEvidenceSnapshot = buildDataAiWorkflowEvidenceSnapshot({
+    topicId: "world-news",
+    recent,
+    readiness,
+    review,
+    reviewQueue,
+    infrastructureRecent,
+    infrastructureReadiness,
+    infrastructureReview,
+    infrastructureReviewQueue
+  });
+  const currentAwarenessDigest = buildDataAiCurrentAwarenessDigest({
+    recent,
+    readiness,
+    review,
+    reviewQueue,
+    infrastructureRecent,
+    infrastructureReadiness,
+    infrastructureReview,
+    infrastructureReviewQueue
+  });
+  const worldNewsCurrentAwarenessDigest = buildDataAiCurrentAwarenessDigest({
+    topicId: "world-news",
+    recent,
+    readiness,
+    review,
+    reviewQueue,
+    infrastructureRecent,
+    infrastructureReadiness,
+    infrastructureReview,
+    infrastructureReviewQueue
+  });
+  const reviewExportCoherenceSummary = buildDataAiReviewExportCoherenceSummary({
+    recent,
+    readiness,
+    review,
+    reviewQueue,
+    infrastructureRecent,
+    infrastructureReadiness,
+    infrastructureReview,
+    infrastructureReviewQueue
+  });
+  const worldNewsReviewExportCoherenceSummary = buildDataAiReviewExportCoherenceSummary({
+    topicId: "world-news",
+    recent,
+    readiness,
+    review,
+    reviewQueue,
+    infrastructureRecent,
+    infrastructureReadiness,
+    infrastructureReview,
+    infrastructureReviewQueue
+  });
+  const topicSafeReportExportPacket = buildDataAiTopicSafeReportExportPacket({
+    recent,
+    readiness,
+    review,
+    reviewQueue,
+    infrastructureRecent,
+    infrastructureReadiness,
+    infrastructureReview,
+    infrastructureReviewQueue
+  });
+  const worldNewsTopicSafeReportExportPacket = buildDataAiTopicSafeReportExportPacket({
+    topicId: "world-news",
+    recent,
+    readiness,
+    review,
+    reviewQueue,
+    infrastructureRecent,
+    infrastructureReadiness,
+    infrastructureReview,
+    infrastructureReviewQueue
+  });
+  const questionBriefingPacket = buildDataAiQuestionBriefingPacket({
+    recent,
+    readiness,
+    review,
+    reviewQueue,
+    infrastructureRecent,
+    infrastructureReadiness,
+    infrastructureReview,
+    infrastructureReviewQueue
+  });
+  const worldNewsQuestionBriefingPacket = buildDataAiQuestionBriefingPacket({
+    topicId: "world-news",
+    recent,
+    readiness,
+    review,
+    reviewQueue,
+    infrastructureRecent,
+    infrastructureReadiness,
+    infrastructureReview,
+    infrastructureReviewQueue
+  });
 
   assert(summary, "Summary should be built when readiness, review, and review-queue responses exist.");
   assert(
@@ -1374,6 +1484,46 @@ function runRegression() {
   assert(
     worldNewsTopicReportPacket,
     "Topic report packet should support explicit topic selection over the existing metadata-only surfaces."
+  );
+  assert(
+    workflowEvidenceSnapshot,
+    "Workflow-evidence snapshot should be built when the existing Data AI reporting-path metadata surfaces exist."
+  );
+  assert(
+    worldNewsWorkflowEvidenceSnapshot,
+    "Workflow-evidence snapshot should support explicit topic selection over the current reporting path."
+  );
+  assert(
+    currentAwarenessDigest,
+    "Current-awareness digest should be built when the existing Data AI family/topic/report/workflow metadata surfaces exist."
+  );
+  assert(
+    worldNewsCurrentAwarenessDigest,
+    "Current-awareness digest should support explicit topic selection over the current reporting path."
+  );
+  assert(
+    reviewExportCoherenceSummary,
+    "Review/export coherence summary should be built when the existing Data AI review, queue, readiness, topic, report, workflow, and digest surfaces exist."
+  );
+  assert(
+    worldNewsReviewExportCoherenceSummary,
+    "Review/export coherence summary should support explicit topic selection over the current reporting path."
+  );
+  assert(
+    topicSafeReportExportPacket,
+    "Topic-safe report export packet should be built when the existing Data AI topic/report/workflow/coherence surfaces exist."
+  );
+  assert(
+    worldNewsTopicSafeReportExportPacket,
+    "Topic-safe report export packet should support explicit topic selection over the current reporting path."
+  );
+  assert(
+    questionBriefingPacket,
+    "Question briefing packet should be built when the existing Data AI topic/report/workflow/export surfaces exist."
+  );
+  assert(
+    worldNewsQuestionBriefingPacket,
+    "Question briefing packet should support explicit topic selection over the current reporting path."
   );
   assert(
     summary.workflowValidationState === "workflow-supporting-evidence-only",
@@ -1572,6 +1722,270 @@ function runRegression() {
         (line) => /bbc-world: contextual \| media-world \| source health loaded/i.test(line)
       ),
     "Explicit world-news topic packet should preserve the bounded world-news family and metadata-only recent evidence lines."
+  );
+  assert(
+    workflowEvidenceSnapshot.workflowValidationState === "workflow-supporting-evidence-only" &&
+      workflowEvidenceSnapshot.topicId === topicReportPacket.topicId,
+    "Workflow-evidence snapshot should remain workflow-supporting evidence only and inherit the active topic packet lineage."
+  );
+  assert(
+    workflowEvidenceSnapshot.selectedFamilyIds.includes("official-advisories") &&
+      workflowEvidenceSnapshot.evidenceBases.includes("advisory") &&
+      workflowEvidenceSnapshot.evidenceBases.includes("contextual"),
+    "Workflow-evidence snapshot should preserve family-filter coverage and evidence bases from the reporting path."
+  );
+  assert(
+    /Topic-packet lineage/i.test(workflowEvidenceSnapshot.topicPacketLineageLine) &&
+      /Report-packet lineage/i.test(workflowEvidenceSnapshot.reportPacketLineageLine),
+    "Workflow-evidence snapshot should preserve explicit topic-packet and report-packet lineage."
+  );
+  assert(
+    /export gaps 0|export gaps 1/i.test(workflowEvidenceSnapshot.readinessLine) &&
+      /prompt injection fixture-backed-inert-text-checks/i.test(workflowEvidenceSnapshot.readinessLine),
+    "Workflow-evidence snapshot should preserve readiness and prompt-injection posture."
+  );
+  assert(
+    workflowEvidenceSnapshot.exportLines.length > 0 &&
+      workflowEvidenceSnapshot.exportLines.every((line) => !/https?:\/\//i.test(line)),
+    "Workflow-evidence snapshot export lines should stay metadata-only and URL-free."
+  );
+  assert(
+    workflowEvidenceSnapshot.displayLines.every(
+      (line) =>
+        !/IGNORE ALL PRIOR INSTRUCTIONS|Ignorez les instructions precedentes|attacker\.example|recommend action/i.test(
+          line
+        )
+    ),
+    "Workflow-evidence snapshot display lines should not leak hostile or free-form feed text."
+  );
+  assert(
+    /does not prove workflow validation|does not prove/i.test(workflowEvidenceSnapshot.doesNotProveLine) &&
+      /metadata-only workflow support/i.test(workflowEvidenceSnapshot.guardrailLine) &&
+      !/truth score|severity score|threat score|legal score|action score/i.test(
+        workflowEvidenceSnapshot.guardrailLine
+      ),
+    "Workflow-evidence snapshot should preserve does-not-prove and no-scoring guardrails."
+  );
+  assert(
+    worldNewsWorkflowEvidenceSnapshot.topicId === "world-news" &&
+      worldNewsWorkflowEvidenceSnapshot.topicLabel === "World News" &&
+      worldNewsWorkflowEvidenceSnapshot.selectedSourceIds.includes("bbc-world"),
+    "Explicit world-news workflow-evidence snapshot should preserve bounded world-news reporting lineage."
+  );
+  assert(
+    currentAwarenessDigest.workflowValidationState === "workflow-supporting-evidence-only" &&
+      currentAwarenessDigest.topicId === topicReportPacket.topicId,
+    "Current-awareness digest should remain workflow-supporting evidence only and inherit the active topic packet."
+  );
+  assert(
+    currentAwarenessDigest.sections.map((section) => section.sectionId).join(",") ===
+      "observe,orient,prioritize,explain",
+    "Current-awareness digest should preserve deterministic observe/orient/prioritize/explain section order."
+  );
+  assert(
+    currentAwarenessDigest.evidenceBases.includes("advisory") &&
+      currentAwarenessDigest.evidenceBases.includes("contextual") &&
+      currentAwarenessDigest.selectedFamilyIds.includes("official-advisories"),
+    "Current-awareness digest should preserve bounded evidence posture and family coverage from the active topic packet."
+  );
+  assert(
+    /Workflow lineage:/i.test(currentAwarenessDigest.workflowLineageLine) &&
+      /topic issues|export gaps|prompt injection/i.test(currentAwarenessDigest.attentionLine),
+    "Current-awareness digest should preserve explicit workflow lineage and attention posture."
+  );
+  assert(
+    currentAwarenessDigest.familyCoverageLines.some((line) => /Evidence class advisory:/i.test(line)) &&
+      currentAwarenessDigest.familyCoverageLines.every(
+        (line) =>
+          !/IGNORE ALL PRIOR INSTRUCTIONS|Ignorez les instructions precedentes|attacker\.example|recommend action/i.test(
+            line
+          )
+      ),
+    "Current-awareness digest should preserve inert metadata-only family-coverage lines."
+  );
+  assert(
+    currentAwarenessDigest.exportLines.length > 0 &&
+      currentAwarenessDigest.exportLines.every((line) => !/https?:\/\//i.test(line)),
+    "Current-awareness digest export lines should stay metadata-only and URL-free."
+  );
+  assert(
+    currentAwarenessDigest.displayLines.every(
+      (line) =>
+        !/IGNORE ALL PRIOR INSTRUCTIONS|Ignorez les instructions precedentes|attacker\.example|recommend action/i.test(
+          line
+        )
+    ),
+    "Current-awareness digest display lines should not leak hostile or free-form feed text."
+  );
+  assert(
+    /does not prove/i.test(currentAwarenessDigest.doesNotProveLine) &&
+      /metadata-only workflow support/i.test(currentAwarenessDigest.guardrailLine) &&
+      !/truth score|severity score|threat score|legal score|action score/i.test(
+        currentAwarenessDigest.guardrailLine
+      ),
+    "Current-awareness digest should preserve does-not-prove and no-scoring guardrails."
+  );
+  assert(
+    worldNewsCurrentAwarenessDigest.topicId === "world-news" &&
+      worldNewsCurrentAwarenessDigest.topicLabel === "World News" &&
+      worldNewsCurrentAwarenessDigest.selectedSourceIds.includes("bbc-world") &&
+      worldNewsCurrentAwarenessDigest.activeTopicIds.includes("world-news"),
+    "Explicit world-news current-awareness digest should preserve bounded world-news topic selection and active-topic posture."
+  );
+  assert(
+    reviewExportCoherenceSummary.workflowValidationState === "workflow-supporting-evidence-only" &&
+      reviewExportCoherenceSummary.topicId === currentAwarenessDigest.topicId,
+    "Review/export coherence summary should remain workflow-supporting evidence only and inherit the active digest topic."
+  );
+  assert(
+    /Family-review posture:/i.test(reviewExportCoherenceSummary.familyReviewLine) &&
+      /Review-queue posture:/i.test(reviewExportCoherenceSummary.reviewQueueLine) &&
+      /Readiness\/export posture:/i.test(reviewExportCoherenceSummary.readinessExportLine),
+    "Review/export coherence summary should preserve explicit family-review, review-queue, and readiness/export posture lines."
+  );
+  assert(
+    /lineage aligned/i.test(reviewExportCoherenceSummary.topicReportLineageLine) &&
+      /sections aligned/i.test(reviewExportCoherenceSummary.topicReportLineageLine),
+    "Review/export coherence summary should preserve aligned topic/report/digest lineage and section-order checks."
+  );
+  assert(
+    reviewExportCoherenceSummary.sourceModes.includes("fixture") &&
+      reviewExportCoherenceSummary.selectedFamilyIds.includes("official-advisories") &&
+      reviewExportCoherenceSummary.selectedSourceIds.includes("cisa-cybersecurity-advisories"),
+    "Review/export coherence summary should preserve active family/source filters and source-mode posture."
+  );
+  assert(
+    reviewExportCoherenceSummary.exportLines.length > 0 &&
+      reviewExportCoherenceSummary.exportLines.every((line) => !/https?:\/\//i.test(line)),
+    "Review/export coherence export lines should stay metadata-only and URL-free."
+  );
+  assert(
+    reviewExportCoherenceSummary.displayLines.every(
+      (line) =>
+        !/IGNORE ALL PRIOR INSTRUCTIONS|Ignorez les instructions precedentes|attacker\.example|recommend action/i.test(
+          line
+        )
+    ),
+    "Review/export coherence display lines should not leak hostile or free-form feed text."
+  );
+  assert(
+    /does not prove/i.test(reviewExportCoherenceSummary.doesNotProveLine) &&
+      /metadata-only workflow support/i.test(reviewExportCoherenceSummary.guardrailLine) &&
+      !/truth score|severity score|threat score|legal score|action score/i.test(
+        reviewExportCoherenceSummary.guardrailLine
+      ),
+    "Review/export coherence summary should preserve does-not-prove and no-scoring guardrails."
+  );
+  assert(
+    worldNewsReviewExportCoherenceSummary.topicId === "world-news" &&
+      worldNewsReviewExportCoherenceSummary.topicLabel === "World News" &&
+      worldNewsReviewExportCoherenceSummary.selectedSourceIds.includes("bbc-world"),
+    "Explicit world-news review/export coherence summary should preserve bounded world-news coherence posture."
+  );
+  assert(
+    topicSafeReportExportPacket.workflowValidationState === "workflow-supporting-evidence-only" &&
+      topicSafeReportExportPacket.topicId === currentAwarenessDigest.topicId,
+    "Topic-safe report export packet should remain workflow-supporting evidence only and inherit the active topic."
+  );
+  assert(
+    topicSafeReportExportPacket.lineageLines.length >= 3 &&
+      topicSafeReportExportPacket.lineageLines.some((line) => /Topic-packet lineage:/i.test(line)) &&
+      topicSafeReportExportPacket.lineageLines.some((line) => /Workflow lineage:/i.test(line)) &&
+      topicSafeReportExportPacket.lineageLines.some((line) => /Topic\/report coherence:/i.test(line)),
+    "Topic-safe report export packet should preserve lineage across topic packet, workflow snapshot, digest, and coherence summary."
+  );
+  assert(
+    topicSafeReportExportPacket.familyCoverageLines.some((line) => /Evidence class advisory:/i.test(line)) &&
+      topicSafeReportExportPacket.evidenceBases.includes("advisory") &&
+      topicSafeReportExportPacket.evidenceBases.includes("contextual"),
+    "Topic-safe report export packet should preserve evidence-class family coverage."
+  );
+  assert(
+    /topic issues|review issues|export gaps|prompt injection/i.test(
+      topicSafeReportExportPacket.reviewReadinessLine
+    ) &&
+      /source modes|loaded/i.test(topicSafeReportExportPacket.activeSourcePostureLine),
+    "Topic-safe report export packet should preserve review/readiness and active-source posture lines."
+  );
+  assert(
+    topicSafeReportExportPacket.exportLines.length > 0 &&
+      topicSafeReportExportPacket.exportLines.every((line) => !/https?:\/\//i.test(line)),
+    "Topic-safe report export packet export lines should stay metadata-only and URL-free."
+  );
+  assert(
+    topicSafeReportExportPacket.displayLines.every(
+      (line) =>
+        !/IGNORE ALL PRIOR INSTRUCTIONS|Ignorez les instructions precedentes|attacker\.example|recommend action/i.test(
+          line
+        )
+    ),
+    "Topic-safe report export packet display lines should not leak hostile or free-form feed text."
+  );
+  assert(
+    /does not prove/i.test(topicSafeReportExportPacket.doesNotProveLine) &&
+      /metadata-only workflow support/i.test(topicSafeReportExportPacket.guardrailLine) &&
+      !/truth score|severity score|threat score|legal score|action score/i.test(
+        topicSafeReportExportPacket.guardrailLine
+      ),
+    "Topic-safe report export packet should preserve does-not-prove and no-scoring guardrails."
+  );
+  assert(
+    worldNewsTopicSafeReportExportPacket.topicId === "world-news" &&
+      worldNewsTopicSafeReportExportPacket.topicLabel === "World News" &&
+      worldNewsTopicSafeReportExportPacket.selectedSourceIds.includes("bbc-world"),
+    "Explicit world-news topic-safe report export packet should preserve bounded world-news export posture."
+  );
+  assert(
+    questionBriefingPacket.workflowValidationState === "workflow-supporting-evidence-only" &&
+      questionBriefingPacket.topicId === topicSafeReportExportPacket.topicId,
+    "Question briefing packet should remain workflow-supporting evidence only and inherit the active topic-safe export packet topic."
+  );
+  assert(
+    /Briefing timeframe:/i.test(questionBriefingPacket.timeframeLine) &&
+      /Freshness posture:/i.test(questionBriefingPacket.freshnessLine),
+    "Question briefing packet should preserve explicit timeframe and freshness posture."
+  );
+  assert(
+    questionBriefingPacket.familyCoverageLines.some((line) => /Evidence class advisory:/i.test(line)) &&
+      questionBriefingPacket.lineageLines.some((line) => /Topic-packet lineage:/i.test(line)) &&
+      questionBriefingPacket.lineageLines.some((line) => /Topic\/report coherence:/i.test(line)),
+    "Question briefing packet should preserve evidence-class family coverage and multi-helper lineage."
+  );
+  assert(
+    questionBriefingPacket.unansweredQuestionLines.length >= 2 &&
+      questionBriefingPacket.unansweredQuestionLines.some((line) => /Open review gaps:/i.test(line)) &&
+      questionBriefingPacket.unansweredQuestionLines.some(
+        (line) => /Unanswered-question posture:|Freshness question:/i.test(line)
+      ),
+    "Question briefing packet should preserve open review-gap and unanswered-question posture lines."
+  );
+  assert(
+    questionBriefingPacket.exportLines.length > 0 &&
+      questionBriefingPacket.exportLines.every((line) => !/https?:\/\//i.test(line)),
+    "Question briefing packet export lines should stay metadata-only and URL-free."
+  );
+  assert(
+    questionBriefingPacket.displayLines.every(
+      (line) =>
+        !/IGNORE ALL PRIOR INSTRUCTIONS|Ignorez les instructions precedentes|attacker\.example|recommend action/i.test(
+          line
+        )
+    ),
+    "Question briefing packet display lines should not leak hostile or free-form feed text."
+  );
+  assert(
+    /does not prove/i.test(questionBriefingPacket.doesNotProveLine) &&
+      /metadata-only workflow support/i.test(questionBriefingPacket.guardrailLine) &&
+      !/truth score|severity score|threat score|legal score|action score|corroboration score/i.test(
+        questionBriefingPacket.guardrailLine
+      ),
+    "Question briefing packet should preserve does-not-prove and no-scoring/no-corroboration guardrails."
+  );
+  assert(
+    worldNewsQuestionBriefingPacket.topicId === "world-news" &&
+      worldNewsQuestionBriefingPacket.topicLabel === "World News" &&
+      worldNewsQuestionBriefingPacket.selectedSourceIds.includes("bbc-world"),
+    "Explicit world-news question briefing packet should preserve bounded world-news briefing posture."
   );
   assert(
     infrastructureSummary.workflowValidationState === "workflow-supporting-evidence-only",

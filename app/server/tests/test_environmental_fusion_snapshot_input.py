@@ -35,8 +35,16 @@ def _settings() -> Settings:
         HKO_FIXTURE_PATH=_fixture("hko_weather_fixture.json"),
         METNO_METALERTS_SOURCE_MODE="fixture",
         METNO_METALERTS_FIXTURE_PATH=_fixture("metno_metalerts_fixture.json"),
+        NWS_ALERTS_SOURCE_MODE="fixture",
+        NWS_ALERTS_FIXTURE_PATH=_fixture("nws_alerts_fixture.json"),
+        NHC_GIS_SOURCE_MODE="fixture",
+        NHC_GIS_FIXTURE_PATH=_fixture("nhc_gis_atlantic_fixture.xml"),
         CANADA_CAP_SOURCE_MODE="fixture",
         CANADA_CAP_FIXTURE_PATH=_fixture("canada_cap_index_fixture.html"),
+        NOAA_NOWCOAST_SOURCE_MODE="fixture",
+        NOAA_NOWCOAST_FIXTURE_PATH=_fixture("noaa_nowcoast_layer_catalog_fixture.json"),
+        METEOALARM_ATOM_SOURCE_MODE="fixture",
+        METEOALARM_ATOM_FIXTURE_PATH=_fixture("meteoalarm_atom_norway_fixture.xml"),
         DWD_CAP_SOURCE_MODE="fixture",
         DWD_CAP_FIXTURE_PATH=_fixture("dwd_cap_directory_fixture.html"),
         IPMA_SOURCE_MODE="fixture",
@@ -53,6 +61,8 @@ def _settings() -> Settings:
         GSHHG_SHORELINES_FIXTURE_PATH=_fixture("gshhg_shorelines_fixture.json"),
         PB2002_PLATE_BOUNDARIES_SOURCE_MODE="fixture",
         PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=_fixture("pb2002_plate_boundaries_fixture.json"),
+        GEOBOUNDARIES_ADMIN_SOURCE_MODE="fixture",
+        GEOBOUNDARIES_ADMIN_FIXTURE_PATH=_fixture("geoboundaries_admin_bel_adm1_fixture.json"),
         NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
         NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=_fixture("noaa_global_volcano_locations_fixture.json"),
         TAIWAN_CWA_SOURCE_MODE="fixture",
@@ -103,6 +113,10 @@ def test_environmental_fusion_snapshot_input_keeps_dynamic_and_static_context_se
     assert "base-earth-reference" not in payload["dynamicFamilyIds"]
     assert payload["dynamicEnvironmentalContext"]["metadata"]["profile"] == "source-health-review"
     assert "dwd-cap-alerts" in payload["dynamicSourceIds"]
+    assert "meteoalarm-atom-feeds" in payload["dynamicSourceIds"]
+    assert "nws-alerts" in payload["dynamicSourceIds"]
+    assert "noaa-nhc-gis-atlantic" in payload["dynamicSourceIds"]
+    assert "noaa-nowcoast-ogc" in payload["dynamicSourceIds"]
     assert payload["canadaContext"]["metadata"]["source"] == "environmental-canada-context-export-package"
     assert payload["baseEarthReference"]["metadata"]["source"] == "environmental-base-earth-export-package"
     assert payload["glacierReference"]["sourceId"] == "rgi-glacier-inventory"

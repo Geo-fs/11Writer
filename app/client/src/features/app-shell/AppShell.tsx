@@ -14,6 +14,7 @@ import {
   buildAerospaceGeomagnetismContextSummary,
   buildAerospaceGeomagnetismExportLines
 } from "../inspector/aerospaceGeomagnetismContext";
+import { buildAerospaceGpsJamContextSummary } from "../inspector/aerospaceGpsJamContext";
 import { buildAerospaceVaacContextSummary } from "../inspector/aerospaceVaacContext";
 import { buildAerospaceVaacAdvisoryReportPackageSummary } from "../inspector/aerospaceVaacAdvisoryReportPackage";
 import {
@@ -41,7 +42,12 @@ import { buildAerospaceEvidenceTimelinePackageSummary } from "../inspector/aeros
 import { buildAerospacePackageCoherenceSummary } from "../inspector/aerospacePackageCoherence";
 import { buildAerospaceFusionSnapshotInputSummary } from "../inspector/aerospaceFusionSnapshotInput";
 import { buildAerospaceReportBriefPackageSummary } from "../inspector/aerospaceReportBriefPackage";
+import { buildAerospaceSelectedTargetOperationalQuestionPacketSummary } from "../inspector/aerospaceSelectedTargetOperationalQuestionPacket";
 import { buildAerospaceSpaceWeatherContinuityPackageSummary } from "../inspector/aerospaceSpaceWeatherContinuityPackage";
+import { buildAerospaceCurrentAwarenessDigestSummary } from "../inspector/aerospaceCurrentAwarenessDigest";
+import { buildAerospaceReportingHandoffContractSummary } from "../inspector/aerospaceReportingHandoffContract";
+import { buildAerospaceQuestionBriefingPacketSummary } from "../inspector/aerospaceQuestionBriefingPacket";
+import { buildAerospaceHazardContextConsumerPacketSummary } from "../inspector/aerospaceHazardContextConsumerPacket";
 import {
   buildAerospaceSourceReadinessBundleSummary,
   buildAerospaceSourceReadinessSummary
@@ -89,6 +95,9 @@ import {
 } from "../inspector/aerospaceSourceHealth";
 import { TopBar } from "../status/TopBar";
 import { HudBar } from "../status/HudBar";
+import { WorkbenchActivityRail } from "../workbench/WorkbenchActivityRail";
+import { WorkbenchShell } from "../workbench/WorkbenchShell";
+import type { WorkbenchModeId } from "../workbench/workbenchModes";
 import {
   useAircraftReferenceLinkQuery,
   useAviationWeatherContextQuery,
@@ -99,11 +108,14 @@ import {
   useEarthquakeEventsQuery,
   useEonetEventsQuery,
   useFaaNasAirportStatusQuery,
+  useGpsJamContextQuery,
   useGeoNetHazardsQuery,
   useHkoWeatherQuery,
   useMetNoMetAlertsQuery,
   useNearestAirportReferenceQuery,
   useNearestRunwayThresholdReferenceQuery,
+  useNoaaNowCoastLayerCatalogQuery,
+  useNwsAlertsRecentQuery,
   useOpenSkyStatesQuery,
   useOurAirportsReferenceQuery,
   usePublicConfigQuery,
@@ -202,6 +214,7 @@ type DebugWindow = Window & {
     openskyAnonymousContext?: unknown;
     cneosSpaceContext?: unknown;
     swpcSpaceWeatherContext?: unknown;
+    gpsjamContext?: unknown;
     nceiSpaceWeatherArchiveContext?: unknown;
     aerospaceCurrentArchiveContext?: unknown;
     vaacContext?: unknown;
@@ -224,8 +237,13 @@ type DebugWindow = Window & {
     aerospaceEvidenceTimelinePackage?: unknown;
     aerospaceFusionSnapshotInput?: unknown;
     aerospaceReportBriefPackage?: unknown;
+    aerospaceSelectedTargetOperationalQuestionPacket?: unknown;
     aerospaceSpaceWeatherContinuityPackage?: unknown;
     aerospaceVaacAdvisoryReportPackage?: unknown;
+    aerospaceCurrentAwarenessDigest?: unknown;
+    aerospaceReportingHandoffContract?: unknown;
+    aerospaceQuestionBriefingPacket?: unknown;
+    aerospaceHazardContextConsumerPacket?: unknown;
     aerospacePackageCoherence?: unknown;
     aerospaceContextReport?: unknown;
     aerospaceExportProfile?: unknown;
@@ -550,6 +568,7 @@ if (debugTarget) {
 }
 
 export function AppShell() {
+  const activeWorkbenchModeId: WorkbenchModeId = "map";
   const [viewer, setViewer] = useState<Viewer | null>(null);
   const initializedFromViewStateRef = useRef(false);
   const imageryRestoreAppliedRef = useRef(false);
@@ -795,6 +814,20 @@ export function AppShell() {
   const nceiSpaceWeatherArchiveQuery = useNceiSpaceWeatherArchiveQuery({
     enabled: selectedAircraft != null || selectedSatellite != null,
   });
+  const gpsJamContextQuery = useGpsJamContextQuery({
+    enabled: selectedAircraft != null || selectedSatellite != null,
+    limit: 5,
+  });
+  const nwsAlertsRecentQuery = useNwsAlertsRecentQuery({
+    enabled: selectedAircraft != null || selectedSatellite != null,
+    limit: 3,
+    sort: "severity",
+  });
+  const noaaNowCoastLayerCatalogQuery = useNoaaNowCoastLayerCatalogQuery({
+    enabled: selectedAircraft != null || selectedSatellite != null,
+    group: "hazards",
+    limit: 3,
+  });
   const washingtonVaacQuery = useWashingtonVaacAdvisoriesQuery({
     enabled: selectedAircraft != null || selectedSatellite != null,
     limit: 2
@@ -839,6 +872,10 @@ export function AppShell() {
   const nceiSpaceWeatherArchiveSourceHealth =
     selectedAircraft != null || selectedSatellite != null
       ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "noaa-ncei-space-weather-portal") ?? null
+      : null;
+  const gpsJamSourceHealth =
+    selectedAircraft != null || selectedSatellite != null
+      ? (sourceStatusQuery.data?.sources ?? []).find((source) => source.name === "gpsjam-gnss-interference") ?? null
       : null;
   const washingtonVaacSourceHealth =
     selectedAircraft != null || selectedSatellite != null
@@ -885,6 +922,10 @@ export function AppShell() {
   const nceiSpaceWeatherArchiveSummary = buildAerospaceSpaceWeatherArchiveContextSummary({
     context: nceiSpaceWeatherArchiveQuery.data,
     sourceHealth: nceiSpaceWeatherArchiveSourceHealth
+  });
+  const gpsJamContextSummary = buildAerospaceGpsJamContextSummary({
+    context: gpsJamContextQuery.data,
+    sourceHealth: gpsJamSourceHealth,
   });
   const aerospaceCurrentArchiveContextSummary = buildAerospaceCurrentArchiveContextSummary({
     currentSummary: swpcSpaceWeatherSummary,
@@ -1316,6 +1357,7 @@ export function AppShell() {
     const geomagnetismLines = buildAerospaceGeomagnetismExportLines(geomagnetismSummary);
     const cneosSpaceContextLines = buildAerospaceSpaceContextExportLines(cneosSpaceContextSummary);
     const swpcSpaceWeatherLines = buildAerospaceSpaceWeatherExportLines(swpcSpaceWeatherSummary);
+    const gpsJamContextLines = gpsJamContextSummary?.exportLines ?? [];
     const nceiSpaceWeatherArchiveLines = buildAerospaceSpaceWeatherArchiveExportLines(
       nceiSpaceWeatherArchiveSummary
     );
@@ -1349,6 +1391,7 @@ export function AppShell() {
       geomagnetismLines,
       cneosSpaceContextLines,
       swpcSpaceWeatherLines,
+      gpsJamContextLines,
       nceiSpaceWeatherArchiveLines,
       currentArchiveSpaceWeatherLines,
       vaacContextLines,
@@ -1470,6 +1513,72 @@ export function AppShell() {
         vaacContextSummary,
         reportBriefPackageSummary: aerospaceReportBriefPackageSummary,
       });
+    const aerospaceSelectedTargetOperationalQuestionPacketSummary =
+      buildAerospaceSelectedTargetOperationalQuestionPacketSummary({
+        selectedTargetSummary,
+        weatherSummary: aviationWeatherSummary,
+        airportStatusSummary: faaNasAirportStatusSummary,
+        openSkySummary: openSkyContextSummary,
+        gpsJamSummary: gpsJamContextSummary,
+        operationalContextSummary: aerospaceOperationalContextSummary,
+        reportBriefPackageSummary: aerospaceReportBriefPackageSummary,
+        spaceWeatherContinuityPackageSummary: aerospaceSpaceWeatherContinuityPackageSummary,
+        vaacAdvisoryReportPackageSummary: aerospaceVaacAdvisoryReportPackageSummary,
+      });
+    const aerospaceCurrentAwarenessDigestSummary =
+      buildAerospaceCurrentAwarenessDigestSummary({
+        selectedTargetSummary,
+        gpsJamSummary: gpsJamContextSummary,
+        operationalContextSummary: aerospaceOperationalContextSummary,
+        reportBriefPackageSummary: aerospaceReportBriefPackageSummary,
+        selectedTargetOperationalQuestionPacketSummary:
+          aerospaceSelectedTargetOperationalQuestionPacketSummary,
+        spaceWeatherContinuityPackageSummary:
+          aerospaceSpaceWeatherContinuityPackageSummary,
+        vaacAdvisoryReportPackageSummary: aerospaceVaacAdvisoryReportPackageSummary,
+        workflowEvidenceLedgerSummary: aerospaceWorkflowEvidenceLedgerSummary,
+        workflowValidationEvidenceSnapshotSummary:
+          aerospaceWorkflowValidationEvidenceSnapshotSummary,
+      });
+    const aerospaceReportingHandoffContractSummary =
+      buildAerospaceReportingHandoffContractSummary({
+        selectedTargetSummary,
+        reportBriefPackageSummary: aerospaceReportBriefPackageSummary,
+        selectedTargetOperationalQuestionPacketSummary:
+          aerospaceSelectedTargetOperationalQuestionPacketSummary,
+        currentAwarenessDigestSummary: aerospaceCurrentAwarenessDigestSummary,
+        spaceWeatherContinuityPackageSummary:
+          aerospaceSpaceWeatherContinuityPackageSummary,
+        vaacAdvisoryReportPackageSummary: aerospaceVaacAdvisoryReportPackageSummary,
+        workflowEvidenceLedgerSummary: aerospaceWorkflowEvidenceLedgerSummary,
+        workflowValidationEvidenceSnapshotSummary:
+          aerospaceWorkflowValidationEvidenceSnapshotSummary,
+      });
+    const aerospaceQuestionBriefingPacketSummary =
+      buildAerospaceQuestionBriefingPacketSummary({
+        selectedTargetSummary,
+        reportBriefPackageSummary: aerospaceReportBriefPackageSummary,
+        selectedTargetOperationalQuestionPacketSummary:
+          aerospaceSelectedTargetOperationalQuestionPacketSummary,
+        currentAwarenessDigestSummary: aerospaceCurrentAwarenessDigestSummary,
+        reportingHandoffContractSummary: aerospaceReportingHandoffContractSummary,
+        spaceWeatherContinuityPackageSummary:
+          aerospaceSpaceWeatherContinuityPackageSummary,
+        vaacAdvisoryReportPackageSummary: aerospaceVaacAdvisoryReportPackageSummary,
+        workflowEvidenceLedgerSummary: aerospaceWorkflowEvidenceLedgerSummary,
+        workflowValidationEvidenceSnapshotSummary:
+          aerospaceWorkflowValidationEvidenceSnapshotSummary,
+      });
+    const aerospaceHazardContextConsumerPacketSummary =
+      buildAerospaceHazardContextConsumerPacketSummary({
+        selectedTargetSummary,
+        gpsJamSummary: gpsJamContextSummary,
+        nwsAlerts: nwsAlertsRecentQuery.data,
+        nowCoast: noaaNowCoastLayerCatalogQuery.data,
+        reportBriefPackageSummary: aerospaceReportBriefPackageSummary,
+        workflowValidationEvidenceSnapshotSummary:
+          aerospaceWorkflowValidationEvidenceSnapshotSummary,
+      });
     const exportProfileSummary = buildAerospaceExportProfileSummary({
       profileId: selectedAerospaceExportProfile,
       selectedTargetLines: summaryLines,
@@ -1501,6 +1610,16 @@ export function AppShell() {
       evidenceTimelineLines: aerospaceEvidenceTimelinePackageSummary?.exportLines ?? [],
       fusionSnapshotInputLines: aerospaceFusionSnapshotInputSummary?.exportLines ?? [],
       reportBriefPackageLines: aerospaceReportBriefPackageSummary?.exportLines ?? [],
+      selectedTargetOperationalQuestionPacketLines:
+        aerospaceSelectedTargetOperationalQuestionPacketSummary?.exportLines ?? [],
+      currentAwarenessDigestLines:
+        aerospaceCurrentAwarenessDigestSummary?.exportLines ?? [],
+      reportingHandoffContractLines:
+        aerospaceReportingHandoffContractSummary?.exportLines ?? [],
+      questionBriefingPacketLines:
+        aerospaceQuestionBriefingPacketSummary?.exportLines ?? [],
+      hazardContextConsumerPacketLines:
+        aerospaceHazardContextConsumerPacketSummary?.exportLines ?? [],
       spaceWeatherContinuityPackageLines:
         aerospaceSpaceWeatherContinuityPackageSummary?.exportLines ?? [],
       vaacAdvisoryReportPackageLines:
@@ -2211,6 +2330,28 @@ export function AppShell() {
               caveats: swpcSpaceWeatherSummary.caveats.slice(0, 4),
             }
           : null,
+        gpsjamContext: gpsJamContextSummary
+          ? {
+              source: gpsJamContextSummary.source,
+              sourceMode: gpsJamContextSummary.sourceMode,
+              sourceHealth: gpsJamContextSummary.sourceHealth,
+              sourceState: gpsJamContextSummary.sourceState,
+              date: gpsJamContextSummary.date,
+              earliestAvailableDate: gpsJamContextSummary.earliestAvailableDate,
+              latestAvailableDate: gpsJamContextSummary.latestAvailableDate,
+              suspect: gpsJamContextSummary.suspect,
+              dataVersion: gpsJamContextSummary.dataVersion,
+              sampleCount: gpsJamContextSummary.sampleCount,
+              totalHexCount: gpsJamContextSummary.totalHexCount,
+              badHexCount: gpsJamContextSummary.badHexCount,
+              topInterferenceLevel: gpsJamContextSummary.topInterferenceLevel,
+              topPercentBadAircraft: gpsJamContextSummary.topPercentBadAircraft,
+              summaryLine: gpsJamContextSummary.summaryLine,
+              displayLines: gpsJamContextSummary.displayLines.slice(0, 6),
+              caveats: gpsJamContextSummary.caveats.slice(0, 4),
+              doesNotProveLines: gpsJamContextSummary.doesNotProveLines.slice(0, 2),
+            }
+          : null,
         nceiSpaceWeatherArchiveContext: nceiSpaceWeatherArchiveSummary
           ? {
               source: nceiSpaceWeatherArchiveSummary.source,
@@ -2332,6 +2473,22 @@ export function AppShell() {
           : null,
         aerospaceReportBriefPackage: aerospaceReportBriefPackageSummary
           ? aerospaceReportBriefPackageSummary.metadata
+          : null,
+        aerospaceSelectedTargetOperationalQuestionPacket:
+          aerospaceSelectedTargetOperationalQuestionPacketSummary
+            ? aerospaceSelectedTargetOperationalQuestionPacketSummary.metadata
+            : null,
+        aerospaceCurrentAwarenessDigest: aerospaceCurrentAwarenessDigestSummary
+          ? aerospaceCurrentAwarenessDigestSummary.metadata
+          : null,
+        aerospaceReportingHandoffContract: aerospaceReportingHandoffContractSummary
+          ? aerospaceReportingHandoffContractSummary.metadata
+          : null,
+        aerospaceQuestionBriefingPacket: aerospaceQuestionBriefingPacketSummary
+          ? aerospaceQuestionBriefingPacketSummary.metadata
+          : null,
+        aerospaceHazardContextConsumerPacket: aerospaceHazardContextConsumerPacketSummary
+          ? aerospaceHazardContextConsumerPacketSummary.metadata
           : null,
         aerospaceSpaceWeatherContinuityPackage: aerospaceSpaceWeatherContinuityPackageSummary
           ? aerospaceSpaceWeatherContinuityPackageSummary.metadata
@@ -2601,7 +2758,10 @@ export function AppShell() {
     openSkyContextSummary,
     ourAirportsReferenceSummary,
     swpcSpaceWeatherSummary,
+    gpsJamContextSummary,
+    noaaNowCoastLayerCatalogQuery.data,
     nceiSpaceWeatherArchiveSummary,
+    nwsAlertsRecentQuery.data,
     aerospaceCurrentArchiveContextSummary,
     vaacContextSummary,
     geomagnetismSummary,
@@ -2733,22 +2893,29 @@ export function AppShell() {
   }, [aerospaceFocusComputation]);
 
   return (
-    <div className="app-shell">
-      <TopBar
-        config={publicConfigQuery.data}
-        status={sourceStatusQuery.data}
-        onCommandSubmit={handleCommandSubmit}
-        onCopyPermalink={handleCopyPermalink}
-        onSaveBookmark={handleSaveBookmark}
-        onExportSnapshot={handleExportSnapshot}
-      />
-      <div className="app-shell__body">
+    <WorkbenchShell
+      activeModeId={activeWorkbenchModeId}
+      activityRail={<WorkbenchActivityRail activeModeId={activeWorkbenchModeId} />}
+      topBar={
+        <TopBar
+          activeModeId={activeWorkbenchModeId}
+          config={publicConfigQuery.data}
+          status={sourceStatusQuery.data}
+          onCommandSubmit={handleCommandSubmit}
+          onCopyPermalink={handleCopyPermalink}
+          onSaveBookmark={handleSaveBookmark}
+          onExportSnapshot={handleExportSnapshot}
+        />
+      }
+      sidebar={
         <LayerPanel
           status={sourceStatusQuery.data}
           onJumpToCity={handleJumpToCity}
           onCopyPermalink={handleCopyPermalink}
         />
-        <main className="app-shell__viewport">
+      }
+      center={
+        <div className="app-shell__viewport">
           <CesiumViewport
             googleMapsApiKey={publicConfigQuery.data?.tiles.googleMapsApiKey ?? null}
             planetConfig={publicConfigQuery.data?.planet}
@@ -2771,21 +2938,21 @@ export function AppShell() {
           </div>
           <AircraftLayer viewer={viewer} />
           <SatelliteLayer viewer={viewer} />
-            <CameraLayer viewer={viewer} />
-            <EarthquakeLayer viewer={viewer} />
-            <EonetLayer viewer={viewer} />
-            <VolcanoLayer viewer={viewer} />
-            <TsunamiLayer viewer={viewer} />
-            <UkFloodLayer viewer={viewer} />
-            <GeoNetLayer viewer={viewer} />
-            <HkoWeatherLayer viewer={viewer} />
-            <MetNoAlertsLayer viewer={viewer} />
-            <CanadaCapLayer viewer={viewer} />
-          </main>
-        <InspectorPanel />
-      </div>
-      <HudBar />
-    </div>
+          <CameraLayer viewer={viewer} />
+          <EarthquakeLayer viewer={viewer} />
+          <EonetLayer viewer={viewer} />
+          <VolcanoLayer viewer={viewer} />
+          <TsunamiLayer viewer={viewer} />
+          <UkFloodLayer viewer={viewer} />
+          <GeoNetLayer viewer={viewer} />
+          <HkoWeatherLayer viewer={viewer} />
+          <MetNoAlertsLayer viewer={viewer} />
+          <CanadaCapLayer viewer={viewer} />
+        </div>
+      }
+      inspector={<InspectorPanel />}
+      statusStrip={<HudBar activeModeId={activeWorkbenchModeId} />}
+    />
   );
 }
 

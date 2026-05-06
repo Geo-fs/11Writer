@@ -1,5 +1,248 @@
 # Atlas AI Progress
 
+## 2026-05-06 05:33 America/Chicago
+
+Task:
+- complete media-geolocation tracker item `5`: add GeoCLIP performance controls, profiling, and safe runtime/device controls without silently changing the current accuracy posture
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added explicit GeoCLIP runtime-control settings for:
+  - runtime profile
+  - target device
+  - experimental non-CPU acceleration gating
+  - max image edge override
+  - prediction-cache entry count
+- kept the default runtime posture conservative and explicit:
+  - `full_fidelity`
+  - `cpu`
+  - no silent acceleration
+- added fail-closed device resolution so `cuda` or `mps` requests do not silently fall back to a different path when experimental acceleration is not explicitly enabled
+- added GeoCLIP performance instrumentation into engine-attempt metadata:
+  - `preprocessMs`
+  - `predictMs`
+  - cache-hit state
+  - requested vs resolved device
+  - profile metadata
+- added two cache-reuse paths:
+  - profile-keyed preprocessed artifact reuse on disk
+  - exact artifact-and-profile prediction reuse inside the local process
+- updated the live benchmark aggregation so per-engine results can expose profiling metrics and cache-hit behavior instead of only coarse end-to-end latency
+- reran the real local GeoCLIP and StreetCLIP benchmark with explicit workspace-local model/cache configuration to verify the new profiling path on the actual model stack
+
+Files touched:
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/media-geolocation-framework.md`
+- `app/docs/media-geolocation-next-5-tracker.md`
+- `app/server/src/config/settings.py`
+- `app/server/src/services/media_evidence_service.py`
+- `app/server/src/services/media_geolocation_eval_service.py`
+- `app/server/tests/test_media_geolocation_eval.py`
+- `app/server/tests/test_media_geolocation_service.py`
+
+Validation:
+- `python -m py_compile app/server/src/services/media_evidence_service.py app/server/src/services/media_geolocation_eval_service.py app/server/src/config/settings.py app/server/tests/test_media_geolocation_service.py app/server/tests/test_media_geolocation_eval.py`
+- `python -m pytest app/server/tests/test_media_geolocation_service.py -q`
+- `python -m pytest app/server/tests/test_media_geolocation_eval.py -q`
+- `python -m pytest app/server/tests/test_media_geolocation_service.py app/server/tests/test_media_geolocation_eval.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+- enabled live benchmark rerun via:
+  - `app/server/.venv-win/Scripts/python.exe app/server/tests/run_media_geolocation_live_benchmark.py`
+  - with workspace-local `APP_USER_DATA_DIR`
+  - and explicit GeoCLIP / StreetCLIP env overrides pointing at local prepared caches
+
+Key runtime results:
+- enabled live benchmark retained the prior accuracy shape on the 11-case curated set:
+  - `GeoCLIP top1HitRate25Km: 0.8182`
+  - `GeoCLIP top5HitRate25Km: 1.0`
+  - `GeoCLIP countryRegionAccuracy: 1.0`
+  - `StreetCLIP countryRegionAccuracy: 0.9091`
+  - `fusion top1HitRate25Km: 0.8182`
+  - `fusion top5HitRate25Km: 1.0`
+  - `fusion countryRegionAccuracy: 1.0`
+- default CPU `full_fidelity` GeoCLIP remains expensive, with the enabled rerun showing roughly `11` to `12` seconds of mean profiled prediction time
+- same-process fusion runs now show GeoCLIP cache-hit behavior when a standalone GeoCLIP pass already computed the same artifact/profile fingerprint earlier in the benchmark
+
+Blockers or caveats:
+- the default profile still preserves accuracy posture over speed, so the new controls make tradeoffs explicit but do not magically remove CPU cost
+- the preprocessed-artifact reuse path only helps when the selected profile actually requests bounded resizing
+- non-CPU GeoCLIP remains explicitly experimental and fail-closed by default in this repo path
+
+Next recommended task:
+- start a new post-tracker queue for either:
+  - explicit `balanced` / `cpu_optimized` benchmark comparison runs
+  - stronger deterministic clue enrichment for the two remaining harder miss classes
+  - or operator-surface exposure of the new GeoCLIP runtime controls
+
+## 2026-05-06 00:10 America/Chicago
+
+Task:
+- complete media-geolocation tracker items `3` and `4`: strengthen deterministic clue extraction and add explicit GeoCLIP/StreetCLIP install-health tooling
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- strengthened deterministic media-geolocation clue extraction by:
+  - normalizing OCR/caption text with geolocation-specific cleanup before parsing
+  - adding stronger route-reference extraction such as `US 101` / `I-80`
+  - adding explicit left-driving / right-driving text clues
+  - adding bounded offline gazetteer landmark/place matches as deterministic place-text clues
+  - expanding terrain and infrastructure phrase coverage for coast, bay, canyon, dam, cliffs, and crossings
+  - feeding text-derived environment context into the deterministic clue packet
+- added explicit GeoCLIP / StreetCLIP install-health tooling in the backend:
+  - `GET /api/source-discovery/media/geolocation/models`
+  - `POST /api/source-discovery/media/geolocation/models/{model_name}/actions`
+- added explicit verify/prewarm workflow support with:
+  - ready vs not-ready reporting
+  - warm vs cold state
+  - present vs missing component lists
+  - expected vs installed version visibility
+  - GeoCLIP weights and CLIP-backbone snapshot checks
+  - StreetCLIP local snapshot checks
+- fixed a snapshot-readiness bug so Hugging Face-style model directories are only marked ready when config plus actual weight files are present
+- added focused service and route tests covering deterministic clue extraction and media-geolocation model health surfaces
+
+Files touched:
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/media-geolocation-framework.md`
+- `app/docs/media-geolocation-next-5-tracker.md`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/media_evidence_service.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/test_media_geolocation_service.py`
+- `app/server/tests/test_source_discovery_memory.py`
+
+Validation:
+- `python -m py_compile app/server/src/services/media_evidence_service.py app/server/src/routes/source_discovery.py app/server/src/types/source_discovery.py app/server/tests/test_media_geolocation_service.py app/server/tests/test_source_discovery_memory.py`
+- `python -m pytest app/server/tests/test_media_geolocation_service.py -q`
+- `python -m pytest app/server/tests/test_media_geolocation_eval.py app/server/tests/test_media_geolocation_service.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+
+Blockers or caveats:
+- deterministic clue extraction is stronger, but it is still bounded and should not be treated as authoritative reverse geocoding
+- model-health surfaces report local readiness and explicit prewarm state; they do not silently install or download assets
+- GeoCLIP performance-control work is still pending and remains the next tracker item
+
+Next recommended task:
+- do item `5` from `app/docs/media-geolocation-next-5-tracker.md`: add GeoCLIP performance controls and profiling so local accuracy work can continue without turning CPU-heavy runtime behavior into guesswork
+
+## 2026-05-05 23:46 America/Chicago
+
+Task:
+- implement the next media-geolocation items: expand the live benchmark beyond landmarks, add offline GeoCLIP coordinate-to-place enrichment, and create a tracker doc for the five-item follow-on backlog
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- expanded the live media-geolocation benchmark manifest from the original landmark-only set into an 11-case mix spanning:
+  - `urban_landmark`
+  - `natural_landscape`
+  - `transport_infrastructure`
+  - `dense_street_scene`
+- updated the live benchmark harness to emit `categoryMetrics` and top-level `categoryCounts` instead of only per-engine global aggregates
+- added a bounded offline media-geolocation place gazetteer and new settings so GeoCLIP coordinate candidates can be labeled with nearby landmark/locality/admin/country context without external reverse geocoding
+- wired the offline place context into:
+  - GeoCLIP candidate labels and metadata
+  - geolocation summary strings
+  - engine-agreement logic
+  - country/region benchmark matching
+- added focused tests for category-aware aggregation and GeoCLIP place enrichment
+- created a dedicated tracker doc for the current five-item media-geolocation follow-on queue
+- reran the real local GeoCLIP and StreetCLIP benchmark against the expanded manifest
+
+Files touched:
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/media-geolocation-framework.md`
+- `app/docs/media-geolocation-next-5-tracker.md`
+- `app/server/data/media_geolocation_live_benchmark_manifest.json`
+- `app/server/data/media_geolocation_place_gazetteer.json`
+- `app/server/src/config/settings.py`
+- `app/server/src/services/media_evidence_service.py`
+- `app/server/src/services/media_geolocation_eval_service.py`
+- `app/server/tests/test_media_geolocation_eval.py`
+- `app/server/tests/test_media_geolocation_service.py`
+
+Validation:
+- `python -m py_compile app/server/src/services/media_evidence_service.py app/server/src/services/media_geolocation_eval_service.py app/server/src/config/settings.py`
+- `python -m pytest app/server/tests/test_media_geolocation_eval.py app/server/tests/test_media_geolocation_service.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+- full live benchmark via `app/server/.venv-win/Scripts/python.exe app/server/tests/run_media_geolocation_live_benchmark.py`
+
+Key runtime results:
+- live benchmark size:
+  - `11` cases
+  - `4` categories
+- `GeoCLIP`
+  - `top1HitRate25Km: 0.8182`
+  - `top5HitRate25Km: 1.0`
+  - `countryRegionAccuracy: 1.0`
+- `fusion`
+  - `top1HitRate25Km: 0.8182`
+  - `top5HitRate25Km: 1.0`
+  - `countryRegionAccuracy: 1.0`
+- `StreetCLIP`
+  - `countryRegionAccuracy: 0.9091`
+
+Blockers or caveats:
+- the offline gazetteer is intentionally bounded and should grow carefully; it is a local humanization layer, not authoritative reverse geocoding
+- the hardest current misses remain `Bixby Creek Bridge` and `Mount Fuji from Lake Kawaguchi`, which means natural/infrastructure scenes still need stronger deterministic clue extraction and/or better secondary ranking
+- GeoCLIP remains CPU-expensive in the local path even after the benchmark/reporting cleanup
+- `git diff --check` reported only LF/CRLF warnings for touched files
+
+Next recommended task:
+- do item `3` from `app/docs/media-geolocation-next-5-tracker.md`: strengthen deterministic clue extraction for harder outdoor scenes before moving to heavier install/health or performance-control work
+
+## 2026-05-05 22:22 America/Chicago
+
+Task:
+- resume live media-geolocation model integration, fix GeoCLIP runtime blockers, and run the curated local benchmark
+
+Assignment version read:
+- `2026-04-30 15:08 America/Chicago`
+
+What changed:
+- added managed local snapshot handling for the GeoCLIP CLIP backbone and StreetCLIP model so both engines use explicit workspace-managed/runtime-managed paths instead of implicit Hugging Face user-profile cache behavior
+- added GeoCLIP compatibility patching for the installed `transformers` `5.8.0` return shape so the third-party package still produces image embeddings correctly
+- fixed media fetch behavior so oversized public media are rejected instead of being silently truncated into corrupted artifacts
+- updated the live benchmark harness to use the configured media byte budget instead of a hardcoded `3_000_000` byte cap
+- tuned fusion scoring so coordinate-bearing GeoCLIP candidates outrank StreetCLIP label-only candidates while StreetCLIP remains supporting coarse-label evidence
+- ran the curated landmark benchmark successfully with live local GeoCLIP and StreetCLIP execution
+- updated the media geolocation framework doc with the live benchmark posture and current engine findings
+
+Files touched:
+- `app/docs/agent-progress/atlas-ai.md`
+- `app/docs/alerts.md`
+- `app/docs/media-geolocation-framework.md`
+- `app/server/src/config/settings.py`
+- `app/server/src/services/media_evidence_service.py`
+- `app/server/src/services/media_geolocation_eval_service.py`
+
+Validation:
+- `python -m py_compile app/server/src/services/media_evidence_service.py app/server/src/config/settings.py app/server/src/services/media_geolocation_eval_service.py`
+- `python -m pytest app/server/tests/test_media_geolocation_eval.py -q`
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q`
+- live GeoCLIP single-case probe on Golden Gate Bridge via `app/server/.venv-win`
+- live StreetCLIP single-case probe on Golden Gate Bridge via `app/server/.venv-win`
+- full curated live benchmark via `python app/server/tests/run_media_geolocation_live_benchmark.py`
+
+Blockers or caveats:
+- the current live benchmark set is small and landmark-heavy; it is useful for tuning but not broad real-world proof
+- GeoCLIP is accurate on the current benchmark but slow on local CPU, roughly `9` to `13` seconds per image in this environment
+- StreetCLIP is strong for supplied coarse labels but still does not emit coordinates, so it should stay a reranker/support engine
+- local model caches and the benchmark report live under runtime artifacts, not commit material:
+  - `app/server/data/model-cache/`
+  - `app/server/data/runtime-user/`
+
+Next recommended task:
+- expand the curated benchmark with harder non-landmark outdoor scenes, then add bounded place-label enrichment for GeoCLIP coordinate candidates so country/region reporting is less dependent on StreetCLIP-only labels
+
 ## 2026-05-01 14:51 America/Chicago
 
 Task:

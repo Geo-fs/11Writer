@@ -11,6 +11,7 @@ Purpose:
 Scope:
 
 - [source-assignment-board.md](/C:/Users/mike/11Writer/app/docs/source-assignment-board.md)
+- [source-onboarding-contract.md](/C:/Users/mike/11Writer/app/docs/source-onboarding-contract.md)
 - repo evidence in `app/server`, `app/client`, and `app/docs`
 
 Important rules:
@@ -19,6 +20,7 @@ Important rules:
 - Route presence, tests, hooks, and minimal UI are enough for `implemented`.
 - They are not enough by themselves for `validated`.
 - Discovered source candidates are not source implementations. Source discovery can create review evidence and source-memory evidence, but it cannot promote a source to `implemented`, `workflow-validated`, or `fully validated`.
+- Browser-only, discovery-only, and runtime-only surfaces are not source implementations by themselves and should remain below implementation proof unless the shared onboarding contract is satisfied by a separate stable public machine-readable endpoint.
 
 Source discovery note:
 
@@ -53,17 +55,28 @@ Source discovery note:
 | `gshhg-shorelines` | `/api/context/reference/gshhg/shorelines` | `app/server/tests/test_base_earth_reference_bundle.py` | `app/docs/environmental-events-gshhg-shorelines.md` | `app/server/data/gshhg_shorelines_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first static/reference shoreline slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `noaa-global-volcano-locations` | `/api/context/reference/noaa-global-volcanoes` | `app/server/tests/test_base_earth_reference_bundle.py` | `app/docs/environmental-events-noaa-global-volcano-locations.md` | `app/server/data/noaa_global_volcano_locations_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first static/reference slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `pb2002-plate-boundaries` | `/api/context/reference/pb2002/plate-boundaries` | `app/server/tests/test_base_earth_reference_bundle.py` | `app/docs/environmental-events-pb2002-plate-boundaries.md` | `app/server/data/pb2002_plate_boundaries_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first static/reference tectonic-context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `geoboundaries-admin` | `/api/context/reference/geoboundaries-admin` | `app/server/tests/test_geoboundaries_admin.py` | `app/docs/environmental-events-geoboundaries-admin.md` | `app/server/data/geoboundaries_admin_bel_adm1_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first static/reference admin-boundary slice is explicit and contract-tested, but it intentionally stays on one `gbOpen` country and one admin level only and has no workflow validation or stable frontend consumer record yet |
 | `rgi-glacier-inventory` | `/api/context/reference/rgi-glacier-inventory` | `app/server/tests/test_base_earth_reference_bundle.py` | `app/docs/environmental-events-rgi-glacier-inventory.md` | `app/server/data/rgi_glacier_inventory_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first static/reference glacier-inventory slice is explicit and contract-tested, but it intentionally stays region-scoped and snapshot-only and has no workflow validation or stable frontend consumer record yet |
 | `geosphere-austria-warnings` | `/api/events/geosphere-austria/warnings` | `app/server/tests/test_geosphere_austria_warnings.py` | `app/docs/environmental-events-geosphere-austria-warnings.md` | `app/server/data/geosphere_austria_warnings_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first advisory slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `nasa-power-meteorology-solar` | `/api/context/weather/nasa-power` | `app/server/tests/test_nasa_power_meteorology_solar.py` | `app/docs/environmental-events-nasa-power-meteorology-solar.md` | `app/server/data/nasa_power_meteorology_solar_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first modeled-context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `cisa-cyber-advisories` | `/api/context/cyber/cisa-advisories/recent` | `app/server/tests/test_cisa_cyber_advisories.py` | `app/docs/cyber-context-sources.md` | `app/server/data/cisa_cybersecurity_advisories_fixture.xml` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first advisory/context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `first-epss` | `/api/context/cyber/first-epss` | `app/server/tests/test_first_epss.py` | `app/docs/cyber-context-sources.md` | `app/server/data/first_epss_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first scored/context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `cisa-kev-catalog` | `/api/context/cyber/cisa-kev` | `app/server/tests/test_cisa_kev.py` | `app/docs/cyber-context-sources.md` | `app/server/data/cisa_kev_catalog_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first official source-reported catalog slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `nist-nvd-cve` | `/api/context/cyber/nvd-cve` | `app/server/tests/test_nvd_cve.py` | `app/docs/cyber-context-sources.md` | `app/server/data/nvd_cve_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first NVD metadata/context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `rdap-bootstrap-context` | `/api/context/internet/rdap` | `app/server/tests/test_rdap_context.py` | `app/docs/cyber-context-sources.md` | `app/server/data/rdap_bootstrap/*`, `app/server/data/rdap_lookup_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first bounded RDAP bootstrap plus delegated lookup slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `crtsh-certificate-transparency` | `/api/context/internet/crtsh` | `app/server/tests/test_crtsh.py` | `app/docs/cyber-context-sources.md` | `app/server/data/crtsh_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first bounded certificate-transparency lookup slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `gpsjam-context` | `/api/aerospace/context/gpsjam` | `app/server/tests/test_gpsjam_contracts.py` | `app/docs/aerospace-workflow-validation.md` | `app/server/data/gpsjam_context_fixture.json` | `aerospaceGpsJamContext` | `implemented-not-fully-validated` | Backend-first contextual GNSS-disruption awareness slice is explicit and contract-tested, with build/lint and export-aware helper coverage recorded, but executed browser smoke remains host-blocked by `windows-browser-launch-permission` and no workflow validation is recorded yet |
+| `sec-edgar-submissions` | `/api/context/institutional/sec-edgar/company` | `app/server/tests/test_sec_edgar.py` | `app/docs/cyber-context-sources.md` | `app/server/data/sec_edgar_submissions_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first official filing-history and issuer-metadata slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
+| `usaspending-recipient` | `/api/context/institutional/usaspending/recipient` | `app/server/tests/test_usaspending.py` | `app/docs/cyber-context-sources.md` | `app/server/data/usaspending_recipient_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first official recipient-spending-context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `taiwan-cwa-aws-opendata` | `/api/context/weather/taiwan-cwa` | `app/server/tests/test_taiwan_cwa_weather.py` | `app/docs/environmental-events-taiwan-cwa-weather.md` | `app/server/data/taiwan_cwa_current_weather_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first observed/context slice is explicit and contract-tested, but no workflow validation or stable frontend consumer record is explicit yet |
 | `meteoswiss-open-data` | `/api/context/weather/meteoswiss` | `app/server/tests/test_meteoswiss_open_data.py` | `app/docs/environmental-events-meteoswiss-open-data.md` | `app/server/data/meteoswiss_open_data_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first SwissMetNet observed station-context slice is explicit and contract-tested, but it intentionally stays on station metadata plus one `t_now` asset family only and has no workflow validation or stable frontend consumer record yet |
+| `nws-alerts` | `/api/events/nws-alerts/recent` | `app/server/tests/test_nws_alerts.py` | `app/docs/environmental-events-nws-alerts.md` | `app/server/data/nws_alerts_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first NWS advisory slice is explicit and contract-tested, preserves the required custom `User-Agent` posture for live backend requests, and remains advisory/contextual only with no workflow validation or stable frontend consumer record yet |
+| `noaa-nhc-gis-atlantic` | `/api/events/nhc-gis/recent` | `app/server/tests/test_nhc_gis.py` | `app/docs/environmental-events-nhc-gis.md` | `app/server/data/nhc_gis_atlantic_fixture.xml` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first bounded NHC GIS Atlantic advisory/product slice is explicit and contract-tested, preserves official experimental-feed caveats and source-provided storm-summary metadata, and does not turn GIS product links into impact or incident truth |
 | `canada-cap-alerts` | `/api/events/canada-cap/recent` | `app/server/tests/test_canada_cap_events.py` | `app/docs/environmental-events-canada-cap.md` | `app/server/data/cap_alert_watch_bc.xml` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first Canada CAP advisory slice is explicit and contract-tested, but it remains advisory/contextual only and has no workflow validation or stable frontend consumer record yet |
+| `meteoalarm-atom-feeds` | `/api/events/meteoalarm/country-warnings` | `app/server/tests/test_meteoalarm_atom_feed.py` | `app/docs/environmental-events-meteoalarm-atom-feeds.md` | `app/server/data/meteoalarm_atom_norway_fixture.xml` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first Meteoalarm Atom advisory slice is explicit and contract-tested, but it intentionally stays on one bounded Norway Atom feed only and keeps Meteoalarm below underlying national-source authority in downstream meaning |
 | `dwd-cap-alerts` | `/api/events/dwd-alerts/recent` | `app/server/tests/test_dwd_cap_alerts.py` | `app/docs/environmental-events-dwd-cap-alerts.md` | `app/server/data/dwd_cap_snapshot_fixture.zip` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first DWD CAP advisory slice is explicit and contract-tested, but it intentionally stays on one bounded snapshot family only and has no workflow validation or stable frontend consumer record yet |
 | `canada-geomet-ogc` | `/api/context/weather/canada-geomet/climate-stations` | `app/server/tests/test_canada_geomet_ogc.py` | `app/docs/environmental-events-canada-geomet-ogc.md` | `app/server/data/canada_geomet_climate_stations_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first GeoMet OGC slice is explicit and contract-tested, but it intentionally stays pinned to one `climate-stations` collection only and has no workflow validation or stable frontend consumer record yet |
+| `noaa-nowcoast-ogc` | `/api/context/weather/nowcoast/layer-catalog` | `app/server/tests/test_noaa_nowcoast.py` | `app/docs/environmental-events-noaa-nowcoast.md` | `app/server/data/noaa_nowcoast_layer_catalog_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first nowCOAST map-layer catalog slice is explicit and contract-tested, but it intentionally stays on bounded service metadata only and does not normalize nowCOAST into event truth or a stable frontend consumer yet |
 | `bc-wildfire-datamart` | `/api/context/fire-weather/bcws` | `app/server/tests/test_bc_wildfire_datamart.py` | `app/docs/environmental-events-bc-wildfire-datamart.md` | `app/server/data/bc_wildfire_datamart_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first fire-weather context slice is explicit and contract-tested, but it stays bounded to station reference rows and danger summaries only and has no workflow validation or stable frontend consumer record yet |
 | `nrc-event-notifications` | `/api/events/nrc/recent` | `app/server/tests/test_nrc_event_notifications.py` | `app/docs/environmental-events-nrc-event-notifications.md` | `app/server/data/nrc_event_notifications_fixture.xml` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first source-reported/context slice is explicit and contract-tested, with prompt-injection-safe free-text fixture coverage, but no workflow validation or stable frontend consumer record is explicit yet |
 | `bmkg-earthquakes` | `/api/events/bmkg-earthquakes/recent` | `app/server/tests/test_bmkg_earthquakes.py` | `app/docs/environmental-events-bmkg-earthquakes.md` | `app/server/data/bmkg_earthquakes_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend-first regional-authority earthquake slice is explicit and contract-tested, with source-health and prompt-injection-safe free-text coverage, but no workflow validation or stable frontend consumer record is explicit yet |
@@ -76,6 +89,7 @@ Source discovery note:
 | `noaa-aviation-weather-center-data-api` | `/api/aviation-weather/airport-context` | `app/server/tests/test_aviation_weather_contracts.py` | `app/docs/source-acceleration-phase2-briefs.md` | mocked contract payloads, no dedicated `app/server/data` fixture identified in this audit | `useAviationWeatherContextQuery` | `implemented-not-fully-validated` | No explicit workflow validation record |
 | `faa-nas-airport-status` | `/api/aerospace/airports/{airport_code}/faa-nas-status` | `app/server/tests/test_faa_nas_status_contracts.py` | `app/docs/source-acceleration-phase2-briefs.md` | `app/server/data/faa_nas_airport_status_fixture.xml` | `useFaaNasAirportStatusQuery` | `implemented-not-fully-validated` | No explicit workflow validation record |
 | `noaa-ndbc-realtime` | `/api/marine/context/ndbc` | `app/server/tests/test_marine_contracts.py` | `app/docs/source-acceleration-phase2-briefs.md` | fixture-backed context in `app/server/tests/smoke_fixture_app.py` | `useMarineNdbcContextQuery` | `workflow-validated` | Workflow validation is explicit in [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md:1), and contract hardening now explicitly covers `health=empty`, explicit fixture `sourceMode` on empty responses, `health=disabled` for disabled behavior, source-level caveats, and request validation errors; still not fully validated or live validated |
+| `navtex-context` | `/api/marine/context/navtex` | `app/server/tests/test_marine_navtex.py`, `app/server/tests/test_marine_contracts.py` | `app/docs/marine-module.md` | fixture-backed context in `app/server/tests/smoke_fixture_app.py` | `marineNavtexContext` | `implemented-not-fully-validated` | Backend-first NAVTEX advisory/context slice is explicit and contract-tested, with helper regression, build/lint, export metadata, and marine smoke evidence recorded, but no explicit source-row workflow-validation promotion is recorded yet |
 | `scottish-water-overflows` | `/api/marine/context/scottish-water-overflows` | `app/server/tests/test_marine_contracts.py` | `app/docs/source-acceleration-phase2-global-briefs.md` | fixture-backed context in `app/server/tests/smoke_fixture_app.py` | `useMarineScottishWaterOverflowsQuery` | `workflow-validated` | Workflow validation is explicit in [marine-workflow-validation.md](/C:/Users/mike/11Writer/app/docs/marine-workflow-validation.md:1), and contract hardening now explicitly covers `health=empty`, explicit fixture `sourceMode` on empty responses, `health=disabled` for disabled behavior, source-level caveats, and request validation errors; still contextual only and not fully validated or live validated |
 | `finland-digitraffic` | `/api/features/finland-road-weather/stations` and `/api/features/finland-road-weather/stations/{station_id}` | `app/server/tests/test_finland_digitraffic.py` | `app/docs/source-acceleration-phase2-international-briefs.md` | `app/server/data/digitraffic_weather_stations_fixture.json`, `app/server/data/digitraffic_weather_station_data_fixture.json` | no dedicated client hook identified in this audit | `implemented-not-fully-validated` | Backend route, detail route, endpoint health, and freshness interpretation are explicit, but no stable frontend consumer or workflow validation record is explicit yet |
 | `netherlands-rws-waterinfo` | `/api/marine/context/netherlands-rws-waterinfo` | `app/server/tests/test_netherlands_rws_waterinfo.py`, `app/server/tests/test_marine_contracts.py` | `app/docs/source-endpoint-verification-netherlands-rws-waterinfo.md` | fixture-backed marine context payloads in marine backend data flow | no client hook yet identified | `implemented-not-fully-validated` | Backend-first WaterWebservices slice is explicit and contract-tested, and Marine AI progress now also records a bounded helper/export follow-on, but no explicit workflow-validation record is recorded yet |
@@ -260,11 +274,11 @@ Source discovery note:
   - `app/server/src/services/data_ai_multi_feed_service.py`
   - feed definitions and fixtures for `bbc-world`, `guardian-world`, `aljazeera-all`, `dw-all`, `france24-en`, and `npr-world`
   - prompt-injection-like fixture coverage for editorial, attribution-heavy, quoted, and imperative-looking media text
-  - client-light metadata-only consumer coverage through `app/client/src/features/inspector/dataAiSourceIntelligence.ts` and `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`, including the bounded topic-scoped report packet
+  - client-light metadata-only consumer coverage through `app/client/src/features/inspector/dataAiSourceIntelligence.ts` and `app/client/scripts/dataAiSourceIntelligenceRegression.mjs`, including the bounded topic-scoped report packet, workflow-evidence snapshot, current-awareness digest, review/export coherence summary, topic-safe report export packet, and question briefing packet
 - Full validation status:
   - `implemented-not-fully-validated`
 - Blockers / caveats:
-  - the world-news awareness wave is contract-tested and threaded into metadata-only source-intelligence, topic, fusion, report, and topic-report packet surfaces, but no explicit smoke/manual workflow-validation record is recorded
+  - the world-news awareness wave is contract-tested and threaded into metadata-only source-intelligence, topic, fusion, report, topic-report packet, workflow-evidence snapshot, current-awareness digest, review/export coherence, topic-safe report export packet, and question briefing packet surfaces, but no explicit smoke/manual workflow-validation record is recorded
   - media reporting remains contextual awareness only and must not become primary event truth, field confirmation, impact certainty, attribution proof, legal certainty, or required-action guidance
   - editorial framing, quotes, and imperative-looking text remain untrusted data and must stay inert
 - Next validation action:
@@ -504,6 +518,10 @@ Source discovery note:
   - `app/docs/prompt-injection-defense.md`
   - bounded topic/context lens coverage plus export-safe topic lines over recent-item metadata and family review/readiness metadata
   - bounded report-brief package over the same metadata-only surfaces
+  - bounded current-awareness digest over the same metadata-only surfaces
+  - bounded review/export coherence summary over the same metadata-only surfaces
+  - bounded topic-safe report export packet over the same metadata-only surfaces
+  - bounded question briefing packet over the same metadata-only surfaces
 - Full validation status:
   - `implemented-not-fully-validated`
 - Blockers / caveats:
@@ -512,6 +530,7 @@ Source discovery note:
   - no smoke or manual workflow-validation record is recorded yet
 - Next validation action:
   - record one bounded inspector/export workflow note for the metadata-only consumer before treating it as anything stronger than implemented
+  - keep the completed topic-safe report export packet and question briefing packet classified as metadata-only workflow support, not source-validation proof
 
 ### `data-ai-infrastructure-status-context-package`
 
@@ -719,10 +738,158 @@ Source discovery note:
   - `implemented-not-fully-validated`
 - Blockers / caveats:
   - this is a conservative composition helper, not a new source of truth
-  - the helper must not collapse metadata, advisory, prioritization, and discovery text into one incident or exploitation claim
+  - the helper must not collapse metadata, KEV catalog context, advisory text, prioritization, and discovery text into one incident or exploitation claim
   - no explicit workflow validation or stable frontend consumer record is recorded yet
 - Next validation action:
-  - validate one bounded consumer or export path that keeps NVD, CISA, EPSS, and feed-context semantics distinct
+  - validate one bounded consumer or export path that keeps NVD, KEV, CISA, EPSS, and feed-context semantics distinct
+
+### `cisa-kev-catalog`
+
+- Aggregate route:
+  - `/api/context/cyber/cisa-kev`
+- Current board status:
+  - backend-first implemented source row
+- Existing evidence:
+  - `app/server/tests/test_cisa_kev.py`
+  - `app/server/src/services/cisa_kev_service.py`
+  - `app/server/src/routes/cisa_kev.py`
+  - `app/docs/cyber-context-sources.md`
+  - Data AI progress records a fixture-first KEV slice plus conservative CVE-context integration
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - KEV is official source-reported catalog context only and must not be turned into target-specific exploitation certainty, impact proof, or action mandates
+  - required-action text remains inert source data and does not become repo behavior or workflow instruction
+  - no explicit workflow validation or stable frontend consumer record is recorded yet
+- Next validation action:
+  - validate one bounded consumer or export path that preserves source-reported KEV semantics without turning the catalog into a threat or urgency score
+
+### `rdap-bootstrap-context`
+
+- Aggregate route:
+  - `/api/context/internet/rdap`
+- Current board status:
+  - backend-first implemented source row
+- Existing evidence:
+  - `app/server/tests/test_rdap_context.py`
+  - `app/server/src/services/rdap_context_service.py`
+  - `app/server/src/routes/internet_context.py`
+  - `app/docs/cyber-context-sources.md`
+  - Data AI progress records bounded bootstrap resolution for `domain`, `ip`, and `autnum`
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - RDAP remains registration/allocation context only and must not be turned into ownership certainty, person-tracking, bad-intent claims, attribution, or action guidance
+  - the slice intentionally preserves entity handles and roles only rather than full contact-card details
+  - no explicit workflow validation or stable frontend consumer record is recorded yet
+- Next validation action:
+  - validate one bounded entity or reporting consumer that preserves registration-context semantics without exposing person-tracking fields
+
+### `crtsh-certificate-transparency`
+
+- Aggregate route:
+  - `/api/context/internet/crtsh`
+- Current board status:
+  - backend-first implemented source row
+- Existing evidence:
+  - `app/server/tests/test_crtsh.py`
+  - `app/server/src/services/crtsh_service.py`
+  - `app/server/src/routes/internet_context.py`
+  - `app/docs/cyber-context-sources.md`
+  - Data AI progress records bounded certificate-transparency lookup with inert prompt-like text handling
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - crt.sh results are public certificate-log context only and must not be turned into current-control certainty, malicious-activity claims, attribution, or action guidance
+  - duplicate names or certificate volume must not become corroboration or threat scoring
+  - no explicit workflow validation or stable frontend consumer record is recorded yet
+- Next validation action:
+  - validate one bounded reporting consumer that preserves certificate-log semantics without promoting CT records into field truth or action mandates
+
+### `gpsjam-context`
+
+- Aggregate route:
+  - `/api/aerospace/context/gpsjam`
+- Current board status:
+  - backend-first implemented source row
+- Existing evidence:
+  - `app/server/tests/test_gpsjam_contracts.py`
+  - `app/server/src/services/gpsjam_service.py`
+  - `app/server/src/routes/gpsjam.py`
+  - `app/docs/aerospace-workflow-validation.md`
+  - Aerospace AI progress records helper integration into selected-target, digest, export, and smoke-prep metadata paths
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - GPSJam remains contextual GNSS-disruption awareness only and must not be turned into outage certainty, jamming attribution, route impact, safety consequence, or action guidance
+  - prepared smoke assertions exist, but executed aerospace smoke remains host-blocked by `windows-browser-launch-permission`
+  - no explicit workflow validation or stable executed browser consumer record is recorded yet
+- Next validation action:
+  - rerun prepared aerospace smoke on a launch-capable Windows host and record one bounded workflow/export-path validation note that preserves GNSS-context caveats
+
+### `navtex-context`
+
+- Aggregate route:
+  - `/api/marine/context/navtex`
+- Current board status:
+  - backend-first implemented source row
+- Existing evidence:
+  - `app/server/tests/test_marine_navtex.py`
+  - `app/server/tests/test_marine_contracts.py`
+  - `app/server/src/services/marine_context_service.py`
+  - `app/server/src/routes/marine.py`
+  - `app/docs/marine-module.md`
+  - Marine AI progress records helper regression, marine smoke, export metadata, and bounded card/source-summary/fusion-family integration
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - NAVTEX remains advisory/contextual warning text only and must not be turned into closure certainty, legal status, threat, vessel intent, or action guidance
+  - helper regression, build/lint, and marine smoke evidence are explicit, but no explicit source-row workflow-validation promotion has been recorded yet
+  - live URL family posture remains documented while implementation stays fixture-first in this phase
+- Next validation action:
+  - record one explicit source-row workflow-validation note that preserves advisory-only semantics, source-health posture, and export metadata distinctions before any promotion
+
+### `sec-edgar-submissions`
+
+- Aggregate route:
+  - `/api/context/institutional/sec-edgar/company`
+- Current board status:
+  - backend-first implemented source row
+- Existing evidence:
+  - `app/server/tests/test_sec_edgar.py`
+  - `app/server/src/services/sec_edgar_service.py`
+  - `app/server/src/routes/institutional_context.py`
+  - `app/docs/cyber-context-sources.md`
+  - Data AI progress records a bounded submissions-by-CIK slice with inert filing metadata only
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - SEC EDGAR submissions data remains official filing-history and issuer-metadata context only
+  - the slice must not extract filing bodies or turn filing text, forms, or document descriptions into wrongdoing verdicts, legal conclusions, urgency claims, or action mandates
+  - no explicit workflow validation or stable frontend consumer record is recorded yet
+- Next validation action:
+  - validate one bounded institutional reporting or export consumer that preserves filing-metadata semantics without drifting into filing-body extraction or verdict logic
+
+### `usaspending-recipient`
+
+- Aggregate route:
+  - `/api/context/institutional/usaspending/recipient`
+- Current board status:
+  - backend-first implemented source row
+- Existing evidence:
+  - `app/server/tests/test_usaspending.py`
+  - `app/server/src/services/usaspending_service.py`
+  - `app/server/src/routes/institutional_context.py`
+  - `app/docs/cyber-context-sources.md`
+  - Data AI progress records a bounded recipient-by-hash slice with inert recipient and top-agency metadata only
+- Full validation status:
+  - `implemented-not-fully-validated`
+- Blockers / caveats:
+  - USAspending recipient data remains official federal-spending context only
+  - the slice must not turn spending totals or agency relationships into fraud claims, lobbying conclusions, person-tracking dossiers, urgency claims, or action mandates
+  - no explicit workflow validation or stable frontend consumer record is recorded yet
+- Next validation action:
+  - validate one bounded institutional reporting or export consumer that preserves recipient-context semantics without drifting into dossier or allegation logic
 
 ### `environmental-source-family-overview-helper`
 
@@ -1221,7 +1388,8 @@ Source discovery note:
   - `app/docs/osint-framework-intake-routing-memo.md`
   - Atlas AI progress records shared source-memory storage, claim-outcome updates, wave-fit separation, Wave Monitor source-candidate seeding, bounded seed/health/expand/snapshot/reversal/tick primitives, review queue/actions, runtime-status posture, and a newer Source Discovery Ten-Step backend slice as peer/runtime input
   - Connect AI progress records persistent store wiring and explicit runtime-boundary validation
-  - Wonder planning docs for Browser Use, macOS plugin workflows, connector capability mapping, and connector adoption remain peer planning input only and do not change source-validation posture
+- Wonder planning docs for Browser Use, macOS plugin workflows, connector capability mapping, and connector adoption remain peer planning input only and do not change source-validation posture
+- Wonder archive-index scan, mailing-list archive adapters, and curated directory or regional-portal scan remain candidate/review/runtime discovery input only and do not change source-validation posture
 - Full validation status:
   - `implemented-not-fully-validated`
 - Blockers / caveats:
@@ -1231,8 +1399,9 @@ Source discovery note:
   - source reputation observations are not claim truth, source truth, attribution proof, causation proof, intent proof, wrongdoing proof, or action guidance
   - bounded jobs, snapshots, review actions, runtime status, and manual scheduler tick now exist, but no autonomous discovery runner, hidden live polling, or automatic source approval is recorded in current repo evidence
   - `runtime_scheduler_service.py` is currently compatibility and status plumbing, not proof of hidden background scheduling
-  - Atlas media geolocation remains peer and derived-evidence input only, not validation proof
+  - Atlas media geolocation hardening remains peer and derived-evidence input only, not validation proof
   - Wonder Statuspage and Mastodon discovery remain candidate/review discovery input only, not source approval or workflow-validation proof
+  - Wonder Stack Exchange and seed-packet discovery remain candidate/review discovery input only, not source approval, implementation proof, or workflow-validation proof
 - Next validation action:
   - keep the surface at implemented shared-tool status now that Connect has recorded the runtime/storage boundary truth, and only add later review-workflow validation without bypassing the normal source lifecycle
 
@@ -2047,6 +2216,10 @@ If repo-wide lint or build failures unrelated to a source are later reported, th
   - backend-first helper evidence is clear, but no explicit consumer-path or workflow-validation note is recorded yet
 - `environmental-fusion-snapshot-input-helper`
   - backend-first helper evidence is clear for keeping dynamic environmental context, Canada regional context, base-earth reference context, and direct RGI glacier snapshot context separate inside one bounded geospatial domain package, but no explicit downstream consumer-path or workflow-validation note is recorded yet
+- `environmental-current-awareness-digest-helper`
+  - backend-first helper evidence is clear for packaging the existing geospatial reporting stack into bounded `observe`, `orient`, `prioritize`, and `explain` sections without flattening observed, advisory, forecast/model, contextual, and static-reference meaning, but no explicit downstream consumer-path or workflow-validation note is recorded yet
+- `environmental-question-briefing-packet-helper`
+  - backend-first helper evidence is clear for packaging place/timeframe/family-filter briefing posture over the current geospatial reporting stack without flattening observed, advisory, forecast/model, contextual, and static-reference meaning, but no explicit downstream consumer-path or workflow-validation note is recorded yet
 - `dwd-cap-alerts`
   - backend-first advisory implementation evidence is clear, but it intentionally stays on one bounded DWD snapshot family only and no stable consumer or workflow-validation note is recorded yet
 - `environmental-canada-context-package-helper`
@@ -2066,7 +2239,7 @@ If repo-wide lint or build failures unrelated to a source are later reported, th
 - `data-ai-report-brief-package-helper`
   - helper evidence is clear for organizing the existing Data AI metadata-only surfaces into `observe`, `orient`, `prioritize`, and `explain` reporting sections in the existing inspector consumer, but it remains workflow-supporting metadata only and is not source-validation proof
 - `source-discovery-runtime-surface`
-  - shared runtime evidence is clear, but it remains candidate/review/runtime evidence rather than source implementation or workflow-validation proof
+  - shared runtime evidence is clear, including bounded archive-index and curated-directory discovery support, but it remains candidate/review/runtime evidence rather than source implementation or workflow-validation proof
 - `france-vigicrues-hydrometry`
   - backend-first implementation evidence is clear, and the latest Marine follow-through adds export/helper/smoke/build evidence, but no explicit source-row workflow-validation record is recorded yet
 - `natural-earth-physical`

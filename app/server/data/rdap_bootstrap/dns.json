@@ -1,0 +1,14 @@
+{
+  "description": "Fixture RDAP bootstrap for DNS",
+  "publication": "2026-05-01T00:00:00Z",
+  "services": [
+    [
+      [
+        "com"
+      ],
+      [
+        "https://rdap.verisign.com/com/v1/"
+      ]
+    ]
+  ]
+}

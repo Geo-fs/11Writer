@@ -11,6 +11,7 @@ Purpose:
 
 Scope:
 
+- [source-onboarding-contract.md](/C:/Users/mike/11Writer/app/docs/source-onboarding-contract.md)
 - [source-acceleration-phase2-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-briefs.md)
 - [source-acceleration-phase2-international-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-international-briefs.md)
 - [source-acceleration-phase2-batch4-briefs.md](/C:/Users/mike/11Writer/app/docs/source-acceleration-phase2-batch4-briefs.md)
@@ -82,13 +83,15 @@ Repo-local status note:
 - the shared `/api/feeds/data-ai/source-families/review-queue` helper is review metadata only and must not be treated as source truth, source scoring, or workflow-validation proof.
 - use [data-ai-next-routing-after-family-summary.md](/C:/Users/mike/11Writer/app/docs/data-ai-next-routing-after-family-summary.md) for the next bounded helper/coherence lane or any later narrow family reopening instead of reopening those implemented waves as fresh source-creation work.
 - `propublica` and `global-voices` are already implemented backend-first and should not be routed again as fresh next-wave Data work.
-- the next larger Data wave is one bounded topic-scoped report packet on top of the completed source-intelligence, fusion, report-brief, and world-news-awareness stack; do not reopen older implemented families as fresh work.
+- the next larger Data wave is one bounded topic/report/export follow-through on top of the completed source-intelligence, fusion, report-brief, world-news-awareness, topic-packet, current-awareness, and review/export coherence stack; do not reopen older implemented families as fresh work.
 
 Runtime-boundary note:
 
 - Source Discovery `structure-scan`, knowledge-node clustering/backfill, review-claim import/apply, and shared source-memory surfaces remain candidate/review/runtime evidence only.
+- Wonder archive-index scan, mailing-list archive adapters, and curated directory or regional-portal scan remain candidate/review/runtime evidence only.
 - Wave LLM provider management, BYOK/runtime controls, and execution history remain runtime-boundary and review-only surfaces.
 - Media/OCR enrichment remains partially scaffolded and derived-evidence-only until narrower provenance/review gates are satisfied.
+- The landed user-priority wave now includes `SEC EDGAR` and `USAspending`, leaves `GeoNames` as the clean next `geospatial` follow-on, leaves `HDX` and `UNOSAT on HDX` as `gather` verification-first lanes before any domain ownership handoff, leaves `ReliefWeb` as verification-only until its approval-signup conflict is resolved, and keeps `OpenStreetMap` / `Overpass` / `Geofabrik` as completed candidate-support-only evidence with `features-webcam`; keep `Sherlock`, `Maigret`, `WhatsMyName`, and `Blackbird` outside default implementation routing as safety-sensitive identity-enumeration utilities.
 
 May 2026 camera-candidate note:
 
@@ -154,7 +157,7 @@ Repo-local status note:
 - `bmkg-earthquakes` and `ga-recent-earthquakes` now have backend-first implemented slices in repo code.
 - Keep ownership with `geospatial`, but treat the next handoff as consumer/validation follow-on work rather than raw connector creation.
 - `environmentalFusionSnapshotInput` now exists as a backend-first geospatial reporting input over dynamic environmental, Canada, base-earth, and glacier context.
-- keep ownership with `geospatial`, but treat the next larger handoff as `belgium-rmi-warnings` plus bounded environmental reporting integration rather than another duplicate report-helper lane.
+- keep ownership with `geospatial`, but treat `meteoalarm-atom-feeds` as implemented bounded warning context, keep `belgium-rmi-warnings` verification-gated, and keep `geoboundaries-admin` as a bounded implemented static/reference follow-on rather than another duplicate report-helper lane.
 
 | Source id | Primary owner agent | Secondary consumer agents | First implementation slice | Shared-or-local guidance | Collision risk |
 | --- | --- | --- | --- | --- | --- |
@@ -176,6 +179,7 @@ Repo-local status note:
 - Consumers must not re-implement a source because they want a slightly different panel or filter.
 - Source health, freshness, provenance, and caveat language must survive downstream consumption.
 - Export and evidence surfaces must preserve source id, source URL when available, observed time, fetched time, and caveat text.
+- Auth posture, machine-usability posture, and fixture-first expectations should follow [source-onboarding-contract.md](/C:/Users/mike/11Writer/app/docs/source-onboarding-contract.md) before a source is treated as implementation-ready.
 
 ## Ownership Table
 

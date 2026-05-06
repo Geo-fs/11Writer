@@ -1,0 +1,447 @@
+{
+  "places": [
+    {
+      "name": "Golden Gate Bridge",
+      "kind": "landmark",
+      "latitude": 37.8199,
+      "longitude": -122.4783,
+      "locality": "San Francisco",
+      "admin1": "California",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Eiffel Tower",
+      "kind": "landmark",
+      "latitude": 48.8584,
+      "longitude": 2.2945,
+      "locality": "Paris",
+      "admin1": "Ile-de-France",
+      "country": "France",
+      "countryCode": "FR"
+    },
+    {
+      "name": "Brandenburg Gate",
+      "kind": "landmark",
+      "latitude": 52.5163,
+      "longitude": 13.3777,
+      "locality": "Berlin",
+      "admin1": "Berlin",
+      "country": "Germany",
+      "countryCode": "DE"
+    },
+    {
+      "name": "Sydney Opera House",
+      "kind": "landmark",
+      "latitude": -33.8568,
+      "longitude": 151.2153,
+      "locality": "Sydney",
+      "admin1": "New South Wales",
+      "country": "Australia",
+      "countryCode": "AU"
+    },
+    {
+      "name": "Tokyo Tower",
+      "kind": "landmark",
+      "latitude": 35.6586,
+      "longitude": 139.7454,
+      "locality": "Tokyo",
+      "admin1": "Tokyo",
+      "country": "Japan",
+      "countryCode": "JP"
+    },
+    {
+      "name": "Bixby Creek Bridge",
+      "kind": "landmark",
+      "latitude": 36.3714,
+      "longitude": -121.901,
+      "locality": "Big Sur",
+      "admin1": "California",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Cliffs of Moher",
+      "kind": "landmark",
+      "latitude": 52.9715,
+      "longitude": -9.4309,
+      "locality": "Liscannor",
+      "admin1": "County Clare",
+      "country": "Ireland",
+      "countryCode": "IE"
+    },
+    {
+      "name": "Grand Canyon South Rim",
+      "kind": "landmark",
+      "latitude": 36.0579,
+      "longitude": -112.1431,
+      "locality": "Grand Canyon Village",
+      "admin1": "Arizona",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Hoover Dam",
+      "kind": "landmark",
+      "latitude": 36.0158,
+      "longitude": -114.7378,
+      "locality": "Boulder City",
+      "admin1": "Nevada",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Mount Fuji",
+      "kind": "landmark",
+      "latitude": 35.3606,
+      "longitude": 138.7274,
+      "locality": "Fujikawaguchiko",
+      "admin1": "Yamanashi",
+      "country": "Japan",
+      "countryCode": "JP"
+    },
+    {
+      "name": "Shibuya Crossing",
+      "kind": "landmark",
+      "latitude": 35.6595,
+      "longitude": 139.7006,
+      "locality": "Shibuya",
+      "admin1": "Tokyo",
+      "country": "Japan",
+      "countryCode": "JP",
+      "aliases": [
+        "Shibuya Scramble Crossing"
+      ]
+    },
+    {
+      "name": "San Francisco",
+      "kind": "city",
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "admin1": "California",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Los Angeles",
+      "kind": "city",
+      "latitude": 34.0522,
+      "longitude": -118.2437,
+      "admin1": "California",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Seattle",
+      "kind": "city",
+      "latitude": 47.6062,
+      "longitude": -122.3321,
+      "admin1": "Washington",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Portland",
+      "kind": "city",
+      "latitude": 45.5152,
+      "longitude": -122.6784,
+      "admin1": "Oregon",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Las Vegas",
+      "kind": "city",
+      "latitude": 36.1699,
+      "longitude": -115.1398,
+      "admin1": "Nevada",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Vancouver",
+      "kind": "city",
+      "latitude": 49.2827,
+      "longitude": -123.1207,
+      "admin1": "British Columbia",
+      "country": "Canada",
+      "countryCode": "CA"
+    },
+    {
+      "name": "Paris",
+      "kind": "city",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "admin1": "Ile-de-France",
+      "country": "France",
+      "countryCode": "FR"
+    },
+    {
+      "name": "London",
+      "kind": "city",
+      "latitude": 51.5072,
+      "longitude": -0.1276,
+      "admin1": "England",
+      "country": "United Kingdom",
+      "countryCode": "GB"
+    },
+    {
+      "name": "Berlin",
+      "kind": "city",
+      "latitude": 52.52,
+      "longitude": 13.405,
+      "admin1": "Berlin",
+      "country": "Germany",
+      "countryCode": "DE"
+    },
+    {
+      "name": "Brussels",
+      "kind": "city",
+      "latitude": 50.8503,
+      "longitude": 4.3517,
+      "admin1": "Brussels-Capital Region",
+      "country": "Belgium",
+      "countryCode": "BE"
+    },
+    {
+      "name": "Rome",
+      "kind": "city",
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "admin1": "Lazio",
+      "country": "Italy",
+      "countryCode": "IT"
+    },
+    {
+      "name": "Vienna",
+      "kind": "city",
+      "latitude": 48.2082,
+      "longitude": 16.3738,
+      "admin1": "Vienna",
+      "country": "Austria",
+      "countryCode": "AT"
+    },
+    {
+      "name": "Prague",
+      "kind": "city",
+      "latitude": 50.0755,
+      "longitude": 14.4378,
+      "admin1": "Prague",
+      "country": "Czech Republic",
+      "countryCode": "CZ"
+    },
+    {
+      "name": "Warsaw",
+      "kind": "city",
+      "latitude": 52.2297,
+      "longitude": 21.0122,
+      "admin1": "Masovian Voivodeship",
+      "country": "Poland",
+      "countryCode": "PL"
+    },
+    {
+      "name": "Budapest",
+      "kind": "city",
+      "latitude": 47.4979,
+      "longitude": 19.0402,
+      "admin1": "Budapest",
+      "country": "Hungary",
+      "countryCode": "HU"
+    },
+    {
+      "name": "Sydney",
+      "kind": "city",
+      "latitude": -33.8688,
+      "longitude": 151.2093,
+      "admin1": "New South Wales",
+      "country": "Australia",
+      "countryCode": "AU"
+    },
+    {
+      "name": "Melbourne",
+      "kind": "city",
+      "latitude": -37.8136,
+      "longitude": 144.9631,
+      "admin1": "Victoria",
+      "country": "Australia",
+      "countryCode": "AU"
+    },
+    {
+      "name": "Auckland",
+      "kind": "city",
+      "latitude": -36.8485,
+      "longitude": 174.7633,
+      "admin1": "Auckland",
+      "country": "New Zealand",
+      "countryCode": "NZ"
+    },
+    {
+      "name": "Brisbane",
+      "kind": "city",
+      "latitude": -27.4698,
+      "longitude": 153.0251,
+      "admin1": "Queensland",
+      "country": "Australia",
+      "countryCode": "AU"
+    },
+    {
+      "name": "Perth",
+      "kind": "city",
+      "latitude": -31.9523,
+      "longitude": 115.8613,
+      "admin1": "Western Australia",
+      "country": "Australia",
+      "countryCode": "AU"
+    },
+    {
+      "name": "Wellington",
+      "kind": "city",
+      "latitude": -41.2866,
+      "longitude": 174.7756,
+      "admin1": "Wellington",
+      "country": "New Zealand",
+      "countryCode": "NZ"
+    },
+    {
+      "name": "Tokyo",
+      "kind": "city",
+      "latitude": 35.6762,
+      "longitude": 139.6503,
+      "admin1": "Tokyo",
+      "country": "Japan",
+      "countryCode": "JP"
+    },
+    {
+      "name": "Osaka",
+      "kind": "city",
+      "latitude": 34.6937,
+      "longitude": 135.5023,
+      "admin1": "Osaka",
+      "country": "Japan",
+      "countryCode": "JP"
+    },
+    {
+      "name": "Seoul",
+      "kind": "city",
+      "latitude": 37.5665,
+      "longitude": 126.978,
+      "admin1": "Seoul",
+      "country": "South Korea",
+      "countryCode": "KR"
+    },
+    {
+      "name": "Taipei",
+      "kind": "city",
+      "latitude": 25.033,
+      "longitude": 121.5654,
+      "admin1": "Taipei",
+      "country": "Taiwan",
+      "countryCode": "TW"
+    },
+    {
+      "name": "Hong Kong",
+      "kind": "city",
+      "latitude": 22.3193,
+      "longitude": 114.1694,
+      "admin1": "Hong Kong",
+      "country": "China",
+      "countryCode": "CN"
+    },
+    {
+      "name": "Nagasaki",
+      "kind": "city",
+      "latitude": 32.7503,
+      "longitude": 129.8777,
+      "admin1": "Nagasaki",
+      "country": "Japan",
+      "countryCode": "JP"
+    },
+    {
+      "name": "Big Sur",
+      "kind": "locality",
+      "latitude": 36.2704,
+      "longitude": -121.8081,
+      "admin1": "California",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Monterey",
+      "kind": "city",
+      "latitude": 36.6002,
+      "longitude": -121.8947,
+      "admin1": "California",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Liscannor",
+      "kind": "locality",
+      "latitude": 52.9416,
+      "longitude": -9.3774,
+      "admin1": "County Clare",
+      "country": "Ireland",
+      "countryCode": "IE"
+    },
+    {
+      "name": "Grand Canyon Village",
+      "kind": "locality",
+      "latitude": 36.0486,
+      "longitude": -112.139,
+      "admin1": "Arizona",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Boulder City",
+      "kind": "city",
+      "latitude": 35.9786,
+      "longitude": -114.8325,
+      "admin1": "Nevada",
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Fujikawaguchiko",
+      "kind": "locality",
+      "latitude": 35.4973,
+      "longitude": 138.7552,
+      "admin1": "Yamanashi",
+      "country": "Japan",
+      "countryCode": "JP"
+    },
+    {
+      "name": "Shibuya",
+      "kind": "district",
+      "latitude": 35.6618,
+      "longitude": 139.7041,
+      "admin1": "Tokyo",
+      "country": "Japan",
+      "countryCode": "JP"
+    },
+    {
+      "name": "County Clare",
+      "kind": "region",
+      "latitude": 52.8489,
+      "longitude": -8.9863,
+      "country": "Ireland",
+      "countryCode": "IE"
+    },
+    {
+      "name": "Arizona",
+      "kind": "region",
+      "latitude": 34.0489,
+      "longitude": -111.0937,
+      "country": "United States",
+      "countryCode": "US"
+    },
+    {
+      "name": "Yamanashi",
+      "kind": "region",
+      "latitude": 35.6639,
+      "longitude": 138.5684,
+      "country": "Japan",
+      "countryCode": "JP"
+    }
+  ]
+}

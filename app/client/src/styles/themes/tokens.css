@@ -1,0 +1,204 @@
+:root,
+:root[data-theme="standard-dark"] {
+  color-scheme: dark;
+
+  --theme-font-family-sans: "Segoe UI", "Helvetica Neue", sans-serif;
+  --theme-radius-control: 14px;
+  --theme-radius-card: 18px;
+  --theme-radius-panel: 24px;
+  --theme-radius-pill: 999px;
+  --theme-control-height: 40px;
+  --theme-control-height-compact: 32px;
+  --theme-control-padding-x: 14px;
+  --theme-control-gap: 8px;
+  --theme-focus-ring-width: 1px;
+
+  --theme-bg-app: #1e1e1e;
+  --theme-bg-app-chrome: #181818;
+  --theme-bg-canvas: #111111;
+  --theme-surface-panel: rgba(37, 37, 38, 0.88);
+  --theme-surface-panel-soft: rgba(255, 255, 255, 0.03);
+  --theme-surface-card: rgba(255, 255, 255, 0.04);
+  --theme-surface-card-subtle: rgba(255, 255, 255, 0.02);
+  --theme-surface-input: #3c3c3c;
+  --theme-surface-input-hover: #45494e;
+  --theme-surface-input-disabled: #2f2f2f;
+  --theme-surface-button-primary: #0e639c;
+  --theme-surface-button-primary-hover: #1177bb;
+  --theme-surface-button-secondary: #383b3d;
+  --theme-surface-button-secondary-hover: #45494e;
+  --theme-surface-button-ghost: rgba(255, 255, 255, 0.04);
+  --theme-surface-button-ghost-hover: rgba(255, 255, 255, 0.09);
+  --theme-surface-selection: #08286b;
+  --theme-surface-overlay-info: rgba(6, 59, 73, 0.86);
+  --theme-surface-overlay-warning: rgba(53, 42, 5, 0.86);
+  --theme-surface-overlay-danger: rgba(90, 29, 29, 0.86);
+
+  --theme-text-primary: #cccccc;
+  --theme-text-secondary: #bbbbbb;
+  --theme-text-muted: rgba(204, 204, 204, 0.7);
+  --theme-text-placeholder: #a6a6a6;
+  --theme-text-disabled: rgba(204, 204, 204, 0.5);
+  --theme-text-inverse: #ffffff;
+  --theme-link: #3794ff;
+  --theme-link-hover: #56a6ff;
+
+  --theme-border-default: #303031;
+  --theme-border-strong: #454545;
+  --theme-border-input: #3c3c3c;
+  --theme-border-focus: #007fd4;
+  --theme-border-selection: #3794ff;
+  --theme-shadow-panel: 0 24px 64px rgba(0, 0, 0, 0.38);
+
+  --theme-status-info-bg: rgba(0, 122, 204, 0.16);
+  --theme-status-info-border: rgba(0, 122, 204, 0.38);
+  --theme-status-info-fg: var(--theme-text-primary);
+  --theme-status-success-bg: rgba(54, 148, 50, 0.18);
+  --theme-status-success-border: rgba(54, 148, 50, 0.4);
+  --theme-status-success-fg: var(--theme-text-primary);
+  --theme-status-warning-bg: rgba(184, 149, 0, 0.18);
+  --theme-status-warning-border: rgba(184, 149, 0, 0.4);
+  --theme-status-warning-fg: var(--theme-text-primary);
+  --theme-status-danger-bg: rgba(244, 135, 113, 0.16);
+  --theme-status-danger-border: rgba(244, 135, 113, 0.38);
+  --theme-status-danger-fg: #ffd7d0;
+  --theme-status-source-bg: rgba(0, 122, 204, 0.1);
+  --theme-status-source-border: rgba(0, 122, 204, 0.32);
+
+  --theme-input-validation-info-bg: #063b49;
+  --theme-input-validation-info-border: #007acc;
+  --theme-input-validation-warning-bg: #352a05;
+  --theme-input-validation-warning-border: #b89500;
+  --theme-input-validation-danger-bg: #5a1d1d;
+  --theme-input-validation-danger-border: #be1100;
+
+  --bg-strong: var(--theme-bg-app);
+  --bg-panel: var(--theme-surface-panel);
+  --bg-panel-soft: var(--theme-surface-panel-soft);
+  --border: color-mix(in srgb, var(--theme-border-default) 72%, transparent);
+  --text-primary: var(--theme-text-primary);
+  --text-muted: var(--theme-text-muted);
+  --accent: var(--theme-link);
+  --accent-soft: rgba(55, 148, 255, 0.14);
+  --shadow: var(--theme-shadow-panel);
+}
+
+:root[data-theme="standard-light"] {
+  color-scheme: light;
+
+  --theme-bg-app: #ffffff;
+  --theme-bg-app-chrome: #f3f3f3;
+  --theme-bg-canvas: #f8f8f8;
+  --theme-surface-panel: rgba(255, 255, 255, 0.92);
+  --theme-surface-panel-soft: rgba(0, 0, 0, 0.03);
+  --theme-surface-card: rgba(0, 0, 0, 0.03);
+  --theme-surface-card-subtle: rgba(0, 0, 0, 0.02);
+  --theme-surface-input: #ffffff;
+  --theme-surface-input-hover: #f6f6f6;
+  --theme-surface-input-disabled: #f2f2f2;
+  --theme-surface-button-primary: #007acc;
+  --theme-surface-button-primary-hover: #005f9e;
+  --theme-surface-button-secondary: #e8e8e8;
+  --theme-surface-button-secondary-hover: #dcdcdc;
+  --theme-surface-button-ghost: rgba(0, 0, 0, 0.03);
+  --theme-surface-button-ghost-hover: rgba(0, 0, 0, 0.07);
+  --theme-surface-selection: #e5ebf1;
+  --theme-surface-overlay-info: rgba(214, 236, 242, 0.88);
+  --theme-surface-overlay-warning: rgba(246, 245, 210, 0.92);
+  --theme-surface-overlay-danger: rgba(242, 222, 222, 0.94);
+
+  --theme-text-primary: #616161;
+  --theme-text-secondary: #4c4c4c;
+  --theme-text-muted: #717171;
+  --theme-text-placeholder: #767676;
+  --theme-text-disabled: rgba(97, 97, 97, 0.55);
+  --theme-text-inverse: #ffffff;
+  --theme-link: #006ab1;
+  --theme-link-hover: #00518a;
+
+  --theme-border-default: #d4d4d4;
+  --theme-border-strong: #cecece;
+  --theme-border-input: #cecece;
+  --theme-border-focus: #0090f1;
+  --theme-border-selection: #90c2f9;
+  --theme-shadow-panel: 0 20px 48px rgba(0, 0, 0, 0.12);
+
+  --theme-status-info-bg: rgba(0, 122, 204, 0.1);
+  --theme-status-info-border: rgba(0, 122, 204, 0.28);
+  --theme-status-success-bg: rgba(54, 148, 50, 0.12);
+  --theme-status-success-border: rgba(54, 148, 50, 0.26);
+  --theme-status-warning-bg: rgba(184, 149, 0, 0.12);
+  --theme-status-warning-border: rgba(184, 149, 0, 0.3);
+  --theme-status-danger-bg: rgba(161, 38, 13, 0.1);
+  --theme-status-danger-border: rgba(161, 38, 13, 0.28);
+  --theme-status-danger-fg: #8d230d;
+  --theme-status-source-bg: rgba(0, 122, 204, 0.08);
+  --theme-status-source-border: rgba(0, 122, 204, 0.22);
+
+  --theme-input-validation-info-bg: #d6ecf2;
+  --theme-input-validation-info-border: #007acc;
+  --theme-input-validation-warning-bg: #f6f5d2;
+  --theme-input-validation-warning-border: #b89500;
+  --theme-input-validation-danger-bg: #f2dede;
+  --theme-input-validation-danger-border: #be1100;
+}
+
+:root[data-theme="abyss"] {
+  color-scheme: dark;
+
+  --theme-bg-app: #000c18;
+  --theme-bg-app-chrome: #051336;
+  --theme-bg-canvas: #060621;
+  --theme-surface-panel: rgba(16, 25, 44, 0.9);
+  --theme-surface-panel-soft: rgba(102, 136, 204, 0.08);
+  --theme-surface-card: rgba(24, 31, 47, 0.76);
+  --theme-surface-card-subtle: rgba(24, 31, 47, 0.54);
+  --theme-surface-input: #181f2f;
+  --theme-surface-input-hover: #202a3f;
+  --theme-surface-input-disabled: #10192c;
+  --theme-surface-button-primary: #2b3c5d;
+  --theme-surface-button-primary-hover: #38517e;
+  --theme-surface-button-secondary: #10192c;
+  --theme-surface-button-secondary-hover: #152037;
+  --theme-surface-button-ghost: rgba(102, 136, 204, 0.08);
+  --theme-surface-button-ghost-hover: rgba(102, 136, 204, 0.16);
+  --theme-surface-selection: #08286b;
+  --theme-surface-overlay-info: rgba(5, 19, 54, 0.9);
+  --theme-surface-overlay-warning: rgba(91, 126, 122, 0.22);
+  --theme-surface-overlay-danger: rgba(162, 45, 68, 0.22);
+
+  --theme-text-primary: #6688cc;
+  --theme-text-secondary: #80a2c2;
+  --theme-text-muted: #596f99;
+  --theme-text-placeholder: #596f99;
+  --theme-text-disabled: rgba(102, 136, 204, 0.52);
+  --theme-text-inverse: #e0eddd;
+  --theme-link: #80baff;
+  --theme-link-hover: #bbdaff;
+
+  --theme-border-default: #2b2b4a;
+  --theme-border-strong: #596f99;
+  --theme-border-input: #181f2f;
+  --theme-border-focus: #596f99;
+  --theme-border-selection: #0063a5;
+  --theme-shadow-panel: 0 24px 64px rgba(0, 0, 0, 0.52);
+
+  --theme-status-info-bg: rgba(0, 99, 165, 0.16);
+  --theme-status-info-border: rgba(0, 99, 165, 0.34);
+  --theme-status-success-bg: rgba(34, 170, 68, 0.16);
+  --theme-status-success-border: rgba(34, 170, 68, 0.32);
+  --theme-status-warning-bg: rgba(91, 126, 122, 0.24);
+  --theme-status-warning-border: rgba(91, 126, 122, 0.38);
+  --theme-status-danger-bg: rgba(162, 45, 68, 0.2);
+  --theme-status-danger-border: rgba(171, 57, 91, 0.36);
+  --theme-status-danger-fg: #ffe0e5;
+  --theme-status-source-bg: rgba(0, 99, 165, 0.14);
+  --theme-status-source-border: rgba(89, 111, 153, 0.36);
+
+  --theme-input-validation-info-bg: #051336;
+  --theme-input-validation-info-border: #384078;
+  --theme-input-validation-warning-bg: rgba(91, 126, 122, 0.3);
+  --theme-input-validation-warning-border: #5b7e7a;
+  --theme-input-validation-danger-bg: rgba(162, 45, 68, 0.26);
+  --theme-input-validation-danger-border: #ab395b;
+}

@@ -1,6 +1,6 @@
 # 11Writer
 
-11Writer is an OSINT and spatial intelligence platform built around a Cesium 3D globe, real data layers, replay workflows, contextual analysis, and evidence-aware exports.
+11Writer is a local-first public-source fusion, source-discovery, and spatial intelligence platform built around a Cesium 3D globe, evidence-aware backend services, review workflows, and provenance-preserving exports.
 
 The core platform operating plan targets three first-class interfaces backed by one shared FastAPI/core runtime:
 
@@ -8,17 +8,35 @@ The core platform operating plan targets three first-class interfaces backed by 
 - A companion web app for efficient browser and partner-device check-ins after explicit pairing/auth
 - A backend-only runtime for unattended user-configured collection and task execution
 
-The current repository is still the local development foundation for that plan. Existing setup commands run the backend and frontend directly while packaging, service/daemon lifecycle, companion pairing, and OS-native installers are implemented.
+The current repository is still the local development foundation for that plan. Existing setup commands run the backend and frontend directly. Packaging, service or daemon lifecycle, companion pairing, and OS-native installers are still implementation work rather than claimed shipped behavior.
+
+## Current repository state
+
+What is true today:
+
+- the browser client plus FastAPI backend foundation is real and actively used
+- research-grade Source Discovery backend infrastructure is implemented as bounded candidate, review, and runtime support
+- many domain and source slices are implemented backend-first, but validation maturity varies by slice
+- Phase 3 workbench and shared-shell planning is active in docs, but the product is not yet a finished Code-OSS-style workstation shell
+
+Use these docs for current-state truth:
+
+- `app/docs/README.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/source-discovery-public-web-workflow.md`
+- `app/docs/release-readiness.md`
+- `app/docs/phase3-code-oss-workbench-spec.md`
 
 ## Major capabilities
 
 - Planet imagery modes with explicit caveats for composites, daily imagery, seasonal views, and optional photorealistic 3D tiles
-- USGS earthquake and environmental event overlay support on the globe
+- Environmental event and context ingestion with advisory, observed, derived, and contextual evidence preserved separately
 - Aircraft and satellite analyst workspace with selected-target context, replay surfaces, and evidence-oriented summaries
-- Marine replay, transmission-gap review, and anomaly-ranking workflows
-- Webcam and public camera source operations with inventory and source-health handling
-- Canonical reference subsystem for facilities, navigation objects, and place linkage 
-- Analyst workbench endpoints for evidence timelines, source readiness, and spatial context briefs with provenance/caveats preserved
+- Marine replay, transmission-gap review, anomaly ranking, and context workflows
+- Webcam and public camera source operations with inventory, lifecycle, and source-health handling
+- Canonical reference and linkage support for facilities, navigation objects, and place context
+- Analyst workbench endpoints for evidence timelines, source readiness, and spatial briefs
+- Source Discovery backend for bounded public-web discovery, review routing, knowledge clustering, event graphing, reputation calibration, and adversarial observability
 
 ## Repository layout
 
@@ -27,6 +45,8 @@ app/
   client/   React + TypeScript + Vite + CesiumJS
   server/   FastAPI + Python + Alembic + local SQLite foundation
   docs/     subsystem, architecture, and workflow documentation
+scripts/    validation, release, and repo support tooling
+third_party/ pinned reference material such as Code - OSS workbench sources
 ```
 
 ## Prerequisites
@@ -78,12 +98,15 @@ Backend:
 ```bash
 cd app/server
 python -m compileall src
-pytest tests/test_earthquake_events.py
-pytest tests/test_planet_config.py
+pytest tests/test_source_discovery_memory.py
+pytest tests/test_wave_monitor.py
+pytest tests/test_analyst_workbench.py
 pytest tests/test_marine_contracts.py
-pytest tests/test_reference_module.py
 pytest tests/test_webcam_module.py
+pytest tests/test_earthquake_events.py
 ```
+
+These are high-signal checks, not the entire test surface. Use slice-specific tests for the area you changed, and use `app/docs/release-readiness.md` for the current shared validation checkpoint.
 
 Frontend:
 
@@ -96,13 +119,16 @@ npm run build
 ## Operating notes
 
 - Preserve provenance. Keep observed, inferred, derived, scored, and contextual data clearly separated.
+- Treat Source Discovery and discovered-source memory as candidate, review, and runtime infrastructure only. Discovery does not equal implementation proof or workflow validation.
 - Do not present imagery as same-time ground truth unless the source explicitly supports that claim.
 - Anomaly scores and prioritization surfaces direct analyst attention; they are not proof of wrongdoing or intent.
 - Live source access, freshness, and coverage vary by provider and by credential posture.
+- External source text and rendered webpage text are untrusted data, not instructions.
 
 ## Known Limitations
 
 - The current codebase is a local development foundation for the cross-platform operating plan, not yet a packaged production desktop, companion-web, or backend-only release.
+- Many source slices are still `implemented-not-fully-validated`; use `app/docs/source-validation-status.md` before claiming stable workflow coverage.
 - SQLite is suitable for foundation and local-scale workflows, not planetary-scale production storage.
 - OS-native packaging and service/daemon behavior still require validation on Windows 10/11, macOS, and Linux before support is claimed.
 - Companion access must remain disabled by default until explicit pairing/auth and network-exposure validation exist.
@@ -110,13 +136,19 @@ npm run build
 - Environmental events and live-source overlays reflect source-specific coverage, not guaranteed complete global coverage.
 - Some validation flows depend on fixture-backed modes because live providers can rate-limit, require credentials, or vary operationally.
 - Headless Playwright and Cesium canvas interaction can still be less stable than normal browser use in some flows.
+- Phase 3 workbench-shell direction is documented and active, but the repo has not yet converged on the final shared workstation shell.
 
 ## Documentation
 
+- `app/docs/README.md`
 - `app/docs/architecture.md`
-- `app/docs/integrations.md`
+- `app/docs/strategic-roadmap.md`
+- `app/docs/roadmap.md`
 - `app/docs/planet-imagery.md`
-- `app/docs/environmental-events-earthquakes.md`
+- `app/docs/source-discovery-public-web-workflow.md`
+- `app/docs/source-validation-status.md`
+- `app/docs/release-readiness.md`
+- `app/docs/phase3-code-oss-workbench-spec.md`
 - `app/docs/marine-module.md`
 - `app/docs/webcams.md`
 - `app/docs/reference-module.md`
@@ -126,9 +158,7 @@ npm run build
 - `app/docs/runtime-interface-requirements.md`
 - `app/docs/cross-platform-implementation-playbook.md`
 - `app/docs/cross-platform-agent-guidelines.md`
-- `app/docs/cross-platform-agent-broadcast.md`
 
 ## License
-
 
 This repository uses the existing `AGPL-3.0` license from the public GitHub repository. The root `LICENSE` file is preserved from `origin/main`.

@@ -1,0 +1,113 @@
+{
+  "type": "FeatureCollection",
+  "title": "NWS Active Alerts",
+  "features": [
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.nws.alert.001",
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-97.45, 38.82],
+            [-97.1, 38.82],
+            [-97.1, 39.12],
+            [-97.45, 39.12],
+            [-97.45, 38.82]
+          ]
+        ]
+      },
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.nws.alert.001",
+        "id": "urn:oid:2.49.0.1.840.0.nws.alert.001",
+        "areaDesc": "Central Kansas",
+        "sent": "2026-05-05T22:15:00+00:00",
+        "effective": "2026-05-05T22:15:00+00:00",
+        "onset": "2026-05-05T22:30:00+00:00",
+        "expires": "2026-05-06T01:00:00+00:00",
+        "status": "Actual",
+        "messageType": "Alert",
+        "category": ["Met"],
+        "severity": "Severe",
+        "certainty": "Likely",
+        "urgency": "Immediate",
+        "event": "Severe Thunderstorm Warning",
+        "senderName": "NWS Wichita KS",
+        "headline": "Severe Thunderstorm Warning issued May 5 at 5:15PM CDT",
+        "description": "Damaging wind threat remains possible.",
+        "instruction": "Move indoors. <script>alert('ignore')</script>",
+        "response": "Shelter",
+        "geocode": {
+          "UGC": ["KSZ052", "KSC105"]
+        }
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.nws.alert.002",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.nws.alert.002",
+        "id": "urn:oid:2.49.0.1.840.0.nws.alert.002",
+        "areaDesc": "Western Pennsylvania",
+        "sent": "2026-05-05T20:00:00+00:00",
+        "effective": "2026-05-05T20:00:00+00:00",
+        "expires": "2026-05-06T06:00:00+00:00",
+        "status": "Actual",
+        "messageType": "Alert",
+        "category": ["Met"],
+        "severity": "Moderate",
+        "certainty": "Possible",
+        "urgency": "Future",
+        "event": "Flood Watch",
+        "senderName": "NWS Pittsburgh PA",
+        "headline": "Flood Watch remains in effect tonight",
+        "description": "Excessive rainfall may lead to flooding in poor drainage areas.",
+        "instruction": null,
+        "response": "Monitor",
+        "geocode": {
+          "UGC": ["PAZ029", "PAC003"]
+        }
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.nws.alert.003",
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-83.2, 29.8],
+            [-82.9, 29.8],
+            [-82.9, 30.0],
+            [-83.2, 30.0],
+            [-83.2, 29.8]
+          ]
+        ]
+      },
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.nws.alert.003",
+        "id": "urn:oid:2.49.0.1.840.0.nws.alert.003",
+        "areaDesc": "North Florida",
+        "sent": "2026-05-05T18:30:00+00:00",
+        "effective": "2026-05-05T18:30:00+00:00",
+        "expires": "2026-05-06T00:00:00+00:00",
+        "status": "Actual",
+        "messageType": "Alert",
+        "category": ["Met"],
+        "severity": "Minor",
+        "certainty": "Observed",
+        "urgency": "Expected",
+        "event": "Heat Advisory",
+        "senderName": "NWS Jacksonville FL",
+        "headline": "Heat Advisory for portions of inland northeast Florida",
+        "description": "Heat index values up to 108 expected.",
+        "instruction": "Limit time outdoors.",
+        "response": "Avoid",
+        "geocode": {
+          "UGC": ["FLZ021", "FLC023"]
+        }
+      }
+    }
+  ]
+}

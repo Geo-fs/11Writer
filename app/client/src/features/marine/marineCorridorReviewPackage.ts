@@ -10,7 +10,7 @@ import type { MarineReplayNavigationTarget } from "./marineReplayNavigation";
 export interface MarineCorridorReviewSourceRow {
   sourceId: string;
   label: string;
-  category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+  category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
   sourceMode: "fixture" | "live" | "unknown";
   health:
     | "loaded"
@@ -417,3 +417,4 @@ function replaySuspiciousGapCount(input: {
     0
   );
 }
+

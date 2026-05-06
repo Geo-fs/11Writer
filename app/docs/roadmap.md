@@ -1,5 +1,8 @@
 # Roadmap
 
+Last updated:
+- `2026-05-06 America/Chicago`
+
 11Writer is not just a globe, dashboard, or map viewer.
 
 11Writer is a public-source, no-auth, evidence-aware spatial intelligence platform.
@@ -14,6 +17,24 @@ This roadmap is the short project map. The full strategic direction lives in:
 - [spatial-intelligence-loop.md](/C:/Users/mike/11Writer/app/docs/spatial-intelligence-loop.md)
 - [fusion-layer-architecture.md](/C:/Users/mike/11Writer/app/docs/fusion-layer-architecture.md)
 - [safety-boundaries.md](/C:/Users/mike/11Writer/app/docs/safety-boundaries.md)
+- [source-validation-status.md](/C:/Users/mike/11Writer/app/docs/source-validation-status.md)
+- [source-discovery-public-web-workflow.md](/C:/Users/mike/11Writer/app/docs/source-discovery-public-web-workflow.md)
+- [phase3-code-oss-workbench-spec.md](/C:/Users/mike/11Writer/app/docs/phase3-code-oss-workbench-spec.md)
+
+## Current State Snapshot
+
+- the repo is still a local-first browser plus FastAPI development foundation
+- research-grade Source Discovery backend infrastructure is implemented
+- many sources are implemented backend-first but remain below full workflow validation
+- Phase 3 is now active with the persistent controlled roster:
+  - `Connect AI`
+  - `Systems AI`
+  - `Workspace AI`
+  - `Spatial AI`
+  - `Reporting AI`
+  - `Platform AI`
+  - `Gov AI`
+- the final shared workstation shell is not yet complete, but the repo is no longer in a Phase-3-planning-only posture
 
 ## Current Product Direction
 
@@ -59,10 +80,15 @@ Goal:
 
 Current priorities:
 
-- new source slices
-- new feature slices
-- workflow validation where features mature
-- documentation that makes Phase 3 consolidation easier
+- workflow validation where implemented slices are already mature
+- Phase 3 shell and component-contract convergence
+- keeping backend truth, source-health semantics, and export metadata stable while UI unification advances
+- documentation that reduces stale planning drift
+
+Status:
+
+- no longer the sole operating center
+- Phase 2 source and workflow work continues as supporting input to the active Phase 3 UI/workbench push
 
 Avoid:
 
@@ -79,6 +105,19 @@ Goal:
 - consolidate inspector, layer, and context presentation patterns
 - build a common situation view from already-fusion-compatible domain outputs
 - reduce duplicated UI logic and badge/card/caveat drift
+
+Status:
+
+- active
+- the controlled persistent roster is now:
+  - `Connect AI`
+  - `Systems AI`
+  - `Workspace AI`
+  - `Spatial AI`
+  - `Reporting AI`
+  - `Platform AI`
+  - `Gov AI`
+- implementation has started, but the final shared workstation shell is not yet complete
 
 ### Phase 4: Final Polish and Resilient Expansion
 

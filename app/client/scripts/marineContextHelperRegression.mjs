@@ -7,10 +7,14 @@ import { buildMarineContextFusionSummary } from "../src/features/marine/marineCo
 import { buildMarineContextIssueExportBundle } from "../src/features/marine/marineContextIssueExportBundle.ts";
 import { buildMarineContextIssueQueue } from "../src/features/marine/marineContextIssueQueue.ts";
 import { buildMarineContextReviewReport } from "../src/features/marine/marineContextReviewReport.ts";
+import { buildMarineCurrentAwarenessDigest } from "../src/features/marine/marineCurrentAwarenessDigest.ts";
 import { buildMarineFusionSnapshotInput } from "../src/features/marine/marineFusionSnapshotInput.ts";
 import { buildMarineHydrologySourceHealthReportSummary } from "../src/features/marine/marineHydrologySourceHealthReport.ts";
 import { buildMarineHydrologySourceHealthWorkflowSummary } from "../src/features/marine/marineHydrologySourceHealthWorkflow.ts";
+import { buildMarineHydrologyRegionalComparisonPackage } from "../src/features/marine/marineHydrologyRegionalComparisonPackage.ts";
+import { buildMarineQuestionBriefingPacket } from "../src/features/marine/marineQuestionBriefingPacket.ts";
 import { buildMarineReportBriefPackage } from "../src/features/marine/marineReportBriefPackage.ts";
+import { buildMarineSourceRowWorkflowClosurePacket } from "../src/features/marine/marineSourceRowWorkflowClosurePacket.ts";
 import { buildMarineSourceHealthExportCoherenceSummary } from "../src/features/marine/marineSourceHealthExportCoherence.ts";
 import {
   buildMarineContextSnapshot,
@@ -66,6 +70,19 @@ function buildDominatedSourceRegistrySummary() {
       evidenceBasis: "contextual"
     },
     {
+      sourceId: "uscg-navtex-broadcast-notices",
+      label: "USCG NAVTEX Broadcast Notices",
+      category: "maritime-warning",
+      sourceMode: "fixture",
+      health: "degraded",
+      availability: "degraded",
+      nearbyCount: 1,
+      activeCount: null,
+      topSummary: "Meteorological Warnings | issued 2026-04-04T11:32:00Z | coverage approx 741 km",
+      caveats: ["Partial subject classification degrades warning-context confidence for this fixture review path."],
+      evidenceBasis: "advisory"
+    },
+    {
       sourceId: "france-vigicrues-hydrometry",
       label: "France Vigicrues Hydrometry",
       category: "hydrology",
@@ -112,20 +129,20 @@ function buildDominatedSourceRegistrySummary() {
     rows,
     sourceCount: rows.length,
     availableSourceCount: 1,
-    degradedSourceCount: 3,
+    degradedSourceCount: 4,
     unavailableSourceCount: 1,
-    fixtureSourceCount: 6,
+    fixtureSourceCount: 7,
     disabledSourceCount: 0,
     caveats: [
       "Marine context source registry summarizes availability only; it does not imply vessel behavior."
     ],
-    exportLines: ["Marine context sources: 1/6 loaded | 3 degraded | 1 unavailable | 6 fixture"],
+    exportLines: ["Marine context sources: 1/7 loaded | 4 degraded | 1 unavailable | 7 fixture"],
     metadata: {
       sourceCount: rows.length,
       availableSourceCount: 1,
-      degradedSourceCount: 3,
+      degradedSourceCount: 4,
       unavailableSourceCount: 1,
-      fixtureSourceCount: 6,
+      fixtureSourceCount: 7,
       disabledSourceCount: 0,
       rows,
       caveats: [
@@ -331,6 +348,107 @@ function buildWaterinfoContextSummary() {
   };
 }
 
+function buildGebcoBathymetryContextSummary() {
+  return {
+    sourceLine: "GEBCO Gridded Bathymetry: loaded | fixture/local | 3 nearby samples | GEBCO_2026",
+    sampleLines: [],
+    exportLines: [
+      "GEBCO Gridded Bathymetry: loaded | fixture/local | 3 nearby samples | GEBCO_2026",
+      "Nearest GEBCO sample: depth 14.0 m below sea level | sample 29.285, -94.760"
+    ],
+    metadata: {
+      sourceId: "gebco-gridded-bathymetry",
+      sourceMode: "fixture",
+      health: "loaded",
+      gridVersion: "GEBCO_2026",
+      gridResolutionArcSeconds: 15,
+      nearbySampleCount: 3,
+      centerElevationMeters: -14.0,
+      centerDepthMeters: 14.0,
+      minElevationMeters: -41.0,
+      maxElevationMeters: -14.0,
+      underseaSampleCount: 3,
+      landSampleCount: 0,
+      topSample: {
+        sampleId: "gebco-galveston-shelf-001",
+        latitude: 29.285,
+        longitude: -94.76,
+        distanceKm: 0.8,
+        elevationMeters: -14.0,
+        depthMeters: 14.0
+      },
+      topSummary: "depth 14.0 m below sea level | sample 29.285, -94.760",
+      caveats: [
+        "GEBCO bathymetry is static seafloor context only and does not prove route safety, closure, impact, or vessel behavior."
+      ]
+    }
+  };
+}
+
+function buildBroadNavtexContextSummary() {
+  return {
+    sourceLine:
+      "USCG NAVTEX Broadcast Notices: loaded | fixture/local | 2 nearby broadcasts | all warning subjects",
+    broadcastLines: [],
+    exportLines: [
+      "USCG NAVTEX Broadcast Notices: loaded | fixture/local | 2 nearby broadcasts | all warning subjects",
+      "Top NAVTEX broadcast: Miami | Meteorological Warnings | issued 2026-04-04T11:32:00Z | coverage approx 741 km"
+    ],
+    metadata: {
+      sourceId: "uscg-navtex-broadcast-notices",
+      sourceMode: "fixture",
+      health: "loaded",
+      messageTypeFilter: "all",
+      nearbyBroadcastCount: 2,
+      topIssuedAt: "2026-04-04T11:32:00Z",
+      topBroadcast: {
+        messageId: "navtex-miami-1",
+        stationId: "miami",
+        stationName: "Miami",
+        subjectIndicator: "B",
+        subjectLabel: "Meteorological Warnings",
+        distanceKm: 21.4
+      },
+      topSummary: "Meteorological Warnings | issued 2026-04-04T11:32:00Z | coverage approx 741 km",
+      caveats: [
+        "NAVTEX broadcast text is advisory context only and does not prove closure certainty, legal status, or required action."
+      ]
+    }
+  };
+}
+
+function buildLimitedNavtexContextSummary() {
+  return {
+    sourceLine:
+      "USCG NAVTEX Broadcast Notices: degraded | fixture/local | 1 nearby broadcast | all warning subjects",
+    broadcastLines: [],
+    exportLines: [
+      "USCG NAVTEX Broadcast Notices: degraded | fixture/local | 1 nearby broadcast | all warning subjects",
+      "Top NAVTEX broadcast: Miami | Meteorological Warnings | issued 2026-04-04T11:32:00Z | coverage approx 741 km"
+    ],
+    metadata: {
+      sourceId: "uscg-navtex-broadcast-notices",
+      sourceMode: "fixture",
+      health: "degraded",
+      messageTypeFilter: "all",
+      nearbyBroadcastCount: 1,
+      topIssuedAt: "2026-04-04T11:32:00Z",
+      topBroadcast: {
+        messageId: "navtex-miami-1",
+        stationId: "miami",
+        stationName: "Miami",
+        subjectIndicator: "B",
+        subjectLabel: "Meteorological Warnings",
+        distanceKm: 21.4
+      },
+      topSummary: "Meteorological Warnings | issued 2026-04-04T11:32:00Z | coverage approx 741 km",
+      caveats: [
+        "Partial subject classification degrades warning-context confidence for this fixture review path."
+      ]
+    }
+  };
+}
+
 function buildScottishWaterContextSummary() {
   return {
     sourceLine: "Scottish Water Overflows: degraded | fixture/local | 3 nearby monitors | 1 active",
@@ -397,6 +515,19 @@ function buildBroadAllSourcesSourceRegistrySummary() {
       evidenceBasis: "contextual"
     },
     {
+      sourceId: "uscg-navtex-broadcast-notices",
+      label: "USCG NAVTEX Broadcast Notices",
+      category: "maritime-warning",
+      sourceMode: "fixture",
+      health: "loaded",
+      availability: "loaded",
+      nearbyCount: 2,
+      activeCount: null,
+      topSummary: "Meteorological Warnings | issued 2026-04-04T11:32:00Z | coverage approx 741 km",
+      caveats: ["NAVTEX broadcast text is advisory context only and does not prove closure certainty, legal status, or required action."],
+      evidenceBasis: "advisory"
+    },
+    {
       sourceId: "france-vigicrues-hydrometry",
       label: "France Vigicrues Hydrometry",
       category: "hydrology",
@@ -440,21 +571,21 @@ function buildBroadAllSourcesSourceRegistrySummary() {
   return {
     rows,
     sourceCount: rows.length,
-    availableSourceCount: 6,
+    availableSourceCount: 7,
     degradedSourceCount: 0,
     unavailableSourceCount: 0,
-    fixtureSourceCount: 6,
+    fixtureSourceCount: 7,
     disabledSourceCount: 0,
     caveats: [
       "Marine context source registry summarizes availability only; it does not imply vessel behavior."
     ],
-    exportLines: ["Marine context sources: 6/6 loaded | 0 degraded | 0 unavailable | 6 fixture"],
+    exportLines: ["Marine context sources: 7/7 loaded | 0 degraded | 0 unavailable | 7 fixture"],
     metadata: {
       sourceCount: rows.length,
-      availableSourceCount: 6,
+      availableSourceCount: 7,
       degradedSourceCount: 0,
       unavailableSourceCount: 0,
-      fixtureSourceCount: 6,
+      fixtureSourceCount: 7,
       disabledSourceCount: 0,
       rows,
       caveats: [
@@ -614,6 +745,19 @@ function buildToggleLimitedSourceRegistrySummary() {
       evidenceBasis: "contextual"
     },
     {
+      sourceId: "uscg-navtex-broadcast-notices",
+      label: "USCG NAVTEX Broadcast Notices",
+      category: "maritime-warning",
+      sourceMode: "fixture",
+      health: "degraded",
+      availability: "degraded",
+      nearbyCount: 1,
+      activeCount: null,
+      topSummary: "Meteorological Warnings | issued 2026-04-04T11:32:00Z | coverage approx 741 km",
+      caveats: ["Partial subject classification degrades warning-context confidence for this fixture review path."],
+      evidenceBasis: "advisory"
+    },
+    {
       sourceId: "france-vigicrues-hydrometry",
       label: "France Vigicrues Hydrometry",
       category: "hydrology",
@@ -660,20 +804,20 @@ function buildToggleLimitedSourceRegistrySummary() {
     rows,
     sourceCount: rows.length,
     availableSourceCount: 2,
-    degradedSourceCount: 2,
+    degradedSourceCount: 3,
     unavailableSourceCount: 1,
-    fixtureSourceCount: 6,
+    fixtureSourceCount: 7,
     disabledSourceCount: 1,
     caveats: [
       "Marine context source registry summarizes availability only; it does not imply vessel behavior."
     ],
-    exportLines: ["Marine context sources: 2/6 loaded | 2 degraded | 1 unavailable | 1 disabled | 6 fixture"],
+    exportLines: ["Marine context sources: 2/7 loaded | 3 degraded | 1 unavailable | 1 disabled | 7 fixture"],
     metadata: {
       sourceCount: rows.length,
       availableSourceCount: 2,
-      degradedSourceCount: 2,
+      degradedSourceCount: 3,
       unavailableSourceCount: 1,
-      fixtureSourceCount: 6,
+      fixtureSourceCount: 7,
       disabledSourceCount: 1,
       rows,
       caveats: [
@@ -773,12 +917,16 @@ function runRegression() {
   const environmentalContextSummary = buildEnvironmentalContextSummary();
   const hydrologyContextSummary = buildHydrologyContextSummary();
   const waterinfoContextSummary = buildWaterinfoContextSummary();
+  const gebcoBathymetryContextSummary = buildGebcoBathymetryContextSummary();
+  const broadNavtexContextSummary = buildBroadNavtexContextSummary();
+  const limitedNavtexContextSummary = buildLimitedNavtexContextSummary();
   const scottishWaterContextSummary = buildScottishWaterContextSummary();
   const sourceRegistrySummary = buildDominatedSourceRegistrySummary();
   const issueQueueSummary = buildMarineContextIssueQueue(sourceRegistrySummary);
   const fusionSummary = buildMarineContextFusionSummary({
     environmentalContextSummary,
     hydrologyContextSummary,
+    navtexContextSummary: limitedNavtexContextSummary,
     scottishWaterContextSummary,
     contextSourceRegistrySummary: sourceRegistrySummary,
     contextIssueQueueSummary: issueQueueSummary
@@ -834,7 +982,7 @@ function runRegression() {
     /not anomaly severity, impact, or vessel-intent evidence/i.test(issueExportBundle.dominantLimitationLine ?? ""),
     "Issue export bundle should preserve no-severity/no-impact/no-intent wording."
   );
-  assert(issueExportBundle.rows.length === 6, "Issue export bundle should preserve all six source rows.");
+  assert(issueExportBundle.rows.length === 7, "Issue export bundle should preserve all seven source rows.");
 
   const scottishWaterRow = issueExportBundle.rows.find((row) => row.sourceId === "scottish-water-overflows");
   assert(scottishWaterRow, "Issue export bundle should include Scottish Water row.");
@@ -1453,6 +1601,7 @@ function runRegression() {
   const broadFusionSummary = buildMarineContextFusionSummary({
     environmentalContextSummary: broadEnvironmentalContextSummary,
     hydrologyContextSummary: broadHydrologyContextSummary,
+    navtexContextSummary: broadNavtexContextSummary,
     scottishWaterContextSummary: broadScottishWaterContextSummary,
     contextSourceRegistrySummary: broadSourceRegistrySummary,
     contextIssueQueueSummary: broadIssueQueueSummary
@@ -1517,6 +1666,7 @@ function runRegression() {
   const limitedFusionSummary = buildMarineContextFusionSummary({
     environmentalContextSummary: limitedEnvironmentalContextSummary,
     hydrologyContextSummary: limitedHydrologyContextSummary,
+    navtexContextSummary: limitedNavtexContextSummary,
     scottishWaterContextSummary: limitedScottishWaterContextSummary,
     contextSourceRegistrySummary: limitedSourceRegistrySummary,
     contextIssueQueueSummary: limitedIssueQueueSummary
@@ -1889,7 +2039,7 @@ function runRegression() {
     "Limited transition issue-export metadata should preserve disabled-source review action."
   );
   assert(
-    limitedTransitionMetadata.contextFusionSummary?.limitedSourceCount === 4 &&
+    limitedTransitionMetadata.contextFusionSummary?.limitedSourceCount === 5 &&
       limitedTransitionMetadata.contextFusionSummary?.dominatedByLimitedSources === true,
     "Limited transition fusion metadata should align with degraded/unavailable/disabled source totals."
   );
@@ -1932,6 +2082,7 @@ function runRegression() {
     const contextFusionSummary = buildMarineContextFusionSummary({
       environmentalContextSummary: input.environmentalContextSummary,
       hydrologyContextSummary: input.hydrologyContextSummary,
+      navtexContextSummary: input.navtexContextSummary,
       scottishWaterContextSummary: input.scottishWaterContextSummary,
       contextSourceRegistrySummary: input.contextSourceRegistrySummary,
       contextIssueQueueSummary: issueQueueSummary
@@ -1993,6 +2144,8 @@ function runRegression() {
       noaaContextSummary: input.noaaContextSummary,
       ndbcContextSummary: input.ndbcContextSummary,
       scottishWaterContextSummary: input.scottishWaterContextSummary,
+      navtexContextSummary: input.navtexContextSummary,
+      gebcoBathymetryContextSummary: input.gebcoBathymetryContextSummary,
       vigicruesContextSummary: input.vigicruesContextSummary,
       irelandOpwContextSummary: input.irelandOpwContextSummary,
       hydrologyContextSummary: input.hydrologyContextSummary,
@@ -2189,6 +2342,8 @@ function runRegression() {
     environmentalContextSummary: selectedVesselEnvironmentalContextSummary,
     contextSourceRegistrySummary: broadSourceRegistrySummary,
     hydrologyContextSummary: broadHydrologyContextSummary,
+    navtexContextSummary: broadNavtexContextSummary,
+    gebcoBathymetryContextSummary,
     scottishWaterContextSummary: broadScottishWaterContextSummary,
     noaaContextSummary: broadNoaaContextSummary,
     ndbcContextSummary: broadNdbcContextSummary,
@@ -2254,6 +2409,8 @@ function runRegression() {
     environmentalContextSummary: fallbackEnvironmentalContextSummary,
     contextSourceRegistrySummary: broadSourceRegistrySummary,
     hydrologyContextSummary: broadHydrologyContextSummary,
+    navtexContextSummary: broadNavtexContextSummary,
+    gebcoBathymetryContextSummary,
     scottishWaterContextSummary: broadScottishWaterContextSummary,
     noaaContextSummary: broadNoaaContextSummary,
     ndbcContextSummary: broadNdbcContextSummary,
@@ -2284,6 +2441,8 @@ function runRegression() {
     environmentalContextSummary,
     contextSourceRegistrySummary: sourceRegistrySummary,
     hydrologyContextSummary,
+    navtexContextSummary: limitedNavtexContextSummary,
+    gebcoBathymetryContextSummary,
     scottishWaterContextSummary,
     noaaContextSummary,
     ndbcContextSummary,
@@ -2421,6 +2580,8 @@ function runRegression() {
     environmentalContextSummary: smallRadiusEnvironmentalContextSummary,
     contextSourceRegistrySummary: smallRadiusSourceRegistrySummary,
     hydrologyContextSummary: broadHydrologyContextSummary,
+    navtexContextSummary: broadNavtexContextSummary,
+    gebcoBathymetryContextSummary,
     scottishWaterContextSummary: broadScottishWaterContextSummary,
     noaaContextSummary: {
       ...broadNoaaContextSummary,
@@ -2448,6 +2609,8 @@ function runRegression() {
     environmentalContextSummary: largeRadiusEnvironmentalContextSummary,
     contextSourceRegistrySummary: broadSourceRegistrySummary,
     hydrologyContextSummary: broadHydrologyContextSummary,
+    navtexContextSummary: broadNavtexContextSummary,
+    gebcoBathymetryContextSummary,
     scottishWaterContextSummary: broadScottishWaterContextSummary,
     noaaContextSummary: broadNoaaContextSummary,
     ndbcContextSummary: broadNdbcContextSummary,
@@ -2938,6 +3101,128 @@ function runRegression() {
     ),
     "Marine corridor situation package should preserve no-closure/no-wrongdoing/no-action guardrails."
   );
+  const hydrologyRegionalComparisonPackage = buildMarineHydrologyRegionalComparisonPackage({
+    fusionSnapshotInput,
+    reportBriefPackage,
+    hydrologySourceHealthReportSummary: evidenceSummaryHydrologySourceHealthReportSummary
+  });
+  assert(
+    hydrologyRegionalComparisonPackage?.metadata.posture === "limited",
+    "Marine hydrology regional comparison package should preserve limited hydrology posture in the current source mix."
+  );
+  assert(
+    hydrologyRegionalComparisonPackage?.hydrologyRows.length === 3,
+    "Marine hydrology regional comparison package should preserve three hydrology rows."
+  );
+  assert(
+    hydrologyRegionalComparisonPackage?.explain.some((line) =>
+      /vigicrues workflow evidence|waterinfo workflow evidence|opw workflow evidence/i.test(line)
+    ),
+    "Marine hydrology regional comparison package should preserve workflow-evidence lines."
+  );
+  assert(
+    hydrologyRegionalComparisonPackage?.doesNotProveLines.some((line) =>
+      /impact|closure certainty|action need/i.test(line)
+    ),
+    "Marine hydrology regional comparison package should preserve no-impact/no-closure/no-action guardrails."
+  );
+  const currentAwarenessDigest = buildMarineCurrentAwarenessDigest({
+    fusionSnapshotInput,
+    reportBriefPackage,
+    corridorSituationPackage,
+    hydrologyRegionalComparisonPackage
+  });
+  assert(
+    currentAwarenessDigest?.metadata.posture === "limited",
+    "Marine current-awareness digest should preserve limited posture in the current source mix."
+  );
+  assert(
+    currentAwarenessDigest?.observe.some((line) => /current posture:/i.test(line)),
+    "Marine current-awareness digest should preserve current-posture observe wording."
+  );
+  assert(
+    currentAwarenessDigest?.orient.some((line) => /selected corridor:|chokepoint posture:/i.test(line)),
+    "Marine current-awareness digest should preserve corridor or chokepoint orientation wording."
+  );
+  assert(
+    currentAwarenessDigest?.explain.some((line) =>
+      /vigicrues workflow evidence|waterinfo workflow evidence|opw workflow evidence/i.test(line)
+    ),
+    "Marine current-awareness digest should preserve workflow-evidence explanation lines."
+  );
+  assert(
+    currentAwarenessDigest?.doesNotProveLines.some((line) =>
+      /impact|closure certainty|action need|wrongdoing/i.test(line)
+    ),
+    "Marine current-awareness digest should preserve no-impact/no-closure/no-action/no-wrongdoing guardrails."
+  );
+  const sourceRowWorkflowClosurePacket = buildMarineSourceRowWorkflowClosurePacket({
+    fusionSnapshotInput,
+    reportBriefPackage,
+    corridorSituationPackage,
+    hydrologyRegionalComparisonPackage,
+    currentAwarenessDigest
+  });
+  assert(
+    sourceRowWorkflowClosurePacket?.metadata.posture === "limited",
+    "Marine source-row workflow closure packet should preserve limited posture in the current source mix."
+  );
+  assert(
+    sourceRowWorkflowClosurePacket?.observe.some((line) => /source rows:/i.test(line)),
+    "Marine source-row workflow closure packet should preserve source-row observe wording."
+  );
+  assert(
+    sourceRowWorkflowClosurePacket?.orient.some((line) => /export coherence:/i.test(line)),
+    "Marine source-row workflow closure packet should preserve export-coherence orientation wording."
+  );
+  assert(
+    sourceRowWorkflowClosurePacket?.explain.some((line) =>
+      /vigicrues workflow evidence|waterinfo workflow evidence|opw workflow evidence/i.test(line)
+    ),
+    "Marine source-row workflow closure packet should preserve workflow-evidence explanation lines."
+  );
+  assert(
+    sourceRowWorkflowClosurePacket?.doesNotProveLines.some((line) =>
+      /impact|closure certainty|action need|wrongdoing/i.test(line)
+    ),
+    "Marine source-row workflow closure packet should preserve no-impact/no-closure/no-action/no-wrongdoing guardrails."
+  );
+  const questionBriefingPacket = buildMarineQuestionBriefingPacket({
+    fusionSnapshotInput,
+    reportBriefPackage,
+    corridorSituationPackage,
+    hydrologyRegionalComparisonPackage,
+    currentAwarenessDigest,
+    sourceRowWorkflowClosurePacket
+  });
+  assert(
+    questionBriefingPacket?.metadata.posture === "limited",
+    "Marine question briefing packet should preserve limited posture in the current source mix."
+  );
+  assert(
+    questionBriefingPacket?.metadata.questionFamily === "mixed",
+    "Marine question briefing packet should preserve mixed corridor/hydrology question posture."
+  );
+  assert(
+    questionBriefingPacket?.observe.some((line) => /question posture:/i.test(line)),
+    "Marine question briefing packet should preserve question-posture observe wording."
+  );
+  assert(
+    questionBriefingPacket?.orient.some((line) => /export coherence:/i.test(line)),
+    "Marine question briefing packet should preserve export-coherence orientation wording."
+  );
+  assert(
+    questionBriefingPacket?.explain.some((line) =>
+      /vigicrues workflow evidence|waterinfo workflow evidence|opw workflow evidence/i.test(line)
+    ),
+    "Marine question briefing packet should preserve workflow-evidence explanation lines."
+  );
+  assert(
+    questionBriefingPacket?.doesNotProveLines.some((line) =>
+      /impact|closure certainty|wrongdoing|action need/i.test(line)
+    ),
+    "Marine question briefing packet should preserve no-impact/no-closure/no-wrongdoing/no-action guardrails."
+  );
 
   const evidenceSummary = buildMarineEvidenceSummary({
     selectedVesselSummary,
@@ -2956,6 +3241,7 @@ function runRegression() {
     vigicruesContextSummary: evidenceSummaryVigicruesContextSummary,
     irelandOpwContextSummary: evidenceSummaryIrelandOpwContextSummary,
     netherlandsRwsWaterinfoContextSummary: waterinfoContextSummary,
+    gebcoBathymetryContextSummary,
     hydrologyContextSummary,
     contextFusionSummary: fusionSummary,
     contextReviewReportSummary: reviewReport,
@@ -2973,6 +3259,7 @@ function runRegression() {
   assert(marineMetadata.contextSourceSummary, "Marine evidence summary should export context source-summary metadata.");
   assert(marineMetadata.contextIssueQueue, "Marine evidence summary should export context issue queue metadata.");
   assert(marineMetadata.contextIssueExportBundle, "Marine evidence summary should export context issue-export metadata.");
+  assert(marineMetadata.gebcoBathymetryContext, "Marine evidence summary should export GEBCO bathymetry metadata.");
   assert(marineMetadata.hydrologyContext, "Marine evidence summary should export hydrology metadata.");
   assert(
     marineMetadata.sourceHealthExportCoherence,
@@ -3001,6 +3288,22 @@ function runRegression() {
   assert(
     marineMetadata.corridorSituationPackage,
     "Marine evidence summary should export corridor-situation package metadata."
+  );
+  assert(
+    marineMetadata.hydrologyRegionalComparisonPackage,
+    "Marine evidence summary should export hydrology regional comparison package metadata."
+  );
+  assert(
+    marineMetadata.currentAwarenessDigest,
+    "Marine evidence summary should export current-awareness digest metadata."
+  );
+  assert(
+    marineMetadata.sourceRowWorkflowClosurePacket,
+    "Marine evidence summary should export source-row workflow closure packet metadata."
+  );
+  assert(
+    marineMetadata.questionBriefingPacket,
+    "Marine evidence summary should export question briefing packet metadata."
   );
   assert(
     marineMetadata.netherlandsRwsWaterinfoContext,
@@ -3212,6 +3515,118 @@ function runRegression() {
     "Marine evidence summary should preserve no-closure/no-wrongdoing/no-action guardrails in corridor-situation metadata."
   );
   assert(
+    /Marine hydrology comparison:/i.test(
+      marineMetadata.hydrologyRegionalComparisonPackage.summaryLine ?? ""
+    ),
+    "Marine evidence summary should preserve hydrology comparison summary wording."
+  );
+  assert(
+    marineMetadata.hydrologyRegionalComparisonPackage.posture ===
+      hydrologyRegionalComparisonPackage?.metadata.posture,
+    "Marine evidence summary should preserve hydrology comparison posture."
+  );
+  assert(
+    /vigicrues workflow evidence/i.test(
+      marineMetadata.hydrologyRegionalComparisonPackage.vigicruesWorkflowEvidenceLine ?? ""
+    ),
+    "Marine evidence summary should preserve Vigicrues workflow-evidence wording in hydrology comparison metadata."
+  );
+  assert(
+    /waterinfo workflow evidence/i.test(
+      marineMetadata.hydrologyRegionalComparisonPackage.waterinfoWorkflowEvidenceLine ?? ""
+    ),
+    "Marine evidence summary should preserve Waterinfo workflow-evidence wording in hydrology comparison metadata."
+  );
+  assert(
+    /opw workflow evidence/i.test(
+      marineMetadata.hydrologyRegionalComparisonPackage.opwWorkflowEvidenceLine ?? ""
+    ),
+    "Marine evidence summary should preserve OPW workflow-evidence wording in hydrology comparison metadata."
+  );
+  assert(
+    marineMetadata.hydrologyRegionalComparisonPackage.doesNotProveLines.some((line) =>
+      /impact|closure certainty|action need/i.test(line)
+    ),
+    "Marine evidence summary should preserve no-impact/no-closure/no-action guardrails in hydrology comparison metadata."
+  );
+  assert(
+    /Marine current awareness:/i.test(marineMetadata.currentAwarenessDigest.summaryLine ?? ""),
+    "Marine evidence summary should preserve current-awareness digest summary wording."
+  );
+  assert(
+    marineMetadata.currentAwarenessDigest.posture === currentAwarenessDigest?.metadata.posture,
+    "Marine evidence summary should preserve current-awareness digest posture."
+  );
+  assert(
+    marineMetadata.currentAwarenessDigest.sourceCount === currentAwarenessDigest?.metadata.sourceCount,
+    "Marine evidence summary should preserve current-awareness digest source count."
+  );
+  assert(
+    /vigicrues workflow evidence/i.test(
+      marineMetadata.currentAwarenessDigest.vigicruesWorkflowEvidenceLine ?? ""
+    ),
+    "Marine evidence summary should preserve Vigicrues workflow-evidence wording in current-awareness metadata."
+  );
+  assert(
+    marineMetadata.currentAwarenessDigest.doesNotProveLines.some((line) =>
+      /impact|closure certainty|action need|wrongdoing/i.test(line)
+    ),
+    "Marine evidence summary should preserve current-awareness digest guardrails."
+  );
+  assert(
+    /Marine source-row workflow closure:/i.test(
+      marineMetadata.sourceRowWorkflowClosurePacket.summaryLine ?? ""
+    ),
+    "Marine evidence summary should preserve source-row workflow closure summary wording."
+  );
+  assert(
+    marineMetadata.sourceRowWorkflowClosurePacket.posture ===
+      sourceRowWorkflowClosurePacket?.metadata.posture,
+    "Marine evidence summary should preserve source-row workflow closure posture."
+  );
+  assert(
+    marineMetadata.sourceRowWorkflowClosurePacket.sourceCount ===
+      sourceRowWorkflowClosurePacket?.metadata.sourceCount,
+    "Marine evidence summary should preserve source-row workflow closure source count."
+  );
+  assert(
+    /vigicrues workflow evidence/i.test(
+      marineMetadata.sourceRowWorkflowClosurePacket.vigicruesWorkflowEvidenceLine ?? ""
+    ),
+    "Marine evidence summary should preserve Vigicrues workflow-evidence wording in source-row workflow closure metadata."
+  );
+  assert(
+    marineMetadata.sourceRowWorkflowClosurePacket.doesNotProveLines.some((line) =>
+      /impact|closure certainty|action need|wrongdoing/i.test(line)
+    ),
+    "Marine evidence summary should preserve source-row workflow closure guardrails."
+  );
+  assert(
+    /Marine question briefing:/i.test(marineMetadata.questionBriefingPacket.summaryLine ?? ""),
+    "Marine evidence summary should preserve question briefing summary wording."
+  );
+  assert(
+    marineMetadata.questionBriefingPacket.posture === questionBriefingPacket?.metadata.posture,
+    "Marine evidence summary should preserve question briefing posture."
+  );
+  assert(
+    marineMetadata.questionBriefingPacket.questionFamily ===
+      questionBriefingPacket?.metadata.questionFamily,
+    "Marine evidence summary should preserve question briefing family posture."
+  );
+  assert(
+    /vigicrues workflow evidence/i.test(
+      marineMetadata.questionBriefingPacket.vigicruesWorkflowEvidenceLine ?? ""
+    ),
+    "Marine evidence summary should preserve Vigicrues workflow-evidence wording in question briefing metadata."
+  );
+  assert(
+    marineMetadata.questionBriefingPacket.doesNotProveLines.some((line) =>
+      /impact|closure certainty|wrongdoing|action need/i.test(line)
+    ),
+    "Marine evidence summary should preserve question briefing guardrails."
+  );
+  assert(
     JSON.stringify(marineMetadata.netherlandsRwsWaterinfoContext) ===
       JSON.stringify(waterinfoContextSummary.metadata),
     "Marine evidence summary should preserve Waterinfo metadata without drift."
@@ -3309,8 +3724,8 @@ function runRegression() {
     "Issue export bundle should preserve three hydrology rows."
   );
   assert(
-    new Set(marineMetadata.contextIssueExportBundle.rows.map((row) => row.category)).size === 4,
-    "Issue export bundle should preserve all four source-family categories."
+    new Set(marineMetadata.contextIssueExportBundle.rows.map((row) => row.category)).size === 5,
+    "Issue export bundle should preserve all five source-family categories."
   );
   assert(
     marineMetadata.contextIssueExportBundle.rows.some(
@@ -3375,6 +3790,10 @@ function runRegression() {
   assert(
     evidenceSummary.displayLines.some((line) => /Marine corridor situation:/i.test(line)),
     "Evidence summary display lines should preserve corridor-situation wording."
+  );
+  assert(
+    evidenceSummary.displayLines.some((line) => /Marine hydrology comparison:/i.test(line)),
+    "Evidence summary display lines should preserve hydrology comparison wording."
   );
   assert(
     evidenceSummary.displayLines.some((line) => /Marine chokepoint review: Hormuz-style bounded corridor review/i.test(line)),

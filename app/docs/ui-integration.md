@@ -10,6 +10,19 @@ Workflow consolidation should follow the single workspace model in [unified-user
 
 For rollout sequencing and section-by-section migration targets, see [ui-primitive-migration-map.md](/C:/Users/mike/11Writer/app/docs/ui-primitive-migration-map.md).
 
+For the full Phase 3 shell, theme, and Code - OSS reference-backed target, see [phase3-code-oss-workbench-spec.md](/C:/Users/mike/11Writer/app/docs/phase3-code-oss-workbench-spec.md).
+
+For the concrete Phase 3 token and shared-control contract, see [phase3-shared-ui-contract.md](/C:/Users/mike/11Writer/app/docs/phase3-shared-ui-contract.md).
+
+For canonical Phase 3 sequencing, slice acceptance, vocabulary enforcement, and one-off UI deviation handling, see [phase3-governance-sequencing-packet.md](/C:/Users/mike/11Writer/app/docs/phase3-governance-sequencing-packet.md).
+
+Phase 3 enforcement note:
+
+- shared common UI parts are mandatory, not optional
+- if the same semantic UI need appears in multiple places, the default answer is one shared component
+- this includes text boxes, cards, badges, caveat blocks, section wrappers, source-health rows, and empty/loading/error states
+- agents should not reinvent a local version just because it is faster in the moment
+
 ## Current Audit
 
 ### Repeated patterns already in use
@@ -50,7 +63,10 @@ These files generate domain meaning. They should feed shared presentation primit
 ### New shared module
 
 - `app/client/src/components/ui/primitives.tsx`
+- `app/client/src/components/ui/controls.tsx`
 - `app/client/src/components/ui/index.ts`
+- `app/client/src/styles/themes/tokens.css`
+- `app/client/src/styles/ui-controls.css`
 - `app/client/src/styles/ui-primitives.css`
 
 ### First-slice primitives
@@ -64,6 +80,11 @@ These files generate domain meaning. They should feed shared presentation primit
 - `InspectorSection`
 - `MetricRow`
 - `PriorityBadge`
+- `WorkbenchButton`
+- `WorkbenchIconButton`
+- `WorkbenchInput`
+- `WorkbenchTextarea`
+- `WorkbenchSelect`
 
 ### Current adoption
 
@@ -115,6 +136,7 @@ These are presentation-only helpers. Domains compute their own source-health, fr
 - Domains own the computation of health, freshness, and basis values.
 - Do not invent local source-health badges or freshness pills if `SourceHealthRow`, `FreshnessBadge`, or `DataBasisBadge` already fit.
 - If a domain needs a state not covered by the shared vocabulary, document the gap before adding a one-off visual.
+- The same rule applies to shared inputs and form controls: if a textbox or similar control has the same semantic job elsewhere, use one shared component/look rather than creating another local version.
 
 ## Consolidation Plan
 
@@ -148,7 +170,9 @@ These are active integration surfaces. Do not do a style-driven giant refactor i
 ## Rules For Domain Agents
 
 - Use shared primitives from `app/client/src/components/ui` before creating new card, badge, or caveat markup.
+- Use shared common parts for repeated inputs and controls before creating local textbox, filter, search, or field variants.
 - Do not invent local UI first. Before adding a new badge, card, caveat, or empty-state style, check `app/client/src/components/ui` and `app/client/src/styles/ui-primitives.css`.
+- Treat visual consistency as a requirement that reduces future coordination cost, not as optional polish.
 - If a primitive is insufficient, document the exact gap in your task or diff instead of immediately creating a one-off replacement.
 - Avoid custom card or badge CSS unless the domain requires a genuinely new semantic state that the shared primitives cannot express.
 - Keep domain UI modular. Build data in domain helpers and render it through shared primitives.
@@ -201,8 +225,9 @@ These are active integration surfaces. Do not do a style-driven giant refactor i
 
 ## Recommended Next Sequence
 
-1. Convert repeated empty/loading/error branches in `LayerPanel.tsx`, `InspectorPanel.tsx`, and `WebcamOperationsPanel.tsx` to `EmptyState`.
-2. Replace ad hoc status and readiness pills in webcams, imagery, aerospace, and source health with `StatusBadge`, `SourceBadge`, and `PriorityBadge`.
-3. Extract inspector-specific section wrappers and evidence-summary cards from `InspectorPanel.tsx`.
-4. Split `WebcamOperationsPanel.tsx` into summary, filters, source cards, cluster detail, and review queue subcomponents.
-5. Move remaining shared styles out of `global.css` once the high-conflict files stabilize.
+1. `Systems AI` and `Platform AI` lock the shared control, state, and token contracts before shell migration accelerates.
+2. Stable surfaces should migrate raw input and select usage to `WorkbenchInput`, `WorkbenchTextarea`, and `WorkbenchSelect` before high-collision panels are touched.
+3. `Workspace AI` builds the persistent workbench shell after those contracts exist.
+4. `Spatial AI` migrates `Map` into a real workbench mode instead of leaving it as the shell owner.
+5. `Reporting AI` builds report and export surfaces inside the same shell and primitive grammar.
+6. `Gov AI` keeps the migration map, deviation log, and component-vocabulary enforcement truth current throughout.

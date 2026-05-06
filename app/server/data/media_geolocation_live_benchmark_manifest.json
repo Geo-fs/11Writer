@@ -1,0 +1,290 @@
+{
+  "cases": [
+    {
+      "caseId": "golden-gate-bridge",
+      "category": "urban_landmark",
+      "sourceId": "benchmark:golden-gate-bridge",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Golden_Gate_Bridge_.JPG",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Golden%20Gate%20Bridge%20.JPG",
+      "candidateLabels": [
+        "San Francisco",
+        "Los Angeles",
+        "Seattle",
+        "Portland",
+        "Las Vegas",
+        "Vancouver"
+      ],
+      "expected": {
+        "latitude": 37.827677,
+        "longitude": -122.481661,
+        "countryOrRegion": "San Francisco"
+      },
+      "engines": [
+        "deterministic",
+        "geoclip",
+        "streetclip",
+        "fusion"
+      ]
+    },
+    {
+      "caseId": "eiffel-tower",
+      "category": "urban_landmark",
+      "sourceId": "benchmark:eiffel-tower",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Eiffel_Tower_(3438957111).jpg",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Eiffel%20Tower%20%283438957111%29.jpg",
+      "candidateLabels": [
+        "Paris",
+        "London",
+        "Berlin",
+        "Brussels",
+        "Rome",
+        "Vienna"
+      ],
+      "expected": {
+        "latitude": 48.858997,
+        "longitude": 2.292773,
+        "countryOrRegion": "Paris"
+      },
+      "engines": [
+        "deterministic",
+        "geoclip",
+        "streetclip",
+        "fusion"
+      ]
+    },
+    {
+      "caseId": "brandenburg-gate",
+      "category": "urban_landmark",
+      "sourceId": "benchmark:brandenburg-gate",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:The_Brandenburg_Gate.jpg",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The%20Brandenburg%20Gate.jpg",
+      "candidateLabels": [
+        "Berlin",
+        "Paris",
+        "Prague",
+        "Warsaw",
+        "Vienna",
+        "Budapest"
+      ],
+      "expected": {
+        "latitude": 52.514674,
+        "longitude": 13.375446,
+        "countryOrRegion": "Berlin"
+      },
+      "engines": [
+        "deterministic",
+        "geoclip",
+        "streetclip",
+        "fusion"
+      ]
+    },
+    {
+      "caseId": "sydney-opera-house",
+      "category": "urban_landmark",
+      "sourceId": "benchmark:sydney-opera-house",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Sydney_Opera_House.JPG",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sydney%20Opera%20House.JPG",
+      "candidateLabels": [
+        "Sydney",
+        "Melbourne",
+        "Auckland",
+        "Brisbane",
+        "Perth",
+        "Wellington"
+      ],
+      "expected": {
+        "latitude": -33.856667,
+        "longitude": 151.215,
+        "countryOrRegion": "Sydney"
+      },
+      "engines": [
+        "deterministic",
+        "geoclip",
+        "streetclip",
+        "fusion"
+      ]
+    },
+    {
+      "caseId": "tokyo-tower",
+      "category": "urban_landmark",
+      "sourceId": "benchmark:tokyo-tower",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Tokyo_Tower_20060211.JPG",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Tokyo%20Tower%2020060211.JPG",
+      "candidateLabels": [
+        "Tokyo",
+        "Osaka",
+        "Seoul",
+        "Taipei",
+        "Nagasaki",
+        "Hong Kong"
+      ],
+      "expected": {
+        "latitude": 35.66226,
+        "longitude": 139.741057,
+        "countryOrRegion": "Tokyo"
+      },
+      "engines": [
+        "deterministic",
+        "geoclip",
+        "streetclip",
+        "fusion"
+      ]
+    },
+    {
+      "caseId": "bixby-creek-bridge",
+      "category": "transport_infrastructure",
+      "sourceId": "benchmark:bixby-creek-bridge",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Bixby_creek_bridge.jpg",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bixby%20creek%20bridge.jpg",
+      "candidateLabels": [
+        "Big Sur",
+        "Monterey",
+        "Santa Cruz",
+        "San Luis Obispo",
+        "Santa Barbara",
+        "Los Angeles"
+      ],
+      "expected": {
+        "latitude": 36.371437,
+        "longitude": -121.901018,
+        "countryOrRegion": "Big Sur"
+      },
+      "engines": [
+        "deterministic",
+        "geoclip",
+        "streetclip",
+        "fusion"
+      ]
+    },
+    {
+      "caseId": "cliffs-of-moher",
+      "category": "natural_landscape",
+      "sourceId": "benchmark:cliffs-of-moher",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Cliffs-of-Moher.jpg",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cliffs-of-Moher.jpg",
+      "candidateLabels": [
+        "County Clare",
+        "Galway",
+        "Limerick",
+        "Cork",
+        "Donegal",
+        "Dingle"
+      ],
+      "expected": {
+        "latitude": 52.971542,
+        "longitude": -9.430909,
+        "countryOrRegion": "County Clare"
+      },
+      "engines": [
+        "deterministic",
+        "geoclip",
+        "streetclip",
+        "fusion"
+      ]
+    },
+    {
+      "caseId": "grand-canyon-south-rim",
+      "category": "natural_landscape",
+      "sourceId": "benchmark:grand-canyon-south-rim",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Grand_Canyon_South_Rim.jpg",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Grand%20Canyon%20South%20Rim.jpg",
+      "candidateLabels": [
+        "Grand Canyon Village",
+        "Flagstaff",
+        "Sedona",
+        "Page",
+        "Las Vegas",
+        "Moab"
+      ],
+      "expected": {
+        "latitude": 36.057944,
+        "longitude": -112.143099,
+        "countryOrRegion": "Arizona"
+      },
+      "engines": [
+        "deterministic",
+        "geoclip",
+        "streetclip",
+        "fusion"
+      ]
+    },
+    {
+      "caseId": "hoover-dam",
+      "category": "transport_infrastructure",
+      "sourceId": "benchmark:hoover-dam",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Hoover_Dam.jpg",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Hoover%20Dam.jpg",
+      "candidateLabels": [
+        "Boulder City",
+        "Las Vegas",
+        "Phoenix",
+        "Palm Springs",
+        "Tucson",
+        "Salt Lake City"
+      ],
+      "expected": {
+        "latitude": 36.015833,
+        "longitude": -114.737778,
+        "countryOrRegion": "Boulder City"
+      },
+      "engines": [
+        "deterministic",
+        "geoclip",
+        "streetclip",
+        "fusion"
+      ]
+    },
+    {
+      "caseId": "mount-fuji-from-lake-kawaguchi",
+      "category": "natural_landscape",
+      "sourceId": "benchmark:mount-fuji-from-lake-kawaguchi",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Mount_Fuji_from_Lake_Kawaguchi.jpg",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mount%20Fuji%20from%20Lake%20Kawaguchi.jpg",
+      "candidateLabels": [
+        "Fujikawaguchiko",
+        "Tokyo",
+        "Hakone",
+        "Nagano",
+        "Sendai",
+        "Matsumoto"
+      ],
+      "expected": {
+        "latitude": 35.360625,
+        "longitude": 138.727363,
+        "countryOrRegion": "Fujikawaguchiko"
+      },
+      "engines": [
+        "deterministic",
+        "geoclip",
+        "streetclip",
+        "fusion"
+      ]
+    },
+    {
+      "caseId": "shibuya-crossing-2018",
+      "category": "dense_street_scene",
+      "sourceId": "benchmark:shibuya-crossing-2018",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:2018_Shibuya_Crossing.jpg",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/2018%20Shibuya%20Crossing.jpg",
+      "candidateLabels": [
+        "Tokyo",
+        "Shinjuku",
+        "Osaka",
+        "Seoul",
+        "Taipei",
+        "Hong Kong"
+      ],
+      "expected": {
+        "latitude": 35.659494,
+        "longitude": 139.700553,
+        "countryOrRegion": "Tokyo"
+      },
+      "engines": [
+        "deterministic",
+        "geoclip",
+        "streetclip",
+        "fusion"
+      ]
+    }
+  ]
+}

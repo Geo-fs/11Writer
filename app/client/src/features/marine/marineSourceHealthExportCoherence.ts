@@ -18,7 +18,7 @@ type SourceHealth =
 interface MarineSourceHealthExportRow {
   sourceId: string;
   label: string;
-  category: "oceanographic" | "meteorological" | "hydrology";
+  category: "oceanographic" | "meteorological" | "hydrology" | "maritime-warning";
   sourceMode: SourceMode;
   health: SourceHealth;
   evidenceBasis: "observed";
@@ -216,3 +216,4 @@ function isLimitedHealth(health: SourceHealth) {
     health === "error"
   );
 }
+

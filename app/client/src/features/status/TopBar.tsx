@@ -1,9 +1,12 @@
 import type { PublicConfigResponse, SourceStatusResponse } from "../../types/api";
 import { useAppStore } from "../../lib/store";
+import { WorkbenchButton, WorkbenchInput } from "../../components/ui";
+import type { WorkbenchModeId } from "../workbench/workbenchModes";
 
 interface TopBarProps {
   config?: PublicConfigResponse;
   status?: SourceStatusResponse;
+  activeModeId: WorkbenchModeId;
   onCommandSubmit: (value: string) => void;
   onCopyPermalink: () => void;
   onSaveBookmark: () => void;
@@ -13,6 +16,7 @@ interface TopBarProps {
 export function TopBar({
   config,
   status,
+  activeModeId,
   onCommandSubmit,
   onCopyPermalink,
   onSaveBookmark,
@@ -28,8 +32,9 @@ export function TopBar({
   return (
     <header className="topbar">
       <div className="topbar__title">
-        <p className="topbar__eyebrow">Public Data OSINT Workspace</p>
-        <h1>WorldView Spatial Console</h1>
+        <p className="topbar__eyebrow">11Writer Workbench</p>
+        <h1>Situation Workspace</h1>
+        <span className="topbar__subtitle">{activeModeId === "map" ? "Map mode" : `${activeModeId} mode`}</span>
       </div>
       <form
         className="topbar__command"
@@ -39,27 +44,28 @@ export function TopBar({
           onCommandSubmit(String(form.get("command") ?? ""));
         }}
       >
-        <input
+        <WorkbenchInput
           className="topbar__command-input"
           type="text"
           name="command"
           placeholder="Try callsign:dal123, icao24:a1b2c3, norad:25544, source:opensky-network, or austin"
           autoComplete="off"
         />
-        <button type="submit" className="ghost-button">
+        <WorkbenchButton type="submit" tone="primary">
           Run
-        </button>
+        </WorkbenchButton>
       </form>
       <div className="topbar__meta">
-        <button type="button" className="ghost-button" onClick={onCopyPermalink}>
+        <WorkbenchButton type="button" onClick={onCopyPermalink}>
           Copy Permalink
-        </button>
-        <button type="button" className="ghost-button" onClick={onSaveBookmark}>
+        </WorkbenchButton>
+        <WorkbenchButton type="button" onClick={onSaveBookmark}>
           Save View
-        </button>
-        <button type="button" className="ghost-button" onClick={onExportSnapshot}>
+        </WorkbenchButton>
+        <WorkbenchButton type="button" onClick={onExportSnapshot}>
           Export Snapshot
-        </button>
+        </WorkbenchButton>
+        <span>Mode {activeModeId}</span>
         <span>{config?.environment ?? "local"} environment</span>
         <span>{hud.imageryModeTitle}</span>
         <span>{hud.imageryModeRole}</span>

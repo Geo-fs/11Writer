@@ -57,6 +57,7 @@ Marine workflow update:
 - They still remain below `fully validated` and should not be treated as live validated from this evidence alone.
 - `france-vigicrues-hydrometry` now has implemented backend-first source evidence plus completed hydrology/corridor report-follow-through in Marine AI progress, but it still remains below `workflow-validated` because no explicit source-row workflow-validation record is recorded yet.
 - `netherlands-rws-waterinfo` now also has a completed bounded helper/export follow-on in Marine AI progress, but it still remains below `workflow-validated` because no explicit workflow-validation record is recorded yet.
+- Marine AI progress now also records a landed backend-first `navtex-context` slice with helper regression, build/lint, export metadata, and marine smoke evidence; keep it at `implemented` until an explicit source-row workflow-validation note is recorded.
 
 Aerospace workflow update:
 
@@ -74,6 +75,7 @@ Aerospace workflow update:
 - Backend contract tests, server compile, frontend lint, and frontend build are explicitly recorded as passing for the current aerospace lane.
 - Executed browser smoke is still not recorded on this host because Playwright launch is currently classified as `windows-browser-launch-permission` before app assertions.
 - Treat the five aerospace sources above as `implemented` and clearly `contract-tested`, but not `workflow-validated` from this evidence alone.
+- Aerospace AI progress now also records a landed backend-first `gpsjam-context` slice with deterministic regression coverage and prepared smoke assertions; keep it at `implemented` until executed workflow smoke is recorded.
 
 Data workflow update:
 
@@ -185,6 +187,8 @@ Cross-lane helper update:
   - `/api/feeds/data-ai/source-families/review-queue`
 - Data AI progress now also records a client-light inspector helper path at:
   - `dataAiSourceIntelligence`
+- Data AI progress now also records a completed metadata-only question-briefing packet inside:
+  - `dataAiSourceIntelligence`
 - Geospatial AI progress now also records a backend-first environmental weather/observation review queue route at:
   - `/api/context/environmental/weather-observation-review-queue`
 - Geospatial AI progress now also records a backend-first environmental weather/observation export bundle route at:
@@ -199,6 +203,8 @@ Cross-lane helper update:
   - `/api/context/environmental/situation-snapshot-package`
 - Geospatial AI progress now also records a backend-first environmental fusion-snapshot input route at:
   - `/api/context/environmental/fusion-snapshot-input`
+- Geospatial AI progress now also records a completed backend-first environmental question-briefing packet route at:
+  - `/api/context/environmental/question-briefing-packet`
 - Marine AI progress now also records a workflow-supporting export helper path at:
   - `marineAnomalySummary.contextIssueExportBundle`
 - Marine AI progress now also records a full review/export coherence regression over `marineAnomalySummary` helper outputs
@@ -213,6 +219,10 @@ Cross-lane helper update:
 - Marine AI progress now also records a completed fusion-snapshot input helper path at:
   - `marineAnomalySummary.fusionSnapshotInput`
 - Treat that fusion input as implemented workflow-supporting metadata only; it now has regression and smoke-metadata evidence, but it still remains below `workflow-validated`
+- Marine AI progress now also records a completed source-row workflow closure helper path at:
+  - `marineAnomalySummary.sourceRowWorkflowClosurePacket`
+- Treat that source-row workflow closure packet as implemented workflow-supporting metadata only; it now has regression and smoke-metadata evidence, but it still remains below `workflow-validated`
+- Marine AI progress now also records an in-progress question-briefing packet over the current marine reporting stack.
 - Aerospace AI progress now also records a workflow-supporting review helper path at:
   - `aerospaceContextGapQueue`
 - Aerospace AI progress now also records a workflow-supporting current-vs-archive separation helper path at:
@@ -230,6 +240,9 @@ Cross-lane helper update:
   - `aerospaceContextReviewExportBundle`
 - Aerospace AI progress now also records a completed report-brief package helper path at:
   - `aerospaceReportBriefPackage`
+- Aerospace AI progress now also records a completed reporting-handoff contract helper path at:
+  - `aerospaceReportingHandoffContract`
+- Aerospace AI progress now also records an in-progress question-briefing packet over the current aerospace reporting stack.
 - Features/Webcam AI progress now also records a workflow-supporting evidence-packet selector route at:
   - `/api/cameras/source-ops-evidence-packets`
 - Features/Webcam AI progress now also records a workflow-supporting aggregate export-bundle route at:
@@ -241,6 +254,7 @@ Cross-lane helper update:
 - Features/Webcam AI progress now also records `nsw-live-traffic-cameras` and `quebec-mtmd-traffic-cameras` as `candidate-sandbox-importable` only; that is source-ops evidence and not implementation or validation proof.
 - Features/Webcam AI progress now also records `baton-rouge-traffic-cameras` and `vancouver-web-cam-url-links` as `candidate-sandbox-importable`, `arlington-traffic-cameras` as `endpoint-verified` only, and `qldtraffic-web-cameras` as held after a `401` on `/v1/webcams`; that remains candidate/source-ops evidence rather than implementation or validation proof.
 - Features/Webcam AI progress now also records a backend-only sandbox-candidate review-burden and source-health-expectation summary over current candidate-sandbox-importable sources.
+- Features/Webcam AI progress now also records a completed source-ops review-priority packet and a completed source-ops regional portfolio packet over the same bounded candidate cohort.
 - Atlas AI progress now also records a fixture-backed Wave Monitor tool surface at:
   - `/api/tools/waves/overview`
 - Atlas AI progress now also records shared analyst/readiness integration for:
@@ -264,6 +278,8 @@ Cross-lane helper update:
 - Atlas alerting and current next-task routing now also record a newer runtime operator-console slice as peer/runtime input only pending Connect validation.
 - Atlas alerting now also records a media-geolocation peer slice; keep it at derived-evidence or candidate-location input only unless a later controlled validation pass explicitly promotes a narrower surface.
 - Wonder alerting now also records bounded Statuspage and Mastodon discovery; keep both at candidate/review discovery input only unless a later controlled validation pass explicitly promotes a narrower surface.
+- Wonder alerting now also records Stack Exchange and seed-packet discovery; keep both at candidate/review discovery input only unless a later controlled validation pass explicitly promotes a narrower surface.
+- Wonder breadth intake now also records archive-index scan, mailing-list archive adapters, and curated directory or regional-portal scan; keep all three at candidate/review/runtime discovery input only unless a later controlled validation pass explicitly promotes a narrower surface.
 - Wonder planning docs now also record Browser Use guidance plus macOS/plugin/connector planning, but those remain peer planning input only and must not change source-validation posture by themselves.
 - These helper paths are implemented and useful for review/export workflows, but they should not be treated as external-source workflow validation proof by themselves.
 - Current evidence split:
@@ -273,7 +289,7 @@ Cross-lane helper update:
   - Data AI Source Intelligence is implemented as a client-light metadata-only inspector consumer, and its topic/context lens plus export-safe topic lines remain metadata-only workflow support without explicit smoke or manual workflow-validation record
   - the infrastructure/status context package over `cloudflare-radar`, `netblocks`, and `apnic-blog` is now completed workflow-supporting metadata, not the active fresh Data lane
   - the latest completed Data lanes now include the bounded fusion/claim-integrity snapshot and bounded report-brief package over the existing metadata-only Data AI surfaces
-  - the next useful Data move is one bounded topic-scoped report packet plus reporting-input coherence and validation/export closure; do not reopen implemented infrastructure/status, completed `world-news-awareness`, `propublica`, or `global-voices` as fresh source-build lanes
+  - the next useful Data move is reporting-input coherence, validation/export closure, or one very small topic-coverage follow-on; do not reopen implemented infrastructure/status, completed `world-news-awareness`, `propublica`, or `global-voices` as fresh source-build lanes
   - cyber-vendor/community follow-on is implemented and contract-tested on the existing shared Data AI route, but still has no explicit consumer-path or workflow-validation record
   - internet-governance/standards context is implemented and contract-tested on the existing shared Data AI route, but still has no explicit consumer-path or workflow-validation record
   - public-institution/world-context is implemented and contract-tested on the existing shared Data AI route, but still has no explicit consumer-path or workflow-validation record

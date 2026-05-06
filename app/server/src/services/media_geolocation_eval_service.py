@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import Any
 
 from src.config.settings import Settings
-from src.services.media_evidence_service import geolocate_media_artifact
+from src.services.media_evidence_service import fetch_media_artifact, geolocate_media_artifact
+from src.services.runtime_paths import resolve_runtime_paths
 
 
 class MediaGeolocationEvaluationService:
@@ -164,6 +165,129 @@ class MediaGeolocationEvaluationService:
             "results": results,
         }
 
+    def run_live_benchmark(self, path: str | None = None) -> dict[str, Any]:
+        manifest_path = path or self._settings.source_discovery_media_geolocation_live_benchmark_manifest_path
+        manifest = self.load_fixture_manifest(manifest_path)
+        raw_cases = manifest.get("cases", [])
+        if not isinstance(raw_cases, list):
+            raise ValueError("Media geolocation live benchmark manifest must include a list of cases.")
+        engine_matrix: list[str] = [
+            "deterministic",
+            "geoclip",
+            "streetclip",
+            "fusion",
+        ]
+        per_engine_results: dict[str, list[dict[str, Any]]] = {engine: [] for engine in engine_matrix}
+        category_counts: dict[str, int] = {}
+        for case in raw_cases:
+            if not isinstance(case, dict):
+                continue
+            category = _coerce_optional_str(case.get("category")) or "uncategorized"
+            category_counts[category] = category_counts.get(category, 0) + 1
+            image_url = _coerce_optional_str(case.get("imageUrl"))
+            page_url = _coerce_optional_str(case.get("pageUrl"))
+            if not image_url:
+                continue
+            source_id = _coerce_optional_str(case.get("sourceId")) or f"benchmark:{_coerce_optional_str(case.get('caseId')) or 'unknown'}"
+            inspection, _ = fetch_media_artifact(
+                self._settings,
+                source_id=source_id,
+                media_url=image_url,
+                parent_page_url=page_url,
+                fixture_bytes_base64=None,
+                fixture_content_type=None,
+                request_budget=1,
+                max_bytes=max(1, self._settings.source_discovery_media_max_bytes),
+            )
+            artifact_metadata = dict(inspection.metadata)
+            artifact_metadata.setdefault("mimeTypeSniffed", getattr(inspection, "mime_type", None))
+            artifact_metadata.setdefault("width", getattr(inspection, "width", None))
+            artifact_metadata.setdefault("height", getattr(inspection, "height", None))
+            for engine in [str(item).strip().lower() for item in case.get("engines", engine_matrix) if str(item).strip()] if isinstance(case.get("engines"), list) else engine_matrix:
+                started = time.perf_counter()
+                result = geolocate_media_artifact(
+                    self._settings,
+                    artifact_path=inspection.artifact_path,
+                    artifact_metadata=artifact_metadata,
+                    observed_latitude=inspection.observed_latitude,
+                    observed_longitude=inspection.observed_longitude,
+                    exif_timestamp=inspection.exif_timestamp,
+                    ocr_text=_coerce_optional_str(case.get("ocrText")),
+                    captions=[str(item) for item in case.get("captions", []) if str(item).strip()] if isinstance(case.get("captions"), list) else [],
+                    engine=engine,
+                    analyst_adapter="none",
+                    model=None,
+                    analyst_model=None,
+                    allow_local_ai=False,
+                    fixture_result=None,
+                    candidate_labels=[str(item) for item in case.get("candidateLabels", []) if str(item).strip()] if isinstance(case.get("candidateLabels"), list) else [],
+                    prior_place_hypothesis=None,
+                    prior_place_confidence=None,
+                    prior_place_basis=None,
+                    prior_geolocation_hypothesis=None,
+                    prior_geolocation_confidence=None,
+                    prior_geolocation_basis=None,
+                    inherited_context=None,
+                )
+                elapsed_ms = round((time.perf_counter() - started) * 1000.0, 3)
+                expected = case.get("expected", {}) if isinstance(case.get("expected"), dict) else {}
+                target_lat = _coerce_float(expected.get("latitude"))
+                target_lon = _coerce_float(expected.get("longitude"))
+                country_region = _coerce_optional_str(expected.get("countryOrRegion"))
+                top_distance_km = _distance_km(result.top_latitude, result.top_longitude, target_lat, target_lon)
+                top5_distance_km = _best_top5_distance_km(result.candidates, target_lat, target_lon)
+                per_engine_results.setdefault(engine, []).append(
+                    {
+                        "caseId": _coerce_optional_str(case.get("caseId")) or f"case-{len(per_engine_results.get(engine, [])) + 1}",
+                        "category": category,
+                        "status": result.status,
+                        "topLabel": result.top_label,
+                        "topLatitude": result.top_latitude,
+                        "topLongitude": result.top_longitude,
+                        "topConfidence": result.top_confidence,
+                        "topConfidenceCeiling": result.top_confidence_ceiling,
+                        "topDistanceKm": top_distance_km,
+                        "top5DistanceKm": top5_distance_km,
+                        "top1Hit25Km": top_distance_km is not None and top_distance_km <= 25.0,
+                        "top5Hit25Km": top5_distance_km is not None and top5_distance_km <= 25.0,
+                        "countryRegionHit": _matches_country_region(result, country_region) if country_region else None,
+                        "engineAttempts": [
+                            {
+                                "engine": attempt.engine,
+                                "status": attempt.status,
+                                "modelName": attempt.model_name,
+                                "warmState": attempt.warm_state,
+                                "metadata": dict(getattr(attempt, "metadata", {}) or {}),
+                            }
+                            for attempt in result.engine_attempts
+                        ],
+                        "latencyMs": elapsed_ms,
+                    }
+                )
+        report = {
+            "metadata": {
+                "manifestPath": str(Path(manifest_path)),
+                "mode": "live_benchmark",
+                "caseCount": sum(category_counts.values()),
+                "categoryCounts": {key: category_counts[key] for key in sorted(category_counts)},
+                "runtimeCacheDir": str(Path(resolve_runtime_paths(self._settings)["cache_dir"]) / "media-artifacts"),
+            },
+            "engines": {
+                engine: {
+                    "metrics": _aggregate_live_metrics(rows),
+                    "categoryMetrics": _aggregate_live_category_metrics(rows),
+                    "results": rows,
+                }
+                for engine, rows in per_engine_results.items()
+            },
+        }
+        output_path = _coerce_optional_str(self._settings.source_discovery_media_geolocation_live_benchmark_output_path)
+        if output_path:
+            output_file = Path(output_path)
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            output_file.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        return report
+
 
 def _best_top5_distance_km(candidates: list[Any], target_lat: float | None, target_lon: float | None) -> float | None:
     if target_lat is None or target_lon is None:
@@ -178,6 +302,65 @@ def _best_top5_distance_km(candidates: list[Any], target_lat: float | None, targ
     return round(min(numeric), 3)
 
 
+def _aggregate_live_metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    count = max(1, len(rows))
+    top1 = sum(1 for row in rows if row.get("top1Hit25Km") is True)
+    top5 = sum(1 for row in rows if row.get("top5Hit25Km") is True)
+    country_region = sum(1 for row in rows if row.get("countryRegionHit") is True)
+    unavailable = sum(
+        1
+        for row in rows
+        for attempt in row.get("engineAttempts", [])
+        if isinstance(attempt, dict) and attempt.get("status") == "unavailable"
+    )
+    latencies = [float(row["latencyMs"]) for row in rows if row.get("latencyMs") is not None]
+    profiled_predict_ms: list[float] = []
+    profiled_preprocess_ms: list[float] = []
+    cache_hit_values: list[int] = []
+    for row in rows:
+        for attempt in row.get("engineAttempts", []):
+            if not isinstance(attempt, dict):
+                continue
+            metadata = attempt.get("metadata", {})
+            if not isinstance(metadata, dict):
+                continue
+            predict_ms = _coerce_float(metadata.get("predictMs"))
+            preprocess_ms = _coerce_float(metadata.get("preprocessMs"))
+            cache_hit = metadata.get("cacheHit")
+            if predict_ms is not None:
+                profiled_predict_ms.append(float(predict_ms))
+            if preprocess_ms is not None:
+                profiled_preprocess_ms.append(float(preprocess_ms))
+            if isinstance(cache_hit, bool):
+                cache_hit_values.append(1 if cache_hit else 0)
+    return {
+        "caseCount": len(rows),
+        "top1HitRate25Km": round(top1 / count, 4),
+        "top5HitRate25Km": round(top5 / count, 4),
+        "countryRegionAccuracy": round(country_region / count, 4),
+        "unavailableAttemptRate": round(unavailable / count, 4),
+        "meanLatencyMs": round(sum(latencies) / max(1, len(latencies)), 3),
+        "meanProfiledPredictMs": round(sum(profiled_predict_ms) / max(1, len(profiled_predict_ms)), 3)
+        if profiled_predict_ms
+        else None,
+        "meanProfiledPreprocessMs": round(sum(profiled_preprocess_ms) / max(1, len(profiled_preprocess_ms)), 3)
+        if profiled_preprocess_ms
+        else None,
+        "cacheHitRate": round(sum(cache_hit_values) / max(1, len(cache_hit_values)), 4) if cache_hit_values else None,
+    }
+
+
+def _aggregate_live_category_metrics(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        category = _coerce_optional_str(row.get("category")) or "uncategorized"
+        grouped.setdefault(category, []).append(row)
+    return {
+        category: _aggregate_live_metrics(grouped_rows)
+        for category, grouped_rows in sorted(grouped.items(), key=lambda item: item[0])
+    }
+
+
 def _matches_country_region(result: Any, expected_country_region: str | None) -> bool:
     if not expected_country_region:
         return False
@@ -188,6 +371,12 @@ def _matches_country_region(result: Any, expected_country_region: str | None) ->
         label = getattr(candidate, "label", None)
         if label and expected in label.casefold():
             return True
+        metadata = getattr(candidate, "metadata", None)
+        if isinstance(metadata, dict):
+            for key in ("landmark", "locality", "admin1", "country"):
+                value = metadata.get(key)
+                if isinstance(value, str) and expected in value.casefold():
+                    return True
     return False
 
 

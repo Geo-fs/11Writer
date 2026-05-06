@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import cast
+from typing import Literal, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -8,12 +8,13 @@ from src.services.canada_geomet_ogc_service import CanadaGeoMetOgcQuery, CanadaG
 from src.services.dmi_forecast_service import DmiForecastQuery, DmiForecastService
 from src.services.met_eireann_forecast_service import MetEireannForecastQuery, MetEireannForecastService
 from src.services.meteoswiss_open_data_service import MeteoSwissOpenDataQuery, MeteoSwissOpenDataService
+from src.services.noaa_nowcoast_service import NoaaNowCoastQuery, NoaaNowCoastService
 from src.services.nasa_power_meteorology_solar_service import (
     NasaPowerMeteorologySolarQuery,
     NasaPowerMeteorologySolarService,
 )
 from src.services.taiwan_cwa_weather_service import TaiwanCwaSort, TaiwanCwaWeatherQuery, TaiwanCwaWeatherService
-from src.types.api import CanadaGeoMetOgcResponse, DmiForecastResponse, MeteoSwissOpenDataResponse, MetEireannForecastResponse, NasaPowerMeteorologySolarResponse, TaiwanCwaWeatherResponse
+from src.types.api import CanadaGeoMetOgcResponse, DmiForecastResponse, MeteoSwissOpenDataResponse, MetEireannForecastResponse, NasaPowerMeteorologySolarResponse, NoaaNowCoastResponse, TaiwanCwaWeatherResponse
 
 router = APIRouter(prefix="/api/context/weather", tags=["geospatial-context"])
 
@@ -134,6 +135,26 @@ async def canada_geomet_climate_stations_context(
         CanadaGeoMetOgcQuery(
             province_code=province_code,
             station_name=station_name,
+            limit=limit,
+        )
+    )
+
+
+@router.get("/nowcoast/layer-catalog", response_model=NoaaNowCoastResponse)
+async def noaa_nowcoast_layer_catalog_context(
+    group: str = Query(default="all"),
+    q: str | None = Query(default=None),
+    limit: int = Query(default=25, ge=1, le=100),
+    settings: Settings = Depends(get_settings),
+) -> NoaaNowCoastResponse:
+    if group not in {"all", "hazards", "imagery", "observations"}:
+        raise HTTPException(status_code=400, detail="group must be one of: all, hazards, imagery, observations")
+
+    service = NoaaNowCoastService(settings)
+    return await service.get_context(
+        NoaaNowCoastQuery(
+            group=cast(Literal["all", "hazards", "imagery", "observations"], group),
+            q=q,
             limit=limit,
         )
     )

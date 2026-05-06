@@ -1,5 +1,484 @@
 # Geospatial AI Progress
 
+## 2026-05-05T23:59:21.5558894-05:00
+
+- Assignment version:
+  - `2026-05-05 23:58 America/Chicago`
+- Task:
+  - Finished the current geospatial checkpoint at a coherent stop point and wrote the Phase 3 Geospatial AI handoff packet instead of starting another source expansion wave.
+- What changed:
+  - confirmed the active bounded checkpoint was already complete:
+    - `nws-alerts`
+    - `noaa-nowcoast-ogc`
+    - `noaa-nhc-gis-atlantic`
+  - wrote the Phase 3 handoff packet in:
+    - `app/docs/phase3-handoffs/geospatial-ai.md`
+  - documented:
+    - completed scope
+    - current backend/reporting state
+    - key services/routes/tests/docs to know
+    - validation already run
+    - blockers and caveats
+    - what Spatial AI, Reporting AI, Platform AI, and Connect AI should do first
+    - what not to break
+    - why this work matters for Phase 3
+  - no staging, commit, or push was performed
+- Files touched:
+  - `app/docs/phase3-handoffs/geospatial-ai.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - docs-and-handoff update only in this pass
+  - relied on the already-recorded validation set from the completed NHC/NWS/nowCOAST checkpoint
+- Blockers or caveats:
+  - this was intentionally a finish-up and handoff pass, not a new source implementation pass
+  - the handoff explicitly preserves advisory versus observed versus contextual versus reference meaning boundaries
+  - no unsupported damage, impact, causation, certainty, legal, responsibility, or action claims were introduced
+- Next recommended task:
+  - incoming Phase 3 agents should start from `app/docs/phase3-handoffs/geospatial-ai.md` and the shared environmental reporting helper before attempting any new consumer or source widening work
+
+## 2026-05-05T23:18:11.3287583-05:00
+
+- Assignment version:
+  - `2026-05-05 20:22 America/Chicago`
+- Task:
+  - Implemented one bounded official `NHC GIS` follow-on slice over the NOAA National Hurricane Center Atlantic GIS RSS feed, then threaded it into the existing backend environmental reporting stack without reopening frontend surfaces.
+- What changed:
+  - added backend advisory route:
+    - `GET /api/events/nhc-gis/recent`
+  - added fixture-first service for:
+    - `noaa-nhc-gis-atlantic`
+  - added typed source contracts, metadata, and source-health models for the new source
+  - bounded the first slice to:
+    - one official Atlantic GIS RSS feed
+    - advisory/product-distribution records only
+    - source-provided storm-summary metadata and product links only
+  - added deterministic XML fixture and focused tests for:
+    - fixture parsing
+    - provenance
+    - product-type and storm-name filtering
+    - representative center-point handling when the source provides it
+    - empty and disabled behavior
+    - inert free-text sanitization
+  - threaded `noaa-nhc-gis-atlantic` into `weather-alert-advisory`
+  - updated downstream family-overview, fusion snapshot, and current-awareness validation surfaces to include the new source id without flattening tropical advisory meaning into general alert or impact truth
+  - added source docs and updated family/validation overview docs
+  - no staging, commit, or push was performed
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/routes/events.py`
+  - `app/server/src/services/nhc_gis_service.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/data/nhc_gis_atlantic_fixture.xml`
+  - `app/server/tests/test_nhc_gis.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/server/tests/test_environmental_fusion_snapshot_input.py`
+  - `app/server/tests/test_environmental_current_awareness_digest.py`
+  - `app/docs/environmental-events-nhc-gis.md`
+  - `app/docs/environmental-events.md`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/source-validation-status.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_nhc_gis.py -q`
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m pytest app/server/tests/test_environmental_fusion_snapshot_input.py -q`
+  - `python -m pytest app/server/tests/test_environmental_current_awareness_digest.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - `noaa-nhc-gis-atlantic` remains advisory/contextual only and preserves the official NHC experimental-feed posture
+  - the first slice is intentionally bounded to one Atlantic basin GIS RSS feed rather than all NHC basins or downstream shapefile/KML ingestion
+  - source-provided storm-center coordinates remain representative advisory metadata only
+  - no live incident truth, damage, impact, certainty, legal, responsibility, or action claims were introduced
+  - `alerts_ledger.py` completed successfully and reported 9 open low-priority alerts in `app/docs/alerts.md`; no alert-file changes were made in this assignment
+- Next recommended task:
+  - if Manager wants another coherent geospatial follow-on, keep it backend-first and similarly bounded rather than widening NHC into full multi-basin GIS product ingestion or reopening frontend layer work
+
+## 2026-05-05T20:14:07.6543670-05:00
+
+- Assignment version:
+  - `2026-05-05 19:41 America/Chicago`
+- Task:
+  - Implemented one bounded official hazard/map-layer source wave centered on `NWS Alerts API` and `NOAA nowCOAST`, then threaded both sources into the existing backend reporting stack without reopening frontend surfaces.
+- What changed:
+  - added backend advisory route:
+    - `GET /api/events/nws-alerts/recent`
+  - added backend contextual map-layer route:
+    - `GET /api/context/weather/nowcoast/layer-catalog`
+  - added fixture-first services for:
+    - `nws-alerts`
+    - `noaa-nowcoast-ogc`
+  - added typed source contracts, metadata, and source-health models for both new sources
+  - added deterministic fixtures and focused tests for:
+    - fixture parsing
+    - source provenance
+    - filtering and limit behavior
+    - geometry/coordinate handling
+    - disabled and empty behavior
+    - inert free-text sanitization
+  - threaded `nws-alerts` into `weather-alert-advisory`
+  - threaded `noaa-nowcoast-ogc` into `weather-flood-hydrology`
+  - updated the downstream family-overview, fusion snapshot, and current-awareness validation surfaces to include the new source ids without flattening their meanings
+  - added source docs for both new slices and updated family/validation overview docs
+  - no staging, commit, or push was performed
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/routes/events.py`
+  - `app/server/src/routes/weather_context.py`
+  - `app/server/src/services/nws_alerts_service.py`
+  - `app/server/src/services/noaa_nowcoast_service.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/data/nws_alerts_fixture.json`
+  - `app/server/data/noaa_nowcoast_layer_catalog_fixture.json`
+  - `app/server/tests/test_nws_alerts.py`
+  - `app/server/tests/test_noaa_nowcoast.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/server/tests/test_environmental_fusion_snapshot_input.py`
+  - `app/server/tests/test_environmental_current_awareness_digest.py`
+  - `app/docs/environmental-events-nws-alerts.md`
+  - `app/docs/environmental-events-noaa-nowcoast.md`
+  - `app/docs/environmental-events.md`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/source-validation-status.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_nws_alerts.py -q`
+  - `python -m pytest app/server/tests/test_noaa_nowcoast.py -q`
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m pytest app/server/tests/test_environmental_fusion_snapshot_input.py -q`
+  - `python -m pytest app/server/tests/test_environmental_current_awareness_digest.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - `nws-alerts` remains advisory/contextual only and preserves the NWS custom `User-Agent` requirement for backend live requests
+  - `noaa-nowcoast-ogc` remains bounded map-layer/context metadata only and is not normalized event ingestion or alert truth
+  - no coordinates are invented:
+    - NWS rows without source geometry remain coordinate-null
+    - nowCOAST stays on source-bounded bbox summaries only
+  - no damage, impact, certainty, responsibility, legal, or action claims were introduced
+  - `alerts_ledger.py` completed successfully and reported 7 open low-priority alerts in `app/docs/alerts.md`; no alert-file changes were made in this assignment
+- Next recommended task:
+  - if Manager wants the coherent follow-on from this same wave, assign one narrow NHC GIS or similarly bounded tropical advisory/context slice rather than broadening nowCOAST into feature-level event ingestion or reopening frontend layer work
+
+## 2026-05-05 19:28:57 -05:00
+
+- Assignment version:
+  - `2026-05-05 19:15 America/Chicago`
+- Task:
+  - Re-checked the active environmental question briefing packet assignment and verified that the current tree already satisfies it.
+- What changed:
+  - no new geospatial source or reporting code changes were required in this pass
+  - re-verified the existing bounded backend route:
+    - `GET /api/context/environmental/question-briefing-packet`
+  - re-verified the existing packet contracts, service composition, tests, and docs already present in the tree
+  - no staging, commit, or push was performed
+- Files touched:
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m pytest app/server/tests/test_environmental_fusion_snapshot_input.py -q`
+  - `python -m pytest app/server/tests/test_environmental_current_awareness_digest.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - the assignment version did not advance beyond the already implemented `environmentalQuestionBriefingPacket` task
+  - this pass was verification-only and did not reopen the packet, digest, fusion, Meteoalarm, DWD, or geoBoundaries lanes
+  - `alerts_ledger.py` completed successfully and reported 6 open low-priority alerts in `app/docs/alerts.md`; no alert-file changes were made in this pass
+- Next recommended task:
+  - wait for the next assignment-version update before widening the geospatial reporting stack further
+
+## 2026-05-05 19:25:16 -05:00
+
+- Assignment version:
+  - `2026-05-05 19:15 America/Chicago`
+- Task:
+  - Built one bounded environmental question briefing packet on top of the existing geospatial reporting stack so place-, timeframe-, or family-scoped environmental asks can be answered without reopening sources or flattening evidence classes.
+- What changed:
+  - added backend route:
+    - `GET /api/context/environmental/question-briefing-packet`
+  - added typed packet contracts for:
+    - packet metadata
+    - packet response shape
+  - implemented a bounded packet helper that composes:
+    - environmental current-awareness digest
+    - environmental fusion snapshot input
+    - existing source-family overview outputs already consumed by those artifacts
+  - added bounded posture support for:
+    - `place`
+    - `timeframe`
+    - repeated `family` filters
+  - preserved inside the packet:
+    - active place/timeframe/filter posture labels
+    - dynamic-event, warning, forecast/model, contextual, and static-reference coverage by evidence class
+    - source ids
+    - source modes
+    - source health
+    - review or readiness gaps
+    - export-safe briefing lines
+    - explicit `observe`, `orient`, `prioritize`, and `explain`
+    - explicit caveats and does-not-prove lines
+  - kept distinct:
+    - Meteoalarm and DWD as advisory/contextual warning inputs
+    - observed event sources as observed
+    - forecast/model rows below observed truth
+    - geoBoundaries and other static/reference rows as orientation context only
+  - added focused packet tests covering:
+    - route shape
+    - place/timeframe/family posture
+    - evidence-class preservation
+    - missing family reporting
+    - no scoring or action-overclaim language
+  - updated reporting docs and validation notes
+  - no staging, commit, or push was performed
+- Files touched:
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/src/routes/environmental_context.py`
+  - `app/server/tests/test_environmental_question_briefing_packet.py`
+  - `app/docs/environmental-question-briefing-packet.md`
+  - `app/docs/environmental-events.md`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/source-validation-status.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_environmental_question_briefing_packet.py -q`
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m pytest app/server/tests/test_environmental_fusion_snapshot_input.py -q`
+  - `python -m pytest app/server/tests/test_environmental_current_awareness_digest.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - this is a bounded backend briefing artifact only and not a new incident-analysis or action model
+  - place and timeframe labels are briefing posture only and do not prove local footprint, exposure, or impact
+  - family filters are reporting-selection controls only and do not elevate or suppress source truth
+  - static/reference and geoboundary rows remain orientation context only and do not become live incident, legal, or operational truth
+  - no damage, impact, certainty, responsibility, legal, or action claims were introduced
+  - `alerts_ledger.py` completed successfully and reported 6 open low-priority alerts in `app/docs/alerts.md`; no alert-file changes were made in this assignment
+- Next recommended task:
+  - wait for the next assignment-version update before widening the packet into frontend question workflows or another reporting artifact that duplicates the existing bounded geospatial stack
+
+## 2026-05-05 19:09:54 -05:00
+
+- Assignment version:
+  - `2026-05-05 19:01 America/Chicago`
+- Task:
+  - Built one bounded backend environmental current-awareness digest on top of the existing geospatial reporting stack without reopening fresh sources.
+- What changed:
+  - added backend route:
+    - `GET /api/context/environmental/current-awareness-digest`
+  - added typed digest contracts for:
+    - current-awareness metadata
+    - per-source summary rows
+    - digest response shape
+  - implemented a bounded digest helper that composes:
+    - environmental source-family overview
+    - environmental fusion snapshot input
+    - existing Canada context package
+    - existing base-earth reference package
+    - direct RGI glacier reference summary already present in the fusion path
+  - preserved in the digest:
+    - active environmental posture
+    - source ids
+    - source modes
+    - source health
+    - observed vs advisory vs forecast/model vs static-reference distinction
+    - review/readiness gaps
+    - export-safe digest lines
+    - explicit `observe`, `orient`, `prioritize`, and `explain` sections
+    - explicit caveats and does-not-prove lines
+  - kept warning-distribution, advisory, observed, forecast/model, regional-context, and static-reference meanings distinct:
+    - Meteoalarm and DWD remain advisory/contextual warning rows
+    - observed earthquake/event rows remain separate
+    - forecast/model rows remain below observed truth
+    - geoBoundaries and other base-earth rows remain static/reference only
+  - added focused digest tests covering:
+    - route shape
+    - source inclusion
+    - evidence-basis/context-class separation
+    - no scoring or action-overclaim language
+  - updated geospatial reporting docs and validation notes
+  - no staging, commit, or push was performed
+- Files touched:
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/src/routes/environmental_context.py`
+  - `app/server/tests/test_environmental_current_awareness_digest.py`
+  - `app/docs/environmental-current-awareness-digest.md`
+  - `app/docs/environmental-events.md`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/source-validation-status.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_environmental_current_awareness_digest.py -q`
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m pytest app/server/tests/test_environmental_fusion_snapshot_input.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - this is a bounded backend reporting artifact only and not a new common hazard or action model
+  - it intentionally reuses the existing geospatial reporting stack instead of creating another parallel source or review framework
+  - Meteoalarm, DWD, dynamic event sources, regional-context rows, and static/reference rows remain semantically distinct inside the digest
+  - no damage, impact, certainty, responsibility, legal, or action claims were introduced
+  - `alerts_ledger.py` completed successfully and reported 6 open low-priority alerts in `app/docs/alerts.md`; no alert-file changes were made in this assignment
+- Next recommended task:
+  - wait for the next assignment-version update before widening the digest into a frontend sweep or another report artifact that duplicates the current bounded geospatial reporting stack
+
+## 2026-05-05 18:55:54 -05:00
+
+- Assignment version:
+  - `2026-05-05 18:44 America/Chicago`
+- Task:
+  - Implemented one bounded backend-first `meteoalarm-atom-feeds` slice for the official Norway Atom feed and threaded it into the current environmental reporting inputs.
+- What changed:
+  - added backend route:
+    - `GET /api/events/meteoalarm/country-warnings`
+  - added typed Meteoalarm Atom contracts for:
+    - warning entries
+    - metadata
+    - source health
+    - response shape
+  - added fixture-first Meteoalarm Atom service with:
+    - one official pinned country feed posture only:
+      - `https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-norway`
+    - bounded Atom entry parsing and normalization
+    - explicit country preservation:
+      - `Norway`
+    - source mode and source health handling
+    - empty and disabled behavior
+    - inert free-text sanitization
+    - advisory/contextual evidence posture
+    - explicit caveats that Meteoalarm is normalized warning context and not stronger than underlying national-source authority
+  - added deterministic fixtures:
+    - one Norway Atom feed fixture
+    - one empty Norway Atom feed fixture
+  - added focused route tests for:
+    - provenance
+    - entry normalization
+    - q filter
+    - limit
+    - title sort
+    - inert text handling
+    - empty behavior
+    - disabled behavior
+    - invalid params
+  - threaded the source into:
+    - environmental source-family overview under `weather-alert-advisory`
+    - environmental fusion snapshot input through the existing dynamic environmental package path
+    - source-validation docs
+    - environmental source overview docs
+  - no staging, commit, or push was performed
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/meteoalarm_atom_service.py`
+  - `app/server/src/routes/events.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/data/meteoalarm_atom_norway_fixture.xml`
+  - `app/server/data/meteoalarm_atom_norway_empty_fixture.xml`
+  - `app/server/tests/test_meteoalarm_atom_feed.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/server/tests/test_environmental_fusion_snapshot_input.py`
+  - `app/docs/environmental-events-meteoalarm-atom-feeds.md`
+  - `app/docs/environmental-events.md`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/source-validation-status.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_meteoalarm_atom_feed.py -q`
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m pytest app/server/tests/test_environmental_fusion_snapshot_input.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - this slice intentionally stays on one official Meteoalarm Atom country feed only:
+    - Norway
+  - it does not expand into all Meteoalarm countries, Europe summary mode, or deprecated RSS
+  - Meteoalarm remains a warning-distribution layer in this slice and does not override the underlying national warning provider as the authoritative origin
+  - warning text remains advisory/contextual only and does not create damage, impact, certainty, responsibility, legal, or action claims
+  - `alerts_ledger.py` completed successfully and reported 5 open low-priority alerts in `app/docs/alerts.md`; no alert-file changes were made in this assignment
+- Next recommended task:
+  - wait for the next assignment-version update before widening Meteoalarm into another country feed, another product family, or any frontend consumer beyond the current bounded environmental reporting inputs
+
+## 2026-05-05 12:55:00 -05:00
+
+- Assignment version:
+  - `2026-05-05 18:15 America/Chicago`
+- Task:
+  - Implemented one bounded backend-first `geoboundaries-admin` slice for `gbOpen/BEL/ADM1` and threaded it into the current base-earth and environmental reporting inputs.
+- What changed:
+  - added backend route:
+    - `GET /api/context/reference/geoboundaries-admin`
+  - added typed geoBoundaries contracts for:
+    - reference records
+    - metadata
+    - source health
+    - response shape
+  - added fixture-first geoBoundaries service with:
+    - one pinned official `gbOpen/BEL/ADM1` metadata request posture
+    - one bounded admin-boundary record posture
+    - source mode and source health handling
+    - bbox parsing and shape-ISO filtering
+    - reference-only evidence basis
+    - release-family and license preservation
+    - representative bbox and center summaries only
+    - inert text sanitization
+  - added deterministic fixture:
+    - Belgium `ADM1` metadata and bounded region-record summaries only
+  - added deterministic route tests for:
+    - provenance
+    - shape filter
+    - bbox filter
+    - limit behavior
+    - empty behavior
+    - invalid bbox handling
+    - inert free-text handling
+  - threaded the source into:
+    - base-earth reference family overview
+    - base-earth export package
+    - base-earth review queue
+    - environmental fusion snapshot input through the existing base-earth package path
+    - source-validation docs
+  - updated source docs and family-overview docs
+  - no staging, commit, or push was performed
+- Files touched:
+  - `app/server/src/config/settings.py`
+  - `app/server/src/types/api.py`
+  - `app/server/src/services/geoboundaries_admin_service.py`
+  - `app/server/src/routes/base_earth_context.py`
+  - `app/server/src/services/environmental_source_families_overview_service.py`
+  - `app/server/data/geoboundaries_admin_bel_adm1_fixture.json`
+  - `app/server/tests/test_geoboundaries_admin.py`
+  - `app/server/tests/test_base_earth_reference_bundle.py`
+  - `app/server/tests/test_base_earth_reference_review.py`
+  - `app/server/tests/test_environmental_source_families_overview.py`
+  - `app/server/tests/test_environmental_fusion_snapshot_input.py`
+  - `app/docs/environmental-events-geoboundaries-admin.md`
+  - `app/docs/environmental-events.md`
+  - `app/docs/environmental-source-family-overview.md`
+  - `app/docs/source-validation-status.md`
+  - `app/docs/agent-progress/geospatial-ai.md`
+- Validation:
+  - `python -m pytest app/server/tests/test_geoboundaries_admin.py -q`
+  - `python -m pytest app/server/tests/test_base_earth_reference_bundle.py -q`
+  - `python -m pytest app/server/tests/test_base_earth_reference_review.py -q`
+  - `python -m pytest app/server/tests/test_environmental_source_families_overview.py -q`
+  - `python -m pytest app/server/tests/test_environmental_fusion_snapshot_input.py -q`
+  - `python -m compileall app/server/src`
+  - `python scripts/alerts_ledger.py --json`
+- Blockers or caveats:
+  - this slice intentionally stays on one official release family only:
+    - `gbOpen`
+  - it intentionally stays on one country and one admin level only:
+    - `BEL`
+    - `ADM1`
+  - the geometry posture is representative bbox and center summary only, not full legal or operational boundary truth
+  - geoBoundaries data remains reference-only and does not create legal-jurisdiction, live-incident, impact, certainty, responsibility, or action claims
+  - `alerts_ledger.py` completed successfully and reported 5 open low-priority alerts in `app/docs/alerts.md`; no alert-file changes were made in this assignment
+- Next recommended task:
+  - wait for the next assignment-version update before widening geoBoundaries into another country, another admin level, another release family, or any geometry-heavy consumer beyond the current bounded base-earth and reporting inputs
+
 ## 2026-05-05 12:30:00 -05:00
 
 - Assignment version:

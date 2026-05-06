@@ -28,7 +28,7 @@ type EvidenceBasis =
 export interface MarineFusionSnapshotInputSourceRow {
   sourceId: string;
   label: string;
-  category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology";
+  category: "oceanographic" | "meteorological" | "coastal-infrastructure" | "hydrology" | "maritime-warning";
   sourceMode: SourceMode;
   health: SourceHealth;
   evidenceBasis: EvidenceBasis;
@@ -358,3 +358,4 @@ function isLimited(health: SourceHealth) {
     health === "error"
   );
 }
+

@@ -31,6 +31,24 @@ def test_source_ops_report_index_summarizes_existing_lifecycle_artifacts() -> No
     assert response.candidate_network_summary.export_lines
     assert response.promotion_readiness_summary.total_candidates >= 11
     assert response.promotion_readiness_summary.export_lines
+    assert response.camera_sandbox_readiness_comparison_report.total_sources_in_scope >= 9
+    assert response.camera_sandbox_readiness_comparison_report.export_lines
+    assert response.camera_sandbox_readiness_comparison_report.does_not_prove_lines
+    assert response.camera_source_ops_portfolio_digest.total_candidates >= 11
+    assert response.camera_source_ops_portfolio_digest.export_lines
+    assert response.camera_source_ops_portfolio_digest.does_not_prove_lines
+    assert response.camera_source_ops_review_priority_packet.total_candidates >= 11
+    assert response.camera_source_ops_review_priority_packet.export_lines
+    assert response.camera_source_ops_review_priority_packet.does_not_prove_lines
+    assert response.camera_source_ops_regional_portfolio_packet.total_candidates >= 11
+    assert response.camera_source_ops_regional_portfolio_packet.export_lines
+    assert response.camera_source_ops_regional_portfolio_packet.does_not_prove_lines
+    assert response.camera_source_ops_osm_lead_discovery_packet.total_candidates >= 11
+    assert response.camera_source_ops_osm_lead_discovery_packet.export_lines
+    assert response.camera_source_ops_osm_lead_discovery_packet.does_not_prove_lines
+    assert response.camera_source_ops_osm_lead_review_reconciliation_packet.total_candidates >= 11
+    assert response.camera_source_ops_osm_lead_review_reconciliation_packet.export_lines
+    assert response.camera_source_ops_osm_lead_review_reconciliation_packet.does_not_prove_lines
     assert any(
         group.key == "candidate-sandbox-importable"
         for group in response.candidate_network_summary.by_lifecycle_state
@@ -50,6 +68,42 @@ def test_source_ops_report_index_summarizes_existing_lifecycle_artifacts() -> No
     assert any(
         group.key == "blocked-do-not-scrape"
         for group in response.candidate_network_summary.by_lifecycle_state
+    )
+    assert any(
+        group.key == "review-next"
+        for group in response.camera_source_ops_review_priority_packet.by_priority_band
+    )
+    assert any(
+        group.key == "hold"
+        for group in response.camera_source_ops_review_priority_packet.by_priority_band
+    )
+    assert any(
+        group.key == "document compliant alternative"
+        for group in response.camera_source_ops_review_priority_packet.by_next_safe_review_step
+    )
+    assert any(
+        group.key == "United States"
+        for group in response.camera_source_ops_regional_portfolio_packet.by_country_group
+    )
+    assert any(
+        group.key == "Canada"
+        for group in response.camera_source_ops_regional_portfolio_packet.by_country_group
+    )
+    assert any(
+        group.key == "endpoint-known-plus-map-lead"
+        for group in response.camera_source_ops_osm_lead_discovery_packet.by_endpoint_known_posture
+    )
+    assert any(
+        group.key == "overpass-api-read-only-query"
+        for group in response.camera_source_ops_osm_lead_discovery_packet.by_lead_provenance
+    )
+    assert any(
+        group.key == "endpoint-known-review-next"
+        for group in response.camera_source_ops_osm_lead_review_reconciliation_packet.by_reconciliation_bucket
+    )
+    assert any(
+        group.key == "map-only-research"
+        for group in response.camera_source_ops_osm_lead_review_reconciliation_packet.by_reconciliation_bucket
     )
     assert any(
         group.key == "direct-image-documented"
@@ -75,6 +129,10 @@ def test_source_ops_report_index_summarizes_existing_lifecycle_artifacts() -> No
         group.key == "blocked-hold"
         for group in response.promotion_readiness_summary.by_bucket
     )
+    assert any(
+        "does not validate ingest readiness" in line.lower()
+        for line in response.camera_source_ops_review_priority_packet.does_not_prove_lines
+    )
     assert "read-only lifecycle evidence" in response.caveat
     assert response.export_lines
 
@@ -93,6 +151,30 @@ def test_source_ops_report_index_tracks_finland_ashcam_minnesota_and_wsdot() -> 
     promotion_rows = {
         row.source_id: row
         for row in response.promotion_readiness_summary.rows
+    }
+    comparison_rows = {
+        row.source_id: row
+        for row in response.camera_sandbox_readiness_comparison_report.rows
+    }
+    portfolio_rows = {
+        row.source_id: row
+        for row in response.camera_source_ops_portfolio_digest.rows
+    }
+    review_priority_rows = {
+        row.source_id: row
+        for row in response.camera_source_ops_review_priority_packet.rows
+    }
+    regional_rows = {
+        row.source_id: row
+        for row in response.camera_source_ops_regional_portfolio_packet.rows
+    }
+    osm_rows = {
+        row.source_id: row
+        for row in response.camera_source_ops_osm_lead_discovery_packet.rows
+    }
+    reconciliation_rows = {
+        row.source_id: row
+        for row in response.camera_source_ops_osm_lead_review_reconciliation_packet.rows
     }
 
     ashcam = entries["usgs-ashcam"]
@@ -208,6 +290,17 @@ def test_source_ops_report_index_tracks_finland_ashcam_minnesota_and_wsdot() -> 
     assert promotion_rows["nzta-traffic-cameras"].promotion_readiness_bucket == "endpoint-verified-held"
     assert promotion_rows["nzta-traffic-cameras"].payload_shape_posture == "api-family-documented-shape-unpinned"
     assert promotion_rows["nzta-traffic-cameras"].comparison_basis.startswith("Endpoint family is documented")
+    assert comparison_rows["nzta-traffic-cameras"].comparison_role == "endpoint-only-hold"
+    assert comparison_rows["nzta-traffic-cameras"].sandbox_feasibility_posture == "endpoint-family-unpinned"
+    assert comparison_rows["nzta-traffic-cameras"].source_health_posture == candidate_rows["nzta-traffic-cameras"].source_health_expectation
+    assert portfolio_rows["nzta-traffic-cameras"].portfolio_role == "endpoint-only-hold"
+    assert review_priority_rows["nzta-traffic-cameras"].priority_band == "hold"
+    assert "bounded camera payload" in review_priority_rows["nzta-traffic-cameras"].priority_rationale.lower()
+    assert regional_rows["nzta-traffic-cameras"].country_group == "New Zealand"
+    assert regional_rows["nzta-traffic-cameras"].review_burden_posture == "medium"
+    assert osm_rows["nzta-traffic-cameras"].endpoint_known_posture == "endpoint-known-plus-map-lead"
+    assert "geofabrik-regional-extract" in osm_rows["nzta-traffic-cameras"].lead_provenance
+    assert reconciliation_rows["nzta-traffic-cameras"].reconciliation_bucket == "endpoint-known-hold"
 
     caltrans = entries["caltrans-cctv-cameras"]
     assert caltrans.lifecycle_bucket == "candidate-sandbox-importable"
@@ -225,6 +318,15 @@ def test_source_ops_report_index_tracks_finland_ashcam_minnesota_and_wsdot() -> 
     assert candidate_rows["caltrans-cctv-cameras"].review_priority == "review-next"
     assert candidate_rows["caltrans-cctv-cameras"].next_safe_review_step == "review sandbox mapping"
     assert promotion_rows["caltrans-cctv-cameras"].promotion_readiness_bucket == "sandbox-stronger-follow-up"
+    assert comparison_rows["caltrans-cctv-cameras"].comparison_role == "sandbox-comparator"
+    assert comparison_rows["caltrans-cctv-cameras"].sandbox_feasibility_posture == "fixture-backed-direct-image-review"
+    assert portfolio_rows["caltrans-cctv-cameras"].portfolio_role == "sandbox-comparator"
+    assert review_priority_rows["caltrans-cctv-cameras"].priority_band == "review-next"
+    assert "mapping and source-health review can proceed" in review_priority_rows["caltrans-cctv-cameras"].priority_rationale.lower()
+    assert regional_rows["caltrans-cctv-cameras"].country_group == "United States"
+    assert regional_rows["caltrans-cctv-cameras"].review_burden_posture == "low"
+    assert osm_rows["caltrans-cctv-cameras"].review_burden_posture == "low"
+    assert reconciliation_rows["caltrans-cctv-cameras"].reconciliation_bucket == "endpoint-known-review-next"
 
     euskadi = entries["euskadi-traffic-cameras"]
     assert euskadi.lifecycle_bucket == "candidate-needs-review"
@@ -234,6 +336,11 @@ def test_source_ops_report_index_tracks_finland_ashcam_minnesota_and_wsdot() -> 
     )
     assert candidate_rows["euskadi-traffic-cameras"].review_priority == "follow-up"
     assert "endpoint verification" in candidate_rows["euskadi-traffic-cameras"].missing_evidence
+    assert portfolio_rows["euskadi-traffic-cameras"].portfolio_role == "research-needed"
+    assert review_priority_rows["euskadi-traffic-cameras"].priority_band == "follow-up"
+    assert regional_rows["euskadi-traffic-cameras"].country_group == "Spain"
+    assert osm_rows["euskadi-traffic-cameras"].endpoint_known_posture == "map-only-lead"
+    assert reconciliation_rows["euskadi-traffic-cameras"].reconciliation_bucket == "map-only-research"
 
     minnesota = entries["minnesota-511-public-arcgis"]
     assert minnesota.lifecycle_bucket == "blocked-do-not-scrape"
@@ -245,6 +352,12 @@ def test_source_ops_report_index_tracks_finland_ashcam_minnesota_and_wsdot() -> 
     assert candidate_rows["minnesota-511-public-arcgis"].review_priority == "blocked"
     assert candidate_rows["minnesota-511-public-arcgis"].next_safe_review_step == "document compliant alternative"
     assert candidate_rows["minnesota-511-public-arcgis"].missing_evidence == ["compliant machine-readable alternative"]
+    assert portfolio_rows["minnesota-511-public-arcgis"].portfolio_role == "blocked-hold"
+    assert review_priority_rows["minnesota-511-public-arcgis"].priority_band == "blocked-review"
+    assert "must not drift into scraping" in review_priority_rows["minnesota-511-public-arcgis"].priority_rationale.lower()
+    assert regional_rows["minnesota-511-public-arcgis"].review_burden_posture == "high"
+    assert osm_rows["minnesota-511-public-arcgis"].endpoint_known_posture == "map-only-lead"
+    assert reconciliation_rows["minnesota-511-public-arcgis"].reconciliation_bucket == "map-only-blocked"
 
     wsdot = entries["wsdot-cameras"]
     assert wsdot.lifecycle_bucket == "credential-blocked"
@@ -284,6 +397,82 @@ def test_source_ops_index_route_is_read_only_and_compact() -> None:
         row["sourceId"] == "caltrans-cctv-cameras"
         and row["promotionReadinessBucket"] == "sandbox-stronger-follow-up"
         for row in payload["promotionReadinessSummary"]["rows"]
+    )
+    assert payload["cameraSandboxReadinessComparisonReport"]["totalSourcesInScope"] >= 9
+    assert payload["cameraSandboxReadinessComparisonReport"]["exportLines"]
+    assert payload["cameraSourceOpsPortfolioDigest"]["totalCandidates"] >= 11
+    assert payload["cameraSourceOpsPortfolioDigest"]["exportLines"]
+    assert payload["cameraSourceOpsReviewPriorityPacket"]["totalCandidates"] >= 11
+    assert payload["cameraSourceOpsReviewPriorityPacket"]["exportLines"]
+    assert payload["cameraSourceOpsRegionalPortfolioPacket"]["totalCandidates"] >= 11
+    assert payload["cameraSourceOpsRegionalPortfolioPacket"]["exportLines"]
+    assert payload["cameraSourceOpsOsmLeadDiscoveryPacket"]["totalCandidates"] >= 11
+    assert payload["cameraSourceOpsOsmLeadDiscoveryPacket"]["exportLines"]
+    assert payload["cameraSourceOpsOsmLeadReviewReconciliationPacket"]["totalCandidates"] >= 11
+    assert payload["cameraSourceOpsOsmLeadReviewReconciliationPacket"]["exportLines"]
+    assert any(
+        row["sourceId"] == "nzta-traffic-cameras"
+        and row["comparisonRole"] == "endpoint-only-hold"
+        for row in payload["cameraSandboxReadinessComparisonReport"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "euskadi-traffic-cameras"
+        and row["portfolioRole"] == "research-needed"
+        for row in payload["cameraSourceOpsPortfolioDigest"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "minnesota-511-public-arcgis"
+        and row["portfolioRole"] == "blocked-hold"
+        for row in payload["cameraSourceOpsPortfolioDigest"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "caltrans-cctv-cameras"
+        and row["priorityBand"] == "review-next"
+        for row in payload["cameraSourceOpsReviewPriorityPacket"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "minnesota-511-public-arcgis"
+        and row["priorityBand"] == "blocked-review"
+        for row in payload["cameraSourceOpsReviewPriorityPacket"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "quebec-mtmd-traffic-cameras"
+        and row["countryGroup"] == "Canada"
+        for row in payload["cameraSourceOpsRegionalPortfolioPacket"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "finland-digitraffic-road-cameras"
+        and row["endpointKnownPosture"] == "endpoint-known-plus-map-lead"
+        for row in payload["cameraSourceOpsOsmLeadDiscoveryPacket"]["rows"]
+    )
+    assert any(
+        row["sourceId"] == "euskadi-traffic-cameras"
+        and row["reconciliationBucket"] == "map-only-research"
+        for row in payload["cameraSourceOpsOsmLeadReviewReconciliationPacket"]["rows"]
+    )
+    assert any(
+        "does not activate or schedule any source" in line.lower()
+        for line in payload["cameraSandboxReadinessComparisonReport"]["doesNotProveLines"]
+    )
+    assert any(
+        "does not validate ingest readiness" in line.lower()
+        for line in payload["cameraSourceOpsPortfolioDigest"]["doesNotProveLines"]
+    )
+    assert any(
+        "does not validate ingest readiness" in line.lower()
+        for line in payload["cameraSourceOpsReviewPriorityPacket"]["doesNotProveLines"]
+    )
+    assert any(
+        "does not validate ingest readiness" in line.lower()
+        for line in payload["cameraSourceOpsRegionalPortfolioPacket"]["doesNotProveLines"]
+    )
+    assert any(
+        "does not prove that map presence" in line.lower()
+        for line in payload["cameraSourceOpsOsmLeadDiscoveryPacket"]["doesNotProveLines"]
+    )
+    assert any(
+        "does not turn map-only leads" in line.lower()
+        for line in payload["cameraSourceOpsOsmLeadReviewReconciliationPacket"]["doesNotProveLines"]
     )
     assert any("does not activate the source" in caveat.lower() for caveat in finland["caveats"])
 

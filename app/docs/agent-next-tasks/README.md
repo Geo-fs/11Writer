@@ -23,17 +23,26 @@ Suggested file set:
 
 - `manager-ai.md`
 - `connect-ai.md`
-- `gather-ai.md`
-- `geospatial-ai.md`
-- `marine-ai.md`
-- `aerospace-ai.md`
-- `features-webcam-ai.md`
-- `data-ai.md`
+- `systems-ai.md`
+- `workspace-ai.md`
+- `spatial-ai.md`
+- `reporting-ai.md`
+- `platform-ai.md`
+- `gov-ai.md`
 - `atlas-ai.md`
 - `wonder-ai.md`
 
 Special case:
 
-- `data-ai.md` is a normal Manager-controlled lane. Manager AI owns rewriting it during check-ins after Data AI reports completion.
+- Phase 2 manager-controlled lane task docs may still exist as handoff-history artifacts, but they are no longer the active operating center after the Phase 3 cutover.
+- active persistent controlled roster is:
+  - `Connect AI`
+  - `Systems AI`
+  - `Workspace AI`
+  - `Spatial AI`
+  - `Reporting AI`
+  - `Platform AI`
+  - `Gov AI`
+- `systems-ai.md`, `workspace-ai.md`, `spatial-ai.md`, `reporting-ai.md`, `platform-ai.md`, and `gov-ai.md` are normal Manager-controlled Phase 3 lanes once Manager AI starts issuing repo-backed follow-on tasks.
 - `atlas-ai.md` is user-directed. Manager AI may help prepare or sync it when the user asks, but should not treat Atlas AI as a normal manager-assigned lane by default.
 - `wonder-ai.md` is user-directed. Manager AI may help prepare or sync it when the user asks, but should not treat Wonder AI as a normal manager-assigned lane by default.

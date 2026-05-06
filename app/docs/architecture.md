@@ -1,5 +1,16 @@
 # Architecture
 
+Last updated:
+- `2026-05-05 America/Chicago`
+
+Related:
+- `app/docs/README.md`
+- `app/docs/strategic-roadmap.md`
+- `app/docs/runtime-interface-requirements.md`
+- `app/docs/cross-platform-desktop-app-plan.md`
+- `app/docs/cross-platform-implementation-playbook.md`
+- `app/docs/safety-boundaries.md`
+
 ## Summary
 
 Phase 1 is split into a browser client and a lightweight API server. The client owns scene rendering, camera interaction, and immersive UI state. The server owns safe configuration exposure, source normalization, source health, task/runtime state, and adapter boundaries for live data phases.
@@ -47,6 +58,25 @@ The backend must remain usable in all target runtime modes:
 - `backend-only`: no UI, long-running collection/tasks on loopback by default
 - `companion-server`: explicitly enabled partner-device access after pairing/auth
 
+## Current Implemented Backend Subsystems
+
+The backend is no longer only a thin config and event surface. Important implemented subsystems now include:
+
+- domain event and context routes across environmental, aerospace, marine, webcam, cyber, and reference families
+- Analyst Workbench evidence-timeline, source-readiness, and spatial-brief composition routes
+- Wave Monitor and reviewed Wave LLM task plumbing
+- Source Discovery memory, review, discovery, archive, locale, link-graph, event-graph, reputation, and adversarial-observability surfaces
+- optional queue-backed runtime scheduling and inspection surfaces for bounded background work
+
+This means the main architecture concern is not just "frontend plus API bootstrapping" anymore. It is shared backend truth across:
+
+- source discovery
+- source health
+- evidence basis
+- review and claim handling
+- runtime scheduling
+- export-safe metadata
+
 ## Normalized Entity Model
 
 The core schema is shared conceptually across client and server:
@@ -77,3 +107,41 @@ The core schema is shared conceptually across client and server:
 - No private feeds, covert tracking, or identity features
 - Keys and billing dependencies remain documented and isolated behind server config
 - All third-party sources must be public or explicitly approved, documented, and removable
+
+## External Integration Boundary
+
+Approved integration families remain:
+
+- public or explicitly approved map, terrain, imagery, aircraft, satellite, and source-health inputs
+- public machine-readable sources used through documented backend adapters
+- optional provider-backed features where the repo already defines clear safety, provenance, and runtime boundaries
+
+Prohibited integration patterns remain:
+
+- scraped private cameras
+- bypassed authentication
+- brittle or hidden endpoints used as unofficial feeds
+- facial recognition, license-plate recognition, or personal identification
+- anything positioned as real operational targeting capability
+
+Frontend bootstrap config should expose only what the client actually needs:
+
+- runtime environment name
+- active tiles or imagery mode metadata
+- whether a public client-safe key is available
+- explicitly enabled feature flags
+
+Do not expose private credentials, internal-only secrets, or future vendor secrets through public config routes.
+
+## Validation Boundary
+
+Current architecture truth should be read with:
+
+- `app/docs/source-validation-status.md`
+- `app/docs/release-readiness.md`
+
+Important distinction:
+
+- implemented backend surface does not by itself prove workflow validation
+- discovered-source memory does not by itself prove a source implementation
+- Phase 3 workbench-shell planning does not by itself prove packaged desktop readiness

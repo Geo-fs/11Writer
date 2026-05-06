@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import time
 import zlib
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from datetime import datetime
 from importlib import metadata as importlib_metadata
@@ -57,6 +58,11 @@ except ImportError:  # pragma: no cover - optional local dependency
     AutoProcessor = None  # type: ignore[assignment]
 
 try:
+    from huggingface_hub import snapshot_download  # type: ignore[import-not-found]
+except ImportError:  # pragma: no cover - optional local dependency
+    snapshot_download = None  # type: ignore[assignment]
+
+try:
     from geoclip import GeoCLIP  # type: ignore[import-not-found]
 except ImportError:  # pragma: no cover - optional local dependency
     GeoCLIP = None  # type: ignore[assignment]
@@ -65,8 +71,12 @@ except ImportError:  # pragma: no cover - optional local dependency
 MEDIA_HTTP_USER_AGENT = "11Writer/MediaEvidence (+https://local.11writer.invalid; public-no-auth-media-evidence)"
 _GEOCLIP_RUNTIME_LOCK = Lock()
 _GEOCLIP_RUNTIME_CACHE: dict[str, Any] = {}
+_GEOCLIP_PREDICTION_CACHE_LOCK = Lock()
+_GEOCLIP_PREDICTION_CACHE: OrderedDict[str, dict[str, Any]] = OrderedDict()
 _STREETCLIP_RUNTIME_LOCK = Lock()
 _STREETCLIP_RUNTIME_CACHE: dict[str, Any] = {}
+_PLACE_GAZETTEER_RUNTIME_LOCK = Lock()
+_PLACE_GAZETTEER_RUNTIME_CACHE: dict[str, Any] = {}
 
 
 @dataclass
@@ -276,6 +286,30 @@ class MediaGeolocationResult:
     caveats: list[str] = field(default_factory=list)
 
 
+@dataclass
+class MediaGeolocationModelHealth:
+    model_name: str
+    role: str
+    enabled: bool
+    status: str
+    install_ready: bool
+    runtime_ready: bool
+    warm_state: str
+    summary: str | None
+    installed_version: str | None = None
+    expected_version: str | None = None
+    model_id: str | None = None
+    download_allowed: bool = False
+    cache_dir: str | None = None
+    local_dir: str | None = None
+    weights_path: str | None = None
+    clip_backbone_dir: str | None = None
+    missing_components: list[str] = field(default_factory=list)
+    present_components: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    caveats: list[str] = field(default_factory=list)
+
+
 def fetch_media_artifact(
     settings: Settings,
     *,
@@ -298,7 +332,9 @@ def fetch_media_artifact(
         request = Request(media_url, headers={"User-Agent": MEDIA_HTTP_USER_AGENT}, method="GET")
         with urlopen(request, timeout=15) as response:
             raw = response.read(max_bytes + 1)
-            body = raw[:max_bytes]
+            if len(raw) > max_bytes:
+                raise ValueError(f"Media artifact exceeded the configured byte limit of {max_bytes} bytes.")
+            body = raw
             content_type = response.headers.get("content-type") or content_type
         used_requests = 1
         acquisition_method = "direct_media_fetch"
@@ -606,6 +642,7 @@ def geolocate_media_artifact(
         )
 
     clue_packet, deterministic_reasoning, deterministic_caveats = _extract_geolocation_clue_packet(
+        settings=settings,
         observed_latitude=observed_latitude,
         observed_longitude=observed_longitude,
         exif_timestamp=exif_timestamp,
@@ -1878,11 +1915,12 @@ def _fixture_geolocation_result(fixture_result: dict[str, Any]) -> MediaGeolocat
 
 
 def _text_for_geolocation_clues(ocr_text: str | None, captions: list[str]) -> str:
-    return _normalize_text("\n".join([ocr_text or "", *captions]))
+    return _normalize_geolocation_text("\n".join([ocr_text or "", *captions]))
 
 
 def _extract_geolocation_clue_packet(
     *,
+    settings: Settings,
     observed_latitude: float | None,
     observed_longitude: float | None,
     exif_timestamp: str | None,
@@ -1926,7 +1964,7 @@ def _extract_geolocation_clue_packet(
     if coordinate_clues:
         reasoning.append("OCR or caption text exposed coordinate-like clues that can seed precise location hypotheses.")
 
-    place_clues = _extract_place_text_clues(combined_text)
+    place_clues = _extract_place_text_clues(combined_text, settings=settings)
     packet.place_text_clues.extend(place_clues)
     if place_clues:
         reasoning.append("Place-text extraction found bounded location phrases, operators, or regional labels.")
@@ -1937,6 +1975,7 @@ def _extract_geolocation_clue_packet(
         reasoning.append("Visible text yielded script or language-family hints that can help regional ranking.")
 
     environment_clues = _extract_environment_clues(artifact_metadata)
+    environment_clues.extend(_extract_text_environment_clues(combined_text))
     packet.environment_clues.extend(environment_clues)
     if environment_clues:
         reasoning.append("Bounded visual statistics contributed environment clues such as vegetation, snow, water, or urban density.")
@@ -2035,7 +2074,10 @@ def _build_deterministic_geolocation_candidates(
     for clue in clue_packet.place_text_clues[:10]:
         if not clue.text.strip():
             continue
-        kind = "country_region" if clue.clue_type in {"country_token", "state_token", "transit_operator"} else "place_label"
+        if clue.latitude is not None and clue.longitude is not None:
+            kind = "gps_point"
+        else:
+            kind = "country_region" if clue.clue_type in {"country_token", "state_token", "transit_operator"} else "place_label"
         confidence = clue.confidence or 0.45
         if clue.inherited:
             confidence = max(0.25, min(confidence, 0.5))
@@ -2184,7 +2226,7 @@ def _extract_coordinate_clues(text: str) -> tuple[list[MediaGeolocationClue], li
     return accepted, rejected
 
 
-def _extract_place_text_clues(text: str) -> list[MediaGeolocationClue]:
+def _extract_place_text_clues(text: str, *, settings: Settings) -> list[MediaGeolocationClue]:
     clues: list[MediaGeolocationClue] = []
     if not text:
         return clues
@@ -2194,7 +2236,7 @@ def _extract_place_text_clues(text: str) -> list[MediaGeolocationClue]:
         "port_phrase": r"\b([A-Z][\w'&.-]+(?:\s+[A-Z][\w'&.-]+){0,4}\s+(?:Port|Harbor|Harbour))\b",
         "road_phrase": r"\b((?:Route|Road|Highway|Hwy|Interstate|I-|US-)\s*[\w-]+)\b",
         "district_phrase": r"\b([A-Z][\w'&.-]+(?:\s+[A-Z][\w'&.-]+){0,4}\s+District)\b",
-        "park_phrase": r"\b([A-Z][\w'&.-]+(?:\s+[A-Z][\w'&.-]+){0,4}\s+(?:Park|Trail|Campus|Bridge|Mountain|Mount))\b",
+        "park_phrase": r"\b([A-Z][\w'&.-]+(?:\s+[A-Z][\w'&.-]+){0,4}\s+(?:Park|Trail|Campus|Bridge|Mountain|Mount|Dam|Canyon|Crossing|Bay|Coast|Cliffs?))\b",
     }
     for clue_type, pattern in keyword_patterns.items():
         for match in re.finditer(pattern, text):
@@ -2210,6 +2252,9 @@ def _extract_place_text_clues(text: str) -> list[MediaGeolocationClue]:
                     reason="A place-like phrase was extracted directly from OCR or caption text.",
                 )
             )
+    clues.extend(_extract_route_reference_clues(text))
+    clues.extend(_extract_driving_side_clues(text))
+    clues.extend(_extract_gazetteer_place_text_clues(text, settings=settings))
     country_state_tokens = [
         "India",
         "Japan",
@@ -2238,7 +2283,29 @@ def _extract_place_text_clues(text: str) -> list[MediaGeolocationClue]:
                     reason="OCR or caption text included a country or state token that can help regional ranking.",
                 )
             )
-    for operator in ["Amtrak", "MBTA", "BART", "MTA", "JR", "SNCF", "Renfe", "DB", "Metro"]:
+    for operator in [
+        "Amtrak",
+        "BART",
+        "Caltrain",
+        "CTA",
+        "DB",
+        "JR",
+        "JR East",
+        "MARTA",
+        "MBTA",
+        "Metra",
+        "Metro",
+        "MTA",
+        "Muni",
+        "NJ Transit",
+        "Renfe",
+        "RER",
+        "SEPTA",
+        "SFMTA",
+        "SNCF",
+        "TfL",
+        "VTA",
+    ]:
         if re.search(rf"\b{re.escape(operator)}\b", text, flags=re.IGNORECASE):
             clues.append(
                 MediaGeolocationClue(
@@ -2250,6 +2317,111 @@ def _extract_place_text_clues(text: str) -> list[MediaGeolocationClue]:
                 )
             )
     return clues[:24]
+
+
+def _extract_route_reference_clues(text: str) -> list[MediaGeolocationClue]:
+    clues: list[MediaGeolocationClue] = []
+    seen_tokens: set[str] = set()
+    route_patterns = [
+        ("interstate_route", re.compile(r"\b(?:Interstate|I)[-\s]?(\d{1,3}[A-Z]?)\b", re.IGNORECASE), lambda value: f"I-{value.upper()}"),
+        ("us_route", re.compile(r"\bUS[-\s]?(\d{1,3}[A-Z]?)\b", re.IGNORECASE), lambda value: f"US {value.upper()}"),
+        ("state_route", re.compile(r"\b(?:State Route|SR|Route|Highway|Hwy)[-\s]+(\d{1,4}[A-Z]?)\b", re.IGNORECASE), lambda value: f"Route {value.upper()}"),
+    ]
+    for clue_type, pattern, formatter in route_patterns:
+        for match in pattern.finditer(text):
+            normalized_route = formatter(match.group(1))
+            route_key = f"{clue_type}:{normalized_route.casefold()}"
+            if route_key in seen_tokens:
+                continue
+            seen_tokens.add(route_key)
+            clues.append(
+                MediaGeolocationClue(
+                    clue_type=clue_type,
+                    text=normalized_route,
+                    confidence=0.44 if clue_type == "state_route" else 0.5,
+                    normalized_value=normalized_route.casefold(),
+                    reason="OCR or caption text exposed a route-style road reference that can assist later regional ranking.",
+                )
+            )
+    return clues
+
+
+def _extract_driving_side_clues(text: str) -> list[MediaGeolocationClue]:
+    clues: list[MediaGeolocationClue] = []
+    phrase_map = {
+        "left_driving": [
+            r"\bkeep left\b",
+            r"\bleft-hand traffic\b",
+            r"\bdrive on the left\b",
+        ],
+        "right_driving": [
+            r"\bkeep right\b",
+            r"\bright-hand traffic\b",
+            r"\bdrive on the right\b",
+        ],
+    }
+    for normalized_value, patterns in phrase_map.items():
+        for pattern in patterns:
+            if re.search(pattern, text, flags=re.IGNORECASE):
+                clues.append(
+                    MediaGeolocationClue(
+                        clue_type="driving_side_text",
+                        text=normalized_value,
+                        confidence=0.53,
+                        normalized_value=normalized_value,
+                        reason="Visible text explicitly referenced road-side driving direction.",
+                    )
+                )
+                break
+    return clues
+
+
+def _extract_gazetteer_place_text_clues(text: str, *, settings: Settings) -> list[MediaGeolocationClue]:
+    clues: list[MediaGeolocationClue] = []
+    seen_entries: set[str] = set()
+    normalized_text = _normalize_text(text)
+    if not normalized_text:
+        return clues
+    entries = sorted(
+        _load_media_geolocation_place_gazetteer(settings),
+        key=lambda item: len(str(item.get("name") or "")),
+        reverse=True,
+    )
+    for entry in entries:
+        phrases = [entry.get("name"), *(entry.get("aliases", []) if isinstance(entry.get("aliases"), list) else [])]
+        for phrase in phrases:
+            candidate_phrase = _normalize_text(str(phrase or ""))
+            if len(candidate_phrase) < 4:
+                continue
+            if not re.search(rf"\b{re.escape(candidate_phrase)}\b", normalized_text, flags=re.IGNORECASE):
+                continue
+            entry_key = f"{entry.get('kind')}:{str(entry.get('name') or '').casefold()}"
+            if entry_key in seen_entries:
+                break
+            seen_entries.add(entry_key)
+            kind = str(entry.get("kind") or "unknown")
+            confidence = 0.72 if kind == "landmark" else (0.6 if kind in {"city", "locality", "district"} else 0.52)
+            clues.append(
+                MediaGeolocationClue(
+                    clue_type="gazetteer_landmark" if kind == "landmark" else "gazetteer_place",
+                    text=str(entry.get("name") or candidate_phrase),
+                    confidence=confidence,
+                    normalized_value=str(entry.get("name") or candidate_phrase).casefold(),
+                    latitude=_coerce_float(entry.get("latitude")),
+                    longitude=_coerce_float(entry.get("longitude")),
+                    reason="OCR or caption text matched a bounded offline gazetteer entry, which can seed a reviewable place hypothesis.",
+                    metadata={
+                        "gazetteerKind": kind,
+                        "locality": entry.get("locality"),
+                        "admin1": entry.get("admin1"),
+                        "country": entry.get("country"),
+                        "countryCode": entry.get("countryCode"),
+                        "matchedPhrase": candidate_phrase,
+                    },
+                )
+            )
+            break
+    return clues[:12]
 
 
 def _extract_script_language_clues(text: str) -> list[MediaGeolocationClue]:
@@ -2327,6 +2499,34 @@ def _extract_environment_clues(artifact_metadata: dict[str, Any]) -> list[MediaG
     if channel_means and max((_coerce_float(channel_means.get("red")) or 0.0), (_coerce_float(channel_means.get("green")) or 0.0), (_coerce_float(channel_means.get("blue")) or 0.0)) < 0.24:
         clues.append(MediaGeolocationClue(clue_type="dark_scene", text="dark_scene", confidence=0.3, reason="Low average channel intensity suggests a dark or night scene."))
     return clues[:12]
+
+
+def _extract_text_environment_clues(text: str) -> list[MediaGeolocationClue]:
+    clues: list[MediaGeolocationClue] = []
+    if not text:
+        return clues
+    keyword_sets = {
+        "coastal_context": ["coast", "coastal", "harbor", "harbour", "bay", "beach", "shore"],
+        "mountainous_context": ["mount", "mountain", "peak", "summit", "ridge", "alps"],
+        "canyon_or_cliff_context": ["canyon", "gorge", "cliff", "cliffs"],
+        "bridge_or_crossing_context": ["bridge", "crossing", "viaduct"],
+        "dam_or_reservoir_context": ["dam", "reservoir"],
+    }
+    lowered = text.casefold()
+    for clue_type, keywords in keyword_sets.items():
+        matched = next((keyword for keyword in keywords if re.search(rf"\b{re.escape(keyword)}\b", lowered)), None)
+        if matched is None:
+            continue
+        clues.append(
+            MediaGeolocationClue(
+                clue_type=clue_type,
+                text=matched,
+                confidence=0.34,
+                normalized_value=matched,
+                reason="OCR or caption text exposed a terrain or built-environment keyword that can help later ranking.",
+            )
+        )
+    return clues[:8]
 
 
 def _extract_time_clues(
@@ -2446,6 +2646,256 @@ def _dms_to_decimal(degrees_text: str, minutes_text: str, seconds_text: str, dir
     return decimal
 
 
+def _resolve_geoclip_runtime_profile(settings: Settings) -> dict[str, Any]:
+    allowed_profiles = {"full_fidelity", "balanced", "cpu_optimized"}
+    profile = (_normalize_optional(settings.source_discovery_media_geoclip_runtime_profile) or "full_fidelity").casefold()
+    caveats: list[str] = []
+    if profile not in allowed_profiles:
+        caveats.append(
+            f"Unsupported GeoCLIP runtime profile `{settings.source_discovery_media_geoclip_runtime_profile}` was requested; falling back to `full_fidelity`."
+        )
+        profile = "full_fidelity"
+    profile_default_edges: dict[str, int | None] = {
+        "full_fidelity": None,
+        "balanced": 1536,
+        "cpu_optimized": 1024,
+    }
+    configured_edge = int(settings.source_discovery_media_geoclip_max_image_edge)
+    if configured_edge > 0:
+        max_image_edge: int | None = max(256, min(configured_edge, 4096))
+    else:
+        max_image_edge = profile_default_edges.get(profile)
+    requested_device = (_normalize_optional(settings.source_discovery_media_geoclip_target_device) or "cpu").casefold()
+    resolved_device, device_error, device_caveats = _resolve_geoclip_target_device(
+        settings,
+        requested_device=requested_device,
+    )
+    prediction_cache_entries = max(0, int(settings.source_discovery_media_geoclip_prediction_cache_entries))
+    return {
+        "profile": profile,
+        "maxImageEdge": max_image_edge,
+        "requestedDevice": requested_device,
+        "resolvedDevice": resolved_device,
+        "deviceError": device_error,
+        "predictionCacheEntries": prediction_cache_entries,
+        "experimentalAccelerationEnabled": bool(settings.source_discovery_media_geoclip_allow_experimental_acceleration),
+        "caveats": _dedupe_text_list([*caveats, *device_caveats]),
+    }
+
+
+def _resolve_geoclip_target_device(
+    settings: Settings,
+    *,
+    requested_device: str,
+) -> tuple[str | None, str | None, list[str]]:
+    normalized = requested_device.casefold().strip() if requested_device else "cpu"
+    caveats: list[str] = []
+    if normalized not in {"cpu", "auto", "cuda", "mps"}:
+        caveats.append(f"Unsupported GeoCLIP device `{requested_device}` was requested; falling back to `cpu`.")
+        normalized = "cpu"
+
+    cuda_available = bool(
+        torch is not None
+        and hasattr(torch, "cuda")
+        and callable(getattr(torch.cuda, "is_available", None))
+        and torch.cuda.is_available()
+    )
+    mps_backend = getattr(getattr(torch, "backends", None), "mps", None) if torch is not None else None
+    mps_available = bool(mps_backend is not None and callable(getattr(mps_backend, "is_available", None)) and mps_backend.is_available())
+
+    if normalized == "cpu":
+        return "cpu", None, caveats
+    if normalized == "auto":
+        if not settings.source_discovery_media_geoclip_allow_experimental_acceleration:
+            return "cpu", None, caveats
+        if cuda_available:
+            return "cuda", None, caveats
+        if mps_available:
+            return "mps", None, caveats
+        return "cpu", None, caveats
+    if not settings.source_discovery_media_geoclip_allow_experimental_acceleration:
+        reason = (
+            "Non-CPU GeoCLIP execution is gated behind SOURCE_DISCOVERY_MEDIA_GEOCLIP_ALLOW_EXPERIMENTAL_ACCELERATION=true "
+            "because the current repo path is validated primarily on CPU."
+        )
+        return None, reason, [reason]
+    if normalized == "cuda":
+        if not cuda_available:
+            reason = "GeoCLIP requested `cuda`, but CUDA is not available in this environment."
+            return None, reason, [reason]
+        return "cuda", None, caveats
+    if normalized == "mps":
+        if not mps_available:
+            reason = "GeoCLIP requested `mps`, but Apple Metal Performance Shaders are not available in this environment."
+            return None, reason, [reason]
+        return "mps", None, caveats
+    return "cpu", None, caveats
+
+
+def _prepare_geoclip_inference_artifact(
+    settings: Settings,
+    *,
+    artifact_path: str,
+    profile_config: dict[str, Any],
+) -> tuple[str, dict[str, Any], list[str]]:
+    metadata: dict[str, Any] = {
+        "profile": profile_config.get("profile"),
+        "requestedDevice": profile_config.get("requestedDevice"),
+        "resolvedDevice": profile_config.get("resolvedDevice"),
+        "maxImageEdge": profile_config.get("maxImageEdge"),
+        "usedPreprocessedArtifact": False,
+        "sourceWidth": None,
+        "sourceHeight": None,
+        "inferenceWidth": None,
+        "inferenceHeight": None,
+        "preprocessedArtifactPath": None,
+    }
+    caveats: list[str] = list(profile_config.get("caveats", [])) if isinstance(profile_config.get("caveats"), list) else []
+    max_image_edge = profile_config.get("maxImageEdge")
+    if not isinstance(max_image_edge, int) or max_image_edge <= 0:
+        return artifact_path, metadata, _dedupe_text_list(caveats)
+    if Image is None:
+        caveats.append("GeoCLIP image resizing was skipped because Pillow is unavailable in this environment.")
+        return artifact_path, metadata, _dedupe_text_list(caveats)
+
+    source_file = Path(artifact_path)
+    try:
+        source_stat = source_file.stat()
+    except OSError:
+        caveats.append("GeoCLIP performance preprocessing could not stat the artifact path, so the original artifact was used.")
+        return artifact_path, metadata, _dedupe_text_list(caveats)
+    try:
+        resolved_source = str(source_file.resolve())
+    except OSError:
+        resolved_source = str(source_file)
+
+    try:
+        with Image.open(source_file) as opened:
+            oriented = ImageOps.exif_transpose(opened) if ImageOps is not None else opened.copy()
+            rgb = oriented.convert("RGB")
+            source_width, source_height = rgb.size
+            metadata["sourceWidth"] = int(source_width)
+            metadata["sourceHeight"] = int(source_height)
+            longest_edge = max(source_width, source_height)
+            if longest_edge <= max_image_edge:
+                metadata["inferenceWidth"] = int(source_width)
+                metadata["inferenceHeight"] = int(source_height)
+                return artifact_path, metadata, _dedupe_text_list(caveats)
+            scale = max_image_edge / float(longest_edge)
+            target_width = max(1, int(round(source_width * scale)))
+            target_height = max(1, int(round(source_height * scale)))
+            cache_root = Path(resolve_runtime_paths(settings)["cache_dir"]) / "media-geolocation" / "geoclip-preprocessed"
+            cache_root.mkdir(parents=True, exist_ok=True)
+            cache_key_material = "|".join(
+                [
+                    resolved_source,
+                    str(source_stat.st_mtime_ns),
+                    str(source_stat.st_size),
+                    str(profile_config.get("profile") or "full_fidelity"),
+                    str(max_image_edge),
+                ]
+            )
+            cache_key = hashlib.sha1(cache_key_material.encode("utf-8")).hexdigest()
+            output_path = cache_root / f"{cache_key}.png"
+            if not output_path.exists():
+                lanczos = getattr(getattr(Image, "Resampling", Image), "LANCZOS", getattr(Image, "LANCZOS", 1))
+                resized = rgb.resize((target_width, target_height), lanczos)
+                resized.save(output_path, format="PNG")
+            metadata.update(
+                {
+                    "usedPreprocessedArtifact": True,
+                    "inferenceWidth": int(target_width),
+                    "inferenceHeight": int(target_height),
+                    "preprocessedArtifactPath": str(output_path),
+                }
+            )
+            if profile_config.get("profile") != "full_fidelity":
+                caveats.append(
+                    f"GeoCLIP inference used the explicit `{profile_config.get('profile')}` profile with max image edge {max_image_edge}px to reduce runtime cost."
+                )
+            else:
+                caveats.append(
+                    f"GeoCLIP inference used an explicit max image edge override of {max_image_edge}px under the `full_fidelity` profile."
+                )
+            return str(output_path), metadata, _dedupe_text_list(caveats)
+    except (OSError, UnidentifiedImageError):
+        caveats.append("GeoCLIP performance preprocessing could not decode the artifact cleanly, so the original artifact was used.")
+        return artifact_path, metadata, _dedupe_text_list(caveats)
+
+
+def _build_geoclip_prediction_cache_key(
+    runtime: dict[str, Any],
+    *,
+    artifact_path: str,
+    max_candidates: int,
+    profile_config: dict[str, Any],
+) -> str:
+    artifact_file = Path(artifact_path)
+    try:
+        artifact_stat = artifact_file.stat()
+        artifact_mtime = str(artifact_stat.st_mtime_ns)
+        artifact_size = str(artifact_stat.st_size)
+    except OSError:
+        artifact_mtime = "unknown"
+        artifact_size = "unknown"
+    try:
+        resolved_artifact_path = str(artifact_file.resolve())
+    except OSError:
+        resolved_artifact_path = str(artifact_file)
+    runtime_cache_key = _normalize_optional(runtime.get("cache_key")) or _normalize_optional(runtime.get("cacheKey")) or "runtime"
+    return "|".join(
+        [
+            runtime_cache_key,
+            resolved_artifact_path,
+            artifact_mtime,
+            artifact_size,
+            str(profile_config.get("profile") or "full_fidelity"),
+            str(profile_config.get("maxImageEdge")),
+            str(profile_config.get("requestedDevice") or "cpu"),
+            str(profile_config.get("resolvedDevice") or "cpu"),
+            str(max_candidates),
+        ]
+    )
+
+
+def _lookup_geoclip_prediction_cache(cache_key: str) -> dict[str, Any] | None:
+    with _GEOCLIP_PREDICTION_CACHE_LOCK:
+        cached = _GEOCLIP_PREDICTION_CACHE.get(cache_key)
+        if cached is None:
+            return None
+        _GEOCLIP_PREDICTION_CACHE.move_to_end(cache_key)
+        return dict(cached)
+
+
+def _store_geoclip_prediction_cache(
+    cache_key: str,
+    payload: dict[str, Any],
+    *,
+    max_entries: int,
+) -> None:
+    if max_entries <= 0:
+        return
+    with _GEOCLIP_PREDICTION_CACHE_LOCK:
+        _GEOCLIP_PREDICTION_CACHE[cache_key] = dict(payload)
+        _GEOCLIP_PREDICTION_CACHE.move_to_end(cache_key)
+        while len(_GEOCLIP_PREDICTION_CACHE) > max_entries:
+            _GEOCLIP_PREDICTION_CACHE.popitem(last=False)
+
+
+def _move_geoclip_model_to_device(model: Any, *, device: str) -> None:
+    if device == "cpu":
+        if hasattr(model, "to") and callable(getattr(model, "to")):
+            model.to("cpu")
+        if hasattr(model, "device"):
+            model.device = "cpu"
+        return
+    if not hasattr(model, "to") or not callable(getattr(model, "to")):
+        raise RuntimeError(f"GeoCLIP model does not expose `.to(...)`, so it cannot be moved to `{device}` safely.")
+    model.to(device)
+    if hasattr(model, "device"):
+        model.device = device
+
+
 def _load_geoclip_runtime(settings: Settings) -> tuple[dict[str, Any] | None, MediaGeolocationEngineAttempt]:
     attempt = MediaGeolocationEngineAttempt(
         engine="geoclip",
@@ -2453,6 +2903,19 @@ def _load_geoclip_runtime(settings: Settings) -> tuple[dict[str, Any] | None, Me
         status="unavailable",
         warm_state="cold",
     )
+    profile_config = _resolve_geoclip_runtime_profile(settings)
+    attempt.metadata = {
+        "performanceProfile": profile_config.get("profile"),
+        "requestedDevice": profile_config.get("requestedDevice"),
+        "resolvedDevice": profile_config.get("resolvedDevice"),
+        "maxImageEdge": profile_config.get("maxImageEdge"),
+        "predictionCacheEntries": profile_config.get("predictionCacheEntries"),
+        "experimentalAccelerationEnabled": profile_config.get("experimentalAccelerationEnabled"),
+    }
+    if profile_config.get("deviceError"):
+        attempt.availability_reason = str(profile_config["deviceError"])
+        attempt.caveats = _dedupe_text_list(list(profile_config.get("caveats", [])) + [attempt.availability_reason])
+        return None, attempt
     if GeoCLIP is None:
         attempt.availability_reason = "GeoCLIP is not installed in this environment."
         attempt.caveats = ["GeoCLIP is not installed in this environment."]
@@ -2470,8 +2933,20 @@ def _load_geoclip_runtime(settings: Settings) -> tuple[dict[str, Any] | None, Me
             return None, attempt
         attempt.metadata["installedVersion"] = installed_version
     weights_path = _normalize_optional(settings.source_discovery_media_geoclip_weights_path)
-    cache_dir = _normalize_optional(settings.source_discovery_media_geoclip_model_cache_dir)
-    if not settings.source_discovery_media_geoclip_allow_runtime_download and not (weights_path or cache_dir):
+    clip_backbone_model_id = (
+        _normalize_optional(settings.source_discovery_media_geoclip_clip_backbone_model_id)
+        or "openai/clip-vit-large-patch14"
+    )
+    cache_dir_path = _resolve_media_model_cache_dir(settings, configured=_normalize_optional(settings.source_discovery_media_geoclip_model_cache_dir))
+    cache_dir = str(cache_dir_path)
+    clip_backbone_dir = _resolve_media_model_dir(
+        settings,
+        configured=_normalize_optional(settings.source_discovery_media_geoclip_clip_backbone_dir),
+        default_segments=("media-geolocation", "geoclip", "clip-backbone"),
+    )
+    bundled_weights_dir = _discover_geoclip_bundled_weights_dir()
+    bundled_weights_available = bundled_weights_dir is not None and bundled_weights_dir.exists()
+    if not settings.source_discovery_media_geoclip_allow_runtime_download and not (weights_path or bundled_weights_available):
         attempt.availability_reason = "GeoCLIP requires a prepared local weights path or cache directory when runtime downloads are disabled."
         attempt.caveats = [attempt.availability_reason]
         return None, attempt
@@ -2480,20 +2955,55 @@ def _load_geoclip_runtime(settings: Settings) -> tuple[dict[str, Any] | None, Me
         attempt.caveats = [attempt.availability_reason]
         attempt.metadata = {"weightsPath": weights_path}
         return None, attempt
-    if cache_dir and not Path(cache_dir).exists() and not settings.source_discovery_media_geoclip_allow_runtime_download:
-        attempt.availability_reason = "Configured GeoCLIP cache directory does not exist."
+    _apply_hf_cache_environment(cache_dir=cache_dir, offline=not settings.source_discovery_media_geoclip_allow_runtime_download)
+    clip_backbone_snapshot_dir, clip_backbone_error = _prepare_hf_repo_local_snapshot(
+        repo_id=clip_backbone_model_id,
+        cache_dir=cache_dir_path,
+        local_dir=clip_backbone_dir,
+        allow_download=settings.source_discovery_media_geoclip_allow_runtime_download,
+        allow_patterns=[
+            "*.json",
+            "*.txt",
+            "*.safetensors",
+            "*.bin",
+            "*.model",
+        ],
+    )
+    if clip_backbone_snapshot_dir is None:
+        attempt.availability_reason = clip_backbone_error or "GeoCLIP CLIP backbone is unavailable."
         attempt.caveats = [attempt.availability_reason]
-        attempt.metadata = {"cacheDir": cache_dir}
+        attempt.metadata = {
+            "cacheDir": cache_dir,
+            "clipBackboneModelId": clip_backbone_model_id,
+            "clipBackboneDir": str(clip_backbone_dir),
+        }
         return None, attempt
-    cache_key = "|".join([weights_path or "", cache_dir or "", str(bool(settings.source_discovery_media_geoclip_allow_runtime_download))])
+    cache_key = "|".join(
+        [
+            weights_path or "",
+            cache_dir,
+            str(clip_backbone_snapshot_dir),
+            clip_backbone_model_id,
+            str(bool(settings.source_discovery_media_geoclip_allow_runtime_download)),
+            str(profile_config.get("resolvedDevice") or "cpu"),
+        ]
+    )
     with _GEOCLIP_RUNTIME_LOCK:
         existing = _GEOCLIP_RUNTIME_CACHE.get(cache_key)
         if isinstance(existing, dict) and existing.get("model") is not None:
             attempt.status = "available"
             attempt.warm_state = "warm"
             attempt.model_name = str(existing.get("model_name") or "GeoCLIP")
-            attempt.metadata = {"cacheKey": cache_key, "loadedAt": existing.get("loaded_at")}
+            attempt.metadata = {
+                **attempt.metadata,
+                "cacheKey": cache_key,
+                "loadedAt": existing.get("loaded_at"),
+                "resolvedDevice": existing.get("resolved_device") or profile_config.get("resolvedDevice"),
+                "performanceProfile": existing.get("performance_profile") or profile_config.get("profile"),
+            }
+            attempt.caveats = _dedupe_text_list(list(profile_config.get("caveats", [])))
             return existing, attempt
+        manual_weights_dir = Path(weights_path) if weights_path else bundled_weights_dir
         init_kwargs: dict[str, Any] = {}
         try:
             signature = inspect.signature(GeoCLIP)
@@ -2507,12 +3017,29 @@ def _load_geoclip_runtime(settings: Settings) -> tuple[dict[str, Any] | None, Me
                 init_kwargs["cache_dir"] = cache_dir
             if "download" in parameters:
                 init_kwargs["download"] = bool(settings.source_discovery_media_geoclip_allow_runtime_download)
+            if manual_weights_dir is not None and "from_pretrained" in parameters:
+                init_kwargs["from_pretrained"] = False
         try:
-            model = GeoCLIP(**init_kwargs)
+            model = _instantiate_geoclip_with_local_backbone(
+                clip_backbone_path=clip_backbone_snapshot_dir,
+                cache_dir=cache_dir_path,
+                init_kwargs=init_kwargs,
+            )
+            if manual_weights_dir is not None:
+                _load_geoclip_weights_from_directory(model, manual_weights_dir)
+            _move_geoclip_model_to_device(model, device=str(profile_config.get("resolvedDevice") or "cpu"))
+            _patch_geoclip_predict_performance(model)
         except Exception as exc:  # pragma: no cover - optional dependency runtime variance
             attempt.availability_reason = f"GeoCLIP load failed: {_normalize_text(str(exc)) or 'unknown error'}"
-            attempt.caveats = [attempt.availability_reason]
-            attempt.metadata = {"cacheKey": cache_key, "weightsPath": weights_path, "cacheDir": cache_dir}
+            attempt.caveats = _dedupe_text_list(list(profile_config.get("caveats", [])) + [attempt.availability_reason])
+            attempt.metadata = {
+                **attempt.metadata,
+                "cacheKey": cache_key,
+                "weightsPath": weights_path,
+                "cacheDir": cache_dir,
+                "clipBackboneModelId": clip_backbone_model_id,
+                "clipBackboneDir": str(clip_backbone_snapshot_dir),
+            }
             return None, attempt
         runtime = {
             "model": model,
@@ -2520,12 +3047,33 @@ def _load_geoclip_runtime(settings: Settings) -> tuple[dict[str, Any] | None, Me
             "loaded_at": datetime.utcnow().isoformat() + "Z",
             "weights_path": weights_path,
             "cache_dir": cache_dir,
+            "bundled_weights_dir": str(bundled_weights_dir) if bundled_weights_dir is not None else None,
+            "clip_backbone_model_id": clip_backbone_model_id,
+            "clip_backbone_dir": str(clip_backbone_snapshot_dir),
+            "cache_key": cache_key,
+            "requested_device": str(profile_config.get("requestedDevice") or "cpu"),
+            "resolved_device": str(profile_config.get("resolvedDevice") or "cpu"),
+            "performance_profile": str(profile_config.get("profile") or "full_fidelity"),
+            "max_image_edge": profile_config.get("maxImageEdge"),
+            "prediction_cache_entries": int(profile_config.get("predictionCacheEntries") or 0),
+            "experimental_acceleration_enabled": bool(profile_config.get("experimentalAccelerationEnabled")),
         }
         _GEOCLIP_RUNTIME_CACHE[cache_key] = runtime
         attempt.status = "available"
         attempt.warm_state = "cold_loaded"
         attempt.model_name = "GeoCLIP"
-        attempt.metadata = {"cacheKey": cache_key, "weightsPath": weights_path, "cacheDir": cache_dir}
+        attempt.metadata = {
+            **attempt.metadata,
+            "cacheKey": cache_key,
+            "weightsPath": weights_path,
+            "cacheDir": cache_dir,
+            "bundledWeightsDir": str(bundled_weights_dir) if bundled_weights_dir is not None else None,
+            "clipBackboneModelId": clip_backbone_model_id,
+            "clipBackboneDir": str(clip_backbone_snapshot_dir),
+            "resolvedDevice": str(profile_config.get("resolvedDevice") or "cpu"),
+            "performanceProfile": str(profile_config.get("profile") or "full_fidelity"),
+        }
+        attempt.caveats = _dedupe_text_list(list(profile_config.get("caveats", [])))
         return runtime, attempt
 
 
@@ -2553,14 +3101,34 @@ def _load_streetclip_runtime(settings: Settings) -> tuple[dict[str, Any] | None,
             return None, attempt
         attempt.metadata["installedVersion"] = installed_version
     model_id = settings.source_discovery_media_streetclip_model_id.strip() or "geolocal/StreetCLIP"
-    cache_dir = _normalize_optional(settings.source_discovery_media_streetclip_model_cache_dir)
+    cache_dir_path = _resolve_media_model_cache_dir(settings, configured=_normalize_optional(settings.source_discovery_media_streetclip_model_cache_dir))
+    cache_dir = str(cache_dir_path)
+    local_dir = _resolve_media_model_dir(
+        settings,
+        configured=_normalize_optional(settings.source_discovery_media_streetclip_local_dir),
+        default_segments=("media-geolocation", "streetclip", _safe_id(model_id)),
+    )
     local_only = not settings.source_discovery_media_streetclip_allow_runtime_download
-    if local_only and cache_dir and not Path(cache_dir).exists():
-        attempt.availability_reason = "Configured StreetCLIP cache directory does not exist."
+    _apply_hf_cache_environment(cache_dir=cache_dir, offline=local_only)
+    snapshot_dir, snapshot_error = _prepare_hf_repo_local_snapshot(
+        repo_id=model_id,
+        cache_dir=cache_dir_path,
+        local_dir=local_dir,
+        allow_download=not local_only,
+        allow_patterns=[
+            "*.json",
+            "*.txt",
+            "*.safetensors",
+            "*.bin",
+            "*.model",
+        ],
+    )
+    if snapshot_dir is None:
+        attempt.availability_reason = snapshot_error or "StreetCLIP snapshot is unavailable."
         attempt.caveats = [attempt.availability_reason]
-        attempt.metadata = {"cacheDir": cache_dir}
+        attempt.metadata = {"modelId": model_id, "cacheDir": cache_dir, "localDir": str(local_dir), "localOnly": local_only}
         return None, attempt
-    cache_key = "|".join([model_id, cache_dir or "", str(local_only)])
+    cache_key = "|".join([model_id, cache_dir, str(snapshot_dir), str(local_only)])
     with _STREETCLIP_RUNTIME_LOCK:
         existing = _STREETCLIP_RUNTIME_CACHE.get(cache_key)
         if isinstance(existing, dict) and existing.get("model") is not None and existing.get("processor") is not None:
@@ -2570,25 +3138,714 @@ def _load_streetclip_runtime(settings: Settings) -> tuple[dict[str, Any] | None,
             attempt.metadata = {"cacheKey": cache_key, "loadedAt": existing.get("loaded_at")}
             return existing, attempt
         try:
-            processor = AutoProcessor.from_pretrained(model_id, local_files_only=local_only, cache_dir=cache_dir)
-            model = AutoModel.from_pretrained(model_id, local_files_only=local_only, cache_dir=cache_dir)
+            processor = AutoProcessor.from_pretrained(str(snapshot_dir), local_files_only=True, cache_dir=cache_dir)
+            model = AutoModel.from_pretrained(str(snapshot_dir), local_files_only=True, cache_dir=cache_dir)
         except Exception as exc:  # pragma: no cover - optional dependency runtime variance
             attempt.availability_reason = f"StreetCLIP load failed: {_normalize_text(str(exc)) or 'unknown error'}"
             attempt.caveats = [attempt.availability_reason]
-            attempt.metadata = {"modelId": model_id, "cacheDir": cache_dir, "localOnly": local_only}
+            attempt.metadata = {
+                "modelId": model_id,
+                "cacheDir": cache_dir,
+                "localDir": str(snapshot_dir),
+                "localOnly": local_only,
+            }
             return None, attempt
         runtime = {
             "model": model,
             "processor": processor,
             "model_name": model_id,
             "loaded_at": datetime.utcnow().isoformat() + "Z",
+            "local_dir": str(snapshot_dir),
         }
         _STREETCLIP_RUNTIME_CACHE[cache_key] = runtime
         attempt.status = "available"
         attempt.warm_state = "cold_loaded"
         attempt.model_name = model_id
-        attempt.metadata = {"modelId": model_id, "cacheDir": cache_dir, "localOnly": local_only}
+        attempt.metadata = {
+            "modelId": model_id,
+            "cacheDir": cache_dir,
+            "localDir": str(snapshot_dir),
+            "localOnly": local_only,
+        }
         return runtime, attempt
+
+
+def inspect_media_geolocation_models(settings: Settings) -> list[MediaGeolocationModelHealth]:
+    return [
+        _inspect_geoclip_model_health(settings),
+        _inspect_streetclip_model_health(settings),
+    ]
+
+
+def inspect_media_geolocation_model(settings: Settings, model_name: str) -> MediaGeolocationModelHealth:
+    normalized = (model_name or "").strip().lower()
+    if normalized == "geoclip":
+        return _inspect_geoclip_model_health(settings)
+    if normalized == "streetclip":
+        return _inspect_streetclip_model_health(settings)
+    raise ValueError(f"Unsupported media geolocation model: {model_name}")
+
+
+def prewarm_media_geolocation_model(
+    settings: Settings,
+    model_name: str,
+) -> tuple[MediaGeolocationModelHealth, MediaGeolocationEngineAttempt]:
+    normalized = (model_name or "").strip().lower()
+    if normalized == "geoclip":
+        _, attempt = _load_geoclip_runtime(settings)
+        return _inspect_geoclip_model_health(settings), attempt
+    if normalized == "streetclip":
+        _, attempt = _load_streetclip_runtime(settings)
+        return _inspect_streetclip_model_health(settings), attempt
+    raise ValueError(f"Unsupported media geolocation model: {model_name}")
+
+
+def _inspect_geoclip_model_health(settings: Settings) -> MediaGeolocationModelHealth:
+    enabled = settings.source_discovery_media_geoclip_enabled
+    profile_config = _resolve_geoclip_runtime_profile(settings)
+    expected_version = _normalize_optional(settings.source_discovery_media_geoclip_expected_version)
+    installed_version = _installed_distribution_version("geoclip")
+    weights_path = _normalize_optional(settings.source_discovery_media_geoclip_weights_path)
+    cache_dir_path = _resolve_media_model_cache_dir(settings, configured=_normalize_optional(settings.source_discovery_media_geoclip_model_cache_dir))
+    cache_dir = str(cache_dir_path)
+    clip_backbone_model_id = _normalize_optional(settings.source_discovery_media_geoclip_clip_backbone_model_id) or "openai/clip-vit-large-patch14"
+    clip_backbone_dir = _resolve_media_model_dir(
+        settings,
+        configured=_normalize_optional(settings.source_discovery_media_geoclip_clip_backbone_dir),
+        default_segments=("media-geolocation", "geoclip", "clip-backbone"),
+    )
+    bundled_weights_dir = _discover_geoclip_bundled_weights_dir()
+    manual_weights_dir = Path(weights_path) if weights_path else bundled_weights_dir
+    present_components: list[str] = []
+    missing_components: list[str] = []
+    caveats: list[str] = []
+    metadata: dict[str, Any] = {
+        "clipBackboneModelId": clip_backbone_model_id,
+        "bundledWeightsDir": str(bundled_weights_dir) if bundled_weights_dir is not None else None,
+        "performanceProfile": profile_config.get("profile"),
+        "requestedDevice": profile_config.get("requestedDevice"),
+        "resolvedDevice": profile_config.get("resolvedDevice"),
+        "maxImageEdge": profile_config.get("maxImageEdge"),
+        "predictionCacheEntries": profile_config.get("predictionCacheEntries"),
+        "experimentalAccelerationEnabled": profile_config.get("experimentalAccelerationEnabled"),
+        "validatedDevices": ["cpu"],
+    }
+    if GeoCLIP is not None and installed_version is not None:
+        present_components.append("package:geoclip")
+    else:
+        missing_components.append("package:geoclip")
+        caveats.append("GeoCLIP is not installed in this environment.")
+    if expected_version:
+        metadata["expectedVersion"] = expected_version
+    if installed_version:
+        metadata["installedVersion"] = installed_version
+    version_matches = not expected_version or installed_version == expected_version
+    if expected_version and not version_matches:
+        caveats.append(f"Expected GeoCLIP version {expected_version}, found {installed_version or 'missing'}.")
+    if profile_config.get("deviceError"):
+        caveats.append(str(profile_config["deviceError"]))
+    if manual_weights_dir is not None and _geoclip_weights_dir_ready(manual_weights_dir):
+        present_components.append("weights")
+    else:
+        missing_components.append("weights")
+    if _hf_snapshot_dir_ready(clip_backbone_dir):
+        present_components.append("clip_backbone_snapshot")
+    else:
+        missing_components.append("clip_backbone_snapshot")
+    runtime_ready, warm_state, loaded_at = _geoclip_runtime_state(
+        settings,
+        cache_dir=cache_dir,
+        weights_path=weights_path,
+        clip_backbone_model_id=clip_backbone_model_id,
+        clip_backbone_dir=clip_backbone_dir,
+    )
+    if loaded_at:
+        metadata["runtimeLoadedAt"] = loaded_at
+    install_ready = (
+        enabled
+        and "package:geoclip" in present_components
+        and version_matches
+        and "weights" in present_components
+        and "clip_backbone_snapshot" in present_components
+        and profile_config.get("resolvedDevice") is not None
+    )
+    if not enabled:
+        status = "disabled"
+        summary = "GeoCLIP is disabled by configuration."
+    elif "package:geoclip" not in present_components:
+        status = "missing_dependency"
+        summary = "GeoCLIP package support is missing in this environment."
+    elif expected_version and not version_matches:
+        status = "version_mismatch"
+        summary = f"GeoCLIP version mismatch: expected {expected_version}, found {installed_version or 'missing'}."
+    elif profile_config.get("deviceError"):
+        status = "unsupported_runtime"
+        summary = str(profile_config["deviceError"])
+    elif install_ready and runtime_ready:
+        status = "ready"
+        summary = "GeoCLIP local assets are present and the runtime is prewarmed."
+    elif install_ready:
+        status = "ready"
+        summary = "GeoCLIP local assets are present and ready for explicit prewarm."
+    elif settings.source_discovery_media_geoclip_allow_runtime_download:
+        status = "degraded"
+        summary = "GeoCLIP local assets are incomplete, but explicit prewarm may still recover them because runtime downloads are allowed."
+    else:
+        status = "missing_asset"
+        summary = "GeoCLIP is enabled but one or more local assets required for no-download runtime are missing."
+    return MediaGeolocationModelHealth(
+        model_name="geoclip",
+        role="specialized geocoder",
+        enabled=enabled,
+        status=status,
+        install_ready=install_ready,
+        runtime_ready=runtime_ready,
+        warm_state=warm_state,
+        summary=summary,
+        installed_version=installed_version,
+        expected_version=expected_version,
+        model_id="GeoCLIP",
+        download_allowed=bool(settings.source_discovery_media_geoclip_allow_runtime_download),
+        cache_dir=cache_dir,
+        local_dir=None,
+        weights_path=str(manual_weights_dir) if manual_weights_dir is not None else None,
+        clip_backbone_dir=str(clip_backbone_dir),
+        missing_components=missing_components,
+        present_components=present_components,
+        metadata=metadata,
+        caveats=_dedupe_text_list([*caveats, *list(profile_config.get("caveats", []))]),
+    )
+
+
+def _inspect_streetclip_model_health(settings: Settings) -> MediaGeolocationModelHealth:
+    enabled = settings.source_discovery_media_streetclip_enabled
+    expected_version = _normalize_optional(settings.source_discovery_media_streetclip_expected_transformers_version)
+    installed_version = _installed_distribution_version("transformers")
+    model_id = settings.source_discovery_media_streetclip_model_id.strip() or "geolocal/StreetCLIP"
+    cache_dir_path = _resolve_media_model_cache_dir(settings, configured=_normalize_optional(settings.source_discovery_media_streetclip_model_cache_dir))
+    cache_dir = str(cache_dir_path)
+    local_dir = _resolve_media_model_dir(
+        settings,
+        configured=_normalize_optional(settings.source_discovery_media_streetclip_local_dir),
+        default_segments=("media-geolocation", "streetclip", _safe_id(model_id)),
+    )
+    present_components: list[str] = []
+    missing_components: list[str] = []
+    caveats: list[str] = []
+    metadata: dict[str, Any] = {"modelId": model_id}
+    if Image is not None:
+        present_components.append("dependency:pillow")
+    else:
+        missing_components.append("dependency:pillow")
+    if torch is not None:
+        present_components.append("dependency:torch")
+    else:
+        missing_components.append("dependency:torch")
+    if AutoModel is not None and AutoProcessor is not None:
+        present_components.append("dependency:transformers")
+    else:
+        missing_components.append("dependency:transformers")
+    if installed_version:
+        present_components.append("package:transformers")
+        metadata["installedVersion"] = installed_version
+    else:
+        missing_components.append("package:transformers")
+    version_matches = not expected_version or installed_version == expected_version
+    if expected_version:
+        metadata["expectedVersion"] = expected_version
+    if expected_version and not version_matches:
+        caveats.append(f"Expected transformers version {expected_version}, found {installed_version or 'missing'}.")
+    if _hf_snapshot_dir_ready(local_dir):
+        present_components.append("model_snapshot")
+    else:
+        missing_components.append("model_snapshot")
+    runtime_ready, warm_state, loaded_at = _streetclip_runtime_state(
+        settings,
+        cache_dir=cache_dir,
+        model_id=model_id,
+        local_dir=local_dir,
+    )
+    if loaded_at:
+        metadata["runtimeLoadedAt"] = loaded_at
+    install_ready = (
+        enabled
+        and all(
+            component in present_components
+            for component in ["dependency:pillow", "dependency:torch", "dependency:transformers", "package:transformers", "model_snapshot"]
+        )
+        and version_matches
+    )
+    if not enabled:
+        status = "disabled"
+        summary = "StreetCLIP is disabled by configuration."
+    elif any(component in missing_components for component in ["dependency:pillow", "dependency:torch", "dependency:transformers", "package:transformers"]):
+        status = "missing_dependency"
+        summary = "StreetCLIP dependencies are incomplete in this environment."
+    elif expected_version and not version_matches:
+        status = "version_mismatch"
+        summary = f"Transformers version mismatch for StreetCLIP: expected {expected_version}, found {installed_version or 'missing'}."
+    elif install_ready and runtime_ready:
+        status = "ready"
+        summary = "StreetCLIP local assets are present and the runtime is prewarmed."
+    elif install_ready:
+        status = "ready"
+        summary = "StreetCLIP local assets are present and ready for explicit prewarm."
+    elif settings.source_discovery_media_streetclip_allow_runtime_download:
+        status = "degraded"
+        summary = "StreetCLIP local assets are incomplete, but explicit prewarm may still recover them because runtime downloads are allowed."
+    else:
+        status = "missing_asset"
+        summary = "StreetCLIP is enabled but one or more local assets required for no-download runtime are missing."
+    return MediaGeolocationModelHealth(
+        model_name="streetclip",
+        role="street-scene reranker",
+        enabled=enabled,
+        status=status,
+        install_ready=install_ready,
+        runtime_ready=runtime_ready,
+        warm_state=warm_state,
+        summary=summary,
+        installed_version=installed_version,
+        expected_version=expected_version,
+        model_id=model_id,
+        download_allowed=bool(settings.source_discovery_media_streetclip_allow_runtime_download),
+        cache_dir=cache_dir,
+        local_dir=str(local_dir),
+        weights_path=None,
+        clip_backbone_dir=None,
+        missing_components=missing_components,
+        present_components=present_components,
+        metadata=metadata,
+        caveats=_dedupe_text_list(caveats),
+    )
+
+
+def _installed_distribution_version(distribution_name: str) -> str | None:
+    try:
+        return importlib_metadata.version(distribution_name)
+    except importlib_metadata.PackageNotFoundError:
+        return None
+
+
+def _geoclip_weights_dir_ready(path: Path) -> bool:
+    return path.exists() and all(
+        (path / file_name).exists()
+        for file_name in ["image_encoder_mlp_weights.pth", "location_encoder_weights.pth", "logit_scale_weights.pth"]
+    )
+
+
+def _hf_snapshot_dir_ready(path: Path) -> bool:
+    if not path.exists() or not path.is_dir():
+        return False
+    has_config = any((path / file_name).exists() for file_name in ["config.json", "preprocessor_config.json", "tokenizer_config.json"])
+    has_weights = False
+    for pattern in ["*.safetensors", "*.bin", "*.model"]:
+        if next(path.rglob(pattern), None) is not None:
+            has_weights = True
+            break
+    return has_config and has_weights
+
+
+def _geoclip_runtime_state(
+    settings: Settings,
+    *,
+    cache_dir: str,
+    weights_path: str | None,
+    clip_backbone_model_id: str,
+    clip_backbone_dir: Path,
+) -> tuple[bool, str, str | None]:
+    cache_key = "|".join(
+        [
+            weights_path or "",
+            cache_dir,
+            str(clip_backbone_dir),
+            clip_backbone_model_id,
+            str(bool(settings.source_discovery_media_geoclip_allow_runtime_download)),
+        ]
+    )
+    with _GEOCLIP_RUNTIME_LOCK:
+        runtime = _GEOCLIP_RUNTIME_CACHE.get(cache_key)
+        if isinstance(runtime, dict) and runtime.get("model") is not None:
+            return True, "warm", _normalize_optional(runtime.get("loaded_at"))
+    return False, "cold", None
+
+
+def _streetclip_runtime_state(
+    settings: Settings,
+    *,
+    cache_dir: str,
+    model_id: str,
+    local_dir: Path,
+) -> tuple[bool, str, str | None]:
+    cache_key = "|".join(
+        [
+            model_id,
+            cache_dir,
+            str(local_dir),
+            str(not settings.source_discovery_media_streetclip_allow_runtime_download),
+        ]
+    )
+    with _STREETCLIP_RUNTIME_LOCK:
+        runtime = _STREETCLIP_RUNTIME_CACHE.get(cache_key)
+        if isinstance(runtime, dict) and runtime.get("model") is not None and runtime.get("processor") is not None:
+            return True, "warm", _normalize_optional(runtime.get("loaded_at"))
+    return False, "cold", None
+
+
+def _apply_hf_cache_environment(*, cache_dir: str | None, offline: bool) -> None:
+    if cache_dir:
+        os.environ["HF_HOME"] = cache_dir
+        os.environ["HF_HUB_CACHE"] = cache_dir
+        os.environ["HUGGINGFACE_HUB_CACHE"] = cache_dir
+        os.environ["TRANSFORMERS_CACHE"] = cache_dir
+        os.environ["HF_ASSETS_CACHE"] = cache_dir
+        os.environ["XDG_CACHE_HOME"] = str(Path(cache_dir).parent)
+    if offline:
+        os.environ["HF_HUB_OFFLINE"] = "1"
+        os.environ["TRANSFORMERS_OFFLINE"] = "1"
+    else:
+        os.environ["HF_HUB_OFFLINE"] = "0"
+        os.environ["TRANSFORMERS_OFFLINE"] = "0"
+
+
+def _resolve_media_model_cache_dir(settings: Settings, *, configured: str | None) -> Path:
+    if configured:
+        candidate = Path(configured)
+        if not candidate.is_absolute():
+            candidate = (Path(resolve_runtime_paths(settings)["resource_dir"]) / candidate).resolve()
+        return candidate
+    return (Path(resolve_runtime_paths(settings)["cache_dir"]) / "huggingface").resolve()
+
+
+def _resolve_media_model_dir(settings: Settings, *, configured: str | None, default_segments: tuple[str, ...]) -> Path:
+    if configured:
+        candidate = Path(configured)
+        if not candidate.is_absolute():
+            candidate = (Path(resolve_runtime_paths(settings)["resource_dir"]) / candidate).resolve()
+        return candidate
+    return (Path(resolve_runtime_paths(settings)["cache_dir"]) / Path(*default_segments)).resolve()
+
+
+def _prepare_hf_repo_local_snapshot(
+    *,
+    repo_id: str,
+    cache_dir: Path,
+    local_dir: Path,
+    allow_download: bool,
+    allow_patterns: list[str] | None = None,
+) -> tuple[Path | None, str | None]:
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    local_dir.parent.mkdir(parents=True, exist_ok=True)
+    if snapshot_download is None:
+        if _hf_snapshot_is_usable(local_dir):
+            return local_dir, None
+        return None, "huggingface_hub is required to prepare the local model snapshot."
+    try:
+        resolved = snapshot_download(
+            repo_id,
+            cache_dir=str(cache_dir),
+            local_dir=str(local_dir),
+            local_files_only=not allow_download,
+            allow_patterns=allow_patterns,
+            max_workers=1,
+        )
+        resolved_path = Path(resolved).resolve()
+        if _hf_snapshot_is_usable(resolved_path):
+            return resolved_path, None
+    except Exception as exc:  # pragma: no cover - optional dependency runtime variance
+        if _hf_snapshot_is_usable(local_dir):
+            return local_dir, None
+        reason = _normalize_text(str(exc)) or "unknown error"
+        if allow_download:
+            return None, f"Model snapshot preparation failed for {repo_id}: {reason}"
+        return None, f"Local model snapshot is missing or incomplete for {repo_id}: {reason}"
+    if _hf_snapshot_is_usable(local_dir):
+        return local_dir, None
+    return None, f"Local model snapshot is missing required files for {repo_id}."
+
+
+def _hf_snapshot_is_usable(path: Path) -> bool:
+    if not path.exists() or not path.is_dir():
+        return False
+    has_config = (path / "config.json").exists()
+    has_processor = any((path / name).exists() for name in ("preprocessor_config.json", "processor_config.json", "tokenizer_config.json"))
+    has_weights = any((path / name).exists() for name in ("model.safetensors", "pytorch_model.bin", "open_clip_pytorch_model.bin"))
+    return has_config and has_processor and has_weights
+
+
+def _instantiate_geoclip_with_local_backbone(
+    *,
+    clip_backbone_path: Path,
+    cache_dir: Path,
+    init_kwargs: dict[str, Any],
+) -> Any:
+    from geoclip.model import image_encoder as geoclip_image_encoder  # type: ignore[import-not-found]
+
+    original_clip_loader = geoclip_image_encoder.CLIPModel.from_pretrained
+    original_processor_loader = geoclip_image_encoder.AutoProcessor.from_pretrained
+
+    def _patched_clip_loader(_: str, *args: Any, **kwargs: Any) -> Any:
+        kwargs["local_files_only"] = True
+        kwargs["cache_dir"] = str(cache_dir)
+        return original_clip_loader(str(clip_backbone_path), *args, **kwargs)
+
+    def _patched_processor_loader(_: str, *args: Any, **kwargs: Any) -> Any:
+        kwargs["local_files_only"] = True
+        kwargs["cache_dir"] = str(cache_dir)
+        return original_processor_loader(str(clip_backbone_path), *args, **kwargs)
+
+    geoclip_image_encoder.CLIPModel.from_pretrained = _patched_clip_loader
+    geoclip_image_encoder.AutoProcessor.from_pretrained = _patched_processor_loader
+    try:
+        model = GeoCLIP(**init_kwargs)
+        _patch_geoclip_image_encoder_output_compat(model)
+        return model
+    finally:
+        geoclip_image_encoder.CLIPModel.from_pretrained = original_clip_loader
+        geoclip_image_encoder.AutoProcessor.from_pretrained = original_processor_loader
+
+
+def _patch_geoclip_image_encoder_output_compat(model: Any) -> None:
+    image_encoder = getattr(model, "image_encoder", None)
+    if image_encoder is None or not hasattr(image_encoder, "CLIP") or not hasattr(image_encoder, "mlp"):
+        return
+
+    def _patched_forward(self: Any, x: Any) -> Any:
+        clip_output = self.CLIP.get_image_features(pixel_values=x)
+        if hasattr(clip_output, "image_embeds"):
+            clip_features = clip_output.image_embeds
+        elif hasattr(clip_output, "pooler_output"):
+            clip_features = clip_output.pooler_output
+        elif isinstance(clip_output, (list, tuple)) and clip_output:
+            clip_features = clip_output[0]
+        else:
+            clip_features = clip_output
+        return self.mlp(clip_features)
+
+    image_encoder.forward = _patched_forward.__get__(image_encoder, image_encoder.__class__)
+
+
+def _patch_geoclip_predict_performance(model: Any) -> None:
+    if getattr(model, "_11writer_predict_perf_patch", False):
+        return
+    if Image is None or torch is None:
+        return
+    if not callable(getattr(model, "predict", None)):
+        return
+    if not callable(getattr(model, "forward", None)):
+        return
+    image_encoder = getattr(model, "image_encoder", None)
+    if image_encoder is None or not callable(getattr(image_encoder, "preprocess_image", None)):
+        return
+
+    def _patched_predict(self: Any, image_path: str, top_k: int) -> Any:
+        with Image.open(image_path) as opened:
+            image = self.image_encoder.preprocess_image(opened)
+        image = image.to(self.device)
+
+        cached_gallery = getattr(self, "_11writer_cached_gps_gallery", None)
+        cached_gallery_device = getattr(self, "_11writer_cached_gps_gallery_device", None)
+        if cached_gallery is None or cached_gallery_device != self.device:
+            cached_gallery = self.gps_gallery.to(self.device)
+            self._11writer_cached_gps_gallery = cached_gallery
+            self._11writer_cached_gps_gallery_device = self.device
+
+        logits_per_image = self.forward(image, cached_gallery)
+        probs_per_image = logits_per_image.softmax(dim=-1).cpu()
+        top_pred = torch.topk(probs_per_image, top_k, dim=1)
+        top_pred_gps = self.gps_gallery[top_pred.indices[0]]
+        top_pred_prob = top_pred.values[0]
+        return top_pred_gps, top_pred_prob
+
+    model.predict = _patched_predict.__get__(model, model.__class__)
+    model._11writer_predict_perf_patch = True
+
+
+def _discover_geoclip_bundled_weights_dir() -> Path | None:
+    try:
+        class_file = Path(inspect.getfile(GeoCLIP)).resolve()
+    except (TypeError, OSError):
+        return None
+    weights_dir = class_file.parent / "weights"
+    return weights_dir if weights_dir.exists() else None
+
+
+def _load_geoclip_weights_from_directory(model: Any, weights_dir: Path) -> None:
+    if torch is None:
+        raise RuntimeError("torch is required to load GeoCLIP weights.")
+    image_weights = weights_dir / "image_encoder_mlp_weights.pth"
+    location_weights = weights_dir / "location_encoder_weights.pth"
+    logit_scale_weights = weights_dir / "logit_scale_weights.pth"
+    if not image_weights.exists() or not location_weights.exists() or not logit_scale_weights.exists():
+        raise FileNotFoundError("GeoCLIP weights directory is missing one or more required weight files.")
+    model.image_encoder.mlp.load_state_dict(torch.load(image_weights, map_location="cpu"))
+    model.location_encoder.load_state_dict(torch.load(location_weights, map_location="cpu"))
+    model.logit_scale = torch.nn.Parameter(torch.load(logit_scale_weights, map_location="cpu"))
+
+
+def _load_media_geolocation_place_gazetteer(settings: Settings) -> list[dict[str, Any]]:
+    path = Path(settings.source_discovery_media_geolocation_place_gazetteer_path)
+    try:
+        resolved_path = path.resolve()
+    except OSError:
+        resolved_path = path
+    if not resolved_path.exists():
+        return []
+    mtime_ns = resolved_path.stat().st_mtime_ns
+    cache_key = str(resolved_path)
+    with _PLACE_GAZETTEER_RUNTIME_LOCK:
+        cached = _PLACE_GAZETTEER_RUNTIME_CACHE.get(cache_key)
+        if cached and cached.get("mtimeNs") == mtime_ns:
+            return list(cached.get("entries", []))
+    try:
+        payload = json.loads(resolved_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    raw_places = payload.get("places", []) if isinstance(payload, dict) else []
+    entries: list[dict[str, Any]] = []
+    for raw_entry in raw_places:
+        if not isinstance(raw_entry, dict):
+            continue
+        name = _normalize_text(raw_entry.get("name"))
+        kind = _normalize_text(raw_entry.get("kind")).casefold() or "unknown"
+        latitude = _coerce_float(raw_entry.get("latitude"))
+        longitude = _coerce_float(raw_entry.get("longitude"))
+        if not name or latitude is None or longitude is None:
+            continue
+        raw_aliases = raw_entry.get("aliases", [])
+        aliases = [
+            alias
+            for alias in (_normalize_text(item) for item in raw_aliases if isinstance(raw_aliases, list))
+            if alias
+        ]
+        entries.append(
+            {
+                "name": name,
+                "kind": kind,
+                "latitude": round(latitude, 6),
+                "longitude": round(longitude, 6),
+                "locality": _normalize_text(raw_entry.get("locality")) or None,
+                "admin1": _normalize_text(raw_entry.get("admin1")) or None,
+                "country": _normalize_text(raw_entry.get("country")) or None,
+                "countryCode": (_normalize_text(raw_entry.get("countryCode")) or None),
+                "aliases": aliases[:16],
+            }
+        )
+    with _PLACE_GAZETTEER_RUNTIME_LOCK:
+        _PLACE_GAZETTEER_RUNTIME_CACHE[cache_key] = {"mtimeNs": mtime_ns, "entries": list(entries)}
+    return entries
+
+
+def _build_media_geolocation_place_context(
+    settings: Settings,
+    *,
+    latitude: float,
+    longitude: float,
+) -> dict[str, Any] | None:
+    entries = _load_media_geolocation_place_gazetteer(settings)
+    if not entries:
+        return None
+    nearest_landmark: dict[str, Any] | None = None
+    nearest_locality: dict[str, Any] | None = None
+    for entry in entries:
+        distance_km = _distance_km_between_points(latitude, longitude, entry.get("latitude"), entry.get("longitude"))
+        if distance_km is None:
+            continue
+        ranked = {**entry, "distanceKm": round(distance_km, 3)}
+        if entry.get("kind") == "landmark":
+            if nearest_landmark is None or ranked["distanceKm"] < nearest_landmark["distanceKm"]:
+                nearest_landmark = ranked
+            continue
+        if entry.get("kind") in {"city", "locality", "district", "region"}:
+            if nearest_locality is None or ranked["distanceKm"] < nearest_locality["distanceKm"]:
+                nearest_locality = ranked
+    landmark_radius_km = max(0.5, float(settings.source_discovery_media_geolocation_place_landmark_radius_km))
+    locality_radius_km = max(1.0, float(settings.source_discovery_media_geolocation_place_locality_radius_km))
+    landmark_match = nearest_landmark if nearest_landmark and nearest_landmark["distanceKm"] <= landmark_radius_km else None
+    locality_match = nearest_locality if nearest_locality and nearest_locality["distanceKm"] <= locality_radius_km else None
+    if landmark_match is None and locality_match is None:
+        return None
+    locality_name = None
+    admin1 = None
+    country = None
+    country_code = None
+    if landmark_match is not None:
+        locality_name = landmark_match.get("locality")
+        admin1 = landmark_match.get("admin1")
+        country = landmark_match.get("country")
+        country_code = landmark_match.get("countryCode")
+    if locality_match is not None:
+        locality_name = locality_name or locality_match.get("name")
+        admin1 = admin1 or locality_match.get("admin1")
+        country = country or locality_match.get("country")
+        country_code = country_code or locality_match.get("countryCode")
+    label_parts: list[str] = []
+    seen_parts: set[str] = set()
+    for part in [
+        landmark_match.get("name") if landmark_match is not None else None,
+        locality_name,
+        admin1,
+        country,
+    ]:
+        normalized = _normalize_text(part)
+        if not normalized:
+            continue
+        token = normalized.casefold()
+        if token in seen_parts:
+            continue
+        seen_parts.add(token)
+        label_parts.append(normalized)
+    if not label_parts:
+        return None
+    agreement_labels: list[str] = []
+    seen_agreement_labels: set[str] = set()
+    for part in [
+        landmark_match.get("name") if landmark_match is not None else None,
+        locality_name,
+        admin1,
+        country,
+        *(landmark_match.get("aliases", []) if isinstance(landmark_match, dict) else []),
+        *(locality_match.get("aliases", []) if isinstance(locality_match, dict) else []),
+    ]:
+        normalized = _normalize_text(part)
+        if not normalized:
+            continue
+        token = normalized.casefold()
+        if token in seen_agreement_labels:
+            continue
+        seen_agreement_labels.add(token)
+        agreement_labels.append(normalized)
+    return {
+        "displayLabel": ", ".join(label_parts),
+        "landmark": landmark_match.get("name") if landmark_match is not None else None,
+        "locality": locality_name,
+        "admin1": admin1,
+        "country": country,
+        "countryCode": country_code,
+        "nearestLandmark": landmark_match,
+        "nearestLocality": locality_match,
+        "agreementLabels": agreement_labels[:12],
+        "distanceKm": landmark_match.get("distanceKm") if landmark_match is not None else (locality_match.get("distanceKm") if locality_match is not None else None),
+        "source": "local_media_geolocation_place_gazetteer",
+    }
+
+
+def _distance_km_between_points(
+    latitude_a: float | None,
+    longitude_a: float | None,
+    latitude_b: float | None,
+    longitude_b: float | None,
+) -> float | None:
+    if None in {latitude_a, longitude_a, latitude_b, longitude_b}:
+        return None
+    lat1 = math.radians(float(latitude_a))
+    lon1 = math.radians(float(longitude_a))
+    lat2 = math.radians(float(latitude_b))
+    lon2 = math.radians(float(longitude_b))
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    hav = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    return round(6371.0088 * 2 * math.asin(min(1.0, math.sqrt(hav))), 3)
 
 
 def _try_geoclip_candidates(
@@ -2618,18 +3875,80 @@ def _try_geoclip_candidates(
     runtime, attempt = _load_geoclip_runtime(settings)
     if runtime is None:
         return [], None, [], list(attempt.caveats), attempt
+    profile_config = {
+        "profile": runtime.get("performance_profile") or "full_fidelity",
+        "maxImageEdge": runtime.get("max_image_edge"),
+        "requestedDevice": runtime.get("requested_device") or "cpu",
+        "resolvedDevice": runtime.get("resolved_device") or "cpu",
+        "predictionCacheEntries": runtime.get("prediction_cache_entries") or 0,
+        "experimentalAccelerationEnabled": runtime.get("experimental_acceleration_enabled") or False,
+        "caveats": list(attempt.caveats),
+    }
+    preprocess_started = time.perf_counter()
+    inference_artifact_path, preprocess_metadata, preprocess_caveats = _prepare_geoclip_inference_artifact(
+        settings,
+        artifact_path=artifact_path,
+        profile_config=profile_config,
+    )
+    preprocess_ms = round((time.perf_counter() - preprocess_started) * 1000.0, 3)
+    cache_key = _build_geoclip_prediction_cache_key(
+        runtime,
+        artifact_path=inference_artifact_path,
+        max_candidates=max_candidates,
+        profile_config=profile_config,
+    )
+    predict_ms = 0.0
+    cache_hit = False
     try:
-        model = runtime["model"]
-        predicted_gps, predicted_probabilities = model.predict(artifact_path, top_k=max_candidates)
+        cached_prediction = _lookup_geoclip_prediction_cache(cache_key)
+        if cached_prediction is not None:
+            predicted_gps = cached_prediction.get("gpsRows", [])
+            predicted_probabilities = cached_prediction.get("probabilityRows", [])
+            cache_hit = True
+        else:
+            model = runtime["model"]
+            predict_started = time.perf_counter()
+            predicted_gps, predicted_probabilities = model.predict(inference_artifact_path, top_k=max_candidates)
+            predict_ms = round((time.perf_counter() - predict_started) * 1000.0, 3)
+            gps_rows_for_cache = predicted_gps.tolist() if hasattr(predicted_gps, "tolist") else list(predicted_gps)
+            probability_rows_for_cache = (
+                predicted_probabilities.tolist()
+                if hasattr(predicted_probabilities, "tolist")
+                else list(predicted_probabilities)
+            )
+            _store_geoclip_prediction_cache(
+                cache_key,
+                {
+                    "gpsRows": gps_rows_for_cache,
+                    "probabilityRows": probability_rows_for_cache,
+                    "createdAt": datetime.utcnow().isoformat() + "Z",
+                },
+                max_entries=int(profile_config.get("predictionCacheEntries") or 0),
+            )
+            predicted_gps = gps_rows_for_cache
+            predicted_probabilities = probability_rows_for_cache
     except Exception as exc:  # pragma: no cover - optional dependency runtime variance
         message = f"GeoCLIP execution failed: {_normalize_text(str(exc)) or 'unknown error'}"
         attempt.status = "failed"
         attempt.availability_reason = message
-        attempt.caveats = _dedupe_text_list(attempt.caveats + [message])
+        attempt.caveats = _dedupe_text_list([*attempt.caveats, *preprocess_caveats, message])
+        attempt.metadata = {
+            **attempt.metadata,
+            **preprocess_metadata,
+            "artifactPath": artifact_path,
+            "inferenceArtifactPath": inference_artifact_path,
+            "preprocessMs": preprocess_ms,
+            "predictMs": predict_ms,
+            "cacheHit": cache_hit,
+            "performanceProfile": profile_config.get("profile"),
+            "requestedDevice": profile_config.get("requestedDevice"),
+            "resolvedDevice": profile_config.get("resolvedDevice"),
+        }
         return [], runtime.get("model_name"), [], [message], attempt
     gps_rows = predicted_gps.tolist() if hasattr(predicted_gps, "tolist") else list(predicted_gps)
     probability_rows = predicted_probabilities.tolist() if hasattr(predicted_probabilities, "tolist") else list(predicted_probabilities)
     candidates: list[MediaGeolocationCandidate] = []
+    used_place_enrichment = False
     for index, item in enumerate(gps_rows[:max_candidates]):
         if not isinstance(item, (list, tuple)) or len(item) < 2:
             continue
@@ -2638,29 +3957,79 @@ def _try_geoclip_candidates(
         if latitude is None or longitude is None:
             continue
         probability = probability_rows[index] if index < len(probability_rows) else None
+        rounded_latitude = round(latitude, 6)
+        rounded_longitude = round(longitude, 6)
+        place_context = _build_media_geolocation_place_context(
+            settings,
+            latitude=rounded_latitude,
+            longitude=rounded_longitude,
+        )
+        label = place_context.get("displayLabel") if isinstance(place_context, dict) else None
+        if label:
+            used_place_enrichment = True
+        else:
+            label = f"{rounded_latitude:.4f}, {rounded_longitude:.4f}"
+        metadata = {"rawRetrievalScore": _coerce_float(probability)}
+        basis = ["GeoCLIP image-to-GPS retrieval predicted this coordinate candidate from the image alone."]
+        provenance_chain = ["geoclip_topk_retrieval"]
+        candidate_caveats: list[str] = []
+        if isinstance(place_context, dict):
+            metadata.update(
+                {
+                    "placeContext": place_context,
+                    "landmark": place_context.get("landmark"),
+                    "locality": place_context.get("locality"),
+                    "admin1": place_context.get("admin1"),
+                    "country": place_context.get("country"),
+                    "countryCode": place_context.get("countryCode"),
+                    "agreementLabels": place_context.get("agreementLabels", []),
+                }
+            )
+            basis.append("Human-readable place context was added from a bounded offline gazetteer around the GeoCLIP coordinate candidate.")
+            provenance_chain.append("offline_place_gazetteer")
+            candidate_caveats.append("The place label is an offline nearest-place enrichment around the predicted coordinates, not a direct GeoCLIP text output.")
         candidates.append(
             MediaGeolocationCandidate(
                 rank=index + 1,
                 candidate_kind="gps_point",
-                label=f"GeoCLIP candidate {index + 1}",
-                latitude=round(latitude, 6),
-                longitude=round(longitude, 6),
+                label=label,
+                latitude=rounded_latitude,
+                longitude=rounded_longitude,
                 confidence=_coerce_float(probability),
                 engine="geoclip",
-                basis=["GeoCLIP image-to-GPS retrieval predicted this coordinate candidate from the image alone."],
-                provenance_chain=["geoclip_topk_retrieval"],
-                metadata={"rawRetrievalScore": _coerce_float(probability)},
+                basis=basis,
+                provenance_chain=provenance_chain,
+                metadata=metadata,
+                caveats=candidate_caveats,
             )
         )
     reasoning = ["GeoCLIP produced image-to-GPS candidate coordinates for fusion with deterministic clues."] if candidates else []
-    caveats = ["GeoCLIP output is retrieval-based and should be fused with textual, timestamp, and provenance clues before operator use."] if candidates else []
+    if used_place_enrichment:
+        reasoning.append("GeoCLIP coordinate candidates were enriched with bounded offline place labels so review packets show nearby locality and landmark context.")
+    if preprocess_metadata.get("usedPreprocessedArtifact"):
+        reasoning.append("GeoCLIP inference reused a profile-controlled preprocessed artifact so repeated local runs can trade explicit image-size limits for lower CPU cost.")
+    if cache_hit:
+        reasoning.append("GeoCLIP reused a cached prediction for the exact artifact-and-profile fingerprint instead of rerunning image-to-GPS retrieval.")
+    caveats = [
+        "GeoCLIP output is retrieval-based and should be fused with textual, timestamp, and provenance clues before operator use."
+    ] if candidates else []
+    caveats = _dedupe_text_list([*caveats, *preprocess_caveats])
     attempt.status = "completed"
     attempt.produced_candidate_count = len(candidates)
     attempt.model_name = runtime.get("model_name")
     attempt.metadata = {
         **attempt.metadata,
         "artifactPath": artifact_path,
+        "inferenceArtifactPath": inference_artifact_path,
         "candidateCount": len(candidates),
+        "usedPlaceEnrichment": used_place_enrichment,
+        "preprocessMs": preprocess_ms,
+        "predictMs": predict_ms,
+        "cacheHit": cache_hit,
+        "performanceProfile": profile_config.get("profile"),
+        "requestedDevice": profile_config.get("requestedDevice"),
+        "resolvedDevice": profile_config.get("resolvedDevice"),
+        **preprocess_metadata,
     }
     attempt.caveats = _dedupe_text_list(attempt.caveats + caveats)
     return candidates, runtime.get("model_name"), reasoning, caveats, attempt
@@ -3125,8 +4494,8 @@ def _fuse_geolocation_candidates(
     ranked = sorted(
         ranked_items,
         key=lambda candidate: (
-            -(candidate.confidence_score if candidate.confidence_score is not None else candidate.confidence or 0.0),
-            0 if candidate.latitude is not None and candidate.longitude is not None else 1,
+            _geolocation_candidate_sort_priority(candidate),
+            -_effective_geolocation_ranking_score(candidate),
             candidate.label or "",
         ),
     )[:max_candidates]
@@ -3151,15 +4520,20 @@ def _score_geolocation_candidate(
     contradicting: list[str] = []
     provenance = list(candidate.provenance_chain)
     evidence_families: list[str] = []
+    direct_coordinate_support = False
     if candidate.engine == "deterministic":
         evidence_families.append("deterministic")
         base += 0.08
     if candidate.engine == "geoclip":
         evidence_families.append("geoclip")
-        base += 0.05
+        base = max(base + 0.05, 0.72 if candidate.latitude is not None and candidate.longitude is not None else 0.48)
+        supporting.append("GeoCLIP contributed direct coordinate retrieval, which outranks coarse place-label similarity in fusion.")
     if candidate.engine == "streetclip":
         evidence_families.append("streetclip")
         base += 0.02
+        if candidate.latitude is None or candidate.longitude is None:
+            base = min(base, 0.54)
+            supporting.append("StreetCLIP contributed coarse place-label ranking rather than direct coordinates.")
     if candidate.engine in {"ollama", "openai_compat_local", "qwen_vl_local", "internvl_local", "llava_local"}:
         evidence_families.append("local_vlm")
     if candidate.latitude is not None and candidate.longitude is not None:
@@ -3169,6 +4543,7 @@ def _score_geolocation_candidate(
     if observed_latitude is not None and observed_longitude is not None and candidate.latitude is not None and candidate.longitude is not None:
         if abs(candidate.latitude - observed_latitude) < 0.001 and abs(candidate.longitude - observed_longitude) < 0.001:
             base = max(base, 0.99)
+            direct_coordinate_support = True
             supporting.append("Observed media coordinates matched this candidate directly.")
             provenance.append("observed_metadata")
     for clue in clue_packet.coordinate_clues:
@@ -3177,6 +4552,7 @@ def _score_geolocation_candidate(
                 supporting.append(f"Coordinate clue supported this candidate: {clue.text}.")
                 if clue.clue_type == "observed_coordinates":
                     base = max(base, 0.99)
+                    direct_coordinate_support = True
                 elif clue.inherited:
                     base = max(base, 0.52)
                 else:
@@ -3215,6 +4591,8 @@ def _score_geolocation_candidate(
         ceiling = 0.62
     if candidate.engine in {"ollama", "openai_compat_local", "qwen_vl_local", "internvl_local", "llava_local"}:
         ceiling = 0.58
+    if direct_coordinate_support:
+        ceiling = max(ceiling, 0.99)
     if candidate.inherited:
         ceiling = min(ceiling, 0.68)
         base -= 0.06
@@ -3223,8 +4601,8 @@ def _score_geolocation_candidate(
         ceiling -= 0.08
     if inherited_context and inherited_context.get("relationshipKinds"):
         provenance.extend(str(item) for item in inherited_context.get("relationshipKinds", []) if str(item).strip())
-    candidate.confidence_score = round(max(0.0, min(0.99, base)), 4)
-    candidate.confidence_ceiling = round(max(candidate.confidence_score, min(0.99, ceiling)), 4) if candidate.confidence_score > ceiling else round(max(0.0, min(0.99, ceiling)), 4)
+    candidate.confidence_score = round(max(0.0, min(0.99, min(base, ceiling))), 4)
+    candidate.confidence_ceiling = round(max(0.0, min(0.99, ceiling)), 4)
     candidate.confidence = candidate.confidence_score
     candidate.supporting_evidence = _dedupe_text_list(supporting)
     candidate.contradicting_evidence = _dedupe_text_list(contradicting)
@@ -3236,17 +4614,68 @@ def _score_geolocation_candidate(
     }
 
 
+def _geolocation_candidate_sort_priority(candidate: MediaGeolocationCandidate) -> int:
+    if candidate.latitude is not None and candidate.longitude is not None:
+        if candidate.engine == "deterministic":
+            return 0
+        if candidate.engine == "geoclip":
+            return 1
+        return 2
+    if candidate.engine == "streetclip":
+        return 4
+    if candidate.engine in {"ollama", "openai_compat_local", "qwen_vl_local", "internvl_local", "llava_local"}:
+        return 5
+    return 3
+
+
+def _effective_geolocation_ranking_score(candidate: MediaGeolocationCandidate) -> float:
+    raw_score = candidate.confidence_score if candidate.confidence_score is not None else candidate.confidence or 0.0
+    if candidate.confidence_ceiling is None:
+        return raw_score
+    return min(raw_score, candidate.confidence_ceiling)
+
+
+def _candidate_geolocation_agreement_terms(candidate: MediaGeolocationCandidate) -> set[str]:
+    terms: set[str] = set()
+    if candidate.label:
+        normalized_label = _normalize_text(candidate.label)
+        if normalized_label:
+            terms.add(normalized_label.casefold())
+            for part in normalized_label.split(","):
+                normalized_part = _normalize_text(part)
+                if normalized_part:
+                    terms.add(normalized_part.casefold())
+    metadata = candidate.metadata if isinstance(candidate.metadata, dict) else {}
+    for key in ("landmark", "locality", "admin1", "country"):
+        normalized = _normalize_text(metadata.get(key))
+        if normalized:
+            terms.add(normalized.casefold())
+    agreement_labels = metadata.get("agreementLabels")
+    if isinstance(agreement_labels, list):
+        for item in agreement_labels:
+            normalized = _normalize_text(item)
+            if normalized:
+                terms.add(normalized.casefold())
+    return terms
+
+
 def _geolocation_candidates_agree(left: MediaGeolocationCandidate, right: MediaGeolocationCandidate) -> bool:
     if left.latitude is not None and left.longitude is not None and right.latitude is not None and right.longitude is not None:
         return abs(left.latitude - right.latitude) < 1.0 and abs(left.longitude - right.longitude) < 1.0
-    if left.label and right.label:
-        return left.label.casefold() == right.label.casefold()
+    left_terms = _candidate_geolocation_agreement_terms(left)
+    right_terms = _candidate_geolocation_agreement_terms(right)
+    if left_terms and right_terms and left_terms.intersection(right_terms):
+        return True
     return False
 
 
 def _geolocation_candidates_conflict(left: MediaGeolocationCandidate, right: MediaGeolocationCandidate) -> bool:
     if left.latitude is not None and left.longitude is not None and right.latitude is not None and right.longitude is not None:
         return abs(left.latitude - right.latitude) > 5.0 or abs(left.longitude - right.longitude) > 5.0
+    left_terms = _candidate_geolocation_agreement_terms(left)
+    right_terms = _candidate_geolocation_agreement_terms(right)
+    if left_terms and right_terms and left_terms.intersection(right_terms):
+        return False
     if left.label and right.label:
         return left.label.casefold() != right.label.casefold()
     return False
@@ -3299,6 +4728,12 @@ def _build_geolocation_summary(
 ) -> str | None:
     if top_candidate is not None:
         top_confidence = top_candidate.confidence_score if top_candidate.confidence_score is not None else (top_candidate.confidence or 0.0)
+        if top_candidate.latitude is not None and top_candidate.longitude is not None and top_candidate.label:
+            return (
+                f"Top media geolocation candidate is '{top_candidate.label}'"
+                f" at {top_candidate.latitude:.4f}, {top_candidate.longitude:.4f}"
+                f" via {top_candidate.engine} with confidence {top_confidence:.2f}."
+            )
         if top_candidate.latitude is not None and top_candidate.longitude is not None:
             return (
                 f"Top media geolocation candidate is {top_candidate.latitude:.4f}, {top_candidate.longitude:.4f}"
@@ -3825,6 +5260,32 @@ def _normalize_optional(value: Any) -> str | None:
         return None
     normalized = _normalize_text(str(value))
     return normalized or None
+
+
+def _normalize_geolocation_text(value: str) -> str:
+    normalized = value or ""
+    replacements = {
+        "\u00a0": " ",
+        "Â°": "°",
+        "º": "°",
+        "–": "-",
+        "—": "-",
+        "−": "-",
+        "“": '"',
+        "”": '"',
+        "‟": '"',
+        "’": "'",
+        "‘": "'",
+        "′": "'",
+        "″": '"',
+    }
+    for old, new in replacements.items():
+        normalized = normalized.replace(old, new)
+    normalized = re.sub(r"\b([Il|])\s*-\s*(\d{1,3}[A-Z]?)\b", lambda match: f"I-{match.group(2).upper()}", normalized)
+    normalized = re.sub(r"\b([Il|])\s+(\d{1,3}[A-Z]?)\b", lambda match: f"I-{match.group(2).upper()}", normalized)
+    normalized = re.sub(r"\bU[S5]\s*-\s*(\d{1,3}[A-Z]?)\b", lambda match: f"US {match.group(1).upper()}", normalized, flags=re.IGNORECASE)
+    normalized = re.sub(r"\bU[S5]\s+(\d{1,3}[A-Z]?)\b", lambda match: f"US {match.group(1).upper()}", normalized, flags=re.IGNORECASE)
+    return _normalize_text(normalized)
 
 
 def _normalize_text(value: str) -> str:

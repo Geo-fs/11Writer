@@ -6,6 +6,181 @@ Use this file for Wonder AI startup sync entries, user-directed task reports, va
 
 Newest entries should go at the top.
 
+## 2026-05-06 00:07 America/Chicago
+
+Task:
+- polish the root README and the most important current-state docs so they reflect the actual repo posture
+
+Assignment version read:
+- direct user instruction after the broader docs-canonicalization pass
+
+What changed:
+- rewrote `README.md` so it now reflects the current repo state instead of an older thinner-platform summary
+- added explicit current-state language for the implemented Source Discovery backend, mixed validation maturity, and active Phase 3 workbench planning
+- replaced stale root-doc references with current canonical docs, including `app/docs/README.md`, `app/docs/source-validation-status.md`, `app/docs/source-discovery-public-web-workflow.md`, `app/docs/release-readiness.md`, and `app/docs/phase3-code-oss-workbench-spec.md`
+- refreshed `app/docs/README.md` with a current-project-state section, validation and release-state category, Phase 3 workbench category, and doc-interpretation rules
+- refreshed `app/docs/strategic-roadmap.md`, `app/docs/roadmap.md`, and `app/docs/architecture.md` so they now explicitly acknowledge the implemented Source Discovery backend, the distinction between implementation and workflow validation, and the current Phase 3 planning posture
+
+Files touched:
+- `README.md`
+- `app/docs/README.md`
+- `app/docs/strategic-roadmap.md`
+- `app/docs/roadmap.md`
+- `app/docs/architecture.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/wonder-ai.md`
+
+Validation:
+- `rg -n "integrations.md|browser-use-security-verification|source-validation-status|phase3-code-oss-workbench-spec" README.md app/docs/README.md app/docs/strategic-roadmap.md app/docs/roadmap.md app/docs/architecture.md` -> current references are intentional and no deleted-root doc link remains in the refreshed entry docs
+- line counts for `README.md`, `app/docs/README.md`, `app/docs/strategic-roadmap.md`, `app/docs/roadmap.md`, and `app/docs/architecture.md` remain well under the normal-doc line cap
+
+Notes:
+- I did not rewrite `app/docs/source-validation-status.md` or `app/docs/release-readiness.md` because they were already the stronger current-state truth surfaces; the main gap was that the entry docs were not pointing to them clearly enough.
+
+## 2026-05-05 23:53 America/Chicago
+
+Task:
+- perform a comprehensive docs polish and review pass, consolidate overlapping notes, review old docs for deletion, and enforce the normal-doc line policy
+
+Assignment version read:
+- direct user instruction; Wonder AI startup assignment `2026-05-01 15:40 America/Chicago` remains the current onboarding context
+
+What changed:
+- added `app/docs/README.md` as the docs entry point and canonical-map guide for product, runtime, discovery, safety, operations, and planning/history doc families
+- merged browser-specific malicious-site and prompt-injection handling into `app/docs/browser-use-agent-guidelines.md` and reduced `app/docs/browser-use-security-verification.md` to a historical redirect stub
+- merged connector adoption sequencing into `app/docs/connector-capability-map.md` and reduced `app/docs/connector-adoption-plan.md` to a historical redirect stub
+- folded the macOS native UI extras note into `app/docs/build-macos-apps-plugin-workflows.md` and reduced `app/docs/macos-native-ui-extras.md` to a historical redirect stub
+- refreshed `app/docs/architecture.md` so it now carries the durable integration-boundary constraints that previously lived in the orphaned legacy `app/docs/integrations.md` note, then deleted that legacy file
+- updated live references in `repo-workflow`, `prompt-injection-defense`, `source-prompt-index`, `long-tail-information-discovery-strategy`, `notion-workspace-shape`, and `linear-issue-seed-pack` to point at the canonical docs instead of split notes
+
+Files touched:
+- `app/docs/README.md`
+- `app/docs/architecture.md`
+- `app/docs/build-macos-apps-plugin-workflows.md`
+- `app/docs/macos-native-ui-extras.md`
+- `app/docs/connector-capability-map.md`
+- `app/docs/connector-adoption-plan.md`
+- `app/docs/browser-use-agent-guidelines.md`
+- `app/docs/browser-use-security-verification.md`
+- `app/docs/prompt-injection-defense.md`
+- `app/docs/repo-workflow.md`
+- `app/docs/source-prompt-index.md`
+- `app/docs/notion-workspace-shape.md`
+- `app/docs/linear-issue-seed-pack.md`
+- `app/docs/long-tail-information-discovery-strategy.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/wonder-ai.md`
+- deleted: `app/docs/integrations.md`
+
+Validation:
+- `Get-ChildItem app/docs -Recurse -Filter *.md ... | Where-Object { $_.Path -notmatch 'agent-progress|agent-next-tasks' -and $_.Lines -gt 2500 }` -> no non-agent/history docs over the line cap
+- `rg -n "browser-use-security-verification|connector-adoption-plan|macos-native-ui-extras|integrations.md" app/docs | rg -v "agent-progress|alerts.md|agent-next-tasks|README.md|connector-adoption-plan.md|browser-use-security-verification.md|macos-native-ui-extras.md"` -> no remaining live-doc references to the retired or redirect-only notes
+
+Notes:
+- I intentionally kept short redirect stubs for historically referenced files instead of hard-deleting every merged note, because alerts and progress/history docs still point at those paths.
+- I did not mass-delete old batch or packet docs; many are still planning or history artifacts. `app/docs/README.md` now marks the canonical routing and validation docs so those older packets are less likely to be mistaken for current truth.
+
+## 2026-05-05 23:35 America/Chicago
+
+Task:
+- implement research-grade Source Discovery roadmap item `10`: observability hardening, adversarial validation, and prompt-injection stress testing
+
+Assignment version read:
+- direct user instruction; Wonder AI startup assignment `2026-05-01 15:40 America/Chicago` remains the current onboarding context
+
+What changed:
+- added persisted adversarial or prompt-injection finding storage plus additive memory and snapshot safety posture fields, including risk level, signal counts, signal families, and latest adversarial scan time
+- integrated hostile-text detection into bounded `structure-scan` and bounded content capture so instruction overrides, secret requests, execution prompts, developer-tools prompts, validation-bypass language, and hidden instruction text are preserved as review metadata
+- added `GET /api/source-discovery/adversarial/overview` and `GET /api/source-discovery/adversarial/findings`
+- extended memory detail/export, discovery queue, review queue, and runtime status with adversarial posture summaries
+- added a fixture-safe adversarial evaluation harness and CLI runner for prompt-injection regression testing
+- updated long-tail strategy, public-web workflow, prompt-injection defense policy, and shared alerts so the research-grade checklist now marks item `10` implemented
+
+Files touched:
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/services/runtime_scheduler_service.py`
+- `app/server/src/services/source_discovery_adversarial_eval_service.py`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/source_discovery/models.py`
+- `app/server/src/source_discovery/db.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/data/source_discovery_adversarial_fixtures.json`
+- `app/server/tests/run_source_discovery_adversarial_eval.py`
+- `app/server/tests/test_source_discovery_adversarial_eval.py`
+- `app/server/tests/test_source_discovery_memory.py`
+- `app/docs/long-tail-information-discovery-strategy.md`
+- `app/docs/source-discovery-public-web-workflow.md`
+- `app/docs/prompt-injection-defense.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/wonder-ai.md`
+
+Validation:
+- `python -m compileall app/server/src app/server/tests` -> pass
+- `python -m pytest app/server/tests/test_source_discovery_adversarial_eval.py -q` -> pass
+- `python -m pytest app/server/tests/test_source_discovery_eval.py -q` -> pass
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q` -> pass
+- `python -m pytest app/server/tests/test_wave_monitor.py -q` -> pass
+- `python -m pytest app/server/tests/test_analyst_workbench.py -q` -> pass
+
+Blockers or caveats:
+- adversarial detection is bounded deterministic pattern matching over captured public text; it is intentionally review-oriented and not a claim-falsity engine or malicious-intent classifier
+- structure-scan and content-capture findings can force hold-review posture for safer intake, but they do not by themselves reject a source permanently
+
+Next recommended task:
+- if the user wants the next hardening slice, expand adversarial coverage into more discovery surfaces and add deeper false-positive benchmarking over larger hostile and benign fixture corpora
+
+## 2026-05-05 22:16 America/Chicago
+
+Task:
+- continue and finish research-grade Source Discovery roadmap items `7`, `8`, and `9`: event-level corroboration or contradiction graphing, reputation calibration plus evaluation corpora, and queue-backed runtime scale or failure handling
+
+Assignment version read:
+- direct user instruction; Wonder AI startup assignment `2026-05-01 15:40 America/Chicago` remains the current onboarding context
+
+What changed:
+- added deterministic event-graph persistence and APIs over reviewed claim outcomes and optional pending review claims, including `POST /api/source-discovery/jobs/event-graph-refresh`, `GET /api/source-discovery/events/overview`, and `GET /api/source-discovery/events/{event_id}`
+- extended memory, knowledge-node, review-queue, and export surfaces with event-cluster summaries, contested or open-question counts, and latest event-graph timestamps
+- replaced direct hardcoded reputation drift with versioned profile handling, preserved legacy-compatible live-route behavior under `baseline_v2`, and added alternate calibrated comparison support through `calibrated_v1`
+- added `GET /api/source-discovery/reputation/profiles` and `POST /api/source-discovery/jobs/reputation-recompute`
+- added fixture-safe reputation and event evaluation support, including repo-safe fixtures, local benchmark manifest examples, and CLI test runners
+- added optional queue-backed runtime scheduling with shard-aware work items, retry or dead-letter handling, per-domain and per-provider budget windows, and runtime inspection routes for work queues, failures, and run history
+- updated the long-tail strategy, public-web workflow note, and shared alerts so the research-grade checklist now marks items `7`, `8`, and `9` implemented
+
+Files touched:
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/services/runtime_scheduler_service.py`
+- `app/server/src/services/source_discovery_eval_service.py`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/source_discovery/models.py`
+- `app/server/src/source_discovery/db.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/src/config/settings.py`
+- `app/server/data/source_discovery_eval_fixtures.json`
+- `app/server/data/source_discovery_eval_local_manifest.example.json`
+- `app/server/tests/run_source_discovery_eval.py`
+- `app/server/tests/run_source_discovery_live_benchmark.py`
+- `app/server/tests/test_source_discovery_eval.py`
+- `app/server/tests/test_source_discovery_memory.py`
+- `app/docs/long-tail-information-discovery-strategy.md`
+- `app/docs/source-discovery-public-web-workflow.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/wonder-ai.md`
+
+Validation:
+- `python -m compileall app/server/src app/server/tests` -> pass
+- `python -m pytest app/server/tests/test_source_discovery_eval.py -q` -> pass
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q` -> pass
+- `python -m pytest app/server/tests/test_wave_monitor.py -q` -> pass
+- `python -m pytest app/server/tests/test_analyst_workbench.py -q` -> pass
+
+Blockers or caveats:
+- event graphing remains deterministic review infrastructure, not event-truth adjudication
+- `baseline_v2` intentionally preserves legacy-compatible live-route scoring, while alternate calibration behavior lives behind explicit profile selection or recompute
+- queue-backed runtime mode remains single-database and service-managed; it does not introduce an external broker in this tranche
+
+Next recommended task:
+- if the user wants the next research-grade slice, implement checklist item `10`: observability hardening, adversarial validation, and prompt-injection stress testing over the new discovery and runtime surfaces
+
 ## 2026-05-04 22:16 America/Chicago
 
 Task:
@@ -674,3 +849,86 @@ Blockers or caveats:
 Next recommended task:
 - concise next assignment or "wait for direct user instructions"
 ```
+
+## 2026-05-05 20:28 America/Chicago
+
+Task:
+- implement the research-grade Source Discovery breadth slice for archive-index discovery, public mailing-list archive adapters, and curated directory or regional-portal discovery
+
+Assignment version read:
+- `2026-05-01 15:40 America/Chicago`
+
+What changed:
+- added bounded `archive-index-scan` support for public archive or open-web index inputs with candidate-only original-URL recovery for `wayback_cdx`, `archive_it_cdx`, `common_crawl_cdxj`, and fixture-backed `common_crawl_host_index`
+- extended platform-aware Source Discovery so `structure-scan` and `catalog-scan` now detect and follow public mailing-list archive roots for HyperKitty, Pipermail, and Mailman-style public list trees without crossing into subscribe, post, auth, or private surfaces
+- added bounded `directory-scan` so curated directories, association link pages, and regional portals can emit capped cross-domain public roots with packet lineage, scope hints, and normalized regional or local tags
+- updated discovery priority and review explanations so mailing-list and curated-directory roots remain explicit long-tail review infrastructure rather than hidden trust signals
+- documented the research-grade Source Discovery checklist in repo truth so future Source Discovery prompts can re-check implemented versus pending breadth slices
+
+Files touched:
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/test_source_discovery_memory.py`
+- `app/docs/source-discovery-public-web-workflow.md`
+- `app/docs/long-tail-information-discovery-strategy.md`
+- `app/docs/agent-progress/wonder-ai.md`
+- `app/docs/alerts.md`
+
+Validation:
+- `python -m compileall app/server/src` -> pass
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q` -> pass (`82 passed`)
+- `python -m pytest app/server/tests/test_wave_monitor.py -q` -> pass (`25 passed`)
+- `python -m pytest app/server/tests/test_analyst_workbench.py -q` -> pass (`5 passed`)
+- `python scripts/alerts_ledger.py` -> pass
+
+Blockers or caveats:
+- archive-index scan is intentionally bounded: it records public archive provenance and original URLs when available, but it does not fetch archived page bodies or auto-follow archive hits
+- mailing-list and directory discovery remain candidate/review infrastructure only and must not be treated as source-validation proof, trust promotion, or broad crawling authority
+
+Next recommended task:
+- implement checklist item `4`: cross-language and locality-aware seed expansion, or wait for direct user instructions
+
+## 2026-05-05 20:43 America/Chicago
+
+Task:
+- implement research-grade Source Discovery roadmap items `4-6`: locale seed expansion, trusted-root link-graph expansion, and archive-aware article extraction normalization
+
+Assignment version read:
+- `2026-05-01 15:40 America/Chicago`
+
+What changed:
+- added bounded `locale-seed-expand` with deterministic locale alias generation, locality-aware query shaping, GDELT DOC provider lift, locale basis persistence, and provider provenance on resulting source memories
+- added bounded `link-graph-scan` plus optional scheduler support so reviewed public roots can emit one-hop root-like outbound discovery candidates without recursive crawling
+- added persisted `archiveHits`, archive-aware `article-fetch`, archive-wrapper normalization, archive-host gating, snapshot retrieval-origin metadata, and detected-language merge-back into source memory scope hints
+- updated discovery, review, memory-detail, export, and scheduler contracts so locale/provider and archive/link-graph provenance stay visible as review/runtime metadata rather than hidden trust signals
+
+Files touched:
+- `app/server/src/config/settings.py`
+- `app/server/src/routes/source_discovery.py`
+- `app/server/src/services/content_extraction.py`
+- `app/server/src/services/runtime_scheduler_service.py`
+- `app/server/src/services/source_discovery_service.py`
+- `app/server/src/source_discovery/db.py`
+- `app/server/src/source_discovery/models.py`
+- `app/server/src/types/source_discovery.py`
+- `app/server/tests/test_source_discovery_memory.py`
+- `app/docs/long-tail-information-discovery-strategy.md`
+- `app/docs/source-discovery-public-web-workflow.md`
+- `app/docs/alerts.md`
+- `app/docs/agent-progress/wonder-ai.md`
+
+Validation:
+- `python -m compileall app/server/src app/server/tests/test_source_discovery_memory.py` -> pass
+- `python -m pytest app/server/tests/test_source_discovery_memory.py -q` -> pass (`88 passed`)
+- `python -m pytest app/server/tests/test_wave_monitor.py -q` -> pass (`25 passed`)
+- `python -m pytest app/server/tests/test_analyst_workbench.py -q` -> pass (`5 passed`)
+- `python scripts/alerts_ledger.py` -> pass
+
+Blockers or caveats:
+- locale expansion remains bounded to explicit terms, explicit locale inputs, and public provider results; it is not open-ended translation or generic search scraping
+- link-graph scan is one-hop and root-like only; it excludes article/post/search/share/download targets and does not recurse
+- archive-body fetch requires an explicit public capture reference from an allowed archive host and does not browse archive indexes or follow archived child links
+
+Next recommended task:
+- implement checklist item `7`: event-level corroboration and contradiction graphing, or wait for direct user instructions

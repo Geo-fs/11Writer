@@ -35,8 +35,16 @@ def _settings() -> Settings:
         HKO_FIXTURE_PATH=_fixture("hko_weather_fixture.json"),
         METNO_METALERTS_SOURCE_MODE="fixture",
         METNO_METALERTS_FIXTURE_PATH=_fixture("metno_metalerts_fixture.json"),
+        NWS_ALERTS_SOURCE_MODE="fixture",
+        NWS_ALERTS_FIXTURE_PATH=_fixture("nws_alerts_fixture.json"),
+        NHC_GIS_SOURCE_MODE="fixture",
+        NHC_GIS_FIXTURE_PATH=_fixture("nhc_gis_atlantic_fixture.xml"),
         CANADA_CAP_SOURCE_MODE="fixture",
         CANADA_CAP_FIXTURE_PATH=_fixture("canada_cap_index_fixture.html"),
+        NOAA_NOWCOAST_SOURCE_MODE="fixture",
+        NOAA_NOWCOAST_FIXTURE_PATH=_fixture("noaa_nowcoast_layer_catalog_fixture.json"),
+        METEOALARM_ATOM_SOURCE_MODE="fixture",
+        METEOALARM_ATOM_FIXTURE_PATH=_fixture("meteoalarm_atom_norway_fixture.xml"),
         DWD_CAP_SOURCE_MODE="fixture",
         DWD_CAP_FIXTURE_PATH=_fixture("dwd_cap_directory_fixture.html"),
         IPMA_SOURCE_MODE="fixture",
@@ -53,6 +61,8 @@ def _settings() -> Settings:
         GSHHG_SHORELINES_FIXTURE_PATH=_fixture("gshhg_shorelines_fixture.json"),
         PB2002_PLATE_BOUNDARIES_SOURCE_MODE="fixture",
         PB2002_PLATE_BOUNDARIES_FIXTURE_PATH=_fixture("pb2002_plate_boundaries_fixture.json"),
+        GEOBOUNDARIES_ADMIN_SOURCE_MODE="fixture",
+        GEOBOUNDARIES_ADMIN_FIXTURE_PATH=_fixture("geoboundaries_admin_bel_adm1_fixture.json"),
         NOAA_GLOBAL_VOLCANO_SOURCE_MODE="fixture",
         NOAA_GLOBAL_VOLCANO_FIXTURE_PATH=_fixture("noaa_global_volcano_locations_fixture.json"),
         TAIWAN_CWA_SOURCE_MODE="fixture",
@@ -101,7 +111,7 @@ def test_environmental_source_families_overview_shape_and_family_grouping() -> N
     assert payload["metadata"]["source"] == "environmental-source-family-overview"
     assert payload["metadata"]["sourceMode"] == "fixture"
     assert payload["familyCount"] >= 10
-    assert payload["sourceCount"] >= 33
+    assert payload["sourceCount"] >= 37
     family_ids = [family["familyId"] for family in payload["families"]]
     assert "seismic" in family_ids
     assert "environmental-event-context" in family_ids
@@ -119,7 +129,10 @@ def test_environmental_source_families_overview_shape_and_family_grouping() -> N
     assert all("impact score" not in line.lower() for line in seismic["exportLines"])
     weather_alerts = next(family for family in payload["families"] if family["familyId"] == "weather-alert-advisory")
     assert "hong-kong-observatory-open-weather" in weather_alerts["sourceIds"]
+    assert "nws-alerts" in weather_alerts["sourceIds"]
+    assert "noaa-nhc-gis-atlantic" in weather_alerts["sourceIds"]
     assert "environment-canada-cap-alerts" in weather_alerts["sourceIds"]
+    assert "meteoalarm-atom-feeds" in weather_alerts["sourceIds"]
     assert "dwd-cap-alerts" in weather_alerts["sourceIds"]
     assert "met-norway-metalerts" in weather_alerts["sourceIds"]
     assert "portugal-ipma-open-data" in weather_alerts["sourceIds"]
@@ -130,6 +143,7 @@ def test_environmental_source_families_overview_shape_and_family_grouping() -> N
     assert "natural-earth-physical" in base_earth["sourceIds"]
     assert "gshhg-shorelines" in base_earth["sourceIds"]
     assert "pb2002-plate-boundaries" in base_earth["sourceIds"]
+    assert "geoboundaries-admin" in base_earth["sourceIds"]
 
 
 def test_environmental_source_families_overview_preserves_caveats_and_prompt_injection_inertness() -> None:
@@ -170,6 +184,7 @@ def test_environmental_source_families_overview_review_lines_and_runtime_states_
     assert "bc-wildfire-datamart" in water_family["sourceIds"]
     assert "meteoswiss-open-data" in water_family["sourceIds"]
     assert "canada-geomet-ogc" in water_family["sourceIds"]
+    assert "noaa-nowcoast-ogc" in water_family["sourceIds"]
     assert "met-eireann-forecast" in water_family["sourceIds"]
     assert water_family["familyHealth"] in {"loaded", "mixed", "empty", "degraded", "unknown"}
     assert all("hazard score" not in line.lower() for line in water_family["exportLines"])

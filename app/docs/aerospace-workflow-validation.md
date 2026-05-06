@@ -45,6 +45,7 @@ and executed smoke evidence.
 - Confirm aerospace evidence-timeline/export package accounting is present without collapsing timeline order into causation, and without implying intent, impact, failure, airport/runway availability, route consequence, safety conclusion, or action recommendation.
 - Confirm aerospace fusion-snapshot input accounting is present as a stable future cross-domain domain input over the existing aerospace package stack, without replacing those surfaces or collapsing distinct evidence classes together.
 - Confirm aerospace report-brief package accounting is present as a report-ready transformation over fusion input that keeps observe/orient/prioritize/explain sections bounded and does not duplicate existing aerospace review/export/timeline helpers.
+- Confirm aerospace selected-target operational question packet accounting is present as a bounded answer to what context exists for the selected target right now while keeping source classes distinct and non-causal.
 - Confirm aerospace space-weather continuity package accounting is present as a bounded continuity layer over current SWPC advisories, archival NCEI metadata, and observed USGS geomagnetism while keeping those source classes distinct.
 - Confirm aerospace VAAC advisory report-package accounting is present as a bounded advisory/source-reported transformation over the implemented VAAC context, without implying route impact, ash-plume precision beyond the source, aircraft exposure, or operational conclusions.
 - Confirm aerospace package-coherence accounting is present as a non-duplicative parity surface over the existing helper stack, without implying severity, source certification, behavior proof, operational consequence, or action recommendation.
@@ -57,6 +58,7 @@ and executed smoke evidence.
 ## Baseline Checks
 
 - Backend contract tests:
+  - `python -m pytest app/server/tests/test_gpsjam_contracts.py -q`
   - `python -m pytest app/server/tests/test_anchorage_vaac_contracts.py -q`
   - `python -m pytest app/server/tests/test_tokyo_vaac_contracts.py -q`
   - `python -m pytest app/server/tests/test_washington_vaac_contracts.py -q`
@@ -73,8 +75,13 @@ and executed smoke evidence.
 - Frontend build:
   - `cmd /c npm.cmd run build`
 - Focused regression:
+  - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceGpsJamContextRegression.mjs`
   - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceFusionSnapshotInputRegression.mjs`
   - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceReportBriefPackageRegression.mjs`
+  - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceSelectedTargetOperationalQuestionPacketRegression.mjs`
+  - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceCurrentAwarenessDigestRegression.mjs`
+  - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceReportingHandoffContractRegression.mjs`
+  - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceQuestionBriefingPacketRegression.mjs`
   - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceSpaceWeatherContinuityPackageRegression.mjs`
   - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceVaacAdvisoryReportPackageRegression.mjs`
   - From `app/client`: `node --experimental-strip-types --experimental-specifier-resolution=node scripts/aerospaceEvidenceTimelineRegression.mjs`
@@ -134,6 +141,14 @@ The following aerospace source slices are contract-tested at the backend layer:
   rate-limited source-status handling,
   non-authoritative and non-replacement caveat coverage,
   deterministic smoke-fixture exposure
+- GPSJam GNSS Context:
+  fixture serialization,
+  limit handling,
+  explicit empty-result behavior,
+  stable per-hex summary formula and threshold coverage,
+  source-status degradation reporting,
+  no-outage/no-attribution/no-source-replacement caveat coverage,
+  deterministic smoke-fixture exposure
 - Washington VAAC Advisories:
   fixture serialization,
   volcano filtering,
@@ -166,6 +181,9 @@ Required contract fields and caveats:
 - Empty-result behavior must remain explicit and non-fatal where the slice supports empty results.
 - OurAirports reference must keep baseline/reference caveats visible and must not drift into airport status, runway availability, or source-replacement semantics.
 - OpenSky must keep anonymous/rate-limited/non-authoritative caveats visible.
+- GPSJam must keep contextual GNSS-disruption caveats visible and must not drift into outage certainty, attribution, intent, target-specific effect, or source-replacement semantics.
+- The aerospace hazard-context consumer packet must keep GPSJam GNSS context, NWS public weather alerts, and NOAA nowCOAST map-layer metadata explicitly separated.
+  It must not turn public alerts into aviation operational status, and it must not turn map-layer metadata into alert truth, route-impact guidance, safety consequence, or action recommendation.
 - NOAA NCEI space-weather portal must keep archival/contextual caveats visible and must not drift into current SWPC or failure semantics.
 - Washington VAAC must keep advisory/contextual provenance and no-route-impact/no-aircraft-exposure caveats visible.
 - Anchorage VAAC must keep advisory/contextual provenance and no-route-impact/no-aircraft-exposure caveats visible.
@@ -291,6 +309,44 @@ Required contract fields and caveats:
   contract-tested.
   Workflow-validated when smoke confirms inspector presence and export metadata.
 
+### GPSJam GNSS Context
+
+- Existing aerospace export/digest/question surfaces preserve `gpsjamContext` with:
+  - source id
+  - source mode
+  - source health
+  - runtime/source-state posture
+  - source day/date
+  - flagged-hex counts
+  - top-sample summary
+  - explicit does-not-prove lines
+- Workflow note:
+  GPSJam is contextual GNSS-disruption awareness only.
+  It remains separate from AWC, FAA NAS, OpenSky comparison, SWPC, geomagnetism, VAAC, and selected-target evidence.
+  It must not be promoted into outage certainty, attribution, target effect, route impact, or action guidance.
+- Snapshot metadata preserves `gpsjamContext`.
+- Workflow note:
+  contract-tested.
+  Deterministic client regression, smoke fixture support, and prepared aerospace smoke assertions now exist for this slice.
+
+### Hazard-Context Consumer Packet
+
+- Snapshot/export metadata preserves `aerospaceHazardContextConsumerPacket`.
+- The packet consumes already-landed:
+  `gpsjamContext`,
+  geospatial `NWS Alerts`,
+  and geospatial `NOAA nowCOAST` layer-catalog metadata.
+- Required distinctions:
+  GPSJam remains GNSS-disruption context only.
+  NWS Alerts remain public weather advisories.
+  NOAA nowCOAST remains contextual map-layer metadata.
+  None of those surfaces may drift into AWC, FAA NAS, OpenSky comparison, route-impact verdicts, outage claims, target-specific effects, safety consequences, or action recommendations.
+- Workflow note:
+  deterministic client regression exists.
+  Deterministic smoke-fixture routes exist for the two geospatial feeds in the aerospace smoke lane.
+  Prepared aerospace smoke assertions exist for `aerospaceHazardContextConsumerPacket`.
+  Executed smoke evidence still depends on a Windows host where Playwright Chromium launch is permitted.
+
 ### USGS Geomagnetism
 
 - Inspector shows `Geomagnetism (USGS)` for selected aircraft or satellites with:
@@ -383,6 +439,7 @@ Required contract fields and caveats:
 - `Aerospace Context Review Export Bundle` is present in snapshot/export metadata and preserves the queue's review lines, export-safe lines, source ids, source modes, source health states, evidence bases, caveats, and active export-profile linkage.
 - `Aerospace Context Report` is present and summarizes selected-target evidence, availability, readiness, review-queue state, and bounded caveats only.
 - `Aerospace Workflow Validation Evidence` is present and summarizes validation posture across the selected-target report package, context review queue/export bundle, workflow readiness package, and OurAirports reference context while keeping prepared-vs-executed smoke truth explicit.
+- `Aerospace Selected-Target Operational Question Packet` is present in snapshot/export metadata and answers what context exists right now for the selected target while keeping source distinctions explicit.
 - `Aerospace Space-Weather Continuity Package` is present in snapshot/export metadata and keeps current advisory context, archive metadata, and observed geomagnetism explicitly separate.
 - `Aerospace Review Queue` is present and summarizes review ordering only.
 - `Current vs Archive Space-Weather Context` is present and keeps current NOAA SWPC advisory context separate from archival NOAA NCEI metadata in both inspector lines and export metadata.
@@ -438,6 +495,14 @@ Snapshot metadata should preserve, when applicable:
   including selected-target summary lines, active export-profile label, distinct observed/forecast/advisory/source-reported/archive/reference/comparison/validation sections, source ids, source modes, source health states, evidence bases, validation posture, export-readiness posture, attention counts, does-not-prove lines, and a metadata/accounting input guardrail line
 - `aerospaceReportBriefPackage`
   including observe/orient/prioritize/explain sections, distinct context classes, source ids, source modes, source health states, evidence bases, validation posture, export-readiness posture, attention counts, and a report-ready metadata/accounting guardrail line
+- `aerospaceSelectedTargetOperationalQuestionPacket`
+  including selected-target posture, distinct AWC/FAA NAS/OpenSky/SWPC/NCEI/geomagnetism/VAAC context entries, source ids, source modes, source health states, evidence bases, observe/orient/prioritize/explain sections, does-not-prove lines, and a question-packet guardrail line
+- `aerospaceCurrentAwarenessDigest`
+  including target-or-area posture, active context profile, validation posture, continuity posture, source ids, source modes, source health states, evidence bases, current/advisory/archive/observed distinction lines, observe/orient/prioritize/explain sections, does-not-prove lines, and a broad context/accounting guardrail line
+- `aerospaceReportingHandoffContract`
+  including selected-target or area posture, current/advisory/archive/observed distinction lines, source ids, source modes, source health states, evidence bases, validation and readiness posture, lineage across packet/brief/digest surfaces, export-safe handoff lines, explicit caveats, does-not-prove lines, and a bounded handoff-artifact guardrail line
+- `aerospaceQuestionBriefingPacket`
+  including selected-target or area posture, active question posture, current/advisory/archive/observed distinction lines, source ids, source modes, source health states, freshness posture, validation and readiness posture, lineage across packet/brief/digest/handoff surfaces, export-safe briefing lines, explicit caveats, does-not-prove lines, and a bounded question-driven reporting guardrail line
 - `aerospaceSpaceWeatherContinuityPackage`
   including current/advisory, archive, and observed source ids, source modes, source health states, evidence bases, continuity posture, current freshness, archive coverage, observed timing, does-not-prove lines, and a distinct-source metadata/accounting guardrail line
 - `aerospaceVaacAdvisoryReportPackage`
@@ -484,6 +549,7 @@ When the aerospace Playwright environment is healthy, smoke should validate meta
 - aerospace workflow validation evidence snapshot
 - aerospace fusion snapshot input
 - aerospace report brief package
+- aerospace selected-target operational question packet
 - aerospace space-weather continuity package
 - aerospace VAAC advisory report package
 - aerospace context report
@@ -558,6 +624,7 @@ Do not collapse the above prepared smoke coverage into executed workflow evidenc
 - Aerospace evidence-timeline/export notes remain review/accounting only; timeline order is not causation, and distinct observed, forecast, archive, reference, anonymous-comparison, and advisory/source-reported contexts must stay separate.
 - Aerospace fusion-snapshot input notes remain metadata/accounting inputs only; they keep observed, forecast, advisory/source-reported, archive, reference, anonymous-comparison, derived, and validation context distinct for a future cross-domain Source Fusion Snapshot and do not replace source-specific aerospace surfaces.
 - Aerospace report-brief package notes remain report-ready metadata/accounting only; they turn fusion input into bounded observe/orient/prioritize/explain sections and do not replace source-specific aerospace surfaces or existing aerospace review/export/timeline helpers.
+- Aerospace selected-target operational question packet notes remain metadata/accounting only; they answer what context exists right now while keeping AWC, FAA NAS, OpenSky comparison, VAAC, SWPC, NCEI archive, and observed geomagnetism distinct and do not imply intent, route impact, failure, threat, causation, safety conclusion, or action recommendation.
 - Aerospace space-weather continuity package notes remain metadata/accounting only; they keep current advisories, archival metadata, and observed geomagnetism distinct and do not imply GPS/radio/satellite/aircraft failure, outage, route impact, causation, or operational consequence.
 - Aerospace VAAC advisory report-package notes remain report-ready metadata/accounting only; they preserve advisory/source-reported VAAC context from Washington, Anchorage, and Tokyo without implying route impact, aircraft exposure, ash-plume precision beyond the source, operational consequence, or action recommendation.
 - Aerospace package-coherence notes remain metadata/accounting only; they exist to avoid duplicating the existing review/export/timeline packages while checking parity across them.

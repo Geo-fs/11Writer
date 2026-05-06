@@ -26,6 +26,7 @@ SourceDiscoverySeedFamily = Literal[
     "sitemap_root",
     "catalog_root",
     "archive_root",
+    "mailing_list_root",
     "regional_outlet",
     "official_bulletin",
     "forum_root",
@@ -38,16 +39,32 @@ SourceDiscoverySeedFamily = Literal[
 SourceDiscoveryPlatformFamily = Literal[
     "unknown",
     "discourse",
+    "mailing_list",
     "mediawiki",
     "mastodon",
     "stack_exchange",
     "statuspage",
 ]
+SourceDiscoveryLocaleExpansionProvider = Literal["deterministic", "gdelt_doc"]
+SourceDiscoveryArchiveIndexProvider = Literal[
+    "wayback_cdx",
+    "archive_it_cdx",
+    "common_crawl_cdxj",
+    "common_crawl_host_index",
+]
+SourceDiscoveryDirectoryType = Literal[
+    "auto",
+    "curated_directory",
+    "association_links",
+    "regional_portal",
+]
 SourceAuthRequirement = Literal["no_auth", "login_required", "unknown"]
 SourceCaptchaRequirement = Literal["no_captcha", "captcha_required", "unknown"]
 SourceIntakeDisposition = Literal["public_no_auth", "hold_review", "blocked"]
+SourceDiscoveryAdversarialRiskLevel = Literal["none", "low", "medium", "high"]
+SourceDiscoveryAdversarialFindingStatus = Literal["open", "acknowledged", "resolved"]
 SourceDiscoveryPriority = Literal["high", "medium", "low"]
-SourceDiscoveryNextAction = Literal["structure_scan", "feed_link_scan", "sitemap_scan", "catalog_scan", "none"]
+SourceDiscoveryNextAction = Literal["structure_scan", "feed_link_scan", "sitemap_scan", "catalog_scan", "link_graph_scan", "none"]
 SourceDiscoveryDuplicateClass = Literal[
     "canonical",
     "exact_duplicate",
@@ -58,8 +75,37 @@ SourceDiscoveryDuplicateClass = Literal[
     "correction_or_contradiction",
 ]
 SourceDiscoveryStorageMode = Literal["full_text", "compacted_duplicate", "metadata_only"]
+SourceDiscoveryFetchMode = Literal["auto", "live", "archive"]
+SourceDiscoveryRetrievalOrigin = Literal["live", "archive"]
 SourceDiscoveryKnowledgeBackfillMode = Literal["missing_only", "recompute_selected"]
 SourceDiscoveryReviewClaimCandidateStatus = Literal["pending", "applied"]
+SourceDiscoveryEventGraphRefreshMode = Literal["missing_only", "recompute_selected"]
+SourceDiscoveryEventMemberRole = Literal["supporting", "contradicting", "corrective", "open_question", "provisional"]
+SourceDiscoveryEventStatus = Literal["single_source", "corroborated", "contested", "corrected", "open_question"]
+SourceDiscoveryReputationRecomputeMode = Literal["dry_run", "apply"]
+SourceDiscoveryRuntimeWorkItemStatus = Literal[
+    "queued",
+    "leased",
+    "running",
+    "completed",
+    "retry_scheduled",
+    "skipped_budget",
+    "blocked",
+    "dead_lettered",
+]
+SourceDiscoveryRuntimeFailureKind = Literal[
+    "rate_limited",
+    "timeout",
+    "dns_error",
+    "tls_error",
+    "unexpected_status",
+    "parse_error",
+    "unsupported_shape",
+    "budget_exhausted",
+    "blocked_auth",
+    "blocked_captcha",
+    "operator_hold",
+]
 ClaimOutcome = Literal[
     "confirmed",
     "contradicted",
@@ -105,6 +151,8 @@ SourceDiscoveryMediaGeolocationAnalystAdapter = Literal[
 ]
 SourceDiscoveryMediaGeolocationStatus = Literal["completed", "failed", "unavailable", "rejected"]
 SourceDiscoveryMediaGeolocationCandidateKind = Literal["gps_point", "place_label", "country_region", "model_hypothesis"]
+SourceDiscoveryMediaGeolocationModelName = Literal["geoclip", "streetclip"]
+SourceDiscoveryMediaGeolocationModelAction = Literal["verify", "prewarm"]
 
 
 class SourceDiscoveryMemory(CamelModel):
@@ -144,9 +192,18 @@ class SourceDiscoveryMemory(CamelModel):
     platform_family: SourceDiscoveryPlatformFamily = "unknown"
     source_family_tags: list[str] = Field(default_factory=list)
     scope_hints: "SourceDiscoveryScopeHints" = Field(default_factory=lambda: SourceDiscoveryScopeHints())
+    locale_expansion_basis: list[str] = Field(default_factory=list)
+    discovered_from_provider: str | None = None
+    reputation_policy_version: str = "baseline_v1"
+    last_calibrated_at: str | None = None
     first_seen_at: str
     last_seen_at: str
     last_reputation_event_at: str | None = None
+    latest_event_graph_at: str | None = None
+    adversarial_risk_level: SourceDiscoveryAdversarialRiskLevel = "none"
+    adversarial_signal_count: int = 0
+    adversarial_signals: list[str] = Field(default_factory=list)
+    latest_adversarial_scan_at: str | None = None
     next_check_at: str | None = None
     last_discovery_scan_at: str | None = None
     next_discovery_scan_at: str | None = None
@@ -217,6 +274,8 @@ class SourceDiscoveryCandidateSeed(CamelModel):
     platform_family: SourceDiscoveryPlatformFamily | None = None
     source_family_tags: list[str] = Field(default_factory=list)
     scope_hints: SourceDiscoveryScopeHints = Field(default_factory=SourceDiscoveryScopeHints)
+    locale_expansion_basis: list[str] = Field(default_factory=list)
+    discovered_from_provider: str | None = None
 
 
 class SourceDiscoverySeedUrlJobRequest(CamelModel):
@@ -242,6 +301,9 @@ class SourceDiscoverySeedBatchRequest(CamelModel):
     packet_provenance: str | None = None
     imported_by: str | None = None
     packet_caveats: list[str] = Field(default_factory=list)
+    default_seed_family: SourceDiscoverySeedFamily | None = None
+    default_source_family_tags: list[str] = Field(default_factory=list)
+    default_scope_hints: SourceDiscoveryScopeHints = Field(default_factory=SourceDiscoveryScopeHints)
     caveats: list[str] = Field(default_factory=list)
 
 
@@ -265,6 +327,16 @@ class SourceDiscoveryJobSummary(CamelModel):
     used_requests: int
     started_at: str
     finished_at: str | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryEventGraphRefreshRequest(CamelModel):
+    source_ids: list[str] = Field(default_factory=list)
+    wave_ids: list[str] = Field(default_factory=list)
+    knowledge_node_ids: list[str] = Field(default_factory=list)
+    include_pending_claims: bool = False
+    mode: SourceDiscoveryEventGraphRefreshMode = "missing_only"
+    max_events: int = 200
     caveats: list[str] = Field(default_factory=list)
 
 
@@ -329,6 +401,120 @@ class SourceDiscoveryCatalogScanResponse(CamelModel):
     memories: list[SourceDiscoveryMemory] = Field(default_factory=list)
     catalog_type: str
     extracted_url_count: int = 0
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryArchiveIndexScanRequest(CamelModel):
+    provider: SourceDiscoveryArchiveIndexProvider
+    target_host: str
+    url_prefix: str | None = None
+    from_date: str | None = None
+    to_date: str | None = None
+    wave_id: str | None = None
+    wave_title: str | None = None
+    fixture_text: str | None = None
+    max_results: int = 25
+    request_budget: int = 1
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryArchiveIndexScanResponse(CamelModel):
+    job: SourceDiscoveryJobSummary
+    provider: SourceDiscoveryArchiveIndexProvider
+    discovered_capture_count: int = 0
+    discovered_candidate_count: int = 0
+    memories: list[SourceDiscoveryMemory] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryDirectoryScanRequest(CamelModel):
+    directory_url: str
+    directory_type: SourceDiscoveryDirectoryType = "auto"
+    wave_id: str | None = None
+    wave_title: str | None = None
+    discovery_reason: str = "bounded directory scan"
+    fixture_text: str | None = None
+    max_external_domains: int = 10
+    max_discovered: int = 25
+    request_budget: int = 1
+    packet_id: str | None = None
+    packet_title: str | None = None
+    packet_provenance: str | None = None
+    imported_by: str | None = None
+    packet_caveats: list[str] = Field(default_factory=list)
+    seed_family: SourceDiscoverySeedFamily | None = None
+    source_family_tags: list[str] = Field(default_factory=list)
+    scope_hints: SourceDiscoveryScopeHints = Field(default_factory=SourceDiscoveryScopeHints)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryDirectoryScanResponse(CamelModel):
+    job: SourceDiscoveryJobSummary
+    directory_type: SourceDiscoveryDirectoryType
+    extracted_url_count: int = 0
+    discovered_domain_count: int = 0
+    memories: list[SourceDiscoveryMemory] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryLocaleExpansionProviderRunSummary(CamelModel):
+    provider: SourceDiscoveryLocaleExpansionProvider
+    query_count: int = 0
+    raw_result_count: int = 0
+    discovered_count: int = 0
+    status: str = "completed"
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryLocaleSeedExpandRequest(CamelModel):
+    seed_terms: list[str] = Field(default_factory=list)
+    aliases: list[str] = Field(default_factory=list)
+    country_codes: list[str] = Field(default_factory=list)
+    language_codes: list[str] = Field(default_factory=list)
+    place_labels: list[str] = Field(default_factory=list)
+    wave_id: str | None = None
+    wave_title: str | None = None
+    providers: list[SourceDiscoveryLocaleExpansionProvider] = Field(default_factory=lambda: ["deterministic", "gdelt_doc"])
+    fixture_provider_payloads: dict[str, str] = Field(default_factory=dict)
+    packet_id: str | None = None
+    packet_title: str | None = None
+    packet_provenance: str | None = None
+    imported_by: str | None = None
+    source_family_tags: list[str] = Field(default_factory=list)
+    scope_hints: SourceDiscoveryScopeHints = Field(default_factory=SourceDiscoveryScopeHints)
+    max_queries: int = 8
+    max_provider_hits: int = 20
+    max_domains: int = 15
+    max_discovered: int = 25
+    request_budget: int = 1
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryLocaleSeedExpandResponse(CamelModel):
+    job: SourceDiscoveryJobSummary
+    generated_aliases: list[str] = Field(default_factory=list)
+    generated_queries: list[str] = Field(default_factory=list)
+    provider_runs: list[SourceDiscoveryLocaleExpansionProviderRunSummary] = Field(default_factory=list)
+    discovered_domain_count: int = 0
+    memories: list[SourceDiscoveryMemory] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryLinkGraphScanRequest(CamelModel):
+    source_id: str
+    fixture_text: str | None = None
+    max_same_domain: int = 6
+    max_external_domains: int = 8
+    max_discovered: int = 20
+    request_budget: int = 1
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryLinkGraphScanResponse(CamelModel):
+    job: SourceDiscoveryJobSummary
+    discovered_domain_count: int = 0
+    extracted_url_count: int = 0
+    memories: list[SourceDiscoveryMemory] = Field(default_factory=list)
     caveats: list[str] = Field(default_factory=list)
 
 
@@ -452,6 +638,11 @@ class SourceDiscoveryContentSnapshotRequest(CamelModel):
     author: str | None = None
     published_at: str | None = None
     content_type: str | None = None
+    retrieval_origin: SourceDiscoveryRetrievalOrigin = "live"
+    retrieved_from_url: str | None = None
+    resolved_original_url: str | None = None
+    detected_language: str | None = None
+    normalization_notes: list[str] = Field(default_factory=list)
     request_budget: int = 1
     caveats: list[str] = Field(default_factory=list)
 
@@ -471,6 +662,11 @@ class SourceDiscoveryContentSnapshotSummary(CamelModel):
     request_budget: int
     used_requests: int
     extraction_confidence: float
+    retrieval_origin: SourceDiscoveryRetrievalOrigin = "live"
+    retrieved_from_url: str | None = None
+    resolved_original_url: str | None = None
+    detected_language: str | None = None
+    normalization_notes: list[str] = Field(default_factory=list)
     knowledge_node_id: str | None = None
     canonical_snapshot_id: str | None = None
     duplicate_class: SourceDiscoveryDuplicateClass | None = None
@@ -478,6 +674,74 @@ class SourceDiscoveryContentSnapshotSummary(CamelModel):
     supporting_source_count: int = 1
     independent_source_count: int = 1
     as_detailed_in_addition_to: list[str] = Field(default_factory=list)
+    adversarial_risk_level: SourceDiscoveryAdversarialRiskLevel = "none"
+    adversarial_signal_count: int = 0
+    adversarial_signals: list[str] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryAdversarialFindingSummary(CamelModel):
+    finding_id: int
+    source_id: str
+    snapshot_id: str | None = None
+    job_id: str | None = None
+    surface_type: str
+    signal_type: str
+    risk_level: SourceDiscoveryAdversarialRiskLevel
+    summary: str
+    matched_text: str | None = None
+    detected_at: str
+    status: SourceDiscoveryAdversarialFindingStatus = "open"
+
+
+class SourceDiscoveryEventClusterSummary(CamelModel):
+    event_id: str
+    signature: str
+    status: SourceDiscoveryEventStatus
+    claim_type: str
+    canonical_claim_text: str
+    observed_day: str | None = None
+    wave_id: str | None = None
+    knowledge_node_ids: list[str] = Field(default_factory=list)
+    media_cluster_ids: list[str] = Field(default_factory=list)
+    member_source_ids: list[str] = Field(default_factory=list)
+    supporting_source_count: int = 0
+    contradiction_source_count: int = 0
+    corrective_source_count: int = 0
+    open_question_count: int = 0
+    first_seen_at: str
+    last_seen_at: str
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryEventMemberSummary(CamelModel):
+    member_id: int
+    event_id: str
+    source_id: str
+    wave_id: str | None = None
+    role: SourceDiscoveryEventMemberRole
+    claim_text: str
+    claim_type: str
+    evidence_basis: str
+    outcome: ClaimOutcome | None = None
+    observed_at: str | None = None
+    snapshot_id: str | None = None
+    knowledge_node_id: str | None = None
+    media_cluster_id: str | None = None
+    claim_outcome_id: int | None = None
+    claim_candidate_id: int | None = None
+    source_class: SourceClass = "unknown"
+    created_at: str
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryEventOpenQuestionSummary(CamelModel):
+    question_id: int
+    event_id: str
+    source_id: str | None = None
+    question_text: str
+    created_at: str
+    status: str
     caveats: list[str] = Field(default_factory=list)
 
 
@@ -517,6 +781,7 @@ class SourceDiscoveryKnowledgeNodeDetailResponse(CamelModel):
     members: list[SourceDiscoveryKnowledgeNodeMember] = Field(default_factory=list)
     pending_claim_count: int = 0
     latest_review_claim_at: str | None = None
+    linked_events: list[SourceDiscoveryEventClusterSummary] = Field(default_factory=list)
     caveats: list[str] = Field(default_factory=list)
 
 
@@ -532,10 +797,25 @@ class SourceDiscoveryContentSnapshotResponse(CamelModel):
     caveats: list[str] = Field(default_factory=list)
 
 
+class SourceDiscoveryArchiveHitSummary(CamelModel):
+    archive_hit_id: str
+    source_id: str
+    provider: str
+    original_url: str
+    archive_url: str | None = None
+    captured_at: str | None = None
+    discovered_at: str
+    caveats: list[str] = Field(default_factory=list)
+
+
 class SourceDiscoveryArticleFetchRequest(CamelModel):
     source_id: str
     fixture_html: str | None = None
     fixture_text: str | None = None
+    fetch_mode: SourceDiscoveryFetchMode = "auto"
+    archive_hit_id: str | None = None
+    archive_url: str | None = None
+    fixture_archive_html: str | None = None
     request_budget: int = 1
     caveats: list[str] = Field(default_factory=list)
 
@@ -544,6 +824,17 @@ class SourceDiscoveryArticleFetchResponse(CamelModel):
     job: SourceDiscoveryJobSummary
     snapshot: SourceDiscoveryContentSnapshotSummary | None = None
     memory: SourceDiscoveryMemory | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryEventGraphRefreshResponse(CamelModel):
+    job: SourceDiscoveryJobSummary
+    processed_claim_count: int
+    created_event_count: int
+    updated_event_count: int
+    contested_event_count: int
+    open_question_count: int
+    events: list[SourceDiscoveryEventClusterSummary] = Field(default_factory=list)
     caveats: list[str] = Field(default_factory=list)
 
 
@@ -933,6 +1224,48 @@ class SourceDiscoveryMediaGeolocationDetailResponse(CamelModel):
     caveats: list[str] = Field(default_factory=list)
 
 
+class SourceDiscoveryMediaGeolocationModelHealthSummary(CamelModel):
+    model_name: SourceDiscoveryMediaGeolocationModelName
+    role: str
+    enabled: bool
+    status: str
+    install_ready: bool
+    runtime_ready: bool
+    warm_state: str = "cold"
+    summary: str | None = None
+    installed_version: str | None = None
+    expected_version: str | None = None
+    model_id: str | None = None
+    download_allowed: bool = False
+    cache_dir: str | None = None
+    local_dir: str | None = None
+    weights_path: str | None = None
+    clip_backbone_dir: str | None = None
+    missing_components: list[str] = Field(default_factory=list)
+    present_components: list[str] = Field(default_factory=list)
+    metadata: dict[str, object] = Field(default_factory=dict)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryMediaGeolocationModelStatusResponse(CamelModel):
+    models: list[SourceDiscoveryMediaGeolocationModelHealthSummary] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryMediaGeolocationModelActionRequest(CamelModel):
+    action: SourceDiscoveryMediaGeolocationModelAction
+    requested_by: str
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryMediaGeolocationModelActionResponse(CamelModel):
+    model: SourceDiscoveryMediaGeolocationModelHealthSummary
+    action: SourceDiscoveryMediaGeolocationModelAction
+    requested_by: str
+    attempt: SourceDiscoveryMediaGeolocationEngineAttemptSummary | None = None
+    caveats: list[str] = Field(default_factory=list)
+
+
 class SourceDiscoveryMediaCompareJobRequest(CamelModel):
     left_artifact_id: str
     right_artifact_id: str
@@ -1009,6 +1342,8 @@ class SourceDiscoveryReviewQueueItem(CamelModel):
     platform_family: SourceDiscoveryPlatformFamily = "unknown"
     source_family_tags: list[str] = Field(default_factory=list)
     scope_hints: SourceDiscoveryScopeHints = Field(default_factory=SourceDiscoveryScopeHints)
+    locale_expansion_basis: list[str] = Field(default_factory=list)
+    discovered_from_provider: str | None = None
     global_reputation_score: float
     domain_reputation_score: float
     source_health_score: float
@@ -1019,6 +1354,11 @@ class SourceDiscoveryReviewQueueItem(CamelModel):
     best_wave_fit_score: float | None = None
     next_check_at: str | None = None
     pending_claim_count: int = 0
+    contested_event_count: int = 0
+    open_question_count: int = 0
+    adversarial_risk_level: SourceDiscoveryAdversarialRiskLevel = "none"
+    adversarial_signal_count: int = 0
+    adversarial_signals: list[str] = Field(default_factory=list)
     next_discovery_action: SourceDiscoveryNextAction = "none"
     discovery_priority_score: int = 0
     discovery_priority: SourceDiscoveryPriority = "low"
@@ -1080,8 +1420,47 @@ class SourceDiscoveryReputationEventSummary(CamelModel):
     score_after: float
     reason: str
     created_at: str
+    policy_version: str = "baseline_v1"
     reversed_at: str | None = None
     reversal_reason: str | None = None
+
+
+class SourceDiscoveryReputationProfileSummary(CamelModel):
+    profile_name: str
+    version: str
+    description: str
+    claim_outcome_deltas: dict[str, float] = Field(default_factory=dict)
+    source_class_modifiers: dict[str, float] = Field(default_factory=dict)
+    corroboration_bonus: float = 0.0
+    contradiction_penalty: float = 0.0
+    correction_penalty: float = 0.0
+    timeliness_penalty: float = 0.0
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryReputationProfilesResponse(CamelModel):
+    metadata: dict[str, object]
+    profiles: list[SourceDiscoveryReputationProfileSummary] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryReputationRecomputeRequest(CamelModel):
+    source_ids: list[str] = Field(default_factory=list)
+    wave_ids: list[str] = Field(default_factory=list)
+    profile_name: str = "baseline_v2"
+    mode: SourceDiscoveryReputationRecomputeMode = "dry_run"
+    max_sources: int = 200
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryReputationRecomputeResponse(CamelModel):
+    job: SourceDiscoveryJobSummary
+    profile_name: str
+    affected_source_count: int
+    changed_source_count: int
+    score_delta_summary: dict[str, float] = Field(default_factory=dict)
+    memories: list[SourceDiscoveryMemory] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
 
 
 class SourceDiscoveryReputationReversalRequest(CamelModel):
@@ -1121,6 +1500,7 @@ class SourceDiscoveryMemoryDetailResponse(CamelModel):
     memory: SourceDiscoveryMemory
     wave_fits: list[SourceDiscoveryWaveFit] = Field(default_factory=list)
     snapshots: list[SourceDiscoveryContentSnapshotSummary] = Field(default_factory=list)
+    archive_hits: list["SourceDiscoveryArchiveHitSummary"] = Field(default_factory=list)
     knowledge_nodes: list[SourceDiscoveryKnowledgeNodeSummary] = Field(default_factory=list)
     media_artifacts: list[SourceDiscoveryMediaArtifactSummary] = Field(default_factory=list)
     media_clusters: list[SourceDiscoveryMediaDuplicateClusterSummary] = Field(default_factory=list)
@@ -1135,8 +1515,12 @@ class SourceDiscoveryMemoryDetailResponse(CamelModel):
     reputation_events: list[SourceDiscoveryReputationEventSummary] = Field(default_factory=list)
     claim_outcomes: list[SourceDiscoveryClaimOutcomeSummary] = Field(default_factory=list)
     pending_review_claims: list["SourceDiscoveryReviewClaimCandidateSummary"] = Field(default_factory=list)
+    event_clusters: list[SourceDiscoveryEventClusterSummary] = Field(default_factory=list)
+    adversarial_findings: list[SourceDiscoveryAdversarialFindingSummary] = Field(default_factory=list)
     pending_claim_count: int = 0
     latest_review_claim_at: str | None = None
+    contested_event_count: int = 0
+    open_question_count: int = 0
     caveats: list[str] = Field(default_factory=list)
 
 
@@ -1146,6 +1530,7 @@ class SourceDiscoveryMemoryExportPacket(CamelModel):
     memory: SourceDiscoveryMemory
     wave_fits: list[SourceDiscoveryWaveFit] = Field(default_factory=list)
     snapshots: list[SourceDiscoveryContentSnapshotSummary] = Field(default_factory=list)
+    archive_hits: list["SourceDiscoveryArchiveHitSummary"] = Field(default_factory=list)
     knowledge_nodes: list[SourceDiscoveryKnowledgeNodeSummary] = Field(default_factory=list)
     media_artifacts: list[SourceDiscoveryMediaArtifactSummary] = Field(default_factory=list)
     media_clusters: list[SourceDiscoveryMediaDuplicateClusterSummary] = Field(default_factory=list)
@@ -1160,8 +1545,12 @@ class SourceDiscoveryMemoryExportPacket(CamelModel):
     reputation_events: list[SourceDiscoveryReputationEventSummary] = Field(default_factory=list)
     claim_outcomes: list[SourceDiscoveryClaimOutcomeSummary] = Field(default_factory=list)
     pending_review_claims: list["SourceDiscoveryReviewClaimCandidateSummary"] = Field(default_factory=list)
+    event_clusters: list[SourceDiscoveryEventClusterSummary] = Field(default_factory=list)
+    adversarial_findings: list[SourceDiscoveryAdversarialFindingSummary] = Field(default_factory=list)
     pending_claim_count: int = 0
     latest_review_claim_at: str | None = None
+    contested_event_count: int = 0
+    open_question_count: int = 0
     caveats: list[str] = Field(default_factory=list)
 
 
@@ -1174,6 +1563,7 @@ class SourceDiscoverySchedulerTickRequest(CamelModel):
     health_check_limit: int = 5
     structure_scan_limit: int = 0
     public_discovery_job_limit: int = 0
+    link_graph_job_limit: int = 0
     expansion_job_limit: int = 0
     knowledge_backfill_limit: int = 0
     record_source_extract_limit: int = 0
@@ -1192,6 +1582,7 @@ class SourceDiscoverySchedulerTickResponse(CamelModel):
     health_checks_completed: int
     structure_scans_completed: int
     public_discovery_jobs_completed: int
+    link_graph_jobs_completed: int
     expansion_jobs_completed: int
     knowledge_backfill_jobs_completed: int
     record_extract_jobs_completed: int
@@ -1199,6 +1590,12 @@ class SourceDiscoverySchedulerTickResponse(CamelModel):
     duplicate_snapshots_skipped: int
     request_budget: int
     used_requests: int
+    queued_work_items: int = 0
+    executed_work_items: int = 0
+    retry_scheduled_items: int = 0
+    budget_blocked_items: int = 0
+    dead_lettered_items: int = 0
+    active_shard_id: str = "0/1"
     health_checks: list[SourceDiscoveryHealthCheckSummary] = Field(default_factory=list)
     jobs: list[SourceDiscoveryJobSummary] = Field(default_factory=list)
     llm_executions: list[WaveLlmExecutionSummary] = Field(default_factory=list)
@@ -1218,6 +1615,23 @@ class SourceDiscoveryMemoryOverviewResponse(CamelModel):
     wave_fits: list[SourceDiscoveryWaveFit]
     recent_jobs: list[SourceDiscoveryJobSummary] = Field(default_factory=list)
     recent_reputation_events: list[SourceDiscoveryReputationEventSummary] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryEventOverviewResponse(CamelModel):
+    metadata: dict[str, object]
+    total_event_count: int = 0
+    contested_event_count: int = 0
+    open_question_count: int = 0
+    counts_by_status: dict[str, int] = Field(default_factory=dict)
+    events: list[SourceDiscoveryEventClusterSummary] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryEventClusterDetailResponse(CamelModel):
+    event: SourceDiscoveryEventClusterSummary
+    members: list[SourceDiscoveryEventMemberSummary] = Field(default_factory=list)
+    open_questions: list[SourceDiscoveryEventOpenQuestionSummary] = Field(default_factory=list)
     caveats: list[str] = Field(default_factory=list)
 
 
@@ -1253,6 +1667,24 @@ class SourceDiscoveryDiscoveryOverviewResponse(CamelModel):
     caveats: list[str] = Field(default_factory=list)
 
 
+class SourceDiscoveryAdversarialOverviewResponse(CamelModel):
+    metadata: dict[str, object]
+    total_finding_count: int = 0
+    open_finding_count: int = 0
+    flagged_source_count: int = 0
+    high_risk_source_count: int = 0
+    counts_by_risk_level: dict[str, int] = Field(default_factory=dict)
+    counts_by_signal_type: dict[str, int] = Field(default_factory=dict)
+    recent_findings: list[SourceDiscoveryAdversarialFindingSummary] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryAdversarialFindingsResponse(CamelModel):
+    metadata: dict[str, object]
+    findings: list[SourceDiscoveryAdversarialFindingSummary] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
 class SourceDiscoveryDiscoveryQueueItem(CamelModel):
     source_id: str
     title: str
@@ -1272,6 +1704,8 @@ class SourceDiscoveryDiscoveryQueueItem(CamelModel):
     platform_family: SourceDiscoveryPlatformFamily = "unknown"
     source_family_tags: list[str] = Field(default_factory=list)
     scope_hints: SourceDiscoveryScopeHints = Field(default_factory=SourceDiscoveryScopeHints)
+    locale_expansion_basis: list[str] = Field(default_factory=list)
+    discovered_from_provider: str | None = None
     structure_hints: list[str] = Field(default_factory=list)
     source_health: str
     source_health_score: float
@@ -1291,6 +1725,9 @@ class SourceDiscoveryDiscoveryQueueItem(CamelModel):
     last_discovery_scan_at: str | None = None
     next_discovery_scan_at: str | None = None
     discovery_scan_fail_count: int = 0
+    adversarial_risk_level: SourceDiscoveryAdversarialRiskLevel = "none"
+    adversarial_signal_count: int = 0
+    adversarial_signals: list[str] = Field(default_factory=list)
 
 
 class SourceDiscoveryDiscoveryQueueResponse(CamelModel):
@@ -1336,6 +1773,50 @@ class SourceDiscoveryRuntimeRunSummary(CamelModel):
     lease_owner: str | None = None
     started_at: str
     finished_at: str | None = None
+    summary: str | None = None
+    error_summary: str | None = None
+
+
+class SourceDiscoveryRuntimeWorkItemSummary(CamelModel):
+    work_item_id: str
+    worker_name: SourceDiscoveryRuntimeWorkerName
+    job_type: str
+    status: SourceDiscoveryRuntimeWorkItemStatus
+    source_id: str | None = None
+    seed_url: str | None = None
+    domain_key: str | None = None
+    provider_key: str | None = None
+    shard_index: int = 0
+    shard_count: int = 1
+    dedupe_key: str
+    priority_score: int = 0
+    next_run_at: str
+    lease_owner: str | None = None
+    lease_expires_at: str | None = None
+    attempt_count: int = 0
+    max_attempts: int = 0
+    request_budget: int = 0
+    last_failure_kind: SourceDiscoveryRuntimeFailureKind | None = None
+    last_error: str | None = None
+    created_at: str
+    updated_at: str
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryRuntimeFailureSummary(CamelModel):
+    attempt_id: int
+    work_item_id: str
+    run_id: str | None = None
+    job_type: str
+    status: SourceDiscoveryRuntimeWorkItemStatus
+    failure_kind: SourceDiscoveryRuntimeFailureKind | None = None
+    source_id: str | None = None
+    domain_key: str | None = None
+    provider_key: str | None = None
+    attempt_index: int = 0
+    started_at: str
+    finished_at: str | None = None
+    used_requests: int = 0
     summary: str | None = None
     error_summary: str | None = None
 
@@ -1410,6 +1891,14 @@ class SourceDiscoveryRuntimeStatusResponse(CamelModel):
     pending_structure_scan_count: int = 0
     eligible_public_followup_count: int = 0
     last_discovery_run_summary: str | None = None
+    queue_enabled: bool = False
+    queued_work_item_count: int = 0
+    retry_scheduled_work_item_count: int = 0
+    blocked_work_item_count: int = 0
+    dead_lettered_work_item_count: int = 0
+    adversarial_flagged_source_count: int = 0
+    high_risk_adversarial_source_count: int = 0
+    active_shard_id: str = "0/1"
     wave_monitor_scheduler_enabled: bool
     wave_monitor_scheduler_running: bool
     wave_monitor_scheduler_poll_seconds: int
@@ -1447,6 +1936,31 @@ class SourceDiscoveryRuntimeServiceBundleResponse(CamelModel):
     runtime_paths: SourceDiscoveryRuntimePathSummary
     services: list[SourceDiscoveryRuntimeServiceSpec] = Field(default_factory=list)
     installations: list[SourceDiscoveryRuntimeServiceInstallationSummary] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryRuntimeWorkQueueResponse(CamelModel):
+    metadata: dict[str, object]
+    items: list[SourceDiscoveryRuntimeWorkItemSummary] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryRuntimeRunsResponse(CamelModel):
+    metadata: dict[str, object]
+    runs: list[SourceDiscoveryRuntimeRunSummary] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryRuntimeFailuresResponse(CamelModel):
+    metadata: dict[str, object]
+    failures: list[SourceDiscoveryRuntimeFailureSummary] = Field(default_factory=list)
+    caveats: list[str] = Field(default_factory=list)
+
+
+class SourceDiscoveryRuntimeRunDetailResponse(CamelModel):
+    run: SourceDiscoveryRuntimeRunSummary
+    work_items: list[SourceDiscoveryRuntimeWorkItemSummary] = Field(default_factory=list)
+    failures: list[SourceDiscoveryRuntimeFailureSummary] = Field(default_factory=list)
     caveats: list[str] = Field(default_factory=list)
 
 

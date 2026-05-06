@@ -24,6 +24,8 @@ from src.source_discovery.models import (
     RuntimeSchedulerWorkerORM,
     RuntimeServiceActionORM,
     RuntimeServiceInstallationORM,
+    SourceMemoryORM,
+    SourceRuntimeWorkItemORM,
 )
 from src.types.source_discovery import (
     SourceDiscoveryRuntimeControlRequest,
@@ -93,6 +95,49 @@ def build_runtime_status(settings: Settings) -> SourceDiscoveryRuntimeStatusResp
     _sync_service_installation_rows(settings, current_platform)
     discovery_overview = SourceDiscoveryService(settings).discovery_overview(limit=200)
     last_discovery_run_summary = discovery_overview.recent_runs[0].outcome_summary if discovery_overview.recent_runs else None
+    queued_work_item_count = 0
+    retry_scheduled_work_item_count = 0
+    blocked_work_item_count = 0
+    dead_lettered_work_item_count = 0
+    adversarial_flagged_source_count = 0
+    high_risk_adversarial_source_count = 0
+    with session_scope(settings.source_discovery_database_url) as session:
+        queued_work_item_count = sum(
+            1
+            for _ in session.scalars(
+                select(SourceRuntimeWorkItemORM.work_item_id).where(SourceRuntimeWorkItemORM.status == "queued")
+            )
+        )
+        retry_scheduled_work_item_count = sum(
+            1
+            for _ in session.scalars(
+                select(SourceRuntimeWorkItemORM.work_item_id).where(SourceRuntimeWorkItemORM.status == "retry_scheduled")
+            )
+        )
+        blocked_work_item_count = sum(
+            1
+            for _ in session.scalars(
+                select(SourceRuntimeWorkItemORM.work_item_id).where(SourceRuntimeWorkItemORM.status == "blocked")
+            )
+        )
+        dead_lettered_work_item_count = sum(
+            1
+            for _ in session.scalars(
+                select(SourceRuntimeWorkItemORM.work_item_id).where(SourceRuntimeWorkItemORM.status == "dead_lettered")
+            )
+        )
+        adversarial_flagged_source_count = sum(
+            1
+            for _ in session.scalars(
+                select(SourceMemoryORM.source_id).where(SourceMemoryORM.adversarial_signal_count > 0)
+            )
+        )
+        high_risk_adversarial_source_count = sum(
+            1
+            for _ in session.scalars(
+                select(SourceMemoryORM.source_id).where(SourceMemoryORM.adversarial_risk_level == "high")
+            )
+        )
     return SourceDiscoveryRuntimeStatusResponse(
         runtime_mode=_STATE.runtime_mode,
         recommended_runtime_deployment="os-managed-service" if service_managers else "embedded-preview",
@@ -110,6 +155,14 @@ def build_runtime_status(settings: Settings) -> SourceDiscoveryRuntimeStatusResp
         pending_structure_scan_count=discovery_overview.pending_structure_scan_count,
         eligible_public_followup_count=discovery_overview.eligible_public_followup_count,
         last_discovery_run_summary=last_discovery_run_summary,
+        queue_enabled=settings.source_discovery_queue_enabled,
+        queued_work_item_count=queued_work_item_count,
+        retry_scheduled_work_item_count=retry_scheduled_work_item_count,
+        blocked_work_item_count=blocked_work_item_count,
+        dead_lettered_work_item_count=dead_lettered_work_item_count,
+        adversarial_flagged_source_count=adversarial_flagged_source_count,
+        high_risk_adversarial_source_count=high_risk_adversarial_source_count,
+        active_shard_id=f"{settings.source_discovery_shard_index}/{max(1, settings.source_discovery_shard_count)}",
         wave_monitor_scheduler_enabled=wave_worker.enabled_by_config,
         wave_monitor_scheduler_running=wave_worker.loop_active_in_process,
         wave_monitor_scheduler_poll_seconds=wave_worker.poll_seconds,
@@ -482,6 +535,7 @@ class RuntimeSchedulerCoordinator:
                 health_check_limit=max(0, self._settings.source_discovery_scheduler_health_check_limit),
                 structure_scan_limit=max(0, self._settings.source_discovery_scheduler_structure_scan_limit),
                 public_discovery_job_limit=max(0, self._settings.source_discovery_scheduler_public_discovery_job_limit),
+                link_graph_job_limit=max(0, self._settings.source_discovery_scheduler_link_graph_job_limit),
                 expansion_job_limit=max(0, self._settings.source_discovery_scheduler_expansion_job_limit),
                 knowledge_backfill_limit=max(0, self._settings.source_discovery_scheduler_knowledge_backfill_limit),
                 record_source_extract_limit=max(0, self._settings.source_discovery_scheduler_record_extract_limit),

@@ -35,6 +35,27 @@ class Settings(BaseSettings):
         default="./data/opensky_states_fixture.json",
         alias="OPENSKY_FIXTURE_PATH",
     )
+    gpsjam_source_mode: str = Field(default="fixture", alias="GPSJAM_SOURCE_MODE")
+    gpsjam_manifest_url: str = Field(
+        default="https://gpsjam.org/data/manifest.csv",
+        alias="GPSJAM_MANIFEST_URL",
+    )
+    gpsjam_data_base_url: str = Field(
+        default="https://gpsjam.org/data",
+        alias="GPSJAM_DATA_BASE_URL",
+    )
+    gpsjam_data_version: int = Field(
+        default=4,
+        alias="GPSJAM_DATA_VERSION",
+    )
+    gpsjam_http_timeout_seconds: int = Field(
+        default=20,
+        alias="GPSJAM_HTTP_TIMEOUT_SECONDS",
+    )
+    gpsjam_fixture_path: str = Field(
+        default="./data/gpsjam_context_fixture.json",
+        alias="GPSJAM_FIXTURE_PATH",
+    )
     celestrak_base_url: str = Field(
         default="https://celestrak.org/NORAD/elements",
         alias="CELESTRAK_BASE_URL",
@@ -252,6 +273,40 @@ class Settings(BaseSettings):
     netherlands_rws_waterinfo_http_timeout_seconds: int = Field(
         default=20,
         alias="NETHERLANDS_RWS_WATERINFO_HTTP_TIMEOUT_SECONDS",
+    )
+    marine_navtex_mode: str = Field(default="fixture", alias="MARINE_NAVTEX_MODE")
+    marine_navtex_fixture_path: str = Field(
+        default="./data/marine_navtex_fixture.json",
+        alias="MARINE_NAVTEX_FIXTURE_PATH",
+    )
+    marine_navtex_info_url: str = Field(
+        default="https://www.navcen.uscg.gov/navtex-maritime-safety-broadcasts?pageName=mtMsi",
+        alias="MARINE_NAVTEX_INFO_URL",
+    )
+    marine_navtex_rss_url: str = Field(
+        default="https://public.govdelivery.com/topics/USDHSCG_425/feed.rss",
+        alias="MARINE_NAVTEX_RSS_URL",
+    )
+    marine_navtex_http_timeout_seconds: int = Field(
+        default=20,
+        alias="MARINE_NAVTEX_HTTP_TIMEOUT_SECONDS",
+    )
+    marine_gebco_bathymetry_mode: str = Field(default="fixture", alias="MARINE_GEBCO_BATHYMETRY_MODE")
+    marine_gebco_bathymetry_fixture_path: str = Field(
+        default="./data/marine_gebco_bathymetry_fixture.json",
+        alias="MARINE_GEBCO_BATHYMETRY_FIXTURE_PATH",
+    )
+    marine_gebco_bathymetry_docs_url: str = Field(
+        default="https://www.gebco.net/data-products/gridded-bathymetry-data",
+        alias="MARINE_GEBCO_BATHYMETRY_DOCS_URL",
+    )
+    marine_gebco_bathymetry_download_url: str = Field(
+        default="https://download.gebco.net/downloads",
+        alias="MARINE_GEBCO_BATHYMETRY_DOWNLOAD_URL",
+    )
+    marine_gebco_bathymetry_http_timeout_seconds: int = Field(
+        default=20,
+        alias="MARINE_GEBCO_BATHYMETRY_HTTP_TIMEOUT_SECONDS",
     )
     scottish_water_overflows_mode: str = Field(
         default="fixture",
@@ -650,6 +705,38 @@ class Settings(BaseSettings):
         default=20,
         alias="PB2002_PLATE_BOUNDARIES_HTTP_TIMEOUT_SECONDS",
     )
+    geoboundaries_admin_source_mode: str = Field(
+        default="fixture",
+        alias="GEOBOUNDARIES_ADMIN_SOURCE_MODE",
+    )
+    geoboundaries_admin_fixture_path: str = Field(
+        default="./data/geoboundaries_admin_bel_adm1_fixture.json",
+        alias="GEOBOUNDARIES_ADMIN_FIXTURE_PATH",
+    )
+    geoboundaries_admin_documentation_url: str = Field(
+        default="https://www.geoboundaries.org/api.html",
+        alias="GEOBOUNDARIES_ADMIN_DOCUMENTATION_URL",
+    )
+    geoboundaries_admin_release_type: str = Field(
+        default="gbOpen",
+        alias="GEOBOUNDARIES_ADMIN_RELEASE_TYPE",
+    )
+    geoboundaries_admin_country_iso: str = Field(
+        default="BEL",
+        alias="GEOBOUNDARIES_ADMIN_COUNTRY_ISO",
+    )
+    geoboundaries_admin_admin_level: str = Field(
+        default="ADM1",
+        alias="GEOBOUNDARIES_ADMIN_ADMIN_LEVEL",
+    )
+    geoboundaries_admin_api_url: str = Field(
+        default="https://www.geoboundaries.org/api/current/gbOpen/BEL/ADM1/",
+        alias="GEOBOUNDARIES_ADMIN_API_URL",
+    )
+    geoboundaries_admin_http_timeout_seconds: int = Field(
+        default=20,
+        alias="GEOBOUNDARIES_ADMIN_HTTP_TIMEOUT_SECONDS",
+    )
     noaa_global_volcano_source_mode: str = Field(
         default="fixture",
         alias="NOAA_GLOBAL_VOLCANO_SOURCE_MODE",
@@ -736,6 +823,70 @@ class Settings(BaseSettings):
         alias="CANADA_CAP_FEED_URL",
     )
     canada_cap_http_timeout_seconds: int = Field(default=20, alias="CANADA_CAP_HTTP_TIMEOUT_SECONDS")
+    nws_alerts_source_mode: str = Field(default="fixture", alias="NWS_ALERTS_SOURCE_MODE")
+    nws_alerts_fixture_path: str = Field(
+        default="./data/nws_alerts_fixture.json",
+        alias="NWS_ALERTS_FIXTURE_PATH",
+    )
+    nws_alerts_api_url: str = Field(
+        default="https://api.weather.gov/alerts/active",
+        alias="NWS_ALERTS_API_URL",
+    )
+    nws_alerts_http_timeout_seconds: int = Field(default=20, alias="NWS_ALERTS_HTTP_TIMEOUT_SECONDS")
+    nws_contact_user_agent: str = Field(
+        default="11Writer/1.0 (https://github.com/Geo-fs/11Writer)",
+        alias="NWS_CONTACT_USER_AGENT",
+    )
+    noaa_nowcoast_source_mode: str = Field(default="fixture", alias="NOAA_NOWCOAST_SOURCE_MODE")
+    noaa_nowcoast_fixture_path: str = Field(
+        default="./data/noaa_nowcoast_layer_catalog_fixture.json",
+        alias="NOAA_NOWCOAST_FIXTURE_PATH",
+    )
+    noaa_nowcoast_documentation_url: str = Field(
+        default="https://nowcoast.noaa.gov/",
+        alias="NOAA_NOWCOAST_DOCUMENTATION_URL",
+    )
+    noaa_nowcoast_warnings_service_url: str = Field(
+        default="https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/wwa_meteoceanhydro_shortduration_hazards_warnings_time/MapServer",
+        alias="NOAA_NOWCOAST_WARNINGS_SERVICE_URL",
+    )
+    noaa_nowcoast_watches_service_url: str = Field(
+        default="https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/wwa_meteoceanhydro_shortduration_hazards_watches_time/MapServer",
+        alias="NOAA_NOWCOAST_WATCHES_SERVICE_URL",
+    )
+    noaa_nowcoast_radar_service_url: str = Field(
+        default="https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer",
+        alias="NOAA_NOWCOAST_RADAR_SERVICE_URL",
+    )
+    noaa_nowcoast_http_timeout_seconds: int = Field(default=20, alias="NOAA_NOWCOAST_HTTP_TIMEOUT_SECONDS")
+    nhc_gis_source_mode: str = Field(default="fixture", alias="NHC_GIS_SOURCE_MODE")
+    nhc_gis_fixture_path: str = Field(
+        default="./data/nhc_gis_atlantic_fixture.xml",
+        alias="NHC_GIS_FIXTURE_PATH",
+    )
+    nhc_gis_documentation_url: str = Field(
+        default="https://www.nhc.noaa.gov/gis/rss.php",
+        alias="NHC_GIS_DOCUMENTATION_URL",
+    )
+    nhc_gis_feed_url: str = Field(
+        default="https://www.nhc.noaa.gov/gis-at.xml",
+        alias="NHC_GIS_FEED_URL",
+    )
+    nhc_gis_http_timeout_seconds: int = Field(default=20, alias="NHC_GIS_HTTP_TIMEOUT_SECONDS")
+    meteoalarm_atom_source_mode: str = Field(default="fixture", alias="METEOALARM_ATOM_SOURCE_MODE")
+    meteoalarm_atom_fixture_path: str = Field(
+        default="./data/meteoalarm_atom_norway_fixture.xml",
+        alias="METEOALARM_ATOM_FIXTURE_PATH",
+    )
+    meteoalarm_atom_feed_url: str = Field(
+        default="https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-norway",
+        alias="METEOALARM_ATOM_FEED_URL",
+    )
+    meteoalarm_atom_country: str = Field(
+        default="Norway",
+        alias="METEOALARM_ATOM_COUNTRY",
+    )
+    meteoalarm_atom_http_timeout_seconds: int = Field(default=20, alias="METEOALARM_ATOM_HTTP_TIMEOUT_SECONDS")
     dwd_cap_source_mode: str = Field(default="fixture", alias="DWD_CAP_SOURCE_MODE")
     dwd_cap_fixture_path: str = Field(
         default="./data/dwd_cap_directory_fixture.html",
@@ -963,6 +1114,22 @@ class Settings(BaseSettings):
         default=20,
         alias="CISA_CYBER_ADVISORIES_HTTP_TIMEOUT_SECONDS",
     )
+    cisa_kev_source_mode: str = Field(
+        default="fixture",
+        alias="CISA_KEV_SOURCE_MODE",
+    )
+    cisa_kev_fixture_path: str = Field(
+        default="./data/cisa_kev_catalog_fixture.json",
+        alias="CISA_KEV_FIXTURE_PATH",
+    )
+    cisa_kev_api_url: str = Field(
+        default="https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+        alias="CISA_KEV_API_URL",
+    )
+    cisa_kev_http_timeout_seconds: int = Field(
+        default=20,
+        alias="CISA_KEV_HTTP_TIMEOUT_SECONDS",
+    )
     first_epss_source_mode: str = Field(
         default="fixture",
         alias="FIRST_EPSS_SOURCE_MODE",
@@ -1011,6 +1178,86 @@ class Settings(BaseSettings):
         default=20,
         alias="NVD_CVE_HTTP_TIMEOUT_SECONDS",
     )
+    rdap_source_mode: str = Field(
+        default="fixture",
+        alias="RDAP_SOURCE_MODE",
+    )
+    rdap_bootstrap_fixture_root: str = Field(
+        default="./data/rdap_bootstrap",
+        alias="RDAP_BOOTSTRAP_FIXTURE_ROOT",
+    )
+    rdap_lookup_fixture_path: str = Field(
+        default="./data/rdap_lookup_fixture.json",
+        alias="RDAP_LOOKUP_FIXTURE_PATH",
+    )
+    rdap_bootstrap_dns_url: str = Field(
+        default="https://data.iana.org/rdap/dns.json",
+        alias="RDAP_BOOTSTRAP_DNS_URL",
+    )
+    rdap_bootstrap_ipv4_url: str = Field(
+        default="https://data.iana.org/rdap/ipv4.json",
+        alias="RDAP_BOOTSTRAP_IPV4_URL",
+    )
+    rdap_bootstrap_ipv6_url: str = Field(
+        default="https://data.iana.org/rdap/ipv6.json",
+        alias="RDAP_BOOTSTRAP_IPV6_URL",
+    )
+    rdap_bootstrap_asn_url: str = Field(
+        default="https://data.iana.org/rdap/asn.json",
+        alias="RDAP_BOOTSTRAP_ASN_URL",
+    )
+    rdap_http_timeout_seconds: int = Field(
+        default=20,
+        alias="RDAP_HTTP_TIMEOUT_SECONDS",
+    )
+    crtsh_source_mode: str = Field(
+        default="fixture",
+        alias="CRTSH_SOURCE_MODE",
+    )
+    crtsh_fixture_path: str = Field(
+        default="./data/crtsh_fixture.json",
+        alias="CRTSH_FIXTURE_PATH",
+    )
+    crtsh_base_url: str = Field(
+        default="https://crt.sh/",
+        alias="CRTSH_BASE_URL",
+    )
+    crtsh_http_timeout_seconds: int = Field(
+        default=20,
+        alias="CRTSH_HTTP_TIMEOUT_SECONDS",
+    )
+    sec_edgar_source_mode: str = Field(
+        default="fixture",
+        alias="SEC_EDGAR_SOURCE_MODE",
+    )
+    sec_edgar_fixture_path: str = Field(
+        default="./data/sec_edgar_submissions_fixture.json",
+        alias="SEC_EDGAR_FIXTURE_PATH",
+    )
+    sec_edgar_submissions_base_url: str = Field(
+        default="https://data.sec.gov/submissions",
+        alias="SEC_EDGAR_SUBMISSIONS_BASE_URL",
+    )
+    sec_edgar_http_timeout_seconds: int = Field(
+        default=20,
+        alias="SEC_EDGAR_HTTP_TIMEOUT_SECONDS",
+    )
+    usaspending_source_mode: str = Field(
+        default="fixture",
+        alias="USASPENDING_SOURCE_MODE",
+    )
+    usaspending_fixture_path: str = Field(
+        default="./data/usaspending_recipient_fixture.json",
+        alias="USASPENDING_FIXTURE_PATH",
+    )
+    usaspending_recipient_base_url: str = Field(
+        default="https://api.usaspending.gov/api/v2/recipient",
+        alias="USASPENDING_RECIPIENT_BASE_URL",
+    )
+    usaspending_http_timeout_seconds: int = Field(
+        default=20,
+        alias="USASPENDING_HTTP_TIMEOUT_SECONDS",
+    )
     wave_monitor_database_url: str = Field(
         default="sqlite:///./data/wave_monitor.db",
         alias="WAVE_MONITOR_DATABASE_URL",
@@ -1029,12 +1276,31 @@ class Settings(BaseSettings):
     source_discovery_scheduler_health_check_limit: int = Field(default=2, alias="SOURCE_DISCOVERY_SCHEDULER_HEALTH_CHECK_LIMIT")
     source_discovery_scheduler_structure_scan_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_STRUCTURE_SCAN_LIMIT")
     source_discovery_scheduler_public_discovery_job_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_PUBLIC_DISCOVERY_JOB_LIMIT")
+    source_discovery_scheduler_link_graph_job_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_LINK_GRAPH_JOB_LIMIT")
     source_discovery_scheduler_expansion_job_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_EXPANSION_JOB_LIMIT")
     source_discovery_scheduler_knowledge_backfill_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_KNOWLEDGE_BACKFILL_LIMIT")
     source_discovery_scheduler_record_extract_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_RECORD_EXTRACT_LIMIT")
     source_discovery_scheduler_llm_task_limit: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_LLM_TASK_LIMIT")
     source_discovery_scheduler_request_budget: int = Field(default=0, alias="SOURCE_DISCOVERY_SCHEDULER_REQUEST_BUDGET")
     source_discovery_scheduler_allow_network: bool = Field(default=False, alias="SOURCE_DISCOVERY_SCHEDULER_ALLOW_NETWORK")
+    source_discovery_queue_enabled: bool = Field(default=False, alias="SOURCE_DISCOVERY_QUEUE_ENABLED")
+    source_discovery_shard_count: int = Field(default=1, alias="SOURCE_DISCOVERY_SHARD_COUNT")
+    source_discovery_shard_index: int = Field(default=0, alias="SOURCE_DISCOVERY_SHARD_INDEX")
+    source_discovery_work_item_lease_seconds: int = Field(default=120, alias="SOURCE_DISCOVERY_WORK_ITEM_LEASE_SECONDS")
+    source_discovery_work_item_max_attempts: int = Field(default=3, alias="SOURCE_DISCOVERY_WORK_ITEM_MAX_ATTEMPTS")
+    source_discovery_retry_backoff_base_seconds: int = Field(default=60, alias="SOURCE_DISCOVERY_RETRY_BACKOFF_BASE_SECONDS")
+    source_discovery_retry_backoff_max_seconds: int = Field(default=3600, alias="SOURCE_DISCOVERY_RETRY_BACKOFF_MAX_SECONDS")
+    source_discovery_per_domain_request_budget: int = Field(default=0, alias="SOURCE_DISCOVERY_PER_DOMAIN_REQUEST_BUDGET")
+    source_discovery_per_provider_request_budget: int = Field(default=0, alias="SOURCE_DISCOVERY_PER_PROVIDER_REQUEST_BUDGET")
+    source_discovery_per_tick_execute_limit: int = Field(default=8, alias="SOURCE_DISCOVERY_PER_TICK_EXECUTE_LIMIT")
+    source_discovery_eval_fixture_path: str = Field(
+        default="./app/server/data/source_discovery_eval_fixtures.json",
+        alias="SOURCE_DISCOVERY_EVAL_FIXTURE_PATH",
+    )
+    source_discovery_live_benchmark_manifest_path: str = Field(
+        default="./app/server/data/source_discovery_eval_local_manifest.example.json",
+        alias="SOURCE_DISCOVERY_LIVE_BENCHMARK_MANIFEST_PATH",
+    )
     source_discovery_media_max_bytes: int = Field(default=5_000_000, alias="SOURCE_DISCOVERY_MEDIA_MAX_BYTES")
     source_discovery_media_ocr_binary: str = Field(default="tesseract", alias="SOURCE_DISCOVERY_MEDIA_OCR_BINARY")
     source_discovery_media_ocr_default_engine: str = Field(default="tesseract", alias="SOURCE_DISCOVERY_MEDIA_OCR_DEFAULT_ENGINE")
@@ -1053,16 +1319,68 @@ class Settings(BaseSettings):
         default="./app/server/data/media_geolocation_eval_fixtures.json",
         alias="SOURCE_DISCOVERY_MEDIA_GEOLOCATION_EVAL_FIXTURE_PATH",
     )
+    source_discovery_media_geolocation_live_benchmark_manifest_path: str = Field(
+        default="./app/server/data/media_geolocation_live_benchmark_manifest.json",
+        alias="SOURCE_DISCOVERY_MEDIA_GEOLOCATION_LIVE_BENCHMARK_MANIFEST_PATH",
+    )
+    source_discovery_media_geolocation_live_benchmark_output_path: str | None = Field(
+        default=None,
+        alias="SOURCE_DISCOVERY_MEDIA_GEOLOCATION_LIVE_BENCHMARK_OUTPUT_PATH",
+    )
+    source_discovery_media_geolocation_place_gazetteer_path: str = Field(
+        default="./app/server/data/media_geolocation_place_gazetteer.json",
+        alias="SOURCE_DISCOVERY_MEDIA_GEOLOCATION_PLACE_GAZETTEER_PATH",
+    )
+    source_discovery_media_geolocation_place_landmark_radius_km: float = Field(
+        default=25.0,
+        alias="SOURCE_DISCOVERY_MEDIA_GEOLOCATION_PLACE_LANDMARK_RADIUS_KM",
+    )
+    source_discovery_media_geolocation_place_locality_radius_km: float = Field(
+        default=150.0,
+        alias="SOURCE_DISCOVERY_MEDIA_GEOLOCATION_PLACE_LOCALITY_RADIUS_KM",
+    )
     source_discovery_media_geoclip_enabled: bool = Field(default=False, alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_ENABLED")
     source_discovery_media_geoclip_allow_runtime_download: bool = Field(default=False, alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_ALLOW_RUNTIME_DOWNLOAD")
     source_discovery_media_geoclip_model_cache_dir: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_MODEL_CACHE_DIR")
     source_discovery_media_geoclip_weights_path: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_WEIGHTS_PATH")
     source_discovery_media_geoclip_expected_version: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_EXPECTED_VERSION")
+    source_discovery_media_geoclip_clip_backbone_model_id: str = Field(
+        default="openai/clip-vit-large-patch14",
+        alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_CLIP_BACKBONE_MODEL_ID",
+    )
+    source_discovery_media_geoclip_clip_backbone_dir: str | None = Field(
+        default=None,
+        alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_CLIP_BACKBONE_DIR",
+    )
+    source_discovery_media_geoclip_runtime_profile: str = Field(
+        default="full_fidelity",
+        alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_RUNTIME_PROFILE",
+    )
+    source_discovery_media_geoclip_target_device: str = Field(
+        default="cpu",
+        alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_TARGET_DEVICE",
+    )
+    source_discovery_media_geoclip_allow_experimental_acceleration: bool = Field(
+        default=False,
+        alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_ALLOW_EXPERIMENTAL_ACCELERATION",
+    )
+    source_discovery_media_geoclip_max_image_edge: int = Field(
+        default=0,
+        alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_MAX_IMAGE_EDGE",
+    )
+    source_discovery_media_geoclip_prediction_cache_entries: int = Field(
+        default=32,
+        alias="SOURCE_DISCOVERY_MEDIA_GEOCLIP_PREDICTION_CACHE_ENTRIES",
+    )
     source_discovery_media_streetclip_enabled: bool = Field(default=False, alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_ENABLED")
     source_discovery_media_streetclip_model_id: str = Field(default="geolocal/StreetCLIP", alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_MODEL_ID")
     source_discovery_media_streetclip_allow_runtime_download: bool = Field(default=False, alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_ALLOW_RUNTIME_DOWNLOAD")
     source_discovery_media_streetclip_model_cache_dir: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_MODEL_CACHE_DIR")
     source_discovery_media_streetclip_expected_transformers_version: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_EXPECTED_TRANSFORMERS_VERSION")
+    source_discovery_media_streetclip_local_dir: str | None = Field(
+        default=None,
+        alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_LOCAL_DIR",
+    )
     source_discovery_media_streetclip_label_bank_enabled: bool = Field(default=True, alias="SOURCE_DISCOVERY_MEDIA_STREETCLIP_LABEL_BANK_ENABLED")
     source_discovery_media_qwen_vl_local_model: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_QWEN_VL_LOCAL_MODEL")
     source_discovery_media_internvl_local_model: str | None = Field(default=None, alias="SOURCE_DISCOVERY_MEDIA_INTERNVL_LOCAL_MODEL")

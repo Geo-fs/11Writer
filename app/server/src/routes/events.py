@@ -53,6 +53,8 @@ from src.services.geonet_service import (
     parse_bbox as parse_geonet_bbox,
 )
 from src.services.hko_weather_service import HkoSort, HkoWeatherQuery, HkoWeatherService, HkoWarningType
+from src.services.nws_alerts_service import NwsAlertType, NwsAlertsQuery, NwsAlertsService, NwsSeverity, NwsSort
+from src.services.nhc_gis_service import NhcGisProductType, NhcGisQuery, NhcGisService, NhcGisSort
 from src.services.emsc_seismicportal_realtime_service import (
     EmscSeismicPortalQuery,
     EmscSeismicPortalRealtimeService,
@@ -66,6 +68,7 @@ from src.services.metno_metalerts_service import (
     parse_bbox as parse_metno_bbox,
 )
 from src.services.canada_cap_service import CanadaCapAlertType, CanadaCapQuery, CanadaCapService, CanadaCapSeverity, CanadaCapSort
+from src.services.meteoalarm_atom_service import MeteoalarmAtomQuery, MeteoalarmAtomService
 from src.services.dwd_cap_alerts_service import DwdCapAlertsService, DwdCapQuery, DwdCapSeverity, DwdCapSort
 from src.services.bmkg_earthquakes_service import BmkgEarthquakesQuery, BmkgEarthquakesService, BmkgSort
 from src.services.ga_recent_earthquakes_service import (
@@ -100,8 +103,11 @@ from src.types.api import (
     GeoNetHazardsResponse,
     HkoWeatherResponse,
     IpmaWarningsResponse,
+    MeteoalarmAtomFeedResponse,
     MetEireannWarningsResponse,
     MetNoMetAlertsResponse,
+    NhcGisResponse,
+    NwsAlertsResponse,
     NrcEventNotificationsResponse,
     TsunamiAlertResponse,
     UkEaFloodResponse,
@@ -380,6 +386,65 @@ async def recent_hko_weather(
     )
 
 
+@router.get("/nws-alerts/recent", response_model=NwsAlertsResponse)
+async def recent_nws_alerts(
+    alert_type: str = Query(default="all"),
+    severity: str = Query(default="all"),
+    area: str | None = Query(default=None),
+    zone: str | None = Query(default=None),
+    event: str | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=1000),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> NwsAlertsResponse:
+    if alert_type not in {"all", "warning", "watch", "advisory", "statement", "unknown"}:
+        raise HTTPException(status_code=400, detail="alert_type must be one of: all, warning, watch, advisory, statement, unknown")
+    if severity not in {"all", "extreme", "severe", "moderate", "minor", "unknown"}:
+        raise HTTPException(status_code=400, detail="severity must be one of: all, extreme, severe, moderate, minor, unknown")
+    if sort not in {"newest", "severity"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, severity")
+
+    service = NwsAlertsService(settings)
+    return await service.list_recent(
+        NwsAlertsQuery(
+            alert_type=cast(NwsAlertType, alert_type),
+            severity=cast(NwsSeverity, severity),
+            area=area,
+            zone=zone,
+            event=event,
+            limit=limit,
+            sort=cast(NwsSort, sort),
+        )
+    )
+
+
+@router.get("/nhc-gis/recent", response_model=NhcGisResponse)
+async def recent_nhc_gis(
+    product_type: str = Query(default="all"),
+    storm_name: str | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=1000),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> NhcGisResponse:
+    if product_type not in {"all", "summary", "atcf-xml", "forecast", "cone", "watches-warnings", "wind-field", "wind-probabilities", "outlook", "best-track", "surge", "unknown"}:
+        raise HTTPException(
+            status_code=400,
+            detail="product_type must be one of: all, summary, atcf-xml, forecast, cone, watches-warnings, wind-field, wind-probabilities, outlook, best-track, surge, unknown",
+        )
+    if sort not in {"newest", "product_type"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, product_type")
+
+    service = NhcGisService(settings)
+    return await service.list_recent(
+        NhcGisQuery(
+            product_type=cast(NhcGisProductType, product_type),
+            storm_name=storm_name,
+            limit=limit,
+            sort=cast(NhcGisSort, sort),
+        )
+    )
+
+
 @router.get("/metno-alerts/recent", response_model=MetNoMetAlertsResponse)
 async def recent_metno_alerts(
     severity: str = Query(default="all"),
@@ -437,6 +502,26 @@ async def recent_canada_cap_alerts(
             province=province,
             limit=limit,
             sort=cast(CanadaCapSort, sort),
+        )
+    )
+
+
+@router.get("/meteoalarm/country-warnings", response_model=MeteoalarmAtomFeedResponse)
+async def recent_meteoalarm_country_warnings(
+    q: str | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=1000),
+    sort: str = Query(default="newest"),
+    settings: Settings = Depends(get_settings),
+) -> MeteoalarmAtomFeedResponse:
+    if sort not in {"newest", "title"}:
+        raise HTTPException(status_code=400, detail="sort must be one of: newest, title")
+
+    service = MeteoalarmAtomService(settings)
+    return await service.list_recent(
+        MeteoalarmAtomQuery(
+            q=q,
+            limit=limit,
+            sort=cast(Literal["newest", "title"], sort),
         )
     )
 

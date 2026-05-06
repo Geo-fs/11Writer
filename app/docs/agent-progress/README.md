@@ -49,14 +49,26 @@ Agent files:
 
 - `manager-ai.md`
 - `connect-ai.md`
-- `gather-ai.md`
-- `geospatial-ai.md`
-- `marine-ai.md`
-- `aerospace-ai.md`
-- `features-webcam-ai.md`
-- `data-ai.md`
+- `systems-ai.md`
+- `workspace-ai.md`
+- `spatial-ai.md`
+- `reporting-ai.md`
+- `platform-ai.md`
+- `gov-ai.md`
 - `atlas-ai.md`
 - `wonder-ai.md`
+
+Phase 3 active persistent controlled roster:
+
+- `Connect AI`
+- `Systems AI`
+- `Workspace AI`
+- `Spatial AI`
+- `Reporting AI`
+- `Platform AI`
+- `Gov AI`
+
+Phase 2 manager-controlled lane progress docs may still exist as handoff history, but they are no longer the active operating center after the Phase 3 cutover.
 
 Related:
 

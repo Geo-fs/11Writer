@@ -61,6 +61,15 @@ class SourceMemoryORM(SourceDiscoveryBase):
     platform_family: Mapped[str] = mapped_column(String(64), default="unknown", index=True)
     source_family_tags_json: Mapped[str] = mapped_column(Text, default="[]")
     scope_hints_json: Mapped[str] = mapped_column(Text, default='{"spatial":[],"language":[],"topic":[]}')
+    locale_expansion_basis_json: Mapped[str] = mapped_column(Text, default="[]")
+    discovered_from_provider: Mapped[str | None] = mapped_column(String(64), index=True)
+    reputation_policy_version: Mapped[str] = mapped_column(String(64), default="baseline_v2", index=True)
+    last_calibrated_at: Mapped[str | None] = mapped_column(String(64), index=True)
+    latest_event_graph_at: Mapped[str | None] = mapped_column(String(64), index=True)
+    adversarial_risk_level: Mapped[str] = mapped_column(String(16), default="none", index=True)
+    adversarial_signal_count: Mapped[int] = mapped_column(Integer, default=0)
+    adversarial_signals_json: Mapped[str] = mapped_column(Text, default="[]")
+    latest_adversarial_scan_at: Mapped[str | None] = mapped_column(String(64), index=True)
     last_discovery_outcome: Mapped[str | None] = mapped_column(Text)
 
 
@@ -154,6 +163,7 @@ class SourceReputationEventORM(SourceDiscoveryBase):
     score_after: Mapped[float] = mapped_column(Float)
     reason: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[str] = mapped_column(String(64), index=True)
+    policy_version: Mapped[str] = mapped_column(String(64), default="baseline_v2", index=True)
     reversed_at: Mapped[str | None] = mapped_column(String(64), index=True)
     reversal_reason: Mapped[str | None] = mapped_column(Text)
 
@@ -216,10 +226,110 @@ class SourceContentSnapshotORM(SourceDiscoveryBase):
     request_budget: Mapped[int] = mapped_column(Integer, default=1)
     used_requests: Mapped[int] = mapped_column(Integer, default=0)
     extraction_confidence: Mapped[float] = mapped_column(Float, default=0.5)
+    retrieval_origin: Mapped[str] = mapped_column(String(32), default="live", index=True)
+    retrieved_from_url: Mapped[str | None] = mapped_column(Text)
+    resolved_original_url: Mapped[str | None] = mapped_column(Text)
+    detected_language: Mapped[str | None] = mapped_column(String(64), index=True)
     knowledge_node_id: Mapped[str | None] = mapped_column(String(180), index=True)
     canonical_snapshot_id: Mapped[str | None] = mapped_column(String(180), index=True)
     duplicate_class: Mapped[str | None] = mapped_column(String(64), index=True)
     body_storage_mode: Mapped[str] = mapped_column(String(32), default="full_text", index=True)
+    adversarial_risk_level: Mapped[str] = mapped_column(String(16), default="none", index=True)
+    adversarial_signal_count: Mapped[int] = mapped_column(Integer, default=0)
+    adversarial_signals_json: Mapped[str] = mapped_column(Text, default="[]")
+    normalization_notes_json: Mapped[str] = mapped_column(Text, default="[]")
+    caveats_json: Mapped[str] = mapped_column(Text, default="[]")
+
+
+class SourceAdversarialFindingORM(SourceDiscoveryBase):
+    __tablename__ = "source_adversarial_findings"
+
+    finding_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    source_id: Mapped[str] = mapped_column(String(160), index=True)
+    snapshot_id: Mapped[str | None] = mapped_column(String(180), index=True)
+    job_id: Mapped[str | None] = mapped_column(String(180), index=True)
+    surface_type: Mapped[str] = mapped_column(String(64), index=True)
+    signal_type: Mapped[str] = mapped_column(String(64), index=True)
+    risk_level: Mapped[str] = mapped_column(String(16), default="low", index=True)
+    summary: Mapped[str] = mapped_column(Text, default="")
+    matched_text: Mapped[str | None] = mapped_column(Text)
+    detected_at: Mapped[str] = mapped_column(String(64), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="open", index=True)
+
+
+class SourceArchiveHitORM(SourceDiscoveryBase):
+    __tablename__ = "source_archive_hits"
+
+    archive_hit_id: Mapped[str] = mapped_column(String(180), primary_key=True)
+    source_id: Mapped[str] = mapped_column(String(160), index=True)
+    provider: Mapped[str] = mapped_column(String(64), index=True)
+    original_url: Mapped[str] = mapped_column(Text)
+    archive_url: Mapped[str | None] = mapped_column(Text)
+    captured_at: Mapped[str | None] = mapped_column(String(64), index=True)
+    discovered_at: Mapped[str] = mapped_column(String(64), index=True)
+    caveats_json: Mapped[str] = mapped_column(Text, default="[]")
+
+
+class SourceEventClusterORM(SourceDiscoveryBase):
+    __tablename__ = "source_event_clusters"
+    __table_args__ = (
+        UniqueConstraint("signature", name="uq_source_event_cluster_signature"),
+    )
+
+    event_id: Mapped[str] = mapped_column(String(180), primary_key=True)
+    signature: Mapped[str] = mapped_column(String(160), index=True)
+    status: Mapped[str] = mapped_column(String(64), default="single_source", index=True)
+    claim_type: Mapped[str] = mapped_column(String(64), default="state", index=True)
+    canonical_claim_text: Mapped[str] = mapped_column(Text, default="")
+    normalized_claim_text: Mapped[str] = mapped_column(Text, default="")
+    observed_day: Mapped[str | None] = mapped_column(String(32), index=True)
+    wave_id: Mapped[str | None] = mapped_column(String(160), index=True)
+    supporting_source_count: Mapped[int] = mapped_column(Integer, default=0)
+    contradiction_source_count: Mapped[int] = mapped_column(Integer, default=0)
+    corrective_source_count: Mapped[int] = mapped_column(Integer, default=0)
+    open_question_count: Mapped[int] = mapped_column(Integer, default=0)
+    first_seen_at: Mapped[str] = mapped_column(String(64), index=True)
+    last_seen_at: Mapped[str] = mapped_column(String(64), index=True)
+    last_graph_refresh_at: Mapped[str] = mapped_column(String(64), index=True)
+    member_source_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    knowledge_node_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    media_cluster_ids_json: Mapped[str] = mapped_column(Text, default="[]")
+    scope_hints_json: Mapped[str] = mapped_column(Text, default='{"spatial":[],"language":[],"topic":[]}')
+    caveats_json: Mapped[str] = mapped_column(Text, default="[]")
+
+
+class SourceEventMemberORM(SourceDiscoveryBase):
+    __tablename__ = "source_event_members"
+
+    member_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_id: Mapped[str] = mapped_column(String(180), index=True)
+    source_id: Mapped[str] = mapped_column(String(160), index=True)
+    wave_id: Mapped[str | None] = mapped_column(String(160), index=True)
+    role: Mapped[str] = mapped_column(String(32), default="supporting", index=True)
+    claim_text: Mapped[str] = mapped_column(Text, default="")
+    claim_type: Mapped[str] = mapped_column(String(64), default="state", index=True)
+    evidence_basis: Mapped[str] = mapped_column(String(64), default="contextual", index=True)
+    outcome: Mapped[str | None] = mapped_column(String(64), index=True)
+    observed_at: Mapped[str | None] = mapped_column(String(64), index=True)
+    snapshot_id: Mapped[str | None] = mapped_column(String(180), index=True)
+    knowledge_node_id: Mapped[str | None] = mapped_column(String(180), index=True)
+    media_cluster_id: Mapped[str | None] = mapped_column(String(180), index=True)
+    claim_outcome_id: Mapped[int | None] = mapped_column(Integer, index=True)
+    claim_candidate_id: Mapped[int | None] = mapped_column(Integer, index=True)
+    source_class: Mapped[str] = mapped_column(String(64), default="unknown", index=True)
+    created_at: Mapped[str] = mapped_column(String(64), index=True)
+    caveats_json: Mapped[str] = mapped_column(Text, default="[]")
+
+
+class SourceEventOpenQuestionORM(SourceDiscoveryBase):
+    __tablename__ = "source_event_open_questions"
+
+    question_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_id: Mapped[str] = mapped_column(String(180), index=True)
+    source_id: Mapped[str | None] = mapped_column(String(160), index=True)
+    question_text: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[str] = mapped_column(String(64), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="open", index=True)
     caveats_json: Mapped[str] = mapped_column(Text, default="[]")
 
 
@@ -456,6 +566,8 @@ class SourceSchedulerTickORM(SourceDiscoveryBase):
     health_checks_completed: Mapped[int] = mapped_column(Integer, default=0)
     structure_scans_requested: Mapped[int] = mapped_column(Integer, default=0)
     structure_scans_completed: Mapped[int] = mapped_column(Integer, default=0)
+    link_graph_jobs_requested: Mapped[int] = mapped_column(Integer, default=0)
+    link_graph_jobs_completed: Mapped[int] = mapped_column(Integer, default=0)
     expansion_jobs_requested: Mapped[int] = mapped_column(Integer, default=0)
     expansion_jobs_completed: Mapped[int] = mapped_column(Integer, default=0)
     knowledge_backfill_jobs_requested: Mapped[int] = mapped_column(Integer, default=0)
@@ -503,6 +615,73 @@ class RuntimeSchedulerRunORM(SourceDiscoveryBase):
     finished_at: Mapped[str | None] = mapped_column(String(64), index=True)
     summary: Mapped[str | None] = mapped_column(Text)
     error_summary: Mapped[str | None] = mapped_column(Text)
+
+
+class SourceRuntimeWorkItemORM(SourceDiscoveryBase):
+    __tablename__ = "source_runtime_work_items"
+
+    work_item_id: Mapped[str] = mapped_column(String(180), primary_key=True)
+    worker_name: Mapped[str] = mapped_column(String(64), index=True)
+    job_type: Mapped[str] = mapped_column(String(64), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="queued", index=True)
+    source_id: Mapped[str | None] = mapped_column(String(160), index=True)
+    seed_url: Mapped[str | None] = mapped_column(Text)
+    domain_key: Mapped[str | None] = mapped_column(String(255), index=True)
+    provider_key: Mapped[str | None] = mapped_column(String(128), index=True)
+    shard_index: Mapped[int] = mapped_column(Integer, default=0, index=True)
+    shard_count: Mapped[int] = mapped_column(Integer, default=1)
+    dedupe_key: Mapped[str] = mapped_column(String(255), index=True)
+    priority_score: Mapped[int] = mapped_column(Integer, default=0, index=True)
+    next_run_at: Mapped[str] = mapped_column(String(64), index=True)
+    lease_owner: Mapped[str | None] = mapped_column(String(160), index=True)
+    lease_expires_at: Mapped[str | None] = mapped_column(String(64), index=True)
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0)
+    max_attempts: Mapped[int] = mapped_column(Integer, default=3)
+    request_budget: Mapped[int] = mapped_column(Integer, default=0)
+    last_failure_kind: Mapped[str | None] = mapped_column(String(64), index=True)
+    last_error: Mapped[str | None] = mapped_column(Text)
+    payload_json: Mapped[str] = mapped_column(Text, default="{}")
+    caveats_json: Mapped[str] = mapped_column(Text, default="[]")
+    created_at: Mapped[str] = mapped_column(String(64), index=True)
+    updated_at: Mapped[str] = mapped_column(String(64), index=True)
+
+
+class SourceRuntimeWorkAttemptORM(SourceDiscoveryBase):
+    __tablename__ = "source_runtime_work_attempts"
+
+    attempt_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    work_item_id: Mapped[str] = mapped_column(String(180), index=True)
+    run_id: Mapped[str | None] = mapped_column(String(180), index=True)
+    job_type: Mapped[str] = mapped_column(String(64), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="running", index=True)
+    failure_kind: Mapped[str | None] = mapped_column(String(64), index=True)
+    source_id: Mapped[str | None] = mapped_column(String(160), index=True)
+    domain_key: Mapped[str | None] = mapped_column(String(255), index=True)
+    provider_key: Mapped[str | None] = mapped_column(String(128), index=True)
+    attempt_index: Mapped[int] = mapped_column(Integer, default=0)
+    started_at: Mapped[str] = mapped_column(String(64), index=True)
+    finished_at: Mapped[str | None] = mapped_column(String(64), index=True)
+    used_requests: Mapped[int] = mapped_column(Integer, default=0)
+    summary: Mapped[str | None] = mapped_column(Text)
+    error_summary: Mapped[str | None] = mapped_column(Text)
+    caveats_json: Mapped[str] = mapped_column(Text, default="[]")
+
+
+class SourceRuntimeBudgetWindowORM(SourceDiscoveryBase):
+    __tablename__ = "source_runtime_budget_windows"
+    __table_args__ = (
+        UniqueConstraint("budget_scope", "budget_key", "window_start", name="uq_source_runtime_budget_window"),
+    )
+
+    budget_window_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    budget_scope: Mapped[str] = mapped_column(String(32), index=True)
+    budget_key: Mapped[str] = mapped_column(String(255), index=True)
+    window_start: Mapped[str] = mapped_column(String(64), index=True)
+    window_end: Mapped[str] = mapped_column(String(64), index=True)
+    request_limit: Mapped[int] = mapped_column(Integer, default=0)
+    used_requests: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[str] = mapped_column(String(64), index=True)
+    updated_at: Mapped[str] = mapped_column(String(64), index=True)
 
 
 class RuntimeServiceInstallationORM(SourceDiscoveryBase):
